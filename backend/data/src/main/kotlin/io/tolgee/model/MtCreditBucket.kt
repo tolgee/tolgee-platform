@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
@@ -14,10 +15,10 @@ import java.util.*
   ],
 )
 class MtCreditBucket(
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @Deprecated("Only organization can own a credit bucket...")
   var userAccount: UserAccount? = null,
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   var organization: Organization? = null,
 ) : StandardAuditModel() {
   var credits: Long = 0

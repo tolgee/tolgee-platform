@@ -171,6 +171,8 @@ function assertLanguagesSelected(languages: string[]) {
     .findDcy('translations-language-select-form-control')
     .click();
 
+  cy.gcy('translations-language-select-item').should('be.visible');
+
   languages.forEach((language) => {
     cy.gcy('translations-language-select-item')
       .contains(language)

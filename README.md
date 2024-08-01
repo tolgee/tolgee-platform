@@ -120,12 +120,4 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
   <img alt="contributors" src="https://contrib.rocks/image?repo=tolgee/tolgee-platform"/>
 </a>
 
-## Launching Tolgee Rewards
- Contributed to Tolgee? Here is a big thank you from our community to you.
- Claim your badge and showcase them with pride.
- Let us inspire more folks !
-
- ![Tolgee Badges](https://aviyel.com/assets/uploads/rewards/share/project/28/512/share.png)
- ### **[Claim Now!](https://aviyel.com/projects/28/tolgee/rewards)**
-
 Let us know what you think! #feedbackwanted ❤️
