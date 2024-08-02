@@ -143,23 +143,23 @@ task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {
 
 task runDockerE2e(type: Exec, group: "e2e") {
     dependsOn "tagDockerLocal"
-    commandLine "docker-compose", "up", "-d"
+    commandLine "docker", "compose", "up", "-d"
     workingDir E2E_DIR
     finalizedBy "waitForRunningContainer"
 }
 
 task runDockerE2eDev(type: Exec, group: "e2e") {
-    commandLine "docker-compose", "up", "-d", "fakesmtp"
+    commandLine "docker", "compose", "up", "-d", "fakesmtp"
     workingDir E2E_DIR
 }
 
 task stopDockerE2e(type: Exec, group: "e2e") {
-    commandLine "docker-compose", "stop"
+    commandLine "docker", "compose", "stop"
     workingDir E2E_DIR
 }
 
 task cleanupDockerE2e(type: Exec, group: "e2e") {
-    commandLine "docker-compose", "rm", "-f"
+    commandLine "docker", "compose", "rm", "-f"
     workingDir E2E_DIR
 }
 
