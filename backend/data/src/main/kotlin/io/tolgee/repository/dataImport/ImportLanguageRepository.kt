@@ -17,22 +17,33 @@ import java.util.*
 interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
   companion object {
     private const val VIEW_BASE_QUERY = """
-            select il.id as id, il.name as name, el.id as existingLanguageId, 
-            el.tag as existingLanguageTag, el.name as existingLanguageName,
-            if.name as importFileName, if.id as importFileId,
-            if.namespace as namespace,
-            (select count(*) from if.issues) as importFileIssueCount,
-            count(ik) as totalCount, 
-            sum(case when it.conflict is null then 0 else 1 end) as conflictCount,
-            sum(case when (it.conflict is null or it.resolvedHash is null) then 0 else 1 end) as resolvedCount
-            from ImportLanguage il join il.file if left join il.existingLanguage el left 
-            join il.translations it on it.isSelectedToImport = true
-            left join it.key ik on ik.shouldBeImported 
+           SELECT 
+    il.id AS id, 
+    il.name AS name, 
+    el.id AS existingLanguageId, 
+    el.tag AS existingLanguageTag, 
+    el.name AS existingLanguageName, 
+    f.name AS importFileName, 
+    f.id AS importFileId, 
+    f.namespace AS namespace, 
+    (SELECT COUNT(i.id) FROM ImportFileIssue i WHERE f.id = i.file.id) AS importFileIssueCount, 
+    (SELECT COUNT(t.id) FROM ImportTranslation t WHERE t.language.id = il.id AND t.isSelectedToImport = TRUE
+and t.key.shouldBeImported
+    ) AS totalCount, 
+    COALESCE ((SELECT SUM(CASE WHEN t.conflict IS NULL THEN 0 ELSE 1 END) FROM ImportTranslation t WHERE t.language.id = il.id AND t.isSelectedToImport = TRUE 
+    and t.key.shouldBeImported
+    ),0) AS conflictCount, 
+    COALESCE ((SELECT SUM(CASE WHEN t.conflict IS NULL OR t.resolvedHash IS NULL THEN 0 ELSE 1 END) FROM ImportTranslation t WHERE t.language.id = il.id AND t.isSelectedToImport = TRUE
+and t.key.shouldBeImported
+    ), 0) AS resolvedCount 
+FROM ImportLanguage il 
+JOIN il.file f 
+LEFT JOIN il.existingLanguage el 
 
         """
 
     private const val VIEW_GROUP_BY = """
-            group by il.id, if.id, el.id
+            group by il.id, f.id, el.id
         """
   }
 
@@ -47,7 +58,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
   @Query(
     """
    $VIEW_BASE_QUERY
-        WHERE if.import.id = :importId
+        WHERE f.import.id = :importId
             $VIEW_GROUP_BY
             order by il.id
             """,
