@@ -7,11 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.ErrorException
-import io.tolgee.exceptions.ErrorResponseBody
-import io.tolgee.exceptions.ErrorResponseTyped
-import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.*
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import jakarta.persistence.EntityNotFoundException

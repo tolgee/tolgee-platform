@@ -80,14 +80,12 @@ class EmailVerificationService(
     }
 
     val email = newEmail ?: getEmail(userAccount)
-    val policy = rateLimitService.getIEmailVerificationIpRateLimitPolicy(request, email)
+    val policy = rateLimitService.getEmailVerificationIpRateLimitPolicy(request, email)
 
     if (policy != null) {
-      rateLimitService.consumeBucketUnless(policy) {
-        createForUser(userAccount, callbackUrl, email)
-        isVerified(userAccount)
-      }
+      rateLimitService.consumeBucket(policy)
     }
+    createForUser(userAccount, callbackUrl, newEmail)
   }
 
   fun getEmail(userAccount: UserAccount): String {

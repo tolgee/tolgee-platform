@@ -1,4 +1,4 @@
-import { Button, styled, Typography, useTheme } from '@mui/material';
+import { Link as MuiLink, styled, Typography, useTheme } from '@mui/material';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { T, useTranslate } from '@tolgee/react';
@@ -9,6 +9,8 @@ import { StyledWrapper } from 'tg.component/searchSelect/SearchStyled';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { Redirect } from 'react-router-dom';
+import { useState } from 'react';
+import { useTimerCountdown } from 'tg.fixtures/useTimerCountdown';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -30,11 +32,21 @@ const StyledHeader = styled(Typography)`
 const StyledDescription = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.primary}
   margin-bottom: 40px;
+  text-align: center;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 60%;
 `;
 
-const StyledHint = styled(Typography)`
-  margin-bottom: 20px;
-  font-weight: bold;
+export const StyledLink = styled(MuiLink)`
+  cursor: pointer;
+  font-weight: 400;
+
+  &.disabled {
+    color: ${({ theme }) => theme.palette.emphasis[400]};
+    pointer-events: none;
+  }
 `;
 
 const StyledImg = styled('img')`
@@ -42,7 +54,7 @@ const StyledImg = styled('img')`
   margin-bottom: 30px;
 `;
 
-const StyledEnabled = styled('span')`
+const BoldSpan = styled('span')`
   font-weight: 500;
 `;
 
@@ -66,6 +78,46 @@ export const EmailNotVerifiedView = () => {
     method: 'post',
   });
 
+  const setDelayAndStartTimer = (delay: number) => {
+    setDelay(delay);
+    setEnabled(true);
+    startTimer();
+  };
+
+  const handleResendEmail = () => {
+    resendEmail.mutate(
+      {},
+      {
+        onSuccess: () => {
+          setDelayAndStartTimer(30000);
+
+          messageService.success(<T keyName="verify_email_resend_message" />);
+        },
+
+        onError: (err) => {
+          if (err.data?.message === 'rate_limited') {
+            const retryAfter = err.data?.retryAfter;
+            setDelayAndStartTimer(retryAfter);
+          } else {
+            err.handleError?.();
+          }
+        },
+      }
+    );
+  };
+
+  const [enabled, setEnabled] = useState(false);
+  const [delay, setDelay] = useState(0);
+
+  const { startTimer, remainingTime } = useTimerCountdown({
+    callback: () => {
+      setEnabled(false);
+    },
+    delay: delay,
+    enabled,
+  });
+  const remainingSeconds = Math.floor(remainingTime / 1000);
+
   return (
     <StyledWrapper>
       <DashboardPage>
@@ -78,37 +130,40 @@ export const EmailNotVerifiedView = () => {
         >
           <StyledContainer>
             <StyledHeader variant="h4">
-              <T keyName="verify_email_title" />
+              <T keyName="verify_email_check_inbox" />
             </StyledHeader>
             <StyledDescription variant="body1" mb={2}>
               <T
-                keyName="verify_email_description"
-                params={{ email: email, b: <StyledEnabled /> }}
+                keyName="verify_email_we_sent_email"
+                params={{ email: email, b: <BoldSpan /> }}
               />
             </StyledDescription>
             <StyledImg src={imageSrc} alt="Verify email" />
-            <StyledHint variant="body2">
-              <T keyName="verify_email_didnt_receive_email_hint" />
-            </StyledHint>
-            <Button
-              variant="contained"
-              data-cy="resend-email-button"
-              onClick={() =>
-                resendEmail.mutate(
-                  {},
-                  {
-                    onSuccess: () => {
-                      messageService.success(
-                        <T keyName="verify_email_resend_message" />
-                      );
-                    },
-                  }
-                )
-              }
-              color="primary"
-            >
-              <T keyName="verify_email_resend_button" />
-            </Button>
+
+            <StyledDescription variant="body1">
+              {enabled ? (
+                <T
+                  keyName="verify_email_resend_link_retry_after"
+                  params={{
+                    seconds: remainingSeconds,
+                    link: <StyledLink className="disabled" />,
+                  }}
+                />
+              ) : (
+                <T
+                  keyName="verify_email_resend_link"
+                  params={{
+                    link: (
+                      <StyledLink
+                        className={resendEmail.isLoading ? 'disabled' : ''}
+                        data-cy="resend-email-button"
+                        onClick={handleResendEmail}
+                      />
+                    ),
+                  }}
+                />
+              )}
+            </StyledDescription>
           </StyledContainer>
         </BaseView>
       </DashboardPage>

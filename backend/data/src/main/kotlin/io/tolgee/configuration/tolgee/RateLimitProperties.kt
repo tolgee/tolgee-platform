@@ -56,7 +56,7 @@ class RateLimitProperties(
     defaultExplanation = "= 1 minute",
   )
   var userRequestWindow: Long = 1 * 60 * 1000,
-  var emailVerificationRequestLimit: Int = 5,
+  var emailVerificationRequestLimit: Int = 2,
   var emailVerificationRequestWindow: Long = 1 * 60 * 1000,
   var emailVerificationRequestLimitEnabled: Boolean = true,
 )
