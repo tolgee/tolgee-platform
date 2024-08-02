@@ -1,3 +1,10 @@
+## [3.70.7](https://github.com/tolgee/tolgee-platform/compare/v3.70.6...v3.70.7) (2024-08-02)
+
+
+### Bug Fixes
+
+* email resend sign up view fix ([#2421](https://github.com/tolgee/tolgee-platform/issues/2421)) ([c1d79f8](https://github.com/tolgee/tolgee-platform/commit/c1d79f88796c9de20419d2db4e5419092b97391c))
+
 ## [3.70.6](https://github.com/tolgee/tolgee-platform/compare/v3.70.5...v3.70.6) (2024-07-30)
 
 
