@@ -77,10 +77,12 @@ class UserAccountService(
     return this.findActive(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
+  @Transactional
   fun findActive(id: Long): UserAccount? {
     return userAccountRepository.findActive(id)
   }
 
+  @Transactional
   fun findInitialUser(): UserAccount? {
     return userAccountRepository.findInitialUser()
   }

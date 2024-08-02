@@ -17,7 +17,7 @@ COPY BOOT-INF/classes /app
 #################
 
 ENV spring_profiles_active docker
-CMD ["ash", "-c", "java -cp app:app/lib/* io.tolgee.Application"]
+CMD ["java", "-cp", "app:app/lib/*", "io.tolgee.Application"]
 
 ENV HEALTHCHECK_PORT=8080
 
