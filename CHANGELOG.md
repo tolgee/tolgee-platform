@@ -1,3 +1,10 @@
+## [3.70.8](https://github.com/tolgee/tolgee-platform/compare/v3.70.7...v3.70.8) (2024-08-03)
+
+
+### Bug Fixes
+
+* Lazy loading error when loading initial user ([#2429](https://github.com/tolgee/tolgee-platform/issues/2429)) ([b111e5e](https://github.com/tolgee/tolgee-platform/commit/b111e5e4e0ca5268971f576cb2ba3720978b57bb))
+
 ## [3.70.7](https://github.com/tolgee/tolgee-platform/compare/v3.70.6...v3.70.7) (2024-08-02)
 
 
