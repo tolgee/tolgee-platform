@@ -17,7 +17,7 @@ import java.util.*
 interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
   companion object {
     private const val VIEW_BASE_QUERY = """
-           SELECT 
+    SELECT 
     il.id AS id, 
     il.name AS name, 
     el.id AS existingLanguageId, 

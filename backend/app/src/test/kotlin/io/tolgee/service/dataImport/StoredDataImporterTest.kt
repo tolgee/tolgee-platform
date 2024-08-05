@@ -166,7 +166,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `only updates old keys but does not add new ones when option enabled`() {
+  fun `only updates old keys but does not add new ones when option disabled`() {
     defaultImportSettings.createNewKeys = false
     storedDataImporter =
       StoredDataImporter(
@@ -190,7 +190,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `add new key when option disabled`() {
+  fun `add new key when option enabled`() {
     defaultImportSettings.createNewKeys = true
     storedDataImporter =
       StoredDataImporter(

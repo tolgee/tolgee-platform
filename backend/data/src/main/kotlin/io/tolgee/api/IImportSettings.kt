@@ -9,7 +9,7 @@ interface IImportSettings {
   var overrideKeyDescriptions: Boolean
 
   @get:Schema(
-    description = "If true, only updates keys, skipping the creation of new keys",
+    description = "If false, only updates keys, skipping the creation of new keys",
   )
   var createNewKeys: Boolean
 
