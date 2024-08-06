@@ -57,7 +57,7 @@ class TaskService(
     filters: TaskFilters,
   ): Page<TaskWithScopeView> {
     val pagedTasks = taskRepository.getAllByProjectId(project.id, pageable, search, filters)
-    val withPrefetched = taskRepository.getByIdsWithAllPrefetched(pagedTasks.content)
+    val withPrefetched = getPrefetchedTasks(pagedTasks.content)
     return PageImpl(getTasksWithScope(withPrefetched), pageable, pagedTasks.totalElements)
   }
 
@@ -68,8 +68,15 @@ class TaskService(
     filters: TaskFilters,
   ): Page<TaskWithScopeView> {
     val pagedTasks = taskRepository.getAllByAssignee(userId, pageable, search, filters)
-    val withPrefetched = taskRepository.getByIdsWithAllPrefetched(pagedTasks.content)
+    val withPrefetched = getPrefetchedTasks(pagedTasks.content)
     return PageImpl(getTasksWithScope(withPrefetched), pageable, pagedTasks.totalElements)
+  }
+
+  fun getPrefetchedTasks(tasks: Collection<Task>): List<Task> {
+    val ids = tasks.map { it.id }.mapIndexed { i, v -> Pair(v, i) }.toMap()
+    val data = taskRepository.getByIdsWithAllPrefetched(tasks)
+    // return tasks in the same order
+    return data.sortedBy { ids[it.id] }
   }
 
   @Transactional

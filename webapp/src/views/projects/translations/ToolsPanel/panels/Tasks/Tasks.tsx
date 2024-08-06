@@ -32,6 +32,7 @@ export const Tasks: React.FC<PanelContentProps> = ({
     path: { projectId: project.id },
     query: {
       filterTranslation: [translation.id],
+      sort: ['type,desc'],
     },
     options: {
       enabled: Boolean(translation),
