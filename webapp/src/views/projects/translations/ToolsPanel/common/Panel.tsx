@@ -67,26 +67,34 @@ export const Panel = ({
   name,
   component,
   data,
-  itemsCountComponent,
+  itemsCountFunction,
+  hideWhenCountZero,
   onToggle,
   open,
 }: Props) => {
   const [itemsCount, setItemsCount] = useState<number | undefined>(undefined);
   const Component = component;
-  const ItemsCountComponent = itemsCountComponent;
+  const countContent =
+    (itemsCount !== undefined && itemsCount !== null) || itemsCountFunction
+      ? itemsCountFunction
+        ? itemsCountFunction(data)
+        : itemsCount
+      : null;
+
+  const hidden = !countContent && hideWhenCountZero;
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <StyledContainer data-cy="translation-panel" data-cy-id={id}>
       <StyledHeader onMouseDown={(e) => e.preventDefault()}>
         {icon}
         <StyledName>{name}</StyledName>
-        {typeof itemsCount === 'number' || ItemsCountComponent ? (
+        {typeof itemsCount === 'number' || itemsCountFunction ? (
           <StyledBadge>
-            {ItemsCountComponent ? (
-              <ItemsCountComponent {...data} />
-            ) : (
-              itemsCount
-            )}
+            {itemsCountFunction ? itemsCountFunction(data) : itemsCount}
           </StyledBadge>
         ) : (
           <div />

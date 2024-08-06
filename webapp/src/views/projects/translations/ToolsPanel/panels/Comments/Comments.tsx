@@ -176,9 +176,9 @@ export const Comments: React.FC<PanelContentProps> = ({
   );
 };
 
-export const CommentsItemsCount = ({ keyData, language }: PanelContentData) => {
+export const commentsCount = ({ keyData, language }: PanelContentData) => {
   const translation = keyData.translations[language.tag] as
     | TranslationViewModel
     | undefined;
-  return <>{translation?.commentCount ?? 0}</>;
+  return translation?.commentCount ?? 0;
 };

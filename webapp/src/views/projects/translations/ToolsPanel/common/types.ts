@@ -25,6 +25,7 @@ export type PanelConfig = {
   icon: React.ReactNode;
   name: React.ReactNode;
   component: React.FC<PanelContentProps>;
-  itemsCountComponent?: React.FC<PanelContentData>;
+  itemsCountFunction?: (props: PanelContentData) => number | React.ReactNode;
   displayPanel?: (value: PanelContentData) => boolean;
+  hideWhenCountZero?: boolean;
 };

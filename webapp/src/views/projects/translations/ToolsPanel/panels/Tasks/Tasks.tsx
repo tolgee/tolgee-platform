@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { T } from '@tolgee/react';
 import { styled } from '@mui/material';
 import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 
@@ -53,18 +52,14 @@ export const Tasks: React.FC<PanelContentProps> = ({
         <TabMessage>
           <LoadingSkeletonFadingIn variant="text" />
         </TabMessage>
-      ) : (
-        <TabMessage>
-          <T keyName="translations_comments_no_comments"></T>
-        </TabMessage>
-      )}
+      ) : null}
     </StyledContainer>
   );
 };
 
-export const CommentsItemsCount = ({ keyData, language }: PanelContentData) => {
+export const tasksCount = ({ keyData, language }: PanelContentData) => {
   const translation = keyData.translations[language.tag] as
     | TranslationViewModel
     | undefined;
-  return <>{translation?.commentCount ?? 0}</>;
+  return translation?.commentCount ?? 0;
 };
