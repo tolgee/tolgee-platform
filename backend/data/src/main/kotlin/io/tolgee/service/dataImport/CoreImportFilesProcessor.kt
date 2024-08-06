@@ -12,14 +12,11 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.ImportFileProcessorFactory
-import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportFile
-import io.tolgee.model.dataImport.ImportKey
-import io.tolgee.model.dataImport.ImportLanguage
-import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
@@ -36,6 +33,7 @@ class CoreImportFilesProcessor(
   // single step import doesn't save data
   val saveData: Boolean = true,
 ) : Logging {
+  private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
   private val importFileProcessorFactory: ImportFileProcessorFactory by lazy {
     applicationContext.getBean(
@@ -262,6 +260,7 @@ class CoreImportFilesProcessor(
       entry.value.forEach translationForeach@{ newTranslation ->
         processTranslation(newTranslation, keyEntity)
       }
+      keyEntity.shouldBeImported = shouldImportKey(keyEntity.name)
     }
     importDataManager.prepareKeyMetas()
     if (saveData) {
@@ -269,6 +268,14 @@ class CoreImportFilesProcessor(
       importDataManager.saveAllKeyMetas()
       importDataManager.saveAllStoredTranslations()
     }
+  }
+
+  private fun FileProcessorContext.shouldImportKey(keyName: String): Boolean {
+    if (importSettings.createNewKeys) {
+      return true
+    }
+    val n = this.getNamespaceToPreselect()
+    return keyService.find(import.project.id, keyName, this.getNamespaceToPreselect()) != null
   }
 
   private fun FileProcessorContext.processTranslation(

@@ -60,6 +60,20 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `does not create new key if option isn't enabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+      params = mapOf("createNewKeys" to false),
+    )
+    executeInNewTransaction {
+      keyService.find(testData.project.id, "test", null).assert.isNull()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `correctly maps language in single language file`() {
     saveAndPrepare()
     performImport(

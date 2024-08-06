@@ -26,4 +26,7 @@ class ImportSettings(
 
   @ColumnDefault("true")
   override var convertPlaceholdersToIcu: Boolean = true
+
+  @ColumnDefault("true")
+  override var createNewKeys: Boolean = true
 }

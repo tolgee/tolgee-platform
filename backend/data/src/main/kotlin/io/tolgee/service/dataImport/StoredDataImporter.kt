@@ -105,7 +105,6 @@ class StoredDataImporter(
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
     }
-
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
@@ -205,6 +204,9 @@ class StoredDataImporter(
 
   private fun handleKeyMetas() {
     this.importDataManager.storedKeys.entries.forEach { (fileNamePair, importKey) ->
+      if (!importKey.shouldBeImported) {
+        return@forEach
+      }
       val importedKeyMeta = storedMetas[fileNamePair.first.namespace to importKey.name]
       // don't touch key meta when imported key has no meta
       if (importedKeyMeta != null) {
@@ -230,6 +232,9 @@ class StoredDataImporter(
 
   private fun addAllKeys() {
     importDataManager.storedKeys.map { (fileNamePair, importKey) ->
+      if (!importKey.shouldBeImported) {
+        return@map
+      }
       addKeyToSave(importKey.file.namespace, importKey.name)
     }
   }
@@ -237,11 +242,12 @@ class StoredDataImporter(
   private fun ImportLanguage.prepareImport() {
     importDataManager.populateStoredTranslations(this)
     importDataManager.handleConflicts(true)
+    importDataManager.applyKeyCreateChange(importSettings.createNewKeys)
     importDataManager.getStoredTranslations(this).forEach { it.doImport() }
   }
 
   private fun ImportTranslation.doImport() {
-    if (!this.isSelectedToImport) {
+    if (!this.isSelectedToImport || !this.key.shouldBeImported) {
       return
     }
     this.checkConflictResolved()

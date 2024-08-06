@@ -431,6 +431,20 @@ class ImportTestData {
     }
   }
 
+  fun addImportKeyThatDoesntExistInProject() {
+    importBuilder.data.importFiles[0].build {
+      val key =
+        addImportKey {
+          name = "I'm new key in project"
+        }
+      addImportTranslation {
+        text = "Hey!"
+        this.key = key.self
+        language = importEnglish
+      }
+    }
+  }
+
   data class AddFilesWithNamespacesResult(
     val importFrenchInNs: ImportLanguage,
   )
