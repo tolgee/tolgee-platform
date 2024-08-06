@@ -1,3 +1,10 @@
+# [3.71.0](https://github.com/tolgee/tolgee-platform/compare/v3.70.8...v3.71.0) (2024-08-06)
+
+
+### Features
+
+* Ability to only update translations and not add new keys in import ([#2413](https://github.com/tolgee/tolgee-platform/issues/2413)) ([1f7ed02](https://github.com/tolgee/tolgee-platform/commit/1f7ed0229a1d922312278555b78e9afc59414f90))
+
 ## [3.70.8](https://github.com/tolgee/tolgee-platform/compare/v3.70.7...v3.70.8) (2024-08-03)
 
 
