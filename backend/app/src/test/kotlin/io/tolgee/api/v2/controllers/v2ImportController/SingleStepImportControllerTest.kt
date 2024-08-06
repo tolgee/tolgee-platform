@@ -60,7 +60,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `do not create new key if option isn't enabled`() {
+  fun `does not create new key if option isn't enabled`() {
     saveAndPrepare()
     performImport(
       projectId = testData.project.id,
