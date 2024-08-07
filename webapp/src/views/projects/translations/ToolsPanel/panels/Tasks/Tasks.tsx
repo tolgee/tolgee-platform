@@ -25,13 +25,15 @@ export const Tasks: React.FC<PanelContentProps> = ({
   project,
 }) => {
   const translation = keyData.translations[language.tag];
+  const firstTask = translation.tasks?.[0];
   const tasksLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks',
     method: 'get',
     path: { projectId: project.id },
     query: {
       filterTranslation: [translation.id],
-      sort: ['type,desc'],
+      filterState: ['IN_PROGRESS'],
+      sort: ['type,desc', 'id,desc'],
     },
     options: {
       enabled: Boolean(translation),
@@ -46,7 +48,11 @@ export const Tasks: React.FC<PanelContentProps> = ({
     <StyledContainer>
       {tasksLoadable.data?._embedded?.tasks?.length ? (
         tasksLoadable.data._embedded.tasks.map((task) => (
-          <TaskLabel key={task.id} task={task} sx={{ padding: 1 }} />
+          <TaskLabel
+            key={task.id}
+            task={task}
+            sx={{ padding: 1, opacity: task.id === firstTask?.id ? 1 : 0.6 }}
+          />
         ))
       ) : tasksLoadable.isLoading ? (
         <TabMessage>

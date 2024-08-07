@@ -251,7 +251,7 @@ class TaskService(
     taskId: Long,
     keyId: Long,
     dto: UpdateTaskKeyRequest,
-  ) {
+  ): UpdateTaskKeyResponse {
     val task =
       taskRepository.findById(TaskId(projectEntity, taskId)).or {
         throw NotFoundException(Message.TASK_NOT_FOUND)
@@ -270,6 +270,8 @@ class TaskService(
         throw NotFoundException(Message.TASK_NOT_FOUND)
       }.get()
 
+    val previousValue = taskTranslation.done
+
     if (dto.done == true) {
       taskTranslation.author =
         entityManager.getReference(
@@ -280,7 +282,20 @@ class TaskService(
       taskTranslation.author = null
     }
     taskTranslation.done = dto.done ?: false
-    taskTranslationRepository.save(taskTranslation)
+    taskTranslationRepository.saveAndFlush(taskTranslation)
+
+    if (!previousValue && taskTranslation.done) {
+      val taskItem = getTask(projectEntity, taskId)
+      return UpdateTaskKeyResponse(
+        done = taskTranslation.done,
+        taskFinished = taskItem.doneItems == taskItem.totalItems
+      )
+    } else {
+      return UpdateTaskKeyResponse(
+        done = taskTranslation.done,
+        taskFinished = false
+      )
+    }
   }
 
   @Transactional

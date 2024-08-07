@@ -12,6 +12,7 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { TaskMenu } from './TaskMenu';
 import { TaskLabel } from './TaskLabel';
 import { getLinkToTask } from './utils';
+import { TaskState } from './TaskState';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -80,7 +81,11 @@ export const TaskItem = ({
         {t('task_keys_count', { value: task.totalItems })}
       </StyledItem>
       <StyledProgress>
-        <BatchProgress progress={task.doneItems} max={task.totalItems} />
+        {task.state === 'IN_PROGRESS' ? (
+          <BatchProgress progress={task.doneItems} max={task.totalItems} />
+        ) : (
+          <TaskState state={task.state} />
+        )}
         {task.dueDate ? (
           <Box display="flex" alignItems="center" gap={0.5}>
             <AccessAlarm sx={{ fontSize: 16 }} />

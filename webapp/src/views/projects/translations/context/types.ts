@@ -8,6 +8,8 @@ type KeyWithTranslationsModel =
 type TranslationsQueryType =
   operations['getTranslations']['parameters']['query'];
 
+type UpdateTaskRequest = components['schemas']['UpdateTaskRequest'];
+
 export type DeletableKeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'] & { deleted?: boolean };
 
@@ -32,6 +34,11 @@ export type UpdateTranslation = {
   keyId: number;
   lang: string;
   data: Partial<TranslationViewModel>;
+};
+
+export type UpdateTask = {
+  taskId: number;
+  data: UpdateTaskRequest;
 };
 
 export type RemoveTag = {

@@ -1,6 +1,6 @@
 import { styled, useTheme } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
+import { useTaskStateTranslation } from 'tg.translationTools/useTaskStateTranslation';
 
 type TaskState = components['schemas']['TaskModel']['state'];
 
@@ -14,15 +14,16 @@ type Props = {
 
 export const TaskState = ({ state }: Props) => {
   const theme = useTheme();
-  const { t } = useTranslate();
+  const translateState = useTaskStateTranslation();
 
   const color =
     state === 'DONE'
       ? theme.palette.tokens._components.progressbar.task.done
-      : theme.palette.tokens._components.progressbar.task.inProgress;
+      : state === 'IN_PROGRESS'
+      ? theme.palette.tokens._components.progressbar.task.inProgress
+      : theme.palette.tokens.text.secondary;
 
-  const label =
-    state === 'DONE' ? t('task_status_done') : t('task_status_in_progress');
-
-  return <StyledContainer style={{ color }}>{label}</StyledContainer>;
+  return (
+    <StyledContainer style={{ color }}>{translateState(state)}</StyledContainer>
+  );
 };

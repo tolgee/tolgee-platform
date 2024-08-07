@@ -132,8 +132,8 @@ class TaskController(
     keyId: Long,
     @RequestBody @Valid
     dto: UpdateTaskKeyRequest,
-  ) {
-    taskService.updateTaskKey(projectHolder.projectEntity, taskId, keyId, dto)
+  ): UpdateTaskKeyResponse {
+    return taskService.updateTaskKey(projectHolder.projectEntity, taskId, keyId, dto)
   }
 
   @PostMapping("/create-multiple")

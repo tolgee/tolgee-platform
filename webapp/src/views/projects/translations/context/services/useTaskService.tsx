@@ -1,16 +1,26 @@
-import { usePutTaskTranslation } from 'tg.service/TranslationHooks';
+import { usePutTask, usePutTaskTranslation } from 'tg.service/TranslationHooks';
 import { useProject } from 'tg.hooks/useProject';
 
-import { SetTaskTranslationState } from '../types';
+import { SetTaskTranslationState, UpdateTask } from '../types';
 import { useTranslationsService } from './useTranslationsService';
+import { confirmation } from 'tg.hooks/confirmation';
+import { T } from '@tolgee/react';
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
 };
 
 export const useTaskService = ({ translations }: Props) => {
-  const putTaskTranslation = usePutTaskTranslation();
   const project = useProject();
+  const putTask = usePutTask();
+  const putTaskTranslation = usePutTaskTranslation();
+
+  const updateTask = ({ taskId, data }: UpdateTask) => {
+    return putTask.mutateAsync({
+      path: { projectId: project.id, taskId: taskId },
+      content: { 'application/json': data },
+    });
+  };
 
   const setTaskTranslationState = (data: SetTaskTranslationState) =>
     putTaskTranslation.mutateAsync(
@@ -27,7 +37,7 @@ export const useTaskService = ({ translations }: Props) => {
         },
       },
       {
-        onSuccess() {
+        onSuccess(response) {
           const key = translations.fixedTranslations?.find(
             (t) => t.keyId === data.keyId
           );
@@ -46,12 +56,29 @@ export const useTaskService = ({ translations }: Props) => {
               },
             });
           }
+          if (response.taskFinished) {
+            confirmation({
+              title: <T keyName="task_finished_confirmation_title" />,
+              message: <T keyName="task_finished_confirmation_message" />,
+              confirmButtonText: (
+                <T keyName="task_finished_confirmation_confirm" />
+              ),
+              onConfirm() {
+                updateTask({
+                  taskId: data.taskId,
+                  data: { state: 'DONE' },
+                }).then(() => {
+                  translations.refetchTranslations();
+                });
+              },
+            });
+          }
         },
       }
     );
 
   return {
     setTaskTranslationState,
-    isLoading: putTaskTranslation.isLoading,
+    isLoading: putTaskTranslation.isLoading || putTask.isLoading,
   };
 };

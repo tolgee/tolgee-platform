@@ -21,6 +21,7 @@ const StyledInputButton = styled(IconButton)`
 
 const StyledContent = styled(Box)`
   display: flex;
+  height: 100%;
   gap: 6px;
   align-items: center;
   & > * {

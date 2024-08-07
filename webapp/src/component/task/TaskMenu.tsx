@@ -26,29 +26,47 @@ export const TaskMenu = ({
   onDetailOpen,
   project,
 }: Props) => {
-  const deleteMutation = useApiMutation({
+  const updateMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskId}',
-    method: 'delete',
+    method: 'put',
     invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });
 
-  function handleDelete() {
-    onClose();
+  function handleClose() {
     confirmation({
-      title: <T keyName="task_menu_delete_confirmation_title" />,
+      title: <T keyName="task_menu_close_confirmation_title" />,
       onConfirm() {
-        deleteMutation.mutate(
+        onClose();
+        updateMutation.mutate(
           {
             path: { projectId: project.id, taskId: task.id },
+            content: { 'application/json': { state: 'CLOSED' } },
           },
           {
             onSuccess() {
-              messageService.success(<T keyName="task_menu_delete_success" />);
+              messageService.success(<T keyName="task_menu_close_success" />);
             },
           }
         );
       },
     });
+  }
+
+  function handleChangeState(state: TaskModel['state']) {
+    updateMutation.mutate(
+      {
+        path: { projectId: project.id, taskId: task.id },
+        content: { 'application/json': { state } },
+      },
+      {
+        onSuccess() {
+          onClose();
+          messageService.success(
+            <T keyName="task_menu_state_changed_success" />
+          );
+        },
+      }
+    );
   }
 
   const withClose = (func: () => void) => () => {
@@ -74,7 +92,21 @@ export const TaskMenu = ({
       <MenuItem onClick={withClose(() => onDetailOpen(task))}>
         {t('task_menu_task_detail')}
       </MenuItem>
-      <MenuItem onClick={handleDelete}>{t('task_menu_delete_task')}</MenuItem>
+      {task.state === 'IN_PROGRESS' ? (
+        <MenuItem
+          onClick={() => handleChangeState('DONE')}
+          disabled={task.doneItems !== task.totalItems}
+        >
+          {t('task_menu_mark_as_done')}
+        </MenuItem>
+      ) : (
+        <MenuItem onClick={() => handleChangeState('IN_PROGRESS')}>
+          {t('task_menu_mark_as_in_progress')}
+        </MenuItem>
+      )}
+      {task.state === 'IN_PROGRESS' && (
+        <MenuItem onClick={handleClose}>{t('task_menu_close_task')}</MenuItem>
+      )}
       <Divider />
       <MenuItem onClick={onClose}>{t('task_menu_clone_task')}</MenuItem>
       <MenuItem onClick={onClose}>{t('task_menu_create_review_task')}</MenuItem>

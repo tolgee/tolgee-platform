@@ -117,7 +117,8 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
      from Task t
         right join t.translations tt on tt.translation.id in :translationIds
         left join t.assignees u on u.id = :currentUserId
-     order by t.type desc
+     where t.state = 'IN_PROGRESS'
+     order by t.type desc, t.id desc
     """,
   )
   fun getByTranslationId(
@@ -147,10 +148,11 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
       from key
           left join (
             select translation.key_id as key_id from translation
-                left join task_translation on (translation.id = task_translation.translation_id)
-                left join task on (task_translation.task_id = task.id and task_translation.task_project_id = :projectId)
+                join task_translation on (translation.id = task_translation.translation_id)
+                join task on (task_translation.task_id = task.id and task_translation.task_project_id = :projectId)
             where task.type = :taskType
                 and task.language_id = :languageId
+                and task.state = 'IN_PROGRESS'
           ) as task on task.key_id = key.id
       where key.project_id = :projectId
           and key.id in :keyIds
