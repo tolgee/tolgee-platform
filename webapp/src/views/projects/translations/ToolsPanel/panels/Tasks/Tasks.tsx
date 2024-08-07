@@ -61,5 +61,5 @@ export const tasksCount = ({ keyData, language }: PanelContentData) => {
   const translation = keyData.translations[language.tag] as
     | TranslationViewModel
     | undefined;
-  return translation?.commentCount ?? 0;
+  return translation?.tasks?.length ?? 0;
 };
