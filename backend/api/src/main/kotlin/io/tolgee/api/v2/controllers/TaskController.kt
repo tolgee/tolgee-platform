@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.task.*
 import io.tolgee.hateoas.task.TaskModel
 import io.tolgee.hateoas.task.TaskModelAssembler
+import io.tolgee.hateoas.task.TaskPerUserReportModel
+import io.tolgee.hateoas.task.TaskPerUserReportModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -41,6 +43,7 @@ class TaskController(
   private val userAccountService: UserAccountService,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val pagedUserResourcesAssembler: PagedResourcesAssembler<ExtendedUserAccountInProject>,
+  private val taskPerUserReportModelAssembler: TaskPerUserReportModelAssembler,
 ) {
   @GetMapping("")
   @Operation(summary = "Get tasks")
@@ -72,7 +75,7 @@ class TaskController(
   }
 
   @GetMapping("/{taskId}")
-  @Operation(summary = "Update task")
+  @Operation(summary = "Get task")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getTask(
@@ -108,6 +111,18 @@ class TaskController(
     taskService.deleteTask(projectHolder.projectEntity, taskId)
   }
 
+  @GetMapping("/{taskId}/per-user-report")
+  @Operation(summary = "Report who did what")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  fun getPerUserReport(
+    @PathVariable
+    taskId: Long,
+  ): List<TaskPerUserReportModel> {
+    val result = taskService.getReport(projectHolder.projectEntity, taskId)
+    return result.map { taskPerUserReportModelAssembler.toModel(it) }
+  }
+
   @PutMapping("/{taskId}/keys")
   @Operation(summary = "Add or remove task keys")
   @UseDefaultPermissions
@@ -122,7 +137,7 @@ class TaskController(
   }
 
   @PutMapping("/{taskId}/keys/{keyId}")
-  @Operation(summary = "Add or remove task keys")
+  @Operation(summary = "Update task key")
   @UseDefaultPermissions
   @AllowApiAccess
   fun updateTaskKey(

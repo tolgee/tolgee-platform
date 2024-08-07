@@ -16,6 +16,7 @@ import io.tolgee.model.task.TaskTranslation
 import io.tolgee.model.task.TaskTranslationId
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.KeysScopeView
+import io.tolgee.model.views.TaskPerUserReportView
 import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.model.views.TranslationToTaskView
 import io.tolgee.repository.TaskRepository
@@ -330,6 +331,14 @@ class TaskService(
       result.set(it.translationId, existing)
     }
     return result
+  }
+
+  fun getReport(projectEntity: Project, taskId: Long): List<TaskPerUserReportView> {
+    return taskRepository.perUserReport(
+      projectEntity.id,
+      taskId,
+      projectEntity.baseLanguage!!.id
+    )
   }
 
   private fun getOnlyProjectKeys(

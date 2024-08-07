@@ -593,6 +593,9 @@ export interface paths {
     /** Returns all used project namespaces. Response contains default (null) namespace if used. */
     get: operations["getUsedNamespaces"];
   };
+  "/v2/projects/{projectId}/tasks/{taskId}/per-user-report": {
+    get: operations["getPerUserReport"];
+  };
   "/v2/projects/{projectId}/tasks/possible-assignees": {
     get: operations["getPossibleAssignees"];
   };
@@ -1141,6 +1144,14 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1187,14 +1198,6 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1389,6 +1392,8 @@ export interface components {
       doneItems: number;
       /** Format: int64 */
       baseWordCount: number;
+      /** Format: int64 */
+      baseCharacterCount: number;
       author?: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       createdAt: number;
@@ -2204,6 +2209,7 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      description: string;
       /** Format: int64 */
       id: number;
       /** Format: int64 */
@@ -2214,7 +2220,6 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2350,19 +2355,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
+      description: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      projectId: number;
+      projectName: string;
+      userFullName?: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       username?: string;
-      description: string;
+      /** Format: int64 */
+      projectId: number;
       scopes: string[];
-      projectName: string;
-      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2447,11 +2452,11 @@ export interface components {
     };
     KeysScopeView: {
       /** Format: int64 */
+      keyCount: number;
+      /** Format: int64 */
       wordCount: number;
       /** Format: int64 */
       characterCount: number;
-      /** Format: int64 */
-      keyCount: number;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];
@@ -3500,22 +3505,22 @@ export interface components {
         | "SLACK_INTEGRATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3576,9 +3581,9 @@ export interface components {
       defaultFileStructureTemplate: string;
     };
     DocItem: {
+      description?: string;
       name: string;
       displayName?: string;
-      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -3627,6 +3632,15 @@ export interface components {
        */
       name?: string;
     };
+    TaskPerUserReportModel: {
+      user: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      doneItems: number;
+      /** Format: int64 */
+      baseCharacterCount: number;
+      /** Format: int64 */
+      baseWordCount: number;
+    };
     PagedModelTaskModel: {
       _embedded?: {
         tasks?: components["schemas"]["TaskModel"][];
@@ -3655,23 +3669,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
       namespace?: string;
-      description?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       baseTranslation?: string;
       namespace?: string;
-      description?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4225,6 +4239,7 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
+      description: string;
       /** Format: int64 */
       id: number;
       /** Format: int64 */
@@ -4235,7 +4250,6 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4352,19 +4366,19 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
+      description: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      projectId: number;
+      projectName: string;
+      userFullName?: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       username?: string;
-      description: string;
+      /** Format: int64 */
+      projectId: number;
       scopes: string[];
-      projectName: string;
-      userFullName?: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -14141,6 +14155,54 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelUsedNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getPerUserReport: {
+    parameters: {
+      path: {
+        taskId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskPerUserReportModel"][];
         };
       };
       /** Bad Request */

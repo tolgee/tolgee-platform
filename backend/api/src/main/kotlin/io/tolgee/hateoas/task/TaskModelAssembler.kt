@@ -39,6 +39,7 @@ class TaskModelAssembler(
       totalItems = entity.totalItems,
       doneItems = entity.doneItems,
       baseWordCount = entity.baseWordCount,
+      baseCharacterCount = entity.baseCharacterCount,
       state = entity.state,
     )
   }

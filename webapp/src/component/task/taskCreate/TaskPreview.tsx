@@ -106,6 +106,16 @@ export const TaskPreview = ({
             )}
           </StyledMetric>
         </Box>
+        <Box display="grid" alignContent="center">
+          <StyledMetric>{t('create_task_preview_characters')}</StyledMetric>
+          <StyledMetric>
+            {statsLoadable.data ? (
+              formatNumber(statsLoadable.data.characterCount)
+            ) : (
+              <Skeleton />
+            )}
+          </StyledMetric>
+        </Box>
       </Box>
       <AssigneeSearchSelect
         value={assigness}

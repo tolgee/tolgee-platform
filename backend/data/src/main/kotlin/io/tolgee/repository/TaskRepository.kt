@@ -5,6 +5,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskId
 import io.tolgee.model.views.KeysScopeView
+import io.tolgee.model.views.TaskPerUserReportView
 import io.tolgee.model.views.TaskScopeView
 import io.tolgee.model.views.TranslationToTaskView
 import org.springframework.data.domain.Page
@@ -195,10 +196,33 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
           left join tk.project p
           left join tk.translations tt
           left join tt.translation t
-          left join tt.translation bt on (bt.key.id = t.key.id and bt.language.id = p.baseLanguage.id)
+          left join t.key k
+          left join k.translations bt on (bt.language.id = p.baseLanguage.id)
       where tk in :tasks
       group by tk.id, tk.project.id
     """,
   )
   fun getTasksScopes(tasks: Collection<Task>): List<TaskScopeView>
+
+  @Query(
+    """
+      select u as user, count(t.id) as doneItems, coalesce(sum(btr.characterCount), 0) as baseCharacterCount, coalesce(sum(btr.wordCount), 0) as baseWordCount
+      from Task tk
+        left join tk.translations as tt
+        left join tt.author as u
+        left join tt.translation as t
+        left join t.key as k
+        left join k.translations as btr on btr.language.id = :baseLangId 
+      where tk.project.id = :projectId
+        and tk.id = :taskId
+        and tt.done
+        and u.id is not NULL
+      group by u
+    """,
+  )
+  fun perUserReport(
+    projectId: Long,
+    taskId: Long,
+    baseLangId: Long,
+  ): List<TaskPerUserReportView>
 }

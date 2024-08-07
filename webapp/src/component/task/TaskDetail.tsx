@@ -66,6 +66,12 @@ export const TaskDetail = ({ task, onClose, project }: Props) => {
     path: { projectId: project.id, taskId: task.id },
   });
 
+  const perUserReportLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/tasks/{taskId}/per-user-report',
+    method: 'get',
+    path: { projectId: project.id, taskId: task.id },
+  });
+
   const updateLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskId}',
     method: 'put',
@@ -150,7 +156,7 @@ export const TaskDetail = ({ task, onClose, project }: Props) => {
               {t('task_detail_scope_title')}
             </Typography>
 
-            <TaskScope task={task} />
+            <TaskScope task={task} perUserData={perUserReportLoadable.data} />
 
             <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" pt="20px">
               <TaskInfoItem
