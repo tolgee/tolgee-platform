@@ -18,6 +18,7 @@ data class TaskWithProjectModel(
   var totalItems: Long = 0,
   var doneItems: Long = 0,
   var baseWordCount: Long = 0,
+  var baseCharacterCount: Long = 0,
   var author: SimpleUserAccountModel? = null,
   var createdAt: Long = 0,
   var closedAt: Long? = null,

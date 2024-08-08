@@ -15,6 +15,7 @@ import { messageService } from 'tg.service/MessageService';
 import { TaskInfoItem } from './TaskInfoItem';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { TaskScope } from './TaskScope';
+import { UserAccount } from 'tg.component/UserAccount';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -161,7 +162,7 @@ export const TaskDetail = ({ task, onClose, project }: Props) => {
             <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" pt="20px">
               <TaskInfoItem
                 label={t('task_detail_author_label')}
-                value={task.author?.name ?? task.author?.username}
+                value={task.author && <UserAccount user={task.author} />}
               />
               <TaskInfoItem
                 label={t('task_detail_created_at_label')}

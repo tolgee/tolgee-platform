@@ -6,8 +6,8 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from 'tg.component/common/TextField';
 import { AssigneeSearchSelectPopover } from './AssigneeSearchSelectPopover';
-import { User } from './types';
 import { FakeInput } from 'tg.component/FakeInput';
+import { User } from 'tg.component/UserAccount';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 

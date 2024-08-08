@@ -25,10 +25,10 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { FiltersType } from 'tg.component/translation/translationFilters/tools';
 import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
 
-import { User } from '../assigneeSelect/types';
 import { TaskDatePicker } from '../TaskDatePicker';
 import { TaskPreview } from './TaskPreview';
 import { Select } from 'tg.component/common/Select';
+import { User } from 'tg.component/UserAccount';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type ProjectModel = components['schemas']['ProjectModel'];
@@ -137,7 +137,7 @@ export const TaskCreateDialog = ({
           assignees: {} as Record<string, User[]>,
         }}
         validationSchema={Validation.CREATE_TASK_FORM(t)}
-        onSubmit={async (values, actions) => {
+        onSubmit={async (values) => {
           const data = languages.map((languageId) => ({
             type: values.type,
             name: values.name,

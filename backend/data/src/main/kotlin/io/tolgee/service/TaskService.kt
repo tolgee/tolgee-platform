@@ -179,6 +179,9 @@ class TaskService(
 
     dto.state?.let {
       task.state = it
+      if (dto.state !== TaskState.IN_PROGRESS) {
+        task.closedAt = Date()
+      }
     }
 
     taskRepository.saveAndFlush(task)

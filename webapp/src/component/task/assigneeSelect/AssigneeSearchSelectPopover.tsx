@@ -16,8 +16,7 @@ import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
-import { AssigneeSearchSelectItem } from './AssigneeSearchSelectItem';
-import { User } from './types';
+import { User, UserAccount } from 'tg.component/UserAccount';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
@@ -206,7 +205,7 @@ export const AssigneeSearchSelectPopover: React.FC<Props> = ({
                       disableRipple
                       sx={{ marginLeft: -1, marginRight: 0.5 }}
                     />
-                    <AssigneeSearchSelectItem data={option} />
+                    <UserAccount user={option} />
                   </MenuItem>
                   {usersLoadable.hasNextPage &&
                     option.id === items![items!.length - 1].id && (

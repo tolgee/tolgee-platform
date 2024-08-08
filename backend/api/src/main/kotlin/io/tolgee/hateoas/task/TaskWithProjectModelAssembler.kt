@@ -41,6 +41,7 @@ class TaskWithProjectModelAssembler(
       totalItems = entity.totalItems,
       doneItems = entity.doneItems,
       baseWordCount = entity.baseWordCount,
+      baseCharacterCount = entity.baseCharacterCount,
       state = entity.state,
       project = entity.project.let { simpleProjectModelAssembler.toModel(it) },
     )

@@ -1,14 +1,15 @@
+import { Warning } from '@mui/icons-material';
+import { Box, Skeleton, styled, Tooltip } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { stringHash } from 'tg.fixtures/stringHash';
-import { Box, Skeleton, styled, Tooltip } from '@mui/material';
 import { FlagImage } from 'tg.component/languages/FlagImage';
-import { useTranslate } from '@tolgee/react';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
-import { Warning } from '@mui/icons-material';
+import { User } from 'tg.component/UserAccount';
 import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
-import { User } from '../assigneeSelect/types';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
