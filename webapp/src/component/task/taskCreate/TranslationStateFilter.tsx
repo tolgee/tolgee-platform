@@ -9,7 +9,6 @@ import {
   Box,
   IconButton,
 } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
 import { StateType, TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
@@ -46,7 +45,6 @@ export const TranslationStateFilter = ({
   sx,
   className,
 }: Props) => {
-  const { t } = useTranslate();
   const translateState = useStateTranslation();
 
   const handleToggle = (item: TranslationStateType) => () => {

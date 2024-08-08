@@ -5,7 +5,6 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  useTheme,
   styled,
   SxProps,
 } from '@mui/material';
@@ -89,8 +88,6 @@ export const TranslationFilters = ({
   }, [isOpen]);
 
   const activeFilters = getActiveFilters(value);
-
-  const theme = useTheme();
 
   const { availableFilters } = useAvailableFilters(
     selectedLanguages,
