@@ -22,7 +22,11 @@ export const Select: FunctionComponent<Props> = (props) => {
   return (
     <StyledContainer>
       {label && <StyledInputLabel>{label}</StyledInputLabel>}
-      <Box sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}>
+      <Box
+        display="grid"
+        alignItems="start"
+        sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
+      >
         <MUISelect
           variant="outlined"
           size="small"

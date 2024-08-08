@@ -2,7 +2,7 @@ import { Checkbox, ListItemText } from '@mui/material';
 
 import { SubmenuStates } from './SubmenuStates';
 import { SubmenuMulti } from './SubmenuMulti';
-import { useAvailableFilters } from './useAvailableFilters';
+import { FilterOptions, useAvailableFilters } from './useAvailableFilters';
 import { toggleFilter } from './tools';
 import {
   CompactListSubheader,
@@ -14,7 +14,8 @@ import { getActiveFilters } from './getActiveFilters';
 export const useFiltersContent = (
   filtersObj: FiltersType,
   onChange: (value: FiltersType) => void,
-  selectedLanguages?: LanguageModel[]
+  selectedLanguages?: LanguageModel[],
+  filterOptions?: FilterOptions
 ) => {
   const options: any[] = [];
 
@@ -25,7 +26,10 @@ export const useFiltersContent = (
     onChange(newFilters);
   };
 
-  const { availableFilters, refresh } = useAvailableFilters(selectedLanguages);
+  const { availableFilters, refresh } = useAvailableFilters(
+    selectedLanguages,
+    filterOptions
+  );
 
   availableFilters.forEach((group, i1) => {
     if (group.options?.length) {

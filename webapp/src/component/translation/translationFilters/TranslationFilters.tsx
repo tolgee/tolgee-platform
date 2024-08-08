@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { FiltersType, LanguageModel } from './tools';
-import { useAvailableFilters } from './useAvailableFilters';
+import { FilterOptions, useAvailableFilters } from './useAvailableFilters';
 import { FilterType } from './tools';
 import { getActiveFilters } from './getActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
@@ -47,7 +47,6 @@ const StyledInputContent = styled('div')`
 `;
 
 const StyledInputText = styled(Typography)`
-  margin-top: 2px;
   align-items: center;
   justify-content: space-between;
   width: 100%;
@@ -66,6 +65,7 @@ type Props = {
   value: FiltersType;
   selectedLanguages: LanguageModel[];
   placeholder?: React.ReactNode;
+  filterOptions?: FilterOptions;
   sx?: SxProps;
   className?: string;
 };
@@ -75,6 +75,7 @@ export const TranslationFilters = ({
   onChange,
   selectedLanguages,
   placeholder,
+  filterOptions,
   sx,
   className,
 }: Props) => {
@@ -91,14 +92,22 @@ export const TranslationFilters = ({
 
   const theme = useTheme();
 
-  const { availableFilters } = useAvailableFilters(selectedLanguages);
+  const { availableFilters } = useAvailableFilters(
+    selectedLanguages,
+    filterOptions
+  );
 
   const findOption = (value: string) =>
     availableFilters
       .map((g) => g.options?.find((o) => o.value === value))
       .filter(Boolean)[0];
 
-  const filtersContent = useFiltersContent(value, onChange, selectedLanguages);
+  const filtersContent = useFiltersContent(
+    value,
+    onChange,
+    selectedLanguages,
+    filterOptions
+  );
 
   const handleClearFilters = (e) => {
     onChange({});
@@ -127,8 +136,7 @@ export const TranslationFilters = ({
         <StyledInputContent>
           <StyledInputText
             style={{
-              color:
-                value.length === 0 ? '#8b9097' : theme.palette.text.primary,
+              opacity: value.length === 0 ? 0.5 : 1,
             }}
             variant="body2"
           >

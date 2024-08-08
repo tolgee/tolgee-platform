@@ -1,14 +1,23 @@
 import { useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
-import { TRANSLATION_STATES } from 'tg.constants/translationStates';
+import { StateType, TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { encodeFilter, GroupType } from './tools';
 import { LanguageModel } from './tools';
+import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
 
-export const useAvailableFilters = (selectedLanguages?: LanguageModel[]) => {
+export type FilterOptions = {
+  keyRelatedOnly: boolean;
+};
+
+export const useAvailableFilters = (
+  selectedLanguages?: LanguageModel[],
+  options?: FilterOptions
+) => {
   const project = useProject();
   const { t } = useTranslate();
+  const translateState = useStateTranslation();
 
   const tags = useApiQuery({
     url: '/v2/projects/{projectId}/tags',
@@ -23,46 +32,45 @@ export const useAvailableFilters = (selectedLanguages?: LanguageModel[]) => {
     path: { projectId: project.id },
   });
 
-  return {
-    refresh: () => {
-      tags.refetch();
-      namespaces.refetch();
+  const availableFilters: GroupType[] = [
+    {
+      name: null,
+      type: 'multi',
+      options: [
+        {
+          label: t('translations_filters_heading_tags'),
+          value: null,
+          submenu:
+            tags.data?._embedded?.tags?.map((val) => {
+              return {
+                label: val.name,
+                value: encodeFilter({
+                  filter: 'filterTag',
+                  value: val.name,
+                }),
+              };
+            }) || [],
+        },
+        {
+          label: t('translations_filters_heading_namespaces'),
+          value: null,
+          submenu:
+            namespaces.data?._embedded?.namespaces?.map((val) => {
+              return {
+                label: val.name || t('namespace_default'),
+                value: encodeFilter({
+                  filter: 'filterNamespace',
+                  value: val.name || '',
+                }),
+              };
+            }) || [],
+        },
+      ],
     },
-    availableFilters: [
-      {
-        name: null,
-        type: 'multi',
-        options: [
-          {
-            label: t('translations_filters_heading_tags'),
-            value: null,
-            submenu:
-              tags.data?._embedded?.tags?.map((val) => {
-                return {
-                  label: val.name,
-                  value: encodeFilter({
-                    filter: 'filterTag',
-                    value: val.name,
-                  }),
-                };
-              }) || [],
-          },
-          {
-            label: t('translations_filters_heading_namespaces'),
-            value: null,
-            submenu:
-              namespaces.data?._embedded?.namespaces?.map((val) => {
-                return {
-                  label: val.name || t('namespace_default'),
-                  value: encodeFilter({
-                    filter: 'filterNamespace',
-                    value: val.name || '',
-                  }),
-                };
-              }) || [],
-          },
-        ],
-      },
+  ];
+
+  if (!options?.keyRelatedOnly) {
+    availableFilters.push(
       {
         name: t('translations_filters_heading_translations'),
         options: [
@@ -76,6 +84,7 @@ export const useAvailableFilters = (selectedLanguages?: LanguageModel[]) => {
         ],
       },
       {
+        name: null,
         options: [
           {
             label: t('translations_filters_something_outdated'),
@@ -85,49 +94,61 @@ export const useAvailableFilters = (selectedLanguages?: LanguageModel[]) => {
             }),
           },
         ],
+      }
+    );
+  }
+
+  availableFilters.push({
+    name: t('translations_filters_heading_screenshots'),
+    options: [
+      {
+        label: t('translations_filters_no_screenshots'),
+        value: encodeFilter({
+          filter: 'filterHasNoScreenshot',
+          value: true,
+        }),
       },
       {
-        name: t('translations_filters_heading_screenshots'),
-        options: [
-          {
-            label: t('translations_filters_no_screenshots'),
-            value: encodeFilter({
-              filter: 'filterHasNoScreenshot',
-              value: true,
-            }),
-          },
-          {
-            label: t('translations_filters_with_screenshots'),
-            value: encodeFilter({
-              filter: 'filterHasScreenshot',
-              value: true,
-            }),
-          },
-        ],
+        label: t('translations_filters_with_screenshots'),
+        value: encodeFilter({
+          filter: 'filterHasScreenshot',
+          value: true,
+        }),
       },
-      {
-        name: t('translations_filters_heading_states'),
-        type: 'states',
-        options:
-          selectedLanguages?.map((language) => {
-            return {
-              label: language.name,
-              value: null,
-              submenu: Object.entries(TRANSLATION_STATES)
-                // MACHINE_TRANSLATED is not supported yet
-                .filter(([key]) => key !== 'MACHINE_TRANSLATED')
-                .map(([key, value]) => {
-                  return {
-                    label: value.translation,
-                    value: encodeFilter({
-                      filter: 'filterState',
-                      value: `${language.tag},${key}`,
-                    }),
-                  };
-                }),
-            };
-          }) || [],
-      },
-    ] as GroupType[],
+    ],
+  });
+
+  if (!options?.keyRelatedOnly) {
+    availableFilters.push({
+      name: t('translations_filters_heading_states'),
+      type: 'states',
+      options:
+        selectedLanguages?.map((language) => {
+          return {
+            label: language.name,
+            value: null,
+            submenu: Object.entries(TRANSLATION_STATES)
+              // MACHINE_TRANSLATED is not supported yet
+              .filter(([key]) => key !== 'MACHINE_TRANSLATED')
+              .map(([key, value]) => {
+                return {
+                  label: translateState(key as StateType),
+                  value: encodeFilter({
+                    filter: 'filterState',
+                    value: `${language.tag},${key}`,
+                  }),
+                };
+              }),
+          };
+        }) || [],
+    });
+  }
+
+  return {
+    refresh: () => {
+      tags.refetch();
+      namespaces.refetch();
+    },
+    availableFilters,
   };
 };

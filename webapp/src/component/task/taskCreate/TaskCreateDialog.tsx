@@ -19,16 +19,19 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { useTaskTranslation } from 'tg.translationTools/useTaskTranslation';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-
 import { Select as FormSelect } from 'tg.component/common/form/fields/Select';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { FiltersType } from 'tg.component/translation/translationFilters/tools';
 import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
+import { Select } from 'tg.component/common/Select';
+import { User } from 'tg.component/UserAccount';
 
 import { TaskDatePicker } from '../TaskDatePicker';
 import { TaskPreview } from './TaskPreview';
-import { Select } from 'tg.component/common/Select';
-import { User } from 'tg.component/UserAccount';
+import {
+  TranslationStateFilter,
+  TranslationStateType,
+} from './TranslationStateFilter';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type ProjectModel = components['schemas']['ProjectModel'];
@@ -53,11 +56,17 @@ const StyledForm = styled('form')`
   width: min(90vw, 800px);
 `;
 
-const StyledTopPart = styled('div')`
+const StyledTopPart = styled(Box)`
   display: grid;
-  gap: ${({ theme }) => theme.spacing(0.5, 3)};
+  gap: ${({ theme }) => theme.spacing(0.5, 2)};
   grid-template-columns: 3fr 5fr;
   align-items: start;
+`;
+
+const StyledFilters = styled(Box)`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing(0.5, 2)};
+  grid-template-columns: 3fr 3fr 2fr;
 `;
 
 const StyledActions = styled('div')`
@@ -97,6 +106,7 @@ export const TaskCreateDialog = ({
   });
 
   const [filters, setFilters] = useState<FiltersType>({});
+  const [stateFilters, setStateFilters] = useState<TranslationStateType[]>([]);
   const [languages, setLanguages] = useState(initialLanguages);
 
   const selectedLoadable = useApiQuery({
@@ -231,15 +241,10 @@ export const TaskCreateDialog = ({
                 minRows={3}
               />
 
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                mt={2}
-              >
-                <Typography variant="subtitle2">
-                  {t('create_task_tasks_and_assignees_title')}
-                </Typography>
+              <Typography variant="subtitle2" mt={2}>
+                {t('create_task_tasks_and_assignees_title')}
+              </Typography>
+              <StyledFilters my={1}>
                 {!selection && (
                   <TranslationFilters
                     value={filters}
@@ -248,10 +253,19 @@ export const TaskCreateDialog = ({
                       languages.includes(l.id)
                     )}
                     placeholder={t('create_task_filter_keys_placeholder')}
-                    sx={{ minWidth: '230px' }}
+                    filterOptions={{ keyRelatedOnly: true }}
+                    sx={{ width: '100%', maxWidth: '270px' }}
                   />
                 )}
-              </Box>
+                <TranslationStateFilter
+                  value={stateFilters}
+                  placeholder={t(
+                    'create_task_filter_translation_states_placeholder'
+                  )}
+                  onChange={setStateFilters}
+                  sx={{ maxWidth: '270px' }}
+                />
+              </StyledFilters>
 
               {allLanguages && (
                 <Box display="grid" gap={2} mt={1}>
