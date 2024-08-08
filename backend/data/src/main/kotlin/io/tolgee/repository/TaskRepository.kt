@@ -75,14 +75,12 @@ const val TASK_FILTERS = """
 
 const val TRANSLATION_SCOPE_FILTERS = """
     (
-      :#{#filters.filterState} is null
-      or COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal}
-    ) and (
-      COALESCE(:#{#filters.filterOutdated}, false) = false
+      COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal}
       or COALESCE(t.outdated, false) = :#{#filters.filterOutdated}
-    ) and (
-      COALESCE(:#{#filters.filterNotOutdated}, false) = false
-      or COALESCE(t.outdated, false) != :#{#filters.filterNotOutdated}
+      or (
+        COALESCE(:#{#filters.filterOutdated}, false) = false
+        and :#{#filters.filterState} is null
+      )
     )
 """
 
