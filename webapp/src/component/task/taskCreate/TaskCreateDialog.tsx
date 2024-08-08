@@ -160,6 +160,10 @@ export const TaskCreateDialog = ({
           createTasksLoadable.mutate(
             {
               path: { projectId: project.id },
+              query: {
+                filterState: stateFilters.filter((i) => i !== 'OUTDATED'),
+                filterOutdated: stateFilters.includes('OUTDATED'),
+              },
               content: {
                 'application/json': { tasks: data },
               },
@@ -279,6 +283,7 @@ export const TaskCreateDialog = ({
                       onUpdateAssignees={(users) => {
                         setFieldValue(`assignees[${language}]`, users);
                       }}
+                      filters={stateFilters}
                     />
                   ))}
                 </Box>

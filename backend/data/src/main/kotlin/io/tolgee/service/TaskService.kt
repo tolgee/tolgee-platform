@@ -15,10 +15,7 @@ import io.tolgee.model.task.TaskId
 import io.tolgee.model.task.TaskTranslation
 import io.tolgee.model.task.TaskTranslationId
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.views.KeysScopeView
-import io.tolgee.model.views.TaskPerUserReportView
-import io.tolgee.model.views.TaskWithScopeView
-import io.tolgee.model.views.TranslationToTaskView
+import io.tolgee.model.views.*
 import io.tolgee.repository.TaskRepository
 import io.tolgee.repository.TaskTranslationRepository
 import io.tolgee.repository.TranslationRepository
@@ -84,9 +81,10 @@ class TaskService(
   fun createMultipleTasks(
     project: Project,
     dtos: Collection<CreateTaskRequest>,
+    filters: TranslationScopeFilters,
   ) {
     dtos.forEach {
-      createTask(project, it)
+      createTask(project, it, filters)
     }
   }
 
@@ -94,12 +92,13 @@ class TaskService(
   fun createTask(
     project: Project,
     dto: CreateTaskRequest,
+    filters: TranslationScopeFilters,
   ): TaskWithScopeView {
     var lastErr = DataIntegrityViolationException("Error")
     repeat(100) {
       // necessary for proper transaction creation
       try {
-        val task = taskService.createTaskInTransaction(project, dto)
+        val task = taskService.createTaskInTransaction(project, dto, filters)
         entityManager.flush()
         return getTasksWithScope(listOf(task)).first()
       } catch (e: DataIntegrityViolationException) {
@@ -113,6 +112,7 @@ class TaskService(
   fun createTaskInTransaction(
     project: Project,
     dto: CreateTaskRequest,
+    filters: TranslationScopeFilters,
   ): Task {
     // Find the maximum ID for the given project
     val lastTask = taskRepository.findByProjectOrderByIdDesc(project).firstOrNull()
@@ -120,7 +120,14 @@ class TaskService(
 
     val language = checkLanguage(dto.languageId!!, project)
     val assignees = checkAssignees(dto.assignees ?: mutableSetOf(), project)
-    val keys = getOnlyProjectKeys(project, dto.languageId!!, dto.type, dto.keys ?: mutableSetOf())
+    val keys =
+      getOnlyProjectKeys(
+        project,
+        dto.languageId!!,
+        dto.type,
+        dto.keys ?: mutableSetOf(),
+        filters,
+      )
 
     val translations = getOrCreateTranslations(language.id, keys)
 
@@ -292,12 +299,12 @@ class TaskService(
       val taskItem = getTask(projectEntity, taskId)
       return UpdateTaskKeyResponse(
         done = taskTranslation.done,
-        taskFinished = taskItem.doneItems == taskItem.totalItems
+        taskFinished = taskItem.doneItems == taskItem.totalItems,
       )
     } else {
       return UpdateTaskKeyResponse(
         done = taskTranslation.done,
-        taskFinished = false
+        taskFinished = false,
       )
     }
   }
@@ -306,7 +313,8 @@ class TaskService(
   fun calculateScope(
     projectEntity: Project,
     dto: CalculateScopeRequest,
-  ): KeysScopeView {
+    filters: TranslationScopeFilters,
+  ): KeyScopeWithIdsView {
     val language = languageService.get(dto.language, projectEntity.id)
     val relevantKeys =
       taskRepository.getKeysWithoutTask(
@@ -314,11 +322,19 @@ class TaskService(
         language.id,
         dto.type.toString(),
         dto.keys!!,
+        filters,
       )
-    return taskRepository.calculateScope(
-      projectEntity.id,
-      projectEntity.baseLanguage!!.id,
-      relevantKeys,
+    val scope =
+      taskRepository.calculateScope(
+        projectEntity.id,
+        projectEntity.baseLanguage!!.id,
+        relevantKeys,
+      )
+    return KeyScopeWithIdsView(
+      keyCount = scope.keyCount,
+      wordCount = scope.wordCount,
+      characterCount = scope.characterCount,
+      keyIds = relevantKeys,
     )
   }
 
@@ -336,11 +352,14 @@ class TaskService(
     return result
   }
 
-  fun getReport(projectEntity: Project, taskId: Long): List<TaskPerUserReportView> {
+  fun getReport(
+    projectEntity: Project,
+    taskId: Long,
+  ): List<TaskPerUserReportView> {
     return taskRepository.perUserReport(
       projectEntity.id,
       taskId,
-      projectEntity.baseLanguage!!.id
+      projectEntity.baseLanguage!!.id,
     )
   }
 
@@ -349,12 +368,14 @@ class TaskService(
     languageId: Long,
     type: TaskType,
     keys: Collection<Long>,
+    filters: TranslationScopeFilters,
   ): MutableSet<Long> {
     return taskRepository.getKeysWithoutTask(
       project.id,
       languageId,
       type.toString(),
       keys,
+      filters,
     ).toMutableSet()
   }
 

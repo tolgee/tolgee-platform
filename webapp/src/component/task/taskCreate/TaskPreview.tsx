@@ -10,6 +10,7 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { User } from 'tg.component/UserAccount';
 import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
+import { TranslationStateType } from './TranslationStateFilter';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -47,6 +48,7 @@ type Props = {
   keys: number[];
   assigness: User[];
   onUpdateAssignees: (users: User[]) => void;
+  filters: TranslationStateType[];
 };
 
 export const TaskPreview = ({
@@ -55,6 +57,7 @@ export const TaskPreview = ({
   keys,
   assigness,
   onUpdateAssignees,
+  filters,
 }: Props) => {
   const { t } = useTranslate();
   const formatNumber = useNumberFormatter();
@@ -66,8 +69,12 @@ export const TaskPreview = ({
     method: 'post',
     path: { projectId: project.id },
     content: { 'application/json': content },
-    // @ts-ignore add dependencies to url, so react query works correctly
-    query: { hash: stringHash(JSON.stringify(content)) },
+    query: {
+      // @ts-ignore add dependencies to url, so react query works correctly
+      hash: stringHash(JSON.stringify(content)),
+      filterState: filters.filter((i) => i !== 'OUTDATED'),
+      filterOutdated: filters.includes('OUTDATED'),
+    },
   });
 
   return (

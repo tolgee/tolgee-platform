@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.dtos.request.task.TaskFilters
+import io.tolgee.dtos.request.task.TranslationScopeFilters
 import io.tolgee.model.Project
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskId
@@ -17,48 +18,48 @@ import org.springframework.stereotype.Repository
 const val TASK_SEARCH = """
     (
         cast(:search as text) is null
-        or lower(t.name) like lower(concat('%', cast(:search as text),'%'))
+        or lower(tk.name) like lower(concat('%', cast(:search as text),'%'))
     )
 """
 
 const val TASK_FILTERS = """
     (
         :#{#filters.filterNotState} is null
-        or t.state not in :#{#filters.filterNotState}
+        or tk.state not in :#{#filters.filterNotState}
     )
     and (
         :#{#filters.filterState} is null
-        or t.state in :#{#filters.filterState}
+        or tk.state in :#{#filters.filterState}
     )
     and (
         :#{#filters.filterType} is null
-        or t.type in :#{#filters.filterType}
+        or tk.type in :#{#filters.filterType}
     )
     and (
         :#{#filters.filterId} is null
-        or t.id in :#{#filters.filterId}
+        or tk.id in :#{#filters.filterId}
     )
     and (
         :#{#filters.filterNotId} is null
-        or t.id not in :#{#filters.filterNotId}
+        or tk.id not in :#{#filters.filterNotId}
     )
     and (
         :#{#filters.filterProject} is null
-        or t.project.id in :#{#filters.filterProject}
+        or tk.project.id in :#{#filters.filterProject}
     )
     and (
         :#{#filters.filterNotProject} is null
-        or t.project.id not in :#{#filters.filterNotProject}
+        or tk.project.id not in :#{#filters.filterNotProject}
     )
     and (
         :#{#filters.filterLanguage} is null
-        or t.language.id in :#{#filters.filterLanguage}
+        or tk.language.id in :#{#filters.filterLanguage}
     )
     and (
         :#{#filters.filterAssignee} is null
         or exists (
             select 1
-            from t.assignees u
+            from tk.assignees u
             where u.id in :#{#filters.filterAssignee}
         )
     )
@@ -66,9 +67,22 @@ const val TASK_FILTERS = """
         :#{#filters.filterTranslation} is null
         or exists (
             select 1
-            from t.translations tt
+            from tk.translations tt
             where tt.translation.id in :#{#filters.filterTranslation}
         )
+    )
+"""
+
+const val TRANSLATION_SCOPE_FILTERS = """
+    (
+      :#{#filters.filterState} is null
+      or COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal}
+    ) and (
+      COALESCE(:#{#filters.filterOutdated}, false) = false
+      or COALESCE(t.outdated, false) = :#{#filters.filterOutdated}
+    ) and (
+      COALESCE(:#{#filters.filterNotOutdated}, false) = false
+      or COALESCE(t.outdated, false) != :#{#filters.filterNotOutdated}
     )
 """
 
@@ -76,10 +90,10 @@ const val TASK_FILTERS = """
 interface TaskRepository : JpaRepository<Task, TaskId> {
   @Query(
     """
-     select t
-     from Task t
+     select tk
+     from Task tk
      where
-        t.project.id = :projectId
+        tk.project.id = :projectId
         and $TASK_SEARCH
         and $TASK_FILTERS
     """,
@@ -93,9 +107,9 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
 
   @Query(
     """
-     select t
-     from Task t
-        right join t.assignees u on u.id = :userId
+     select tk
+     from Task tk
+        right join tk.assignees u on u.id = :userId
      where $TASK_SEARCH
         and $TASK_FILTERS
     """,
@@ -155,9 +169,11 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
                 and task.language_id = :languageId
                 and task.state = 'IN_PROGRESS'
           ) as task on task.key_id = key.id
+          left join translation t on t.key_id = key.id and t.language_id = :languageId
       where key.project_id = :projectId
           and key.id in :keyIds
           and task IS NULL
+          and $TRANSLATION_SCOPE_FILTERS
     """,
   )
   fun getKeysWithoutTask(
@@ -165,6 +181,7 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
     languageId: Long,
     taskType: String,
     keyIds: Collection<Long>,
+    filters: TranslationScopeFilters = TranslationScopeFilters(),
   ): List<Long>
 
   @Query(

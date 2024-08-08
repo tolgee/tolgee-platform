@@ -10,7 +10,7 @@ import io.tolgee.hateoas.task.TaskPerUserReportModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
 import io.tolgee.model.views.ExtendedUserAccountInProject
-import io.tolgee.model.views.KeysScopeView
+import io.tolgee.model.views.KeyScopeWithIdsView
 import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -68,9 +68,10 @@ class TaskController(
   fun createTask(
     @RequestBody @Valid
     dto: CreateTaskRequest,
+    @ParameterObject
+    filters: TranslationScopeFilters,
   ): TaskModel {
-    val task = taskService.createTask(projectHolder.projectEntity, dto)
-
+    val task = taskService.createTask(projectHolder.projectEntity, dto, filters)
     return taskModelAssembler.toModel(task)
   }
 
@@ -158,8 +159,10 @@ class TaskController(
   fun createTasks(
     @RequestBody @Valid
     dto: CreateMultipleTasksRequest,
+    @ParameterObject
+    filters: TranslationScopeFilters,
   ) {
-    taskService.createMultipleTasks(projectHolder.projectEntity, dto.tasks)
+    taskService.createMultipleTasks(projectHolder.projectEntity, dto.tasks, filters)
   }
 
   @PostMapping("/calculate-scope")
@@ -169,8 +172,10 @@ class TaskController(
   fun calculateScope(
     @RequestBody @Valid
     dto: CalculateScopeRequest,
-  ): KeysScopeView {
-    return taskService.calculateScope(projectHolder.projectEntity, dto)
+    @ParameterObject
+    filters: TranslationScopeFilters,
+  ): KeyScopeWithIdsView {
+    return taskService.calculateScope(projectHolder.projectEntity, dto, filters)
   }
 
   @GetMapping("/possible-assignees")

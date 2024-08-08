@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component
 class TaskPerUserReportModelAssembler(
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
 ) : RepresentationModelAssemblerSupport<TaskPerUserReportView, TaskPerUserReportModel>(
-  TaskController::class.java,
-  TaskPerUserReportModel::class.java,
-) {
+    TaskController::class.java,
+    TaskPerUserReportModel::class.java,
+  ) {
   override fun toModel(entity: TaskPerUserReportView): TaskPerUserReportModel {
     return TaskPerUserReportModel(
       user = simpleUserAccountModelAssembler.toModel(entity.user),
