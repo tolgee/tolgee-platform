@@ -127,7 +127,7 @@ export const ProjectTasksView = () => {
             sx: {
               display: 'grid',
               gridTemplateColumns:
-                'minmax(40%, max-content) minmax(15%, max-content) minmax(25%, max-content) minmax(10%, max-content) auto',
+                '1fr minmax(15%, max-content) minmax(25%, max-content) minmax(10%, max-content) auto',
               alignItems: 'center',
             },
           } as ListProps
