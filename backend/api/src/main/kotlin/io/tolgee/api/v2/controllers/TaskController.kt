@@ -10,7 +10,7 @@ import io.tolgee.hateoas.task.TaskPerUserReportModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
 import io.tolgee.model.views.ExtendedUserAccountInProject
-import io.tolgee.model.views.KeyScopeWithIdsView
+import io.tolgee.model.views.KeysScopeView
 import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -174,7 +174,7 @@ class TaskController(
     dto: CalculateScopeRequest,
     @ParameterObject
     filters: TranslationScopeFilters,
-  ): KeyScopeWithIdsView {
+  ): KeysScopeView {
     return taskService.calculateScope(projectHolder.projectEntity, dto, filters)
   }
 

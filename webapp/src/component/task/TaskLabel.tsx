@@ -7,9 +7,18 @@ import { TaskTypeChip } from './TaskTypeChip';
 type TaskModel = components['schemas']['TaskModel'];
 
 const StyledContainer = styled(Box)`
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
   align-items: center;
+  justify-content: start;
   gap: 8px;
+`;
+
+const StyledTaskName = styled(Box)`
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 type Props = {
@@ -29,7 +38,7 @@ export const TaskLabel = ({ task, sx, className }: Props) => {
           <FlagImage flagEmoji={task.language.flagEmoji!} height={20} />
         </Box>
       </Tooltip>
-      <Box>{task.name}</Box>
+      <StyledTaskName sx={{ flexShrink: 1 }}>{task.name}</StyledTaskName>
       <TaskId>{task.id}</TaskId>
       <TaskTypeChip type={task.type} />
     </StyledContainer>

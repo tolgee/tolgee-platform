@@ -53,6 +53,8 @@ export const TaskScope = ({ task, perUserData }: Props) => {
       <Box>{formatNumber(task.baseWordCount)}</Box>
       <Box>{formatNumber(task.baseCharacterCount)}</Box>
 
+      <Box sx={{ gridColumn: 1, height: '4px' }} />
+
       {perUserData?.map((item, i) => (
         <React.Fragment key={i}>
           <Box

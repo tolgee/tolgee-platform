@@ -314,7 +314,7 @@ class TaskService(
     projectEntity: Project,
     dto: CalculateScopeRequest,
     filters: TranslationScopeFilters,
-  ): KeyScopeWithIdsView {
+  ): KeysScopeView {
     val language = languageService.get(dto.language, projectEntity.id)
     val relevantKeys =
       taskRepository.getKeysWithoutTask(
@@ -324,18 +324,12 @@ class TaskService(
         dto.keys!!,
         filters,
       )
-    val scope =
-      taskRepository.calculateScope(
+    return taskRepository.calculateScope(
         projectEntity.id,
         projectEntity.baseLanguage!!.id,
         relevantKeys,
       )
-    return KeyScopeWithIdsView(
-      keyCount = scope.keyCount,
-      wordCount = scope.wordCount,
-      characterCount = scope.characterCount,
-      keyIds = relevantKeys,
-    )
+
   }
 
   fun getTranslationsWithTasks(
