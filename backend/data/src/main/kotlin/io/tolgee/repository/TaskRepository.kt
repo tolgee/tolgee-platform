@@ -73,17 +73,6 @@ const val TASK_FILTERS = """
     )
 """
 
-const val TRANSLATION_SCOPE_FILTERS = """
-    (
-      COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal}
-      or COALESCE(t.outdated, false) = :#{#filters.filterOutdated}
-      or (
-        COALESCE(:#{#filters.filterOutdated}, false) = false
-        and :#{#filters.filterState} is null
-      )
-    )
-"""
-
 @Repository
 interface TaskRepository : JpaRepository<Task, TaskId> {
   @Query(
@@ -171,7 +160,18 @@ interface TaskRepository : JpaRepository<Task, TaskId> {
       where key.project_id = :projectId
           and key.id in :keyIds
           and task IS NULL
-          and $TRANSLATION_SCOPE_FILTERS
+          and (
+            COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter
+            or (
+                -- item fits the filter
+                :#{#filters.filterOutdated} = true 
+                and COALESCE(t.outdated, false) = true
+            ) or (
+              -- no filter is applied
+              COALESCE(:#{#filters.filterOutdated}, false) = false
+              and :#{#filters.filterState} is null
+            )
+          )
     """,
   )
   fun getKeysWithoutTask(

@@ -1782,8 +1782,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2049,10 +2049,10 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2211,11 +2211,11 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -2359,14 +2359,14 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      description: string;
-      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      username?: string;
+      description: string;
       scopes: string[];
     };
     SuperTokenRequest: {
@@ -2450,14 +2450,13 @@ export interface components {
       type: "TRANSLATE" | "REVIEW";
       keys: number[];
     };
-    KeyScopeWithIdsView: {
+    KeysScopeView: {
       /** Format: int64 */
       keyCount: number;
       /** Format: int64 */
-      characterCount: number;
-      /** Format: int64 */
       wordCount: number;
-      keyIds: number[];
+      /** Format: int64 */
+      characterCount: number;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];
@@ -3513,16 +3512,16 @@ export interface components {
       /** Format: int64 */
       id: number;
       basePermissions: components["schemas"]["PermissionModel"];
-      /** @example btforg */
-      slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      /** @example btforg */
+      slug: string;
       avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
@@ -3675,20 +3674,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
-      translation?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
-      translation?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4244,11 +4243,11 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -4373,14 +4372,14 @@ export interface components {
       id: number;
       projectName: string;
       userFullName?: string;
-      description: string;
-      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
+      username?: string;
+      description: string;
       scopes: string[];
     };
     PagedModelUserAccountModel: {
@@ -10453,7 +10452,6 @@ export interface operations {
           | "DISABLED"
         )[];
         filterOutdated?: boolean;
-        filterNotOutdated?: boolean;
       };
       path: {
         projectId: number;
@@ -10511,7 +10509,6 @@ export interface operations {
           | "DISABLED"
         )[];
         filterOutdated?: boolean;
-        filterNotOutdated?: boolean;
       };
       path: {
         projectId: number;
@@ -10521,7 +10518,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["KeyScopeWithIdsView"];
+          "application/json": components["schemas"]["KeysScopeView"];
         };
       };
       /** Bad Request */
@@ -10649,7 +10646,6 @@ export interface operations {
           | "DISABLED"
         )[];
         filterOutdated?: boolean;
-        filterNotOutdated?: boolean;
       };
       path: {
         projectId: number;
