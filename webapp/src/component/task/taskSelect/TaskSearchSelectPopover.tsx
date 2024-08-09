@@ -7,6 +7,7 @@ import {
   Box,
   styled,
   Button,
+  SxProps,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce';
@@ -19,7 +20,7 @@ import { Task } from './types';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
-const USERS_SEARCH_TRESHOLD = 0;
+const ITEMS_SEARCH_TREASHOLD = 5;
 
 const StyledInput = styled(InputBase)`
   padding: 5px 4px 3px 16px;
@@ -63,6 +64,8 @@ type Props = {
   selected: Task | null;
   ownedOnly?: boolean;
   project: SimpleProjectModel;
+  sx?: SxProps;
+  className?: string;
 };
 
 export const TaskSearchSelectPopover: React.FC<Props> = ({
@@ -73,6 +76,8 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
   selected,
   ownedOnly,
   project,
+  sx,
+  className,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslate();
@@ -82,6 +87,7 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
     params: {
       filterCurrentUserOwner: Boolean(ownedOnly),
       search: search || undefined,
+      filterState: ['IN_PROGRESS  '],
     },
     size: 20,
     sort: ['name'],
@@ -124,7 +130,8 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
   useEffect(() => {
     if (usersLoadable.data && displaySearch === undefined) {
       setDisplaySearch(
-        usersLoadable.data.pages[0].page!.totalElements! > USERS_SEARCH_TRESHOLD
+        usersLoadable.data.pages[0].page!.totalElements! >
+          ITEMS_SEARCH_TREASHOLD
       );
     }
   }, [usersLoadable.data]);
@@ -144,7 +151,10 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
           horizontal: 'center',
         }}
       >
-        <StyledWrapper sx={{ minWidth: (anchorEl?.offsetWidth || 200) + 16 }}>
+        <StyledWrapper
+          sx={{ minWidth: (anchorEl?.offsetWidth || 200) + 16, ...sx }}
+          {...{ className }}
+        >
           <Autocomplete
             open
             filterOptions={(x) => x}
@@ -167,6 +177,9 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
               <React.Fragment key={option.id}>
                 <MenuItem
                   {...props}
+                  onClick={() => {
+                    onSelect(option);
+                  }}
                   selected={option.id === selected?.id}
                   data-cy="task-select-item"
                 >
@@ -185,9 +198,6 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
                   )}
               </React.Fragment>
             )}
-            onChange={(_, newValue) => {
-              onSelect(newValue);
-            }}
             renderInput={(params) => (
               <StyledInputWrapper>
                 <StyledInput

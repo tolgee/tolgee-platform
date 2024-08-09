@@ -121,6 +121,9 @@ export const TaskSearchSelect: React.FC<Props> = ({
           onSelect={handleSelectOrganization}
           anchorEl={anchorEl.current!}
           project={project}
+          sx={{
+            width: (anchorEl.current?.offsetWidth ?? 100) + 40,
+          }}
         />
       </Box>
     </>
