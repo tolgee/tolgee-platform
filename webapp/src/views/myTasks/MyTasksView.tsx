@@ -95,7 +95,8 @@ export const MyTasksView = () => {
             {
               sx: {
                 display: 'grid',
-                gridTemplateColumns: '3fr 1fr 2fr 60px 1fr auto',
+                gridTemplateColumns:
+                  '1fr minmax(15%, max-content) minmax(27%, max-content) 45px minmax(10%, max-content) auto',
                 alignItems: 'center',
               },
             } as ListProps
