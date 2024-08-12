@@ -32,7 +32,7 @@ class GenericStructuredFileExporter(
   }
 
   private fun removeSpacesAroundColon(json: String): String {
-    return json.replace(Regex("""\s*:\s*"""), ": ")
+    return json.replace(Regex("""\s+:(?=\s|$)"""), ":")
   }
 
   private fun prepare() {
