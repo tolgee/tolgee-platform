@@ -24,6 +24,7 @@ class SlackTestData {
   var automation: Automation
   var key: Key
   var key2: Key
+  lateinit var baseTranslationNotExistKey: Key
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackWorkspace2: OrganizationSlackWorkspace
   lateinit var secondLanguage: Language
@@ -61,6 +62,11 @@ class SlackTestData {
 
       projectBuilder.addKey("testKey2").also { key2 = it.self }
         .addTranslation("en", "Hello")
+
+      projectBuilder.addKey {
+        name = "base-translation-doesn't-exist"
+        baseTranslationNotExistKey = this
+      }
 
       userAccountBuilder.defaultOrganizationBuilder.addSlackWorkspace {
         author = userAccountBuilder.self
