@@ -1,3 +1,10 @@
+## [3.71.1](https://github.com/tolgee/tolgee-platform/compare/v3.71.0...v3.71.1) (2024-08-12)
+
+
+### Bug Fixes
+
+* slack > auto translate event ([#2431](https://github.com/tolgee/tolgee-platform/issues/2431)) ([d6f8b30](https://github.com/tolgee/tolgee-platform/commit/d6f8b307b6c92bcdcc27df17a142e604962ac3bb))
+
 # [3.71.0](https://github.com/tolgee/tolgee-platform/compare/v3.70.8...v3.71.0) (2024-08-06)
 
 
