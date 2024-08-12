@@ -25,10 +25,14 @@ class GenericStructuredFileExporter(
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
     return result.asSequence().map { (fileName, modelBuilder) ->
-      fileName to
-        objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(modelBuilder.result)
-          .inputStream()
+      val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(modelBuilder.result)
+      val compactJson = removeSpacesAroundColon(json)
+      fileName to compactJson.byteInputStream()
     }.toMap()
+  }
+
+  private fun removeSpacesAroundColon(json: String): String {
+    return json.replace(Regex("""\s*:\s*"""), ": ")
   }
 
   private fun prepare() {
