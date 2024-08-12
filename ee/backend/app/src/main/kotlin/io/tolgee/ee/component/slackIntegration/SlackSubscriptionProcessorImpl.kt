@@ -50,6 +50,7 @@ class SlackSubscriptionProcessorImpl(
         ActivityType.BATCH_MACHINE_TRANSLATE,
         ActivityType.BATCH_COPY_TRANSLATIONS,
         ActivityType.BATCH_CLEAR_TRANSLATIONS,
+        ActivityType.AUTO_TRANSLATE,
       )
   }
 }

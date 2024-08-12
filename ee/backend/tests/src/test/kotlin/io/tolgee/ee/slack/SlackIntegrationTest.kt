@@ -1,17 +1,12 @@
 package io.tolgee.ee.slack
 
-import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
-import com.slack.api.methods.MethodsClient
-import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.request.users.UsersInfoRequest
-import com.slack.api.methods.response.chat.ChatPostMessageResponse
-import com.slack.api.methods.response.users.UsersInfoResponse
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.ee.service.slackIntegration.SlackConfigService
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.slackIntegration.SlackEventType
@@ -21,9 +16,6 @@ import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
@@ -41,6 +33,9 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
   @BeforeAll
   fun setup() {
+    tolgeeProperties.internal.fakeMtProviders = false
+    tolgeeProperties.machineTranslation.google.apiKey = ""
+
     tolgeeProperties.slack.token = "token"
   }
 
@@ -48,13 +43,12 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `sends message to correct channel after translation changed`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    val mockedSlackClient = mockSlackClient()
-
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
     val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
     loginAsUser(testData.user.username)
     Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
+    modifyTranslationData(testData.projectBuilder.self.id, langTag, testData.key.name)
     waitForNotThrowing(timeout = 3000) {
-      modifyTranslationData(testData.projectBuilder.self.id, langTag, testData.key.name)
       val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
       Assertions.assertThat(slackMessageService.find(testData.key.id, testData.slackConfig.id)).hasSize(1)
@@ -65,11 +59,11 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `sends message to correct channel after key added`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    val mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
     loginAsUser(testData.user.username)
+    addKeyToProject(testData.projectBuilder.self.id)
     waitForNotThrowing(timeout = 3000) {
-      addKeyToProject(testData.projectBuilder.self.id)
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
       val request = mockedSlackClient.chatPostMessageRequests.first()
       request.channel.assert.isEqualTo(testData.slackConfig.channelId)
@@ -80,7 +74,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `Doesn't send a message if the subscription isn't global and modified language isn't in preferred languages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    val mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
     val updatedConfig =
       SlackConfigDto(
@@ -108,7 +102,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   fun `Doesn't send a message if the event isn't in subscribed by user`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
-    val mockedSlackClient = mockSlackClient()
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
     val updatedConfig =
       SlackConfigDto(
@@ -132,31 +126,6 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     }
   }
 
-  fun mockSlackClient(): MockedSlackClient {
-    val methodsClientMock = mock<MethodsClient>()
-    whenever(slackClient.methods(any())).thenReturn(methodsClientMock)
-    val mockPostMessageResponse = mock<ChatPostMessageResponse>()
-    whenever(mockPostMessageResponse.isOk).thenReturn(true)
-    whenever(mockPostMessageResponse.ts).thenReturn("ts")
-
-    val mockUsersResponse = mock<UsersInfoResponse>()
-    whenever(mockUsersResponse.isOk).thenReturn(true)
-
-    whenever(
-      methodsClientMock.chatPostMessage(
-        any<RequestConfigurator<ChatPostMessageRequest.ChatPostMessageRequestBuilder>>(),
-      ),
-    ).thenReturn(mockPostMessageResponse)
-
-    whenever(
-      methodsClientMock.usersInfo(
-        any<RequestConfigurator<UsersInfoRequest.UsersInfoRequestBuilder>>(),
-      ),
-    ).thenReturn(mockUsersResponse)
-
-    return MockedSlackClient(methodsClientMock)
-  }
-
   private fun modifyTranslationData(
     projectId: Long,
     landTag: String,
@@ -173,11 +142,11 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
 
   private fun addKeyToProject(projectId: Long) {
     performAuthPost(
-      "/v2/projects/$projectId/translations",
+      "/v2/projects/$projectId/keys/create",
       mapOf(
-        "key" to "newKey",
+        "name" to "newKey",
         "translations" to mapOf("en" to "Sample Translation"),
       ),
-    ).andIsOk
+    ).andIsCreated
   }
 }
