@@ -84,9 +84,9 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
     val actualMap =
       request.attachments
         .dropLast(1).associate {
-          val keyText = ((it.blocks[0] as SectionBlock).text.text).removePrefix("null ").trim()
-          val valueText = (it.blocks[1] as SectionBlock).text.text
-          keyText to valueText
+          val keyLanguage = ((it.blocks[0] as SectionBlock).text.text).removePrefix("null ").trim()
+          val keyTranslation = (it.blocks[1] as SectionBlock).text.text
+          keyLanguage to keyTranslation
         }
 
     assertThat(actualMap).isEqualTo(getExpectedMapOfTranslations())
@@ -99,7 +99,6 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
           keyService.get(testData.projectBuilder.self.id, keyName, null)
             .getLangTranslation(testData.secondLanguage).text
 
-        translatedText
         assertThat(
           translatedText,
         ).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
