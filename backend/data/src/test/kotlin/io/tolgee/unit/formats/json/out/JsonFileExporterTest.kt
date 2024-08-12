@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
@@ -139,6 +140,32 @@ class JsonFileExporterTest {
     |}
       """.trimMargin(),
     )
+  }
+
+  @Test
+  fun `correct exports translation with colon`() {
+    val exporter = getExporter(getTranslationWithColon())
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "item": "name : {name}"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  private fun getTranslationWithColon(): MutableList<ExportTranslationView> {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "name : {name}",
+        )
+      }
+    return built.translations
   }
 
   private fun getIcuPlaceholdersEnabledExporter(): JsonFileExporter {
@@ -285,6 +312,7 @@ class JsonFileExporterTest {
       exportParams = exportParams,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
+      customPrettyPrinter = CustomPrettyPrinter(),
     )
   }
 }
