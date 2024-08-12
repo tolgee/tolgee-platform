@@ -32,10 +32,6 @@ class GenericStructuredFileExporter(
     }.toMap()
   }
 
-  private fun removeSpacesAroundColon(json: String): String {
-    return json.replace(Regex("""\s+:(?=\s|$)"""), ":")
-  }
-
   private fun prepare() {
     translations.forEach { translation ->
       addTranslationToBuilder(translation)
