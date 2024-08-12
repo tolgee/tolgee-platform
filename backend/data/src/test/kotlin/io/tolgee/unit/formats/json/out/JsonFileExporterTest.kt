@@ -100,8 +100,8 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3" : "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
-    |  "item" : "I will be first {icuParam, number}"
+    |  "key3": "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
+    |  "item": "I will be first {icuParam, number}"
     |}
       """.trimMargin(),
     )
@@ -134,8 +134,8 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3" : "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
-    |  "item" : "I will be first '{'icuParam'}' {hello, number}"
+    |  "key3": "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
+    |  "item": "I will be first '{'icuParam'}' {hello, number}"
     |}
       """.trimMargin(),
     )
@@ -180,7 +180,7 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "item" : "I will be first '{'icuParam'}' %<hello>d"
+    |  "item": "I will be first '{'icuParam'}' %<hello>d"
     |}
       """.trimMargin(),
     )
