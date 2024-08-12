@@ -19,15 +19,16 @@ class GenericStructuredFileExporter(
   private val rootKeyIsLanguageTag: Boolean = false,
   private val supportArrays: Boolean,
   private val messageFormat: ExportMessageFormat,
+  private val customPrettyPrinter: CustomPrettyPrinter,
 ) : FileExporter {
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
     return result.asSequence().map { (fileName, modelBuilder) ->
-      val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(modelBuilder.result)
-      val compactJson = removeSpacesAroundColon(json)
-      fileName to compactJson.byteInputStream()
+      fileName to
+        objectMapper.writer(customPrettyPrinter).writeValueAsBytes(modelBuilder.result)
+          .inputStream()
     }.toMap()
   }
 
