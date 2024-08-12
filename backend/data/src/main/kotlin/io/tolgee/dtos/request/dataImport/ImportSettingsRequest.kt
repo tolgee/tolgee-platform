@@ -8,4 +8,6 @@ class ImportSettingsRequest(
   override var overrideKeyDescriptions: Boolean,
   @NotNull
   override var convertPlaceholdersToIcu: Boolean,
+  @NotNull
+  override var createNewKeys: Boolean,
 ) : IImportSettings

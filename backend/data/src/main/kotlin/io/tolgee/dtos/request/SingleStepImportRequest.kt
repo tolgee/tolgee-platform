@@ -29,6 +29,11 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
   override var convertPlaceholdersToIcu: Boolean = true
 
   @get:Schema(
+    description = "If false, only updates keys, skipping the creation of new keys",
+  )
+  override var createNewKeys: Boolean = true
+
+  @get:Schema(
     description = "Definition of mapping for each file to import.",
   )
   var fileMappings: List<ImportFileMapping> = listOf()

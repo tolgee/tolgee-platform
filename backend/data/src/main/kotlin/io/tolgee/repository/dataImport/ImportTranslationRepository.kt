@@ -52,8 +52,10 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         where (itc.id is not null or :onlyConflicts = false)
         and ((itc.id is not null and it.resolvedHash is null) or :onlyUnresolved = false)
         and it.language.id = :languageId
+        and (ik.shouldBeImported)
         and (:search is null or lower(it.text) like lower(concat('%', cast(:search as text), '%'))
         or lower(ik.name) like lower(concat('%', cast(:search as text), '%')))
+
     """,
   )
   fun findImportTranslationsView(

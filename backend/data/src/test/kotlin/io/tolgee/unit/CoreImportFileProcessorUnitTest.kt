@@ -26,12 +26,7 @@ import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.context.ApplicationContext
 
 class CoreImportFileProcessorUnitTest {
@@ -75,11 +70,13 @@ class CoreImportFileProcessorUnitTest {
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
     processor =
       CoreImportFilesProcessor(
-        applicationContextMock, importMock,
+        applicationContextMock,
+        importMock,
         importSettings =
           ImportSettingsRequest(
             overrideKeyDescriptions = false,
             convertPlaceholdersToIcu = true,
+            createNewKeys = false,
           ),
       )
 

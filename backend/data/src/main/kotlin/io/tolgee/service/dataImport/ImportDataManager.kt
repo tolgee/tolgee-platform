@@ -4,11 +4,7 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
-import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportFile
-import io.tolgee.model.dataImport.ImportKey
-import io.tolgee.model.dataImport.ImportLanguage
-import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
@@ -370,6 +366,27 @@ class ImportDataManager(
   ) {
     if (oldSettings.convertPlaceholdersToIcu != newSettings.convertPlaceholdersToIcu) {
       applyConvertPlaceholdersChange(newSettings.convertPlaceholdersToIcu)
+    }
+
+    if (oldSettings.createNewKeys != newSettings.createNewKeys) {
+      applyKeyCreateChange(newSettings.createNewKeys)
+    }
+  }
+
+  fun applyKeyCreateChange(createNewKeys: Boolean) {
+    storedKeys.forEach { (_, key) ->
+      if (createNewKeys) {
+        key.shouldBeImported = true
+      } else {
+        key.shouldBeImported = keyService.find(
+          import.project.id,
+          key.name,
+          getSafeNamespace(key.file.namespace),
+        ) != null
+      }
+      if (saveData) {
+        importService.saveKey(key)
+      }
     }
   }
 

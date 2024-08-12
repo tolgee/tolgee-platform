@@ -3426,4 +3426,18 @@
             create unique index language_tag_name on language (project_id, tag) where deleted_at is null;
         </sql>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1721986584324-2">
+        <addColumn tableName="import_settings">
+            <column defaultValueBoolean="true" name="create_new_keys" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1721986584324-3">
+        <addColumn tableName="import_key">
+            <column defaultValueBoolean="true" name="should_be_imported" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
