@@ -118,6 +118,17 @@ dependencies {
      */
     implementation(project(':misc'))
     implementation 'org.postgresql:postgresql'
+
+    /**
+     * Google translation API
+     */
+    implementation platform(libs.googleCloud)
+    implementation 'com.google.cloud:google-cloud-translate'
+
+    /**
+     * Aws translate
+     */
+    implementation libs.amazonTranslate
 }
 
 test {

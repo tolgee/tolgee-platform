@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.automations.*
@@ -25,6 +26,7 @@ class SlackTestData {
   var key2: Key
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackWorkspace2: OrganizationSlackWorkspace
+  lateinit var secondLanguage: Language
 
   lateinit var slackUserConnection: SlackUserConnection
 
@@ -44,10 +46,15 @@ class SlackTestData {
 
       projectBuilder =
         addProject {
-          name = "projectName"
+          name = "test_project"
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
         }.build buildProject@{
           this@buildProject.self.baseLanguage = this@buildProject.addEnglish().self
+
+          addAutoTranslationConfig {
+            usingTm = true
+            usingPrimaryMtService = true
+          }
         }
       projectBuilder.addKey("testKey").also { key = it.self }
         .addTranslation("en", "Hello")
@@ -84,7 +91,7 @@ class SlackTestData {
         scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
       }
 
-      projectBuilder.addFrench()
+      secondLanguage = projectBuilder.addFrench().self
 
       projectBuilder.addCzech()
 
