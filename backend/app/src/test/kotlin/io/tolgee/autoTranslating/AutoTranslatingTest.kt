@@ -1,13 +1,9 @@
 package io.tolgee.autoTranslating
 
-import io.tolgee.MachineTranslationTest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.node
-import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.fixtures.*
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod

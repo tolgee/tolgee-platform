@@ -1,9 +1,9 @@
-package io.tolgee
+package io.tolgee.fixtures
 
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
+import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.fixtures.andIsCreated
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import org.mockito.Mockito
@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 
-class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
+open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   @MockBean
   lateinit var googleTranslate: Translate
@@ -32,8 +32,7 @@ class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
     Mockito.reset(amazonTranslate)
     val googleTranslationMock = mock() as Translation
     val awsTranslateTextResult =
-      TranslateTextResponse
-        .builder().translatedText("Translated with Amazon").build()
+      TranslateTextResponse.builder().translatedText("Translated with Amazon").build()
 
     whenever(
       googleTranslate.translate(
