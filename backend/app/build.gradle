@@ -48,6 +48,9 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    applyMavenExclusions = false
+}
 
 allOpen {
     annotation("jakarta.persistence.Entity")
