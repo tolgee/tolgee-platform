@@ -2,10 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import net.javacrumbs.jsonunit.assertj.JsonAssert
@@ -39,6 +36,21 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
       .andIsOk.andAssertThatJson {
         assertCountsOnlyResult()
       }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns no activity while 0 tags are added to the key`() {
+    val keyTag = "tag"
+    val key = testData.addKeyWithTag("tag")
+    testDataService.saveTestData(testData.root)
+
+    performProjectAuthPost("start-batch-job/tag-keys", mapOf("keyIds" to listOf(key.id), "tags" to listOf(keyTag)))
+      .andIsOk
+
+    val revision = getLastRevision()
+    performProjectAuthGet("activity/revisions/${revision?.id}")
+      .andIsNotFound
   }
 
   private fun JsonAssert.assertCountsOnlyResult() {
