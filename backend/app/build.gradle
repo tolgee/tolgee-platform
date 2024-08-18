@@ -271,3 +271,9 @@ jar {
 bootJar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
+
+normalization {
+    runtimeClasspath {
+        ignore '**/build-info.properties'
+    }
+}
