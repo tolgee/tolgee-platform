@@ -14,7 +14,6 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """
     from ActivityRevision ar
     where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
-    and ar.modifiedEntities is not empty
   """,
   )
   fun getForProject(

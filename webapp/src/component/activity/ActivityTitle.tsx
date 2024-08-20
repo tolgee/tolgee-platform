@@ -33,6 +33,7 @@ export const ActivityTitle: React.FC<Props> = ({ activity }) => {
     KeyCount: 0,
     TranslationCount: 0,
     KeyMeta: 0,
+    KeyMetaCount: 0,
   };
 
   Object.entries(activity.counts || {}).forEach(([entity, value]) => {
