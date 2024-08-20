@@ -48,6 +48,9 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    applyMavenExclusions = false
+}
 
 allOpen {
     annotation("jakarta.persistence.Entity")
@@ -270,4 +273,10 @@ jar {
 
 bootJar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+normalization {
+    runtimeClasspath {
+        ignore '**/build-info.properties'
+    }
 }
