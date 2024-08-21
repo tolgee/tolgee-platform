@@ -11,11 +11,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
-import io.tolgee.model.Language
-import io.tolgee.model.Project
-import io.tolgee.model.Project_
-import io.tolgee.model.Screenshot
-import io.tolgee.model.UploadedImage
+import io.tolgee.model.*
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -53,6 +49,7 @@ class ResolvingKeyImporter(
   private var importedKeys: List<Key> = emptyList()
   private val updatedTranslationIds = mutableListOf<Long>()
   private val isPluralChangedForKeys = mutableMapOf<Long, String>()
+  private val outdatedFlagKeys: MutableList<Long> = mutableListOf()
 
   operator fun invoke(): KeyImportResolvableResult {
     importedKeys = tryImport()
@@ -83,6 +80,12 @@ class ResolvingKeyImporter(
           val translationExists = !isEmpty && !isNew
 
           if (validate(translationExists, resolvable, key, language.tag)) return@translations
+
+          if (language.base) {
+            if (isNew || existingTranslation?.text != resolvable.text) {
+              outdatedFlagKeys.add(key.id)
+            }
+          }
 
           if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
             translationsToModify.add(TranslationToModify(existingTranslation!!, resolvable.text, false))
@@ -143,6 +146,8 @@ class ResolvingKeyImporter(
   }
 
   private fun List<TranslationToModify>.save() {
+    translationService.setOutdatedBatch(outdatedFlagKeys)
+
     this.forEach {
       translationService.setTranslation(it.translation, it.text)
       updatedTranslationIds.add(it.translation.id)
