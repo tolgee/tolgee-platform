@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
@@ -11,10 +12,11 @@ class ResolvableImportTestData : BaseTestData() {
   lateinit var viewOnlyUser: UserAccount
   lateinit var keyCreateOnlyUser: UserAccount
   lateinit var translateOnlyUser: UserAccount
+  lateinit var secondLanguage: Language
 
   init {
     projectBuilder.apply {
-      addGerman()
+      secondLanguage = addGerman().self
 
       addKey("namespace-1", "key-1") {
         addTranslation("de", "existing translation")
@@ -34,6 +36,22 @@ class ResolvableImportTestData : BaseTestData() {
       }
       addKey("test") {
         addTranslation("en", "existing translation")
+      }
+
+      addKey("keyWith2Translations") {
+        addTranslation("en", "existing translation")
+        addTranslation {
+          this.language = secondLanguage
+          this.text = "existing translation"
+          this.outdated = false
+        }
+      }
+
+      addAutoTranslationConfig {
+        usingTm = true
+        usingPrimaryMtService = true
+        enableForImport = true
+        targetLanguage = secondLanguage
       }
     }
 
