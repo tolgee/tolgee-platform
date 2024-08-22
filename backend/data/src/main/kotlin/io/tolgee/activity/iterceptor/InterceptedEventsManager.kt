@@ -117,11 +117,12 @@ class InterceptedEventsManager(
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
-    activityModifiedEntity.revisionType = when {
-      // when we are replacing ADD with MOD, we want to keep ADD
-      activityModifiedEntity.revisionType == RevisionType.ADD && revisionType == RevisionType.MOD -> RevisionType.ADD
-      else -> revisionType
-    }
+    activityModifiedEntity.revisionType =
+      when {
+        // when we are replacing ADD with MOD, we want to keep ADD
+        activityModifiedEntity.revisionType == RevisionType.ADD && revisionType == RevisionType.MOD -> RevisionType.ADD
+        else -> revisionType
+      }
     activityModifiedEntity.modifications.putAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
@@ -157,7 +158,7 @@ class InterceptedEventsManager(
       activityHolder.modifiedEntities
         .computeIfAbsent(entity::class) { IdentityHashMap() }
         .computeIfAbsent(
-          entity
+          entity,
         ) {
           ActivityModifiedEntity(
             activityRevision,

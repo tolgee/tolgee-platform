@@ -124,7 +124,7 @@ class ActivityService(
   @Transactional
   fun getProjectActivity(
     projectId: Long,
-    revisionId: Long
+    revisionId: Long,
   ): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,

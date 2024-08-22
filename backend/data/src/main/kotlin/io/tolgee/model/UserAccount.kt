@@ -3,10 +3,10 @@ package io.tolgee.model
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
 import io.tolgee.api.SimpleUserAccount
-import io.tolgee.model.slackIntegration.SlackConfig
-import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.notifications.NotificationPreferences
 import io.tolgee.model.notifications.UserNotification
+import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackUserConnection
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

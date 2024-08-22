@@ -135,7 +135,7 @@ class ActivityEventListener(
       ActivityType.WEBHOOK_CONFIG_UPDATE,
       ActivityType.WEBHOOK_CONFIG_DELETE,
       ActivityType.HARD_DELETE_LANGUAGE,
-      null
+      null,
       -> {}
     }
   }

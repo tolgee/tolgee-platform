@@ -5,8 +5,8 @@ import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionB
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
-import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.notifications.NotificationPreferences
+import io.tolgee.model.slackIntegration.SlackUserConnection
 import org.springframework.core.io.ClassPathResource
 
 class UserAccountBuilder(

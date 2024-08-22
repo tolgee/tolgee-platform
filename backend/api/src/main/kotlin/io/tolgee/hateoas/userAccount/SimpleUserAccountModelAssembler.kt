@@ -3,7 +3,6 @@ package io.tolgee.hateoas.userAccount
 import io.tolgee.api.SimpleUserAccount
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.model.UserAccount
 import io.tolgee.service.AvatarService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
