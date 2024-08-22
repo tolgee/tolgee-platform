@@ -28,11 +28,10 @@ class ProjectActivityModelEnhancer(
     baseSchema.required = null
     baseSchema.properties = null
     baseSchema.type = null
-
     baseSchema.oneOf = generateSchemas()
   }
 
-  private fun generateSchemas(): MutableList<Schema<Any>>? {
+  private fun generateSchemas(): MutableList<Schema<Any>> {
     return ActivityType.entries.map {
       val schemaName = it.getSchemaName()
       Schema<Any>().apply {
@@ -57,7 +56,7 @@ class ProjectActivityModelEnhancer(
     val properties =
       activityType.typeDefinitions?.map { (entityClass, definition) ->
         val schema = activityType.createModifiedEntityModel(entityClass)
-        schema.properties["modifications"] = ModificationsSchemaGenerator().getModificationSchema(entityClass, definition)
+        schema.properties["modifications"] = ModificationsSchemaGenerator(openApi).getModificationSchema(entityClass, definition)
         entityClass.simpleName to schema
       }?.toMap()
 
@@ -83,7 +82,7 @@ class ProjectActivityModelEnhancer(
     return objectMapper.readValue(objectMapper.writeValueAsString(this), Schema::class.java)
   }
 
-  fun ActivityType.createModifiedEntityModel(entityClass: KClass<*>): Schema<*> {
+  private fun ActivityType.createModifiedEntityModel(entityClass: KClass<*>): Schema<*> {
     return Schema<Any>().apply {
       name = this@createModifiedEntityModel.getModifiedEntitySchemaName(entityClass)
       properties = modifiedEntityModel.properties.toMutableMap()

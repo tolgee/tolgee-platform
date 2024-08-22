@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.WithRelatedKeysInOrder
 import io.tolgee.model.enums.AssignableTranslationState
+import io.tolgee.sharedDocs.Key
 import io.tolgee.util.getSafeNamespace
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -40,7 +41,7 @@ class CreateKeyDto(
     example = "This key is used on homepage. It's a label of sign up button.",
   )
   val description: String? = null,
-  @Schema(description = "If key is pluralized. If it will be reflected in the editor")
+  @Schema(description = Key.IS_PLURAL_FIELD)
   val isPlural: Boolean = false,
   @Schema(
     description =

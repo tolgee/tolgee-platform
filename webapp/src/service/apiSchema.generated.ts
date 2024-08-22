@@ -651,6 +651,9 @@ export interface paths {
     /** This endpoints returns the activity grouped by time windows so it's easier to read on the frontend. */
     get: operations["getActivityGroups"];
   };
+  "/v2/projects/{projectId}/activity/group-items/create-key/{groupId}": {
+    get: operations["getCreateKeyItems"];
+  };
   "/v2/projects/{projectId}/activity": {
     get: operations["getActivity"];
   };
@@ -1177,6 +1180,24 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1213,24 +1234,6 @@ export interface components {
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2036,7 +2039,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       username: string;
-      name?: string;
+      name: string;
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
     };
@@ -2197,15 +2200,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2360,15 +2363,15 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
+      username?: string;
+      description: string;
       scopes: string[];
       /** Format: int64 */
-      projectId: number;
-      username?: string;
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      expiresAt?: number;
-      description: string;
+      projectId: number;
       projectName: string;
       userFullName?: string;
     };
@@ -3527,11 +3530,11 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /**
        * @description The role of currently authorized user.
        *
@@ -3675,9 +3678,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
@@ -3685,9 +3688,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -4505,6 +4508,394 @@ export interface components {
           counts?: { [key: string]: number };
           params?: { [key: string]: unknown };
         };
+    ActivityGroupModel:
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SET_TRANSLATION_STATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "REVIEW";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SET_TRANSLATIONS";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "DISMISS_AUTO_TRANSLATED_STATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SET_OUTDATED_FLAG";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "ADD_TRANSLATION_COMMENT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "DELETE_TRANSLATION_COMMENT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "EDIT_TRANSLATION_COMMENT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "SET_TRANSLATION_COMMENT_STATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "DELETE_SCREENSHOT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "ADD_SCREENSHOT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "EDIT_KEY_TAGS";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "EDIT_KEY_NAME";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "DELETE_KEY";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CREATE_KEY";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          data?: {
+            /** Format: int32 */
+            keyCount: number;
+          };
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "IMPORT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CREATE_LANGUAGE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "EDIT_LANGUAGE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "DELETE_LANGUAGE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CREATE_PROJECT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          data?: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            languages: components["schemas"]["ActivityGroupLanguageModel"][];
+            description?: string;
+          };
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "EDIT_PROJECT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "NAMESPACE_EDIT";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_PRE_TRANSLATE_BY_TM";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_MACHINE_TRANSLATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "AUTO_TRANSLATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_CLEAR_TRANSLATIONS";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_COPY_TRANSLATIONS";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "BATCH_SET_TRANSLATION_STATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_DELIVERY_CONFIG_CREATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_DELIVERY_CONFIG_UPDATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_DELIVERY_CONFIG_DELETE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_STORAGE_CREATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_STORAGE_UPDATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "CONTENT_STORAGE_DELETE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "WEBHOOK_CONFIG_CREATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "WEBHOOK_CONFIG_UPDATE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
+          type: "WEBHOOK_CONFIG_DELETE";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        };
+    PagedModelActivityGroupModel: {
+      _embedded?: {
+        groups?: components["schemas"]["ActivityGroupModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    CreateKeyGroupItemModel: {
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+      /** @description If key is pluralized. If it will be reflected in the editor */
+      isPlural: boolean;
+      /** @description The argument name for the plural */
+      pluralArgName?: string;
+      /** @description The base translation value entered when key was created */
+      baseTranslationValue?: string;
+      tags: string[];
+      /**
+       * @description Description of key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
+      /** @description Custom values of the key */
+      custom?: { [key: string]: { [key: string]: unknown } };
+    };
+    PagedModelCreateKeyGroupItemModel: {
+      _embedded?: {
+        items?: components["schemas"]["CreateKeyGroupItemModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelProjectActivityModel: {
       _embedded?: {
         activities?: components["schemas"]["ProjectActivityModel"][];
@@ -4915,15 +5306,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -5090,15 +5481,15 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
+      username?: string;
+      description: string;
       scopes: string[];
       /** Format: int64 */
-      projectId: number;
-      username?: string;
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      expiresAt?: number;
-      description: string;
+      projectId: number;
       projectName: string;
       userFullName?: string;
     };
@@ -5125,6 +5516,1567 @@ export interface components {
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
       ids: number[];
+    };
+    ActivityDescribingEntity: {
+      activityRevision: components["schemas"]["ActivityRevision"];
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+      data: { [key: string]: { [key: string]: unknown } };
+      describingRelations?: {
+        [key: string]: components["schemas"]["EntityDescriptionRef"];
+      };
+    };
+    ActivityGroup: {
+      type:
+        | "SET_TRANSLATION_STATE"
+        | "REVIEW"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "ADD_TRANSLATION_COMMENT"
+        | "DELETE_TRANSLATION_COMMENT"
+        | "EDIT_TRANSLATION_COMMENT"
+        | "SET_TRANSLATION_COMMENT_STATE"
+        | "DELETE_SCREENSHOT"
+        | "ADD_SCREENSHOT"
+        | "EDIT_KEY_TAGS"
+        | "EDIT_KEY_NAME"
+        | "DELETE_KEY"
+        | "CREATE_KEY"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE";
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      authorId?: number;
+      /** Format: int64 */
+      projectId?: number;
+      activityRevisions: components["schemas"]["ActivityRevision"][];
+    };
+    ActivityModifiedEntity: {
+      activityRevision: components["schemas"]["ActivityRevision"];
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+      modifications: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+      describingData?: { [key: string]: { [key: string]: unknown } };
+      describingRelations?: {
+        [key: string]: components["schemas"]["EntityDescriptionRef"];
+      };
+      revisionType: "ADD" | "MOD" | "DEL";
+    };
+    ActivityRevision: {
+      /** Format: int64 */
+      id: number;
+      /** Format: date-time */
+      timestamp: string;
+      /** Format: int64 */
+      authorId?: number;
+      meta?: { [key: string]: { [key: string]: unknown } };
+      type?:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE"
+        | "COMPLEX_TAG_OPERATION";
+      /** Format: int64 */
+      projectId?: number;
+      describingRelations: components["schemas"]["ActivityDescribingEntity"][];
+      modifiedEntities: components["schemas"]["ActivityModifiedEntity"][];
+      batchJobChunkExecution?: components["schemas"]["BatchJobChunkExecution"];
+      batchJob?: components["schemas"]["BatchJob"];
+      activityGroups: components["schemas"]["ActivityGroup"][];
+      isInitializedByInterceptor: boolean;
+      /** Format: int32 */
+      cancelledBatchJobExecutionCount?: number;
+    };
+    ApiKey: {
+      key?: string;
+      scopesEnum: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+      )[];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      description: string;
+      keyHash: string;
+      userAccount: components["schemas"]["UserAccount"];
+      project: components["schemas"]["Project"];
+      /** Format: date-time */
+      expiresAt?: string;
+      /** Format: date-time */
+      lastUsedAt?: string;
+      encodedKey?: string;
+      disableActivityLogging: boolean;
+    };
+    AutoTranslationConfig: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      project: components["schemas"]["Project"];
+      targetLanguage?: components["schemas"]["Language"];
+      usingTm: boolean;
+      usingPrimaryMtService: boolean;
+      enableForImport: boolean;
+      disableActivityLogging: boolean;
+    };
+    Automation: {
+      project: components["schemas"]["Project"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      triggers: components["schemas"]["AutomationTrigger"][];
+      actions: components["schemas"]["AutomationAction"][];
+      disableActivityLogging: boolean;
+    };
+    AutomationAction: {
+      automation: components["schemas"]["Automation"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      type: "CONTENT_DELIVERY_PUBLISH" | "WEBHOOK" | "SLACK_SUBSCRIPTION";
+      contentDeliveryConfig?: components["schemas"]["ContentDeliveryConfig"];
+      webhookConfig?: components["schemas"]["WebhookConfig"];
+      slackConfig?: components["schemas"]["SlackConfig"];
+      disableActivityLogging: boolean;
+    };
+    AutomationTrigger: {
+      automation: components["schemas"]["Automation"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      type: "TRANSLATION_DATA_MODIFICATION" | "ACTIVITY";
+      activityType?:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE"
+        | "COMPLEX_TAG_OPERATION";
+      /** Format: int64 */
+      debounceDurationInMs?: number;
+      disableActivityLogging: boolean;
+    };
+    AzureContentStorageConfig: {
+      contentStorage: components["schemas"]["ContentStorage"];
+      connectionString: string;
+      containerName: string;
+    };
+    BatchJob: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      project: components["schemas"]["Project"];
+      author?: components["schemas"]["UserAccount"];
+      target: { [key: string]: unknown }[];
+      /** Format: int32 */
+      totalItems: number;
+      /** Format: int32 */
+      totalChunks: number;
+      /** Format: int32 */
+      chunkSize: number;
+      status:
+        | "PENDING"
+        | "RUNNING"
+        | "SUCCESS"
+        | "FAILED"
+        | "CANCELLED"
+        | "DEBOUNCED";
+      type:
+        | "PRE_TRANSLATE_BT_TM"
+        | "MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "DELETE_KEYS"
+        | "SET_TRANSLATIONS_STATE"
+        | "CLEAR_TRANSLATIONS"
+        | "COPY_TRANSLATIONS"
+        | "TAG_KEYS"
+        | "UNTAG_KEYS"
+        | "SET_KEYS_NAMESPACE"
+        | "AUTOMATION";
+      activityRevision?: components["schemas"]["ActivityRevision"];
+      params?: { [key: string]: unknown };
+      /** Format: int32 */
+      maxPerJobConcurrency: number;
+      jobCharacter: "SLOW" | "FAST";
+      hidden: boolean;
+      /** Format: int64 */
+      debounceDurationInMs?: number;
+      /** Format: int64 */
+      debounceMaxWaitTimeInMs?: number;
+      /** Format: date-time */
+      lastDebouncingEvent?: string;
+      debouncingKey?: string;
+      dto: components["schemas"]["BatchJobDto"];
+      chunkedTarget: { [key: string]: unknown }[][];
+      disableActivityLogging: boolean;
+    };
+    BatchJobChunkExecution: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      batchJob: components["schemas"]["BatchJob"];
+      status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
+      /** Format: int32 */
+      chunkNumber: number;
+      successTargets: { [key: string]: unknown }[];
+      stackTrace?: string;
+      errorKey?: string;
+      errorMessage?:
+        | "unauthenticated"
+        | "api_access_forbidden"
+        | "api_key_not_found"
+        | "invalid_api_key"
+        | "invalid_project_api_key"
+        | "project_api_key_expired"
+        | "bad_credentials"
+        | "mfa_enabled"
+        | "invalid_otp_code"
+        | "mfa_not_enabled"
+        | "can_not_revoke_own_permissions"
+        | "data_corrupted"
+        | "invitation_code_does_not_exist_or_expired"
+        | "language_tag_exists"
+        | "language_name_exists"
+        | "language_not_found"
+        | "operation_not_permitted"
+        | "registrations_not_allowed"
+        | "project_not_found"
+        | "resource_not_found"
+        | "scope_not_found"
+        | "key_exists"
+        | "third_party_auth_error_message"
+        | "third_party_auth_no_email"
+        | "third_party_auth_no_sub"
+        | "third_party_auth_unknown_error"
+        | "email_already_verified"
+        | "third_party_unauthorized"
+        | "third_party_google_workspace_mismatch"
+        | "username_already_exists"
+        | "username_or_password_invalid"
+        | "user_already_has_permissions"
+        | "user_already_has_role"
+        | "user_not_found"
+        | "file_not_image"
+        | "file_too_big"
+        | "invalid_timestamp"
+        | "email_not_verified"
+        | "missing_callback_url"
+        | "invalid_jwt_token"
+        | "expired_jwt_token"
+        | "general_jwt_error"
+        | "cannot_find_suitable_address_part"
+        | "address_part_not_unique"
+        | "user_is_not_member_of_organization"
+        | "organization_has_no_other_owner"
+        | "user_has_no_project_access"
+        | "user_is_organization_owner"
+        | "cannot_set_your_own_permissions"
+        | "user_is_organization_member"
+        | "property_not_mutable"
+        | "import_language_not_from_project"
+        | "existing_language_not_selected"
+        | "conflict_is_not_resolved"
+        | "language_already_selected"
+        | "cannot_parse_file"
+        | "could_not_resolve_property"
+        | "cannot_add_more_then_100_languages"
+        | "no_languages_provided"
+        | "language_with_base_language_tag_not_found"
+        | "language_not_from_project"
+        | "namespace_not_from_project"
+        | "cannot_delete_base_language"
+        | "key_not_from_project"
+        | "max_screenshots_exceeded"
+        | "translation_not_from_project"
+        | "can_edit_only_own_comment"
+        | "request_parse_error"
+        | "filter_by_value_state_not_valid"
+        | "import_has_expired"
+        | "tag_not_from_project"
+        | "translation_text_too_long"
+        | "invalid_recaptcha_token"
+        | "cannot_leave_owning_project"
+        | "cannot_leave_project_with_organization_role"
+        | "dont_have_direct_permissions"
+        | "tag_too_log"
+        | "too_many_uploaded_images"
+        | "one_or_more_images_not_found"
+        | "screenshot_not_of_key"
+        | "service_not_found"
+        | "too_many_requests"
+        | "translation_not_found"
+        | "out_of_credits"
+        | "key_not_found"
+        | "organization_not_found"
+        | "cannot_find_base_language"
+        | "base_language_not_found"
+        | "no_exported_result"
+        | "cannot_set_your_own_role"
+        | "only_translate_review_or_view_permission_accepts_view_languages"
+        | "oauth2_token_url_not_set"
+        | "oauth2_user_url_not_set"
+        | "email_already_invited_or_member"
+        | "price_not_found"
+        | "invoice_not_from_organization"
+        | "invoice_not_found"
+        | "plan_not_found"
+        | "plan_not_available_any_more"
+        | "no_auto_translation_method"
+        | "cannot_translate_base_language"
+        | "pat_not_found"
+        | "invalid_pat"
+        | "pat_expired"
+        | "operation_unavailable_for_account_type"
+        | "validation_email_is_not_valid"
+        | "current_password_required"
+        | "cannot_create_organization"
+        | "wrong_current_password"
+        | "wrong_param_type"
+        | "expired_super_jwt_token"
+        | "cannot_delete_your_own_account"
+        | "cannot_sort_by_this_column"
+        | "namespace_not_found"
+        | "namespace_exists"
+        | "invalid_authentication_method"
+        | "unknown_sort_property"
+        | "only_review_permission_accepts_state_change_languages"
+        | "only_translate_or_review_permission_accepts_translate_languages"
+        | "cannot_set_language_permissions_for_admin_scope"
+        | "cannot_set_view_languages_without_translations_view_scope"
+        | "cannot_set_translate_languages_without_translations_edit_scope"
+        | "cannot_set_state_change_languages_without_translations_state_edit_scope"
+        | "language_not_permitted"
+        | "scopes_has_to_be_set"
+        | "set_exactly_one_of_scopes_or_type"
+        | "translation_exists"
+        | "import_keys_error"
+        | "provide_only_one_of_screenshots_and_screenshot_uploaded_image_ids"
+        | "multiple_projects_not_supported"
+        | "plan_translation_limit_exceeded"
+        | "feature_not_enabled"
+        | "license_key_not_found"
+        | "cannot_set_view_languages_without_for_level_based_permissions"
+        | "cannot_set_different_translate_and_state_change_languages_for_level_based_permissions"
+        | "cannot_disable_your_own_account"
+        | "subscription_not_found"
+        | "invoice_does_not_have_usage"
+        | "customer_not_found"
+        | "subscription_not_active"
+        | "organization_already_subscribed"
+        | "organization_not_subscribed"
+        | "license_key_used_by_another_instance"
+        | "translation_spending_limit_exceeded"
+        | "credit_spending_limit_exceeded"
+        | "seats_spending_limit_exceeded"
+        | "this_instance_is_already_licensed"
+        | "big_meta_not_from_project"
+        | "mt_service_not_enabled"
+        | "project_not_selected"
+        | "organization_not_selected"
+        | "plan_has_subscribers"
+        | "translation_failed"
+        | "batch_job_not_found"
+        | "key_exists_in_namespace"
+        | "tag_is_blank"
+        | "execution_failed_on_management_error"
+        | "translation_api_rate_limit"
+        | "cannot_finalize_activity"
+        | "formality_not_supported_by_service"
+        | "language_not_supported_by_service"
+        | "rate_limited"
+        | "pat_access_not_allowed"
+        | "pak_access_not_allowed"
+        | "cannot_modify_disabled_translation"
+        | "azure_config_required"
+        | "s3_config_required"
+        | "content_storage_config_required"
+        | "content_storage_test_failed"
+        | "content_storage_config_invalid"
+        | "invalid_connection_string"
+        | "cannot_create_azure_storage_client"
+        | "s3_access_key_required"
+        | "azure_connection_string_required"
+        | "s3_secret_key_required"
+        | "cannot_store_file_to_content_storage"
+        | "unexpected_error_while_publishing_to_content_storage"
+        | "webhook_responded_with_non_200_status"
+        | "unexpected_error_while_executing_webhook"
+        | "content_storage_is_in_use"
+        | "cannot_set_state_for_missing_translation"
+        | "no_project_id_provided"
+        | "license_key_not_provided"
+        | "subscription_already_canceled"
+        | "user_is_subscribed_to_paid_plan"
+        | "cannot_create_free_plan_without_fixed_type"
+        | "cannot_modify_plan_free_status"
+        | "key_id_not_provided"
+        | "free_self_hosted_seat_limit_exceeded"
+        | "advanced_params_not_supported"
+        | "plural_forms_not_found_for_language"
+        | "nested_plurals_not_supported"
+        | "message_is_not_plural"
+        | "content_outside_plural_forms"
+        | "invalid_plural_form"
+        | "multiple_plurals_not_supported"
+        | "custom_values_json_too_long"
+        | "unsupported_po_message_format"
+        | "plural_forms_data_loss"
+        | "current_user_does_not_own_image"
+        | "user_cannot_view_this_organization"
+        | "user_is_not_owner_of_organization"
+        | "pak_created_for_different_project"
+        | "custom_slug_is_only_applicable_for_custom_storage"
+        | "invalid_slug_format"
+        | "batch_job_cancellation_timeout"
+        | "import_failed"
+        | "cannot_add_more_then_1000_languages"
+        | "no_data_to_import"
+        | "multiple_namespaces_mapped_to_single_file"
+        | "multiple_mappings_for_same_file_language_name"
+        | "multiple_mappings_for_null_file_language_name"
+        | "too_many_mappings_for_file"
+        | "missing_placeholder_in_template"
+        | "tag_not_found"
+        | "cannot_parse_encrypted_slack_login_data"
+        | "slack_workspace_not_found"
+        | "cannot_fetch_user_details_from_slack"
+        | "slack_missing_scope"
+        | "slack_not_connected_to_your_account"
+        | "slack_invalid_command"
+        | "slack_not_subscribed_yet"
+        | "slack_connection_failed"
+        | "tolgee_account_already_connected"
+        | "slack_not_configured"
+        | "slack_workspace_already_connected"
+        | "slack_connection_error"
+        | "email_verification_code_not_valid";
+      /** Format: date-time */
+      executeAfter?: string;
+      retry: boolean;
+      activityRevision?: components["schemas"]["ActivityRevision"];
+      disableActivityLogging: boolean;
+    };
+    BatchJobDto: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
+      authorId?: number;
+      target: { [key: string]: unknown }[];
+      /** Format: int32 */
+      totalItems: number;
+      /** Format: int32 */
+      totalChunks: number;
+      /** Format: int32 */
+      chunkSize: number;
+      status:
+        | "PENDING"
+        | "RUNNING"
+        | "SUCCESS"
+        | "FAILED"
+        | "CANCELLED"
+        | "DEBOUNCED";
+      type:
+        | "PRE_TRANSLATE_BT_TM"
+        | "MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "DELETE_KEYS"
+        | "SET_TRANSLATIONS_STATE"
+        | "CLEAR_TRANSLATIONS"
+        | "COPY_TRANSLATIONS"
+        | "TAG_KEYS"
+        | "UNTAG_KEYS"
+        | "SET_KEYS_NAMESPACE"
+        | "AUTOMATION";
+      params?: { [key: string]: unknown };
+      /** Format: int32 */
+      maxPerJobConcurrency: number;
+      jobCharacter: "SLOW" | "FAST";
+      hidden: boolean;
+      debouncingKey?: string;
+      /** Format: int64 */
+      createdAt?: number;
+      /** Format: int64 */
+      lastDebouncingEvent?: number;
+      /** Format: int64 */
+      debounceDurationInMs?: number;
+      /** Format: int64 */
+      debounceMaxWaitTimeInMs?: number;
+      chunkedTarget: { [key: string]: unknown }[][];
+    };
+    ContentDeliveryConfig: {
+      project: components["schemas"]["Project"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      slug: string;
+      customSlug: boolean;
+      contentStorage?: components["schemas"]["ContentStorage"];
+      automationActions: components["schemas"]["AutomationAction"][];
+      /** Format: date-time */
+      lastPublished?: string;
+      pruneBeforePublish: boolean;
+      /**
+       * @description Languages to be contained in export.
+       *
+       * If null, all languages are exported
+       * @example en
+       */
+      languages?: string[];
+      /** @description Format to export to */
+      format:
+        | "JSON"
+        | "JSON_TOLGEE"
+        | "XLIFF"
+        | "PO"
+        | "APPLE_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "FLUTTER_ARB"
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML";
+      /**
+       * @description Delimiter to structure file content.
+       *
+       * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
+       *
+       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+       * specific formats like `YAML_RUBY` don't honor this parameter.
+       */
+      structureDelimiter?: string;
+      /**
+       * @description If true, for structured formats (like JSON) arrays are supported.
+       *
+       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
+       */
+      supportArrays: boolean;
+      /** @description Filter key IDs to be contained in export */
+      filterKeyId?: number[];
+      /** @description Filter key IDs not to be contained in export */
+      filterKeyIdNot?: number[];
+      /**
+       * @description Filter keys tagged by.
+       *
+       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+       */
+      filterTag?: string;
+      /** @description Filter keys tagged by one of provided tags */
+      filterTagIn?: string[];
+      /** @description Filter keys not tagged by one of provided tags */
+      filterTagNotIn?: string[];
+      /** @description Filter keys with prefix */
+      filterKeyPrefix?: string;
+      /** @description Filter translations with state. By default, all states except untranslated is exported. */
+      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
+      filterNamespace?: string[];
+      /**
+       * @description Message format to be used for export.
+       *
+       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+       *
+       * This property is honored only for generic formats like JSON or YAML.
+       * For specific formats like `YAML_RUBY` it's ignored.
+       */
+      messageFormat?:
+        | "C_SPRINTF"
+        | "PHP_SPRINTF"
+        | "JAVA_STRING_FORMAT"
+        | "APPLE_SPRINTF"
+        | "RUBY_SPRINTF"
+        | "ICU";
+      /**
+       * @description This is a template that defines the structure of the resulting .zip file content.
+       *
+       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+       *
+       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+       * the English translations of the `home` namespace will be stored in `home/en.json`.
+       *
+       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+       *
+       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+       * but in Android format. (e.g., en-rUS)
+       */
+      fileStructureTemplate?: string;
+      disableActivityLogging: boolean;
+    };
+    ContentStorage: {
+      project: components["schemas"]["Project"];
+      name: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      publicUrlPrefix?: string;
+      azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfig"];
+      s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfig"];
+      configs: components["schemas"]["StorageConfig"][];
+      storageConfig?: components["schemas"]["StorageConfig"];
+      disableActivityLogging: boolean;
+    };
+    EmailVerification: {
+      /** Format: int64 */
+      id?: number;
+      code: string;
+      newEmail?: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      userAccount: components["schemas"]["UserAccount"];
+    };
+    EntityDescriptionRef: {
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+    };
+    Import: {
+      project: components["schemas"]["Project"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      author: components["schemas"]["UserAccount"];
+      files: components["schemas"]["ImportFile"][];
+      /** Format: date-time */
+      deletedAt?: string;
+      disableActivityLogging: boolean;
+    };
+    ImportFile: {
+      name?: string;
+      import: components["schemas"]["Import"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      issues: components["schemas"]["ImportFileIssue"][];
+      keys: components["schemas"]["ImportKey"][];
+      languages: components["schemas"]["ImportLanguage"][];
+      namespace?: string;
+      needsParamConversion: boolean;
+      disableActivityLogging: boolean;
+    };
+    ImportFileIssue: {
+      file: components["schemas"]["ImportFile"];
+      type:
+        | "KEY_IS_NOT_STRING"
+        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
+        | "VALUE_IS_NOT_STRING"
+        | "KEY_IS_EMPTY"
+        | "VALUE_IS_EMPTY"
+        | "PO_MSGCTXT_NOT_SUPPORTED"
+        | "ID_ATTRIBUTE_NOT_PROVIDED"
+        | "TARGET_NOT_PROVIDED"
+        | "TRANSLATION_TOO_LONG"
+        | "KEY_IS_BLANK"
+        | "TRANSLATION_DEFINED_IN_ANOTHER_FILE"
+        | "INVALID_CUSTOM_VALUES";
+      params: components["schemas"]["ImportFileIssueParam"][];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      disableActivityLogging: boolean;
+    };
+    ImportFileIssueParam: {
+      issue: components["schemas"]["ImportFileIssue"];
+      type:
+        | "KEY_NAME"
+        | "KEY_ID"
+        | "LANGUAGE_ID"
+        | "KEY_INDEX"
+        | "VALUE"
+        | "LINE"
+        | "FILE_NODE_ORIGINAL"
+        | "LANGUAGE_NAME";
+      value: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      disableActivityLogging: boolean;
+    };
+    ImportKey: {
+      name: string;
+      file: components["schemas"]["ImportFile"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      translations: components["schemas"]["ImportTranslation"][];
+      keyMeta?: components["schemas"]["KeyMeta"];
+      pluralArgName?: string;
+      disableActivityLogging: boolean;
+    };
+    ImportLanguage: {
+      name: string;
+      file: components["schemas"]["ImportFile"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      translations: components["schemas"]["ImportTranslation"][];
+      existingLanguage?: components["schemas"]["Language"];
+      disableActivityLogging: boolean;
+    };
+    ImportTranslation: {
+      text?: string;
+      language: components["schemas"]["ImportLanguage"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      key: components["schemas"]["ImportKey"];
+      conflict?: components["schemas"]["Translation"];
+      override: boolean;
+      resolvedHash?: string;
+      isSelectedToImport: boolean;
+      isPlural: boolean;
+      rawData?: { [key: string]: unknown };
+      convertor?:
+        | "JSON_ICU"
+        | "JSON_JAVA"
+        | "JSON_PHP"
+        | "JSON_RUBY"
+        | "JSON_C"
+        | "PO_PHP"
+        | "PO_C"
+        | "PO_JAVA"
+        | "PO_ICU"
+        | "PO_RUBY"
+        | "STRINGS"
+        | "STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "PROPERTIES_ICU"
+        | "PROPERTIES_JAVA"
+        | "PROPERTIES_UNKNOWN"
+        | "ANDROID_XML"
+        | "FLUTTER_ARB"
+        | "YAML_RUBY"
+        | "YAML_JAVA"
+        | "YAML_ICU"
+        | "YAML_PHP"
+        | "YAML_UNKNOWN"
+        | "XLIFF_ICU"
+        | "XLIFF_JAVA"
+        | "XLIFF_PHP"
+        | "XLIFF_RUBY";
+      resolved: boolean;
+      disableActivityLogging: boolean;
+    };
+    Invitation: {
+      /** Format: int64 */
+      id?: number;
+      code: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      permission?: components["schemas"]["Permission"];
+      organizationRole?: components["schemas"]["OrganizationRole"];
+      name?: string;
+      email?: string;
+    };
+    Key: {
+      name: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      project: components["schemas"]["Project"];
+      namespace?: components["schemas"]["Namespace"];
+      translations: components["schemas"]["Translation"][];
+      keyMeta?: components["schemas"]["KeyMeta"];
+      keyScreenshotReferences: components["schemas"]["KeyScreenshotReference"][];
+      isPlural: boolean;
+      pluralArgName?: string;
+      disableActivityLogging: boolean;
+    };
+    KeyCodeReference: {
+      keyMeta: components["schemas"]["KeyMeta"];
+      author: components["schemas"]["UserAccount"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      path: string;
+      /** Format: int64 */
+      line?: number;
+      fromImport: boolean;
+      disableActivityLogging: boolean;
+    };
+    KeyComment: {
+      keyMeta: components["schemas"]["KeyMeta"];
+      author: components["schemas"]["UserAccount"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      fromImport: boolean;
+      text: string;
+      disableActivityLogging: boolean;
+    };
+    KeyMeta: {
+      key?: components["schemas"]["Key"];
+      importKey?: components["schemas"]["ImportKey"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      comments: components["schemas"]["KeyComment"][];
+      codeReferences: components["schemas"]["KeyCodeReference"][];
+      tags: components["schemas"]["Tag"][];
+      description?: string;
+      custom?: { [key: string]: { [key: string]: unknown } };
+      disableActivityLogging: boolean;
+    };
+    KeyScreenshotReference: {
+      key: components["schemas"]["Key"];
+      screenshot: components["schemas"]["Screenshot"];
+      positions?: components["schemas"]["KeyInScreenshotPosition"][];
+      originalText?: string;
+    };
+    Language: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      translations: components["schemas"]["Translation"][];
+      project: components["schemas"]["Project"];
+      tag: string;
+      name: string;
+      originalName?: string;
+      flagEmoji?: string;
+      mtServiceConfig?: components["schemas"]["MtServiceConfig"];
+      autoTranslationConfig?: components["schemas"]["AutoTranslationConfig"];
+      stats?: components["schemas"]["LanguageStats"];
+      aiTranslatorPromptDescription?: string;
+      /** Format: date-time */
+      deletedAt?: string;
+      disableActivityLogging: boolean;
+    };
+    LanguageStats: {
+      language: components["schemas"]["Language"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      untranslatedWords: number;
+      /** Format: int64 */
+      translatedWords: number;
+      /** Format: int64 */
+      reviewedWords: number;
+      /** Format: int64 */
+      untranslatedKeys: number;
+      /** Format: int64 */
+      translatedKeys: number;
+      /** Format: int64 */
+      reviewedKeys: number;
+      /** Format: double */
+      untranslatedPercentage: number;
+      /** Format: double */
+      translatedPercentage: number;
+      /** Format: double */
+      reviewedPercentage: number;
+      /** Format: int64 */
+      languageId: number;
+      disableActivityLogging: boolean;
+    };
+    MtCreditBucket: {
+      userAccount?: components["schemas"]["UserAccount"];
+      organization?: components["schemas"]["Organization"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      credits: number;
+      /** Format: int64 */
+      extraCredits: number;
+      /** Format: int64 */
+      bucketSize: number;
+      /** Format: date-time */
+      refilled: string;
+      disableActivityLogging: boolean;
+    };
+    MtServiceConfig: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      project: components["schemas"]["Project"];
+      targetLanguage?: components["schemas"]["Language"];
+      primaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE";
+      primaryServiceFormality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      enabledServices: (
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE"
+      )[];
+      awsFormality: "FORMAL" | "INFORMAL" | "DEFAULT";
+      deeplFormality: "FORMAL" | "INFORMAL" | "DEFAULT";
+      tolgeeFormality: "FORMAL" | "INFORMAL" | "DEFAULT";
+      primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
+      enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
+      disableActivityLogging: boolean;
+    };
+    Namespace: {
+      name: string;
+      project: components["schemas"]["Project"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      disableActivityLogging: boolean;
+    };
+    NotificationPreferences: {
+      userAccount: components["schemas"]["UserAccount"];
+      project?: components["schemas"]["Project"];
+      disabledNotifications: (
+        | "ACTIVITY_LANGUAGES_CREATED"
+        | "ACTIVITY_KEYS_CREATED"
+        | "ACTIVITY_KEYS_UPDATED"
+        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
+        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
+        | "ACTIVITY_TRANSLATIONS_UPDATED"
+        | "ACTIVITY_TRANSLATION_OUTDATED"
+        | "ACTIVITY_TRANSLATION_REVIEWED"
+        | "ACTIVITY_TRANSLATION_UNREVIEWED"
+        | "ACTIVITY_NEW_COMMENTS"
+        | "ACTIVITY_COMMENTS_MENTION"
+        | "BATCH_JOB_ERRORED"
+      )[];
+      /** Format: int64 */
+      id: number;
+    };
+    Organization: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      description?: string;
+      slug: string;
+      mtCreditBucket?: components["schemas"]["MtCreditBucket"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      basePermission: components["schemas"]["Permission"];
+      projects: components["schemas"]["Project"][];
+      preferredBy: components["schemas"]["UserPreferences"][];
+      avatarHash?: string;
+      /** Format: date-time */
+      deletedAt?: string;
+      organizationSlackWorkspace: components["schemas"]["OrganizationSlackWorkspace"][];
+    };
+    OrganizationRole: {
+      invitation?: components["schemas"]["Invitation"];
+      type: "MEMBER" | "OWNER";
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      user?: components["schemas"]["UserAccount"];
+      organization: components["schemas"]["Organization"];
+      disableActivityLogging: boolean;
+    };
+    OrganizationSlackWorkspace: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      organization: components["schemas"]["Organization"];
+      author: components["schemas"]["UserAccount"];
+      slackTeamId: string;
+      slackTeamName: string;
+      accessToken: string;
+      slackSubscriptions: components["schemas"]["SlackConfig"][];
+      disableActivityLogging: boolean;
+    };
+    Pat: {
+      tokenHash: string;
+      description: string;
+      /** Format: date-time */
+      expiresAt?: string;
+      /** Format: date-time */
+      lastUsedAt?: string;
+      token?: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      userAccount: components["schemas"]["UserAccount"];
+      disableActivityLogging: boolean;
+    };
+    Permission: {
+      /** Format: int64 */
+      id: number;
+      user?: components["schemas"]["UserAccount"];
+      organization?: components["schemas"]["Organization"];
+      invitation?: components["schemas"]["Invitation"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      _scopes?: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+      )[];
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      translateLanguages: components["schemas"]["Language"][];
+      viewLanguages: components["schemas"]["Language"][];
+      stateChangeLanguages: components["schemas"]["Language"][];
+      project?: components["schemas"]["Project"];
+      translateLanguageIds?: number[];
+      stateChangeLanguageIds?: number[];
+      /** Format: int64 */
+      userId?: number;
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+      )[];
+      granular: boolean;
+      /** Format: int64 */
+      projectId?: number;
+      viewLanguageIds?: number[];
+      /** Format: int64 */
+      organizationId?: number;
+      /** Format: int64 */
+      invitationId?: number;
+    };
+    Project: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      description?: string;
+      aiTranslatorPromptDescription?: string;
+      slug?: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      languages: components["schemas"]["Language"][];
+      permissions: components["schemas"]["Permission"][];
+      keys: components["schemas"]["Key"][];
+      apiKeys: components["schemas"]["ApiKey"][];
+      userOwner?: components["schemas"]["UserAccount"];
+      organizationOwner: components["schemas"]["Organization"];
+      baseLanguage?: components["schemas"]["Language"];
+      autoTranslationConfigs: components["schemas"]["AutoTranslationConfig"][];
+      mtServiceConfig: components["schemas"]["MtServiceConfig"][];
+      namespaces: components["schemas"]["Namespace"][];
+      defaultNamespace?: components["schemas"]["Namespace"];
+      avatarHash?: string;
+      automations: components["schemas"]["Automation"][];
+      contentDeliveryConfigs: components["schemas"]["ContentDeliveryConfig"][];
+      contentStorages: components["schemas"]["ContentStorage"][];
+      webhookConfigs: components["schemas"]["WebhookConfig"][];
+      slackConfigs: components["schemas"]["SlackConfig"][];
+      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
+      /** Format: date-time */
+      deletedAt?: string;
+      disableActivityLogging: boolean;
+    };
+    S3ContentStorageConfig: {
+      contentStorage: components["schemas"]["ContentStorage"];
+      bucketName: string;
+      accessKey: string;
+      secretKey: string;
+      endpoint: string;
+      signingRegion: string;
+      enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
+    };
+    SavedSlackMessage: {
+      messageTimestamp: string;
+      slackConfig: components["schemas"]["SlackConfig"];
+      /** Format: int64 */
+      keyId: number;
+      languageTags: string[];
+      createdKeyBlocks: boolean;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      info: components["schemas"]["SlackMessageInfo"][];
+      disableActivityLogging: boolean;
+    };
+    Screenshot: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      keyScreenshotReferences: components["schemas"]["KeyScreenshotReference"][];
+      path: string;
+      extension?: string;
+      hasThumbnail: boolean;
+      location?: string;
+      /** Format: int32 */
+      width: number;
+      /** Format: int32 */
+      height: number;
+      hash: string;
+      filename: string;
+      thumbnailFilename: string;
+      pathWithSlash: string;
+      disableActivityLogging: boolean;
+    };
+    SlackConfig: {
+      project: components["schemas"]["Project"];
+      userAccount: components["schemas"]["UserAccount"];
+      channelId: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      automationActions: components["schemas"]["AutomationAction"][];
+      languageTags: string[];
+      events: ("ALL" | "NEW_KEY" | "BASE_CHANGED" | "TRANSLATION_CHANGED")[];
+      savedSlackMessage: components["schemas"]["SavedSlackMessage"][];
+      isGlobalSubscription: boolean;
+      preferences: components["schemas"]["SlackConfigPreference"][];
+      organizationSlackWorkspace?: components["schemas"]["OrganizationSlackWorkspace"];
+      disableActivityLogging: boolean;
+    };
+    SlackConfigPreference: {
+      slackConfig: components["schemas"]["SlackConfig"];
+      languageTag?: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      events: ("ALL" | "NEW_KEY" | "BASE_CHANGED" | "TRANSLATION_CHANGED")[];
+      disableActivityLogging: boolean;
+    };
+    SlackMessageInfo: {
+      slackMessage: components["schemas"]["SavedSlackMessage"];
+      languageTag: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      subscriptionType: "GLOBAL";
+      authorContext: string;
+      disableActivityLogging: boolean;
+    };
+    SlackUserConnection: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      userAccount: components["schemas"]["UserAccount"];
+      slackUserId: string;
+      slackTeamId: string;
+      disableActivityLogging: boolean;
+    };
+    StorageConfig: {
+      enabled: boolean;
+      contentStorageType: "S3" | "AZURE";
+    };
+    Tag: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      project: components["schemas"]["Project"];
+      keyMetas: components["schemas"]["KeyMeta"][];
+      disableActivityLogging: boolean;
+    };
+    Translation: {
+      text?: {
+        old?: string;
+        new?: string;
+      };
+      state?: {
+        old?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+        new?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+      };
+      auto?: {
+        old?: boolean;
+        new?: boolean;
+      };
+      mtProvider?: {
+        old?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+        new?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      };
+      outdated?: {
+        old?: boolean;
+        new?: boolean;
+      };
+    };
+    UserAccount: {
+      /** Format: int64 */
+      id: number;
+      username: string;
+      password?: string;
+      name: string;
+      role?: "USER" | "ADMIN";
+      accountType?: "LOCAL" | "MANAGED" | "THIRD_PARTY";
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: byte */
+      totpKey?: string;
+      mfaRecoveryCodes: string[];
+      /** Format: date-time */
+      tokensValidNotBefore?: string;
+      permissions: components["schemas"]["Permission"][];
+      emailVerification?: components["schemas"]["EmailVerification"];
+      thirdPartyAuthType?: string;
+      thirdPartyAuthId?: string;
+      resetPasswordCode?: string;
+      organizationRoles: components["schemas"]["OrganizationRole"][];
+      preferences?: components["schemas"]["UserPreferences"];
+      pats?: components["schemas"]["Pat"][];
+      apiKeys?: components["schemas"]["ApiKey"][];
+      avatarHash?: string;
+      /** Format: date-time */
+      deletedAt?: string;
+      /** Format: date-time */
+      disabledAt?: string;
+      isInitialUser: boolean;
+      passwordChanged: boolean;
+      isDemo: boolean;
+      slackUserConnection: components["schemas"]["SlackUserConnection"][];
+      slackConfig: components["schemas"]["SlackConfig"][];
+      userNotifications: components["schemas"]["UserNotification"][];
+      projectNotificationPreferences: components["schemas"]["NotificationPreferences"][];
+      globalNotificationPreferences?: components["schemas"]["NotificationPreferences"];
+      deletable?: boolean;
+      deleted: boolean;
+      mfaEnabled?: boolean;
+      needsSuperJwt?: boolean;
+    };
+    UserNotification: {
+      type:
+        | "ACTIVITY_LANGUAGES_CREATED"
+        | "ACTIVITY_KEYS_CREATED"
+        | "ACTIVITY_KEYS_UPDATED"
+        | "ACTIVITY_KEYS_SCREENSHOTS_UPLOADED"
+        | "ACTIVITY_SOURCE_STRINGS_UPDATED"
+        | "ACTIVITY_TRANSLATIONS_UPDATED"
+        | "ACTIVITY_TRANSLATION_OUTDATED"
+        | "ACTIVITY_TRANSLATION_REVIEWED"
+        | "ACTIVITY_TRANSLATION_UNREVIEWED"
+        | "ACTIVITY_NEW_COMMENTS"
+        | "ACTIVITY_COMMENTS_MENTION"
+        | "BATCH_JOB_ERRORED";
+      recipient: components["schemas"]["UserAccount"];
+      project?: components["schemas"]["Project"];
+      modifiedEntities: components["schemas"]["ActivityModifiedEntity"][];
+      batchJob?: components["schemas"]["BatchJob"];
+      /** Format: int64 */
+      id: number;
+      unread: boolean;
+      /** Format: date-time */
+      markedDoneAt?: string;
+      /** Format: date-time */
+      lastUpdated: string;
+    };
+    UserPreferences: {
+      userAccount: components["schemas"]["UserAccount"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      language?: string;
+      preferredOrganization?: components["schemas"]["Organization"];
+      /** Format: int64 */
+      id: number;
+    };
+    WebhookConfig: {
+      project: components["schemas"]["Project"];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      url: string;
+      webhookSecret: string;
+      automationActions: components["schemas"]["AutomationAction"][];
+      /** Format: date-time */
+      firstFailed?: string;
+      /** Format: date-time */
+      lastExecuted?: string;
+      disableActivityLogging: boolean;
+    };
+    EntityDescription: {
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+      data: {
+        name?: string;
+      };
     };
     ProjectActivityUnknownModel: {
       /** Format: int64 */
@@ -5817,6 +7769,369 @@ export interface components {
       meta?: { [key: string]: { [key: string]: unknown } };
       counts?: { [key: string]: number };
       params?: { [key: string]: unknown };
+    };
+    CreateKeyGroupModel: {
+      /** Format: int32 */
+      keyCount: number;
+    };
+    ActivityGroupLanguageModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      originalName: string;
+      tag: string;
+      flagEmoji: string;
+    };
+    CreateProjectGroupModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      languages: components["schemas"]["ActivityGroupLanguageModel"][];
+      description?: string;
+    };
+    ActivityGroupSetTranslationStateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_TRANSLATION_STATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupReviewModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "REVIEW";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupSetTranslationsModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_TRANSLATIONS";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupDismissAutoTranslatedStateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "DISMISS_AUTO_TRANSLATED_STATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupSetOutdatedFlagModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_OUTDATED_FLAG";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupAddTranslationCommentModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "ADD_TRANSLATION_COMMENT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupDeleteTranslationCommentModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "DELETE_TRANSLATION_COMMENT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupEditTranslationCommentModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "EDIT_TRANSLATION_COMMENT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupSetTranslationCommentStateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_TRANSLATION_COMMENT_STATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupDeleteScreenshotModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "DELETE_SCREENSHOT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupAddScreenshotModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "ADD_SCREENSHOT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupEditKeyTagsModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "EDIT_KEY_TAGS";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupEditKeyNameModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "EDIT_KEY_NAME";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupDeleteKeyModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "DELETE_KEY";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupCreateKeyModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CREATE_KEY";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      data?: {
+        /** Format: int32 */
+        keyCount: number;
+      };
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupImportModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "IMPORT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupCreateLanguageModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CREATE_LANGUAGE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupEditLanguageModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "EDIT_LANGUAGE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupDeleteLanguageModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "DELETE_LANGUAGE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupCreateProjectModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CREATE_PROJECT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      data?: {
+        /** Format: int64 */
+        id: number;
+        name: string;
+        languages: components["schemas"]["ActivityGroupLanguageModel"][];
+        description?: string;
+      };
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupEditProjectModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "EDIT_PROJECT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupNamespaceEditModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "NAMESPACE_EDIT";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupBatchPreTranslateByTmModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_PRE_TRANSLATE_BY_TM";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupBatchMachineTranslateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_MACHINE_TRANSLATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupAutoTranslateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "AUTO_TRANSLATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupBatchClearTranslationsModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_CLEAR_TRANSLATIONS";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupBatchCopyTranslationsModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_COPY_TRANSLATIONS";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupBatchSetTranslationStateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "BATCH_SET_TRANSLATION_STATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupContentDeliveryConfigCreateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_DELIVERY_CONFIG_CREATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupContentDeliveryConfigUpdateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_DELIVERY_CONFIG_UPDATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupContentDeliveryConfigDeleteModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_DELIVERY_CONFIG_DELETE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupContentStorageCreateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_STORAGE_CREATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupContentStorageUpdateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_STORAGE_UPDATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupContentStorageDeleteModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "CONTENT_STORAGE_DELETE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupWebhookConfigCreateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "WEBHOOK_CONFIG_CREATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupWebhookConfigUpdateModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "WEBHOOK_CONFIG_UPDATE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
+    ActivityGroupWebhookConfigDeleteModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "WEBHOOK_CONFIG_DELETE";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
     };
   };
 }
@@ -16307,6 +18622,46 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        filterType?:
+          | "SET_TRANSLATION_STATE"
+          | "REVIEW"
+          | "SET_TRANSLATIONS"
+          | "DISMISS_AUTO_TRANSLATED_STATE"
+          | "SET_OUTDATED_FLAG"
+          | "ADD_TRANSLATION_COMMENT"
+          | "DELETE_TRANSLATION_COMMENT"
+          | "EDIT_TRANSLATION_COMMENT"
+          | "SET_TRANSLATION_COMMENT_STATE"
+          | "DELETE_SCREENSHOT"
+          | "ADD_SCREENSHOT"
+          | "EDIT_KEY_TAGS"
+          | "EDIT_KEY_NAME"
+          | "DELETE_KEY"
+          | "CREATE_KEY"
+          | "IMPORT"
+          | "CREATE_LANGUAGE"
+          | "EDIT_LANGUAGE"
+          | "DELETE_LANGUAGE"
+          | "CREATE_PROJECT"
+          | "EDIT_PROJECT"
+          | "NAMESPACE_EDIT"
+          | "BATCH_PRE_TRANSLATE_BY_TM"
+          | "BATCH_MACHINE_TRANSLATE"
+          | "AUTO_TRANSLATE"
+          | "BATCH_CLEAR_TRANSLATIONS"
+          | "BATCH_COPY_TRANSLATIONS"
+          | "BATCH_SET_TRANSLATION_STATE"
+          | "CONTENT_DELIVERY_CONFIG_CREATE"
+          | "CONTENT_DELIVERY_CONFIG_UPDATE"
+          | "CONTENT_DELIVERY_CONFIG_DELETE"
+          | "CONTENT_STORAGE_CREATE"
+          | "CONTENT_STORAGE_UPDATE"
+          | "CONTENT_STORAGE_DELETE"
+          | "WEBHOOK_CONFIG_CREATE"
+          | "WEBHOOK_CONFIG_UPDATE"
+          | "WEBHOOK_CONFIG_DELETE";
+        filterLanguageIdIn?: number[];
+        filterAuthorUserIdIn?: number[];
       };
       path: {
         projectId: number;
@@ -16316,7 +18671,63 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
+          "application/hal+json": components["schemas"]["PagedModelActivityGroupModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getCreateKeyItems: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        groupId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelCreateKeyGroupItemModel"];
         };
       };
       /** Bad Request */

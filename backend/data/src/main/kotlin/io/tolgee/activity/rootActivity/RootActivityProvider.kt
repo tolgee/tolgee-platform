@@ -1,20 +1,27 @@
 package io.tolgee.activity.rootActivity
 
+import io.tolgee.activity.groups.matchers.modifiedEntity.DefaultMatcher
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Pageable
 
 class RootActivityProvider(
   private val applicationContext: ApplicationContext,
-  private val activityRevisionId: Long,
+  private val activityRevisionIds: List<Long>,
   private val activityTreeDefinitionItem: ActivityTreeDefinitionItem,
   private val pageable: Pageable,
+  filterModifications: List<DefaultMatcher<*>>? = null,
 ) {
+  private val filterModificationsByEntityClass = filterModifications?.groupBy { it.entityClass }
+
   private val rootItems by lazy {
+    val rootModificationItems = filterModificationsByEntityClass?.get(activityTreeDefinitionItem.entityClass)
+
     RootItemsProvider(
       pageable,
-      activityRevisionId,
+      activityRevisionIds,
       activityTreeDefinitionItem.entityClass,
+      rootModificationItems,
       applicationContext,
     ).provide()
   }
@@ -31,7 +38,7 @@ class RootActivityProvider(
     val parentIds = parentItems.map { it.entityId }
     parentItemDefinition.children.map { (key, item) ->
       val childItems =
-        ChildItemsProvider(activityRevisionId, item, applicationContext, parentIds).provide().groupBy { it.parentId }
+        ChildItemsProvider(activityRevisionIds, item, applicationContext, parentIds).provide().groupBy { it.parentId }
 
       childItems.forEach {
         addChildren(item, it.value)

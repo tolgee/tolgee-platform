@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.groups.ActivityGroupService
 import io.tolgee.dtos.queryResults.ActivityGroupView
+import io.tolgee.dtos.request.ActivityGroupFilters
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.activity.ActivityGroupModel
 import io.tolgee.hateoas.activity.ActivityGroupModelAssembler
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -50,8 +52,9 @@ class ProjectActivityController(
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
   private val activityGroupService: ActivityGroupService,
   private val groupPagedResourcesAssembler: PagedResourcesAssembler<ActivityGroupView>,
-  private val groupModelAssembler: ActivityGroupModelAssembler
-  ) {
+  private val groupModelAssembler: ActivityGroupModelAssembler,
+  private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
+) {
   @Operation(summary = "Get project activity")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
@@ -108,8 +111,14 @@ class ProjectActivityController(
   @AllowApiAccess
   fun getActivityGroups(
     @ParameterObject pageable: Pageable,
+    @ParameterObject activityGroupFilters: ActivityGroupFilters,
   ): PagedModel<ActivityGroupModel> {
-    val views = activityGroupService.getProjectActivityGroups(projectId = projectHolder.project.id, pageable)
+    val views =
+      activityGroupService.getProjectActivityGroups(
+        projectId = projectHolder.project.id,
+        pageable,
+        activityGroupFilters,
+      )
     return groupPagedResourcesAssembler.toModel(views, groupModelAssembler)
   }
 }

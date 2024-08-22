@@ -3,10 +3,10 @@ package io.tolgee.activity.groups
 import io.tolgee.activity.ModifiedEntitiesType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.queryResults.ActivityGroupView
+import io.tolgee.dtos.request.ActivityGroupFilters
 import io.tolgee.model.activity.ActivityGroup
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.repository.activity.ActivityGroupRepository
-import org.jooq.DSLContext
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -19,7 +19,6 @@ class ActivityGroupService(
   private val applicationContext: ApplicationContext,
   private val activityGroupRepository: ActivityGroupRepository,
   private val currentDateProvider: CurrentDateProvider,
-  private val jooqContext: DSLContext,
 ) {
   fun addToGroup(
     activityRevision: ActivityRevision,
@@ -108,8 +107,9 @@ class ActivityGroupService(
   fun getProjectActivityGroups(
     projectId: Long,
     pageable: Pageable,
+    activityGroupFilters: ActivityGroupFilters,
   ): PageImpl<ActivityGroupView> {
-    return ActivityGroupsProvider(projectId, pageable, applicationContext).get()
+    return ActivityGroupsProvider(projectId, pageable, activityGroupFilters, applicationContext).get()
   }
 
   private val ActivityGroupDto.isTooOld: Boolean

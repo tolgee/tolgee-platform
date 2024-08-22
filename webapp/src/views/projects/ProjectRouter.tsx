@@ -19,6 +19,7 @@ import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
 import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
 import { ActivityDetailRedirect } from 'tg.component/security/ActivityDetailRedirect';
+import { ActivityView } from './ActivityView';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -85,6 +86,9 @@ export const ProjectRouter = () => {
               <ActivityDetailRedirect />
             </Route>
 
+            <Route exact path={LINKS.PROJECT_ACTIVITY_GROUPS.template}>
+              <ActivityView />
+            </Route>
             {/*
               Preview section...
             */}

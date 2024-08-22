@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.invitation.TagModel
 import io.tolgee.hateoas.screenshot.ScreenshotModel
 import io.tolgee.hateoas.translations.TranslationModel
+import io.tolgee.sharedDocs.Key
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
@@ -31,9 +32,9 @@ open class KeyWithDataModel(
   val tags: Set<TagModel>,
   @Schema(description = "Screenshots of the key")
   val screenshots: List<ScreenshotModel>,
-  @Schema(description = "If key is pluralized. If it will be reflected in the editor")
+  @Schema(description = Key.IS_PLURAL_FIELD)
   val isPlural: Boolean,
-  @Schema(description = "The argument name for the plural")
+  @Schema(description = Key.PLURAL_ARG_NAME_FIELD)
   val pluralArgName: String?,
   @Schema(description = "Custom values of the key")
   val custom: Map<String, Any?>,

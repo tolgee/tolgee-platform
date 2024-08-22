@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.activity.ActivityGroup
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.data.domain.Pageable
 import java.time.Duration
 
 class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -75,22 +75,16 @@ class ActivityGroupsCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         description = "Changed!",
         tags = listOf("tag1", "tag2"),
         translations = mapOf(testData.englishLanguage.tag to "Test"),
+        states = mapOf(testData.englishLanguage.tag to AssignableTranslationState.REVIEWED),
       ),
     ).andIsOk
 
     assertGroupsForActivity(
-      ActivityGroupType.KEY_NAME_EDIT,
-      ActivityGroupType.KEY_TAGS_EDIT,
+      ActivityGroupType.EDIT_KEY_NAME,
+      ActivityGroupType.EDIT_KEY_TAGS,
       ActivityGroupType.SET_TRANSLATIONS,
+      ActivityGroupType.REVIEW,
     )
-
-    val groups =
-      activityGroupService.getProjectActivityGroups(
-        projectId = testData.project.id,
-        pageable = Pageable.ofSize(10),
-      )
-
-    groups
   }
 
   private fun assertItStopsGroupingDueToAge() {

@@ -12,11 +12,11 @@ class RootActivityProviderTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `returns rooted activity`() {
     importData()
-    val latestRevisionId = getLatestRevisionId()
+    val latestRevisionId = getLatestRevisionId()!!
     val items =
       RootActivityProvider(
         applicationContext,
-        latestRevisionId!!,
+        listOf(latestRevisionId),
         KeyActivityTreeDefinitionItem,
         Pageable.ofSize(100),
       ).provide()

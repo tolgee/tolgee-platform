@@ -312,7 +312,7 @@ export class LINKS {
     'websockets'
   );
 
-  static ACTIVITY_PREVIEW = Link.ofParent(LINKS.PROJECT, 'activity');
+  static PROJECT_ACTIVITY_GROUPS = Link.ofParent(LINKS.PROJECT, 'activity');
 
   static PROJECT_DASHBOARD = LINKS.PROJECT;
 

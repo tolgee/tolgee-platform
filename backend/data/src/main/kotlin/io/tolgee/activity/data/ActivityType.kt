@@ -16,7 +16,7 @@ enum class ActivityType(
   val hideInList: Boolean = false,
   /**
    * If true, the activity will be saved even if it does
-   * not contain any changes in fields market for activity logging
+   * not contain any changes in fields marked for activity logging
    */
   val saveWithoutModification: Boolean = false,
   val typeDefinitions: Map<KClass<out EntityWithId>, EntityModificationTypeDefinition<*>>? = null,

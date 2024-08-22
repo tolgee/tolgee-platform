@@ -5,7 +5,10 @@ import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.eq
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.modification
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.notNull
+import io.tolgee.activity.groups.matchers.modifiedEntity.DefaultMatcher
+import io.tolgee.activity.groups.matchers.modifiedEntity.ModifiedEntityMatcher
 import io.tolgee.activity.groups.viewProviders.createProject.CreateProjectGroupModelProvider
+import io.tolgee.activity.groups.viewProviders.keyCreate.CreateKeyGroupModelProvider
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
@@ -20,300 +23,250 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.model.webhook.WebhookConfig
-import org.springframework.context.ApplicationContext
+import kotlin.reflect.KClass
 
 enum class ActivityGroupType(
   val sourceActivityTypes: List<ActivityType>,
-  val modifications: List<GroupEntityModificationDefinition<*>>,
-  val modelProviderFactory: ((ApplicationContext) -> GroupModelProvider<*>?)? = null,
+  val modelProviderFactoryClass: KClass<out GroupModelProvider<*, *>>? = null,
+  val matcher: ModifiedEntityMatcher? = null,
 ) {
   SET_TRANSLATION_STATE(
     listOf(ActivityType.SET_TRANSLATION_STATE, ActivityType.COMPLEX_EDIT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
-        revisionTypes = listOf(RevisionType.MOD),
+        revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::outdated, Translation::mtProvider),
         deniedValues =
           mapOf(
             Translation::state to TranslationState.REVIEWED,
             Translation::text to modification(eq(null) to notNull()),
           ),
-        countInView = true,
       ),
-    ),
   ),
-
   REVIEW(
     listOf(ActivityType.SET_TRANSLATION_STATE, ActivityType.COMPLEX_EDIT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
-        revisionTypes = listOf(RevisionType.MOD),
+        revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::outdated, Translation::mtProvider),
         allowedValues = mapOf(Translation::state to TranslationState.REVIEWED),
-        countInView = true,
       ),
-    ),
   ),
 
   SET_TRANSLATIONS(
     listOf(ActivityType.SET_TRANSLATIONS, ActivityType.COMPLEX_EDIT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL, RevisionType.MOD),
         modificationProps = listOf(Translation::text),
-        countInView = true,
       ),
-    ),
   ),
 
   DISMISS_AUTO_TRANSLATED_STATE(
     listOf(ActivityType.DISMISS_AUTO_TRANSLATED_STATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::auto, Translation::mtProvider),
         allowedValues = mapOf(Translation::mtProvider to null, Translation::auto to false),
-        countInView = true,
       ),
-    ),
   ),
 
   SET_OUTDATED_FLAG(
     listOf(ActivityType.SET_OUTDATED_FLAG),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::outdated),
-        countInView = true,
       ),
-    ),
   ),
 
-  TRANSLATION_COMMENT_ADD(
+  ADD_TRANSLATION_COMMENT(
     listOf(ActivityType.TRANSLATION_COMMENT_ADD),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.ADD),
-        countInView = true,
+      ).or(
+        DefaultMatcher(
+          entityClass = Translation::class,
+          revisionTypes = listOf(RevisionType.ADD),
+        ),
       ),
-      GroupEntityModificationDefinition(
-        entityClass = Translation::class,
-        revisionTypes = listOf(RevisionType.ADD),
-      ),
-    ),
   ),
 
-  TRANSLATION_COMMENT_DELETE(
+  DELETE_TRANSLATION_COMMENT(
     listOf(ActivityType.TRANSLATION_COMMENT_DELETE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.DEL),
-        countInView = true,
       ),
-    ),
   ),
 
-  TRANSLATION_COMMENT_EDIT(
+  EDIT_TRANSLATION_COMMENT(
     listOf(ActivityType.TRANSLATION_COMMENT_EDIT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(TranslationComment::text),
-        countInView = true,
       ),
-    ),
   ),
 
-  TRANSLATION_COMMENT_SET_STATE(
+  SET_TRANSLATION_COMMENT_STATE(
     listOf(ActivityType.TRANSLATION_COMMENT_SET_STATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = TranslationComment::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(TranslationComment::state),
-        countInView = true,
       ),
-    ),
   ),
 
-  SCREENSHOT_DELETE(
+  DELETE_SCREENSHOT(
     listOf(ActivityType.SCREENSHOT_DELETE, ActivityType.COMPLEX_EDIT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Screenshot::class,
         revisionTypes = listOf(RevisionType.DEL),
-        countInView = true,
+      ).or(
+        DefaultMatcher(
+          entityClass = KeyScreenshotReference::class,
+          revisionTypes = listOf(RevisionType.DEL),
+        ),
       ),
-      GroupEntityModificationDefinition(
-        entityClass = KeyScreenshotReference::class,
-        revisionTypes = listOf(RevisionType.DEL),
-      ),
-    ),
   ),
 
-  SCREENSHOT_ADD(
+  ADD_SCREENSHOT(
     listOf(ActivityType.SCREENSHOT_ADD, ActivityType.COMPLEX_EDIT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Screenshot::class,
         revisionTypes = listOf(RevisionType.ADD),
-        countInView = true,
+      ).or(
+        DefaultMatcher(
+          entityClass = KeyScreenshotReference::class,
+          revisionTypes = listOf(RevisionType.ADD),
+        ),
       ),
-      GroupEntityModificationDefinition(
-        entityClass = KeyScreenshotReference::class,
-        revisionTypes = listOf(RevisionType.ADD),
-      ),
-    ),
   ),
 
-  KEY_TAGS_EDIT(
+  EDIT_KEY_TAGS(
     listOf(
       ActivityType.KEY_TAGS_EDIT,
       ActivityType.COMPLEX_EDIT,
       ActivityType.BATCH_TAG_KEYS,
       ActivityType.BATCH_UNTAG_KEYS,
     ),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = KeyMeta::class,
-        revisionTypes = listOf(RevisionType.MOD),
+        revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(KeyMeta::tags),
-        countInView = true,
+      ).or(
+        DefaultMatcher(
+          entityClass = Tag::class,
+          revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
+        ),
       ),
-      GroupEntityModificationDefinition(
-        entityClass = Tag::class,
-        revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
-        countInView = true,
-      ),
-    ),
   ),
 
-  KEY_NAME_EDIT(
+  EDIT_KEY_NAME(
     listOf(ActivityType.KEY_NAME_EDIT, ActivityType.COMPLEX_EDIT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Key::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Key::name, Key::namespace),
-        countInView = true,
+      ).or(
+        DefaultMatcher(
+          entityClass = Namespace::class,
+          revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
+        ),
       ),
-      GroupEntityModificationDefinition(
-        entityClass = Namespace::class,
-        revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
-        countInView = true,
-      ),
-    ),
   ),
 
-  KEY_DELETE(
+  DELETE_KEY(
     listOf(ActivityType.KEY_DELETE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Key::class,
         revisionTypes = listOf(RevisionType.DEL),
-        countInView = true,
       ),
-    ),
   ),
 
-  KEY_CREATE(
+  CREATE_KEY(
     listOf(ActivityType.CREATE_KEY),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Key::class,
         revisionTypes = listOf(RevisionType.ADD),
-        countInView = true,
+      ).or(
+        DefaultMatcher(
+          entityClass = KeyMeta::class,
+          revisionTypes = listOf(RevisionType.ADD),
+        ),
+      ).or(
+        DefaultMatcher(
+          Translation::class,
+          listOf(RevisionType.ADD),
+        ),
       ),
-      GroupEntityModificationDefinition(
-        entityClass = KeyMeta::class,
-        revisionTypes = listOf(RevisionType.ADD),
-      ),
-    ),
+    modelProviderFactoryClass = CreateKeyGroupModelProvider::class,
   ),
 
   IMPORT(
     listOf(ActivityType.IMPORT),
-    listOf(
-      GroupEntityModificationDefinition(
-        entityClass = Key::class,
-        revisionTypes = listOf(RevisionType.ADD),
-        countInView = true,
-      ),
-      GroupEntityModificationDefinition(
-        entityClass = KeyMeta::class,
-        revisionTypes = listOf(RevisionType.ADD, RevisionType.MOD),
-        modificationProps = listOf(KeyMeta::custom, KeyMeta::description),
-      ),
-      GroupEntityModificationDefinition(
-        entityClass = Translation::class,
-        revisionTypes = listOf(RevisionType.ADD),
-        countInView = true,
-      ),
-      GroupEntityModificationDefinition(
-        entityClass = Namespace::class,
-        revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
-      ),
-    ),
   ),
 
   CREATE_LANGUAGE(
     listOf(ActivityType.CREATE_LANGUAGE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Language::class,
         revisionTypes = listOf(RevisionType.ADD),
-        countInView = true,
       ),
-    ),
   ),
 
   EDIT_LANGUAGE(
     listOf(ActivityType.EDIT_LANGUAGE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Language::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Language::name, Language::tag, Language::originalName, Language::flagEmoji),
-        countInView = true,
       ),
-    ),
   ),
 
   DELETE_LANGUAGE(
     listOf(ActivityType.DELETE_LANGUAGE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Language::class,
         revisionTypes = listOf(RevisionType.DEL),
-        countInView = true,
       ),
-    ),
   ),
 
   CREATE_PROJECT(
     listOf(ActivityType.CREATE_PROJECT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Project::class,
         revisionTypes = listOf(RevisionType.ADD),
-        countInView = true,
       ),
-    ),
-    modelProviderFactory = { ac -> CreateProjectGroupModelProvider(ac) },
+    modelProviderFactoryClass = CreateProjectGroupModelProvider::class,
   ),
 
   EDIT_PROJECT(
     listOf(ActivityType.EDIT_PROJECT),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Project::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps =
@@ -325,61 +278,52 @@ enum class ActivityGroupType(
             Project::avatarHash,
           ),
       ),
-    ),
   ),
 
   NAMESPACE_EDIT(
     listOf(ActivityType.NAMESPACE_EDIT, ActivityType.BATCH_SET_KEYS_NAMESPACE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Namespace::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Namespace::name),
-        countInView = true,
       ),
-    ),
   ),
 
   BATCH_PRE_TRANSLATE_BY_TM(
     listOf(ActivityType.BATCH_PRE_TRANSLATE_BY_TM),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
-        countInView = true,
       ),
-    ),
   ),
 
   BATCH_MACHINE_TRANSLATE(
     listOf(ActivityType.BATCH_MACHINE_TRANSLATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
-        countInView = true,
       ),
-    ),
   ),
 
   AUTO_TRANSLATE(
     listOf(ActivityType.AUTO_TRANSLATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
-        countInView = true,
       ),
-    ),
   ),
 
   BATCH_CLEAR_TRANSLATIONS(
     listOf(ActivityType.BATCH_CLEAR_TRANSLATIONS),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
@@ -390,122 +334,129 @@ enum class ActivityGroupType(
             Translation::outdated to false,
             Translation::auto to false,
           ),
-        countInView = true,
       ),
-    ),
   ),
 
   BATCH_COPY_TRANSLATIONS(
     listOf(ActivityType.BATCH_COPY_TRANSLATIONS),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD, RevisionType.ADD),
         modificationProps = listOf(Translation::state, Translation::text, Translation::outdated, Translation::auto),
-        countInView = true,
       ),
-    ),
   ),
 
   BATCH_SET_TRANSLATION_STATE(
     listOf(ActivityType.BATCH_SET_TRANSLATION_STATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = Translation::class,
         revisionTypes = listOf(RevisionType.MOD),
         modificationProps = listOf(Translation::state, Translation::outdated, Translation::auto),
-        countInView = true,
       ),
-    ),
   ),
 
   CONTENT_DELIVERY_CONFIG_CREATE(
     listOf(ActivityType.CONTENT_DELIVERY_CONFIG_CREATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = ContentDeliveryConfig::class,
         revisionTypes = listOf(RevisionType.ADD),
       ),
-    ),
   ),
 
   CONTENT_DELIVERY_CONFIG_UPDATE(
     listOf(ActivityType.CONTENT_DELIVERY_CONFIG_UPDATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = ContentDeliveryConfig::class,
         revisionTypes = listOf(RevisionType.MOD),
       ),
-    ),
   ),
 
   CONTENT_DELIVERY_CONFIG_DELETE(
     listOf(ActivityType.CONTENT_DELIVERY_CONFIG_UPDATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = ContentDeliveryConfig::class,
         revisionTypes = listOf(RevisionType.DEL),
       ),
-    ),
   ),
 
   CONTENT_STORAGE_CREATE(
     listOf(ActivityType.CONTENT_STORAGE_CREATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = ContentStorage::class,
         revisionTypes = listOf(RevisionType.ADD),
       ),
-    ),
   ),
 
   CONTENT_STORAGE_UPDATE(
     listOf(ActivityType.CONTENT_STORAGE_UPDATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = ContentStorage::class,
         revisionTypes = listOf(RevisionType.MOD),
       ),
-    ),
   ),
 
   CONTENT_STORAGE_DELETE(
     listOf(ActivityType.CONTENT_STORAGE_DELETE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = ContentStorage::class,
         revisionTypes = listOf(RevisionType.DEL),
       ),
-    ),
   ),
 
   WEBHOOK_CONFIG_CREATE(
     listOf(ActivityType.WEBHOOK_CONFIG_CREATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = WebhookConfig::class,
         revisionTypes = listOf(RevisionType.ADD),
       ),
-    ),
   ),
 
   WEBHOOK_CONFIG_UPDATE(
     listOf(ActivityType.WEBHOOK_CONFIG_CREATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = WebhookConfig::class,
         revisionTypes = listOf(RevisionType.MOD),
       ),
-    ),
   ),
 
   WEBHOOK_CONFIG_DELETE(
     listOf(ActivityType.WEBHOOK_CONFIG_CREATE),
-    listOf(
-      GroupEntityModificationDefinition(
+    matcher =
+      DefaultMatcher(
         entityClass = WebhookConfig::class,
         revisionTypes = listOf(RevisionType.DEL),
       ),
-    ),
   ),
+
+  ;
+
+  fun getProvidingModelTypes(): Pair<KClass<*>?, KClass<*>?>? {
+    val arguments =
+      modelProviderFactoryClass
+        ?.supertypes
+        ?.firstOrNull()
+        ?.arguments ?: return null
+
+    val groupType =
+      arguments.firstOrNull()
+        ?.type
+        ?.classifier as? KClass<*>
+
+    val itemType =
+      arguments[1]
+        .type
+        ?.classifier as? KClass<*>
+
+    return groupType to itemType
+  }
 }

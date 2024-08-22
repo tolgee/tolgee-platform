@@ -42,7 +42,7 @@ class ActivityModifiedEntity(
   var modifications: MutableMap<String, PropertyModification> = mutableMapOf()
 
   /**
-   * Data, which are discribing the entity, but are not modified by the change
+   * Data, which are describing the entity, but are not modified by the change
    */
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)

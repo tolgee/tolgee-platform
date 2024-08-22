@@ -1,5 +1,13 @@
 package io.tolgee.activity.groups
 
-interface GroupModelProvider<View> {
-  fun provide(groupIds: List<Long>): Map<Long, View>
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+
+interface GroupModelProvider<GroupModel, ViewItem> {
+  fun provideGroupModel(groupIds: List<Long>): Map<Long, GroupModel>
+
+  fun provideItemModel(
+    groupId: Long,
+    pageable: Pageable,
+  ): Page<ViewItem>
 }

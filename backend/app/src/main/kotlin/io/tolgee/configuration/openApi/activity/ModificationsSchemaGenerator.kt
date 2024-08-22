@@ -1,7 +1,6 @@
 package io.tolgee.configuration.openApi.activity
 
-import io.swagger.v3.core.converter.AnnotatedType
-import io.swagger.v3.core.converter.ModelConverters
+import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.media.Schema
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedProp
@@ -14,12 +13,14 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 
-class ModificationsSchemaGenerator {
+class ModificationsSchemaGenerator(
+  private val openAPI: OpenAPI,
+) {
   fun getModificationSchema(
     entityClass: KClass<*>,
     definition: EntityModificationTypeDefinition<*>,
   ): Schema<*> {
-    val schema = getEntitySchema(entityClass)
+    val schema = getEntitySchema(openAPI, entityClass)
     schema.required = emptyList()
     val properties = getProperties(entityClass, schema)
 
@@ -50,7 +51,7 @@ class ModificationsSchemaGenerator {
   ): Map<String, Schema<*>> {
     val loggedProps = getAllLoggedProps(entityClass)
     val simplePropNames = loggedProps.getSimpleProps().map { it.name }
-    val schemaSimpleProps = schema.properties.filterKeys { it in simplePropNames }
+    val schemaSimpleProps = schema.properties?.filterKeys { it in simplePropNames } ?: emptyMap()
 
     val singlePropChangeMap =
       schemaSimpleProps.map { (name, prop) ->
@@ -68,10 +69,10 @@ class ModificationsSchemaGenerator {
 
   private fun getModificationSchemaForComplexProp(it: KClass<*>): Schema<*> {
     val describingProps = it.getDescriptionProps().map { it.name }
-    val entitySchema = getEntitySchema(it)
+    val entitySchema = getEntitySchema(openAPI, it)
     val schemaDescribingProps =
       entitySchema.properties?.filterKeys { propertyName -> propertyName in describingProps }
-    descriptionSchema.properties["data"]?.let { dataProp ->
+    descriptionSchema.properties?.get("data")?.let { dataProp ->
       dataProp.properties = schemaDescribingProps
       dataProp.additionalProperties = null
     }
@@ -85,11 +86,6 @@ class ModificationsSchemaGenerator {
     changeSchema.addProperty("new", this)
     return changeSchema
   }
-
-  private fun getEntitySchema(entityClass: KClass<*>): Schema<*> =
-    ModelConverters.getInstance()
-      .readAllAsResolvedSchema(AnnotatedType(entityClass.java))
-      .schema ?: Schema<Any>()
 
   private fun getAllLoggedProps(entityClass: KClass<*>): List<KProperty1<out Any, *>> {
     return entityClass.memberProperties
@@ -118,7 +114,7 @@ class ModificationsSchemaGenerator {
   }
 
   private val descriptionSchema by lazy {
-    getEntitySchema(EntityDescription::class)
+    getEntitySchema(openAPI, EntityDescription::class)
   }
 
   private fun KClassifier?.isSimpleType(): Boolean {

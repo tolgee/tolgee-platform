@@ -1,15 +1,15 @@
 package io.tolgee.activity.groups
 
-import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher
-import io.tolgee.activity.groups.matchers.EqualsValueMatcher
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.api.SimpleUserAccount
 import io.tolgee.dtos.queryResults.ActivityGroupView
-import org.jooq.Condition
+import io.tolgee.dtos.request.ActivityGroupFilters
 import org.jooq.DSLContext
-import org.jooq.Field
 import org.jooq.JSON
 import org.jooq.impl.DSL
 import org.jooq.impl.DSL.field
+import org.jooq.impl.DSL.jsonArrayAgg
 import org.jooq.impl.DSL.max
 import org.jooq.impl.DSL.table
 import org.springframework.context.ApplicationContext
@@ -17,10 +17,14 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import java.util.*
 
-class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applicationContext: ApplicationContext) {
+class ActivityGroupsProvider(
+  val projectId: Long,
+  val pageable: Pageable,
+  val filters: ActivityGroupFilters,
+  applicationContext: ApplicationContext,
+) {
   fun get(): PageImpl<ActivityGroupView> {
     page.forEach {
-      it.counts = counts[it.id] ?: emptyMap()
       it.data = dataViews[it.id]
     }
 
@@ -29,7 +33,25 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
 
   private val page by lazy {
     val from = table("activity_group").`as`("ag")
-    val where = field("ag.project_id").eq(projectId)
+    var where = field("ag.project_id").eq(projectId)
+
+    var having = DSL.noCondition()
+
+    val lmeJsonArrayAggField = jsonArrayAgg(field("lme.entity_id")).`as`("lme_entity_ids")
+    val ldeJsonArrayAggField = jsonArrayAgg(field("lde.entity_id")).`as`("lde_entity_ids")
+
+    if (filters.filterType != null) {
+      where = where.and(field("ag.type").eq(filters.filterType!!.name))
+    }
+
+    if (filters.filterLanguageIdIn != null) {
+      val languageIdsJson = JSON.json(objectMapper.writeValueAsString(filters.filterLanguageIdIn))
+      having = lmeJsonArrayAggField.contains(languageIdsJson).and(ldeJsonArrayAggField.contains(languageIdsJson))
+    }
+
+    if (filters.filterAuthorUserIdIn != null) {
+      where = where.and(field("ag.author_id").`in`(filters.filterAuthorUserIdIn))
+    }
 
     val count = jooqContext.selectCount().from(from).where(where).fetchOne(0, Long::class.java)!!
 
@@ -44,6 +66,8 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
         field("ua.name"),
         field("ua.avatar_hash"),
         field("ua.deleted_at").isNotNull,
+        lmeJsonArrayAggField,
+        ldeJsonArrayAggField,
       )
         .from(from)
         .leftJoin(table("activity_revision_activity_groups").`as`("arag"))
@@ -51,8 +75,16 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
         .leftJoin(table("activity_revision").`as`("ar"))
         .on(field("ar.id").eq(field("arag.activity_revisions_id")))
         .leftJoin(table("user_account").`as`("ua")).on(field("ag.author_id").eq(field("ua.id")))
+        .leftJoin(table("activity_modified_entity").`as`("lme")).on(
+          field("ar.id").eq(field("lme.activity_revision_id"))
+            .and(field("lme.entity_class").eq("Language")),
+        ).leftJoin(table("activity_describing_entity").`as`("lde")).on(
+          field("ar.id").eq(field("lde.activity_revision_id"))
+            .and(field("lde.entity_class").eq("Language")),
+        )
         .where(where)
         .groupBy(field("ag.id"), field("ua.id"))
+        .having(having)
         .orderBy(max(field("ar.timestamp")).desc())
         .limit(pageable.pageSize)
         .offset(pageable.offset).fetch().map {
@@ -60,107 +92,43 @@ class ActivityGroupsProvider(val projectId: Long, val pageable: Pageable, applic
             it[0] as Long,
             ActivityGroupType.valueOf(it[1] as String),
             it[3] as Date,
-            author = object : SimpleUserAccount {
-              override val id: Long = it[4] as Long
-              override val username: String = it[5] as String
-              override val name: String = it[6] as String
-              override val avatarHash: String? = it[7] as String?
-              override val deleted: Boolean = it[8] as Boolean
-            }
+            author =
+              object : SimpleUserAccount {
+                override val id: Long = it[4] as Long
+                override val username: String = it[5] as String
+                override val name: String = it[6] as String
+                override val avatarHash: String? = it[7] as String?
+                override val deleted: Boolean = it[8] as Boolean
+              },
+            mentionedLanguageIds = parseMentionedLanguageIds(it),
           )
         }
 
     PageImpl(result, pageable, count)
   }
 
-  private val counts by lazy {
-    byType.flatMap { (type, items) ->
-      getCounts(type, items).map { it.key to it.value }
-    }.toMap()
+  private fun parseMentionedLanguageIds(it: org.jooq.Record): List<Long> {
+    val lmeIds = it.getJsonValue<List<Long?>>("lme_entity_ids") ?: emptyList()
+    val ldeIds = it.getJsonValue<List<Long?>>("lde_entity_ids") ?: emptyList()
+    return (lmeIds + ldeIds).filterNotNull().toSet().toList()
+  }
+
+  private inline fun <reified T : Any> org.jooq.Record.getJsonValue(fieldName: String): T? {
+    val string = this.getValue(fieldName, String::class.java) ?: return null
+    return objectMapper.readValue(string)
   }
 
   private val dataViews by lazy {
     byType.flatMap { (type, items) ->
-      val provider = type.modelProviderFactory?.invoke(applicationContext)
-      provider?.provide(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
+      val provider =
+        type.modelProviderFactoryClass?.let { applicationContext.getBean(it.java) }
+      provider?.provideGroupModel(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
     }.toMap()
   }
 
   private val byType by lazy { page.groupBy { it.type } }
 
-  private fun getModificationCondition(definition: GroupEntityModificationDefinition<*>): Condition {
-    return field("ame.entity_class").eq(definition.entityClass.simpleName)
-      .and(field("ame.revision_type").`in`(definition.revisionTypes.map { it.ordinal }))
-      .also {
-        if (definition.modificationProps != null) {
-          it.and("array(select jsonb_object_keys(ame.modifications)) && ${allowedModString(definition)}")
-        }
-      }.also {
-        it.and(getAllowedValuesCondition(definition))
-      }
-      .also {
-        it.and(getDeniedValuesCondition(definition))
-      }
-  }
-
-  private fun getAllowedValuesCondition(definition: GroupEntityModificationDefinition<*>): Condition {
-    val allowedValues = definition.allowedValues ?: return DSL.noCondition()
-    val conditions = getValueMatcherConditions(allowedValues)
-    return DSL.and(conditions)
-  }
-
-  private fun getDeniedValuesCondition(definition: GroupEntityModificationDefinition<*>): Condition {
-    val allowedValues = definition.allowedValues ?: return DSL.noCondition()
-    val conditions = getValueMatcherConditions(allowedValues)
-    return DSL.not(DSL.or(conditions))
-  }
-
-  private fun getValueMatcherConditions(values: Map<out Any, Any?>): List<Condition> {
-    return values.map {
-      val matcher =
-        when (val requiredValue = it.value) {
-          is ActivityGroupValueMatcher -> requiredValue
-          else -> EqualsValueMatcher(requiredValue)
-        }
-
-      @Suppress("UNCHECKED_CAST")
-      matcher.createRootSqlCondition(field("ame.modifications") as Field<JSON>)
-    }
-  }
-
-  private fun allowedModString(definition: GroupEntityModificationDefinition<*>): String {
-    return "{${definition.modificationProps?.joinToString(",")}}"
-  }
-
-  private fun getCounts(
-    type: ActivityGroupType,
-    items: List<ActivityGroupView>,
-  ): MutableMap<Long, MutableMap<String, Long>> {
-    val groupIds = items.map { it.id }
-    val result = mutableMapOf<Long, MutableMap<String, Long>>()
-    type.modifications
-      .filter { it.countInView }
-      .forEach { definition ->
-        val queryResult =
-          jooqContext
-            .select(field("arag.activity_groups_id"), DSL.count())
-            .from(table("activity_modified_entity").`as`("ame"))
-            .join(table("activity_revision").`as`("ar"))
-            .on(field("ar.id").eq(field("ame.activity_revision_id")))
-            .join(table("activity_revision_activity_groups").`as`("arag"))
-            .on(field("ar.id").eq(field("arag.activity_revisions_id")))
-            .where(field("arag.activity_groups_id").`in`(groupIds).and(getModificationCondition(definition)))
-            .groupBy(field("arag.activity_groups_id")).fetch()
-        queryResult.forEach {
-          val groupMap =
-            result.computeIfAbsent(it[0] as Long) {
-              mutableMapOf()
-            }
-          groupMap[definition.entityClass.simpleName!!] = (it[1] as Int).toLong()
-        }
-      }
-    return result
-  }
-
   private val jooqContext = applicationContext.getBean(DSLContext::class.java)
+
+  private val objectMapper = applicationContext.getBean(ObjectMapper::class.java)
 }

@@ -78,7 +78,7 @@ export type FieldOptions = boolean | FieldOptionsObj;
 export type LanguageReferenceType = {
   tag: string;
   name: string;
-  flagEmoji: string;
+  flagEmoji?: string;
 };
 
 export type KeyReferenceData = {

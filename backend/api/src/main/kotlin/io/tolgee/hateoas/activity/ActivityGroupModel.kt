@@ -13,6 +13,6 @@ class ActivityGroupModel(
   val timestamp: Long,
   val type: ActivityGroupType,
   val author: SimpleUserAccountModel?,
-  val counts: Map<String, Long>?,
   val data: Any?,
+  var mentionedLanguageIds: List<Long>,
 ) : RepresentationModel<ActivityGroupModel>(), Serializable
