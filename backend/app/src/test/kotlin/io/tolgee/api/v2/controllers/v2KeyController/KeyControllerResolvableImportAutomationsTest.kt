@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions
@@ -48,10 +49,12 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
     val keyName = "keyWith2Translations"
     saveTestData()
     doImport(keyName)
-    val flag =
+    val translation =
       keyService.get(testData.projectBuilder.self.id, keyName, null)
-        .getLangTranslation(testData.secondLanguage).outdated
-    Assertions.assertThat(flag).isTrue
+        .getLangTranslation(testData.secondLanguage)
+    Assertions.assertThat(translation.outdated).isTrue
+
+    Assertions.assertThat(translation.state).isEqualTo(TranslationState.TRANSLATED)
   }
 
   private fun assertThatKeyAutoTranslated(keyName: String) {

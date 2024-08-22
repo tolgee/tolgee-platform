@@ -4,6 +4,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 
 class ResolvableImportTestData : BaseTestData() {
   lateinit var key1and2Screenshot: Screenshot
@@ -44,6 +45,7 @@ class ResolvableImportTestData : BaseTestData() {
           this.language = secondLanguage
           this.text = "existing translation"
           this.outdated = false
+          this.state = TranslationState.REVIEWED
         }
       }
 
