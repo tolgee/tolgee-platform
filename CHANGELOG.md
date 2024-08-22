@@ -1,3 +1,10 @@
+## [3.71.2](https://github.com/tolgee/tolgee-platform/compare/v3.71.1...v3.71.2) (2024-08-22)
+
+
+### Bug Fixes
+
+* Import > Constraint violation when empty code reference ([#2440](https://github.com/tolgee/tolgee-platform/issues/2440)) ([f949d73](https://github.com/tolgee/tolgee-platform/commit/f949d7336aaa80e5276ef6a0e10b4979dde60092))
+
 ## [3.71.1](https://github.com/tolgee/tolgee-platform/compare/v3.71.0...v3.71.1) (2024-08-12)
 
 
