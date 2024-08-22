@@ -142,6 +142,9 @@ data class FileProcessorContext(
     path: String,
     line: Long? = null,
   ) {
+    if (path.isEmpty()) {
+      return
+    }
     val keyMeta = getOrCreateKeyMeta(key)
     keyMeta.addCodeReference {
       this.path = path
