@@ -8,12 +8,7 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.formats.PluralForms
-import io.tolgee.formats.StringIsNotPluralException
-import io.tolgee.formats.convertToIcuPlural
-import io.tolgee.formats.getPluralForms
-import io.tolgee.formats.normalizePlurals
-import io.tolgee.formats.optimizePluralForms
+import io.tolgee.formats.*
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
@@ -396,6 +391,10 @@ class TranslationService(
 
   fun setOutdatedBatch(keyIds: List<Long>) {
     translationRepository.setOutdated(keyIds)
+  }
+
+  fun setUnreviewedStateBatch(keyIds: List<Long>) {
+    translationRepository.setUnreviewState(keyIds)
   }
 
   fun get(keyLanguagesMap: Map<Key, List<LanguageDto>>): List<Translation> {
