@@ -5,15 +5,19 @@ import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.test.annotation.DirtiesContext
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@ContextRecreatingTest
 class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
-    private const val TRANSLATED_WITH_GOOGLE_RESPONSE = "Translated with Google"
+    private const val TRANSLATED_WITH_GOOGLE_RESPONSE = "changed translated with GOOGLE from en to de"
   }
 
   lateinit var testData: ResolvableImportTestData
@@ -21,7 +25,7 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
   @BeforeEach
   fun setup() {
     testData = ResolvableImportTestData()
-    initMachineTranslationMocks(1_000)
+    initMachineTranslationMocks()
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
     this.projectSupplier = { testData.projectBuilder.self }
   }
