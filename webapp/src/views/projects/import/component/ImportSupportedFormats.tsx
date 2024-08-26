@@ -55,6 +55,12 @@ const FORMATS = [
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
   { name: 'i18next', logo: <I18nextLogo /> },
+  {
+    name: 'CSV',
+    logo: <TolgeeLogo />,
+    logoHeight: '24px',
+    logoWidth: '24px',
+  },
 ];
 
 export const ImportSupportedFormats = () => {

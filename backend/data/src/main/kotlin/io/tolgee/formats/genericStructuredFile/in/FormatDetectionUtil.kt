@@ -36,6 +36,7 @@ object FormatDetectionUtil {
     when (data) {
       is Map<*, *> -> data.forEach { (_, value) -> processMapRecursive(value, regex, hits, total) }
       is List<*> -> data.forEach { item -> processMapRecursive(item, regex, hits, total) }
+      is Array<*> -> data.forEach { item -> processMapRecursive(item, regex, hits, total) }
       else -> {
         if (data is String) {
           val count = regex.findAll(data).count()
