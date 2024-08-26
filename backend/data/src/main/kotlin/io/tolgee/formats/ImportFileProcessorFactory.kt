@@ -6,6 +6,7 @@ import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
+import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
 import io.tolgee.formats.importCommon.ImportFileFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
@@ -60,6 +61,7 @@ class ImportFileProcessorFactory(
       ImportFileFormat.XML -> AndroidStringsXmlProcessor(context)
       ImportFileFormat.ARB -> FlutterArbFileProcessor(context, objectMapper)
       ImportFileFormat.YAML -> YamlFileProcessor(context, yamlObjectMapper)
+      ImportFileFormat.CSV -> CsvFileProcessor(context)
     }
   }
 

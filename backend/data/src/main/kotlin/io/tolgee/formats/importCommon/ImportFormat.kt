@@ -13,6 +13,27 @@ enum class ImportFormat(
   val messageConvertorOrNull: ImportMessageConvertor? = null,
   val rootKeyIsLanguageTag: Boolean = false,
 ) {
+  CSV_ICU(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null
+      ),
+  ),
+  CSV_JAVA(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
+  CSV_PHP(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { PhpToIcuPlaceholderConvertor() },
+  ),
+  CSV_RUBY(
+    ImportFileFormat.CSV,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
+  ),
+
   JSON_ICU(
     ImportFileFormat.JSON,
     messageConvertorOrNull =

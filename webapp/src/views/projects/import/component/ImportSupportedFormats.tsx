@@ -53,6 +53,12 @@ const FORMATS = [
   { name: 'Android XML', logo: <AndroidLogo /> },
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
+  {
+    name: 'CSV',
+    logo: <TolgeeLogo />,
+    logoHeight: '24px',
+    logoWidth: '24px',
+  },
 ];
 
 export const ImportSupportedFormats = () => {

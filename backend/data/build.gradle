@@ -171,6 +171,7 @@ dependencies {
     implementation libs.jacksonKotlin
     implementation("org.apache.commons:commons-configuration2:2.10.1")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
+    implementation("com.opencsv:opencsv")
 
     /**
      * Google translation API
