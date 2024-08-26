@@ -393,10 +393,6 @@ class TranslationService(
     translationRepository.setOutdated(keyIds)
   }
 
-  fun setUnreviewedStateBatch(keyIds: List<Long>) {
-    translationRepository.setUnreviewState(keyIds)
-  }
-
   fun get(keyLanguagesMap: Map<Key, List<LanguageDto>>): List<Translation> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createQuery(Translation::class.java)

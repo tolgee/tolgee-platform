@@ -153,22 +153,6 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
-    update Translation t
-    set t.state = TranslationState.TRANSLATED
-    where t.id in (
-      select t.id
-      from Translation t
-      join t.key k on k.id in :keyIds
-      join k.project p
-      where t.language.id <> p.baseLanguage.id and t.state = TranslationState.REVIEWED
-    )
-  """,
-  )
-  @Modifying
-  fun setUnreviewState(keyIds: List<Long>)
-
-  @Query(
-    """
     from Translation t
     join t.language l on l.tag in :languageTags
     where t.key.id in :keys

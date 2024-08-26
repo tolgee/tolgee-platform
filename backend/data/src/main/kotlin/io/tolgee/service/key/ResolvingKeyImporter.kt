@@ -147,7 +147,6 @@ class ResolvingKeyImporter(
 
   private fun List<TranslationToModify>.save() {
     translationService.setOutdatedBatch(outdatedKeys)
-    translationService.setUnreviewedStateBatch(outdatedKeys)
 
     this.forEach {
       translationService.setTranslation(it.translation, it.text)
