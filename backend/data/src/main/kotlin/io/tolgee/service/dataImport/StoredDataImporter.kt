@@ -100,7 +100,7 @@ class StoredDataImporter(
     result
   }
 
-  fun doImport() {
+  fun doImport() : Collection<Key> {
     reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
@@ -136,6 +136,8 @@ class StoredDataImporter(
     deleteOtherKeys()
 
     entityManager.flushAndClear()
+
+    return keyEntitiesToSave
   }
 
   private fun tagNewKeys() {

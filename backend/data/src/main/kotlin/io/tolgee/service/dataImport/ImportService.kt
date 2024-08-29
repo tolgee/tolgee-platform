@@ -2,6 +2,8 @@ package io.tolgee.service.dataImport
 
 import io.sentry.Sentry
 import io.tolgee.api.IImportSettings
+import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.request.AutoTranslationRequest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.reporting.BusinessEventPublisher
@@ -26,9 +28,11 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
+import io.tolgee.model.key.Key
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
+import io.tolgee.repository.LanguageRepository
 import io.tolgee.repository.dataImport.ImportFileRepository
 import io.tolgee.repository.dataImport.ImportKeyRepository
 import io.tolgee.repository.dataImport.ImportLanguageRepository
@@ -37,6 +41,7 @@ import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -73,6 +78,10 @@ class ImportService(
   private val jdbcTemplate: JdbcTemplate,
   @Lazy
   private val importSettingsService: ImportSettingsService,
+  @Lazy
+  private val autoTranslationService: AutoTranslationService,
+  @Lazy
+  private val languageRepository: LanguageRepository,
 ) {
   @Transactional
   fun addFiles(
@@ -153,7 +162,7 @@ class ImportService(
 
     entityManager.clear()
 
-    StoredDataImporter(
+    val keyEntitiesToSave = StoredDataImporter(
       applicationContext,
       import,
       params.forceMode,
@@ -162,6 +171,40 @@ class ImportService(
       _importDataManager = fileProcessor.importDataManager,
       isSingleStepImport = true,
     ).doImport()
+
+    autoTranslateSingleStepImport(project, keyEntitiesToSave);
+  }
+
+  fun autoTranslateSingleStepImport(project : Project, keyEntitiesToSave : Collection<Key> ) {
+    // this doesn't have any effect:
+    // -> publishImportBusinessEvent(import.project.id, import.author.id)
+
+    // Determine if we should auto-translate at all.
+    // See: AutoTranslationEventHandler.shouldRunTheOperation()
+    val configs = autoTranslationService.getConfigs(project)
+    if (!configs.any { it.enableForImport }) return
+    if (!configs.any { it.usingPrimaryMtService } && !configs.any { it.usingTm }) return
+
+    // Find the project languages
+    // -> val importLanguages = project.languages             # exception: NoSession
+    // -> val importLanguages = this.findLanguages(import)    # empty list
+    val importLanguages = languageRepository.findAllByProjectId(project.id);
+
+    // Produce all combinations of imported-keys and target-languages
+    val autoTranslationRequest = AutoTranslationRequest()
+    autoTranslationRequest.target = keyEntitiesToSave.stream().flatMap { key ->
+      importLanguages.stream()
+        .filter { lang -> lang.id != project.baseLanguage?.id }
+        .map { lang -> BatchTranslationTargetItem(key.id, lang.id) }
+    }.toList();
+
+    if(autoTranslationRequest.target.isNotEmpty()) {
+      autoTranslationService.autoTranslateViaBatchJob(
+        project,
+        autoTranslationRequest,
+        false // only hidden for small jobs
+      )
+    }
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
