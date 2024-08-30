@@ -1,12 +1,14 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SingleStepImportTestData
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -216,12 +218,21 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `imports xliff file`() {
     saveAndPrepare()
-    val fileName = "en.xliff"
-    performImport(
-      projectId = testData.project.id,
-      listOf(Pair(fileName, appleXliffFile)),
-      getFileMappings(fileName, format = "APPLE_XLIFF", languageTag = "en"),
-    ).andIsOk
+    importXliffFile()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `triggers auto translation`() {
+    testData.projectBuilder.addAutoTranslationConfig {
+      enableForImport = true
+      usingPrimaryMtService = true
+    }
+
+    saveAndPrepare()
+    importXliffFile()
+
+    assertAutoTranslationTriggered()
   }
 
   @Test
@@ -278,6 +289,20 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
         params,
       ).andIsForbidden
     }
+  }
+
+  private fun importXliffFile() {
+    val fileName = "en.xliff"
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, appleXliffFile)),
+      getFileMappings(fileName, format = "APPLE_XLIFF", languageTag = "en"),
+    ).andIsOk
+  }
+
+  private fun assertAutoTranslationTriggered() {
+    val job = entityManager.createQuery("from BatchJob bj", BatchJob::class.java).singleResult
+    job.type.assert.isEqualTo(BatchJobType.AUTO_TRANSLATE)
   }
 
   private fun assertXliffDataImported() {
