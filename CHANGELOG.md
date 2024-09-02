@@ -1,3 +1,10 @@
+## [3.71.3](https://github.com/tolgee/tolgee-platform/compare/v3.71.2...v3.71.3) (2024-09-02)
+
+
+### Bug Fixes
+
+* Auto translation triggering on Single Step Import ([#2447](https://github.com/tolgee/tolgee-platform/issues/2447)) ([032007b](https://github.com/tolgee/tolgee-platform/commit/032007b407bb64ecfda16b69ea939ee1a49ab7af))
+
 ## [3.71.2](https://github.com/tolgee/tolgee-platform/compare/v3.71.1...v3.71.2) (2024-08-22)
 
 
