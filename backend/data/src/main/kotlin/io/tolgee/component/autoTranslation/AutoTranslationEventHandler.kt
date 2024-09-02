@@ -38,18 +38,20 @@ class AutoTranslationEventHandler(
       return
     }
 
-    if (event.activityRevision.modifiedEntities.any { it.entityClass == Translation::class.simpleName }) {
-      autoTranslationService.autoTranslateViaBatchJob(
-        projectId = projectId,
-        keyIds = keyIds,
-        isBatch = true,
-        baseLanguageId = baseLanguageId ?: return,
-        isHiddenJob = event.isLowVolumeActivity(),
-      )
-    }
+    autoTranslationService.autoTranslateViaBatchJob(
+      projectId = projectId,
+      keyIds = keyIds,
+      isBatch = true,
+      baseLanguageId = baseLanguageId ?: return,
+      isHiddenJob = event.isLowVolumeActivity(),
+    )
   }
 
   private fun shouldRunTheOperation(): Boolean {
+    if (event.activityRevision.modifiedEntities.none { it.entityClass == Translation::class.simpleName }) {
+      return false
+    }
+
     val configs =
       autoTranslationService.getConfigs(
         entityManager.getReference(Project::class.java, projectId),
