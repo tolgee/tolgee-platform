@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
+import { Button, Link as MuiLink, styled, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
@@ -63,6 +63,14 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                   </Typography>
                 </MuiLink>
               )}
+            </Box>
+
+            <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>
+              <MuiLink to={LINKS.SSO_LOGIN.build()} component={Link}>
+                <Typography variant="body2">
+                  <T keyName="login_sso" />
+                </Typography>
+              </MuiLink>
             </Box>
 
             {oAuthServices.length > 0 && <Box height="0px" mt={5} />}

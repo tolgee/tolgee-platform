@@ -54,6 +54,16 @@ export const useAuthService = (
     method: 'get',
   });
 
+  const authorizeOpenIdLoadable = useApiMutation({
+    url: '/v2/oauth2/callback/{registrationId}',
+    method: 'get',
+  });
+
+  const openIdAuthUrlLoadable = useApiMutation({
+    url: '/v2/oauth2/callback/get-authentication-url',
+    method: 'post',
+  });
+
   const acceptInvitationLoadable = useApiMutation({
     url: '/v2/invitations/{code}/accept',
     method: 'get',
@@ -186,6 +196,43 @@ export const useAuthService = (
       setInvitationCode(undefined);
       await handleAfterLogin(response!);
     },
+
+    async loginWithOAuthCodeOpenId(registrationId: string, code: string) {
+      const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({
+        [PARAMS.SERVICE_TYPE]: registrationId,
+      });
+      const response = await authorizeOpenIdLoadable.mutateAsync(
+          {
+            path: { registrationId: registrationId },
+            query: {
+              code,
+              redirect_uri: redirectUri,
+              state: "random_state",
+            },
+          },
+          {
+            onError: (error) => {
+              console.log(error);
+              messageService.error(<TranslatedError code={error.code!} />);
+            },
+          }
+      );
+      await handleAfterLogin(response!);
+    },
+
+    async getSsoAuthLinkByDomain(domain: string, state: string) {
+      return await openIdAuthUrlLoadable.mutateAsync(
+        {
+          content: { 'application/json': { domain, state } },
+        },
+        {
+          onError: (error) => {
+            messageService.error(<TranslatedError code={error.code!} />);
+          },
+        }
+      );
+    },
+
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(
         {

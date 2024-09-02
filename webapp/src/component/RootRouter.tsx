@@ -16,6 +16,8 @@ import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
 import { RootView } from 'tg.views/RootView';
+import { SsoLoginView } from 'tg.component/security/Sso/SsoLoginView';
+import { SsoRedirectionHandler } from 'tg.component/security/Sso/SsoRedirectionHandler';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
@@ -91,6 +93,14 @@ export const RootRouter = () => (
     <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
       <PasswordResetSetView />
     </Route>
+      <PublicOnlyRoute path={LINKS.OPENID_RESPONSE.template}>
+          <SsoRedirectionHandler />
+      </PublicOnlyRoute>
+    <PublicOnlyRoute exact path={LINKS.SSO_LOGIN.template}>
+      <RecaptchaProvider>
+        <SsoLoginView />
+      </RecaptchaProvider>
+    </PublicOnlyRoute>
     <PublicOnlyRoute exact path={LINKS.SIGN_UP.template}>
       <RecaptchaProvider>
         <SignUpView />
