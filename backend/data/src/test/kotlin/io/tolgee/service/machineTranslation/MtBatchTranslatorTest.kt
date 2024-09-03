@@ -49,15 +49,21 @@ class MtBatchTranslatorTest {
         ),
       ).first()
 
-    translated.translatedText.assert.isEqualTo(
+    assertSameLines(
+      translated.translatedText ?: "",
       "{value, plural,\n" +
-        "one {Jeden pes}\n" +
+        "=0 {žádný pes..!}\n" +
+        "=1 {Jeden pes..!}\n" +
+        "=13 {'#' psa}\n" +
+        "zero {žádný pes..?}\n" +
+        "one {Jeden pes..?}\n" +
         "few {'#' psi}\n" +
         "many {'#' psa}\n" +
         "other {'#' psů}\n" +
         "}",
     )
-    translated.actualPrice.assert.isEqualTo(400)
+
+    translated.actualPrice.assert.isEqualTo(100)
   }
 
   @Test
@@ -80,15 +86,32 @@ class MtBatchTranslatorTest {
         ),
       ).first()
 
-    translated.translatedText.assert.isEqualTo(
+    assertSameLines(
+      translated.translatedText ?: "",
       "{value, plural,\n" +
-        "one {Jeden pes}\n" +
+        "=0 {žádný pes..!}\n" +
+        "=1 {Jeden pes..!}\n" +
+        "=13 {'#' psa}\n" +
+        "zero {žádný pes..?}\n" +
+        "one {Jeden pes..?}\n" +
         "few {'#' psi}\n" +
         "many {'#' psa}\n" +
         "other {'#' psů}\n" +
         "}",
     )
+
     translated.actualPrice.assert.isEqualTo(100)
+  }
+
+  private fun assertSameLines(
+    txt1: String,
+    txt2: String,
+  ) {
+    val out1 = txt1.split("\n")
+    val out2 = txt2.split("\n")
+
+    // we are not picky about the order
+    out1.toSortedSet().assert.isEqualTo(out2.toSortedSet())
   }
 
   private fun prepareValidKey() {
@@ -98,7 +121,7 @@ class MtBatchTranslatorTest {
         name = "key",
         namespace = "test",
         description = "test",
-        baseTranslation = "{value, plural, one {# dog} other {# dogs}}",
+        baseTranslation = "{value, plural, =0 {No dog..!} zero {No dog..?} one {# dog} other {# dogs}}",
         isPlural = true,
       )
   }
@@ -110,7 +133,11 @@ class MtBatchTranslatorTest {
           translatedText = null,
           translatedPluralForms =
             mapOf(
-              "one" to "Jeden pes",
+              "=0" to "žádný pes..!",
+              "=1" to "Jeden pes..!",
+              "=13" to "# psa",
+              "zero" to "žádný pes..?",
+              "one" to "Jeden pes..?",
               "few" to "# psi",
               "many" to "# psa",
               "other" to "# psů",
@@ -125,7 +152,27 @@ class MtBatchTranslatorTest {
     mtServiceManagerResults =
       listOf(
         TranslateResult(
-          translatedText = "Jeden pes",
+          translatedText = "žádný pes..!",
+          actualPrice = 100,
+          usedService = MtServiceType.GOOGLE,
+        ),
+        TranslateResult(
+          translatedText = "Jeden pes..!",
+          actualPrice = 100,
+          usedService = MtServiceType.GOOGLE,
+        ),
+        TranslateResult(
+          translatedText = "<x id=\"tolgee-number\">13</x> psů",
+          actualPrice = 100,
+          usedService = MtServiceType.GOOGLE,
+        ),
+        TranslateResult(
+          translatedText = "žádný pes..?",
+          actualPrice = 100,
+          usedService = MtServiceType.GOOGLE,
+        ),
+        TranslateResult(
+          translatedText = "Jeden pes..?",
           actualPrice = 100,
           usedService = MtServiceType.GOOGLE,
         ),

@@ -21,16 +21,44 @@ class PluralTranslationUtil(
     return result
   }
 
-  private val preparedFormSourceStrings: Sequence<Pair<String, String>> by lazy {
-    return@lazy targetExamples.asSequence().map {
+  private fun preparedFormSourceStrings(): Sequence<Pair<String, String>> {
+    val formBasedCases = preparedFormSourceStringsBasedOnForm().toList()
+    val localeBasedCases = preparedFormSourceStringsBasedOnLocale().toList()
+    val localeBasedCaseKeys = localeBasedCases.map { e -> e.first }.toSet()
+
+    // N.B.: locale-based cases take precedence over form-based cases,
+    // yet form-cases appear first so that we naturally end with: 'few', 'many', 'other'
+    val mergedCases = ArrayList<Pair<String, String>>()
+    formBasedCases.stream().filter { e -> !localeBasedCaseKeys.contains(e.first) }.forEach { e -> mergedCases.add(e) }
+    localeBasedCases.stream().forEach { e -> mergedCases.add(e) }
+    return mergedCases.asSequence()
+  }
+
+  private fun preparedFormSourceStringsBasedOnLocale(): Sequence<Pair<String, String>> {
+    return targetExamples.asSequence().map {
       val form = sourceRules?.select(it.value.toDouble())
-      val formValue = forms.forms[form] ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
+      val formValue = forms.forms[form] ?: forms.forms["=" + it.value] ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
       it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value)
     }
   }
 
+  private fun preparedFormSourceStringsBasedOnForm(): Sequence<Pair<String, String>> {
+    return forms.forms.asSequence().map {
+      if (it.key.startsWith("=") && it.key.substring(1).toDoubleOrNull() != null) {
+        it.key to it.value.replaceReplaceNumberPlaceholderWithExample(it.key.substring(1).toDouble())
+      } else {
+        val numValue = targetExamples[it.key]?.toDouble() ?: 10.0
+        val formValue =
+          forms.forms[it.key] ?: forms.forms[sourceRules?.select(numValue)] ?: forms.forms["=" + it.value]
+            ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
+
+        it.key to formValue.replaceReplaceNumberPlaceholderWithExample(numValue)
+      }
+    }
+  }
+
   private val translated by lazy {
-    preparedFormSourceStrings.map {
+    preparedFormSourceStrings().map {
       it.first to translateFn(it.second)
     }
   }
@@ -98,8 +126,9 @@ class PluralTranslationUtil(
       pluralForms: PluralForms,
     ): Sequence<Pair<String, String>> {
       return getTargetNumberExamples(targetLanguageTag).asSequence().map {
-        val form = getRulesByTag(sourceLanguageTag)?.select(it.value.toDouble())
-        val formValue = pluralForms.forms[form] ?: pluralForms.forms[PluralRules.KEYWORD_OTHER] ?: ""
+        val originalForm = "=" + it.value
+        val rewrittenForm = getRulesByTag(sourceLanguageTag)?.select(it.value.toDouble())
+        val formValue = pluralForms.forms[rewrittenForm] ?: pluralForms.forms[originalForm] ?: pluralForms.forms[PluralRules.KEYWORD_OTHER] ?: ""
         it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value, addTag = false)
       }
     }
