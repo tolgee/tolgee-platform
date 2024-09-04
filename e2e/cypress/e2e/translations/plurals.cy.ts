@@ -60,7 +60,7 @@ describe('Translations Base', () => {
       .should('be.visible');
   });
 
-  it.only('shows base and existing exact forms', () => {
+  it('shows base and existing exact forms', () => {
     createKey(
       project.id,
       'Test key',

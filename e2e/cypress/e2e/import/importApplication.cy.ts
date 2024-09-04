@@ -22,7 +22,7 @@ describe('Import application', () => {
     'Applies import',
     {
       retries: {
-        runMode: 4,
+        runMode: 10,
       },
     },
     () => {

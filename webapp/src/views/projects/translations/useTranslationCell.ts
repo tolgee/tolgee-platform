@@ -93,7 +93,7 @@ export const useTranslationCell = ({
       return undefined;
     }
 
-    return keyData.translations[baseLanguage.tag].text;
+    return keyData.translations[baseLanguage.tag]?.text;
   };
 
   const baseText = getBaseText();
