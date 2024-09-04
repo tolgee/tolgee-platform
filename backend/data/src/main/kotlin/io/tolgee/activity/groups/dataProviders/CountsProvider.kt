@@ -18,6 +18,7 @@ class CountsProvider(
   private val activityRevisionActivityGroupsTable = DSL.table("activity_revision_activity_groups").`as`("arag")
   private val groupIdField = DSL.field("arag.activity_groups_id", Long::class.java)
   private val countField = DSL.count()
+  private val entityIdField = DSL.field("ame.entity_id", Long::class.java)
 
   fun provide(): Map<Long, Map<String, Int>> {
     val sqlContext =
@@ -25,6 +26,8 @@ class CountsProvider(
         modificationsField = DSL.field("ame.modifications", JSON::class.java),
         entityClassField = entityClassField,
         revisionTypeField = DSL.field("ame.revision_type", Int::class.java),
+        groupIdField = groupIdField,
+        entityIdField = entityIdField,
       )
 
     val queryResult =

@@ -10,4 +10,6 @@ class SqlContext(
   val modificationsField: Field<JSON>,
   var entityClassField: Field<String>,
   var revisionTypeField: Field<Int>,
+  val groupIdField: Field<Long>,
+  val entityIdField: Field<Long>,
 )
