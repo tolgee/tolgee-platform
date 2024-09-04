@@ -56,6 +56,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     handleInsertBase,
     editEnabled,
     disabled,
+    baseText,
   } = tools;
   const editVal = tools.editVal!;
   const state = translation?.state || 'UNTRANSLATED';
@@ -68,7 +69,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
 
   const baseTranslation = useBaseTranslation(
     activeVariant,
-    keyData.translations[baseLanguage]?.text,
+    baseText,
     keyData.keyIsPlural
   );
 
