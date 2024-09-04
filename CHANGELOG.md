@@ -1,3 +1,10 @@
+## [3.71.4](https://github.com/tolgee/tolgee-platform/compare/v3.71.3...v3.71.4) (2024-09-04)
+
+
+### Bug Fixes
+
+* Exact plural forms for basic MT translators ([#2454](https://github.com/tolgee/tolgee-platform/issues/2454)) ([12b3fd6](https://github.com/tolgee/tolgee-platform/commit/12b3fd62cc48a0bd7b15b3ef06fe85e637505645))
+
 ## [3.71.3](https://github.com/tolgee/tolgee-platform/compare/v3.71.2...v3.71.3) (2024-09-02)
 
 
