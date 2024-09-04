@@ -17,6 +17,7 @@ type Props = {
   autofocus?: boolean;
   activeEditorRef?: RefObject<EditorView | null>;
   mode: 'placeholders' | 'syntax';
+  baseValue?: TolgeeFormat;
 };
 
 export const PluralEditor = ({
@@ -29,6 +30,7 @@ export const PluralEditor = ({
   activeEditorRef,
   editorProps,
   mode,
+  baseValue,
 }: Props) => {
   function handleChange(text: string, variant: string) {
     onChange?.({ ...value, variants: { ...value.variants, [variant]: text } });
@@ -38,6 +40,17 @@ export const PluralEditor = ({
 
   const editorMode = project.icuPlaceholders ? mode : 'plain';
 
+  function getExactForms() {
+    if (!baseValue) {
+      return [];
+    }
+    return Object.keys(baseValue.variants)
+      .filter((key) => /^=\d+(\.\d+)?$/.test(key))
+      .map((key) => parseFloat(key.substring(1)));
+  }
+
+  const exactForms = getExactForms();
+
   return (
     <TranslationPlurals
       value={value}
@@ -45,6 +58,7 @@ export const PluralEditor = ({
       showEmpty
       activeVariant={activeVariant}
       variantPaddingTop="8px"
+      exactForms={exactForms}
       render={({ content, variant, exampleValue }) => {
         const variantOrOther = variant || 'other';
         return (

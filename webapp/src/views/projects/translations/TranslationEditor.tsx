@@ -18,6 +18,7 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
     handleSave,
     handleClose,
     handleInsertBase,
+    baseValue,
   } = tools;
 
   return (
@@ -30,6 +31,7 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
       autofocus={true}
       activeEditorRef={editorRef}
       mode={mode}
+      baseValue={baseValue}
       editorProps={{
         shortcuts: [
           { key: 'Escape', run: () => (handleClose(true), true) },

@@ -12,27 +12,25 @@ class PluralTranslationUtil(
   private val item: MtBatchItemParams,
   private val translateFn: (String) -> MtTranslatorResult,
 ) {
-  val forms by lazy {
-    context.getPluralFormsReplacingReplaceParam(baseTranslationText)
-      ?: throw IllegalStateException("Plural forms are null")
-  }
-
   fun translate(): MtTranslatorResult {
     return result
   }
 
   private val preparedFormSourceStrings: Sequence<Pair<String, String>> by lazy {
-    return@lazy targetExamples.asSequence().map {
-      val form = sourceRules?.select(it.value.toDouble())
-      val formValue = forms.forms[form] ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
-      it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value)
-    }
+    val targetLanguageTag = context.getLanguage(item.targetLanguageId).tag
+    val sourceLanguageTag = context.baseLanguage.tag
+    getPreparedSourceStrings(sourceLanguageTag, targetLanguageTag, forms)
   }
 
   private val translated by lazy {
     preparedFormSourceStrings.map {
       it.first to translateFn(it.second)
     }
+  }
+
+  private val forms by lazy {
+    context.getPluralFormsReplacingReplaceParam(baseTranslationText)
+      ?: throw IllegalStateException("Plural forms are null")
   }
 
   private val result: MtTranslatorResult by lazy {
@@ -57,18 +55,6 @@ class PluralTranslationUtil(
       baseBlank = false,
       exception = result.firstOrNull { it.second.exception != null }?.second?.exception,
     )
-  }
-
-  private val targetExamples by lazy {
-    val targetLanguageTag = context.getLanguage(item.targetLanguageId).tag
-    val targetULocale = getULocaleFromTag(targetLanguageTag)
-    val targetRules = PluralRules.forLocale(targetULocale)
-    getPluralFormExamples(targetRules)
-  }
-
-  private val sourceRules by lazy {
-    val sourceLanguageTag = context.baseLanguage.tag
-    getRulesByTag(sourceLanguageTag)
   }
 
   private fun String.replaceNumberTags(): String {
@@ -125,6 +111,44 @@ class PluralTranslationUtil(
     private fun getRulesByTag(languageTag: String): PluralRules? {
       val sourceULocale = getULocaleFromTag(languageTag)
       return PluralRules.forLocale(sourceULocale)
+    }
+
+    fun getPreparedSourceStrings(
+      sourceLanguageTag: String,
+      targetLanguageTag: String,
+      forms: PluralForms,
+    ): Sequence<Pair<String, String>> {
+      val sourceRules = getRulesByTag(sourceLanguageTag)
+      val keywordCases =
+        getTargetExamples(targetLanguageTag).asSequence().map {
+          val form = sourceRules?.select(it.value.toDouble())
+          val formValue = forms.forms[form] ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
+          it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value)
+        }
+
+      val exactCases =
+        forms.forms.asSequence().filter {
+          it.key.startsWith("=")
+        }.mapNotNull {
+          val number = it.key.substring(1).toDoubleOrNull() ?: return@mapNotNull null
+          it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number)
+        }
+
+      return keywordCases + exactCases
+    }
+
+    private fun String.toDoubleOrNull(): Number? {
+      return try {
+        this.toBigDecimalOrNull()
+      } catch (e: NumberFormatException) {
+        null
+      }
+    }
+
+    private fun getTargetExamples(targetLanguageTag: String): Map<String, Number> {
+      val targetULocale = getULocaleFromTag(targetLanguageTag)
+      val targetRules = PluralRules.forLocale(targetULocale)
+      return getPluralFormExamples(targetRules)
     }
   }
 }

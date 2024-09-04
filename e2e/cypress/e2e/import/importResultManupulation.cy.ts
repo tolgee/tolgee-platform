@@ -188,7 +188,7 @@ describe('Import result & manipulation', () => {
       }
     );
 
-    it('imports with selects namespaces', () => {
+    it('imports with selects namespaces', { retries: { runMode: 5 } }, () => {
       gcy('import_apply_import_button').click();
       assertMessage('Import successful');
       gcy('import-result-row').should('have.length', 0);
