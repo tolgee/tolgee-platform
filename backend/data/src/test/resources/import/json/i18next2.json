@@ -1,0 +1,65 @@
+{
+  "note": "Most features in this example are not supported by the tolgee yet",
+  "translation": {
+    "key": "Hello World",
+    
+    "interpolation_example": "Hello {{name}}",
+    
+    "plural_example": {
+      "one": "You have one message",
+      "other": "You have {{count}} messages"
+    },
+    
+    "context_example": {
+      "male": "He is a teacher",
+      "female": "She is a teacher"
+    },
+    
+    "nested_example": "This is a {{type}} message",
+    "type": "nested",
+
+    "formatted_value": "The price is {{value, currency}}",
+    
+    "array_example": [
+      "Apples",
+      "Oranges",
+      "Bananas"
+    ],
+    
+    "select_example": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    
+    "multiline_example": "This is line one.\nThis is line two.",
+
+    "gender_with_plural": {
+      "male": {
+        "one": "He has one cat",
+        "other": "He has {{count}} cats"
+      },
+      "female": {
+        "one": "She has one cat",
+        "other": "She has {{count}} cats"
+      }
+    },
+
+    "rich_text_example": "<strong>Welcome</strong> to our application!",
+
+    "json_value_example": {
+      "key": "This is a value inside a JSON object"
+    },
+
+    "conditional_translations": "{{isLoggedIn, select, true {Welcome back, {{name}}!} false {Please log in}}}",
+
+    "language_switch": {
+      "en": "English",
+      "es": "Spanish",
+      "fr": "French"
+    },
+
+    "missing_key_fallback": "This is the default value if the key is missing."
+  }
+}
+

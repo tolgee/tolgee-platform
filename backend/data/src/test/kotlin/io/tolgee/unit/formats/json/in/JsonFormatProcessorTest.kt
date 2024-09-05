@@ -178,6 +178,34 @@ class JsonFormatProcessorTest {
   }
 
   @Test
+  fun `returns correct parsed result for i18next`() {
+    mockUtil.mockIt("i18next.json", "src/test/resources/import/json/i18next.json")
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("i18next", "keyDeep.inner")
+    mockUtil.fileProcessorContext.assertTranslations("i18next", "keyWithArrayValue[0]")
+    mockUtil.fileProcessorContext.assertTranslations("i18next", "keyWithArrayValue[1]")
+      .assertSingle {
+        hasText("things")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("i18next", "keyNesting")
+      .assertSingle {
+        hasText("reuse ${'$'}t(keyDeep.inner) (is not supported)")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("i18next", "keyContext_male")
+      .assertSingle {
+        hasText("the male variant (is parsed as normal key and context is ignored)")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("i18next", "keyPluralSimple")
+      .assertSingle {
+        hasText("{value, plural,\n" +
+          "one {the singular (is parsed as plural under one key - keyPluralSimple)}\n" +
+          "other {the plural (is parsed as plural under one key - keyPluralSimple)}\n" +
+          "}")
+      }
+  }
+
+  @Test
   fun `respects provided format`() {
     mockUtil.mockIt("en.json", "src/test/resources/import/json/icu.json")
     mockUtil.fileProcessorContext.params =

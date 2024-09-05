@@ -2,6 +2,7 @@ package io.tolgee.formats.importCommon
 
 import io.tolgee.formats.paramConvertors.`in`.AppleToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.I18nextToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
@@ -10,9 +11,15 @@ import io.tolgee.formats.po.`in`.PoToIcuMessageConvertor
 enum class ImportFormat(
   val fileFormat: ImportFileFormat,
   val pluralsViaNesting: Boolean = false,
+  val pluralsViaSuffixesRegex: Regex? = null,
   val messageConvertorOrNull: ImportMessageConvertor? = null,
   val rootKeyIsLanguageTag: Boolean = false,
 ) {
+  JSON_I18NEXT(
+    ImportFileFormat.JSON,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { I18nextToIcuPlaceholderConvertor() },
+    pluralsViaSuffixesRegex = I18nextToIcuPlaceholderConvertor.I18NEXT_PLURAL_SUFFIX_REGEX,
+  ),
   JSON_ICU(
     ImportFileFormat.JSON,
     messageConvertorOrNull =
