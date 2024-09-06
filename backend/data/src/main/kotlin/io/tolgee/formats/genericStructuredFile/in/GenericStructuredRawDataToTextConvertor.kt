@@ -73,7 +73,7 @@ class GenericStructuredRawDataToTextConvertor(
   ): List<MessageConvertorResult>? {
     val map = rawData as? Map<*, *> ?: return null
 
-    if (!format.pluralsViaNesting && format.pluralsViaSuffixesRegex == null) {
+    if (!format.pluralsViaNesting && format.pluralsViaSuffixesParser == null) {
       return null
     }
 
