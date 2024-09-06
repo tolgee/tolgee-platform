@@ -3,18 +3,17 @@ package io.tolgee.ee.repository
 import io.tolgee.ee.data.DynamicOAuth2ClientRegistration
 import io.tolgee.ee.model.Tenant
 import io.tolgee.ee.service.TenantService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.core.AuthorizationGrantType
+import org.springframework.stereotype.Component
 
-class DynamicOAuth2ClientRegistrationRepository(applicationContext: ApplicationContext) :
+@Component
+class DynamicOAuth2ClientRegistrationRepository(
+  private val tenantService: TenantService,
+) :
   ClientRegistrationRepository {
   private val dynamicClientRegistrations: MutableMap<String, DynamicOAuth2ClientRegistration> = mutableMapOf()
-
-  @Autowired
-  private val tenantService: TenantService = applicationContext.getBean(TenantService::class.java)
 
   override fun findByRegistrationId(registrationId: String): ClientRegistration {
     dynamicClientRegistrations[registrationId]?.let {
@@ -34,7 +33,6 @@ class DynamicOAuth2ClientRegistrationRepository(applicationContext: ApplicationC
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
         .authorizationUri(tenant.authorizationUri)
         .tokenUri(tenant.tokenUri)
-        .jwkSetUri(tenant.jwkSetUri)
         .redirectUri(tenant.redirectUriBase + "/openId/auth_callback/" + tenant.domain)
         .scope("openid", "profile", "email")
         .build()

@@ -27,6 +27,7 @@ import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.web.servlet.FilterRegistrationBean
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
@@ -54,6 +55,7 @@ class WebSecurityConfig(
   private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
   private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
   private val exceptionHandlerFilter: ExceptionHandlerFilter,
+  private val applicationContext: ApplicationContext,
 ) : WebMvcConfigurer {
   @Bean
   fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
@@ -76,7 +78,7 @@ class WebSecurityConfig(
             }
           },
         )
-        it.requestMatchers("/api/public/**", "/v2/public/**").permitAll()
+        it.requestMatchers("/api/public/**", "/v2/public/**", "v2/oauth2/callback/**").permitAll()
         it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
         it.requestMatchers("/api/**", "/v2/**").authenticated()
         it.anyRequest().permitAll()
@@ -89,7 +91,8 @@ class WebSecurityConfig(
         headers.referrerPolicy {
           it.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
         }
-      }.build()
+      }
+      .build()
   }
 
   @Bean
