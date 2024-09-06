@@ -1,4 +1,4 @@
-package io.tolgee.formats.i18next
+package io.tolgee.formats.i18next.`in`
 
 data class ParsedI18nextParam(
   val key: String? = null,

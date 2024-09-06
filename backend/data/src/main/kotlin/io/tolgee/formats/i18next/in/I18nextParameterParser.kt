@@ -1,4 +1,6 @@
-package io.tolgee.formats.i18next
+package io.tolgee.formats.i18next.`in`
+
+import io.tolgee.formats.getGroupOrNull
 
 class I18nextParameterParser {
   fun parse(match: MatchResult): ParsedI18nextParam? {
@@ -8,17 +10,5 @@ class I18nextParameterParser {
       format = match.groups.getGroupOrNull("format")?.value,
       fullMatch = match.value,
     )
-  }
-
-//  FIXME: move somewhere shared
-  private fun MatchGroupCollection.getGroupOrNull(name: String): MatchGroup? {
-    try {
-      return this[name]
-    } catch (e: IllegalArgumentException) {
-      if (e.message?.contains("No group with name") != true) {
-        throw e
-      }
-      return null
-    }
   }
 }

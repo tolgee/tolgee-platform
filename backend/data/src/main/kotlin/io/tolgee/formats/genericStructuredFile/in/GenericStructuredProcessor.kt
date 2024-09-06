@@ -3,9 +3,9 @@ package io.tolgee.formats.genericStructuredFile.`in`
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.allPluralKeywords
-import io.tolgee.formats.i18next.ParsedI18nextKey
-import io.tolgee.formats.i18next.PluralsI18nextKeyParser
 import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.importCommon.ParsedPluralsKey
+import io.tolgee.formats.importCommon.PluralsKeyParser
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class GenericStructuredProcessor(
@@ -15,8 +15,6 @@ class GenericStructuredProcessor(
   private val languageTag: String? = null,
   private val format: ImportFormat,
 ) : ImportFileProcessor() {
-  private val keyParser = PluralsI18nextKeyParser()
-
   override fun process() {
     data.preprocess().import("")
   }
@@ -41,44 +39,49 @@ class GenericStructuredProcessor(
     return this.map { it.preprocess() }
   }
 
-  private fun Map<*, *>.groupByPlurals(keyRegex: Regex): Map<String?, List<Pair<ParsedI18nextKey, Any?>>> {
+  private fun Any?.parsePluralsKey(keyParser: PluralsKeyParser): ParsedPluralsKey? {
+    val key = this as? String ?: return null
+    return keyParser.parse(key).takeIf {
+      it.key != null && it.plural in allPluralKeywords
+    } ?: ParsedPluralsKey(null, null, key)
+  }
+
+  private fun Map<*, *>.groupByPlurals(
+    keyParser: PluralsKeyParser
+  ): Map<String?, List<Pair<ParsedPluralsKey, Any?>>> {
     return this.entries.mapIndexedNotNull { idx, (key, value) ->
-      if (key !is String) {
-        context.fileEntity.addKeyIsNotStringIssue(key.toString(), idx)
-        return@mapIndexedNotNull null
+      key.parsePluralsKey(keyParser)?.let { it to value }.also {
+        if (it == null) {
+          context.fileEntity.addKeyIsNotStringIssue(key.toString(), idx)
+        }
       }
-      val default = ParsedI18nextKey(null, null, key)
+    }.groupBy { (parsedKey, _) -> parsedKey.key }.toMap()
+  }
 
-      val match = keyRegex.find(key) ?: return@mapIndexedNotNull default to value
-      val parsedKey = keyParser.parse(match)
+  private fun List<Pair<ParsedPluralsKey, Any?>>.useOriginalKey(): List<Pair<String, Any?>> {
+    return map { (parsedKey, value) ->
+      parsedKey.originalKey to value
+    }
+  }
 
-      if (parsedKey?.key == null || parsedKey.plural == null || parsedKey.plural !in allPluralKeywords) {
-        return@mapIndexedNotNull default to value
-      }
-
-      return@mapIndexedNotNull parsedKey to value
-    }.groupBy { (parsedKey, _) ->
-      parsedKey.key
-    }.toMap()
+  private fun List<Pair<ParsedPluralsKey, Any?>>.usePluralsKey(commonKey: String): List<Pair<String, Any?>> {
+    return listOf(commonKey to this.associate { (parsedKey, value) ->
+      parsedKey.plural to value
+    })
   }
 
   private fun Map<*, *>.preprocessMap(): Map<*, *> {
-    if (format.pluralsViaSuffixesRegex == null) {
+    if (format.pluralsViaSuffixesParser == null) {
       return this.mapValues { (_, value) -> value.preprocess() }
     }
 
-    val plurals = this.groupByPlurals(format.pluralsViaSuffixesRegex)
+    val plurals = this.groupByPlurals(format.pluralsViaSuffixesParser)
 
-    return plurals.flatMap { (key, values) ->
-      if (key == null || values.size < 2) {
-        // Fallback for non-plural keys
-        values.map { (parsedKey, value) ->
-          parsedKey.fullMatch to value
-        }
+    return plurals.flatMap { (commonKey, values) ->
+      if (commonKey == null || values.size < 2) {
+        values.useOriginalKey()
       } else {
-        listOf(key to values.map { (parsedKey, value) ->
-          parsedKey.plural to value
-        }.toMap())
+        values.usePluralsKey(commonKey)
       }
     }.toMap()
   }

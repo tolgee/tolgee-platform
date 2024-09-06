@@ -11,14 +11,14 @@ import io.tolgee.formats.po.`in`.PoToIcuMessageConvertor
 enum class ImportFormat(
   val fileFormat: ImportFileFormat,
   val pluralsViaNesting: Boolean = false,
-  val pluralsViaSuffixesRegex: Regex? = null,
+  val pluralsViaSuffixesParser: PluralsKeyParser? = null,
   val messageConvertorOrNull: ImportMessageConvertor? = null,
   val rootKeyIsLanguageTag: Boolean = false,
 ) {
   JSON_I18NEXT(
     ImportFileFormat.JSON,
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { I18nextToIcuPlaceholderConvertor() },
-    pluralsViaSuffixesRegex = I18nextToIcuPlaceholderConvertor.I18NEXT_PLURAL_SUFFIX_REGEX,
+    pluralsViaSuffixesParser = I18nextToIcuPlaceholderConvertor.I18NEXT_PLURAL_SUFFIX_KEY_PARSER,
   ),
   JSON_ICU(
     ImportFileFormat.JSON,
