@@ -3,8 +3,11 @@ package io.tolgee.ee.service
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.ee.model.Tenant
 import io.tolgee.ee.repository.TenantRepository
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import org.springframework.stereotype.Service
+import java.net.URI
+import java.net.URISyntaxException
 
 @Service
 class TenantService(
@@ -28,15 +31,36 @@ class TenantService(
 
   fun save(dto: CreateProviderRequest): Tenant {
     val tenant = Tenant()
-    tenant.name = dto.name
-    tenant.ssoProvider = dto.ssoProvider
+    tenant.name = dto.name ?: ""
+    tenant.domain = extractDomain(dto.authorizationUri)
     tenant.clientId = dto.clientId
     tenant.clientSecret = dto.clientSecret
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
-    tenant.jwkSetUri = dto.jwkSetUri
-    tenant.domain = dto.domain
-    tenant.redirectUriBase = dto.redirectUri
+    tenant.redirectUriBase = dto.redirectUri.removeSuffix("/")
     return save(tenant)
+  }
+
+  private fun extractDomain(authorizationUri: String): String {
+    return try {
+      val uri = URI(authorizationUri)
+      val domain = uri.host
+      val port = uri.port
+
+      val domainWithPort =
+        if (port != -1) {
+          "$domain:$port"
+        } else {
+          domain
+        }
+
+      if (domainWithPort.startsWith("www.")) {
+        domainWithPort.substring(4)
+      } else {
+        domainWithPort
+      }
+    } catch (e: URISyntaxException) {
+      throw BadRequestException("Invalid authorization uri")
+    }
   }
 }
