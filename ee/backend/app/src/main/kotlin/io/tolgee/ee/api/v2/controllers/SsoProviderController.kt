@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/providers")
+@RequestMapping("/v2/sso/providers")
 class SsoProviderController(private val tenantService: TenantService) {
   @PostMapping("")
   fun addProvider(
