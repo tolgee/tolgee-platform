@@ -2,7 +2,8 @@ package io.tolgee.formats.paramConvertors.`in`
 
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.escapeIcu
-import io.tolgee.formats.i18next.I18nextParameterParser
+import io.tolgee.formats.i18next.`in`.I18nextParameterParser
+import io.tolgee.formats.i18next.`in`.PluralsI18nextKeyParser
 
 class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private val parser = I18nextParameterParser()
@@ -63,6 +64,8 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       """.trimIndent().toRegex()
 
     val I18NEXT_PLURAL_SUFFIX_REGEX = """^(?<key>\w+)_(?<plural>\w+)$""".toRegex()
+
+    val I18NEXT_PLURAL_SUFFIX_KEY_PARSER = PluralsI18nextKeyParser(I18NEXT_PLURAL_SUFFIX_REGEX)
 
   }
 }
