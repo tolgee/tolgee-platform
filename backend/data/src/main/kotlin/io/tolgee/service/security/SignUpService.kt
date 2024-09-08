@@ -45,6 +45,7 @@ class SignUpService(
     return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
   }
 
+  @Transactional
   fun signUp(
     entity: UserAccount,
     invitationCode: String?,
