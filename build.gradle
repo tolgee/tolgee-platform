@@ -140,6 +140,9 @@ ktlint {
 rootProject.subprojects {
     afterEvaluate {
         tasks.findByName("compileKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("kaptGenerateStubsTestKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("kaptGenerateStubsKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        tasks.findByName("kaptKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
         tasks.findByName("bootBuildInfo")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
         tasks.findByName("compileJava")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
         tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
