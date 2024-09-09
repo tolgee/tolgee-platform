@@ -138,18 +138,18 @@ ktlint {
 }
 
 rootProject.subprojects {
-    afterEvaluate {
+    gradle.taskGraph.whenReady {
         def skipServerBuild = System.getenv("SKIP_SERVER_BUILD") == "true"
         tasks.findByName("compileKotlin")?.onlyIf { !skipServerBuild }
         tasks.findByName("kaptGenerateStubsTestKotlin")?.onlyIf { !skipServerBuild }
         tasks.findByName("kaptGenerateStubsKotlin")?.onlyIf { !skipServerBuild }
         tasks.findByName("kaptKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptTestKotlin")?.onlyIf { !skipServerBuild }
         tasks.findByName("bootBuildInfo")?.onlyIf { !skipServerBuild }
-        tasks.findByName("compileJava")?.onlyIf { !skipServerBuild }
+        tasks.findByName("compileJava")?.onlyIf {!skipServerBuild}
         tasks.findByName("bootJarMainClassName")?.onlyIf { !skipServerBuild }
         tasks.findByName("jar")?.onlyIf { !skipServerBuild }
         tasks.findByName("bootJar")?.onlyIf { !skipServerBuild }
-        tasks.findByName("classes")?.onlyIf { !skipServerBuild }
         tasks.findByName("classes")?.onlyIf { !skipServerBuild }
         tasks.findByName("compileTestKotlin")?.onlyIf { !skipServerBuild }
     }

@@ -205,7 +205,7 @@ test {
     setTestRetry(it)
 }
 
-task runContextRecreatingTests(type: Test, group: 'verification') {
+tasks.register('runContextRecreatingTests', Test) {
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
@@ -213,7 +213,7 @@ task runContextRecreatingTests(type: Test, group: 'verification') {
     setTestRetry(it)
 }
 
-task runStandardTests(type: Test, group: 'verification') {
+tasks.register('runStandardTests', Test) {
     useJUnitPlatform {
         excludeTags "contextRecreating", "websocket"
     }
@@ -221,7 +221,7 @@ task runStandardTests(type: Test, group: 'verification') {
     setTestRetry(it)
 }
 
-task runWebsocketTests(type: Test, group: 'verification') {
+tasks.register('runWebsocketTests', Test) {
     useJUnitPlatform {
         includeTags "websocket"
     }
