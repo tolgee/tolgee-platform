@@ -139,18 +139,18 @@ ktlint {
 
 rootProject.subprojects {
     afterEvaluate {
-        tasks.findByName("compileKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("kaptGenerateStubsTestKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("kaptGenerateStubsKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("kaptKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootBuildInfo")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("compileJava")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("jar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootJar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("compileTestKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+        def skipServerBuild = System.getenv("SKIP_SERVER_BUILD") == "true"
+        tasks.findByName("compileKotlin")?.enabled = !skipServerBuild
+        tasks.findByName("kaptGenerateStubsTestKotlin")?.enabled = !skipServerBuild
+        tasks.findByName("kaptGenerateStubsKotlin")?.enabled = !skipServerBuild
+        tasks.findByName("kaptKotlin")?.enabled = !skipServerBuild
+        tasks.findByName("bootBuildInfo")?.enabled = !skipServerBuild
+        tasks.findByName("compileJava")?.enabled = !skipServerBuild
+        tasks.findByName("bootJarMainClassName")?.enabled = !skipServerBuild
+        tasks.findByName("jar")?.enabled = !skipServerBuild
+        tasks.findByName("bootJar")?.enabled = !skipServerBuild
+        tasks.findByName("classes")?.enabled = !skipServerBuild
+        tasks.findByName("compileTestKotlin")?.enabled = !skipServerBuild
     }
 }
 
