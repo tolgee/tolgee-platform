@@ -140,17 +140,18 @@ ktlint {
 rootProject.subprojects {
     afterEvaluate {
         def skipServerBuild = System.getenv("SKIP_SERVER_BUILD") == "true"
-        tasks.findByName("compileKotlin")?.enabled = !skipServerBuild
-        tasks.findByName("kaptGenerateStubsTestKotlin")?.enabled = !skipServerBuild
-        tasks.findByName("kaptGenerateStubsKotlin")?.enabled = !skipServerBuild
-        tasks.findByName("kaptKotlin")?.enabled = !skipServerBuild
-        tasks.findByName("bootBuildInfo")?.enabled = !skipServerBuild
-        tasks.findByName("compileJava")?.enabled = !skipServerBuild
-        tasks.findByName("bootJarMainClassName")?.enabled = !skipServerBuild
-        tasks.findByName("jar")?.enabled = !skipServerBuild
-        tasks.findByName("bootJar")?.enabled = !skipServerBuild
-        tasks.findByName("classes")?.enabled = !skipServerBuild
-        tasks.findByName("compileTestKotlin")?.enabled = !skipServerBuild
+        tasks.findByName("compileKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptGenerateStubsTestKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptGenerateStubsKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("bootBuildInfo")?.onlyIf { !skipServerBuild }
+        tasks.findByName("compileJava")?.onlyIf { !skipServerBuild }
+        tasks.findByName("bootJarMainClassName")?.onlyIf { !skipServerBuild }
+        tasks.findByName("jar")?.onlyIf { !skipServerBuild }
+        tasks.findByName("bootJar")?.onlyIf { !skipServerBuild }
+        tasks.findByName("classes")?.onlyIf { !skipServerBuild }
+        tasks.findByName("classes")?.onlyIf { !skipServerBuild }
+        tasks.findByName("compileTestKotlin")?.onlyIf { !skipServerBuild }
     }
 }
 
