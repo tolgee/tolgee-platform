@@ -67,7 +67,7 @@ dependencyResolutionManagement {
             library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.7.0")
             library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.26.0")
             library('postHog', 'com.posthog.java:posthog:1.1.1')
-            library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.9.12")
+            library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.13.3")
             library('mailjet', "com.mailjet:mailjet-client:5.2.5")
             library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.11.0')
             library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
