@@ -152,9 +152,6 @@ rootProject.subprojects {
         tasks.findByName("bootJar")?.onlyIf { !skipServerBuild }
         tasks.findByName("classes")?.onlyIf { !skipServerBuild }
         tasks.findByName("compileTestKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("processTestResources")?.onlyIf { !skipServerBuild }
-        tasks.findByName("processResources")?.onlyIf { !skipServerBuild }
-        tasks.findByName("testClasses")?.onlyIf { !skipServerBuild }
     }
 }
 
