@@ -17,6 +17,14 @@ spring:
           enableLazyInitialization: true
           enableDirtyTracking: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
+#      javax:
+#        persistence:
+#          validation:
+#            mode: none
+#      jakarta:
+#        persistence:
+#          validation:
+#            mode: none
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

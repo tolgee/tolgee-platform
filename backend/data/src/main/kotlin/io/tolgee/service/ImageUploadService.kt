@@ -12,6 +12,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.UploadedImageRepository
 import io.tolgee.util.ImageConverter
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.io.InputStreamSource
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -24,6 +25,7 @@ import kotlin.streams.asSequence
 
 @Service
 class ImageUploadService(
+  @Lazy
   val uploadedImageRepository: UploadedImageRepository,
   val fileStorage: FileStorage,
   val dateProvider: CurrentDateProvider,

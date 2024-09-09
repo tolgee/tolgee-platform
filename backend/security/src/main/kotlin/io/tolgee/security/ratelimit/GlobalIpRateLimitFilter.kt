@@ -1,3 +1,4 @@
+
 /**
  * Copyright (C) 2023 Tolgee s.r.o. and contributors
  *
@@ -20,12 +21,14 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class GlobalIpRateLimitFilter(
   private val rateLimitService: RateLimitService,
+  @Lazy
   private val authenticationFacade: AuthenticationFacade,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(

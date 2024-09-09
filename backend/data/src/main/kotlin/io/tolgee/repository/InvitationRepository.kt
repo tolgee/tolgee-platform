@@ -3,12 +3,14 @@ package io.tolgee.repository
 import io.tolgee.model.Invitation
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
+@Lazy
 interface InvitationRepository : JpaRepository<Invitation?, Long?> {
   fun deleteAllByCreatedAtLessThan(date: Date)
 
