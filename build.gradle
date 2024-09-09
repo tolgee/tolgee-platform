@@ -158,6 +158,7 @@ subprojects {
     task allDeps(type: DependencyReportTask) {}
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
+    ext['jackson.version'] = jacksonVersion
 
     tasks.withType(Test) {
         testLogging {
