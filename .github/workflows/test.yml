@@ -122,7 +122,7 @@ jobs:
         with:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }} -x classes -x compileKotlin -x compileJava
+          command: ./gradlew ${{ matrix.command }} 
         env:
           SKIP_SERVER_BUILD: true
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
