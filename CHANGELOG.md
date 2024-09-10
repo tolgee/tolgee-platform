@@ -1,3 +1,10 @@
+## [3.71.5](https://github.com/tolgee/tolgee-platform/compare/v3.71.4...v3.71.5) (2024-09-10)
+
+
+### Performance Improvements
+
+* Update Spring & Faster Startup and time to test ([#2457](https://github.com/tolgee/tolgee-platform/issues/2457)) ([a8fb3ee](https://github.com/tolgee/tolgee-platform/commit/a8fb3ee0bf53fd6b1cb1a68b5147990cdca7ce9d))
+
 ## [3.71.4](https://github.com/tolgee/tolgee-platform/compare/v3.71.3...v3.71.4) (2024-09-04)
 
 
