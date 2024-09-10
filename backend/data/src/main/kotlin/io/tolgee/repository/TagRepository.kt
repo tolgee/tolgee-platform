@@ -4,12 +4,16 @@ import io.tolgee.model.Project
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
 
+@Repository
+@Lazy
 interface TagRepository : JpaRepository<Tag, Long> {
   fun findByProjectAndName(
     project: Project,

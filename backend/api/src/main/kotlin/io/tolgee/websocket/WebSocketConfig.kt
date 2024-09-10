@@ -5,6 +5,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.MessagingException
@@ -21,7 +22,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
+  @Lazy
   private val jwtService: JwtService,
+  @Lazy
   private val securityService: SecurityService,
 ) : WebSocketMessageBrokerConfigurer {
   override fun configureMessageBroker(config: MessageBrokerRegistry) {

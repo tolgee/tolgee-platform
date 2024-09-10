@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.Customizer
@@ -46,12 +47,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 @EnableWebSecurity
 class WebSecurityConfig(
+  @Lazy
   private val authenticationFilter: AuthenticationFilter,
+  @Lazy
   private val globalIpRateLimitFilter: GlobalIpRateLimitFilter,
+  @Lazy
   private val globalUserRateLimitFilter: GlobalUserRateLimitFilter,
+  @Lazy
   private val rateLimitInterceptor: RateLimitInterceptor,
+  @Lazy
   private val authenticationInterceptor: AuthenticationInterceptor,
+  @Lazy
   private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
+  @Lazy
   private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
   private val exceptionHandlerFilter: ExceptionHandlerFilter,
 ) : WebMvcConfigurer {

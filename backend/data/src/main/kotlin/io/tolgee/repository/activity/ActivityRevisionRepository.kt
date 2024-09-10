@@ -2,6 +2,7 @@ package io.tolgee.repository.activity
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.model.activity.ActivityRevision
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   @Query(
     """

@@ -138,16 +138,20 @@ ktlint {
 }
 
 rootProject.subprojects {
-    afterEvaluate {
-        tasks.findByName("compileKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootBuildInfo")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("compileJava")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootJarMainClassName")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("jar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("bootJar")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("classes")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
-        tasks.findByName("compileTestKotlin")?.onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+    gradle.taskGraph.whenReady {
+        def skipServerBuild = System.getenv("SKIP_SERVER_BUILD") == "true"
+        tasks.findByName("compileKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptGenerateStubsTestKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptGenerateStubsKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("kaptTestKotlin")?.onlyIf { !skipServerBuild }
+        tasks.findByName("bootBuildInfo")?.onlyIf { !skipServerBuild }
+        tasks.findByName("compileJava")?.onlyIf {!skipServerBuild}
+        tasks.findByName("bootJarMainClassName")?.onlyIf { !skipServerBuild }
+        tasks.findByName("jar")?.onlyIf { !skipServerBuild }
+        tasks.findByName("bootJar")?.onlyIf { !skipServerBuild }
+        tasks.findByName("classes")?.onlyIf { !skipServerBuild }
+        tasks.findByName("compileTestKotlin")?.onlyIf { !skipServerBuild }
     }
 }
 
@@ -155,6 +159,7 @@ subprojects {
     task allDeps(type: DependencyReportTask) {}
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
+    ext['jackson.version'] = jacksonVersion
 
     tasks.withType(Test) {
         testLogging {

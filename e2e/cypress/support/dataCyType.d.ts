@@ -1,5 +1,5 @@
 declare namespace DataCy {
-    export type Value = 
+    export type Value =
         "account-security-initial-password-set" |
         "account-security-set-password-instructions-sent" |
         "active-plan-license-key-input" |

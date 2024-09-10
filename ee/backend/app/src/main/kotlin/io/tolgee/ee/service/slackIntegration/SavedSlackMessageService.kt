@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.slackIntegration
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.ee.component.slackIntegration.SavedMessageDto
 import io.tolgee.ee.repository.slackIntegration.SavedSlackMessageRepository
@@ -8,15 +7,17 @@ import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.util.addMinutes
 import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
 class SavedSlackMessageService(
+  @Lazy
   private val savedSlackMessageRepository: SavedSlackMessageRepository,
+  @Lazy
   private val slackConfigRepository: SlackConfigRepository,
   private val currentDateProvider: CurrentDateProvider,
-  private val objectMapper: ObjectMapper,
   private val slackMessageInfoService: SlackMessageInfoService,
 ) {
   @Transactional

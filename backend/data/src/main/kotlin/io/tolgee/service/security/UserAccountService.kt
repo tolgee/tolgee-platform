@@ -46,6 +46,7 @@ import java.util.*
 
 @Service
 class UserAccountService(
+  @Lazy
   private val userAccountRepository: UserAccountRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,

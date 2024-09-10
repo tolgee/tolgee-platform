@@ -12,18 +12,24 @@ import io.tolgee.util.addSeconds
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
 import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
 class ScheduledJobCleaner(
+  @Lazy
   private val batchJobService: BatchJobService,
+  @Lazy
   private val lockingManager: BatchJobProjectLockingManager,
   private val currentDateProvider: CurrentDateProvider,
+  @Lazy
   private val batchJobStateProvider: BatchJobStateProvider,
   private val entityManager: EntityManager,
+  @Lazy
   private val cachingBatchJobService: CachingBatchJobService,
+  @Lazy
   private val batchJobStatusProvider: BatchJobStatusProvider,
 ) : Logging {
   /**

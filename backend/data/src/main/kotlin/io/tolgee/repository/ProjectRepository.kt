@@ -3,6 +3,7 @@ package io.tolgee.repository
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.views.ProjectView
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -11,6 +12,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface ProjectRepository : JpaRepository<Project, Long> {
   companion object {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,

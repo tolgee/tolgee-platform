@@ -60,7 +60,7 @@ task waitForRunningContainer(type: Task, group: "e2e") {
             String s = null
             while ((s = stdInput.readLine()) != null) {
                 println(s)
-                if (s.contains("Tomcat started on port(s):")) {
+                if (s.contains("Tomcat started on port")) {
                     return
                 }
             }
