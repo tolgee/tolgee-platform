@@ -143,6 +143,17 @@ class AuthenticationProperties(
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
+  @DocProperty(
+    description =
+      "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`" +
+        "You may need that when you want to log in via third-party SSO options",
+  )
+  var customLogoUrl: String? = null,
+  @DocProperty(
+    description = "Custom text for the login button.",
+    defaultExplanation = "Defaults to 'Login' if not set.",
+  )
+  var customButtonText: String = "SsoLogin",
 ) {
   fun checkAllowedRegistrations() {
     if (!this.registrationsAllowed) {
