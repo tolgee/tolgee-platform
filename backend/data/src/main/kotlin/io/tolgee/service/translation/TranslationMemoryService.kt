@@ -83,9 +83,15 @@ class TranslationMemoryService(
                   target.text <> '' and
                   target.text is not null
             join key targetKey on target.key_id = targetKey.id    
-            where baseTranslation.language_id = p.base_language_id and
-              (cast(:key as bigint) is null or targetKey.id <> :key) and targetKey.is_plural = :isPlural
-              and baseTranslation.text % :baseTranslationText
+            """ +
+
+          // we use the case when syntax to force postgres to evaluate all the other conditions first,
+          // the similarity condition is slow even it uses index, and it tends to be evaluated first since
+          // huge underestimation
+          """
+            where case when (baseTranslation.language_id = p.base_language_id and
+              (cast(:key as bigint) is null or targetKey.id <> :key) and targetKey.is_plural = :isPlural)
+              then baseTranslation.text % :baseTranslationText end
         ) select base.*, count(*) over() 
         from base
         order by base.similarity desc
