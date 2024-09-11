@@ -1,3 +1,10 @@
+## [3.71.6](https://github.com/tolgee/tolgee-platform/compare/v3.71.5...v3.71.6) (2024-09-11)
+
+
+### Performance Improvements
+
+* Translation Memory and Tolgee AI Translator suggestion performance ([#2459](https://github.com/tolgee/tolgee-platform/issues/2459)) ([fee2751](https://github.com/tolgee/tolgee-platform/commit/fee2751c6c8eadef6ba650749ed37abb5c4b4242))
+
 ## [3.71.5](https://github.com/tolgee/tolgee-platform/compare/v3.71.4...v3.71.5) (2024-09-10)
 
 
