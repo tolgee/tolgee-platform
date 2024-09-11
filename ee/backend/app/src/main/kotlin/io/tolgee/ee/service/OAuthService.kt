@@ -35,6 +35,7 @@ class OAuthService(
     redirectUrl: String,
     error: String,
     errorDescription: String,
+    invitationCode: String?,
   ): JwtAuthenticationResponse? {
     if (error.isNotBlank()) {
       logger.info("Third party auth failed: $errorDescription $error")
@@ -58,7 +59,7 @@ class OAuthService(
     val userInfo =
       getUserInfo(tokenResponse.id_token)
 
-    return register(userInfo, clientRegistration.registrationId)
+    return register(userInfo, clientRegistration.registrationId, invitationCode)
   }
 
   private fun exchangeCodeForToken(
@@ -122,6 +123,7 @@ class OAuthService(
   private fun register(
     userResponse: GenericUserResponse,
     registrationId: String,
+    invitationCode: String?,
   ): JwtAuthenticationResponse? {
     val email =
       userResponse.email ?: let {
@@ -151,7 +153,7 @@ class OAuthService(
         newUserAccount.thirdPartyAuthId = userResponse.sub
         newUserAccount.thirdPartyAuthType = registrationId
         newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-        signUpService.signUp(newUserAccount, null, null)
+        signUpService.signUp(newUserAccount, invitationCode, null)
 
         newUserAccount
       }

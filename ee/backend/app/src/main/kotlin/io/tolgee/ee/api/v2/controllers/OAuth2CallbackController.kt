@@ -42,6 +42,7 @@ class OAuth2CallbackController(
     @RequestParam(value = "redirect_uri", required = true) redirectUrl: String,
     @RequestParam(defaultValue = "") error: String,
     @RequestParam(defaultValue = "") error_description: String,
+    @RequestParam(value = "invitationCode", required = false) invitationCode: String?,
     response: HttpServletResponse,
     @PathVariable registrationId: String,
   ): JwtAuthenticationResponse? {
@@ -51,6 +52,7 @@ class OAuth2CallbackController(
       redirectUrl = redirectUrl,
       error = error,
       errorDescription = error_description,
+      invitationCode = invitationCode,
     )
   }
 
