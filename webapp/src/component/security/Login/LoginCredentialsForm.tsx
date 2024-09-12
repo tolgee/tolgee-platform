@@ -33,7 +33,6 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
   const { login } = useGlobalActions();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
-
   const oAuthServices = useOAuthServices();
 
   return (
@@ -42,7 +41,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
       submitButtons={
         <Box>
           <Box display="flex" flexDirection="column" alignItems="stretch">
-            <LoadingButton
+            {remoteConfig.nativeEnabled && ( <LoadingButton
               loading={isLoading}
               variant="contained"
               color="primary"
@@ -51,6 +50,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
             >
               <T keyName="login_login_button" />
             </LoadingButton>
+            )}
 
             <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>
               {remoteConfig.passwordResettable && (
@@ -66,12 +66,34 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
             </Box>
 
             <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>
+              {remoteConfig.nativeEnabled && (
               <MuiLink to={LINKS.SSO_LOGIN.build()} component={Link}>
                 <Typography variant="body2">
                   <T keyName="login_sso" />
                 </Typography>
               </MuiLink>
+               )}
             </Box>
+
+            {!remoteConfig.nativeEnabled && (
+                <Button
+                    component={Link}
+                    to={LINKS.SSO_LOGIN.build()}
+                    size="medium"
+                    endIcon={(
+                        <img
+                            src="https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg"
+                            alt="Custom Logo"
+                            style={{ width: 24, height: 24 }}
+                        />
+                    )}
+                    variant="outlined"
+                    style={{ marginBottom: '0.5rem' }}
+                    color="inherit"
+                >
+                  {remoteConfig.customLoginText}
+                </Button>
+            )}
 
             {oAuthServices.length > 0 && <Box height="0px" mt={5} />}
             {oAuthServices.map((provider) => (
@@ -104,7 +126,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         }
       }}
     >
-      <StyledInputFields>
+      {remoteConfig.nativeEnabled && ( <StyledInputFields>
         <TextField
           name="username"
           label={<T keyName="login_email_label" />}
@@ -117,6 +139,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
           minHeight={false}
         />
       </StyledInputFields>
+        )}
     </StandardForm>
   );
 }
