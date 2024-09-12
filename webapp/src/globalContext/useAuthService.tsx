@@ -207,12 +207,14 @@ export const useAuthService = (
             query: {
               code,
               redirect_uri: redirectUri,
-              state: "random_state",
+              invitationCode: invitationCode,
             },
           },
           {
             onError: (error) => {
-              console.log(error);
+              if (error.code === 'invitation_code_does_not_exist_or_expired') {
+                setInvitationCode(undefined);
+              }
               messageService.error(<TranslatedError code={error.code!} />);
             },
           }
