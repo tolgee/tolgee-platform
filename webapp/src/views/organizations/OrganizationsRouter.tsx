@@ -17,6 +17,7 @@ import { OrganizationInvoicesView } from './billing/Invoices/OrganizationInvoice
 import { OrganizationSubscriptionsView } from './billing/Subscriptions/OrganizationSubscriptionsView';
 import { OrganizationBillingTestClockHelperView } from './billing/OrganizationBillingTestClockHelperView';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
+import { OrganizationSsoView } from 'tg.views/organizations/sso/OrganizationSsoView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -66,6 +67,10 @@ const SpecificOrganizationRouter = () => {
           )}
           <PrivateRoute path={LINKS.ORGANIZATION_APPS.template}>
             <OrganizationAppsView />
+          </PrivateRoute>
+
+          <PrivateRoute path={LINKS.ORGANIZATION_SSO.template}>
+            <OrganizationSsoView />
           </PrivateRoute>
         </>
       ) : (
