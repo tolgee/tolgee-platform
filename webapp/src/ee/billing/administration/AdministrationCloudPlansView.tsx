@@ -1,12 +1,12 @@
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
   ListItem,
   ListItemText,
   Paper,
-  Button,
-  Box,
-  Chip,
-  IconButton,
 } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -15,7 +15,7 @@ import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import { BaseAdministrationView } from './components/BaseAdministrationView';
+import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { Link } from 'react-router-dom';
 import { Delete } from '@mui/icons-material';
 import { useMessage } from 'tg.hooks/useSuccessMessage';

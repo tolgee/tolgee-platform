@@ -1,12 +1,12 @@
 import { Box, Typography } from '@mui/material';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
-import { BaseAdministrationView } from './components/BaseAdministrationView';
+import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { EePlanForm } from './components/EePlanForm';
 
 export const AdministrationEePlanCreateView = () => {

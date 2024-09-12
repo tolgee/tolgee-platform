@@ -2,9 +2,9 @@ import { FunctionComponent, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
 
-import { BaseOrganizationSettingsView } from '../../components/BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useOrganization } from '../../useOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { PlansCloud } from './cloud/PlansCloud';

@@ -1,6 +1,6 @@
 import { Box, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { PrepareUpgradeDialog } from 'tg.views/organizations/billing/PrepareUpgradeDialog';
+import { PrepareUpgradeDialog } from '../../PrepareUpgradeDialog';
 
 import { usePlan } from 'tg.component/billing/Plan/usePlan';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -24,6 +24,7 @@ type Props = {
   custom?: boolean;
   planId: number;
   period: BillingPeriodType;
+  show?: boolean;
 };
 
 export const PlanAction = ({
@@ -33,6 +34,7 @@ export const PlanAction = ({
   organizationHasSomeSubscription,
   planId,
   period,
+  show,
 }: Props) => {
   const {
     cancelMutation,
@@ -85,19 +87,22 @@ export const PlanAction = ({
   }
 
   const { loading, onClick, label } = getLabelAndAction();
+  const shouldShow = show == undefined || show;
 
   return (
     <StyledContainer>
-      <LoadingButton
-        data-cy="billing-plan-action-button"
-        variant="contained"
-        color={custom ? 'info' : 'primary'}
-        size="medium"
-        loading={loading}
-        onClick={onClick}
-      >
-        {label}
-      </LoadingButton>
+      {shouldShow && (
+        <LoadingButton
+          data-cy="billing-plan-action-button"
+          variant="contained"
+          color={custom ? 'info' : 'primary'}
+          size="medium"
+          loading={loading}
+          onClick={onClick}
+        >
+          {label}
+        </LoadingButton>
+      )}
       {prepareUpgradeMutation.data && (
         <PrepareUpgradeDialog
           data={prepareUpgradeMutation.data}

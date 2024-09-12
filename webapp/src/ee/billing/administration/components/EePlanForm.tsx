@@ -1,11 +1,11 @@
 import {
   Box,
-  FormControl,
-  InputLabel,
-  Typography,
   Checkbox,
+  FormControl,
   FormControlLabel,
+  InputLabel,
   Switch,
+  Typography,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Field, FieldProps, Form, Formik } from 'formik';

@@ -1,4 +1,4 @@
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { Box, IconButton, Tooltip } from '@mui/material';

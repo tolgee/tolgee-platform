@@ -11,7 +11,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useTranslate } from '@tolgee/react';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import Dialog from '@mui/material/Dialog';
-import { useOrganization } from '../../useOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { TotalTable } from '../common/usage/TotalTable';
 import { UsageTable } from '../common/usage/UsageTable';

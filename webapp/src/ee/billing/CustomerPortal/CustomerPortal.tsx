@@ -1,12 +1,12 @@
-import { Button, styled, Typography, Box } from '@mui/material';
+import { Box, Button, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import {
   StyledBillingSection,
-  StyledBillingSectionTitle,
   StyledBillingSectionHeader,
+  StyledBillingSectionTitle,
 } from '../BillingSection';
 import StripeLogoSvg from 'tg.svgs/stripeLogo.svg?react';
 

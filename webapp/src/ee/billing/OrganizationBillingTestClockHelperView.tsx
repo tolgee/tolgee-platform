@@ -6,9 +6,9 @@ import {
 } from 'react';
 import { useTranslate } from '@tolgee/react';
 
-import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
 import { LINKS } from 'tg.constants/links';
-import { useOrganization } from '../useOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { UseQueryResult } from 'react-query';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import {

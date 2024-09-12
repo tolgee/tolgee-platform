@@ -1,9 +1,9 @@
 import { FunctionComponent } from 'react';
 import { useTranslate } from '@tolgee/react';
 
-import { BaseOrganizationSettingsView } from '../../components/BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
 import { LINKS } from 'tg.constants/links';
-import { useOrganization } from '../../useOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { CustomerPortal } from '../CustomerPortal/CustomerPortal';
 import { Invoices } from './Invoices';
 import { styled } from '@mui/material';

@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
@@ -10,10 +10,10 @@ import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import { BaseAdministrationView } from './components/BaseAdministrationView';
-import { EePlanForm } from './components/EePlanForm';
+import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
+import { CloudPlanForm } from './components/CloudPlanForm';
 
-export const AdministrationEePlanEditView = () => {
+export const AdministrationCloudPlanEditView = () => {
   const match = useRouteMatch();
   const { t } = useTranslate();
   const messaging = useMessage();
@@ -22,15 +22,15 @@ export const AdministrationEePlanEditView = () => {
   const planId = match.params[PARAMS.PLAN_ID];
 
   const planLoadable = useBillingApiQuery({
-    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
+    url: '/v2/administration/billing/cloud-plans/{planId}',
     method: 'get',
     path: { planId },
   });
 
   const planEditLoadable = useBillingApiMutation({
-    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
+    url: '/v2/administration/billing/cloud-plans/{planId}',
     method: 'put',
-    invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
+    invalidatePrefix: '/v2/administration/billing/cloud-plans',
   });
 
   if (planLoadable.isLoading) {
@@ -46,15 +46,15 @@ export const AdministrationEePlanEditView = () => {
   return (
     <DashboardPage>
       <BaseAdministrationView
-        windowTitle={t('administration_ee_plan_edit')}
+        windowTitle={t('administration_cloud_plan_edit')}
         navigation={[
           [
-            t('administration_ee_plans'),
-            LINKS.ADMINISTRATION_BILLING_EE_PLANS.build(),
+            t('administration_cloud_plans'),
+            LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
           ],
           [
-            t('administration_ee_plan_edit'),
-            LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.build({
+            t('administration_cloud_plan_edit'),
+            LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
               [PARAMS.PLAN_ID]: planId,
             }),
           ],
@@ -64,17 +64,21 @@ export const AdministrationEePlanEditView = () => {
       >
         <Box>
           <Typography variant="h5">
-            {t('administration_ee_plan_edit')}
+            {t('administration_cloud_plan_edit')}
           </Typography>
-          <EePlanForm
+          <CloudPlanForm
             planId={planId}
-            loading={false}
+            loading={planEditLoadable.isLoading}
             initialData={{
               ...planData,
+              autoAssignOrganizationIds: [],
               includedUsage: {
                 seats: planData.includedUsage.seats,
                 mtCredits: planData.includedUsage.mtCredits,
-                translations: planData.includedUsage.translations,
+                translations:
+                  planData.type === 'SLOTS_FIXED'
+                    ? planData.includedUsage.translationSlots
+                    : planData.includedUsage.translations,
               },
             }}
             onSubmit={(values) => {
@@ -94,9 +98,11 @@ export const AdministrationEePlanEditView = () => {
                 {
                   onSuccess() {
                     messaging.success(
-                      <T keyName="administration_ee_plan_updated_success" />
+                      <T keyName="administration_cloud_plan_updated_success" />
                     );
-                    history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
+                    history.push(
+                      LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build()
+                    );
                   },
                 }
               );
