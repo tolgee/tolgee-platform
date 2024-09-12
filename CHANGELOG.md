@@ -1,3 +1,10 @@
+## [3.71.7](https://github.com/tolgee/tolgee-platform/compare/v3.71.6...v3.71.7) (2024-09-12)
+
+
+### Bug Fixes
+
+* Billing fixes ([#2460](https://github.com/tolgee/tolgee-platform/issues/2460)) ([2086657](https://github.com/tolgee/tolgee-platform/commit/2086657ca36fbce93e69aa21dbb0b118226abd96))
+
 ## [3.71.6](https://github.com/tolgee/tolgee-platform/compare/v3.71.5...v3.71.6) (2024-09-11)
 
 
