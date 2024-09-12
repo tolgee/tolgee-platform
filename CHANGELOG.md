@@ -1,3 +1,10 @@
+# [3.72.0](https://github.com/tolgee/tolgee-platform/compare/v3.71.7...v3.72.0) (2024-09-12)
+
+
+### Features
+
+* Enable Cloudflare cache purging ([#2461](https://github.com/tolgee/tolgee-platform/issues/2461)) ([bcb7ec8](https://github.com/tolgee/tolgee-platform/commit/bcb7ec845dd8ece0bbae214944ea2bcbdf640d79))
+
 ## [3.71.7](https://github.com/tolgee/tolgee-platform/compare/v3.71.6...v3.71.7) (2024-09-12)
 
 
