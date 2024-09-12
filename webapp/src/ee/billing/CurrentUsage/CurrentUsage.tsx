@@ -15,7 +15,7 @@ import { PlanMetric } from './PlanMetric';
 import { MtHint } from 'tg.component/billing/MtHint';
 import { EstimatedCosts } from '../common/usage/EstimatedCosts';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { useOrganization } from '../../useOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { getProgressData } from 'tg.component/billing/utils';
 import { StringsHint } from 'tg.component/billing/Hints';
 

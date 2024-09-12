@@ -4,13 +4,13 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
-import { AdministrationEeLicenseView } from './AdministrationEeLicenseView';
-import { AdministrationCloudPlansView } from './AdministrationCloudPlansView';
-import { AdministrationCloudPlanEditView } from './AdministrationCloudPlanEditView';
-import { AdministrationCloudPlanCreateView } from './AdministrationCloudPlanCreateView';
-import { AdministrationEePlansView } from './AdministrationEePlansView';
-import { AdministrationEePlanEditView } from './AdministrationEePlanEditView';
-import { AdministrationEePlanCreateView } from './AdministrationEePlanCreateView';
+import { AdministrationEeLicenseView } from 'tg.ee/billing/administration/AdministrationEeLicenseView';
+import { AdministrationCloudPlansView } from 'tg.ee/billing/administration/AdministrationCloudPlansView';
+import { AdministrationCloudPlanEditView } from 'tg.ee/billing/administration/AdministrationCloudPlanEditView';
+import { AdministrationCloudPlanCreateView } from 'tg.ee/billing/administration/AdministrationCloudPlanCreateView';
+import { AdministrationEePlansView } from 'tg.ee/billing/administration/AdministrationEePlansView';
+import { AdministrationEePlanEditView } from 'tg.ee/billing/administration/AdministrationEePlanEditView';
+import { AdministrationEePlanCreateView } from 'tg.ee/billing/administration/AdministrationEePlanCreateView';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 export const AdministrationView = () => {

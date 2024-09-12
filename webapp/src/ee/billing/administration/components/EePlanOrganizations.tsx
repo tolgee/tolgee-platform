@@ -1,11 +1,11 @@
 import {
+  Box,
+  Checkbox,
+  FormControlLabel,
   ListItem,
   ListItemText,
-  FormControlLabel,
-  Checkbox,
-  Box,
-  Typography,
   Switch,
+  Typography,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useState } from 'react';

@@ -12,10 +12,10 @@ import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivileges
 import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { useOrganization } from './useOrganization';
-import { OrganizationBillingView } from './billing/OrganizationBillingView';
-import { OrganizationInvoicesView } from './billing/Invoices/OrganizationInvoicesView';
-import { OrganizationSubscriptionsView } from './billing/Subscriptions/OrganizationSubscriptionsView';
-import { OrganizationBillingTestClockHelperView } from './billing/OrganizationBillingTestClockHelperView';
+import { OrganizationBillingView } from 'tg.ee/billing/OrganizationBillingView';
+import { OrganizationInvoicesView } from 'tg.ee/billing/Invoices/OrganizationInvoicesView';
+import { OrganizationSubscriptionsView } from 'tg.ee/billing/Subscriptions/OrganizationSubscriptionsView';
+import { OrganizationBillingTestClockHelperView } from 'tg.ee/billing/OrganizationBillingTestClockHelperView';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
 
 const SpecificOrganizationRouter = () => {

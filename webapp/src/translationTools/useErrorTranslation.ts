@@ -127,6 +127,8 @@ export function useErrorTranslation() {
         return t('verify_email_already_verified');
       case 'email_verification_code_not_valid':
         return t('verify_email_verification_code_not_valid');
+      case 'user_is_subscribed_to_paid_plan':
+        return t('user_is_subscribed_to_paid_plan');
       default:
         return code;
     }

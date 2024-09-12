@@ -136,6 +136,7 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
                     active={isActive(plan)}
                     ended={isEnded(plan)}
                     custom={custom}
+                    show={!plan.free}
                     organizationHasSomeSubscription={
                       !activeSubscription.plan.free
                     }

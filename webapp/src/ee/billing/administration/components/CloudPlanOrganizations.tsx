@@ -1,16 +1,17 @@
 import {
+  Box,
+  Checkbox,
+  FormControlLabel,
   ListItem,
   ListItemText,
-  FormControlLabel,
-  Checkbox,
-  Box,
-  Typography,
   Switch,
+  Typography,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import { AssignSwitchCheckbox } from './AssignSwitchCheckbox';
 
 type Props = {
   planId?: number;
@@ -114,7 +115,12 @@ export function CloudPlanOrganizations({
                     }}
                   />
                 }
-                label={<ListItemText>{label}</ListItemText>}
+                label={
+                  <ListItemText>
+                    {label}
+                    <AssignSwitchCheckbox organizationId={o.id} />
+                  </ListItemText>
+                }
               />
             </ListItem>
           );

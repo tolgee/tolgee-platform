@@ -1,12 +1,12 @@
 import {
   Box,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
-  Typography,
-  Checkbox,
-  FormControlLabel,
   Switch,
+  Typography,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Field, FieldProps, Form, Formik } from 'formik';
@@ -24,7 +24,7 @@ type CloudPlanModel = components['schemas']['CloudPlanRequest'];
 type EnabledFeature =
   components['schemas']['CloudPlanRequest']['enabledFeatures'][number];
 
-type FormData = {
+export type CloudPlanFormData = {
   type: CloudPlanModel['type'];
   name: string;
   prices: CloudPlanModel['prices'];
@@ -34,13 +34,13 @@ type FormData = {
   forOrganizationIds: number[];
   public: boolean;
   free: boolean;
-  autoAssign: boolean;
+  autoAssignOrganizationIds: CloudPlanModel['autoAssignOrganizationIds'];
 };
 
 type Props = {
   planId?: number;
-  initialData: FormData;
-  onSubmit: (value: FormData) => void;
+  initialData: CloudPlanFormData;
+  onSubmit: (value: CloudPlanFormData) => void;
   loading: boolean | undefined;
 };
 
@@ -83,8 +83,8 @@ export function CloudPlanForm({
           public: initialData.public,
           forOrganizationIds: initialData.forOrganizationIds,
           free: initialData.free,
-          autoAssign: false,
-        } as FormData
+          autoAssignOrganizationIds: initialData.autoAssignOrganizationIds,
+        } as CloudPlanFormData
       }
       enableReinitialize
       onSubmit={(values) => {
@@ -322,23 +322,6 @@ export function CloudPlanForm({
                   <Typography color="error">
                     {errors.forOrganizationIds}
                   </Typography>
-                )}
-
-                {values.free && (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={values.autoAssign}
-                        onChange={() =>
-                          setFieldValue('autoAssign', !values.autoAssign)
-                        }
-                      />
-                    }
-                    data-cy="administration-cloud-plan-field-auto-assign-to-selected"
-                    label={t(
-                      'administration_cloud_plan_field_auto-assign-to-selected'
-                    )}
-                  />
                 )}
               </Box>
             )}

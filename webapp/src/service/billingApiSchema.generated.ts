@@ -139,6 +139,7 @@ export interface components {
         | "third_party_auth_no_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
+        | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "username_already_exists"
@@ -338,7 +339,12 @@ export interface components {
         | "tolgee_account_already_connected"
         | "slack_not_configured"
         | "slack_workspace_already_connected"
-        | "slack_connection_error";
+        | "slack_connection_error"
+        | "email_verification_code_not_valid"
+        | "cannot_subscribe_to_free_plan"
+        | "plan_auto_assignment_only_for_free_plans"
+        | "plan_auto_assignment_only_for_private_plans"
+        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -590,7 +596,7 @@ export interface components {
       /** Format: date-time */
       usableUntil?: string;
       forOrganizationIds: number[];
-      autoAssign: boolean;
+      autoAssignOrganizationIds: number[];
     };
     CloudPlanAdministrationModel: {
       /** Format: int64 */
