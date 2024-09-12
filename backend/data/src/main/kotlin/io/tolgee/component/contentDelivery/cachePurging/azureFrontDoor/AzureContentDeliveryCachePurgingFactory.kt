@@ -1,5 +1,6 @@
-package io.tolgee.component.contentDelivery.cachePurging
+package io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor
 
+import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingFactory
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate

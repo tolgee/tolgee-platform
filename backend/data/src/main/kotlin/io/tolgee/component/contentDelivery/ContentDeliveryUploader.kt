@@ -47,7 +47,9 @@ class ContentDeliveryUploader(
   ) {
     val isDefaultStorage = contentDeliveryConfig.contentStorage == null
     if (isDefaultStorage) {
-      contentDeliveryCachePurgingProvider.defaultPurging?.purgeForPaths(contentDeliveryConfig, paths)
+      contentDeliveryCachePurgingProvider.purgings.forEach {
+        it.purgeForPaths(contentDeliveryConfig, paths)
+      }
     }
   }
 

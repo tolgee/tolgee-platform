@@ -1,8 +1,8 @@
 package io.tolgee.unit.cachePurging
 
 import com.azure.identity.ClientSecretCredential
-import io.tolgee.component.contentDelivery.cachePurging.AzureContentDeliveryCachePurging
-import io.tolgee.component.contentDelivery.cachePurging.AzureCredentialProvider
+import io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor.AzureContentDeliveryCachePurging
+import io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor.AzureCredentialProvider
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.testing.assert

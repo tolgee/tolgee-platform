@@ -1,7 +1,8 @@
-package io.tolgee.component.contentDelivery.cachePurging
+package io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor
 
 import com.azure.core.credential.TokenRequestContext
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurging
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import org.springframework.http.HttpEntity

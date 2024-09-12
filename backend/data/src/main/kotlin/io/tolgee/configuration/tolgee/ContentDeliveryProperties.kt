@@ -21,6 +21,10 @@ class ContentDeliveryProperties {
   @DocProperty(description = "Configuration of the storage. You have to configure exactly one storage.")
   var storage: ContentStorageProperties = ContentStorageProperties()
 
-  @DocProperty(hidden = true)
+  @DocProperty(
+    description =
+      "Several services can be used as cache. Tolgee is able to purge the cache when " +
+        "new files are published when this configuration is set.",
+  )
   var cachePurging: ContentDeliveryCachePurgingProperties = ContentDeliveryCachePurgingProperties()
 }
