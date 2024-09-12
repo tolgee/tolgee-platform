@@ -1,4 +1,4 @@
-package io.tolgee.component.contentDelivery.cachePurging
+package io.tolgee.component.contentDelivery.cachePurging.azureFrontDoor
 
 import com.azure.identity.ClientSecretCredential
 import com.azure.identity.ClientSecretCredentialBuilder
