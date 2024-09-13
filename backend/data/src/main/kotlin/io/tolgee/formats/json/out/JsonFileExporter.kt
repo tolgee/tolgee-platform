@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.genericStructuredFile.out.GenericStructuredFileExporter
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -15,6 +16,7 @@ class JsonFileExporter(
   val exportParams: IExportParams,
   projectIcuPlaceholdersSupport: Boolean,
   val objectMapper: ObjectMapper,
+  customPrettyPrinter: CustomPrettyPrinter,
 ) : FileExporter {
   private val fileExtension: String = ExportFormat.JSON.extension
 
@@ -33,6 +35,7 @@ class JsonFileExporter(
       objectMapper = objectMapper,
       supportArrays = supportArrays,
       messageFormat = messageFormat,
+      customPrettyPrinter = customPrettyPrinter,
     )
 
   private val supportArrays

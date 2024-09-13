@@ -8,6 +8,7 @@ import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
+import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
@@ -23,6 +24,7 @@ class FileExporterFactory(
   private val objectMapper: ObjectMapper,
   @Qualifier("yamlObjectMapper")
   private val yamlObjectMapper: ObjectMapper,
+  private val customPrettyPrinter: CustomPrettyPrinter,
 ) {
   fun create(
     data: List<ExportTranslationView>,
@@ -38,6 +40,7 @@ class FileExporterFactory(
           exportParams,
           objectMapper = objectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
+          customPrettyPrinter = customPrettyPrinter,
         )
 
       ExportFormat.YAML_RUBY, ExportFormat.YAML ->
@@ -46,6 +49,7 @@ class FileExporterFactory(
           exportParams,
           objectMapper = yamlObjectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
+          customPrettyPrinter,
         )
 
       ExportFormat.XLIFF ->

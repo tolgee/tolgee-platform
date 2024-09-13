@@ -19,6 +19,7 @@ class GenericStructuredFileExporter(
   private val rootKeyIsLanguageTag: Boolean = false,
   private val supportArrays: Boolean,
   private val messageFormat: ExportMessageFormat,
+  private val customPrettyPrinter: CustomPrettyPrinter,
 ) : FileExporter {
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
@@ -26,7 +27,7 @@ class GenericStructuredFileExporter(
     prepare()
     return result.asSequence().map { (fileName, modelBuilder) ->
       fileName to
-        objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(modelBuilder.result)
+        objectMapper.writer(customPrettyPrinter).writeValueAsBytes(modelBuilder.result)
           .inputStream()
     }.toMap()
   }
