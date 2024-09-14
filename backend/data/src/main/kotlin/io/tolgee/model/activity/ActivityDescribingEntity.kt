@@ -23,12 +23,16 @@ class ActivityDescribingEntity(
   val entityClass: String,
   @Id
   val entityId: Long,
-) : Serializable {
+) : Serializable, ActivityEntityWithDescription {
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var data: Map<String, Any?> = mutableMapOf()
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  var describingRelations: Map<String, EntityDescriptionRef>? = null
+  override var describingRelations: Map<String, EntityDescriptionRef>? = null
+
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  override var additionalDescription: MutableMap<String, Any?>? = null
 }

@@ -2,6 +2,7 @@ package io.tolgee.model.activity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.ProjectIdAndBaseLanguageId
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -110,6 +111,17 @@ class ActivityRevision : java.io.Serializable {
 
   @ManyToMany
   var activityGroups: MutableList<ActivityGroup> = mutableListOf()
+
+  /**
+   * We need to store it to know which language was the base language when the change was made
+   * for group and filtering purposes
+   */
+  var baseLanguageId: Long? = null
+
+  fun setProject(project: ProjectIdAndBaseLanguageId) {
+    this.projectId = project.id
+    this.baseLanguageId = project.baseLanguageId
+  }
 
   companion object {
     @Configurable

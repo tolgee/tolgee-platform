@@ -7,4 +7,5 @@ data class ActivityGroupDto(
   val activityGroupType: ActivityGroupType,
   val latestTimestamp: Date,
   val earliestTimestamp: Date,
+  val matchingString: String? = null,
 )

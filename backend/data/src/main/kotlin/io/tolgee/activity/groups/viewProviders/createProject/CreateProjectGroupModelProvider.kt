@@ -13,7 +13,7 @@ class CreateProjectGroupModelProvider(
   private val jooqContext: DSLContext,
 ) :
   GroupModelProvider<CreateProjectGroupModel, Nothing> {
-  override fun provideGroupModel(groupIds: List<Long>): Map<Long, CreateProjectGroupModel> {
+  override fun provideGroup(groupIds: List<Long>): Map<Long, CreateProjectGroupModel> {
     val query =
       jooqContext
         .select(
@@ -63,7 +63,7 @@ class CreateProjectGroupModelProvider(
     }.toMap()
   }
 
-  override fun provideItemModel(
+  override fun provideItems(
     groupId: Long,
     pageable: Pageable,
   ): Page<Nothing> {

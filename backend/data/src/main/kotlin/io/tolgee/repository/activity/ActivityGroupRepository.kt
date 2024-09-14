@@ -13,6 +13,7 @@ interface ActivityGroupRepository : JpaRepository<ActivityGroup, Long> {
       SELECT
         ag.id,
         ag.type,
+        ag.matching_string,
         MAX(ar.timestamp) AS last_activity,
         MIN(ar.timestamp) AS first_activity
       FROM activity_group ag
@@ -22,6 +23,7 @@ interface ActivityGroupRepository : JpaRepository<ActivityGroup, Long> {
         ag.project_id = :projectId
         AND ag.author_id = :authorId
         AND ag.type = :groupTypeName
+        AND (ag.matching_string = :matchingString or (:matchingString is null))
       GROUP BY ag.id
       order by ag.id desc
       limit 1
@@ -31,5 +33,6 @@ interface ActivityGroupRepository : JpaRepository<ActivityGroup, Long> {
     groupTypeName: String,
     authorId: Long?,
     projectId: Long?,
+    matchingString: String?,
   ): List<Array<Any?>>
 }

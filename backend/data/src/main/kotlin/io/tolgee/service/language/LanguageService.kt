@@ -101,7 +101,7 @@ class LanguageService(
   ) {
     activityHolder.activity = ActivityType.HARD_DELETE_LANGUAGE
     activityHolder.activityRevision.authorId = authorId
-    activityHolder.activityRevision.projectId = language.project.id
+    activityHolder.activityRevision.setProject(language.project)
     hardDeleteLanguage(language)
   }
 

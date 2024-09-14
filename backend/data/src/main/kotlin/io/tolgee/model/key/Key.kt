@@ -64,10 +64,12 @@ class Key(
   var keyScreenshotReferences: MutableList<KeyScreenshotReference> = mutableListOf()
 
   @ActivityLoggedProp
+  @ActivityDescribingProp
   @ColumnDefault("false")
   var isPlural: Boolean = false
 
   @ActivityLoggedProp
+  @ActivityDescribingProp
   var pluralArgName: String? = null
 
   constructor(

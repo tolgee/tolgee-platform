@@ -6,9 +6,13 @@ import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.eq
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.modification
 import io.tolgee.activity.groups.matchers.ActivityGroupValueMatcher.Companion.notNull
 import io.tolgee.activity.groups.matchers.modifiedEntity.DefaultMatcher
+import io.tolgee.activity.groups.matchers.modifiedEntity.MatchingStringProvider
 import io.tolgee.activity.groups.matchers.modifiedEntity.ModifiedEntityMatcher
+import io.tolgee.activity.groups.matchers.modifiedEntity.SetTranslationMatchingStringProvider
+import io.tolgee.activity.groups.matchers.modifiedEntity.TranslationMatcher
+import io.tolgee.activity.groups.viewProviders.createKey.CreateKeyGroupModelProvider
 import io.tolgee.activity.groups.viewProviders.createProject.CreateProjectGroupModelProvider
-import io.tolgee.activity.groups.viewProviders.keyCreate.CreateKeyGroupModelProvider
+import io.tolgee.activity.groups.viewProviders.setTranslations.SetTranslationsGroupModelProvider
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
@@ -29,7 +33,55 @@ enum class ActivityGroupType(
   val sourceActivityTypes: List<ActivityType>,
   val modelProviderFactoryClass: KClass<out GroupModelProvider<*, *>>? = null,
   val matcher: ModifiedEntityMatcher? = null,
+  val matchingStringProvider: MatchingStringProvider? = null,
+  /**
+   * Even if we are working with same revisions order can be unnatural in some cases.
+   * e.g. when user creates a key and then sets translations for it. It results in multiple groups.
+   * We need to force the order, so key creation is always before translation set
+   */
+  val orderAfter: ActivityGroupType? = null,
 ) {
+  CREATE_KEY(
+    listOf(ActivityType.CREATE_KEY),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.ADD),
+      ).or(
+        DefaultMatcher(
+          entityClass = KeyMeta::class,
+          revisionTypes = listOf(RevisionType.ADD),
+        ),
+      ).or(
+        TranslationMatcher(TranslationMatcher.Type.BASE),
+      ),
+    modelProviderFactoryClass = CreateKeyGroupModelProvider::class,
+  ),
+
+  EDIT_KEY_NAME(
+    listOf(ActivityType.KEY_NAME_EDIT, ActivityType.COMPLEX_EDIT),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.MOD),
+        modificationProps = listOf(Key::name, Key::namespace),
+      ).or(
+        DefaultMatcher(
+          entityClass = Namespace::class,
+          revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
+        ),
+      ),
+  ),
+
+  DELETE_KEY(
+    listOf(ActivityType.KEY_DELETE),
+    matcher =
+      DefaultMatcher(
+        entityClass = Key::class,
+        revisionTypes = listOf(RevisionType.DEL),
+      ),
+  ),
+
   SET_TRANSLATION_STATE(
     listOf(ActivityType.SET_TRANSLATION_STATE, ActivityType.COMPLEX_EDIT),
     matcher =
@@ -55,14 +107,19 @@ enum class ActivityGroupType(
       ),
   ),
 
-  SET_TRANSLATIONS(
+  SET_BASE_TRANSLATION(
     listOf(ActivityType.SET_TRANSLATIONS, ActivityType.COMPLEX_EDIT),
     matcher =
-      DefaultMatcher(
-        entityClass = Translation::class,
-        revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL, RevisionType.MOD),
-        modificationProps = listOf(Translation::text),
-      ),
+      TranslationMatcher(TranslationMatcher.Type.BASE),
+  ),
+
+  SET_TRANSLATIONS(
+    listOf(ActivityType.SET_TRANSLATIONS, ActivityType.COMPLEX_EDIT, ActivityType.CREATE_KEY),
+    matcher =
+      TranslationMatcher(TranslationMatcher.Type.NON_BASE),
+    matchingStringProvider = SetTranslationMatchingStringProvider(),
+    modelProviderFactoryClass = SetTranslationsGroupModelProvider::class,
+    orderAfter = CREATE_KEY,
   ),
 
   DISMISS_AUTO_TRANSLATED_STATE(
@@ -175,50 +232,6 @@ enum class ActivityGroupType(
           revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
         ),
       ),
-  ),
-
-  EDIT_KEY_NAME(
-    listOf(ActivityType.KEY_NAME_EDIT, ActivityType.COMPLEX_EDIT),
-    matcher =
-      DefaultMatcher(
-        entityClass = Key::class,
-        revisionTypes = listOf(RevisionType.MOD),
-        modificationProps = listOf(Key::name, Key::namespace),
-      ).or(
-        DefaultMatcher(
-          entityClass = Namespace::class,
-          revisionTypes = listOf(RevisionType.ADD, RevisionType.DEL),
-        ),
-      ),
-  ),
-
-  DELETE_KEY(
-    listOf(ActivityType.KEY_DELETE),
-    matcher =
-      DefaultMatcher(
-        entityClass = Key::class,
-        revisionTypes = listOf(RevisionType.DEL),
-      ),
-  ),
-
-  CREATE_KEY(
-    listOf(ActivityType.CREATE_KEY),
-    matcher =
-      DefaultMatcher(
-        entityClass = Key::class,
-        revisionTypes = listOf(RevisionType.ADD),
-      ).or(
-        DefaultMatcher(
-          entityClass = KeyMeta::class,
-          revisionTypes = listOf(RevisionType.ADD),
-        ),
-      ).or(
-        DefaultMatcher(
-          Translation::class,
-          listOf(RevisionType.ADD),
-        ),
-      ),
-    modelProviderFactoryClass = CreateKeyGroupModelProvider::class,
   ),
 
   IMPORT(
@@ -458,5 +471,20 @@ enum class ActivityGroupType(
         ?.classifier as? KClass<*>
 
     return groupType to itemType
+  }
+
+  companion object {
+    fun getOrderedTypes(): List<ActivityGroupType> {
+      val withType = ActivityGroupType.entries.filter { it.orderAfter != null }
+      val referenced = withType.mapNotNull { it.orderAfter }
+      val all = (withType + referenced).toSet()
+      return all.sortedWith { a, b ->
+        when {
+          a.orderAfter == b -> 1
+          b.orderAfter == a -> -1
+          else -> 0
+        }
+      }
+    }
   }
 }

@@ -11,5 +11,6 @@ class SqlContext(
   var entityClassField: Field<String>,
   var revisionTypeField: Field<Int>,
   val groupIdField: Field<Long>,
-  val entityIdField: Field<Long>,
+  val describingRelationsField: Field<JSON>,
+  val baseLanguageField: Field<Long>,
 )

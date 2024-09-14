@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.api.SimpleUserAccount
 import io.tolgee.dtos.queryResults.ActivityGroupView
 import io.tolgee.dtos.request.ActivityGroupFilters
+import org.jooq.CaseWhenStep
 import org.jooq.DSLContext
 import org.jooq.JSON
 import org.jooq.impl.DSL
@@ -85,7 +86,7 @@ class ActivityGroupsProvider(
         .where(where)
         .groupBy(field("ag.id"), field("ua.id"))
         .having(having)
-        .orderBy(max(field("ar.timestamp")).desc())
+        .orderBy(max(field("ar.timestamp")).desc(), orderedTypesField?.desc())
         .limit(pageable.pageSize)
         .offset(pageable.offset).fetch().map {
           ActivityGroupView(
@@ -122,7 +123,7 @@ class ActivityGroupsProvider(
     byType.flatMap { (type, items) ->
       val provider =
         type.modelProviderFactoryClass?.let { applicationContext.getBean(it.java) }
-      provider?.provideGroupModel(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
+      provider?.provideGroup(items.map { it.id })?.map { it.key to it.value } ?: emptyList()
     }.toMap()
   }
 
@@ -131,4 +132,17 @@ class ActivityGroupsProvider(
   private val jooqContext = applicationContext.getBean(DSLContext::class.java)
 
   private val objectMapper = applicationContext.getBean(ObjectMapper::class.java)
+
+  private val orderedTypesField by lazy {
+    val choose = DSL.choose(field("ag.type"))
+    var whenStep: CaseWhenStep<Any, Int>? = null
+    ActivityGroupType.getOrderedTypes().mapIndexed { index, type ->
+      whenStep?.let {
+        whenStep = it.`when`(type.name, index)
+      } ?: let {
+        whenStep = choose.`when`(type.name, index)
+      }
+    }
+    whenStep?.otherwise(0)
+  }
 }

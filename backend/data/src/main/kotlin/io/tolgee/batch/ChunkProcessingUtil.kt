@@ -10,6 +10,7 @@ import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
@@ -53,7 +54,8 @@ open class ChunkProcessingUtil(
     val activityRevision = activityHolder.activityRevision
     activityRevision.batchJobChunkExecution = execution
     val batchJobDto = batchJobService.getJobDto(job.id)
-    activityRevision.projectId = batchJobDto.projectId
+    val project = projectService.get(batchJobDto.projectId)
+    activityRevision.setProject(project)
     activityHolder.activity = batchJobDto.type.activityType
     activityRevision.authorId = batchJobDto.authorId
   }
@@ -148,6 +150,10 @@ open class ChunkProcessingUtil(
 
   private val processor by lazy {
     batchJobService.getProcessor(job.type)
+  }
+
+  private val projectService: ProjectService by lazy {
+    applicationContext.getBean(ProjectService::class.java)
   }
 
   private var successfulTargets: List<Any>? = null

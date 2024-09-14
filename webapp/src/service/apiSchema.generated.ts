@@ -1180,24 +1180,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1234,6 +1216,24 @@ export interface components {
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2200,15 +2200,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2364,14 +2364,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       username?: string;
-      description: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
       projectName: string;
       userFullName?: string;
     };
@@ -3530,18 +3530,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3678,9 +3678,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
-      description?: string;
       translation?: string;
+      description?: string;
+      namespace?: string;
       baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
@@ -3688,9 +3688,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
-      description?: string;
       translation?: string;
+      description?: string;
+      namespace?: string;
       baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -4532,8 +4532,21 @@ export interface components {
           id: number;
           /** Format: int64 */
           timestamp: number;
+          type: "SET_BASE_TRANSLATION";
+          author?: components["schemas"]["SimpleUserAccountModel"];
+          mentionedLanguageIds: number[];
+        }
+      | {
+          /** Format: int64 */
+          id: number;
+          /** Format: int64 */
+          timestamp: number;
           type: "SET_TRANSLATIONS";
           author?: components["schemas"]["SimpleUserAccountModel"];
+          data?: {
+            /** Format: int32 */
+            translationCount: number;
+          };
           mentionedLanguageIds: number[];
         }
       | {
@@ -4889,6 +4902,8 @@ export interface components {
       description?: string;
       /** @description Custom values of the key */
       custom?: { [key: string]: { [key: string]: unknown } };
+      /** Format: int64 */
+      baseLanguageId?: number;
     };
     PagedModelCreateKeyGroupItemModel: {
       _embedded?: {
@@ -5306,15 +5321,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -5482,14 +5497,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       username?: string;
-      description: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
       projectName: string;
       userFullName?: string;
     };
@@ -5531,6 +5546,7 @@ export interface components {
       type:
         | "SET_TRANSLATION_STATE"
         | "REVIEW"
+        | "SET_BASE_TRANSLATION"
         | "SET_TRANSLATIONS"
         | "DISMISS_AUTO_TRANSLATED_STATE"
         | "SET_OUTDATED_FLAG"
@@ -5573,6 +5589,7 @@ export interface components {
       /** Format: int64 */
       projectId?: number;
       activityRevisions: components["schemas"]["ActivityRevision"][];
+      matchingString?: string;
     };
     ActivityModifiedEntity: {
       activityRevision: components["schemas"]["ActivityRevision"];
@@ -5648,6 +5665,9 @@ export interface components {
       batchJobChunkExecution?: components["schemas"]["BatchJobChunkExecution"];
       batchJob?: components["schemas"]["BatchJob"];
       activityGroups: components["schemas"]["ActivityGroup"][];
+      /** Format: int64 */
+      baseLanguageId?: number;
+      project?: components["schemas"]["ProjectIdAndBaseLanguageId"];
       isInitializedByInterceptor: boolean;
       /** Format: int32 */
       cancelledBatchJobExecutionCount?: number;
@@ -6755,10 +6775,6 @@ export interface components {
       viewLanguages: components["schemas"]["Language"][];
       stateChangeLanguages: components["schemas"]["Language"][];
       project?: components["schemas"]["Project"];
-      translateLanguageIds?: number[];
-      stateChangeLanguageIds?: number[];
-      /** Format: int64 */
-      userId?: number;
       scopes: (
         | "translations.view"
         | "translations.edit"
@@ -6787,14 +6803,18 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
-      granular: boolean;
       /** Format: int64 */
       projectId?: number;
+      granular: boolean;
+      /** Format: int64 */
+      userId?: number;
+      /** Format: int64 */
+      invitationId?: number;
       viewLanguageIds?: number[];
       /** Format: int64 */
       organizationId?: number;
-      /** Format: int64 */
-      invitationId?: number;
+      translateLanguageIds?: number[];
+      stateChangeLanguageIds?: number[];
     };
     Project: {
       /** Format: int64 */
@@ -6828,7 +6848,15 @@ export interface components {
       icuPlaceholders: boolean;
       /** Format: date-time */
       deletedAt?: string;
+      /** Format: int64 */
+      baseLanguageId?: number;
       disableActivityLogging: boolean;
+    };
+    ProjectIdAndBaseLanguageId: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      baseLanguageId?: number;
     };
     S3ContentStorageConfig: {
       contentStorage: components["schemas"]["ContentStorage"];
@@ -6874,8 +6902,8 @@ export interface components {
       height: number;
       hash: string;
       filename: string;
-      thumbnailFilename: string;
       pathWithSlash: string;
+      thumbnailFilename: string;
       disableActivityLogging: boolean;
     };
     SlackConfig: {
@@ -7010,11 +7038,11 @@ export interface components {
       slackConfig: components["schemas"]["SlackConfig"][];
       userNotifications: components["schemas"]["UserNotification"][];
       projectNotificationPreferences: components["schemas"]["NotificationPreferences"][];
-      globalNotificationPreferences?: components["schemas"]["NotificationPreferences"];
+      mfaEnabled?: boolean;
       deletable?: boolean;
       deleted: boolean;
-      mfaEnabled?: boolean;
       needsSuperJwt?: boolean;
+      globalNotificationPreferences?: components["schemas"]["NotificationPreferences"];
     };
     UserNotification: {
       type:
@@ -7770,6 +7798,10 @@ export interface components {
       counts?: { [key: string]: number };
       params?: { [key: string]: unknown };
     };
+    SetTranslationsGroupModel: {
+      /** Format: int32 */
+      translationCount: number;
+    };
     CreateKeyGroupModel: {
       /** Format: int32 */
       keyCount: number;
@@ -7807,6 +7839,15 @@ export interface components {
       author?: components["schemas"]["SimpleUserAccountModel"];
       mentionedLanguageIds: number[];
     };
+    ActivityGroupSetBaseTranslationModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      timestamp: number;
+      type: "SET_BASE_TRANSLATION";
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      mentionedLanguageIds: number[];
+    };
     ActivityGroupSetTranslationsModel: {
       /** Format: int64 */
       id: number;
@@ -7814,6 +7855,10 @@ export interface components {
       timestamp: number;
       type: "SET_TRANSLATIONS";
       author?: components["schemas"]["SimpleUserAccountModel"];
+      data?: {
+        /** Format: int32 */
+        translationCount: number;
+      };
       mentionedLanguageIds: number[];
     };
     ActivityGroupDismissAutoTranslatedStateModel: {
@@ -18625,6 +18670,7 @@ export interface operations {
         filterType?:
           | "SET_TRANSLATION_STATE"
           | "REVIEW"
+          | "SET_BASE_TRANSLATION"
           | "SET_TRANSLATIONS"
           | "DISMISS_AUTO_TRANSLATED_STATE"
           | "SET_OUTDATED_FLAG"

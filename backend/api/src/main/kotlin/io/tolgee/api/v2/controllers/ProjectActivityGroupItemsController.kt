@@ -6,8 +6,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.activity.groups.viewProviders.keyCreate.CreateKeyGroupItemModel
-import io.tolgee.activity.groups.viewProviders.keyCreate.CreateKeyGroupModelProvider
+import io.tolgee.activity.groups.viewProviders.createKey.CreateKeyGroupItemModel
+import io.tolgee.activity.groups.viewProviders.createKey.CreateKeyGroupModelProvider
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -40,7 +40,7 @@ class ProjectActivityGroupItemsController(
     @ParameterObject pageable: Pageable,
     @PathVariable groupId: Long,
   ): PagedModel<CreateKeyGroupItemModel> {
-    val data = createKeyGroupModelProvider.provideItemModel(groupId, pageable)
+    val data = createKeyGroupModelProvider.provideItems(groupId, pageable)
     return PagedModel.of(
       data.content,
       PageMetadata(data.pageable.pageSize.toLong(), data.pageable.pageNumber.toLong(), data.totalElements),

@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
+import io.tolgee.api.ProjectIdAndBaseLanguageId
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -50,7 +51,7 @@ class Project(
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   override var slug: String? = null,
-) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable, ISimpleProject {
+) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable, ISimpleProject, ProjectIdAndBaseLanguageId {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()
@@ -157,4 +158,7 @@ class Project(
       }
     }
   }
+
+  override val baseLanguageId: Long?
+    get() = this.baseLanguage?.id
 }

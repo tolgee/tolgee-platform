@@ -40,4 +40,6 @@ class ActivityGroup(
 
   @ManyToMany(mappedBy = "activityGroups")
   var activityRevisions: MutableList<ActivityRevision> = mutableListOf()
+
+  var matchingString: String? = null
 }

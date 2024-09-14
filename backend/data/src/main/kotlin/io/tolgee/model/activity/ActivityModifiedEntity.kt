@@ -33,7 +33,7 @@ class ActivityModifiedEntity(
    */
   @Id
   val entityId: Long,
-) : Serializable {
+) : Serializable, ActivityEntityWithDescription {
   /**
    * Map of field to object containing old and new values
    */
@@ -54,7 +54,11 @@ class ActivityModifiedEntity(
    */
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  var describingRelations: Map<String, EntityDescriptionRef>? = null
+  override var describingRelations: Map<String, EntityDescriptionRef>? = null
+
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  override var additionalDescription: MutableMap<String, Any?>? = null
 
   @Enumerated
   var revisionType: RevisionType = RevisionType.MOD

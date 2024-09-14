@@ -1,4 +1,4 @@
-package io.tolgee.activity.groups.viewProviders.keyCreate
+package io.tolgee.activity.groups.viewProviders.setTranslations
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.IKeyModel
@@ -6,7 +6,7 @@ import io.tolgee.sharedDocs.Key
 import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "items", itemRelation = "item")
-class CreateKeyGroupItemModel(
+class SetTranslationsGroupItemModel(
   override val id: Long,
   override val name: String,
   override val namespace: String?,
@@ -16,7 +16,8 @@ class CreateKeyGroupItemModel(
   val pluralArgName: String?,
   @Schema(description = "The base translation value entered when key was created")
   val baseTranslationValue: String?,
-  val tags: Set<String>,
+  val tags: List<String>,
   override val description: String?,
   override val custom: Map<String, Any?>?,
+  val baseLanguageId: Long?,
 ) : IKeyModel

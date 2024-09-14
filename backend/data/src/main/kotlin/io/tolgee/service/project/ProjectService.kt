@@ -404,7 +404,7 @@ class ProjectService(
     projectRepository.save(project)
     if (isCreating) {
       projectHolder.project = ProjectDto.fromEntity(project)
-      activityHolder.activityRevision.projectId = projectHolder.project.id
+      activityHolder.activityRevision.setProject(project)
     }
     return project
   }

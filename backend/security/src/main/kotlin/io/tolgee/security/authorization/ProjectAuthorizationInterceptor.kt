@@ -139,7 +139,7 @@ class ProjectAuthorizationInterceptor(
     }
 
     projectHolder.project = project
-    activityHolder.activityRevision.projectId = project.id
+    activityHolder.activityRevision.setProject(project)
     organizationHolder.organization = organizationService.findDto(project.organizationOwnerId)
       ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
 

@@ -28,6 +28,7 @@ class RelevantModifiedEntitiesProvider(
   private val describingDataField = DSL.field("ame.describing_data", JSON::class.java)
   private val describingRelationsField = DSL.field("ame.describing_relations", JSON::class.java)
   private val modificationsField = DSL.field("ame.modifications", JSON::class.java)
+  private val activityRevisionId = DSL.field("ame.activity_revision_id", Long::class.java)
 
   private val sqlContext =
     SqlContext(
@@ -35,7 +36,8 @@ class RelevantModifiedEntitiesProvider(
       entityClassField = entityClassField,
       revisionTypeField = DSL.field("ame.revision_type", Int::class.java),
       groupIdField = groupIdField,
-      entityIdField = entityIdField,
+      baseLanguageField = DSL.field("ar.base_language_id", Long::class.java),
+      describingRelationsField = describingRelationsField,
     )
 
   fun getQueryBase(vararg fields: SelectField<*>) =
@@ -65,11 +67,12 @@ class RelevantModifiedEntitiesProvider(
       describingDataField,
       describingRelationsField,
       modificationsField,
+      activityRevisionId,
     )
 
   fun provide(pageable: Pageable? = null): List<ModifiedEntityView> {
     val query =
-      getDataQuery().also { query ->
+      getDataQuery().orderBy(activityRevisionId.desc()).also { query ->
         pageable?.let {
           query.limit(it.pageSize).offset(it.offset)
         }
@@ -84,6 +87,7 @@ class RelevantModifiedEntitiesProvider(
         describingData = objectMapper.readValue(it.get(describingDataField).data()),
         describingRelations = objectMapper.readValue(it.get(describingRelationsField).data()),
         modifications = objectMapper.readValue(it.get(modificationsField).data()),
+        activityRevisionId = activityRevisionId.get(it)!!,
       )
     }
   }

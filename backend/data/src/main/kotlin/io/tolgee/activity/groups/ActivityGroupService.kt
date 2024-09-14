@@ -29,29 +29,36 @@ class ActivityGroupService(
 
   fun getOrCreateCurrentActivityGroupDto(
     type: ActivityGroupType,
+    matchingStrings: Set<String?>,
     projectId: Long?,
     authorId: Long?,
-  ): ActivityGroupDto {
-    val existing = findSuitableExistingSuitableGroupDto(type, projectId, authorId)
-    return existing ?: createActivityGroupDto(type, projectId, authorId)
+  ): Map<String?, ActivityGroupDto> {
+    return matchingStrings.associateWith { matchingString ->
+      val existing = findSuitableExistingSuitableGroupDto(type, matchingString, projectId, authorId)
+      val group = existing ?: createActivityGroupDto(type, matchingString, projectId, authorId)
+      group
+    }
   }
 
   private fun createActivityGroupDto(
     type: ActivityGroupType,
+    matchingString: String?,
     projectId: Long?,
     authorId: Long?,
   ): ActivityGroupDto {
-    val entity = createActivityGroup(type, projectId, authorId)
+    val entity = createActivityGroup(type, matchingString, projectId, authorId)
     return ActivityGroupDto(
       entity.id,
       entity.type,
       currentDateProvider.date,
       currentDateProvider.date,
+      matchingString = entity.matchingString,
     )
   }
 
   private fun createActivityGroup(
     type: ActivityGroupType,
+    matchingString: String?,
     projectId: Long?,
     authorId: Long?,
   ): ActivityGroup {
@@ -61,15 +68,17 @@ class ActivityGroupService(
       it.authorId = authorId
       it.projectId = projectId
       activityGroupRepository.saveAndFlush(it)
+      it.matchingString = matchingString
     }
   }
 
   private fun findSuitableExistingSuitableGroupDto(
     type: ActivityGroupType,
+    matchingString: String?,
     projectId: Long?,
     authorId: Long?,
   ): ActivityGroupDto? {
-    val latest = findLatest(type, authorId, projectId) ?: return null
+    val latest = findLatest(type, matchingString, authorId, projectId) ?: return null
     if (latest.isTooOld || latest.lastActivityTooEarly) {
       return null
     }
@@ -78,12 +87,14 @@ class ActivityGroupService(
 
   private fun findLatest(
     type: ActivityGroupType,
+    matchingString: String?,
     authorId: Long?,
     projectId: Long?,
   ): ActivityGroupDto? {
     val result =
       activityGroupRepository.findLatest(
         groupTypeName = type.name,
+        matchingString = matchingString,
         authorId = authorId,
         projectId = projectId,
       )
@@ -94,12 +105,17 @@ class ActivityGroupService(
 
     val single = result.single()
 
+    return single.mapToGroupDto()
+  }
+
+  private fun Array<Any?>.mapToGroupDto(): ActivityGroupDto {
     return ActivityGroupDto(
-      single[0] as Long,
-      ActivityGroupType.valueOf(single[1] as String),
+      this[0] as Long,
+      ActivityGroupType.valueOf(this[1] as String),
       // if the group is empty we can just consider it as created now
-      single[2] as Date? ?: currentDateProvider.date,
-      single[3] as Date? ?: currentDateProvider.date,
+      this[3] as Date? ?: currentDateProvider.date,
+      this[4] as Date? ?: currentDateProvider.date,
+      matchingString = this[2] as String?,
     )
   }
 

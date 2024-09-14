@@ -3539,4 +3539,24 @@
     <changeSet author="jenik (generated)" id="1717158514937-6">
         <dropPrimaryKey constraintName="user_notification_modified_entities_pkey" tableName="user_notification_modified_entities"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1725517801496-1">
+        <addColumn tableName="activity_revision">
+            <column name="base_language_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1726241625814-1">
+        <addColumn tableName="activity_group">
+            <column name="matching_string" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1726303209143-1">
+        <addColumn tableName="activity_describing_entity">
+            <column name="additional_description" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1726303209143-2">
+        <addColumn tableName="activity_modified_entity">
+            <column name="additional_description" type="jsonb"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

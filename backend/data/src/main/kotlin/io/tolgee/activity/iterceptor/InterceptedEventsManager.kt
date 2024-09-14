@@ -281,7 +281,7 @@ class InterceptedEventsManager(
       revision.isInitializedByInterceptor = true
       revision.authorId = userAccount?.id
       try {
-        revision.projectId = projectHolder.project.id
+        revision.setProject(projectHolder.project)
         activityHolder.organizationId = projectHolder.project.organizationOwnerId
       } catch (e: ProjectNotSelectedException) {
         logger.debug("Project is not set in ProjectHolder. Activity will be stored without projectId.")

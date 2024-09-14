@@ -2,6 +2,7 @@ package io.tolgee.activity.groups
 
 import io.tolgee.activity.ModifiedEntitiesType
 import io.tolgee.activity.groups.matchers.modifiedEntity.StoringContext
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -13,9 +14,10 @@ class ActivityGrouper(
 ) {
   fun addToGroup() {
     val groupTypes = findGroupTypes()
-    groupTypes.forEach {
-      val groupIdToAddTo = getActivityGroupId(it)
-      addToGroup(groupIdToAddTo)
+    groupTypes.forEach { (type, matchingStrings) ->
+      getActivityGroupIds(type, matchingStrings).forEach { group ->
+        addToGroup(group.value)
+      }
     }
   }
 
@@ -31,30 +33,51 @@ class ActivityGrouper(
       .executeUpdate()
   }
 
-  private fun getActivityGroupId(type: ActivityGroupType): Long {
+  private fun getActivityGroupIds(
+    type: ActivityGroupType,
+    matchingStrings: Set<String?>,
+  ): Map<String?, Long> {
     return activityGroupService.getOrCreateCurrentActivityGroupDto(
       type,
+      matchingStrings,
       activityRevision.projectId,
       activityRevision.authorId,
-    ).id
+    ).mapValues { it.value.id }
   }
 
-  private fun findGroupTypes(): List<ActivityGroupType> {
-    return ActivityGroupType.entries.filter { it.matches }
+  private fun findGroupTypes(): Map<ActivityGroupType, Set<String?>> {
+    return ActivityGroupType.entries.mapNotNull { activityGroupType ->
+      val matchingEntities = activityGroupType.matchingEntities
+      if (matchingEntities.isEmpty()) {
+        return@mapNotNull null
+      }
+      activityGroupType to
+        activityGroupType.matchingEntities.map { entity ->
+          activityGroupType.matchingStringProvider?.provide(
+            entity.getStoringContext(),
+          )
+        }.toSet()
+    }.toMap()
   }
 
-  private val ActivityGroupType.matches: Boolean
+  private val ActivityGroupType.matchingEntities: List<ActivityModifiedEntity>
     get() {
       if (!this.sourceActivityTypes.contains(type)) {
-        return false
+        return emptyList()
       }
 
-      return modifiedEntities.any { modifiedEntityEntry ->
-        modifiedEntityEntry.value.values.any { modifiedEntity ->
-          this.matcher?.match(StoringContext(modifiedEntity)) ?: true
-        }
+      return modifiedEntities.values.flatMap {
+        it.values.filter { entity -> entityMatches(entity) }
       }
     }
+
+  private fun ActivityGroupType.entityMatches(entity: ActivityModifiedEntity): Boolean {
+    return this.matcher?.match(entity.getStoringContext()) ?: true
+  }
+
+  private fun ActivityModifiedEntity.getStoringContext(): StoringContext {
+    return StoringContext(this, activityRevision)
+  }
 
   private val type = activityRevision.type
 

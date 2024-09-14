@@ -79,8 +79,13 @@ class DefaultMatcher<T : Any>(
 
   private fun getModificationPropsCondition(context: SqlContext): Condition {
     if (modificationProps != null) {
-      return DSL.condition(
-        "array(select jsonb_object_keys(${context.modificationsField.name})) && ${allowedModString()}",
+      val props = modificationProps.map { it.name }.toTypedArray()
+      return DSL.arrayOverlap(
+        DSL.field(
+          "array(select jsonb_object_keys(${context.modificationsField.name}))::varchar[]",
+          Array<String>::class.java,
+        ),
+        props,
       )
     }
     return DSL.noCondition()
@@ -94,8 +99,8 @@ class DefaultMatcher<T : Any>(
     return context.entityClassField.eq(entityClass.simpleName)
   }
 
-  private fun allowedModString(): String {
-    return "{${modificationProps?.joinToString(",")}}"
+  private fun getAllowedModString(): String {
+    return "{${modificationProps?.joinToString(",") { "'${it.name}'" }}}"
   }
 
   private fun getAllowedValuesCondition(context: SqlContext): Condition {
