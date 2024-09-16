@@ -29,9 +29,13 @@ class TenantService(
     return tenantRepository.findAll()
   }
 
-  fun save(dto: CreateProviderRequest): Tenant {
+  fun save(
+    dto: CreateProviderRequest,
+    organizationId: Long,
+  ): Tenant {
     val tenant = Tenant()
     tenant.name = dto.name ?: ""
+    tenant.organizationId = organizationId
     tenant.domain = extractDomain(dto.authorizationUri)
     tenant.clientId = dto.clientId
     tenant.clientSecret = dto.clientSecret
@@ -62,5 +66,9 @@ class TenantService(
     } catch (e: URISyntaxException) {
       throw BadRequestException("Invalid authorization uri")
     }
+  }
+
+  fun findTenant(organizationId: Long): Tenant? {
+    return tenantRepository.findByOrganizationId(organizationId)
   }
 }

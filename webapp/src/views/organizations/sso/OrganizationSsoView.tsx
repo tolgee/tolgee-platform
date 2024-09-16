@@ -1,9 +1,10 @@
-import React, { FunctionComponent, useRef } from 'react';
+import React, { FunctionComponent, useEffect, useRef } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
 import { CreateProviderSsoForm } from 'tg.views/organizations/sso/CreateProviderSsoForm';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const OrganizationSsoView: FunctionComponent = () => {
   const organization = useOrganization();
@@ -11,6 +12,15 @@ export const OrganizationSsoView: FunctionComponent = () => {
   if (!organization) {
     return null;
   }
+
+  const providersLoadable = useApiQuery({
+    url: `/v2/{organizationId}/sso/providers`,
+    method: 'get',
+    path: {
+      organizationId: organization.id,
+    },
+  });
+
   const credentialsRef = useRef({
     authorizationUri: '',
     clientId: '',
@@ -18,6 +28,18 @@ export const OrganizationSsoView: FunctionComponent = () => {
     redirectUri: '',
     tokenUri: '',
   });
+
+  useEffect(() => {
+    if (providersLoadable.data) {
+      credentialsRef.current = {
+        authorizationUri: providersLoadable.data.authorizationUri || '',
+        clientId: providersLoadable.data.clientId || '',
+        clientSecret: providersLoadable.data.clientSecret || '',
+        redirectUri: providersLoadable.data.redirectUri || '',
+        tokenUri: providersLoadable.data.tokenUri || '',
+      };
+    }
+  }, [providersLoadable.data]);
 
   return (
     <BaseOrganizationSettingsView

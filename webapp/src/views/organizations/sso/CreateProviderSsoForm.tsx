@@ -1,10 +1,11 @@
-import React, { RefObject } from 'react';
+import React from 'react';
 import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -21,24 +22,30 @@ type Provider = {
     tokenUri: string;
 };
 type ProviderProps = {
-    credentialsRef: RefObject<Provider>;
+  credentialsRef: React.RefObject<Provider>;
 };
 
 export function CreateProviderSsoForm(props: ProviderProps) {
 
-    const providersLoadable = useApiMutation({
-        url: `/v2/sso/providers`,
-        method: 'post',
-    });
+    const organization = useOrganization();
+    if (!organization) {
+        return null;
+    }
 
+    const providersCreate = useApiMutation({
+        url: `/v2/{organizationId}/sso/providers`,
+        method: 'post',
+        invalidatePrefix: '/v2/organizations',
+    });
 
     return (
         <StandardForm
             initialValues={props.credentialsRef.current!}
 
             onSubmit={async (data) => {
-                providersLoadable.mutate(
+                providersCreate.mutate(
                     {
+                        path: {organizationId: organization.id},
                         content: {'application/json': {...data}},
                     },
                     {

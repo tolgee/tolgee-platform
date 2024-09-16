@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface TenantRepository : JpaRepository<Tenant, Long> {
   fun findByDomain(domain: String): Tenant?
+
+  fun findByOrganizationId(id: Long): Tenant?
 }
