@@ -46,9 +46,7 @@ class GenericStructuredProcessor(
     } ?: ParsedPluralsKey(null, null, key)
   }
 
-  private fun Map<*, *>.groupByPlurals(
-    keyParser: PluralsKeyParser
-  ): Map<String?, List<Pair<ParsedPluralsKey, Any?>>> {
+  private fun Map<*, *>.groupByPlurals(keyParser: PluralsKeyParser): Map<String?, List<Pair<ParsedPluralsKey, Any?>>> {
     return this.entries.mapIndexedNotNull { idx, (key, value) ->
       key.parsePluralsKey(keyParser)?.let { it to value }.also {
         if (it == null) {
@@ -65,9 +63,12 @@ class GenericStructuredProcessor(
   }
 
   private fun List<Pair<ParsedPluralsKey, Any?>>.usePluralsKey(commonKey: String): List<Pair<String, Any?>> {
-    return listOf(commonKey to this.associate { (parsedKey, value) ->
-      parsedKey.plural to value
-    })
+    return listOf(
+      commonKey to
+        this.associate { (parsedKey, value) ->
+          parsedKey.plural to value
+        },
+    )
   }
 
   private fun Map<*, *>.preprocessMap(): Map<*, *> {

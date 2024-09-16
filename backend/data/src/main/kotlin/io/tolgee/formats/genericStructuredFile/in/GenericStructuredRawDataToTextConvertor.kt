@@ -1,11 +1,9 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
-import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.allPluralKeywords
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.importCommon.unwrapString
-import java.util.*
 
 class GenericStructuredRawDataToTextConvertor(
   private val format: ImportFormat,

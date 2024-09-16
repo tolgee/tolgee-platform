@@ -6,14 +6,15 @@ import io.tolgee.formats.escaping.IcuUnescper
 import io.tolgee.formats.escaping.PluralFormIcuEscaper
 import io.tolgee.util.nullIfEmpty
 
-val allPluralKeywords = listOf(
-  PluralRules.KEYWORD_ZERO,
-  PluralRules.KEYWORD_ONE,
-  PluralRules.KEYWORD_TWO,
-  PluralRules.KEYWORD_FEW,
-  PluralRules.KEYWORD_MANY,
-  PluralRules.KEYWORD_OTHER,
-)
+val allPluralKeywords =
+  listOf(
+    PluralRules.KEYWORD_ZERO,
+    PluralRules.KEYWORD_ONE,
+    PluralRules.KEYWORD_TWO,
+    PluralRules.KEYWORD_FEW,
+    PluralRules.KEYWORD_MANY,
+    PluralRules.KEYWORD_OTHER,
+  )
 
 fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
   val uLocale = getULocaleFromTag(languageTag)
