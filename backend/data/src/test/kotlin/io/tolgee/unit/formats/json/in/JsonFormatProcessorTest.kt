@@ -198,10 +198,12 @@ class JsonFormatProcessorTest {
       }
     mockUtil.fileProcessorContext.assertTranslations("i18next", "keyPluralSimple")
       .assertSingle {
-        hasText("{value, plural,\n" +
-          "one {the singular (is parsed as plural under one key - keyPluralSimple)}\n" +
-          "other {the plural (is parsed as plural under one key - keyPluralSimple)}\n" +
-          "}")
+        hasText(
+          "{value, plural,\n" +
+            "one {the singular (is parsed as plural under one key - keyPluralSimple)}\n" +
+            "other {the plural (is parsed as plural under one key - keyPluralSimple)}\n" +
+            "}",
+        )
       }
   }
 

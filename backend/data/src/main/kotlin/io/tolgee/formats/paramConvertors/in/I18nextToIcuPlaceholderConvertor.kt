@@ -66,6 +66,5 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
     val I18NEXT_PLURAL_SUFFIX_REGEX = """^(?<key>\w+)_(?<plural>\w+)$""".toRegex()
 
     val I18NEXT_PLURAL_SUFFIX_KEY_PARSER = PluralsI18nextKeyParser(I18NEXT_PLURAL_SUFFIX_REGEX)
-
   }
 }
