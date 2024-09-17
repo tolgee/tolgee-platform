@@ -196,6 +196,40 @@ export const formatGroups: FormatGroup[] = [
       },
     ],
   },
+  {
+    name: 'i18next',
+    formats: [
+      {
+        id: 'i18next_flat_json',
+        extension: 'json',
+        messageFormat: 'I18NEXT',
+        defaultStructureDelimiter: '',
+        structured: false,
+        showSupportArrays: true,
+        defaultSupportArrays: true,
+        name: <T keyName="export-format-i18next-json" />,
+        format: 'JSON_I18NEXT',
+        matchByExportParams: (params) =>
+          params.format === 'JSON_I18NEXT' &&
+          (params.structureDelimiter === '' ||
+            params.structureDelimiter == null) &&
+          !params.supportArrays,
+      },
+      {
+        id: 'i18next_structured_json',
+        extension: 'json',
+        messageFormat: 'I18NEXT',
+        defaultStructureDelimiter: '.',
+        structured: true,
+        showSupportArrays: true,
+        defaultSupportArrays: true,
+        name: <T keyName="export-format-i18next-json-structured" />,
+        format: 'JSON_I18NEXT',
+        matchByExportParams: (params) =>
+          params.format === 'JSON_I18NEXT' && params.structureDelimiter === '.',
+      }
+    ]
+  }
 ];
 
 type ExportParamsWithoutZip = Omit<

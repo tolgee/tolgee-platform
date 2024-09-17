@@ -23,6 +23,7 @@ class JsonFileExporter(
   private val messageFormat =
     when (exportParams.format) {
       ExportFormat.JSON_TOLGEE -> ExportMessageFormat.ICU
+      ExportFormat.JSON_I18NEXT -> ExportMessageFormat.I18NEXT
       else -> exportParams.messageFormat ?: ExportMessageFormat.ICU
     }
 
