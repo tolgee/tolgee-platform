@@ -238,6 +238,7 @@ enum class Message {
   THIRD_PARTY_AUTH_FAILED,
   TOKEN_EXCHANGE_FAILED,
   USER_INFO_RETRIEVAL_FAILED,
+  ID_TOKEN_EXPIRED,
   ;
 
   val code: String

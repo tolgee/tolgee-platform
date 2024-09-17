@@ -1,5 +1,13 @@
 package io.tolgee.ee.service
 
+import com.nimbusds.jose.jwk.source.JWKSource
+import com.nimbusds.jose.jwk.source.RemoteJWKSet
+import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector
+import com.nimbusds.jose.proc.SecurityContext
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.SignedJWT
+import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
+import com.nimbusds.jwt.proc.DefaultJWTProcessor
 import com.posthog.java.shaded.org.json.JSONObject
 import io.tolgee.constants.Message
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
@@ -19,6 +27,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import java.net.URL
 import java.util.*
 
 @Service
@@ -56,9 +65,7 @@ class OAuthService(
           null,
         )
 
-    val userInfo =
-      getUserInfo(tokenResponse.id_token)
-
+    val userInfo = verifyAndDecodeIdToken(tokenResponse.id_token, clientRegistration.providerDetails.jwkSetUri)
     return register(userInfo, clientRegistration.registrationId, invitationCode)
   }
 
@@ -96,23 +103,42 @@ class OAuthService(
     }
   }
 
-  private fun getUserInfo(idToken: String): GenericUserResponse {
-    val jwt = decodeJwt(idToken)
-    val response =
-      GenericUserResponse().apply {
-        sub = jwt.optString("sub")
-        name = jwt.optString("name")
-        given_name = jwt.optString("given_name")
-        family_name = jwt.optString("family_name")
-        email = jwt.optString("email")
+  fun verifyAndDecodeIdToken(
+    idToken: String,
+    jwkSetUri: String,
+  ): GenericUserResponse {
+    try {
+      val signedJWT = SignedJWT.parse(idToken)
+
+      val jwkSource: JWKSource<SecurityContext> = RemoteJWKSet(URL(jwkSetUri))
+
+      val jwtProcessor: ConfigurableJWTProcessor<SecurityContext> = DefaultJWTProcessor()
+      val keySelector = JWSAlgorithmFamilyJWSKeySelector.fromJWKSource(jwkSource)
+      jwtProcessor.jwsKeySelector = keySelector
+
+      val jwtClaimsSet: JWTClaimsSet = jwtProcessor.process(signedJWT, null)
+
+      val expirationTime: Date = jwtClaimsSet.expirationTime
+      if (expirationTime.before(Date())) {
+        throw OAuthAuthorizationException(Message.ID_TOKEN_EXPIRED, null)
       }
 
-    return response
+      return GenericUserResponse().apply {
+        sub = jwtClaimsSet.subject
+        name = jwtClaimsSet.getStringClaim("name")
+        given_name = jwtClaimsSet.getStringClaim("given_name")
+        family_name = jwtClaimsSet.getStringClaim("family_name")
+        email = jwtClaimsSet.getStringClaim("email")
+      }
+    } catch (e: Exception) {
+      logger.info(e.stackTraceToString())
+      throw OAuthAuthorizationException(Message.USER_INFO_RETRIEVAL_FAILED, null)
+    }
   }
 
   fun decodeJwt(jwt: String): JSONObject {
     val parts = jwt.split(".")
-    if (parts.size != 3) throw IllegalArgumentException("JWT does not have 3 parts")
+    if (parts.size != 3) throw IllegalArgumentException("JWT does not have 3 parts") // todo change exception type
 
     val payload = parts[1]
     val decodedPayload = String(Base64.getUrlDecoder().decode(payload))
