@@ -7,7 +7,7 @@ const POSTHOG_INSTANCE_WINDOW_PROPERTY = 'posthogInstance';
 
 const IGNORED_USER_DOMAINS = ['tolgee.io'];
 
-async function loadAndInitPosthog() {
+async function loadPosthog() {
   return (await import('posthog-js')).default;
 }
 
@@ -27,7 +27,7 @@ export function usePosthog() {
       const postHogAPIKey = config?.postHogApiKey;
       if (postHogAPIKey) {
         Promise.resolve(
-          window[POSTHOG_INSTANCE_WINDOW_PROPERTY] || loadAndInitPosthog()
+          window[POSTHOG_INSTANCE_WINDOW_PROPERTY] || loadPosthog()
         ).then((posthog: PostHog) => {
           window[POSTHOG_INSTANCE_WINDOW_PROPERTY] = posthog;
           if (!cancelled) {
