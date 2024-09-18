@@ -22,24 +22,7 @@ class CloudflareContentDeliveryCachePurging(
     executePurgeRequest(bodies)
   }
 
-  private fun getChunkedBody(
-    paths: Set<String>,
-    contentDeliveryConfig: ContentDeliveryConfig,
-  ): List<Map<String, List<String>>> {
-    return paths.map {
-      "$prefix/${contentDeliveryConfig.slug}/$it"
-    }
-      .chunked(config.maxFilesPerRequest)
-      .map { urls ->
-        mapOf("files" to urls)
-      }
-  }
-
-  val prefix by lazy {
-    config.urlPrefix?.removeSuffix("/") ?: ""
-  }
-
-  private fun executePurgeRequest(bodies: List<Map<String, List<String>>>) {
+  private fun executePurgeRequest(bodies: List<Map<String, List<Map<String, Any>>>>) {
     bodies.forEach { body ->
       val entity: HttpEntity<String> = getHttpEntity(body)
 
@@ -59,7 +42,49 @@ class CloudflareContentDeliveryCachePurging(
     }
   }
 
-  private fun getHttpEntity(body: Map<String, List<String>>): HttpEntity<String> {
+  private fun getChunkedBody(
+    paths: Set<String>,
+    contentDeliveryConfig: ContentDeliveryConfig,
+  ): List<Map<String, List<Map<String, Any>>>> {
+    return paths.flatMap {
+      getFileItems(contentDeliveryConfig, it)
+    }
+      .chunked(config.maxFilesPerRequest)
+      .map { fileItems ->
+        mapOf("files" to fileItems)
+      }
+  }
+
+  private fun getFileItems(
+    contentDeliveryConfig: ContentDeliveryConfig,
+    path: String,
+  ): List<Map<String, Any>> {
+    return origins.map { origin ->
+      val map =
+        mutableMapOf<String, Any>(
+          "url" to "$prefix/${contentDeliveryConfig.slug}/$path",
+        )
+
+      if (origin != null) {
+        map["headers"] =
+          mapOf(
+            "Origin" to origin,
+          )
+      }
+
+      map
+    }
+  }
+
+  val origins by lazy {
+    config.origins?.split(",") ?: listOf(null)
+  }
+
+  val prefix by lazy {
+    config.urlPrefix?.removeSuffix("/") ?: ""
+  }
+
+  private fun getHttpEntity(body: Any): HttpEntity<String> {
     val headers = getHeaders()
     val jsonBody = jacksonObjectMapper().writeValueAsString(body)
     return HttpEntity(jsonBody, headers)
