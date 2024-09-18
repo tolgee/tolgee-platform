@@ -5,6 +5,8 @@ import { useConfig, useUser } from 'tg.globalContext/helpers';
 
 const POSTHOG_INSTANCE_WINDOW_PROPERTY = 'posthogInstance';
 
+const IGNORED_USER_DOMAINS = ['tolgee.io'];
+
 async function loadAndInitPosthog() {
   return (await import('posthog-js')).default;
 }
@@ -14,7 +16,13 @@ export function usePosthog() {
   const config = useConfig();
 
   useEffect(() => {
-    if (userData?.id !== undefined && config?.postHogApiKey) {
+    if (
+      config?.postHogApiKey &&
+      userData?.id !== undefined &&
+      IGNORED_USER_DOMAINS.every(
+        (domain) => !userData.username.endsWith(domain)
+      )
+    ) {
       let cancelled = false;
       const postHogAPIKey = config?.postHogApiKey;
       if (postHogAPIKey) {
