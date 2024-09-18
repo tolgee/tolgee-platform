@@ -2,13 +2,11 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useGlobalLoading } from './GlobalLoading';
-import { PostHog } from 'posthog-js';
-import { getUtmParams } from 'tg.fixtures/utmCookie';
 import { useIdentify } from 'tg.hooks/useIdentify';
 import { useIsFetching, useIsMutating } from 'react-query';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
+import { usePosthog } from 'tg.hooks/usePosthog';
 
-const POSTHOG_INITIALIZED_WINDOW_PROPERTY = 'postHogInitialized';
 export const MandatoryDataProvider = (props: any) => {
   const userData = useUser();
   const config = useConfig();
@@ -36,38 +34,7 @@ export const MandatoryDataProvider = (props: any) => {
     }
   }, [config?.clientSentryDsn]);
 
-  function initPostHog() {
-    let postHogPromise: Promise<PostHog> | undefined;
-    if (!window[POSTHOG_INITIALIZED_WINDOW_PROPERTY]) {
-      const postHogAPIKey = config?.postHogApiKey;
-      if (postHogAPIKey) {
-        window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = true;
-        postHogPromise = import('posthog-js').then((m) => m.default);
-        postHogPromise.then((posthog) => {
-          posthog.init(postHogAPIKey, {
-            api_host: config?.postHogHost || undefined,
-          });
-          if (userData) {
-            posthog.identify(userData.id.toString(), {
-              name: userData.username,
-              email: userData.username,
-              ...getUtmParams(),
-            });
-          }
-        });
-      }
-    }
-    return () => {
-      postHogPromise?.then((ph) => {
-        ph.reset();
-      });
-      window[POSTHOG_INITIALIZED_WINDOW_PROPERTY] = false;
-    };
-  }
-
-  useEffect(() => {
-    return initPostHog();
-  }, [userData?.id, config?.postHogApiKey]);
+  usePosthog();
 
   useEffect(() => {
     if (userData) {
