@@ -1,3 +1,15 @@
+# [3.73.0](https://github.com/tolgee/tolgee-platform/compare/v3.72.0...v3.73.0) (2024-09-18)
+
+
+### Bug Fixes
+
+* posthog record only when user is logged in ([#2470](https://github.com/tolgee/tolgee-platform/issues/2470)) ([e3e35cf](https://github.com/tolgee/tolgee-platform/commit/e3e35cfe1a5a39718eac79684b7818acc40fb902))
+
+
+### Features
+
+* more common json formatting ([#2432](https://github.com/tolgee/tolgee-platform/issues/2432)) ([bef8218](https://github.com/tolgee/tolgee-platform/commit/bef82184e52c6c0d7c5b243e1f2156f69a839184))
+
 # [3.72.0](https://github.com/tolgee/tolgee-platform/compare/v3.71.7...v3.72.0) (2024-09-12)
 
 
