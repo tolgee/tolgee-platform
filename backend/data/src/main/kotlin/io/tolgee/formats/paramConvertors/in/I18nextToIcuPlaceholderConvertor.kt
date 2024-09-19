@@ -24,6 +24,8 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       return matchResult.value.escapeIcu(isInPlural)
     }
 
+    // TODO: handle unescaped flag by adding info about it to the metadata and using this info when exporting
+
     return when (parsed.format) {
       null -> "{${parsed.key}}"
       "number" -> "{${parsed.key}, number}"
@@ -37,7 +39,7 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       (?x)
       (
         \{\{
-        (?:-\ *)?
+        (?<unescapedflag>-\ *)?
         (?<key>\w+)(?:,\ *(?<format>[^}]+))?
         }}
         |
@@ -53,7 +55,7 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       (^|\W+)
       (
         \{\{
-        (?:-\ *)?
+        (?<unescapedflag>-\ *)?
         (?<key>\w+)(?:,\ *(?<format>[^}]+))?
         }}
         |
