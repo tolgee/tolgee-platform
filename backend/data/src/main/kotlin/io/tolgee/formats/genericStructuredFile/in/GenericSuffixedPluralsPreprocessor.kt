@@ -10,7 +10,6 @@ class GenericSuffixedPluralsPreprocessor(
   private val data: Any?,
   private val pluralsViaSuffixesParser: PluralsKeyParser,
 ) {
-
   fun preprocess(): Any? {
     return data.preprocess()
   }

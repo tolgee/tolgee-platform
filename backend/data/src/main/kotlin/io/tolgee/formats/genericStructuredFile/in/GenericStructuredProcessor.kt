@@ -2,10 +2,7 @@ package io.tolgee.formats.genericStructuredFile.`in`
 
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
-import io.tolgee.formats.allPluralKeywords
 import io.tolgee.formats.importCommon.ImportFormat
-import io.tolgee.formats.importCommon.ParsedPluralsKey
-import io.tolgee.formats.importCommon.PluralsKeyParser
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class GenericStructuredProcessor(
@@ -18,11 +15,12 @@ class GenericStructuredProcessor(
   override fun process() {
     var data = data
     if (format.pluralsViaSuffixesParser != null) {
-      data = GenericSuffixedPluralsPreprocessor(
-        context = context,
-        data = data,
-        pluralsViaSuffixesParser = format.pluralsViaSuffixesParser,
-      ).preprocess()
+      data =
+        GenericSuffixedPluralsPreprocessor(
+          context = context,
+          data = data,
+          pluralsViaSuffixesParser = format.pluralsViaSuffixesParser,
+        ).preprocess()
       return
     }
     data.import("")
