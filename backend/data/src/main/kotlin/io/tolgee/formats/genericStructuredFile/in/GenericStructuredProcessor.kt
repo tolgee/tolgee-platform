@@ -16,75 +16,16 @@ class GenericStructuredProcessor(
   private val format: ImportFormat,
 ) : ImportFileProcessor() {
   override fun process() {
-    data.preprocess().import("")
-  }
-
-  private fun Any?.preprocess(): Any? {
-    if (this == null) {
-      return null
+    var data = data
+    if (format.pluralsViaSuffixesParser != null) {
+      data = GenericSuffixedPluralsPreprocessor(
+        context = context,
+        data = data,
+        pluralsViaSuffixesParser = format.pluralsViaSuffixesParser,
+      ).preprocess()
+      return
     }
-
-    (this as? List<*>)?.let {
-      return it.preprocessList()
-    }
-
-    (this as? Map<*, *>)?.let {
-      return it.preprocessMap()
-    }
-
-    return this
-  }
-
-  private fun List<*>.preprocessList(): List<*> {
-    return this.map { it.preprocess() }
-  }
-
-  private fun Any?.parsePluralsKey(keyParser: PluralsKeyParser): ParsedPluralsKey? {
-    val key = this as? String ?: return null
-    return keyParser.parse(key).takeIf {
-      it.key != null && it.plural in allPluralKeywords
-    } ?: ParsedPluralsKey(null, null, key)
-  }
-
-  private fun Map<*, *>.groupByPlurals(keyParser: PluralsKeyParser): Map<String?, List<Pair<ParsedPluralsKey, Any?>>> {
-    return this.entries.mapIndexedNotNull { idx, (key, value) ->
-      key.parsePluralsKey(keyParser)?.let { it to value }.also {
-        if (it == null) {
-          context.fileEntity.addKeyIsNotStringIssue(key.toString(), idx)
-        }
-      }
-    }.groupBy { (parsedKey, _) -> parsedKey.key }.toMap()
-  }
-
-  private fun List<Pair<ParsedPluralsKey, Any?>>.useOriginalKey(): List<Pair<String, Any?>> {
-    return map { (parsedKey, value) ->
-      parsedKey.originalKey to value
-    }
-  }
-
-  private fun List<Pair<ParsedPluralsKey, Any?>>.usePluralsKey(commonKey: String): List<Pair<String, Any?>> {
-    return listOf(
-      commonKey to
-        this.associate { (parsedKey, value) ->
-          parsedKey.plural to value
-        },
-    )
-  }
-
-  private fun Map<*, *>.preprocessMap(): Map<*, *> {
-    if (format.pluralsViaSuffixesParser == null) {
-      return this.mapValues { (_, value) -> value.preprocess() }
-    }
-
-    val plurals = this.groupByPlurals(format.pluralsViaSuffixesParser)
-
-    return plurals.flatMap { (commonKey, values) ->
-      if (commonKey == null || values.size < 2) {
-        values.useOriginalKey()
-      } else {
-        values.usePluralsKey(commonKey)
-      }
-    }.toMap()
+    data.import("")
   }
 
   private fun Any?.import(key: String) {
