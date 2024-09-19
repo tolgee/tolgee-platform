@@ -13,17 +13,16 @@ class GenericStructuredProcessor(
   private val format: ImportFormat,
 ) : ImportFileProcessor() {
   override fun process() {
-    var data = data
+    var processedData = data
     if (format.pluralsViaSuffixesParser != null) {
-      data =
+      processedData =
         GenericSuffixedPluralsPreprocessor(
           context = context,
           data = data,
           pluralsViaSuffixesParser = format.pluralsViaSuffixesParser,
         ).preprocess()
-      return
     }
-    data.import("")
+    processedData.import("")
   }
 
   private fun Any?.import(key: String) {
