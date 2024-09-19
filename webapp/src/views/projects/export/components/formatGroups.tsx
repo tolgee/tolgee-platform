@@ -227,9 +227,9 @@ export const formatGroups: FormatGroup[] = [
         format: 'JSON_I18NEXT',
         matchByExportParams: (params) =>
           params.format === 'JSON_I18NEXT' && params.structureDelimiter === '.',
-      }
-    ]
-  }
+      },
+    ],
+  },
 ];
 
 type ExportParamsWithoutZip = Omit<
