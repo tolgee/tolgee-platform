@@ -1,5 +1,6 @@
 package io.tolgee.service.bigMeta
 
+import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
@@ -36,6 +37,7 @@ class BigMetaService(
   private val transactionManager: PlatformTransactionManager,
   private val jdbcTemplate: JdbcTemplate,
   private val currentDateProvider: CurrentDateProvider,
+  private val metrics: Metrics,
 ) : Logging {
   companion object {
     const val MAX_DISTANCE_SCORE = 10000L
@@ -64,9 +66,14 @@ class BigMetaService(
       return
     }
 
-    val util = KeysDistanceUtil(relatedKeysInOrder, project, this)
+    val util =
+      metrics.bigMetaNewDistancesComputeTimer.recordCallable {
+        KeysDistanceUtil(relatedKeysInOrder, project, this)
+      }!!
 
-    insertNewDistances(util.newDistances)
+    metrics.bigMetaStoringTimer.recordCallable {
+      insertNewDistances(util.newDistances)
+    }
   }
 
   private fun insertNewDistances(toInsert: List<KeysDistanceDto>) {
@@ -78,7 +85,7 @@ class BigMetaService(
       on conflict (key1id, key2id) do update set score = excluded.score, hits = excluded.hits, updated_at = ?
       """,
       toInsert,
-      100,
+      10000,
     ) { ps, dto ->
       ps.setLong(1, dto.key1Id)
       ps.setLong(2, dto.key2Id)
