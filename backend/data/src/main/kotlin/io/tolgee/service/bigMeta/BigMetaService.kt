@@ -85,7 +85,7 @@ class BigMetaService(
       on conflict (key1id, key2id) do update set score = excluded.score, hits = excluded.hits, updated_at = ?
       """,
       toInsert,
-      1000,
+      10000,
     ) { ps, dto ->
       ps.setLong(1, dto.key1Id)
       ps.setLong(2, dto.key2Id)
