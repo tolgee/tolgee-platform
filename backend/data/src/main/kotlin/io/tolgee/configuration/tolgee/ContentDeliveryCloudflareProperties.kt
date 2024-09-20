@@ -16,7 +16,8 @@ class ContentDeliveryCloudflareProperties(
       "\n" +
       "e.g. `https://example.com,https://example2.com`" +
       "\n\n" +
-      "Read more in the Cloudflare docs: https://developers.cloudflare.com/cache/how-to/purge-cache/purge-by-single-file/",
+      "Read more in the Cloudflare " +
+      "[docs](https://developers.cloudflare.com/cache/how-to/purge-cache/purge-by-single-file/).",
   )
   var origins: String? = null,
   @DocProperty(
