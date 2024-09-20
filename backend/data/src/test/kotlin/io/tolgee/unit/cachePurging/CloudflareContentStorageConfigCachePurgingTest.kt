@@ -30,6 +30,7 @@ class CloudflareContentStorageConfigCachePurgingTest() {
         urlPrefix = "fake-url-prefix",
         maxFilesPerRequest = 10,
         apiKey = "token",
+        origins = "fake-origin,fake-origin2",
       )
     val restTemplateMock: RestTemplate = mock()
     val purging = CloudflareContentDeliveryCachePurging(config, restTemplateMock)
@@ -51,14 +52,33 @@ class CloudflareContentStorageConfigCachePurgingTest() {
     assertFiles(firstInvocation) {
       isArray
         .hasSize(10)
-        .contains("fake-url-prefix/fake-slug/fake-path-1")
+      node("[0]") {
+        node("headers").isEqualTo(
+          mapOf(
+            "Origin" to "fake-origin",
+          ),
+        )
+        node("url").isEqualTo("fake-url-prefix/fake-slug/fake-path-1")
+      }
+      node("[1]") {
+        node("headers").isEqualTo(
+          mapOf(
+            "Origin" to "fake-origin2",
+          ),
+        )
+      }
     }
     assertUrl(firstInvocation)
     assertAuthorizationHeader(firstInvocation)
 
-    assertFiles(invocations.toList()[1]) {
-      isArray.hasSize(5)
+    val invocationList = invocations.toList()
+    assertFiles(invocationList[1]) {
+      isArray.hasSize(10)
     }
+    assertFiles(invocationList[2]) {
+      isArray.hasSize(10)
+    }
+    invocationList.assert.hasSize(3)
   }
 
   private fun assertFiles(
