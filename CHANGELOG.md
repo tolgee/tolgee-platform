@@ -1,3 +1,10 @@
+## [3.73.1](https://github.com/tolgee/tolgee-platform/compare/v3.73.0...v3.73.1) (2024-09-20)
+
+
+### Bug Fixes
+
+* Add metrics for big meta storing ([#2476](https://github.com/tolgee/tolgee-platform/issues/2476)) ([bbb2feb](https://github.com/tolgee/tolgee-platform/commit/bbb2feb45fda97a49a2bfc2add11ccdcba5c68bb))
+
 # [3.73.0](https://github.com/tolgee/tolgee-platform/compare/v3.72.0...v3.73.0) (2024-09-18)
 
 
