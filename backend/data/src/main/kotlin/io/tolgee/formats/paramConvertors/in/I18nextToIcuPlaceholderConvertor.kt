@@ -20,7 +20,7 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
     val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
 
     if (parsed.nestedKey != null) {
-      // TODO: nested keys are not yet supported
+      // Nested keys are not supported
       return matchResult.value.escapeIcu(isInPlural)
     }
 

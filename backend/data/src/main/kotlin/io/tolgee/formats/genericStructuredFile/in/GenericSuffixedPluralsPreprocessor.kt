@@ -69,10 +69,9 @@ class GenericSuffixedPluralsPreprocessor(
   private fun Map<*, *>.preprocessMap(): Map<*, *> {
     return this.groupByPlurals(pluralsViaSuffixesParser).flatMap { (commonKey, values) ->
       if (commonKey == null || values.size < 2) {
-        values.useOriginalKey()
-      } else {
-        values.usePluralsKey(commonKey)
+        return@flatMap values.useOriginalKey()
       }
+      return@flatMap values.usePluralsKey(commonKey)
     }.toMap()
   }
 }
