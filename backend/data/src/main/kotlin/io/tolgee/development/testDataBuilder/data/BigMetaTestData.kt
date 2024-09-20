@@ -36,7 +36,10 @@ class BigMetaTestData {
       (0..5000).map {
         projectBuilder.addKey(null, "key$it").self
       }
+    return keys
+  }
 
+  fun addLotOfReferences(keys: List<Key>) {
     keys.forEachIndexed forEach1@{ idx1, key1 ->
       keys.forEachIndexed forEach2@{ idx2, key2 ->
         if (idx1 >= idx2 || abs(idx1 - idx2) > (BigMetaService.MAX_ORDER_DISTANCE + 1)) return@forEach2
@@ -46,7 +49,5 @@ class BigMetaTestData {
         }
       }
     }
-
-    return keys
   }
 }
