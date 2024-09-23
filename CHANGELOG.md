@@ -1,3 +1,10 @@
+# [3.74.0](https://github.com/tolgee/tolgee-platform/compare/v3.73.1...v3.74.0) (2024-09-23)
+
+
+### Features
+
+* Bunny.net cache purging, Origins specification for Cloudflare ([#2471](https://github.com/tolgee/tolgee-platform/issues/2471)) ([ac048ac](https://github.com/tolgee/tolgee-platform/commit/ac048ac6c85239009a506b12beebf2a46956d66d))
+
 ## [3.73.1](https://github.com/tolgee/tolgee-platform/compare/v3.73.0...v3.73.1) (2024-09-20)
 
 
