@@ -7,7 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.exceptions.*
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ErrorException
+import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.exceptions.ErrorResponseTyped
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import jakarta.persistence.EntityNotFoundException
@@ -32,6 +36,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
+import org.springframework.web.servlet.resource.NoResourceFoundException
 import java.io.Serializable
 import java.util.*
 import java.util.function.Consumer
@@ -235,6 +240,15 @@ class ExceptionHandlers {
     return ResponseEntity(
       RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
       HttpStatus.TOO_MANY_REQUESTS,
+    )
+  }
+
+  @ExceptionHandler(NoResourceFoundException::class)
+  fun handleNoResourceFound(ex: NoResourceFoundException): ResponseEntity<ErrorResponseBody> {
+    logger.debug("No resource found", ex)
+    return ResponseEntity(
+      ErrorResponseBody(Message.RESOURCE_NOT_FOUND.code, listOf(ex.resourcePath)),
+      HttpStatus.NOT_FOUND,
     )
   }
 
