@@ -1,3 +1,11 @@
+## [3.74.1](https://github.com/tolgee/tolgee-platform/compare/v3.74.0...v3.74.1) (2024-09-23)
+
+
+### Bug Fixes
+
+* No static resource found error handling ([#2479](https://github.com/tolgee/tolgee-platform/issues/2479)) ([cadcfa4](https://github.com/tolgee/tolgee-platform/commit/cadcfa442c687dcc49b4e3dddb0030fdfde1cfef))
+* Set outdated flag in resolvable import ([#2442](https://github.com/tolgee/tolgee-platform/issues/2442)) ([d6971d2](https://github.com/tolgee/tolgee-platform/commit/d6971d2c52a4ed532ac747035549c3f218b7b365))
+
 # [3.74.0](https://github.com/tolgee/tolgee-platform/compare/v3.73.1...v3.74.0) (2024-09-23)
 
 
