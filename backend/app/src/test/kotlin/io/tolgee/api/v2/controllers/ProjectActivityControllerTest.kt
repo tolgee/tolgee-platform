@@ -42,15 +42,48 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `returns no activity while 0 tags are added to the key`() {
     val keyTag = "tag"
-    val key = testData.addKeyWithTag("tag")
+    val key = testData.addKeyWithTag(keyTag)
     testDataService.saveTestData(testData.root)
 
     performProjectAuthPost("start-batch-job/tag-keys", mapOf("keyIds" to listOf(key.id), "tags" to listOf(keyTag)))
       .andIsOk
 
-    val revision = getLastRevision()
-    performProjectAuthGet("activity/revisions/${revision?.id}")
-      .andIsNotFound
+    waitForNotThrowing(timeout = 1000) {
+      val revisionsWithTag =
+        findBatchTagKeysActivityRevisions()
+
+      assert(revisionsWithTag.isEmpty())
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns activity while 1 or more tags are added to the key`() {
+    val key = testData.addKeyWithTag("tag")
+    testDataService.saveTestData(testData.root)
+
+    performProjectAuthPost(
+      "start-batch-job/tag-keys",
+      mapOf("keyIds" to listOf(key.id), "tags" to listOf("tag1", "tag2", "tag3")),
+    )
+      .andIsOk
+
+    waitForNotThrowing(timeout = 1000) {
+      val revisionsWithTag =
+        findBatchTagKeysActivityRevisions()
+
+      assert(revisionsWithTag.isNotEmpty())
+    }
+  }
+
+  fun findBatchTagKeysActivityRevisions(): List<ActivityRevision> {
+    return entityManager.createQuery(
+      """
+      select ar from ActivityRevision ar
+      where ar.type = 'BATCH_TAG_KEYS' and ar.authorId = ${testData.userAccount.id}
+      """.trimIndent(),
+      ActivityRevision::class.java,
+    ).resultList
   }
 
   private fun JsonAssert.assertCountsOnlyResult() {
