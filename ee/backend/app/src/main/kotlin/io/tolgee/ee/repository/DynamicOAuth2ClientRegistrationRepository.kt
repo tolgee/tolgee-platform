@@ -16,10 +16,6 @@ class DynamicOAuth2ClientRegistrationRepository(
   private val dynamicClientRegistrations: MutableMap<String, DynamicOAuth2ClientRegistration> = mutableMapOf()
 
   override fun findByRegistrationId(registrationId: String): ClientRegistration {
-    dynamicClientRegistrations[registrationId]?.let {
-      return it.clientRegistration
-    }
-
     val tenant: Tenant = tenantService.getByDomain(registrationId)
     val dynamicRegistration = createDynamicClientRegistration(tenant)
     return dynamicRegistration.clientRegistration
@@ -33,6 +29,7 @@ class DynamicOAuth2ClientRegistrationRepository(
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
         .authorizationUri(tenant.authorizationUri)
         .tokenUri(tenant.tokenUri)
+        .jwkSetUri(tenant.jwkSetUri)
         .redirectUri(tenant.redirectUriBase + "/openId/auth_callback/" + tenant.domain)
         .scope("openid", "profile", "email")
         .build()
