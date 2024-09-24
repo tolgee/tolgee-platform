@@ -1,3 +1,10 @@
+## [3.74.2](https://github.com/tolgee/tolgee-platform/compare/v3.74.1...v3.74.2) (2024-09-24)
+
+
+### Bug Fixes
+
+* Resolvable import timing out ([#2484](https://github.com/tolgee/tolgee-platform/issues/2484)) ([a4e5c05](https://github.com/tolgee/tolgee-platform/commit/a4e5c05436be32f64ef08462fc5a9199d1c9523e))
+
 ## [3.74.1](https://github.com/tolgee/tolgee-platform/compare/v3.74.0...v3.74.1) (2024-09-23)
 
 

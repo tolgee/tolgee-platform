@@ -1294,6 +1294,7 @@
   "task_scope_keys_label": "Keys",
   "task_scope_total_to_translate": "Total to translate",
   "task_scope_words_label": "Words",
+  "tasks_feature_description": "Tasks are feature only available in paid plans",
   "tasks_filter_by_language": "Select language...",
   "tasks_search_placeholder": "Search...",
   "tasks_show_closed_label": "Closed tasks",

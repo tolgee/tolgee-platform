@@ -1292,6 +1292,7 @@
   "task_scope_keys_label": "Nøgler",
   "task_scope_total_to_translate": "I alt at oversætte",
   "task_scope_words_label": "Ord",
+  "tasks_feature_description": "Opgaver er en funktion, der kun er tilgængelig i betalte planer",
   "tasks_filter_by_language": "Vælg sprog...",
   "tasks_search_placeholder": "Søg...",
   "tasks_show_closed_label": "Lukkede opgaver",

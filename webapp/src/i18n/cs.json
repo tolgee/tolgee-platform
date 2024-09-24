@@ -1294,6 +1294,7 @@
   "task_scope_keys_label": "Klíče",
   "task_scope_total_to_translate": "Celkem k překladu",
   "task_scope_words_label": "Slova",
+  "tasks_feature_description": "Úkoly jsou funkce dostupná pouze v placených plánech",
   "tasks_filter_by_language": "Vyberte jazyk...",
   "tasks_search_placeholder": "Hledat...",
   "tasks_show_closed_label": "Uzavřené úkoly",
