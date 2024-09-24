@@ -5,6 +5,7 @@ import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.key.Key
 
 class ResolvableImportTestData : BaseTestData() {
   lateinit var key1and2Screenshot: Screenshot
@@ -101,6 +102,14 @@ class ResolvableImportTestData : BaseTestData() {
       type = null
       scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
       translateLanguages = mutableSetOf(englishLanguage)
+    }
+  }
+
+  fun addLotOfKeys(count: Int): List<Key> {
+    return (1..count).map {
+      projectBuilder.addKey(keyName = "key-lot-$it") {
+        addTranslation("en", "existing translation")
+      }.self
     }
   }
 }

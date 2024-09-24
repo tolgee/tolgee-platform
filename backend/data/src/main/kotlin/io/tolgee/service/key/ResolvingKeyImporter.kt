@@ -11,7 +11,11 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
-import io.tolgee.model.*
+import io.tolgee.model.Language
+import io.tolgee.model.Project
+import io.tolgee.model.Project_
+import io.tolgee.model.Screenshot
+import io.tolgee.model.UploadedImage
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -107,6 +111,7 @@ class ResolvingKeyImporter(
       }
 
     translationService.onKeyIsPluralChanged(isPluralChangedForKeys, true, updatedTranslationIds)
+    translationService.setOutdatedBatch(outdatedKeys)
 
     return result
   }
@@ -146,8 +151,6 @@ class ResolvingKeyImporter(
   }
 
   private fun List<TranslationToModify>.save() {
-    translationService.setOutdatedBatch(outdatedKeys)
-
     this.forEach {
       translationService.setTranslation(it.translation, it.text)
       updatedTranslationIds.add(it.translation.id)

@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.Resource
 import kotlin.properties.Delegates
+import kotlin.time.measureTime
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -145,6 +146,40 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
       assertTranslationText("namespace-1", "key-1", "en", "new")
       assertTranslationText("namespace-1", "key-2", "en", "existing translation")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it imports a lot of data (and set outdated) in time`() {
+    val lotOfKeys = testData.addLotOfKeys(5000)
+    testDataService.saveTestData(testData.root)
+
+    val toImport =
+      lotOfKeys.map {
+        mapOf(
+          "name" to it.name,
+          "translations" to
+            mapOf(
+              "en" to
+                mapOf(
+                  "text" to "new",
+                  "resolution" to "OVERRIDE",
+                ),
+            ),
+        )
+      }
+
+    val time =
+      measureTime {
+        performProjectAuthPost(
+          "keys/import-resolvable",
+          mapOf(
+            "keys" to toImport,
+          ),
+        ).andIsOk
+      }
+
+    time.inWholeSeconds.assert.isLessThan(10)
   }
 
   @Test
