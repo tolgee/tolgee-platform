@@ -1,10 +1,12 @@
-import React, { FunctionComponent, useEffect, useRef } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
 import { CreateProviderSsoForm } from 'tg.views/organizations/sso/CreateProviderSsoForm';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { FormControlLabel, Switch } from '@mui/material';
+import Box from '@mui/material/Box';
 
 export const OrganizationSsoView: FunctionComponent = () => {
   const organization = useOrganization();
@@ -28,6 +30,7 @@ export const OrganizationSsoView: FunctionComponent = () => {
     redirectUri: '',
     tokenUri: '',
   });
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     if (providersLoadable.data) {
@@ -38,8 +41,13 @@ export const OrganizationSsoView: FunctionComponent = () => {
         redirectUri: providersLoadable.data.redirectUri || '',
         tokenUri: providersLoadable.data.tokenUri || '',
       };
+
+      setShowForm(providersLoadable.data.isEnabled);
     }
   }, [providersLoadable.data]);
+  const handleSwitchChange = (event) => {
+    setShowForm(event.target.checked);
+  };
 
   return (
     <BaseOrganizationSettingsView
@@ -57,7 +65,16 @@ export const OrganizationSsoView: FunctionComponent = () => {
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
-      <CreateProviderSsoForm credentialsRef={credentialsRef} />
+      <FormControlLabel
+        control={<Switch checked={showForm} onChange={handleSwitchChange} />}
+        label={t('organization_sso_switch')}
+      />
+      <Box sx={{ marginTop: '16px' }}>
+        <CreateProviderSsoForm
+          credentialsRef={credentialsRef}
+          disabled={!showForm}
+        />
+      </Box>
     </BaseOrganizationSettingsView>
   );
 };

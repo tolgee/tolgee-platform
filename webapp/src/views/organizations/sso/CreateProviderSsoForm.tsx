@@ -25,7 +25,7 @@ type ProviderProps = {
   credentialsRef: React.RefObject<Provider>;
 };
 
-export function CreateProviderSsoForm(props: ProviderProps) {
+export function CreateProviderSsoForm({ credentialsRef, disabled }) {
 
     const organization = useOrganization();
     if (!organization) {
@@ -36,12 +36,11 @@ export function CreateProviderSsoForm(props: ProviderProps) {
         url: `/v2/{organizationId}/sso/providers`,
         method: 'post',
         invalidatePrefix: '/v2/organizations',
-    });
+    })
 
     return (
         <StandardForm
-            initialValues={props.credentialsRef.current!}
-
+            initialValues={credentialsRef.current!}
             onSubmit={async (data) => {
                 providersCreate.mutate(
                     {
@@ -60,6 +59,7 @@ export function CreateProviderSsoForm(props: ProviderProps) {
         >
             <StyledInputFields>
                 <TextField
+                    disabled={disabled}
                     variant="standard"
                     name="authorizationUri"
                     label={<T keyName="organization_sso_authorization_uri"/>}
@@ -68,6 +68,7 @@ export function CreateProviderSsoForm(props: ProviderProps) {
             </StyledInputFields>
             <StyledInputFields>
                 <TextField
+                    disabled={disabled}
                     variant="standard"
                     name="clientId"
                     label={<T keyName="organization_sso_client_id"/>}
@@ -76,6 +77,7 @@ export function CreateProviderSsoForm(props: ProviderProps) {
             </StyledInputFields>
             <StyledInputFields>
                 <TextField
+                    disabled={disabled}
                     variant="standard"
                     name="clientSecret"
                     label={<T keyName="organization_sso_client_secret"/>}
@@ -84,6 +86,7 @@ export function CreateProviderSsoForm(props: ProviderProps) {
             </StyledInputFields>
             <StyledInputFields>
                 <TextField
+                    disabled={disabled}
                     variant="standard"
                     name="redirectUri"
                     label={<T keyName="organization_sso_redirect_uri"/>}
@@ -92,6 +95,7 @@ export function CreateProviderSsoForm(props: ProviderProps) {
             </StyledInputFields>
             <StyledInputFields>
                 <TextField
+                    disabled={disabled}
                     variant="standard"
                     name="tokenUri"
                     label={<T keyName="organization_sso_token_uri"/>}
