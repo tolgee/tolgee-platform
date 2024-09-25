@@ -35,7 +35,7 @@ class BaseImportRawDataConverter(
     }
 
     val converted = convertMessage(stringValue, false)
-    return MessageConvertorResult(converted.message, null)
+    return MessageConvertorResult(converted.message, null, converted.customValues)
   }
 
   private val doesNotNeedConversion =

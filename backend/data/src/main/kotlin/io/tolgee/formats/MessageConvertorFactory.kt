@@ -4,6 +4,7 @@ class MessageConvertorFactory(
   private val message: String,
   private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean = false,
+  private val customValues: Map<String, Any?>? = null,
   private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
 ) {
   fun create(): BaseIcuMessageConvertor {
@@ -12,6 +13,7 @@ class MessageConvertorFactory(
       argumentConvertorFactory = getParamConvertorFactory(),
       forceIsPlural = forceIsPlural,
       keepEscaping = keepEscaping,
+      customValues = customValues,
     )
   }
 

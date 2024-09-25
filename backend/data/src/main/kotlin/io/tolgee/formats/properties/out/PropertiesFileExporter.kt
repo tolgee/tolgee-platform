@@ -32,7 +32,7 @@ class PropertiesFileExporter(
     translations.forEach { translation ->
       val fileName = computeFileName(translation)
       val keyName = translation.key.name
-      val value = convertMessage(translation.text, translation.key.isPlural)
+      val value = convertMessage(translation.text, translation.key.isPlural, translation.key.custom)
       val properties = result.getOrPut(fileName) { PropertiesConfiguration() }
       properties.setProperty(keyName, value)
       properties.layout.setComment(keyName, translation.key.description)
@@ -42,11 +42,13 @@ class PropertiesFileExporter(
   private fun convertMessage(
     text: String?,
     plural: Boolean,
+    customValues: Map<String, Any?>?,
   ): String? {
     return IcuToGenericFormatMessageConvertor(
       text,
       plural,
       projectIcuPlaceholdersSupport,
+      customValues = customValues,
       paramConvertorFactory = messageFormat.paramConvertorFactory,
     ).convert()
   }

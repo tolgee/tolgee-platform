@@ -55,8 +55,9 @@ class XliffFileExporter(
           convertMessage(
             baseTranslations[translation.key.namespace to translation.key.name]?.text,
             translation.key.isPlural,
+            translation.key.custom,
           )
-        this.target = convertMessage(translation.text, translation.key.isPlural)
+        this.target = convertMessage(translation.text, translation.key.isPlural, translation.key.custom)
         this.note = translation.key.description
       },
     )
@@ -65,11 +66,13 @@ class XliffFileExporter(
   private fun convertMessage(
     text: String?,
     plural: Boolean,
+    customValues: Map<String, Any?>?,
   ): String? {
     return IcuToGenericFormatMessageConvertor(
       text,
       plural,
       projectIcuPlaceholdersSupport,
+      customValues = customValues,
       paramConvertorFactory = messageFormat.paramConvertorFactory,
     ).convert()
   }

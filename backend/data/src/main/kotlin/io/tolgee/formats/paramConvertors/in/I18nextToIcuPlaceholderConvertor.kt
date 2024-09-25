@@ -2,6 +2,7 @@ package io.tolgee.formats.paramConvertors.`in`
 
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.escapeIcu
+import io.tolgee.formats.i18next.I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY
 import io.tolgee.formats.i18next.`in`.I18nextParameterParser
 import io.tolgee.formats.i18next.`in`.PluralsI18nextKeyParser
 
@@ -12,6 +13,18 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
     get() = I18NEXT_PLACEHOLDER_REGEX
 
   override val pluralArgName: String? = null
+
+  private val unescapedKeys = mutableListOf<String>()
+
+  private val _customValues = mapOf(I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY to unescapedKeys)
+
+  override val customValues: Map<String, Any>?
+    get() {
+      if (unescapedKeys.isEmpty()) {
+        return null
+      }
+      return _customValues
+    }
 
   override fun convert(
     matchResult: MatchResult,
@@ -24,7 +37,9 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       return matchResult.value.escapeIcu(isInPlural)
     }
 
-    // TODO: handle unescaped flag by adding info about it to the metadata and using this info when exporting
+    if (parsed.key != null && parsed.keepUnescaped) {
+      unescapedKeys.add(parsed.key)
+    }
 
     return when (parsed.format) {
       null -> "{${parsed.key}}"

@@ -16,6 +16,7 @@ class IcuToGenericFormatMessageConvertor(
   private val message: String?,
   private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean,
+  private val customValues: Map<String, Any?>?,
   private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
 ) {
   fun convert(): String? {
@@ -45,6 +46,7 @@ class IcuToGenericFormatMessageConvertor(
       message = message,
       forceIsPlural = forceIsPlural,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      customValues = customValues,
       paramConvertorFactory = paramConvertorFactory,
     ).create().convert()
   }

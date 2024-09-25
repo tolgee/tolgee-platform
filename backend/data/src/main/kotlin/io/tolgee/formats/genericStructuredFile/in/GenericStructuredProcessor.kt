@@ -28,17 +28,8 @@ class GenericStructuredProcessor(
   private fun Any?.import(key: String) {
     // Convertor handles strings and possible nested plurals, if convertor returns null,
     // it means that it's not a string or nested plurals, so we need to parse it further
-    convert(this)?.let { result ->
-      result.forEach {
-        context.addTranslation(
-          key,
-          languageTagOrGuess,
-          it.message,
-          rawData = this@import,
-          convertedBy = format,
-          pluralArgName = it.pluralArgName,
-        )
-      }
+    convert(this)?.let {
+      it.applyAll(key, this@import)
       return
     }
 
@@ -52,16 +43,8 @@ class GenericStructuredProcessor(
       return
     }
 
-    convert(this)?.firstOrNull()?.let {
-      context.addTranslation(
-        keyName = key,
-        languageName = languageTagOrGuess,
-        value = it.message,
-        pluralArgName = it.pluralArgName,
-        rawData = this@import,
-        convertedBy = format,
-      )
-    }
+    // FIXME: I believe when this line is reached the convert function will always return null, am I missing something?
+    convert(this)?.firstOrNull()?.apply(key, this@import)
   }
 
   private fun convert(data: Any?): List<MessageConvertorResult>? {
@@ -92,6 +75,39 @@ class GenericStructuredProcessor(
 
       entry.value.import("$keyPrefixWithDelimiter$key")
       return@forEachIndexed
+    }
+  }
+
+  private fun FileProcessorContext.mergeCustomAll(
+    key: String,
+    customValues: Map<String, Any>?,
+  ) {
+    customValues?.forEach { (cKey, cValue) ->
+      mergeCustom(key, cKey, cValue)
+    }
+  }
+
+  private fun MessageConvertorResult.apply(
+    key: String,
+    rawData: Any?,
+  ) {
+    context.addTranslation(
+      keyName = key,
+      languageName = languageTagOrGuess,
+      value = message,
+      rawData = rawData,
+      convertedBy = format,
+      pluralArgName = pluralArgName,
+    )
+    context.mergeCustomAll(key, customValues)
+  }
+
+  private fun List<MessageConvertorResult>.applyAll(
+    key: String,
+    rawData: Any?,
+  ) {
+    forEach {
+      it.apply(key, rawData)
     }
   }
 

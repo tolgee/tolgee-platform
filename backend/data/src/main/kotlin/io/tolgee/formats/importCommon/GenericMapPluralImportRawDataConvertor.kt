@@ -51,6 +51,7 @@ class GenericMapPluralImportRawDataConvertor(
     baseImportRawDataConverter: BaseImportRawDataConverter,
   ): MessageConvertorResult? {
     var pluralArgName = DEFAULT_PLURAL_ARGUMENT_NAME
+    val customValues = mutableMapOf<String, Any>()
     val converted =
       rawData.mapNotNull { (key, value) ->
         if (key !is String || value !is String?) {
@@ -64,9 +65,12 @@ class GenericMapPluralImportRawDataConvertor(
         convertedMessage.pluralArgName?.let {
           pluralArgName = it
         }
+        convertedMessage.customValues?.let {
+          customValues.putAll(it)
+        }
         key to message
       }.toMap().toIcuPluralString(optimize = optimizePlurals, argName = pluralArgName)
 
-    return MessageConvertorResult(converted, pluralArgName)
+    return MessageConvertorResult(converted, pluralArgName, customValues)
   }
 }

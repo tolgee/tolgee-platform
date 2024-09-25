@@ -9,4 +9,7 @@ interface ToIcuPlaceholderConvertor {
   val regex: Regex
 
   val pluralArgName: String?
+
+  val customValues: Map<String, Any>?
+    get() = null
 }
