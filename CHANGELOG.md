@@ -1,3 +1,10 @@
+## [3.74.3](https://github.com/tolgee/tolgee-platform/compare/v3.74.2...v3.74.3) (2024-09-25)
+
+
+### Bug Fixes
+
+* Update vulnerable dependencies ([#2486](https://github.com/tolgee/tolgee-platform/issues/2486)) ([8b85593](https://github.com/tolgee/tolgee-platform/commit/8b85593cdb122096ce427a7035d1a75fc301a4f7))
+
 ## [3.74.2](https://github.com/tolgee/tolgee-platform/compare/v3.74.1...v3.74.2) (2024-09-24)
 
 
