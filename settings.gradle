@@ -69,7 +69,7 @@ dependencyResolutionManagement {
             library('postHog', 'com.posthog.java:posthog:1.1.1')
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.13.3")
             library('mailjet', "com.mailjet:mailjet-client:5.2.5")
-            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.15.0')
+            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.16.0')
             library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
             library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
             library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
