@@ -5,7 +5,7 @@
   },
   "keyNesting": "reuse $t(keyDeep.inner) (is not supported)",
   "keyInterpolate": "replace this {{value}}",
-  "keyInterpolateUnescaped": "replace this {{- value}} (we ignore the -)",
+  "keyInterpolateUnescaped": "replace this {{- value}} (we save the - into metadata)",
   "keyInterpolateWithFormatting": "replace this {{value, number}} (only number is supported)",
   "keyContext_male": "the male variant (is parsed as normal key and context is ignored)",
   "keyContext_female": "the female variant (is parsed as normal key and context is ignored)",
@@ -17,5 +17,5 @@
   "keyPluralMultipleEgArabic_many": "the plural form 4",
   "keyPluralMultipleEgArabic_other": "the plural form 5",
   "keyWithArrayValue": ["multipe", "things"],
-  "keyWithObjectValue": { "valueA": "return this with valueB", "valueB": "more text" }
+  "keyWithObjectValue": { "valueA": "valueA", "valueB": "more text" }
 }
