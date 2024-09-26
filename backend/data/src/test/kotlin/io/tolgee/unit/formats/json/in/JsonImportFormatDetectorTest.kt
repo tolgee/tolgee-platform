@@ -21,7 +21,7 @@ class JsonImportFormatDetectorTest {
 
   @Test
   fun `detected i18next`() {
-    "src/test/resources/import/json/i18next.json".assertDetected(ImportFormat.JSON_I18NEXT)
+    "src/test/resources/import/i18next/example.json".assertDetected(ImportFormat.JSON_I18NEXT)
   }
 
   @Test
