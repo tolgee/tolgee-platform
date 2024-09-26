@@ -65,7 +65,7 @@ class I18nextFileExporterTest {
     |  "key3_one": "{{count, number}} den {{icuParam, number}}",
     |  "key3_few": "{{count, number}} dny",
     |  "key3_other": "{{count, number}} dní",
-    |  "item": "I will be first '{'icuParam'}' {{hello, number}}"
+    |  "item": "I will be first '{'icuParam'}' {{hello, number}}",
     |  "unescaped": "Unescaped {{- value}} with another text {{text}}"
     |}
       """.trimMargin(),
