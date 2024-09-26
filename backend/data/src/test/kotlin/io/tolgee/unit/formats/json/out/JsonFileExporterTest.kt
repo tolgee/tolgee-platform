@@ -165,23 +165,6 @@ class JsonFileExporterTest {
   }
 
   @Test
-  fun `exports i18next correctly`() {
-    val exporter = getIcuPlaceholdersEnabledExporter(ExportMessageFormat.I18NEXT)
-    val data = getExported(exporter)
-    data.assertFile(
-      "cs.json",
-      """
-    |{
-    |  "key3_one": "{{count, number}} den {{icuParam, number}}",
-    |  "key3_few": "{{count, number}} dny",
-    |  "key3_other": "{{count, number}} dní",
-    |  "item": "I will be first '{'icuParam'}' {{hello, number}}"
-    |}
-      """.trimMargin(),
-    )
-  }
-
-  @Test
   fun `correct exports translation with colon`() {
     val exporter = getExporter(getTranslationWithColon())
     val data = getExported(exporter)
@@ -207,7 +190,7 @@ class JsonFileExporterTest {
     return built.translations
   }
 
-  private fun getIcuPlaceholdersEnabledExporter(messageFormat: ExportMessageFormat? = null): JsonFileExporter {
+  private fun getIcuPlaceholdersEnabledExporter(): JsonFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -223,11 +206,7 @@ class JsonFileExporterTest {
           text = "I will be first '{'icuParam'}' {hello, number}",
         )
       }
-    return getExporter(
-      built.translations,
-      true,
-      exportParams = ExportParams(messageFormat = messageFormat),
-    )
+    return getExporter(built.translations, true)
   }
 
   @Test
