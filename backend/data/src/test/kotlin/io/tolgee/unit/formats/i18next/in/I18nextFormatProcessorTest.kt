@@ -1,10 +1,6 @@
 package io.tolgee.unit.formats.i18next.`in`
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.dtos.request.ImportFileMapping
-import io.tolgee.dtos.request.SingleStepImportRequest
-import io.tolgee.formats.i18next.I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY
-import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
@@ -86,7 +82,7 @@ class I18nextFormatProcessorTest {
           one {the singular (is parsed as plural under one key - keyPluralSimple)}
           other {the plural (is parsed as plural under one key - keyPluralSimple)}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
@@ -101,25 +97,25 @@ class I18nextFormatProcessorTest {
           many {the plural form 4}
           other {the plural form 5}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertKey("keyInterpolateUnescaped"){
+    mockUtil.fileProcessorContext.assertKey("keyInterpolateUnescaped") {
       customEquals(
         """
         {
             "_i18nextUnescapedPlaceholders" : [ "value" ]
           }
-        """.trimIndent()
+        """.trimIndent(),
       )
       description.assert.isNull()
     }
-    mockUtil.fileProcessorContext.assertKey("keyPluralSimple"){
+    mockUtil.fileProcessorContext.assertKey("keyPluralSimple") {
       custom.assert.isNull()
       description.assert.isNull()
     }
-    mockUtil.fileProcessorContext.assertKey("keyPluralMultipleEgArabic"){
+    mockUtil.fileProcessorContext.assertKey("keyPluralMultipleEgArabic") {
       custom.assert.isNull()
       description.assert.isNull()
     }
@@ -150,7 +146,7 @@ class I18nextFormatProcessorTest {
           one {You have one message}
           other {You have {count} messages}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
@@ -210,7 +206,7 @@ class I18nextFormatProcessorTest {
           one {He has one cat}
           other {He has {count} cats}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
@@ -222,7 +218,7 @@ class I18nextFormatProcessorTest {
           one {She has one cat}
           other {She has {count} cats}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
@@ -254,15 +250,15 @@ class I18nextFormatProcessorTest {
       .assertSingle {
         hasText("This is the default value if the key is missing.")
       }
-    mockUtil.fileProcessorContext.assertKey("translation.plural_example"){
+    mockUtil.fileProcessorContext.assertKey("translation.plural_example") {
       custom.assert.isNull()
       description.assert.isNull()
     }
-    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural.male"){
+    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural.male") {
       custom.assert.isNull()
       description.assert.isNull()
     }
-    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural.female"){
+    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural.female") {
       custom.assert.isNull()
       description.assert.isNull()
     }
@@ -285,11 +281,11 @@ class I18nextFormatProcessorTest {
           one {Hello one '#' '{{'icuParam'}}'}
           other {Hello other '{{'icuParam'}}'}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertKey("plural"){
+    mockUtil.fileProcessorContext.assertKey("plural") {
       custom.assert.isNull()
       description.assert.isNull()
     }
@@ -312,11 +308,11 @@ class I18nextFormatProcessorTest {
           one {Hello one '#' '{{'icuParam'}}'}
           other {Hello other '{{'icuParam'}}'}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertKey("plural"){
+    mockUtil.fileProcessorContext.assertKey("plural") {
       custom.assert.isNull()
       description.assert.isNull()
     }
@@ -339,11 +335,11 @@ class I18nextFormatProcessorTest {
           one {Hello one '#' {icuParam}}
           other {Hello other {icuParam}}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertKey("plural"){
+    mockUtil.fileProcessorContext.assertKey("plural") {
       custom.assert.isNull()
       description.assert.isNull()
     }
