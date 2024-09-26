@@ -19,7 +19,7 @@ class IcuToI18nextPlaceholderConvertor : FromIcuPlaceholderConvertor {
     }
 
     if (customValues.hasUnescapedFlag(node.name)) {
-      return "{{- ${node.name}]}"
+      return "{{- ${node.name}}}"
     }
 
     return "{{${node.name}}}"
