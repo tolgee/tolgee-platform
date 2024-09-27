@@ -87,10 +87,12 @@ class GenericStructuredProcessor(
       convertedBy = format,
       pluralArgName = pluralArgName,
     )
-    val customValues = context.getCustom(key)?.toMutableMap() ?: mutableMapOf()
-    customValuesModifier?.invoke(customValues, mutableMapOf())
-    val customValuesNonEmpty = customValues.takeIf { it.isNotEmpty() }
-    context.setCustom(key, customValuesNonEmpty)
+    customValuesModifier?.let {
+      val customValues = context.getCustom(key)?.toMutableMap() ?: mutableMapOf()
+      it(customValues, mutableMapOf())
+      val customValuesNonEmpty = customValues.takeIf { it.isNotEmpty() }
+      context.setCustom(key, customValuesNonEmpty)
+    }
   }
 
   private fun List<MessageConvertorResult>.applyAll(
