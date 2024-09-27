@@ -10,6 +10,7 @@ import AppleLogo from 'tg.svgs/logos/apple.svg?react';
 import AndroidLogo from 'tg.svgs/logos/android.svg?react';
 import FluttrerLogo from 'tg.svgs/logos/flutter.svg?react';
 import RailsLogo from 'tg.svgs/logos/rails.svg?react';
+import I18nextLogo from 'tg.svgs/logos/i18next.svg?react';
 
 const TechLogo = ({
   svg,
@@ -53,6 +54,7 @@ const FORMATS = [
   { name: 'Android XML', logo: <AndroidLogo /> },
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
+  { name: 'i18next', logo: <I18nextLogo /> },
 ];
 
 export const ImportSupportedFormats = () => {
