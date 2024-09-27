@@ -18,7 +18,9 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   private var unescapedKeys = mutableListOf<String>()
   private var escapedKeys = mutableListOf<String>()
 
-  override val customValuesModifier: ((MutableMap<String, Any?>, MutableMap<String, Any?>) -> Unit)? = modifier@{ customValues, memory ->
+  override val customValuesModifier: (
+    (MutableMap<String, Any?>, MutableMap<String, Any?>) -> Unit
+  )? = modifier@{ customValues, memory ->
     if (unescapedKeys.isEmpty() && escapedKeys.isEmpty()) {
       // Optimization
       return@modifier
