@@ -37,7 +37,10 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun MutableMap<String, Any?>.modifyList(key: String, modifier: (MutableList<Any?>) -> Unit) {
+  private fun MutableMap<String, Any?>.modifyList(
+    key: String,
+    modifier: (MutableList<Any?>) -> Unit,
+  ) {
     val value = this[key] ?: mutableListOf<Any?>()
     val list = value as? MutableList<Any?> ?: return
 
@@ -51,9 +54,9 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   }
 
   private fun handleUnescapedModifier(
-   unescapedKeys: MutableList<Any?>,
-   escapedKeys: MutableList<Any?>,
-   unescapedKey: String,
+    unescapedKeys: MutableList<Any?>,
+    escapedKeys: MutableList<Any?>,
+    unescapedKey: String,
   ) {
     if (unescapedKey in escapedKeys || unescapedKey in unescapedKeys) {
       return
