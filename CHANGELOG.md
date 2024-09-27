@@ -1,3 +1,10 @@
+## [3.74.4](https://github.com/tolgee/tolgee-platform/compare/v3.74.3...v3.74.4) (2024-09-27)
+
+
+### Bug Fixes
+
+* Fix message format conversions ([#2490](https://github.com/tolgee/tolgee-platform/issues/2490)) ([5ce2459](https://github.com/tolgee/tolgee-platform/commit/5ce2459ee1f520b99ae1f6c2f0c356e91c8a898a))
+
 ## [3.74.3](https://github.com/tolgee/tolgee-platform/compare/v3.74.2...v3.74.3) (2024-09-25)
 
 
