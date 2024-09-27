@@ -40,10 +40,13 @@ class IcuToI18nextPlaceholderConvertor : FromIcuPlaceholderConvertor {
       ?: false
   }
 
-  override fun convertText(string: String): String {
+  override fun convertText(
+    node: MessagePatternUtil.TextNode,
+    keepEscaping: Boolean,
+  ): String {
     // We should escape {{ and $t, but there doesn't seem to be a documented
     // way how to escape either {{ or $t in i18next
-    return string
+    return node.getText(keepEscaping)
   }
 
   override fun convertReplaceNumber(

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 class I18nextFileExporterTest {
   @Test
   fun `exports with placeholders (ICU placeholders disabled)`() {
-    // FIXME: Is this one correct? (I'm not sure)
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
     data.assertFile(
@@ -25,7 +24,7 @@ class I18nextFileExporterTest {
     |  "key3_one": "# den {icuParam}",
     |  "key3_few": "# dny",
     |  "key3_other": "# dní",
-    |  "item": "I will be first {{icuParam, number}}"
+    |  "item": "I will be first {icuParam, number}"
     |}
       """.trimMargin(),
     )
@@ -65,7 +64,7 @@ class I18nextFileExporterTest {
     |  "key3_one": "{{count, number}} den {{icuParam, number}}",
     |  "key3_few": "{{count, number}} dny",
     |  "key3_other": "{{count, number}} dní",
-    |  "item": "I will be first '{'icuParam'}' {{hello, number}}",
+    |  "item": "I will be first {icuParam} {{hello, number}}",
     |  "unescaped": "Unescaped {{- value}} with another text {{text}}"
     |}
       """.trimMargin(),
