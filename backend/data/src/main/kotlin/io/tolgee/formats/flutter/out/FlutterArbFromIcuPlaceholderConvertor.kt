@@ -8,8 +8,11 @@ class FlutterArbFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
     return "{${node.name}}"
   }
 
-  override fun convertText(string: String): String {
-    return string
+  override fun convertText(
+    node: MessagePatternUtil.TextNode,
+    keepEscaping: Boolean,
+  ): String {
+    return node.getText(keepEscaping)
   }
 
   override fun convertReplaceNumber(

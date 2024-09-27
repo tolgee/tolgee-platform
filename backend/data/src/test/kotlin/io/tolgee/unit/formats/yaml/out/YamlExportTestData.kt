@@ -60,7 +60,7 @@ object YamlExportTestData {
           text = "I will be first {param1}, {param2}",
         )
       }
-    return getExporter(built.translations, false, exportParams)
+    return getExporter(built.translations, true, exportParams)
   }
 
   fun getIcuPlaceholdersEnabledExporter(): YamlFileExporter {

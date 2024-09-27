@@ -106,8 +106,8 @@ class GenericStructuredFileExporter(
   ) = IcuToGenericFormatMessageConvertor(
     text,
     isPlural,
-    projectIcuPlaceholdersSupport,
-    placeholderConvertorFactory,
+    isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
+    paramConvertorFactory = placeholderConvertorFactory,
   )
 
   private fun convertMessageForNestedPlural(text: String?): Map<String, String>? {

@@ -151,12 +151,7 @@ class BaseIcuMessageConvertor(
     form: String?,
   ) {
     val formPlaceholderConvertor = getFormPlaceholderConvertor(form)
-    if (keepEscaping) {
-      val convertedPatternString = formPlaceholderConvertor.convertText(node.patternString)
-      addToResult(convertedPatternString, form)
-      return
-    }
-    val convertedText = formPlaceholderConvertor.convertText(node.text)
+    val convertedText = formPlaceholderConvertor.convertText(node, keepEscaping)
     addToResult(convertedText, form)
   }
 

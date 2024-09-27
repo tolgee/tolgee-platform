@@ -1,7 +1,7 @@
 package io.tolgee.formats.po.out
 
 import io.tolgee.dtos.IExportParams
-import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.getPluralData
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
 import io.tolgee.model.ILanguage
@@ -43,9 +43,7 @@ class PoFileExporter(
     return IcuToPoMessageConvertor(
       message = translation.text ?: "",
       languageTag = translation.languageTag,
-      placeholderConvertor =
-        exportParams.messageFormat?.paramConvertorFactory?.invoke()
-          ?: NoOpFromIcuPlaceholderConvertor(),
+      placeholderConvertor = messageFormat.paramConvertorFactory(),
       forceIsPlural = translation.key.isPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     ).convert()
@@ -53,6 +51,10 @@ class PoFileExporter(
 
   private fun StringBuilder.writeMsgId(keyName: String) {
     this.append(convertToPoMultilineString("msgid", keyName))
+  }
+
+  private val messageFormat by lazy {
+    exportParams.messageFormat ?: ExportMessageFormat.ICU
   }
 
   private fun getResultStringBuilder(translation: ExportTranslationView): StringBuilder {

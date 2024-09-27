@@ -102,13 +102,35 @@ class JsonFileExporterTest {
       """
     |{
     |  "key3": "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
-    |  "item": "I will be first {icuParam, number}"
+    |  "item": "I will be first {icuParam, number} '{hey}'"
     |}
       """.trimMargin(),
     )
   }
 
-  private fun getIcuPlaceholdersDisabledExporter(): JsonFileExporter {
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled - Java)`() {
+    val exporter =
+      getIcuPlaceholdersDisabledExporter(
+        exportParams = ExportParams(messageFormat = ExportMessageFormat.JAVA_STRING_FORMAT),
+      )
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "key3": {
+    |    "one": "# den {icuParam}",
+    |    "few": "# dny",
+    |    "other": "# dní"
+    |  },
+    |  "item": "I will be first {icuParam, number} '{hey}'"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(exportParams: ExportParams = ExportParams()): JsonFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -121,10 +143,10 @@ class JsonFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "item",
-          text = "I will be first {icuParam, number}",
+          text = "I will be first {icuParam, number} '{hey}'",
         )
       }
-    return getExporter(built.translations, false)
+    return getExporter(built.translations, false, exportParams = exportParams)
   }
 
   @Test
@@ -207,7 +229,7 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "item": "I will be first '{'icuParam'}' %<hello>d"
+    |  "item": "I will be first {icuParam} %<hello>d"
     |}
       """.trimMargin(),
     )
