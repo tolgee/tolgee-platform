@@ -1,7 +1,7 @@
 package io.tolgee.formats.properties.out
 
 import io.tolgee.dtos.IExportParams
-import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -47,10 +47,12 @@ class PropertiesFileExporter(
       text,
       plural,
       projectIcuPlaceholdersSupport,
-      paramConvertorFactory =
-        exportParams.messageFormat?.paramConvertorFactory
-          ?: { NoOpFromIcuPlaceholderConvertor() },
+      paramConvertorFactory = messageFormat.paramConvertorFactory,
     ).convert()
+  }
+
+  private val messageFormat by lazy {
+    exportParams.messageFormat ?: ExportMessageFormat.ICU
   }
 
   override fun produceFiles(): Map<String, InputStream> {

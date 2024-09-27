@@ -114,13 +114,13 @@ class AndroidXmlFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <plurals name="key3">
-    |    <item quantity="one"># den {icuParam}</item>
+    |    <item quantity="one"># den {icuParam} \'</item>
     |    <item quantity="few"># dny</item>
     |    <item quantity="many"># dní</item>
     |    <item quantity="other"># dní</item>
     |  </plurals>
     |  <string-array name="i_am_array_item">
-    |    <item>I will be first {icuParam}</item>
+    |    <item>I will be first {icuParam} \'{hey}\'</item>
     |  </string-array>
     |</resources>
     |
@@ -291,14 +291,14 @@ class AndroidXmlFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "key3",
-          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+          text = "{count, plural, one {'#' den '{'icuParam'}' ''} few {'#' dny} other {'#' dní}}",
         ) {
           key.isPlural = true
         }
         add(
           languageTag = "cs",
           keyName = "i_am_array_item[20]",
-          text = "I will be first {icuParam}",
+          text = "I will be first {icuParam} '{hey}'",
         )
       }
     return getExporter(built.translations, false)

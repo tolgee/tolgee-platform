@@ -13,6 +13,6 @@ enum class ExportMessageFormat(val paramConvertorFactory: () -> FromIcuPlacehold
   JAVA_STRING_FORMAT(paramConvertorFactory = { IcuToJavaPlaceholderConvertor() }),
   APPLE_SPRINTF(paramConvertorFactory = { IcuToApplePlaceholderConvertor() }),
   RUBY_SPRINTF(paramConvertorFactory = { IcuToRubyPlaceholderConvertor() }),
-  ICU(paramConvertorFactory = { NoOpFromIcuPlaceholderConvertor() }),
+  ICU(paramConvertorFactory = { IcuToIcuPlaceholderConvertor() }),
 //  PYTHON_SPRINTF,
 }

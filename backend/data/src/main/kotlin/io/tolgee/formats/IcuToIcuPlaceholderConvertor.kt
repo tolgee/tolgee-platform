@@ -1,6 +1,6 @@
 package io.tolgee.formats
 
-class NoOpFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
+class IcuToIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
   override fun convert(node: MessagePatternUtil.ArgNode): String {
     return node.patternString
   }
@@ -9,7 +9,7 @@ class NoOpFromIcuPlaceholderConvertor : FromIcuPlaceholderConvertor {
     node: MessagePatternUtil.TextNode,
     keepEscaping: Boolean,
   ): String {
-    return node.getText(keepEscaping)
+    return node.patternString
   }
 
   override fun convertReplaceNumber(

@@ -396,6 +396,13 @@ object MessagePatternUtil {
     override fun toString(): String {
       return "«$text»"
     }
+
+    fun getText(keepEscaping: Boolean): String {
+      if (keepEscaping) {
+        return this.patternString
+      }
+      return this.text
+    }
   }
 
   /**

@@ -75,8 +75,11 @@ fun getPluralFormsReplacingReplaceParam(
         return noOpConvertor.convert(node)
       }
 
-      override fun convertText(string: String): String {
-        return noOpConvertor.convertText(string)
+      override fun convertText(
+        node: MessagePatternUtil.TextNode,
+        keepEscaping: Boolean,
+      ): String {
+        return noOpConvertor.convertText(node, keepEscaping)
       }
 
       override fun convertReplaceNumber(
@@ -181,7 +184,7 @@ fun <T> Map<T, String?>.convertToIcuPlurals(newPluralArgName: String?): ConvertT
 private fun convertIcuStringNoOp(string: String) =
   BaseIcuMessageConvertor(
     string,
-    { NoOpFromIcuPlaceholderConvertor() },
+    { IcuToIcuPlaceholderConvertor() },
     keepEscaping = true,
   ).convert()
 
