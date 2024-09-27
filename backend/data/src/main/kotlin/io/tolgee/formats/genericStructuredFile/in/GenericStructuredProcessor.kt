@@ -42,9 +42,6 @@ class GenericStructuredProcessor(
       it.parseMap(key)
       return
     }
-
-    // FIXME: I believe when this line is reached the convert function will always return null, am I missing something?
-    convert(this)?.firstOrNull()?.apply(key, this@import)
   }
 
   private fun convert(data: Any?): List<MessageConvertorResult>? {
@@ -78,15 +75,6 @@ class GenericStructuredProcessor(
     }
   }
 
-  private fun FileProcessorContext.mergeCustomAll(
-    key: String,
-    customValues: Map<String, Any>?,
-  ) {
-    customValues?.forEach { (cKey, cValue) ->
-      mergeCustom(key, cKey, cValue)
-    }
-  }
-
   private fun MessageConvertorResult.apply(
     key: String,
     rawData: Any?,
@@ -99,7 +87,10 @@ class GenericStructuredProcessor(
       convertedBy = format,
       pluralArgName = pluralArgName,
     )
-    context.mergeCustomAll(key, customValues)
+    val customValues = context.getCustom(key)?.toMutableMap() ?: mutableMapOf()
+    customValuesModifier?.invoke(customValues, mutableMapOf())
+    val customValuesNonEmpty = customValues.takeIf { it.isNotEmpty() }
+    context.setCustom(key, customValuesNonEmpty)
   }
 
   private fun List<MessageConvertorResult>.applyAll(

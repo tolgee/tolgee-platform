@@ -59,14 +59,14 @@ fun convertMessage(
     )
 
   val pluralArgName = if (isInPlural) convertor.pluralArgName ?: DEFAULT_PLURAL_ARGUMENT_NAME else null
-  return converted.toConvertorResult(pluralArgName, convertor.customValues)
+  return converted.toConvertorResult(pluralArgName, convertor.customValuesModifier)
 }
 
 private fun String?.toConvertorResult(
   pluralArgName: String? = null,
-  customValues: Map<String, Any>? = null,
+  customValuesModifier: ((customValues: MutableMap<String, Any?>, memory: MutableMap<String, Any?>) -> Unit)? = null,
 ) = MessageConvertorResult(
   this,
   pluralArgName,
-  customValues,
+  customValuesModifier,
 )

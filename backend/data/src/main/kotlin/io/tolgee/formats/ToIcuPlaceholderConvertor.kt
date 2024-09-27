@@ -10,6 +10,6 @@ interface ToIcuPlaceholderConvertor {
 
   val pluralArgName: String?
 
-  val customValues: Map<String, Any>?
+  val customValuesModifier: ((customValues: MutableMap<String, Any?>, memory: MutableMap<String, Any?>) -> Unit)?
     get() = null
 }

@@ -4,6 +4,7 @@ import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.escapeIcu
 import io.tolgee.formats.i18next.I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY
 import io.tolgee.formats.i18next.`in`.I18nextParameterParser
+import io.tolgee.formats.i18next.`in`.ParsedI18nextParam
 import io.tolgee.formats.i18next.`in`.PluralsI18nextKeyParser
 
 class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
@@ -14,17 +15,78 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
 
   override val pluralArgName: String? = null
 
-  private val unescapedKeys = mutableListOf<String>()
+  private var unescapedKeys = mutableListOf<String>()
+  private var escapedKeys = mutableListOf<String>()
 
-  private val _customValues = mapOf(I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY to unescapedKeys)
-
-  override val customValues: Map<String, Any>?
-    get() {
-      if (unescapedKeys.isEmpty()) {
-        return null
-      }
-      return _customValues
+  override val customValuesModifier: ((MutableMap<String, Any?>, MutableMap<String, Any?>) -> Unit)? = modifier@{ customValues, memory ->
+    if (unescapedKeys.isEmpty() && escapedKeys.isEmpty()) {
+      // Optimization
+      return@modifier
     }
+
+    customValues.modifyList(I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY) { allUnescapedKeys ->
+      memory.modifyList(I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY) { allEscapedKeys ->
+        unescapedKeys.forEach { unescapedKey ->
+          handleUnescapedModifier(allUnescapedKeys, allEscapedKeys, unescapedKey)
+        }
+        escapedKeys.forEach { escapedKey ->
+          handleEscapedModifier(allUnescapedKeys, allEscapedKeys, escapedKey)
+        }
+      }
+    }
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun MutableMap<String, Any?>.modifyList(key: String, modifier: (MutableList<Any?>) -> Unit) {
+    val value = this[key] ?: mutableListOf<Any?>()
+    val list = value as? MutableList<Any?> ?: return
+
+    modifier(list)
+
+    if (list.isEmpty()) {
+      remove(key)
+      return
+    }
+    this[key] = list
+  }
+
+  private fun handleUnescapedModifier(
+   unescapedKeys: MutableList<Any?>,
+   escapedKeys: MutableList<Any?>,
+   unescapedKey: String,
+  ) {
+    if (unescapedKey in escapedKeys || unescapedKey in unescapedKeys) {
+      return
+    }
+    unescapedKeys.add(unescapedKey)
+  }
+
+  private fun handleEscapedModifier(
+    unescapedKeys: MutableList<Any?>,
+    escapedKeys: MutableList<Any?>,
+    escapedKey: String,
+  ) {
+    if (escapedKey in escapedKeys) {
+      return
+    }
+    escapedKeys.add(escapedKey)
+
+    if (escapedKey !in unescapedKeys) {
+      return
+    }
+    unescapedKeys.remove(escapedKey)
+  }
+
+  private fun ParsedI18nextParam.applyUnescapedFlag() {
+    if (key == null) {
+      return
+    }
+    if (keepUnescaped) {
+      unescapedKeys.add(key)
+      return
+    }
+    escapedKeys.add(key)
+  }
 
   override fun convert(
     matchResult: MatchResult,
@@ -37,9 +99,7 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
       return matchResult.value.escapeIcu(isInPlural)
     }
 
-    if (parsed.key != null && parsed.keepUnescaped) {
-      unescapedKeys.add(parsed.key)
-    }
+    parsed.applyUnescapedFlag()
 
     return when (parsed.format) {
       null -> "{${parsed.key}}"

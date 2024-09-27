@@ -85,25 +85,6 @@ class KeyMeta(
     custom[key] = value
   }
 
-  fun mergeCustom(
-    key: String,
-    value: Any,
-  ) {
-    val custom =
-      custom ?: mutableMapOf<String, Any?>()
-        .also {
-          custom = it
-        }
-
-    val currentValue = custom[key]
-    when {
-      currentValue == null -> custom[key] = value
-      currentValue is List<*> && value is List<*> -> custom[key] = currentValue + value
-      currentValue is Map<*, *> && value is Map<*, *> -> custom[key] = currentValue + value
-      else -> custom[key] = value
-    }
-  }
-
   companion object {
     class KeyMetaListener {
       @PrePersist

@@ -44,7 +44,19 @@ class I18nextFormatProcessorTest {
       }
     mockUtil.fileProcessorContext.assertTranslations("example", "keyInterpolateUnescaped")
       .assertSingle {
-        hasText("replace this {value} (we save the - into metadata)")
+        hasText("replace this {value} (we save the flag into metadata)")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("example", "keyInterpolateUnescapedMultiple")
+      .assertSingle {
+        hasText("replace this {value} and also don't escape {value} (we save the flag into metadata)")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("example", "keyInterpolateUnescapedConflict")
+      .assertSingle {
+        hasText("replace this {value} but escape this {value} (we default to escaping both occurrences)")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("example", "keyInterpolateUnescapedConflictInverted")
+      .assertSingle {
+        hasText("replace this {value} but don't escape this {value} (we default to escaping both occurrences)")
       }
     mockUtil.fileProcessorContext.assertTranslations("example", "keyInterpolateWithFormatting")
       .assertSingle {
@@ -109,6 +121,14 @@ class I18nextFormatProcessorTest {
           }
         """.trimIndent(),
       )
+      description.assert.isNull()
+    }
+    mockUtil.fileProcessorContext.assertKey("keyInterpolateUnescapedConflict") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
+    mockUtil.fileProcessorContext.assertKey("keyInterpolateUnescapedConflictInverted") {
+      custom.assert.isNull()
       description.assert.isNull()
     }
     mockUtil.fileProcessorContext.assertKey("keyPluralSimple") {

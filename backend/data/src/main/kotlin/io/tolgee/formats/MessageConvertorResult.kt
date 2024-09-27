@@ -3,5 +3,5 @@ package io.tolgee.formats
 data class MessageConvertorResult(
   val message: String?,
   val pluralArgName: String?,
-  val customValues: Map<String, Any>? = null,
+  val customValuesModifier: ((customValues: MutableMap<String, Any?>, memory: MutableMap<String, Any?>) -> Unit)? = null,
 )

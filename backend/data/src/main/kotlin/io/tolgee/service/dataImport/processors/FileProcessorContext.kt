@@ -152,23 +152,19 @@ data class FileProcessorContext(
     }
   }
 
-  fun mergeCustom(
+  fun getCustom(translationKey: String): Map<String, Any?>? {
+    return getOrCreateKeyMeta(translationKey).custom
+  }
+
+  fun setCustom(
     translationKey: String,
-    customMapKey: String,
-    value: Any,
+    customMap: Map<String, Any?>?,
   ) {
-    val keyMeta = getOrCreateKeyMeta(translationKey)
-    val previousValue = keyMeta.custom?.get(customMapKey)
-    keyMeta.mergeCustom(customMapKey, value)
-    keyMeta.custom?.let {
-      if (!customValuesValidator.isValid(it)) {
-        keyMeta.custom?.remove(customMapKey)
-        if (previousValue != null) {
-          keyMeta.custom?.put(customMapKey, previousValue)
-        }
-        fileEntity.addIssue(FileIssueType.INVALID_CUSTOM_VALUES, mapOf(FileIssueParamType.KEY_NAME to translationKey))
-      }
+    if (customMap != null && !customValuesValidator.isValid(customMap)) {
+      fileEntity.addIssue(FileIssueType.INVALID_CUSTOM_VALUES, mapOf(FileIssueParamType.KEY_NAME to translationKey))
     }
+    val keyMeta = getOrCreateKeyMeta(translationKey)
+    keyMeta.custom = customMap?.toMutableMap()
   }
 
   fun setCustom(
