@@ -13,7 +13,7 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   override val regex: Regex
     get() = I18NEXT_PLACEHOLDER_REGEX
 
-  override val pluralArgName: String? = null
+  override val pluralArgName: String? = I18NEXT_PLURAL_ARG_NAME
 
   private var unescapedKeys = mutableListOf<String>()
   private var escapedKeys = mutableListOf<String>()
@@ -108,7 +108,12 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
 
     return when (parsed.format) {
       null -> "{${parsed.key}}"
-      "number" -> "{${parsed.key}, number}"
+      "number" -> {
+        if (isInPlural && parsed.key == I18NEXT_PLURAL_ARG_NAME) {
+          return "#"
+        }
+        "{${parsed.key}, number}"
+      }
       else -> matchResult.value.escapeIcu(isInPlural)
     }
   }
@@ -144,6 +149,8 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
         \)
       )
       """.trimIndent().toRegex()
+
+    val I18NEXT_PLURAL_ARG_NAME = "count"
 
     val I18NEXT_PLURAL_SUFFIX_REGEX = """^(?<key>\w+)_(?<plural>\w+)$""".toRegex()
 

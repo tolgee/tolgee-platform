@@ -53,7 +53,7 @@ class GenericSuffixedPluralsPreprocessor(
 
   private fun List<Pair<ParsedPluralsKey, Any?>>.useOriginalKey(): List<Pair<String, Any?>> {
     return map { (parsedKey, value) ->
-      parsedKey.originalKey to value
+      parsedKey.originalKey to value.preprocess()
     }
   }
 

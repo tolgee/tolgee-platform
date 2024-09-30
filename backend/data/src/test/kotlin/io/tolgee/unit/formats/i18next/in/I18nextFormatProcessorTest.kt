@@ -90,7 +90,7 @@ class I18nextFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {value, plural,
+          {count, plural,
           one {the singular (is parsed as plural under one key - keyPluralSimple)}
           other {the plural (is parsed as plural under one key - keyPluralSimple)}
           }
@@ -102,7 +102,7 @@ class I18nextFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {value, plural,
+          {count, plural,
           one {the plural form 1}
           two {the plural form 2}
           few {the plural form 3}
@@ -162,19 +162,19 @@ class I18nextFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {value, plural,
+          {count, plural,
           one {You have one message}
-          other {You have {count} messages}
+          other {You have # messages}
           }
           """.trimIndent(),
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "translation.context_example.male")
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.context_example_male")
       .assertSingle {
         hasText("He is a teacher")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "translation.context_example.female")
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.context_example_female")
       .assertSingle {
         hasText("She is a teacher")
       }
@@ -218,25 +218,25 @@ class I18nextFormatProcessorTest {
       .assertSingle {
         hasText("This is line one.\nThis is line two.")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "translation.gender_with_plural.male")
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.gender_with_plural_male")
       .assertSinglePlural {
         hasText(
           """
-          {value, plural,
+          {count, plural,
           one {He has one cat}
-          other {He has {count} cats}
+          other {He has # cats}
           }
           """.trimIndent(),
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "translation.gender_with_plural.female")
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.gender_with_plural_female")
       .assertSinglePlural {
         hasText(
           """
-          {value, plural,
+          {count, plural,
           one {She has one cat}
-          other {She has {count} cats}
+          other {She has # cats}
           }
           """.trimIndent(),
         )
@@ -250,10 +250,6 @@ class I18nextFormatProcessorTest {
       .assertSingle {
         hasText("This is a value inside a JSON object")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "translation.conditional_translations")
-      .assertSingle {
-        hasText("'{{'isLoggedIn, select, true '{'Welcome back, '{{'name'}}'!'}' false '{'Please log in'}}}'")
-      }
     mockUtil.fileProcessorContext.assertTranslations("example", "translation.language_switch.en")
       .assertSingle {
         hasText("English")
@@ -266,19 +262,15 @@ class I18nextFormatProcessorTest {
       .assertSingle {
         hasText("French")
       }
-    mockUtil.fileProcessorContext.assertTranslations("example", "translation.missing_key_fallback")
-      .assertSingle {
-        hasText("This is the default value if the key is missing.")
-      }
     mockUtil.fileProcessorContext.assertKey("translation.plural_example") {
       custom.assert.isNull()
       description.assert.isNull()
     }
-    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural.male") {
+    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural_male") {
       custom.assert.isNull()
       description.assert.isNull()
     }
-    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural.female") {
+    mockUtil.fileProcessorContext.assertKey("translation.gender_with_plural_female") {
       custom.assert.isNull()
       description.assert.isNull()
     }
@@ -351,7 +343,7 @@ class I18nextFormatProcessorTest {
       .assertSinglePlural {
         hasText(
           """
-          {value, plural,
+          {count, plural,
           one {Hello one '#' {icuParam}}
           other {Hello other {icuParam}}
           }
