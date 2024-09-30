@@ -6,7 +6,10 @@
     "interpolation_example": "Hello {{name}}",
     
     "plural_example_one": "You have one message",
-    "plural_example_other": "You have {{count, number}} messages",
+    "plural_example_other": "You have {{count}} messages",
+
+    "invalid_plural_example_one": "You have one message",
+    "invalid_plural_example_many": "You have {{count}} messages (translation is missing 'other' form)",
     
     "context_example_male": "He is a teacher",
     "context_example_female": "She is a teacher",
@@ -31,9 +34,9 @@
     "multiline_example": "This is line one.\nThis is line two.",
 
     "gender_with_plural_male_one": "He has one cat",
-    "gender_with_plural_male_other": "He has {{count, number}} cats",
+    "gender_with_plural_male_other": "He has {{count}} cats",
     "gender_with_plural_female_one": "She has one cat",
-    "gender_with_plural_female_other": "She has {{count, number}} cats",
+    "gender_with_plural_female_other": "She has {{count}} cats",
 
     "rich_text_example": "<strong>Welcome</strong> to our application!",
 

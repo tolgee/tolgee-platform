@@ -106,14 +106,13 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
 
     parsed.applyUnescapedFlag()
 
+    if (isInPlural && parsed.key == I18NEXT_PLURAL_ARG_NAME && parsed.format == null) {
+      return "#"
+    }
+
     return when (parsed.format) {
       null -> "{${parsed.key}}"
-      "number" -> {
-        if (isInPlural && parsed.key == I18NEXT_PLURAL_ARG_NAME) {
-          return "#"
-        }
-        "{${parsed.key}, number}"
-      }
+      "number" -> "{${parsed.key}, number}"
       else -> matchResult.value.escapeIcu(isInPlural)
     }
   }

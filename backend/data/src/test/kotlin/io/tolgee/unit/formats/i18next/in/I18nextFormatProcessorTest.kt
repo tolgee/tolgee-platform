@@ -170,6 +170,19 @@ class I18nextFormatProcessorTest {
         )
         isPluralOptimized()
       }
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.invalid_plural_example")
+      .assertSinglePlural {
+        hasText(
+          """
+          {count, plural,
+          one {You have one message}
+          many {You have # messages (translation is missing 'other' form)}
+          other {}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
     mockUtil.fileProcessorContext.assertTranslations("example", "translation.context_example_male")
       .assertSingle {
         hasText("He is a teacher")
@@ -263,6 +276,10 @@ class I18nextFormatProcessorTest {
         hasText("French")
       }
     mockUtil.fileProcessorContext.assertKey("translation.plural_example") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
+    mockUtil.fileProcessorContext.assertKey("translation.invalid_plural_example") {
       custom.assert.isNull()
       description.assert.isNull()
     }
