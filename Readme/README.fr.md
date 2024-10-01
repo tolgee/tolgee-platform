@@ -30,7 +30,7 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 
 [![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
 
-Nous envoyons des goodies pour les démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktobefest2024.md](./Hacktobefest2024.md)
+Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktobefest2024.md](./Hacktobefest2024.md).
 
 ### Types de Soumission
 - **Pull Requests** : Soumettez une pull request en traitant des problèmes étiquetés avec #hacktoberfest.
@@ -38,7 +38,7 @@ Nous envoyons des goodies pour les démonstrations impressionnantes avec des PRs
 
 ### Critères de Qualité
 
-Vos soumissions seront évaluées selon les critères suivants, chaque projet recevant une note entre 10 et 50 points :
+Vos soumissions seront évaluées selon les critères suivants, chaque projet recevant une note comprise entre 10 et 50 points :
 - **Qualité** : Le code est-il bien écrit, testé et maintenable ?
 - **Expérience Utilisateur (UX)** : La mise en œuvre est-elle intuitive et facile à utiliser ?
 - **Créativité** : Le projet propose-t-il une approche unique ou des fonctionnalités innovantes ?
@@ -46,15 +46,15 @@ Vos soumissions seront évaluées selon les critères suivants, chaque projet re
     
 En fonction des points obtenus, vous recevrez des goodies :
     
-- 30 - 40 points - Set de stickers Tolgee
-- 40 - 45 points - Set de stickers Tolgee + Chaussettes Tolgee
-- 45 - 50 points - Set de stickers Tolgee + Chaussettes Tolgee + T-shirt Tolgee
-    
+- 30 - 40 points : Set de stickers Tolgee
+- 40 - 45 points : Set de stickers Tolgee + Chaussettes Tolgee
+- 45 - 50 points : Set de stickers Tolgee + Chaussettes Tolgee + T-shirt Tolgee
+
 ### Étoile du Répertoire ⭐
 
 Veuillez donner une étoile au [répertoire Tolgee](https://github.com/tolgee/tolgee-platform) dans le cadre de votre contribution !
 
-Pour des informations complètes, consultez notre [Hacktobefest2024.md](./Hacktobefest2024.md)
+Pour des informations complètes, consultez notre [Hacktobefest2024.md](./Hacktobefest2024.md).
 
 **Rejoignez la famille. Participez à notre [canal Slack <img src="https://img.shields.io/badge/-Communauté Tolgee-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ)**
 
