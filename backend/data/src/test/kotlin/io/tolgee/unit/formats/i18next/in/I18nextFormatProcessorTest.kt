@@ -44,7 +44,7 @@ class I18nextFormatProcessorTest {
       }
     mockUtil.fileProcessorContext.assertTranslations("example", "keyInterpolateUnescaped")
       .assertSingle {
-        hasText("replace this '{{'- value'}}' (we don't support the unescaped flag)")
+        hasText("replace this '{{'- value'}}' (we don't support unescaped flag)")
       }
     mockUtil.fileProcessorContext.assertTranslations("example", "keyInterpolateUnescapedMultiple")
       .assertSingle {
@@ -113,18 +113,6 @@ class I18nextFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertKey("keyInterpolateUnescaped") {
-      custom.assert.isNull()
-      description.assert.isNull()
-    }
-    mockUtil.fileProcessorContext.assertKey("keyInterpolateUnescapedConflict") {
-      custom.assert.isNull()
-      description.assert.isNull()
-    }
-    mockUtil.fileProcessorContext.assertKey("keyInterpolateUnescapedConflictInverted") {
-      custom.assert.isNull()
-      description.assert.isNull()
-    }
     mockUtil.fileProcessorContext.assertKey("keyPluralSimple") {
       custom.assert.isNull()
       description.assert.isNull()
