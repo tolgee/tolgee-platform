@@ -30,7 +30,7 @@ An open-source alternative to Crowdin, Phrase or Lokalise
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
 
-[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)]((./Hacktobefest2024.md))
+[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
 
 We are sending swags for awesome demos merged PRs! For complete information, check
 our [Hacktobefest2024.md](./Hacktobefest2024.md)
