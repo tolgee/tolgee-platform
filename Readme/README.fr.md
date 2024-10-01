@@ -35,21 +35,22 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
 ## 🔗 Liens rapides
-- [🌐 Site web de Tolgee](https://tolgee.io)
+- 🌐 [Site web de Tolgee](https://tolgee.io)
   - 📦 Produit (Découvrez toutes les fonctionnalités intéressantes)
-    - [🔧 Outils pour développeurs](https://tolgee.io/features/dev-tools)
-    - [📝 Assistance à la traduction](https://tolgee.io/features/translation-assistance)
-    - [🤝 Collaboration](https://tolgee.io/features/collaboration)
+    - 🔧 [Outils pour développeurs](https://tolgee.io/features/dev-tools)
+    - 📝 [Assistance à la traduction](https://tolgee.io/features/translation-assistance)
+    - 🤝 [Collaboration](https://tolgee.io/features/collaboration)
 - 🔌 Intégrations (Apprenez à intégrer Tolgee avec votre technologie préférée)
-  - [⚛️ React](https://tolgee.io/integrations/react)
-  - [🅰️ Angular](https://tolgee.io/integrations/angular)
-  - [🖼 Vue](https://tolgee.io/integrations/vue)
-  - [🧩 Svelte](https://tolgee.io/integrations/svelte)
-  - [🔜 Next.js](https://tolgee.io/integrations/next)
-  - [➕ Plus...](https://tolgee.io/integrations/all)
+  - ⚛️ [React](https://tolgee.io/integrations/react)
+  - 🅰️ [Angular](https://tolgee.io/integrations/angular)
+  - 🖼 [Vue](https://tolgee.io/integrations/vue)
+  - 🧩 [Svelte](https://tolgee.io/integrations/svelte)
+  - 🔜 [Next.js](https://tolgee.io/integrations/next)
+  - ➕ [Plus...](https://tolgee.io/integrations/all)
 - 📚 [Documentation de la plateforme Tolgee](https://tolgee.io/docs/platform)
-  - [🖥️ Auto-hébergement](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
-- [💻 Notes de développement (Comment développer Tolgee localement)](https://github.com/tolgee/tolgee-platform/wiki/Development)
+  - 🖥️ [Auto-hébergement](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
+- 💻 [Notes de développement (Comment développer Tolgee localement)](https://github.com/tolgee/tolgee-platform/wiki/Development)
+
 
 ## Pourquoi utiliser Tolgee ?
 
