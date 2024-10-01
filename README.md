@@ -10,7 +10,7 @@
 
 [![Logo](https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg)](https://tolgee.io)
 
-An open-source alternative to Crowdin, Phrase or Lokalise
+An open-source alternative to Crowdin, Phrase, or Lokalise
 
 ![example workflow](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
@@ -70,7 +70,7 @@ Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/b
     - [Dev tools](https://tolgee.io/features/dev-tools)
     - [Translation assistance](https://tolgee.io/features/translation-assistance)
     - [Collaboration](https://tolgee.io/features/collaboration)
-- Integrations (Learn how to integrate Tolgee with you favourite technology)
+- Integrations (Learn how to integrate Tolgee with your favorite technology)
   - [React](https://tolgee.io/integrations/react)
   - [Angular](https://tolgee.io/integrations/angular)
   - [Vue](https://tolgee.io/integrations/vue)
@@ -83,7 +83,7 @@ Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/b
 
 ## Why to use Tolgee?
 
-Beacause it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
+Because it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
 
 ![Frame 47](https://user-images.githubusercontent.com/18496315/188637819-ac4eb02d-7859-4ca8-9807-27818a52782d.png)
 
@@ -109,7 +109,7 @@ We support DeepL, Google Translate, and AWS Translate. Select which services you
 
 ### Translation memory
 
-Tolgee automatically makes suggestions from translations you already used in the project so you can translate similar phrases in a similar way.
+Tolgee automatically makes suggestions from translations you already used in the project so you can similarly translate similar phrases.
 
 Translation memory suggestions also show the similarity percentage, the key, and the original text of the translated string.
 
@@ -119,11 +119,11 @@ When enabled, Tolgee automatically translates new keys using translation memory 
 
 ### Activity log
 
-See who modified, reviewed or commented on the phrases in your project. Clearly.
+See who modified, reviewed, or commented on the phrases in your project. Clearly.
 
 ### Comment on translations
 
-Something look off? Tell others what you would change. You can comment every translation on Tolgee platform.
+Does something look off? Tell others what you would change. You can comment on every translation on the Tolgee platform.
 
 ### Translation history
 
@@ -135,7 +135,7 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 
 1. Sign up at [app.tolgee.io](https://app.tolgee.io/sign_up) or access your self-hosted instance
 2. Create a project
-3. Follow a guide in integration section of your project
+3. Follow a guide in the integration section of your project
 4. Have fun!
 
 ![Integration guides](https://user-images.githubusercontent.com/18496315/188818166-d70d4676-7bd2-4328-91eb-720add935ab6.gif)
