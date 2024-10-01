@@ -1,15 +1,16 @@
-Tolgee
-**Welcome to Hacktoberfest 2024 with Tolgee**
+# Welcome to Hacktoberfest 2024 with Tolgee
 
-Join the Tolgee community this Hacktoberfest by contributing to Tolgee!
+Join the community this Hacktoberfest by contributing to Tolgee!
+
+![Hacktobefest 2024](https://github.com/user-attachments/assets/ac1bd9c1-fc1f-4375-9bf5-8e8c9b41cc15)
 
 You have the opportunity to make a difference by submitting pull requests to the Tolgee repository with the **#hacktoberfest** tag or by creating and showcasing a demo of your work. As a token of our appreciation, you can receive exclusive Tolgee swag, including stickers, socks, and T-shirts, along with a Digital Reward Kit from Hacktoberfest!
 
-**What is Tolgee?**
+### What is Tolgee? 🐁
 
-Tolgee is an open-source localization platform that makes it easy for developers to create multilingual applications. With Tolgee, you can seamlessly integrate translation capabilities into your projects, enabling you to reach a global audience effortlessly.
+Tolgee is an open-source localization platform that makes it **easy for developers to create multilingual apps**. With Tolgee, you can seamlessly integrate translation capabilities into your projects, enabling you to reach a global audience effortlessly.
 
-**Key Features**
+### Key Features
 
 - Supported formats: JSON, XLIFF, PO PHP, PO C/C++, PO Python, Apple Strings, Apple Stringsdict, Apple XLIFF, Android XML, Flutter ARB, Ruby YAML
 - Option to connect Google Translate / DeepL to easily translate words in the dashboard
@@ -19,22 +20,21 @@ Tolgee is an open-source localization platform that makes it easy for developers
 - Publish to CDN and S3 to get fast live translation data
 - CLI may be used to push/pull new data
 
-**How to Get Started?**
+## How to Get Started?
 
 Getting started with Tolgee is easy! You have two options to integrate it into your projects:
 
-1. **Self-Host Tolgee**: You can deploy Tolgee on your own server for complete control and customization. Simply follow our installation guide to set up the platform locally or on your preferred cloud provider.
-2. **Use Tolgee Cloud**: If you prefer a hassle-free experience, you can use Tolgee Cloud [https://app.tolgee.io](https://app.tolgee.io/). This option allows you to access all of Tolgee's features without the need for server management.
+1. **Self-Host Tolgee**: You can deploy Tolgee on your own server for complete control and customization. Simply follow our [installation guide](https://tolgee.io/platform/self_hosting/getting_started) to set up the platform locally or on your preferred cloud provider.
+2. **Use Tolgee Cloud**: If you prefer a hassle-free experience, you can use [Tolgee Cloud](https://app.tolgee.io/). This option allows you to access all of Tolgee's features without the need for server management.
 
-**How to Earn Tolgee Swag?**
+## How to Earn Tolgee Swag?
 
 To ensure that contributions are recognized and rewarded fairly, we’ve established the following rules for earning swag:
 
 1. **Submission Types**:
-    - **Pull Requests**: Submit a pull request to the Tolgee repository with the tag **#hacktoberfest**.
+    - **Pull Requests**: Submit a pull request addressing issues tagged with #hacktoberfest tag
     - **Demo Projects**:
         - Create a demo showcasing your contribution or use of Tolgee
-        - fas
             - React App using Tolgee
             - Angular App using Tolgee
             - Vue App using Tolgee
@@ -45,10 +45,9 @@ To ensure that contributions are recognized and rewarded fairly, we’ve establi
             - Ruby App
             - iOS app
             - Android App
-    
-    Create a demo showcasing your contribution or use of Tolgee
-    
-2. **Quality Criteria**: Your submissions will be evaluated based on the following criteria, with each project receiving a score between 10-50 points:
+        
+2. **Quality Criteria**
+   Your submissions will be evaluated based on the following criteria, with each project receiving a score between 10-50 points:
     - **Quality**: Is the code well-written, tested, and maintainable?
     - **User Experience (UX)**: How intuitive and user-friendly is the implementation?
     - **Creativity**: Does the project offer a unique approach or innovative features?
@@ -57,18 +56,22 @@ To ensure that contributions are recognized and rewarded fairly, we’ve establi
     According to the points, you'll get a amount of swag
     
     - 30 - 40 points - Tolgee Sticker set
-    - 40 - 45 points - Tolgee Sticker set + Tolgee Design Socks
-    - 45 - 50 points - Tolgee Sticker set + Tolgee Design Socks + Tolgee Design T-shirt
-3. **Demo Template**
+    - 40 - 45 points - Tolgee Sticker set + Tolgee Socks
+    - 45 - 50 points - Tolgee Sticker set + Tolgee Socks + Tolgee T-shirt
+  
+4. **Demo Template**
+
 If you’re creating a demo, please include:
     - A brief description of your project
     - A screenshot or video demonstration
     - A link to a DEV.to (or your own blog) article about your demo
-4. **Repository Star** ⭐
+  
+5. **Repository Star** ⭐
+
 Please make sure to star the Tolgee repository https://github.com/tolgee/tolgee-platform as part of your contribution!
 
-**Tolgee Community**
+## Tolgee Community
 
-Join Tolgee Community to share your ideas, suggestions, or questions and connect with other users and contributors.
+Join [Tolgee Slack Community](https://tolgeecommunity.slack.com/ssb/redirect) to share your ideas, suggestions, or questions and connect with other users and contributors.
 
-GH discussions and Slack button
+
