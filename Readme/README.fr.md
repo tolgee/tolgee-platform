@@ -27,6 +27,7 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 [<img src="https://img.shields.io/badge/-Facebook-424549?style=social&logo=facebook" height=25 />](https://www.facebook.com/Tolgee.i18n)
 [<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
+</div>
 
 [![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
 
@@ -58,7 +59,7 @@ Pour des informations complètes, consultez notre [Hacktobefest2024.md](./Hackto
 
 **Rejoignez la famille. Participez à notre [canal Slack <img src="https://img.shields.io/badge/-Communauté Tolgee-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ)**
 
-</div>
+
 
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
