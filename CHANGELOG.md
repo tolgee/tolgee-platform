@@ -1,3 +1,10 @@
+## [3.74.5](https://github.com/tolgee/tolgee-platform/compare/v3.74.4...v3.74.5) (2024-10-01)
+
+
+### Bug Fixes
+
+* activity label zero keys ([#2433](https://github.com/tolgee/tolgee-platform/issues/2433)) ([0be81c6](https://github.com/tolgee/tolgee-platform/commit/0be81c67bf44e85aca3dd72a0af1ec857700df06))
+
 ## [3.74.4](https://github.com/tolgee/tolgee-platform/compare/v3.74.3...v3.74.4) (2024-09-27)
 
 
