@@ -1,5 +1,7 @@
 package io.tolgee.formats
 
+import com.ibm.icu.text.PluralRules
+
 class FormsToIcuPluralConvertor(
   val forms: Map<String, String>,
   val argName: String = DEFAULT_PLURAL_ARGUMENT_NAME,
@@ -10,6 +12,11 @@ class FormsToIcuPluralConvertor(
     val newLineStringInit = if (addNewLines) "\n" else " "
     val icuMsg = StringBuffer("{$argName, plural,$newLineStringInit")
     forms.let {
+      if (PluralRules.KEYWORD_OTHER !in it) {
+        return@let it + (PluralRules.KEYWORD_OTHER to "")
+      }
+      return@let it
+    }.let {
       if (optimize) {
         return@let optimizePluralForms(it)
       }

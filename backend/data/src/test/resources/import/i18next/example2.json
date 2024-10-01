@@ -1,0 +1,57 @@
+{
+  "note": "Most features in this example are not supported by the tolgee yet",
+  "translation": {
+    "key": "Hello World",
+    
+    "interpolation_example": "Hello {{name}}",
+    
+    "plural_example_one": "You have one message",
+    "plural_example_other": "You have {{count}} messages",
+
+    "invalid_plural_example_one": "You have one message",
+    "invalid_plural_example_many": "You have {{count}} messages (translation is missing 'other' form)",
+    
+    "context_example_male": "He is a teacher",
+    "context_example_female": "She is a teacher",
+    
+    "nested_example": "This is a {{type}} message",
+    "type": "nested",
+
+    "formatted_value": "The price is {{value, currency}}",
+    "formatted_value_with_params": "The price is {{value, currency(USD)}}",
+    "intlNumberWithOptions": "Some {{val, number(minimumFractionDigits: 2)}}",
+    "intlList": "A list of {{val, list}}",
+
+    "array_example": [
+      "Apples",
+      "Oranges",
+      "Bananas"
+    ],
+    
+    "select_example": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    
+    "multiline_example": "This is line one.\nThis is line two.",
+
+    "gender_with_plural_male_one": "He has one cat",
+    "gender_with_plural_male_other": "He has {{count}} cats",
+    "gender_with_plural_female_one": "She has one cat",
+    "gender_with_plural_female_other": "She has {{count}} cats",
+
+    "rich_text_example": "<strong>Welcome</strong> to our application!",
+
+    "json_value_example": {
+      "key": "This is a value inside a JSON object"
+    },
+
+    "language_switch": {
+      "en": "English",
+      "es": "Spanish",
+      "fr": "French"
+    }
+  }
+}
+

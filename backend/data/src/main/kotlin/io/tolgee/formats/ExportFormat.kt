@@ -9,6 +9,7 @@ enum class ExportFormat(
 ) {
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
+  JSON_I18NEXT("json", "application/json"),
   XLIFF("xliff", "application/x-xliff+xml"),
   PO("po", "text/x-gettext-translation"),
   APPLE_STRINGS_STRINGSDICT(

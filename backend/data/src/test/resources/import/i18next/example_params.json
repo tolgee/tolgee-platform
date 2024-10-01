@@ -1,0 +1,5 @@
+{
+  "key": "Hello {{icuPara}}",
+  "plural_one": "Hello one # {{icuParam}}",
+  "plural_other": "Hello other {{icuParam}}"
+}

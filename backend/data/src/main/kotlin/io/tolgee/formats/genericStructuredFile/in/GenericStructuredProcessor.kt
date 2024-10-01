@@ -13,23 +13,23 @@ class GenericStructuredProcessor(
   private val format: ImportFormat,
 ) : ImportFileProcessor() {
   override fun process() {
-    data.import("")
+    var processedData = data
+    if (format.pluralsViaSuffixesParser != null) {
+      processedData =
+        GenericSuffixedPluralsPreprocessor(
+          context = context,
+          data = data,
+          pluralsViaSuffixesParser = format.pluralsViaSuffixesParser,
+        ).preprocess()
+    }
+    processedData.import("")
   }
 
   private fun Any?.import(key: String) {
     // Convertor handles strings and possible nested plurals, if convertor returns null,
     // it means that it's not a string or nested plurals, so we need to parse it further
-    convert(this)?.let { result ->
-      result.forEach {
-        context.addTranslation(
-          key,
-          languageTagOrGuess,
-          it.message,
-          rawData = this@import,
-          convertedBy = format,
-          pluralArgName = it.pluralArgName,
-        )
-      }
+    convert(this)?.let {
+      it.applyAll(key, this@import)
       return
     }
 
@@ -41,17 +41,6 @@ class GenericStructuredProcessor(
     (this as? Map<*, *>)?.let {
       it.parseMap(key)
       return
-    }
-
-    convert(this)?.firstOrNull()?.let {
-      context.addTranslation(
-        keyName = key,
-        languageName = languageTagOrGuess,
-        value = it.message,
-        pluralArgName = it.pluralArgName,
-        rawData = this@import,
-        convertedBy = format,
-      )
     }
   }
 
@@ -83,6 +72,29 @@ class GenericStructuredProcessor(
 
       entry.value.import("$keyPrefixWithDelimiter$key")
       return@forEachIndexed
+    }
+  }
+
+  private fun MessageConvertorResult.apply(
+    key: String,
+    rawData: Any?,
+  ) {
+    context.addTranslation(
+      keyName = key,
+      languageName = languageTagOrGuess,
+      value = message,
+      rawData = rawData,
+      convertedBy = format,
+      pluralArgName = pluralArgName,
+    )
+  }
+
+  private fun List<MessageConvertorResult>.applyAll(
+    key: String,
+    rawData: Any?,
+  ) {
+    forEach {
+      it.apply(key, rawData)
     }
   }
 

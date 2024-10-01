@@ -55,8 +55,11 @@ class GenericStructuredFileExporter(
     )
   }
 
+  private val pluralsViaSuffixes
+    get() = messageFormat == ExportMessageFormat.I18NEXT
+
   private val pluralsViaNesting
-    get() = messageFormat != ExportMessageFormat.ICU
+    get() = !pluralsViaSuffixes && messageFormat != ExportMessageFormat.ICU
 
   private val placeholderConvertorFactory
     get() = messageFormat.paramConvertorFactory
@@ -64,6 +67,9 @@ class GenericStructuredFileExporter(
   private fun addPluralTranslation(translation: ExportTranslationView) {
     if (pluralsViaNesting) {
       return addNestedPlural(translation)
+    }
+    if (pluralsViaSuffixes) {
+      return addSuffixedPlural(translation)
     }
     return addSingularTranslation(translation)
   }
@@ -82,6 +88,24 @@ class GenericStructuredFileExporter(
       translation.key.name,
       pluralForms,
     )
+  }
+
+  private fun addSuffixedPlural(translation: ExportTranslationView) {
+    val pluralForms =
+      convertMessageForNestedPlural(translation.text) ?: let {
+        // this should never happen, but if it does, it's better to add a null key then crash or ignore it
+        addNullValue(translation)
+        return
+      }
+
+    val builder = getFileContentResultBuilder(translation)
+    pluralForms.forEach { (keyword, form) ->
+      builder.addValue(
+        translation.languageTag,
+        "${translation.key.name}_$keyword",
+        form,
+      )
+    }
   }
 
   private fun addNullValue(translation: ExportTranslationView) {

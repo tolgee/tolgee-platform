@@ -1,20 +1,14 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
-import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.MessageConvertorResult
+import io.tolgee.formats.allPluralKeywords
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.importCommon.unwrapString
-import java.util.*
 
 class GenericStructuredRawDataToTextConvertor(
   private val format: ImportFormat,
   private val languageTag: String,
 ) : StructuredRawDataConvertor {
-  private val availablePluralKeywords by lazy {
-    val locale = Locale.forLanguageTag(languageTag)
-    PluralRules.forLocale(locale).keywords.toSet()
-  }
-
   override fun convert(
     rawData: Any?,
     projectIcuPlaceholdersEnabled: Boolean,
@@ -77,11 +71,15 @@ class GenericStructuredRawDataToTextConvertor(
   ): List<MessageConvertorResult>? {
     val map = rawData as? Map<*, *> ?: return null
 
-    if (!format.pluralsViaNesting) {
+    if (!format.pluralsViaNesting && format.pluralsViaSuffixesParser == null) {
       return null
     }
 
-    if (!map.keys.all { it in availablePluralKeywords }) {
+    if (!map.keys.all { it in allPluralKeywords }) {
+      return null
+    }
+
+    if (map.size < 2) {
       return null
     }
 

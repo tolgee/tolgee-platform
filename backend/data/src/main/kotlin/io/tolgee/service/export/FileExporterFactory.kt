@@ -34,7 +34,7 @@ class FileExporterFactory(
     projectIcuPlaceholdersSupport: Boolean,
   ): FileExporter {
     return when (exportParams.format) {
-      ExportFormat.JSON, ExportFormat.JSON_TOLGEE ->
+      ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT ->
         JsonFileExporter(
           data,
           exportParams,
