@@ -12,12 +12,12 @@ Tolgee is an open-source localization platform that makes it **easy for develope
 
 ### Key Features
 
-- Native SDKs for Vanilla JS, React frameworks, Angular, VueJS frameworks, Svelte, React Native, Unreal engine enabling you to in-context translate the string directly in your App
+- Native SDKs for Vanilla JS, React frameworks, Angular, VueJS frameworks, Svelte, React Native, and Unreal engine enabling you to in-context translate the string directly in your App
 - Supported formats: JSON, XLIFF, PO PHP, PO C/C++, PO Python, Apple Strings, Apple Stringsdict, Apple XLIFF, Android XML, Flutter ARB, Ruby YAML
-- Tolgee Contextual AI translation: ChatGPT powered translation uses the context gathered by the Native SDKs for Web to provide the best possible results
+- Tolgee Contextual AI translation: ChatGPT-powered translation uses the context gathered by the Native SDKs for the Web to provide the best possible results
 - Option to connect other translators like Google Translate or DeepL to easily translate words in the dashboard
 - Translation memory
-- Opt in Automatic translation: After adding the key your string is automatically translated
+- Opt-in Automatic translation: After adding the key your string is automatically translated
 - Publish to CDN and S3 to get your translation data to production
 - CLI may be used to push/pull new data in all supported formats
 
@@ -26,7 +26,7 @@ Tolgee is an open-source localization platform that makes it **easy for develope
 Getting started with Tolgee is easy! You have two options to integrate it into your projects:
 
 1. **Self-Host Tolgee**
-  - You can deploy Tolgee on your own server for complete control and customization. Simply follow our [installation guide](https://tolgee.io/platform/self_hosting/getting_started) to set up the platform locally or on your preferred cloud provider.
+  - You can deploy Tolgee on your server for complete control and customization. Simply follow our [installation guide](https://tolgee.io/platform/self_hosting/getting_started) to set up the platform locally or on your preferred cloud provider.
   - You can follow the [development wiki](https://github.com/tolgee/tolgee-platform/wiki/Development) to start the tolgee-platform locally in development mode.
 2. **Use Tolgee Cloud**: If you prefer a hassle-free experience, you can use [Tolgee Cloud](https://app.tolgee.io/). This option allows you to access all of Tolgee's features without the need for server management.
 
@@ -51,7 +51,7 @@ To ensure that contributions are recognized and rewarded fairly, we’ve establi
         - Submit the demo into the [`/demos`](./demos) folder in the repository
           - There is an example of [React app in the folder](./demos/react-demo-example)
         - It has to be different from the official examples we have published in [Tolgee JS repository](https://github.com/tolgee/tolgee-js/tree/main/testapps)
-        - For React, Angular, Vue and Svelte, we prefer using [Tolgee Native SDKs](https://tolgee.io/js-sdk)
+        - For React, Angular, Vue, and Svelte, we prefer using [Tolgee Native SDKs](https://tolgee.io/js-sdk)
         - For other technologies, you can use [Tolgee CLI](https://tolgee.io/tolgee-cli) to push and pull strings
         
 2. **Quality Criteria**
@@ -71,7 +71,7 @@ To ensure that contributions are recognized and rewarded fairly, we’ve establi
 If you’re creating a demo, please include:
     - A brief description of your project
     - A screenshot or video demonstration
-    - A link to a DEV.to (or your own blog) article about your demo
+    - A link to a DEV.to (or your blog) article about your demo
   
 5. **Repository Star** ⭐
 
