@@ -32,7 +32,7 @@ An open-source alternative to Crowdin, Phrase or Lokalise
 
 [![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
 
-We are sending swags for awesome demos merged PRs! For complete information, check
+We are sending swags for merged PRs that have awsome demos. For complete information, check
 our [Hacktobefest2024.md](./Hacktobefest2024.md)
 
 ### Submission Types
@@ -55,11 +55,11 @@ According to the points, you'll get an amount of swag:
     
 ### Repository Star ⭐
 
-Please start the [Tolgee repository](https://github.com/tolgee/tolgee-platform) as part of your contribution!
+Please ⭐ Star the [Tolgee repository](https://github.com/tolgee/tolgee-platform) as part of your contribution!
 
 For complete information, check our [Hacktobefest2024.md](./Hacktobefest2024.md)
 
-Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) to share your ideas, suggestions, or questions and connect with other users and contributors.
+Join Tolgee Community for latest informations -> [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) to share your ideas, suggestions, or questions and connect with other users and contributors.
 
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
@@ -83,15 +83,15 @@ Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/b
 
 ## Why to use Tolgee?
 
-Beacause it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
+🚀It saves a lot of time you would spend on localization tasks without it as it enables you to provide perfectly translated software. 
 
 ![Frame 47](https://user-images.githubusercontent.com/18496315/188637819-ac4eb02d-7859-4ca8-9807-27818a52782d.png)
 
 ### In context translating & One click screenshots
 
-Add translations in the code, and translate them directly in the app with the Tolgee i18n tool. Clicking an element while holding the ALT/option key opens a dialog where you can simply modify your strings. No need to edit large .json/.po/.whatever file. In-context translating works great also in the production environment.
+Add translations in the code and translate them directly in the app with the Tolgee i18n tool. Clicking an element while holding the ALT/option key opens a dialog where you can simply modify your strings. No need to edit large .json/.po/ or other files. In-context translation works great also in the production environment.
 
-Once. That's how many times you have to click to take a screenshot from your application with highlighted phrases to translate. Just ALT + click a string and hit the camera button. Boom! Screenshot generated.
+Once, That's how many times you have to click to take a screenshot from your application with highlighted phrases to translate. Just ALT + click a string and hit the camera button. Boom 💥! Screenshot generated.
 
 ![Sep-06-2022 16-38-49](https://user-images.githubusercontent.com/18496315/188672133-064d2a26-e414-4f5e-ab43-549af8cb2145.gif)
 
@@ -101,7 +101,7 @@ In-context translating also works in the production environment of your deployed
 
 ### True integrations
 
-Tolgee is not just another localization platform offering integrations that just sync your local data with the backend. Tolgee is truly integrated into your app via SDKs.
+Tolgee is not just another localization platform offering integrations that just sync your local data with the backend but also Tolgee is truly integrated into your app via SDKs.
 
 ### Machine translation
 
@@ -119,11 +119,11 @@ When enabled, Tolgee automatically translates new keys using translation memory 
 
 ### Activity log
 
-See who modified, reviewed or commented on the phrases in your project. Clearly.
+See who modified, reviewed or commented on the phrases 📄 in your project, Clearly.
 
 ### Comment on translations
 
-Something look off? Tell others what you would change. You can comment every translation on Tolgee platform.
+Something looks off? Tell others what you would change. You can comment every translation on Tolgee platform.It works link tracking changes.
 
 ### Translation history
 
@@ -146,4 +146,6 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
   <img alt="contributors" src="https://contrib.rocks/image?repo=tolgee/tolgee-platform"/>
 </a>
 
-Let us know what you think! #feedbackwanted ❤️
+Let us know what you think! #feedbackwanted 
+We ❤️ you
+#awesomecontributors
