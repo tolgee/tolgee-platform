@@ -1,3 +1,10 @@
+# [3.75.0](https://github.com/tolgee/tolgee-platform/compare/v3.74.5...v3.75.0) (2024-10-01)
+
+
+### Features
+
+* import and export support for i18next ([#2463](https://github.com/tolgee/tolgee-platform/issues/2463)) ([8c36fbf](https://github.com/tolgee/tolgee-platform/commit/8c36fbf285cc8484cd2c0f3f7f54e4136ff15f79))
+
 ## [3.74.5](https://github.com/tolgee/tolgee-platform/compare/v3.74.4...v3.74.5) (2024-10-01)
 
 
