@@ -185,6 +185,18 @@ class I18nextFormatProcessorTest {
       .assertSingle {
         hasText("The price is '{{'value, currency'}}'")
       }
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.formatted_value_with_params")
+      .assertSingle {
+        hasText("The price is '{{'value, currency(USD)'}}'")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.intlNumberWithOptions")
+      .assertSingle {
+        hasText("Some '{{'val, number(minimumFractionDigits: 2)'}}'")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("example", "translation.intlList")
+      .assertSingle {
+        hasText("A list of '{{'val, list'}}'")
+      }
     mockUtil.fileProcessorContext.assertTranslations("example", "translation.array_example[0]")
       .assertSingle {
         hasText("Apples")
