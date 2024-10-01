@@ -152,21 +152,6 @@ data class FileProcessorContext(
     }
   }
 
-  fun getCustom(translationKey: String): Map<String, Any?>? {
-    return getOrCreateKeyMeta(translationKey).custom
-  }
-
-  fun setCustom(
-    translationKey: String,
-    customMap: Map<String, Any?>?,
-  ) {
-    if (customMap != null && !customValuesValidator.isValid(customMap)) {
-      fileEntity.addIssue(FileIssueType.INVALID_CUSTOM_VALUES, mapOf(FileIssueParamType.KEY_NAME to translationKey))
-    }
-    val keyMeta = getOrCreateKeyMeta(translationKey)
-    keyMeta.custom = customMap?.toMutableMap()
-  }
-
   fun setCustom(
     translationKey: String,
     customMapKey: String,

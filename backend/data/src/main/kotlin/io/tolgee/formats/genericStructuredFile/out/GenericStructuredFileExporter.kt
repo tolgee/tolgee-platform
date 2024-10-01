@@ -51,7 +51,7 @@ class GenericStructuredFileExporter(
     builder.addValue(
       translation.languageTag,
       translation.key.name,
-      convertMessage(translation.text, translation.key.isPlural, translation.key.custom),
+      convertMessage(translation.text, translation.key.isPlural),
     )
   }
 
@@ -76,7 +76,7 @@ class GenericStructuredFileExporter(
 
   private fun addNestedPlural(translation: ExportTranslationView) {
     val pluralForms =
-      convertMessageForNestedPlural(translation.text, translation.key.custom) ?: let {
+      convertMessageForNestedPlural(translation.text) ?: let {
         // this should never happen, but if it does, it's better to add a null key then crash or ignore it
         addNullValue(translation)
         return
@@ -92,7 +92,7 @@ class GenericStructuredFileExporter(
 
   private fun addSuffixedPlural(translation: ExportTranslationView) {
     val pluralForms =
-      convertMessageForNestedPlural(translation.text, translation.key.custom) ?: let {
+      convertMessageForNestedPlural(translation.text) ?: let {
         // this should never happen, but if it does, it's better to add a null key then crash or ignore it
         addNullValue(translation)
         return
@@ -120,28 +120,22 @@ class GenericStructuredFileExporter(
   private fun convertMessage(
     text: String?,
     isPlural: Boolean,
-    customValues: Map<String, Any?>?,
   ): String? {
-    return getMessageConvertor(text, isPlural, customValues).convert()
+    return getMessageConvertor(text, isPlural).convert()
   }
 
   private fun getMessageConvertor(
     text: String?,
     isPlural: Boolean,
-    customValues: Map<String, Any?>?,
   ) = IcuToGenericFormatMessageConvertor(
     text,
     isPlural,
     isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
-    customValues = customValues,
     paramConvertorFactory = placeholderConvertorFactory,
   )
 
-  private fun convertMessageForNestedPlural(
-    text: String?,
-    customValues: Map<String, Any?>?,
-  ): Map<String, String>? {
-    return getMessageConvertor(text, true, customValues).getForcedPluralForms()
+  private fun convertMessageForNestedPlural(text: String?): Map<String, String>? {
+    return getMessageConvertor(text, true).getForcedPluralForms()
   }
 
   private fun getFileContentResultBuilder(translation: ExportTranslationView): StructureModelBuilder {

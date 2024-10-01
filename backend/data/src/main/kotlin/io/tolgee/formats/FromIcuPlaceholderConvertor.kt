@@ -1,13 +1,6 @@
 package io.tolgee.formats
 
 interface FromIcuPlaceholderConvertor {
-  fun convert(
-    node: MessagePatternUtil.ArgNode,
-    customValues: Map<String, Any?>?,
-  ): String {
-    return convert(node)
-  }
-
   fun convert(node: MessagePatternUtil.ArgNode): String
 
   /**
@@ -16,27 +9,11 @@ interface FromIcuPlaceholderConvertor {
   fun convertText(
     node: MessagePatternUtil.TextNode,
     keepEscaping: Boolean,
-    customValues: Map<String, Any?>?,
-  ): String {
-    return convertText(node, keepEscaping)
-  }
-
-  fun convertText(
-    node: MessagePatternUtil.TextNode,
-    keepEscaping: Boolean,
   ): String
 
   /**
    * How to # in ICU plural form
    */
-  fun convertReplaceNumber(
-    node: MessagePatternUtil.MessageContentsNode,
-    customValues: Map<String, Any?>?,
-    argName: String? = null,
-  ): String {
-    return convertReplaceNumber(node, argName)
-  }
-
   fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String? = null,

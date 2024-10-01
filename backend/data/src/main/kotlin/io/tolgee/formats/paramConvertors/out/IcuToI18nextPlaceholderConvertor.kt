@@ -3,13 +3,9 @@ package io.tolgee.formats.paramConvertors.out
 import com.ibm.icu.text.MessagePattern
 import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessagePatternUtil
-import io.tolgee.formats.i18next.I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY
 
 class IcuToI18nextPlaceholderConvertor : FromIcuPlaceholderConvertor {
-  override fun convert(
-    node: MessagePatternUtil.ArgNode,
-    customValues: Map<String, Any?>?,
-  ): String {
+  override fun convert(node: MessagePatternUtil.ArgNode): String {
     val type = node.argType
 
     if (type == MessagePattern.ArgType.SIMPLE) {
@@ -18,26 +14,7 @@ class IcuToI18nextPlaceholderConvertor : FromIcuPlaceholderConvertor {
       }
     }
 
-    if (customValues.hasUnescapedFlag(node.name)) {
-      return "{{- ${node.name}}}"
-    }
-
     return "{{${node.name}}}"
-  }
-
-  override fun convert(node: MessagePatternUtil.ArgNode): String {
-    return convert(node, null)
-  }
-
-  private fun Map<String, Any?>?.hasUnescapedFlag(name: String?): Boolean {
-    if (this == null || name == null) {
-      return false
-    }
-    return this[I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY]
-      ?.let { it as? List<*> }
-      ?.mapNotNull { it as? String }
-      ?.contains(name)
-      ?: false
   }
 
   override fun convertText(

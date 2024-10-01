@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
-import io.tolgee.formats.i18next.I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.unit.util.assertFile
@@ -64,8 +63,7 @@ class I18nextFileExporterTest {
     |  "key3_one": "{{count, number}} den {{icuParam, number}}",
     |  "key3_few": "{{count, number}} dny",
     |  "key3_other": "{{count, number}} dní",
-    |  "item": "I will be first {icuParam} {{hello, number}}",
-    |  "unescaped": "Unescaped {{- value}} with another text {{text}}"
+    |  "item": "I will be first {icuParam} {{hello, number}}"
     |}
       """.trimMargin(),
     )
@@ -116,13 +114,6 @@ class I18nextFileExporterTest {
           keyName = "item",
           text = "I will be first '{'icuParam'}' {hello, number}",
         )
-        add(
-          languageTag = "cs",
-          keyName = "unescaped",
-          text = "Unescaped {value} with another text {text}",
-        ) {
-          key.custom = mapOf(I18NEXT_UNESCAPED_FLAG_CUSTOM_KEY to listOf("value"))
-        }
       }
     return getExporter(
       built.translations,

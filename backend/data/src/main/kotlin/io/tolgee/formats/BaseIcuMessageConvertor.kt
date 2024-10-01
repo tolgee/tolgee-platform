@@ -6,7 +6,6 @@ import io.tolgee.constants.Message
 class BaseIcuMessageConvertor(
   private val message: String,
   private val argumentConvertorFactory: () -> FromIcuPlaceholderConvertor,
-  private val customValues: Map<String, Any?>? = null,
   private val keepEscaping: Boolean = false,
   private val forceIsPlural: Boolean? = null,
 ) {
@@ -138,7 +137,7 @@ class BaseIcuMessageConvertor(
 
       is MessagePatternUtil.MessageContentsNode -> {
         if (node.type == MessagePatternUtil.MessageContentsNode.Type.REPLACE_NUMBER) {
-          addToResult(getFormPlaceholderConvertor(form).convertReplaceNumber(node, customValues, pluralArgName), form)
+          addToResult(getFormPlaceholderConvertor(form).convertReplaceNumber(node, pluralArgName), form)
         }
       }
 
@@ -152,7 +151,7 @@ class BaseIcuMessageConvertor(
     form: String?,
   ) {
     val formPlaceholderConvertor = getFormPlaceholderConvertor(form)
-    val convertedText = formPlaceholderConvertor.convertText(node, keepEscaping, customValues)
+    val convertedText = formPlaceholderConvertor.convertText(node, keepEscaping)
     addToResult(convertedText, form)
   }
 
@@ -165,7 +164,7 @@ class BaseIcuMessageConvertor(
     }
     when (node.argType) {
       MessagePattern.ArgType.SIMPLE, MessagePattern.ArgType.NONE -> {
-        addToResult(getFormPlaceholderConvertor(form).convert(node, customValues), form)
+        addToResult(getFormPlaceholderConvertor(form).convert(node), form)
       }
 
       MessagePattern.ArgType.PLURAL -> {
