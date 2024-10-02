@@ -83,7 +83,7 @@ Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/b
 
 ## Why to use Tolgee?
 
-Beacause it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
+Because it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
 
 ![Frame 47](https://user-images.githubusercontent.com/18496315/188637819-ac4eb02d-7859-4ca8-9807-27818a52782d.png)
 
