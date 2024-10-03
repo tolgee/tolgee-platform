@@ -51,6 +51,7 @@ export const MyTasksBoard = ({
       doneTasks={doneTasks}
       inProgressTasks={inProgressTasks}
       newTasks={newTasks}
+      newTaskActions={false}
     />
   );
 };

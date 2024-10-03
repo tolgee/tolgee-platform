@@ -1,35 +1,35 @@
 import React from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, IconButton, styled, Tooltip, useTheme } from '@mui/material';
-import { AlertTriangle } from '@untitled-ui/icons-react';
-import { Link } from 'react-router-dom';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
+import { AlertCircle, ClipboardCheck, X } from '@untitled-ui/icons-react';
 
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { TaskDetail as TaskDetailIcon } from 'tg.component/CustomIcons';
 import { TaskLabel } from 'tg.ee/task/components/TaskLabel';
 import { TaskTooltip } from 'tg.ee/task/components/TaskTooltip';
-import {
-  getTaskRedirect,
-  TASK_ACTIVE_STATES,
-} from 'tg.ee/task/components/utils';
+import { TASK_ACTIVE_STATES } from 'tg.ee/task/components/utils';
 
 import { PrefilterContainer } from './ContainerPrefilter';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useUser } from 'tg.globalContext/helpers';
 import { TaskState } from 'tg.ee/task/components/TaskState';
+import { usePrefilter } from './usePrefilter';
 
 const StyledWarning = styled('div')`
   display: flex;
   align-items: center;
   padding-left: 12px;
   gap: 4px;
+  color: ${({ theme }) => theme.palette.error.main};
+  font-weight: 500;
 `;
 
-const StyledTaskId = styled(Link)`
+const StyledTaskId = styled('span')`
   text-decoration: underline;
   text-underline-offset: 3px;
   color: inherit;
+  cursor: default;
 `;
 
 type Props = {
@@ -38,7 +38,6 @@ type Props = {
 
 export const PrefilterTask = ({ taskNumber }: Props) => {
   const project = useProject();
-  const theme = useTheme();
   const { t } = useTranslate();
   const currentUser = useUser();
 
@@ -55,16 +54,17 @@ export const PrefilterTask = ({ taskNumber }: Props) => {
   });
 
   const [_, setTaskDetail] = useUrlSearchState('taskDetail');
-
-  if (!data) {
-    return null;
-  }
+  const { clear } = usePrefilter();
 
   function handleShowDetails() {
     setTaskDetail(String(taskNumber));
   }
 
   let alert: React.ReactNode | null = null;
+
+  if (!data) {
+    return null;
+  }
 
   const isActive = TASK_ACTIVE_STATES.includes(data.state);
 
@@ -77,10 +77,12 @@ export const PrefilterTask = ({ taskNumber }: Props) => {
           <T keyName="task_filter_indicator_blocking_warning" />{' '}
           {blockingTasksLoadable.data.map((taskNumber, i) => (
             <React.Fragment key={taskNumber}>
-              <TaskTooltip taskNumber={taskNumber} project={project}>
-                <StyledTaskId to={getTaskRedirect(project, taskNumber)}>
-                  #{taskNumber}
-                </StyledTaskId>
+              <TaskTooltip
+                taskNumber={taskNumber}
+                project={project}
+                newTaskActions={true}
+              >
+                <StyledTaskId>#{taskNumber}</StyledTaskId>
               </TaskTooltip>
               {i !== blockingTasksLoadable.data.length - 1 && ', '}
             </React.Fragment>
@@ -93,7 +95,15 @@ export const PrefilterTask = ({ taskNumber }: Props) => {
   return (
     <>
       <PrefilterContainer
+        icon={<ClipboardCheck />}
         title={<T keyName="task_filter_indicator_label" />}
+        closeButton={
+          <Tooltip title={t('task_filter_close_tooltip')} disableInteractive>
+            <IconButton size="small" onClick={clear}>
+              <X />
+            </IconButton>
+          </Tooltip>
+        }
         content={
           <Box display="flex" gap={1} alignItems="center">
             <TaskLabel task={data} />
@@ -105,11 +115,7 @@ export const PrefilterTask = ({ taskNumber }: Props) => {
             {!isActive && <TaskState state={data.state} />}
             {alert ? (
               <StyledWarning>
-                <AlertTriangle
-                  width={18}
-                  height={18}
-                  color={theme.palette.warning.main}
-                />
+                <AlertCircle width={20} height={20} />
                 <Box>{alert}</Box>
               </StyledWarning>
             ) : null}

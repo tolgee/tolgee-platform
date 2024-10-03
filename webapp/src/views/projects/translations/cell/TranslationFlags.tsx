@@ -1,6 +1,5 @@
 import clsx from 'clsx';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Dialog, styled, useTheme } from '@mui/material';
 import { XClose, Flag02, ClipboardCheck } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
@@ -14,9 +13,7 @@ import {
   TranslationFlagIcon,
 } from 'tg.component/TranslationFlagIcon';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { TaskTooltip } from 'tg.ee/task/components/TaskTooltip';
-import { getTaskRedirect } from 'tg.ee/task/components/utils';
 import { TaskDetail } from 'tg.ee/task/components/TaskDetail';
 
 import { useTranslationsActions } from '../context/TranslationsContext';
@@ -83,8 +80,6 @@ export const TranslationFlags: React.FC<Props> = ({
 
   const { updateTranslation } = useTranslationsActions();
   const [taskDetailData, setTaskDetailData] = useState<TaskModel>();
-  const { satisfiesPermission } = useProjectPermissions();
-  const canViewTasks = satisfiesPermission('tasks.view');
 
   const clearAutoTranslatedState = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state',
@@ -138,14 +133,13 @@ export const TranslationFlags: React.FC<Props> = ({
     return (
       <StyledWrapper className={className}>
         {task && (
-          <TaskTooltip taskNumber={task.number} project={project}>
+          <TaskTooltip
+            taskNumber={task.number}
+            project={project}
+            newTaskActions={true}
+          >
             <StyledContainer
-              component={Link}
-              // @ts-ignore
-              to={
-                canViewTasks ? getTaskRedirect(project, task.number) : undefined
-              }
-              className={clsx({ clickDisabled: !canViewTasks })}
+              className={clsx({ clickDisabled: true })}
               data-cy="translations-task-indicator"
             >
               <StyledImgWrapper>
@@ -190,6 +184,7 @@ export const TranslationFlags: React.FC<Props> = ({
               taskNumber={taskDetailData.number}
               onClose={() => setTaskDetailData(undefined)}
               projectId={project.id}
+              newTaskActions={true}
             />
           </Dialog>
         )}

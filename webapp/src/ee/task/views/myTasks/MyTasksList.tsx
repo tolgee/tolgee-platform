@@ -71,6 +71,7 @@ export const MyTasksList = ({
       }
       renderItem={(task) => (
         <TaskItem
+          newTaskActions={false}
           task={task}
           onDetailOpen={(task) => onOpenDetail(task as TaskWithProjectModel)}
           project={task.project}

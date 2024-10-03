@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Divider, Menu, MenuItem } from '@mui/material';
+import { Dialog, Divider, Menu, MenuItem } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
@@ -11,6 +11,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TASK_ACTIVE_STATES, useTaskReport } from './utils';
 import { InitialValues, TaskCreateDialog } from './taskCreate/TaskCreateDialog';
 import { useUser } from 'tg.globalContext/helpers';
+import { TaskDetail } from './TaskDetail';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -21,6 +22,8 @@ type Props = {
   task: TaskModel;
   project: SimpleProjectModel;
   projectScopes?: Scope[];
+  newTaskActions: boolean;
+  hideTaskDetail?: boolean;
 };
 
 export const TaskMenu = ({
@@ -29,10 +32,13 @@ export const TaskMenu = ({
   task,
   project,
   projectScopes,
+  newTaskActions,
+  hideTaskDetail,
 }: Props) => {
   const user = useUser();
   const isOpen = Boolean(anchorEl);
   const [taskCreate, setTaskCreate] = useState<Partial<InitialValues>>();
+  const [taskDetail, setTaskDetail] = useState<TaskModel>();
   const closeMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/close',
     method: 'post',
@@ -144,6 +150,11 @@ export const TaskMenu = ({
     downloadReport(project.id, task);
   }
 
+  function handleOpenDetail(task: TaskModel) {
+    onClose();
+    setTaskDetail(task);
+  }
+
   function handleCloneTask() {
     taskKeysMutation.mutate(
       {
@@ -187,6 +198,11 @@ export const TaskMenu = ({
   return (
     <>
       <Menu anchorEl={anchorEl} open={isOpen} onClose={onClose}>
+        {!hideTaskDetail && (
+          <MenuItem onClick={() => handleOpenDetail(task)}>
+            {t('task_menu_detail')}
+          </MenuItem>
+        )}
         {TASK_ACTIVE_STATES.includes(task.state) ? (
           <MenuItem
             onClick={handleMarkAsDone}
@@ -205,16 +221,20 @@ export const TaskMenu = ({
           </MenuItem>
         )}
         <Divider />
-        <MenuItem onClick={handleCloneTask} disabled={!canEditTask}>
-          {t('task_menu_clone_task')}
-        </MenuItem>
-        {task.type === 'TRANSLATE' && (
+        {newTaskActions && (
+          <MenuItem onClick={handleCloneTask} disabled={!canEditTask}>
+            {t('task_menu_clone_task')}
+          </MenuItem>
+        )}
+
+        {task.type === 'TRANSLATE' && newTaskActions && (
           <MenuItem onClick={handleCreateReviewTask} disabled={!canEditTask}>
             {t('task_menu_create_review_task')}
           </MenuItem>
         )}
 
-        <Divider />
+        {newTaskActions && <Divider />}
+
         <MenuItem onClick={handleGetExcelReport}>
           {t('task_menu_generate_report')}
         </MenuItem>
@@ -228,6 +248,20 @@ export const TaskMenu = ({
           projectId={project.id}
           initialValues={taskCreate}
         />
+      )}
+      {taskDetail && (
+        <Dialog
+          open={true}
+          onClose={() => setTaskDetail(undefined)}
+          maxWidth="xl"
+        >
+          <TaskDetail
+            taskNumber={taskDetail.number}
+            projectId={project.id}
+            onClose={() => setTaskDetail(undefined)}
+            newTaskActions={newTaskActions}
+          />
+        </Dialog>
       )}
     </>
   );

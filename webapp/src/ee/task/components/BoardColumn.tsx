@@ -45,6 +45,7 @@ type Props = {
   onDetailOpen: (task: TaskModel) => void;
   title?: React.ReactNode;
   emptyMessage: React.ReactNode;
+  newTaskActions: boolean;
 };
 
 export const BoardColumn = ({
@@ -56,6 +57,7 @@ export const BoardColumn = ({
   onDetailOpen,
   title,
   emptyMessage,
+  newTaskActions,
 }: Props) => {
   const translateState = useTaskStateTranslation();
   const stateColor = useStateColor();
@@ -78,6 +80,7 @@ export const BoardColumn = ({
             project={project ?? (t as TaskWithProjectModel).project}
             projectScopes={projectScopes}
             onDetailOpen={onDetailOpen}
+            newTaskActions={newTaskActions}
           />
         ))
       ) : (

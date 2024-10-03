@@ -35,6 +35,7 @@ type Props = {
   inProgressTasks: TasksLoadable;
   doneTasks: TasksLoadable;
   project?: SimpleProjectModel;
+  newTaskActions: boolean;
 };
 
 export const TasksBoard = ({
@@ -44,6 +45,7 @@ export const TasksBoard = ({
   inProgressTasks,
   doneTasks,
   project,
+  newTaskActions,
 }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
@@ -84,6 +86,7 @@ export const TasksBoard = ({
           project={project}
           onDetailOpen={onOpenDetail}
           emptyMessage={t('task_board_empty_new')}
+          newTaskActions={newTaskActions}
         />
         <BoardColumn
           state="IN_PROGRESS"
@@ -92,6 +95,7 @@ export const TasksBoard = ({
           project={project}
           onDetailOpen={onOpenDetail}
           emptyMessage={t('task_board_empty_pending')}
+          newTaskActions={newTaskActions}
         />
         <BoardColumn
           state="DONE"
@@ -128,6 +132,7 @@ export const TasksBoard = ({
           project={project}
           onDetailOpen={onOpenDetail}
           emptyMessage={t('task_board_empty_completed')}
+          newTaskActions={newTaskActions}
         />
         {canFetchMore && (
           <Box

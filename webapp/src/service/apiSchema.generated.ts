@@ -1113,7 +1113,10 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids";
+        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
+        | "task_not_found"
+        | "task_not_finished"
+        | "task_not_open";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -1832,8 +1835,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2682,11 +2685,11 @@ export interface components {
     };
     KeysScopeView: {
       /** Format: int64 */
+      characterCount: number;
+      /** Format: int64 */
       wordCount: number;
       /** Format: int64 */
       keyCount: number;
-      /** Format: int64 */
-      characterCount: number;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];
@@ -3027,7 +3030,10 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids";
+        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
+        | "task_not_found"
+        | "task_not_finished"
+        | "task_not_open";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {

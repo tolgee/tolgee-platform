@@ -68,6 +68,7 @@ type Props = {
   project: SimpleProjectModel;
   projectScopes?: Scope[];
   onDetailOpen: (task: TaskModel) => void;
+  newTaskActions: boolean;
 };
 
 export const BoardItem = ({
@@ -75,6 +76,7 @@ export const BoardItem = ({
   project,
   projectScopes,
   onDetailOpen,
+  newTaskActions,
 }: Props) => {
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -113,6 +115,7 @@ export const BoardItem = ({
             projectScopes={projectScopes}
             anchorEl={anchorEl}
             onClose={() => setAnchorEl(null)}
+            newTaskActions={newTaskActions}
           />
         </Box>
       </StyledRow>

@@ -119,6 +119,7 @@ export const MyTasksView = () => {
       {detail !== undefined && (
         <Dialog open={true} onClose={handleDetailClose} maxWidth="xl">
           <TaskDetail
+            newTaskActions={false}
             taskNumber={detail.number}
             onClose={handleDetailClose}
             projectId={detail.project.id}

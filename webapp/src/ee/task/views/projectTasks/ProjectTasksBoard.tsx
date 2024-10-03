@@ -59,6 +59,7 @@ export const ProjectTasksBoard = ({
       inProgressTasks={inProgressTasks}
       newTasks={newTasks}
       project={project}
+      newTaskActions={true}
     />
   );
 };

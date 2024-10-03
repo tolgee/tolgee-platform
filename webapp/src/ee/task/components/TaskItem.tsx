@@ -58,6 +58,7 @@ type Props = {
   project: SimpleProjectModel;
   projectScopes?: Scope[];
   showProject?: boolean;
+  newTaskActions: boolean;
 };
 
 export const TaskItem = ({
@@ -66,6 +67,7 @@ export const TaskItem = ({
   project,
   showProject,
   projectScopes,
+  newTaskActions,
 }: Props) => {
   const { t } = useTranslate();
   const theme = useTheme();
@@ -152,6 +154,7 @@ export const TaskItem = ({
         task={task}
         project={project}
         projectScopes={projectScopes}
+        newTaskActions={newTaskActions}
       />
     </StyledContainer>
   );

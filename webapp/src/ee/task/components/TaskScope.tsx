@@ -1,4 +1,4 @@
-import { Box, styled } from '@mui/material';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { components } from 'tg.service/apiSchema.generated';
@@ -7,27 +7,32 @@ import { TaskState } from './TaskState';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import React from 'react';
 import { UserName } from 'tg.component/common/UserName';
+import { File06 } from '@untitled-ui/icons-react';
+import { useTaskReport } from './utils';
 
 type TaskModel = components['schemas']['TaskModel'];
 type TaskPerUserReportModel = components['schemas']['TaskPerUserReportModel'];
 
 const StyledScope = styled(Box)`
   display: grid;
+  position: relative;
   background: ${({ theme }) => theme.palette.tokens.background.selected};
   padding: 24px;
   border-radius: 8px;
-  grid-template-columns: 3fr 1fr 1fr 1fr;
+  grid-template-columns: 3fr 1fr 1fr 1fr auto;
   gap: 6px;
 `;
 
 type Props = {
   task: TaskModel;
   perUserData: TaskPerUserReportModel[] | undefined;
+  projectId: number;
 };
 
-export const TaskScope = ({ task, perUserData }: Props) => {
+export const TaskScope = ({ task, perUserData, projectId }: Props) => {
   const formatNumber = useNumberFormatter();
   const { t } = useTranslate();
+  const { downloadReport } = useTaskReport();
 
   return (
     <StyledScope>
@@ -48,6 +53,15 @@ export const TaskScope = ({ task, perUserData }: Props) => {
       <Box>{t('task_scope_keys_label')}</Box>
       <Box>{t('task_scope_words_label')}</Box>
       <Box>{t('task_scope_characters_label')}</Box>
+      <Tooltip title={t('task_detail_summarize_tooltip')} disableInteractive>
+        <IconButton
+          data-cy="task-detail-download-report"
+          onClick={() => downloadReport(projectId, task)}
+          sx={{ margin: -1, position: 'relative', left: -8 }}
+        >
+          <File06 />
+        </IconButton>
+      </Tooltip>
 
       <Box sx={{ gridColumn: 1 }}>{t('task_scope_total_to_translate')}</Box>
       <Box data-cy="task-detail-keys">{formatNumber(task.totalItems)}</Box>
