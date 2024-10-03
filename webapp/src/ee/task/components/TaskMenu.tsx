@@ -260,7 +260,6 @@ export const TaskMenu = ({
             taskNumber={taskDetail.number}
             projectId={project.id}
             onClose={() => setTaskDetail(undefined)}
-            newTaskActions={newTaskActions}
           />
         </Dialog>
       )}

@@ -176,7 +176,6 @@ export const Translations = () => {
             taskNumber={Number(taskDetail)}
             onClose={() => setTaskDetail(undefined)}
             projectId={project.id}
-            newTaskActions={true}
           />
         </Dialog>
       )}

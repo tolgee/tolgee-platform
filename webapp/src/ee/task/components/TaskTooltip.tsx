@@ -108,7 +108,6 @@ export const TaskTooltip = ({
             taskNumber={taskDetailData.number}
             onClose={() => setTaskDetailData(undefined)}
             projectId={project.id}
-            newTaskActions={newTaskActions}
           />
         </Dialog>
       )}
