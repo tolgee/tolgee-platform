@@ -129,9 +129,7 @@ export const TaskCreateDialog = ({
     path: { projectId },
     query: {
       ...filters,
-      languages: allLanguages
-        .filter((l) => languages.includes(l.id))
-        .map((l) => l.tag),
+      languages: allLanguages.map((l) => l.tag),
     },
     options: {
       enabled: !initialValues?.selection,
