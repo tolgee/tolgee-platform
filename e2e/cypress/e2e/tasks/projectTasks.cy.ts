@@ -175,14 +175,14 @@ describe('project tasks', () => {
     checkTaskPreview({
       language: 'Czech',
       keys: 2,
-      alert: true,
+      alert: false,
       words: 4,
       characters: 26,
     });
     checkTaskPreview({
       language: 'English',
       keys: 0,
-      alert: true,
+      alert: false,
       words: 0,
       characters: 0,
     });
