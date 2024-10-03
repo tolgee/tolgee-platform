@@ -167,6 +167,7 @@ export const TaskMenu = ({
             name: task.name,
             description: task.description,
             type: task.type,
+            dueDate: task.dueDate,
           });
           onClose();
         },
