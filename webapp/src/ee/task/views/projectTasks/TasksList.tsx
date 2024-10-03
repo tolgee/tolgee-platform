@@ -20,6 +20,7 @@ type Props = {
   filter: TaskFilterType;
   onOpenDetail: (task: TaskModel) => void;
   search: string;
+  newTaskActions: boolean;
 };
 
 export const TasksList = ({
@@ -27,6 +28,7 @@ export const TasksList = ({
   filter,
   search,
   onOpenDetail,
+  newTaskActions,
 }: Props) => {
   const project = useProject();
   const [page, setPage] = useUrlSearchState('page', { defaultVal: '0' });
@@ -75,6 +77,7 @@ export const TasksList = ({
       }
       renderItem={(task) => (
         <TaskItem
+          newTaskActions={newTaskActions}
           task={task}
           onDetailOpen={(task) => onOpenDetail(task)}
           project={project}

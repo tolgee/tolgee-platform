@@ -6,11 +6,10 @@ import {
   DialogTitle,
   IconButton,
   styled,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { File06, Translate01 } from '@untitled-ui/icons-react';
+import { DotsVertical } from '@untitled-ui/icons-react';
 
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -25,17 +24,38 @@ import { TaskInfoItem } from './TaskInfoItem';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { TaskScope } from './TaskScope';
 import { UserAccount } from 'tg.component/UserAccount';
-import { getTaskRedirect, useTaskReport } from './utils';
+import { getTaskRedirect } from './utils';
 import { Scope } from 'tg.fixtures/permissions';
 import { ProjectWithAvatar } from 'tg.component/ProjectWithAvatar';
+import { TaskMenu } from './TaskMenu';
+import { useState } from 'react';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+
+const StyledHeader = styled(Box)`
+  display: grid;
+  padding: ${({ theme }) => theme.spacing(0, 2, 2, 3)};
+  grid-template-columns: 1fr 60px;
+  grid-template-areas:
+    'title    menu'
+    'subtitle menu';
+`;
 
 const StyledMainTitle = styled(DialogTitle)`
+  padding-left: 0px;
+  padding-right: 0px;
+  grid-area: title;
   padding-bottom: 0px;
 `;
 
 const StyledSubtitle = styled('div')`
-  padding: ${({ theme }) => theme.spacing(0, 3, 2, 3)};
+  grid-area: subtitle;
   color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledMenu = styled('div')`
+  grid-area: menu;
+  align-self: center;
+  justify-self: end;
 `;
 
 const StyledContainer = styled('div')`
@@ -65,11 +85,18 @@ type Props = {
   onClose: () => void;
   projectId: number;
   projectScopes?: Scope[];
+  newTaskActions: boolean;
 };
 
-export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
+export const TaskDetail = ({
+  onClose,
+  projectId,
+  taskNumber,
+  newTaskActions,
+}: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const taskLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}',
@@ -100,20 +127,46 @@ export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
 
   const canEditTask = scopes.includes('tasks.edit');
 
-  const { downloadReport } = useTaskReport();
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const data = taskLoadable.data;
 
   return (
     <Box data-cy="task-detail">
-      <StyledMainTitle>
-        <T keyName="task_detail_title" />
-      </StyledMainTitle>
+      <StyledHeader>
+        <StyledMainTitle>
+          <T keyName="task_detail_title" />
+        </StyledMainTitle>
+        {data && projectLoadable.data && (
+          <>
+            <StyledSubtitle>
+              <TaskLabel task={data} />
+            </StyledSubtitle>
+            <StyledMenu>
+              <IconButton
+                size="small"
+                onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
+                data-cy="task-item-menu"
+              >
+                <DotsVertical />
+              </IconButton>
+              <TaskMenu
+                task={data}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                project={projectLoadable.data}
+                projectScopes={projectLoadable.data.computedPermission.scopes}
+                newTaskActions={false}
+                hideTaskDetail={true}
+              />
+            </StyledMenu>
+          </>
+        )}
+      </StyledHeader>
       {!data ? null : (
         <>
-          <StyledSubtitle>
-            <TaskLabel task={data} />
-          </StyledSubtitle>
           <Formik
             initialValues={{
               name: data.name,
@@ -184,41 +237,31 @@ export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
                   disabled={!canEditTask}
                 />
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mt: 1,
+                    mb: 1,
+                  }}
+                >
+                  <Typography variant="subtitle2">
                     {t('task_detail_scope_title')}
                   </Typography>
-                  <Box display="flex" alignItems="center">
-                    <Tooltip
-                      title={t('task_link_translations_tooltip')}
-                      disableInteractive
-                    >
-                      <IconButton
-                        component={Link}
-                        to={
-                          project ? getTaskRedirect(project, data.number) : ''
-                        }
-                      >
-                        <Translate01 />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip
-                      title={t('task_detail_summarize_tooltip')}
-                      disableInteractive
-                    >
-                      <IconButton
-                        data-cy="task-detail-download-report"
-                        onClick={() => downloadReport(projectId, data)}
-                      >
-                        <File06 />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                  <Button
+                    color="primary"
+                    component={Link}
+                    to={project ? getTaskRedirect(project, data.number) : ''}
+                  >
+                    <T keyName="task_link_translations_tooltip" />
+                  </Button>
                 </Box>
 
                 <TaskScope
                   task={data}
                   perUserData={perUserReportLoadable.data}
+                  projectId={projectId}
                 />
 
                 <Box
@@ -249,18 +292,20 @@ export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
                 </Box>
 
                 <StyledActions>
-                  <Button onClick={onClose}>{t('global_cancel_button')}</Button>
-                  <LoadingButton
-                    color="primary"
-                    variant="contained"
-                    loading={isSubmitting}
-                    disabled={!dirty}
-                    type="submit"
-                    data-cy="task-detail-submit"
-                    onClick={() => submitForm()}
-                  >
-                    {t('task_detail_submit_button')}
-                  </LoadingButton>
+                  <Button onClick={onClose}>{t('global_close_button')}</Button>
+                  {canEditTask && (
+                    <LoadingButton
+                      color="primary"
+                      variant="contained"
+                      loading={isSubmitting}
+                      disabled={!dirty}
+                      type="submit"
+                      data-cy="task-detail-submit"
+                      onClick={() => submitForm()}
+                    >
+                      {t('task_detail_submit_button')}
+                    </LoadingButton>
+                  )}
                 </StyledActions>
               </StyledContainer>
             )}

@@ -21,6 +21,7 @@ type Props = {
   project: SimpleProjectModel;
   children: React.ReactElement<any, any>;
   actions?: Action[] | React.ReactNode | ((task: TaskModel) => React.ReactNode);
+  newTaskActions: boolean;
 } & Omit<React.ComponentProps<typeof Tooltip>, 'title'>;
 
 export const TaskTooltip = ({
@@ -28,6 +29,7 @@ export const TaskTooltip = ({
   project,
   children,
   actions = ['open', 'detail'],
+  newTaskActions,
   ...tooltipProps
 }: Props) => {
   const [taskDetailData, setTaskDetailData] = useState<TaskModel>();
@@ -106,6 +108,7 @@ export const TaskTooltip = ({
             taskNumber={taskDetailData.number}
             onClose={() => setTaskDetailData(undefined)}
             projectId={project.id}
+            newTaskActions={newTaskActions}
           />
         </Dialog>
       )}

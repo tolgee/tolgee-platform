@@ -1089,7 +1089,10 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids";
+        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
+        | "task_not_found"
+        | "task_not_finished"
+        | "task_not_open";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -1219,29 +1222,6 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1831,8 +1811,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2104,14 +2084,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2270,15 +2248,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2418,14 +2396,16 @@ export interface components {
       /** Format: int64 */
       id: number;
       userFullName?: string;
-      projectName: string;
       description: string;
       username?: string;
-      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      scopes: string[];
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2509,11 +2489,11 @@ export interface components {
     };
     KeysScopeView: {
       /** Format: int64 */
+      characterCount: number;
+      /** Format: int64 */
       wordCount: number;
       /** Format: int64 */
       keyCount: number;
-      /** Format: int64 */
-      characterCount: number;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];
@@ -2854,7 +2834,10 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids";
+        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
+        | "task_not_found"
+        | "task_not_finished"
+        | "task_not_open";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3343,6 +3326,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "TASKS"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -3757,9 +3741,6 @@ export interface components {
       namespace?: string;
       description?: string;
       translation?: string;
-      namespace?: string;
-      description?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -3770,9 +3751,6 @@ export interface components {
       namespace?: string;
       description?: string;
       translation?: string;
-      namespace?: string;
-      description?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4340,15 +4318,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4468,14 +4446,16 @@ export interface components {
       /** Format: int64 */
       id: number;
       userFullName?: string;
-      projectName: string;
       description: string;
       username?: string;
-      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      scopes: string[];
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {

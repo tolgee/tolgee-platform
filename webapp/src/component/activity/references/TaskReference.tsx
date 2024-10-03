@@ -19,7 +19,11 @@ export const TaskReference: React.FC<Props> = ({ data }) => {
   const project = useProject();
 
   return (
-    <TaskTooltip taskNumber={data.number} project={project}>
+    <TaskTooltip
+      taskNumber={data.number}
+      project={project}
+      newTaskActions={false}
+    >
       <Link
         style={{ textDecoration: 'none' }}
         className="reference"

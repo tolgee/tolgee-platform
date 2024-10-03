@@ -2,6 +2,7 @@ import { Box, styled } from '@mui/material';
 
 const StyledLabel = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
+  padding-bottom: 4px;
 `;
 
 type Props = {
