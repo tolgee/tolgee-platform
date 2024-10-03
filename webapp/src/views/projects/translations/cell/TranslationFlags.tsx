@@ -129,67 +129,63 @@ export const TranslationFlags: React.FC<Props> = ({
       });
   };
 
-  if (translation?.auto || translation?.outdated || task) {
-    return (
-      <StyledWrapper className={className}>
-        {task && (
-          <TaskTooltip
-            taskNumber={task.number}
-            project={project}
-            newTaskActions={true}
+  return (
+    <StyledWrapper className={className}>
+      {task && (
+        <TaskTooltip
+          taskNumber={task.number}
+          project={project}
+          newTaskActions={true}
+        >
+          <StyledContainer
+            className={clsx({ clickDisabled: true })}
+            data-cy="translations-task-indicator"
           >
-            <StyledContainer
-              className={clsx({ clickDisabled: true })}
-              data-cy="translations-task-indicator"
-            >
-              <StyledImgWrapper>
-                <ClipboardCheck color={theme.palette.text.primary} />
-              </StyledImgWrapper>
-            </StyledContainer>
-          </TaskTooltip>
-        )}
-        {translation?.auto && (
-          <StyledContainer data-cy="translations-auto-translated-indicator">
-            <AutoTranslationIcon provider={translation.mtProvider} />
-            <StyledClearButton
-              role="button"
-              onClick={handleClearAutoTranslated}
-              data-cy="translations-auto-translated-clear-button"
-              className="clearButton"
-            />
+            <StyledImgWrapper>
+              <ClipboardCheck color={theme.palette.text.primary} />
+            </StyledImgWrapper>
           </StyledContainer>
-        )}
-        {translation?.outdated && (
-          <StyledContainer data-cy="translations-outdated-indicator">
-            <TranslationFlagIcon
-              tooltip={t('translations_cell_outdated')}
-              icon={<ActiveFlagCircle />}
-            />
-            <StyledClearButton
-              role="button"
-              onClick={handleClearOutdated}
-              data-cy="translations-outdated-clear-button"
-              className="clearButton"
-            />
-          </StyledContainer>
-        )}
-        {taskDetailData && task && (
-          <Dialog
-            open={true}
+        </TaskTooltip>
+      )}
+      {translation?.auto && (
+        <StyledContainer data-cy="translations-auto-translated-indicator">
+          <AutoTranslationIcon provider={translation.mtProvider} />
+          <StyledClearButton
+            role="button"
+            onClick={handleClearAutoTranslated}
+            data-cy="translations-auto-translated-clear-button"
+            className="clearButton"
+          />
+        </StyledContainer>
+      )}
+      {translation?.outdated && (
+        <StyledContainer data-cy="translations-outdated-indicator">
+          <TranslationFlagIcon
+            tooltip={t('translations_cell_outdated')}
+            icon={<ActiveFlagCircle />}
+          />
+          <StyledClearButton
+            role="button"
+            onClick={handleClearOutdated}
+            data-cy="translations-outdated-clear-button"
+            className="clearButton"
+          />
+        </StyledContainer>
+      )}
+      {taskDetailData && (
+        <Dialog
+          open={true}
+          onClose={() => setTaskDetailData(undefined)}
+          maxWidth="xl"
+          onClick={stopAndPrevent()}
+        >
+          <TaskDetail
+            taskNumber={taskDetailData.number}
             onClose={() => setTaskDetailData(undefined)}
-            maxWidth="xl"
-            onClick={stopAndPrevent()}
-          >
-            <TaskDetail
-              taskNumber={taskDetailData.number}
-              onClose={() => setTaskDetailData(undefined)}
-              projectId={project.id}
-            />
-          </Dialog>
-        )}
-      </StyledWrapper>
-    );
-  } else {
-    return null;
-  }
+            projectId={project.id}
+          />
+        </Dialog>
+      )}
+    </StyledWrapper>
+  );
 };
