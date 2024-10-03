@@ -87,6 +87,7 @@ export type InitialValues = {
   name: string;
   description: string;
   languages: number[];
+  dueDate: number;
   languageAssignees: Record<number, User[]>;
   selection: number[];
 };
@@ -157,7 +158,7 @@ export const TaskCreateDialog = ({
           type: initialValues?.type ?? 'TRANSLATE',
           name: initialValues?.name ?? '',
           description: initialValues?.description ?? '',
-          dueDate: undefined as number | undefined,
+          dueDate: initialValues?.dueDate ?? undefined,
           assignees: initialValues?.languageAssignees ?? {},
         }}
         validationSchema={Validation.CREATE_TASK_FORM(t)}
