@@ -12,12 +12,12 @@ Tolgee is an open-source localization platform that makes it **easy for develope
 
 ### Key Features
 
-- Native SDKs for Vanilla JS, React frameworks, Angular, VueJS frameworks, Svelte, React Native, and Unreal engine enabling you to in-context translate the string directly in your App
+- Native SDKs for Vanilla JS, React frameworks, Angular, VueJS frameworks, Svelte, React Native, and Unreal engine enable you to in-context translate the string directly in your App
 - Supported formats: JSON, XLIFF, PO PHP, PO C/C++, PO Python, Apple Strings, Apple Stringsdict, Apple XLIFF, Android XML, Flutter ARB, Ruby YAML
 - Tolgee Contextual AI translation: ChatGPT-powered translation uses the context gathered by the Native SDKs for the Web to provide the best possible results
 - Option to connect other translators like Google Translate or DeepL to easily translate words in the dashboard
 - Translation memory
-- Opt-in Automatic translation: After adding the key your string is automatically translated
+- Opt-in Automatic translation: After adding the key, your string is automatically translated
 - Publish to CDN and S3 to get your translation data to production
 - CLI may be used to push/pull new data in all supported formats
 
