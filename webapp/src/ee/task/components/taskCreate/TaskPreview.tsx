@@ -10,6 +10,7 @@ import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { User } from 'tg.component/UserAccount';
 import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
 import { TranslationStateType } from './TranslationStateFilter';
+import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -66,6 +67,7 @@ export const TaskPreview = ({
   const { t } = useTranslate();
   const formatNumber = useNumberFormatter();
   const theme = useTheme();
+  const translateTaskType = useTaskTypeTranslation();
 
   const content = { keys, type, language: language.id };
   const statsLoadable = useApiQuery({
@@ -100,8 +102,13 @@ export const TaskPreview = ({
             {statsLoadable.data ? (
               <Box display="flex" alignItems="center">
                 {formatNumber(statsLoadable.data.keyCount)}
-                {statsLoadable.data.keyCount !== keys.length && (
-                  <Tooltip title={t('create_task_preview_missing_keys_hint')}>
+                {statsLoadable.data.keyCount !==
+                  statsLoadable.data.keyCountIncludingConflicts && (
+                  <Tooltip
+                    title={t('create_task_preview_missing_keys_hint', {
+                      type: translateTaskType(type).toLocaleLowerCase(),
+                    })}
+                  >
                     <Box
                       display="flex"
                       alignItems="center"

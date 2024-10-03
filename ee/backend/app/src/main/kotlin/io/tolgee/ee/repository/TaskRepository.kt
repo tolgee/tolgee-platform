@@ -6,10 +6,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
-import io.tolgee.model.views.KeysScopeView
-import io.tolgee.model.views.TaskPerUserReportView
-import io.tolgee.model.views.TaskScopeView
-import io.tolgee.model.views.TranslationToTaskView
+import io.tolgee.model.views.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -178,6 +175,35 @@ interface TaskRepository : JpaRepository<Task, Long> {
     value = """
       select key.id
       from key
+          left join translation t on t.key_id = key.id and t.language_id = :languageId
+      where key.project_id = :projectId
+          and key.id in :keyIds
+          and (
+            COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter
+            or (
+                -- item fits the filter
+                :#{#filters.filterOutdated} = true 
+                and COALESCE(t.outdated, false) = true
+            ) or (
+              -- no filter is applied
+              COALESCE(:#{#filters.filterOutdated}, false) = false
+              and :#{#filters.filterState} is null
+            )
+          )
+    """,
+  )
+  fun getFilteredKeys(
+    projectId: Long,
+    languageId: Long,
+    keyIds: Collection<Long>,
+    filters: TranslationScopeFilters = TranslationScopeFilters(),
+  ): List<Long>
+
+  @Query(
+    nativeQuery = true,
+    value = """
+      select key.id
+      from key
           left join (
             select key.id as key_id from key
                 join task_key on (key.id = task_key.key_id)
@@ -242,7 +268,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
     projectId: Long,
     baseLangId: Long,
     keyIds: Collection<Long>,
-  ): KeysScopeView
+  ): KeysScopeSimpleView
 
   @Query(
     value = """
