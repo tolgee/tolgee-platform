@@ -93,7 +93,7 @@ dependencies {
     /**
      * Excel file generation
      */
-    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.3.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
 }
 
