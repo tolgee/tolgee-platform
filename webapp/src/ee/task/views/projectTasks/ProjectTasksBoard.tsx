@@ -24,9 +24,9 @@ export const ProjectTasksBoard = ({
   const project = useProject();
 
   const query = {
-    size: 5,
+    size: 10,
     search,
-    sort: ['createdAt,desc'],
+    sort: ['number,desc'],
     filterAssignee: filter.assignees,
     filterLanguage: filter.languages,
     filterType: filter.types,

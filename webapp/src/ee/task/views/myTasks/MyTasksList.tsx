@@ -36,7 +36,7 @@ export const MyTasksList = ({
       size: 20,
       page: Number(page),
       search,
-      sort: ['createdAt,desc'],
+      sort: ['number,desc'],
       filterNotState: showClosed ? undefined : ['CLOSED'],
       filterProject: filter.projects,
       filterType: filter.types,

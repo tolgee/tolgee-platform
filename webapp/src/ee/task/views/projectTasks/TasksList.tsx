@@ -41,7 +41,7 @@ export const TasksList = ({
       size: 20,
       page: Number(page),
       search,
-      sort: ['createdAt,desc'],
+      sort: ['number,desc'],
       filterNotState: showClosed ? undefined : ['CLOSED'],
       filterAssignee: filter.assignees,
       filterLanguage: filter.languages,
