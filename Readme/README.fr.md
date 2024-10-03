@@ -31,7 +31,7 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 
 [![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
 
-Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktobefest2024.md](./Hacktobefest2024.md).
+Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktobefest2024.md](../Hacktobefest2024.md).
 
 ### Types de Soumission
 - **Pull Requests** : Soumettez une pull request en traitant des problèmes étiquetés avec #hacktoberfest.
@@ -55,7 +55,7 @@ En fonction des points obtenus, vous recevrez des goodies :
 
 Veuillez donner une étoile au [répertoire Tolgee](https://github.com/tolgee/tolgee-platform) dans le cadre de votre contribution !
 
-Pour des informations complètes, consultez notre [Hacktobefest2024.md](./Hacktobefest2024.md).
+Pour des informations complètes, consultez notre [Hacktobefest2024.md](../Hacktobefest2024.md).
 
 **Rejoignez la famille. Participez à notre [canal Slack <img src="https://img.shields.io/badge/-Communauté Tolgee-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ)**
 
