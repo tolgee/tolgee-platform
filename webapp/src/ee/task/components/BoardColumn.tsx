@@ -14,6 +14,8 @@ const StyledColumn = styled(Box)`
   display: grid;
   gap: 12px;
   align-content: start;
+  flex-grow: 1;
+  flex-basis: 200px;
 `;
 
 const StyledColumnTitle = styled(Box)`

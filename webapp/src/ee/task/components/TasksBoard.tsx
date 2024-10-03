@@ -15,10 +15,9 @@ type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
 const StyledColumns = styled(Box)`
   padding-top: 12px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
   gap: 16px;
-  min-width: 1000px;
+  min-width: 900px;
 `;
 
 const StyledContainer = styled(Box)`
@@ -134,19 +133,19 @@ export const TasksBoard = ({
           emptyMessage={t('task_board_empty_completed')}
           newTaskActions={newTaskActions}
         />
-        {canFetchMore && (
-          <Box
-            display="flex"
-            justifyContent="center"
-            gridColumn="1 / -1"
-            paddingBottom={4}
-          >
-            <LoadingButton loading={isFetching} onClick={handleFetchMore}>
-              {t('global_load_more')}
-            </LoadingButton>
-          </Box>
-        )}
       </StyledColumns>
+      <Box
+        display="flex"
+        justifyContent="center"
+        gridColumn="1 / -1"
+        paddingBottom={6}
+        paddingTop={4}
+        visibility={canFetchMore ? 'visible' : 'hidden'}
+      >
+        <LoadingButton loading={isFetching} onClick={handleFetchMore}>
+          {t('global_load_more')}
+        </LoadingButton>
+      </Box>
     </StyledContainer>
   );
 };
