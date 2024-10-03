@@ -184,7 +184,6 @@ export const TranslationFlags: React.FC<Props> = ({
               taskNumber={taskDetailData.number}
               onClose={() => setTaskDetailData(undefined)}
               projectId={project.id}
-              newTaskActions={true}
             />
           </Dialog>
         )}

@@ -63,7 +63,6 @@ const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(3)};
   gap: ${({ theme }) => theme.spacing(0.5, 3)};
   padding-top: ${({ theme }) => theme.spacing(1)};
-  width: min(85vw, 800px);
 `;
 
 const StyledTopPart = styled('div')`
@@ -85,15 +84,9 @@ type Props = {
   onClose: () => void;
   projectId: number;
   projectScopes?: Scope[];
-  newTaskActions: boolean;
 };
 
-export const TaskDetail = ({
-  onClose,
-  projectId,
-  taskNumber,
-  newTaskActions,
-}: Props) => {
+export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -134,7 +127,7 @@ export const TaskDetail = ({
   const data = taskLoadable.data;
 
   return (
-    <Box data-cy="task-detail">
+    <Box data-cy="task-detail" display="grid" width="min(85vw, 800px)">
       <StyledHeader>
         <StyledMainTitle>
           <T keyName="task_detail_title" />
