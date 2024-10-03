@@ -118,8 +118,8 @@ class TaskReportHelper(
       row.createCell(3).setCellValue(taskReport.baseCharacterCount.toDouble())
     }
 
-    sheet.setColumnWidth(0, 4000)
-    sheet.setColumnWidth(1, 3000)
+    sheet.setColumnWidth(0, 8000)
+    sheet.setColumnWidth(1, 4000)
 
     return workbook
   }
