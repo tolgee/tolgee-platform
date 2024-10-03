@@ -192,7 +192,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
           )
     """,
   )
-  fun getFilteredKeys(
+  fun getKeysIncludingConflicts(
     projectId: Long,
     languageId: Long,
     keyIds: Collection<Long>,
@@ -232,7 +232,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
           )
     """,
   )
-  fun getKeysWithoutTask(
+  fun getKeysWithoutConflicts(
     projectId: Long,
     languageId: Long,
     taskType: String,

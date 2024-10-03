@@ -352,18 +352,18 @@ class TaskService(
     filters: TranslationScopeFilters,
   ): KeysScopeView {
     val language = languageService.get(dto.language, projectEntity.id)
-    val relevantKeys =
-      taskRepository.getKeysWithoutTask(
+    val keysIncludingConflicts =
+      taskRepository.getKeysIncludingConflicts(
         projectEntity.id,
         language.id,
-        dto.type.toString(),
         dto.keys!!,
         filters,
       )
-    val allKeys =
-      taskRepository.getFilteredKeys(
+    val relevantKeys =
+      taskRepository.getKeysWithoutConflicts(
         projectEntity.id,
         language.id,
+        dto.type.toString(),
         dto.keys!!,
         filters,
       )
@@ -377,7 +377,7 @@ class TaskService(
       result.keyCount,
       result.wordCount,
       result.characterCount,
-      allKeys.size.toLong(),
+      keysIncludingConflicts.size.toLong(),
     )
   }
 
@@ -428,7 +428,7 @@ class TaskService(
     keys: Collection<Long>,
     filters: TranslationScopeFilters,
   ): MutableSet<Long> {
-    return taskRepository.getKeysWithoutTask(
+    return taskRepository.getKeysWithoutConflicts(
       project.id,
       languageId,
       type.toString(),
