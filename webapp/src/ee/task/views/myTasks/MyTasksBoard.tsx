@@ -21,9 +21,9 @@ export const MyTasksBoard = ({
   search,
 }: Props) => {
   const query = {
-    size: 20,
+    size: 10,
     search,
-    sort: ['createdAt,desc'],
+    sort: ['number,desc'],
     filterProject: filter.projects,
     filterType: filter.types,
   } satisfies QueryParameters;
