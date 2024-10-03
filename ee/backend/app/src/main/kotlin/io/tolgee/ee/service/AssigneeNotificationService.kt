@@ -44,7 +44,7 @@ class AssigneeNotificationService(
           }</a><br/><br/>
           
           
-          Check all your tasks <a href=${myTasksUrl}>here</a>.<br/><br/>
+          Check all your tasks <a href=$myTasksUrl>here</a>.<br/><br/>
           
           Regards,<br/>
           Tolgee
