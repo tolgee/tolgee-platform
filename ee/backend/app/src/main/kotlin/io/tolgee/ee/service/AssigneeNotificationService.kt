@@ -5,6 +5,7 @@ import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -15,11 +16,20 @@ class AssigneeNotificationService(
   private val tolgeeEmailSender: TolgeeEmailSender,
   private val frontendUrlProvider: FrontendUrlProvider,
 ) : Logging {
+  fun getTaskTypeName(type: TaskType): String {
+    return if (type === TaskType.TRANSLATE) {
+      "translate"
+    } else {
+      "review"
+    }
+  }
+
   fun notifyNewAssignee(
     user: UserAccount,
     task: Task,
   ) {
-    val url = "${frontendUrlProvider.url}/projects/${task.project.id}/task?number=${task.number}&detail=true"
+    val taskUrl = "${frontendUrlProvider.url}/projects/${task.project.id}/task?number=${task.number}&detail=true"
+    val myTasksUrl = "${frontendUrlProvider.url}/my-tasks"
 
     val params =
       EmailParams(
@@ -28,8 +38,13 @@ class AssigneeNotificationService(
         text =
           """
           Hello! 👋<br/><br/>          
-          You've been assigned to task <b>${task.name} #${task.number} (${task.language.name})</b>:<br/>
-          <a href="$url">$url</a><br/><br/>
+          You've been assigned to a task:<br/>
+          <a href="$taskUrl">${task.name} #${task.number} (${task.language.name}) - ${
+            getTaskTypeName(task.type)
+          }</a><br/><br/>
+          
+          
+          Check all your tasks <a href=${myTasksUrl}>here</a>.<br/><br/>
           
           Regards,<br/>
           Tolgee
