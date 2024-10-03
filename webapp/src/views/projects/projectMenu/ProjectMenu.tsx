@@ -69,6 +69,18 @@ export const ProjectMenu = ({ id }) => {
           quickStart={{ itemKey: 'menu_translations' }}
         />
       )}
+      {canViewTasks && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_TASKS.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<ClipboardCheck />}
+          text={t('project_menu_tasks')}
+          data-cy="project-menu-item-tasks"
+          matchAsPrefix
+        />
+      )}
+
       {canEditLanguages && (
         <SideMenuItem
           linkTo={LINKS.PROJECT_LANGUAGES.build({
@@ -83,16 +95,21 @@ export const ProjectMenu = ({ id }) => {
           }}
         />
       )}
-      {canViewTasks && (
-        <SideMenuItem
-          linkTo={LINKS.PROJECT_TASKS.build({
-            [PARAMS.PROJECT_ID]: id,
-          })}
-          icon={<ClipboardCheck />}
-          text={t('project_menu_tasks')}
-          data-cy="project-menu-item-tasks"
-          matchAsPrefix
-        />
+
+      {canViewUsers && (
+        <>
+          <SideMenuItem
+            linkTo={LINKS.PROJECT_PERMISSIONS.build({
+              [PARAMS.PROJECT_ID]: id,
+            })}
+            icon={<User01 />}
+            text={t('project_menu_members')}
+            data-cy="project-menu-item-members"
+            quickStart={{
+              itemKey: 'menu_members',
+            }}
+          />
+        </>
       )}
 
       {canImport && (
@@ -117,22 +134,6 @@ export const ProjectMenu = ({ id }) => {
           data-cy="project-menu-item-export"
           quickStart={{ itemKey: 'menu_export' }}
         />
-      )}
-
-      {canViewUsers && (
-        <>
-          <SideMenuItem
-            linkTo={LINKS.PROJECT_PERMISSIONS.build({
-              [PARAMS.PROJECT_ID]: id,
-            })}
-            icon={<User01 />}
-            text={t('project_menu_members')}
-            data-cy="project-menu-item-members"
-            quickStart={{
-              itemKey: 'menu_members',
-            }}
-          />
-        </>
       )}
 
       {canViewDeveloper && (

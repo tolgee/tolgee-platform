@@ -233,6 +233,7 @@ export const TaskCreateDialog = ({
                   size="small"
                   fullWidth
                   multiple
+                  style={{ display: 'grid' }}
                   renderValue={
                     ((langIds: number[]) =>
                       langIds
