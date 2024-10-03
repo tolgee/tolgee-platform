@@ -105,7 +105,13 @@ export const PrefilterTask = ({ taskNumber }: Props) => {
           </Tooltip>
         }
         content={
-          <Box display="flex" gap={1} alignItems="center">
+          <Box
+            display="flex"
+            gap={1}
+            alignItems="center"
+            whiteSpace="nowrap"
+            pr={2}
+          >
             <TaskLabel task={data} />
             <Tooltip title={t('task_detail_tooltip')} disableInteractive>
               <IconButton size="small" onClick={handleShowDetails}>
