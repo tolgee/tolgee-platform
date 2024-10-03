@@ -56,6 +56,7 @@ const StyledRow = styled(Box)`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 `;
 
 const StyledSecondaryItem = styled(Box)`
