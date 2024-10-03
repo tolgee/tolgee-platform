@@ -58,9 +58,9 @@ export const TasksBoard = ({
     doneTasks.hasNextPage;
 
   function handleFetchMore() {
-    newTasks.fetchNextPage();
-    inProgressTasks.fetchNextPage();
-    doneTasks.fetchNextPage();
+    newTasks.hasNextPage && newTasks.fetchNextPage();
+    inProgressTasks.hasNextPage && inProgressTasks.fetchNextPage();
+    doneTasks.hasNextPage && doneTasks.fetchNextPage();
   }
 
   const isLoading =
