@@ -18,7 +18,7 @@ const StyledColumns = styled(Box)`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
-  min-width: 800px;
+  min-width: 1000px;
 `;
 
 const StyledContainer = styled(Box)`

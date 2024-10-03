@@ -3,12 +3,20 @@ import {
   Box,
   FormHelperText,
   Select as MUISelect,
+  selectClasses,
+  styled,
   useTheme,
 } from '@mui/material';
 import {
   StyledContainer,
   StyledInputLabel,
 } from 'tg.component/common/TextField';
+
+const StyledMUISelect = styled(MUISelect)`
+  .${selectClasses.select} {
+    width: unset;
+  }
+`;
 
 type Props = Omit<Partial<ComponentProps<typeof MUISelect>>, 'error'> & {
   minHeight?: boolean;
@@ -28,14 +36,14 @@ export const Select = React.forwardRef(function Select(props: Props, ref) {
         alignItems="start"
         sx={{ minHeight: minHeight ? '64px' : undefined, ...sx }}
       >
-        <MUISelect
+        <StyledMUISelect
           variant="outlined"
           size="small"
           error={Boolean(error)}
           {...otherProps}
         >
           {props.children}
-        </MUISelect>
+        </StyledMUISelect>
         {error && (
           <FormHelperText sx={{ color: theme.palette.error.main }}>
             {error}
