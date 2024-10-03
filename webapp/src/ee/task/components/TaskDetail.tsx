@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Formik } from 'formik';
 import { T, useTranslate } from '@tolgee/react';
 import {
@@ -15,21 +16,23 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { messageService } from 'tg.service/MessageService';
+import { UserAccount } from 'tg.component/UserAccount';
+import { ProjectWithAvatar } from 'tg.component/ProjectWithAvatar';
+import { useDateFormatter } from 'tg.hooks/useLocale';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { components } from 'tg.service/apiSchema.generated';
 
 import { TaskDatePicker } from './TaskDatePicker';
 import { AssigneeSearchSelect } from './assigneeSelect/AssigneeSearchSelect';
 import { TaskLabel } from './TaskLabel';
-import { messageService } from 'tg.service/MessageService';
 import { TaskInfoItem } from './TaskInfoItem';
-import { useDateFormatter } from 'tg.hooks/useLocale';
 import { TaskScope } from './TaskScope';
-import { UserAccount } from 'tg.component/UserAccount';
 import { getTaskRedirect } from './utils';
-import { Scope } from 'tg.fixtures/permissions';
-import { ProjectWithAvatar } from 'tg.component/ProjectWithAvatar';
 import { TaskMenu } from './TaskMenu';
-import { useState } from 'react';
-import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+
+type TaskModel = components['schemas']['TaskModel'];
 
 const StyledHeader = styled(Box)`
   display: grid;
@@ -81,12 +84,12 @@ const StyledActions = styled('div')`
 
 type Props = {
   taskNumber: number;
+  task?: TaskModel;
   onClose: () => void;
   projectId: number;
-  projectScopes?: Scope[];
 };
 
-export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
+export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -128,7 +131,15 @@ export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
     setAnchorEl(null);
   };
 
-  const data = taskLoadable.data;
+  const data = taskLoadable.data ?? task;
+
+  if (!data && taskLoadable.isLoading) {
+    return (
+      <Box display="grid" width="min(85vw, 800px)" justifyContent="center">
+        <BoxLoading />
+      </Box>
+    );
+  }
 
   return (
     <Box data-cy="task-detail" display="grid" width="min(85vw, 800px)">

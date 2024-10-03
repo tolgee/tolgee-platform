@@ -56,6 +56,7 @@ describe('tasks notifications', () => {
       .findDcy('task-item-detail')
       .click();
 
+    waitForGlobalLoading();
     cy.gcy('task-detail').findDcy('assignee-select').click();
     cy.gcy('user-switch-item').contains('Organization member').click();
     dismissMenu();
@@ -63,13 +64,11 @@ describe('tasks notifications', () => {
 
     assertMessage('Task updated sucessfully');
 
-    getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
+    getAssignedEmailNotification().then(({ toAddress, myTasksLink }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
-      cy.visit(taskLink);
+      cy.visit(myTasksLink);
     });
-    cy.gcy('task-detail')
-      .should('be.visible')
-      .findDcy('task-label-name')
-      .should('contain', 'Translate task');
+    cy.gcy('global-base-view-title').should('contain', 'My tasks');
+    cy.gcy('task-item').contains('Translate task').should('be.visible');
   });
 });

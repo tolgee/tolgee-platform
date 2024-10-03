@@ -154,6 +154,7 @@ export const ProjectTasksView = () => {
                   taskNumber={detail.number}
                   onClose={handleDetailClose}
                   projectId={project.id}
+                  task={detail}
                 />
               </Dialog>
             )}
