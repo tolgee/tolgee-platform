@@ -360,10 +360,24 @@ class TaskService(
         dto.keys!!,
         filters,
       )
-    return taskRepository.calculateScope(
-      projectEntity.id,
-      projectEntity.baseLanguage!!.id,
-      relevantKeys,
+    val allKeys =
+      taskRepository.getFilteredKeys(
+        projectEntity.id,
+        language.id,
+        dto.keys!!,
+        filters,
+      )
+    val result =
+      taskRepository.calculateScope(
+        projectEntity.id,
+        projectEntity.baseLanguage!!.id,
+        relevantKeys,
+      )
+    return KeysScopeView(
+      result.keyCount,
+      result.wordCount,
+      result.characterCount,
+      allKeys.size.toLong(),
     )
   }
 

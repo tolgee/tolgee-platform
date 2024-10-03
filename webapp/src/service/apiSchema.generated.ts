@@ -2685,11 +2685,13 @@ export interface components {
     };
     KeysScopeView: {
       /** Format: int64 */
+      keyCount: number;
+      /** Format: int64 */
       characterCount: number;
       /** Format: int64 */
       wordCount: number;
       /** Format: int64 */
-      keyCount: number;
+      keyCountIncludingConflicts: number;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];

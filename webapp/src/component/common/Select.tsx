@@ -14,7 +14,7 @@ import {
 
 const StyledMUISelect = styled(MUISelect)`
   .${selectClasses.select} {
-    width: unset;
+    box-sizing: border-box;
   }
 `;
 
