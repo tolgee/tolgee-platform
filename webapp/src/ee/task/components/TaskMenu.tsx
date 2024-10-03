@@ -42,19 +42,31 @@ export const TaskMenu = ({
   const closeMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/close',
     method: 'post',
-    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/translations',
+      '/v2/projects/{projectId}/tasks',
+      '/v2/user-tasks',
+    ],
   });
 
   const reopenMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/reopen',
     method: 'post',
-    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/translations',
+      '/v2/projects/{projectId}/tasks',
+      '/v2/user-tasks',
+    ],
   });
 
   const finishMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/finish',
     method: 'post',
-    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/translations',
+      '/v2/projects/{projectId}/tasks',
+      '/v2/user-tasks',
+    ],
   });
 
   const { downloadReport } = useTaskReport();
@@ -199,11 +211,6 @@ export const TaskMenu = ({
   return (
     <>
       <Menu anchorEl={anchorEl} open={isOpen} onClose={onClose}>
-        {!hideTaskDetail && (
-          <MenuItem onClick={() => handleOpenDetail(task)}>
-            {t('task_menu_detail')}
-          </MenuItem>
-        )}
         {TASK_ACTIVE_STATES.includes(task.state) ? (
           <MenuItem
             onClick={handleMarkAsDone}
@@ -219,6 +226,11 @@ export const TaskMenu = ({
         {TASK_ACTIVE_STATES.includes(task.state) && (
           <MenuItem disabled={!canEditTask} onClick={handleClose}>
             {t('task_menu_close_task')}
+          </MenuItem>
+        )}
+        {!hideTaskDetail && (
+          <MenuItem onClick={() => handleOpenDetail(task)}>
+            {t('task_menu_detail')}
           </MenuItem>
         )}
         <Divider />

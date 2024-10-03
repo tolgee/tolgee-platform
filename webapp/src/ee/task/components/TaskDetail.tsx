@@ -106,7 +106,11 @@ export const TaskDetail = ({ onClose, projectId, taskNumber }: Props) => {
   const updateLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}',
     method: 'put',
-    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
+    invalidatePrefix: [
+      '/v2/projects/{projectId}/translations',
+      '/v2/projects/{projectId}/tasks',
+      '/v2/user-tasks',
+    ],
   });
 
   const projectLoadable = useApiQuery({
