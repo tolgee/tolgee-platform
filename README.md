@@ -119,11 +119,11 @@ When enabled, Tolgee automatically translates new keys using translation memory 
 
 ### Activity log
 
-See who modified, reviewed or commented on the phrases in your project. Clearly.
+See who modified, reviewed, or commented on the phrases in your project. Clearly.
 
 ### Comment on translations
 
-Something look off? Tell others what you would change. You can comment every translation on Tolgee platform.
+Something look off? Tell others what you would change. You can comment on every translation on Tolgee platform.
 
 ### Translation history
 
@@ -135,7 +135,7 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 
 1. Sign up at [app.tolgee.io](https://app.tolgee.io/sign_up) or access your self-hosted instance
 2. Create a project
-3. Follow a guide in integration section of your project
+3. Follow a guide in the integration section of your project
 4. Have fun!
 
 ![Integration guides](https://user-images.githubusercontent.com/18496315/188818166-d70d4676-7bd2-4328-91eb-720add935ab6.gif)
