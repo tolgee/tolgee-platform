@@ -50,7 +50,7 @@ To ensure that contributions are recognized and rewarded fairly, we’ve establi
             - Android App
         - Submit the demo into the [`/demos`](./demos) folder in the repository
           - There is an example of [React app in the folder](./demos/react-demo-example)
-        - It has to be different from the official examples we have published in [Tolgee JS repository](https://github.com/tolgee/tolgee-js/tree/main/testapps)
+        - It has to be different from the official examples we have published in the [Tolgee JS repository](https://github.com/tolgee/tolgee-js/tree/main/testapps)
         - For React, Angular, Vue, and Svelte, we prefer using [Tolgee Native SDKs](https://tolgee.io/js-sdk)
         - For other technologies, you can use [Tolgee CLI](https://tolgee.io/tolgee-cli) to push and pull strings
         
