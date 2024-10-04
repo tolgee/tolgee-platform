@@ -204,12 +204,6 @@ dependencies {
     implementation libs.slackApiClient
     implementation libs.slackApiModelKotlinExtension
     implementation libs.slackApiClientKotlinExtension
-
-    /**
-     * Excel file generation
-     */
-    implementation 'org.apache.poi:poi-ooxml:5.2.3'
-    implementation 'org.apache.commons:commons-collections4:4.4'
 }
 
 test {
