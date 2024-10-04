@@ -81,7 +81,7 @@ Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/b
   - [Self-hosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
 - [Development notes (How to develop Tolgee locally)](https://github.com/tolgee/tolgee-platform/wiki/Development)
 
-## Why to use Tolgee?
+## Why use Tolgee?
 
 Because it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
 
