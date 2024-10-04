@@ -59,8 +59,7 @@ Please start the [Tolgee repository](https://github.com/tolgee/tolgee-platform) 
 
 For complete information, check our [Hacktobefest2024.md](./Hacktobefest2024.md)
 
-Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) to share your ideas, suggestions, or questions and connect with other users and contributors.
-
+Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-16l0sf7ae-6fmAl2Fb9wqFCV0uzSa7bw) to share your ideas, suggestions, or questions and connect with other users and contributors.
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
 ## Quick links
