@@ -14,7 +14,6 @@ import io.tolgee.util.logger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
@@ -57,11 +56,11 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
     bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
   }
 
-  @OptIn(ExperimentalTime::class)
   @Test
   @ProjectJWTAuthTestMethod
   fun `it performs well`() {
     val keys = testData.addLotOfData()
+    testData.addLotOfReferences(keys)
     saveTestDataAndPrepare()
 
     logger.infoMeasureTime("it performs well time 1") {
@@ -87,6 +86,16 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
     bigMetaService.findExistingKeysDistancesDtosByIds(keys.map { it.id }).assert.hasSize(104790)
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it performs well (large)`() {
+    val keys = testData.addLotOfData()
+    testData.addLotOfReferences(keys)
+    saveTestDataAndPrepare()
+
+    storeLogOfBigMeta(keys, 0, 200)
+  }
+
   private fun storeLogOfBigMeta(
     keys: List<Key>,
     drop: Int,
@@ -96,7 +105,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
       "big-meta",
       mapOf(
         "relatedKeysInOrder" to
-          keys.drop(drop).take(take).map {
+          keys.drop(drop).take(take).reversed().map {
             mapOf(
               "namespace" to it.namespace,
               "keyName" to it.name,
@@ -110,6 +119,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
   @ProjectJWTAuthTestMethod
   fun `it returns correct data`() {
     val keys = testData.addLotOfData()
+    testData.addLotOfReferences(keys)
     saveTestDataAndPrepare()
 
     performProjectAuthGet("keys/${keys.first().id}/big-meta").andIsOk.andAssertThatJson {

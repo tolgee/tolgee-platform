@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { getTolgeeFormat } from '@tginternal/editor';
 
 import { TRANSLATION_STATES } from 'tg.constants/translationStates';
@@ -6,8 +6,8 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from './context/TranslationsContext';
 import {
   AfterCommand,
@@ -88,12 +88,22 @@ export const useTranslationCell = ({
     });
   };
 
-  const handleInsertBase = () => {
-    if (!baseLanguage?.tag) {
-      return;
+  const getBaseText = () => {
+    if (!baseLanguage) {
+      return undefined;
     }
 
-    const baseText = keyData.translations[baseLanguage.tag].text;
+    return keyData.translations[baseLanguage.tag]?.text;
+  };
+
+  const baseText = getBaseText();
+
+  const handleInsertBase = () => {
+    const baseText = getBaseText();
+
+    if (!baseText) {
+      return;
+    }
 
     let baseVariant: string | undefined;
     if (cursor?.activeVariant) {
@@ -111,6 +121,14 @@ export const useTranslationCell = ({
       setEditValueString(baseVariant);
     }
   };
+
+  const baseValue = useMemo(() => {
+    return getTolgeeFormat(
+      getBaseText() || '',
+      keyData.keyIsPlural,
+      !project.icuPlaceholders
+    );
+  }, [baseText, keyData.keyIsPlural]);
 
   const handleClose = (force = false) => {
     if (force) {
@@ -171,5 +189,7 @@ export const useTranslationCell = ({
     editEnabled,
     translation,
     disabled,
+    baseValue,
+    baseText,
   };
 };

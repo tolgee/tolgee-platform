@@ -4,6 +4,7 @@ import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeySearchResultView
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
+@Lazy
 interface KeyRepository : JpaRepository<Key, Long> {
   @Query(
     """

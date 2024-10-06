@@ -28,18 +28,44 @@ An open-source alternative to Crowdin, Phrase or Lokalise
 [<img src="https://img.shields.io/badge/-Facebook-424549?style=social&logo=facebook" height=25 />](https://www.facebook.com/Tolgee.i18n)
 [<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
-
-
-
-**Become part of the family. Join [slack channel <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ)**
-
 </div>
 
+[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
+
+We are sending swags for awesome demos merged PRs! For complete information, check
+our [Hacktobefest2024.md](./Hacktobefest2024.md)
+
+### Submission Types
+- **Pull Requests**: Submit a pull request addressing issues tagged with #hacktoberfest
+- You can **create a demo** with any of the following frameworks: React, Angular, Vue, Svelte, PHP, Flutter, Ruby, iOS, Android
+
+### Quality Criteria
+
+Your submissions will be evaluated based on the following criteria, with each project receiving a score between 10-50 points:
+- **Quality**: Is the code well-written, tested, and maintainable
+- **User Experience (UX)**: How intuitive and user-friendly is the implementation?
+- **Creativity**: Does the project offer a unique approach or innovative features?
+- **Usefulness**: How valuable is the contribution to the users?
+    
+According to the points, you'll get an amount of swag:
+    
+- 30 - 40 points - Tolgee Sticker set
+- 40 - 45 points - Tolgee Sticker set + Tolgee Socks
+- 45 - 50 points - Tolgee Sticker set + Tolgee Socks + Tolgee T-shirt
+    
+### Repository Star ⭐
+
+Please start the [Tolgee repository](https://github.com/tolgee/tolgee-platform) as part of your contribution!
+
+For complete information, check our [Hacktobefest2024.md](./Hacktobefest2024.md)
+
+Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) to share your ideas, suggestions, or questions and connect with other users and contributors.
 
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
 ## Quick links
 - [Tolgee Website](https://tolgee.io)
+
   - Product (Learn more about the great features)
     - [Dev tools](https://tolgee.io/features/dev-tools)
     - [Translation assistance](https://tolgee.io/features/translation-assistance)
@@ -55,9 +81,9 @@ An open-source alternative to Crowdin, Phrase or Lokalise
   - [Self-hosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
 - [Development notes (How to develop Tolgee locally)](https://github.com/tolgee/tolgee-platform/wiki/Development)
 
-## Why to use Tolgee?
+## Why use Tolgee?
 
-Beacause it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
+Because it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
 
 ![Frame 47](https://user-images.githubusercontent.com/18496315/188637819-ac4eb02d-7859-4ca8-9807-27818a52782d.png)
 
@@ -93,11 +119,11 @@ When enabled, Tolgee automatically translates new keys using translation memory 
 
 ### Activity log
 
-See who modified, reviewed or commented on the phrases in your project. Clearly.
+See who modified, reviewed, or commented on the phrases in your project. Clearly.
 
 ### Comment on translations
 
-Something look off? Tell others what you would change. You can comment every translation on Tolgee platform.
+Something look off? Tell others what you would change. You can comment on every translation on Tolgee platform.
 
 ### Translation history
 
@@ -109,7 +135,7 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 
 1. Sign up at [app.tolgee.io](https://app.tolgee.io/sign_up) or access your self-hosted instance
 2. Create a project
-3. Follow a guide in integration section of your project
+3. Follow a guide in the integration section of your project
 4. Have fun!
 
 ![Integration guides](https://user-images.githubusercontent.com/18496315/188818166-d70d4676-7bd2-4328-91eb-720add935ab6.gif)

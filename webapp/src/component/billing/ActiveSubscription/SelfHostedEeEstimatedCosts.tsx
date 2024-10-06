@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { PlanUsageEstimatedCosts } from 'tg.views/organizations/billing/common/usage/PlanUsageEstimatedCosts';
+import { PlanUsageEstimatedCosts } from 'tg.ee/billing/common/usage/PlanUsageEstimatedCosts';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 
 export const SelfHostedEeEstimatedCosts: FC<{

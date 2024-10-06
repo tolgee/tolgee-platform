@@ -1,11 +1,13 @@
 package io.tolgee.repository.machineTranslation
 
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
+@Lazy
 interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
   @Query(
     """

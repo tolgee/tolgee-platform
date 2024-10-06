@@ -210,6 +210,15 @@ class ImportTestData {
     return user.self
   }
 
+  fun addKeyWithTag(keyTag: String): io.tolgee.model.key.Key {
+    return this.projectBuilder.addKey {
+      name = "key with tag"
+      this.keyMeta
+    }.build {
+      addTag(keyTag)
+    }.self
+  }
+
   fun useViewEnOnlyUser(): UserAccount {
     val user =
       this.root.addUserAccount {

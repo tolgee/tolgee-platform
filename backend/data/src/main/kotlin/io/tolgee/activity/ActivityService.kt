@@ -37,6 +37,10 @@ class ActivityService(
     activityRevision: ActivityRevision,
     modifiedEntities: ModifiedEntitiesType,
   ) {
+    if (!activityRevision.shouldSaveWithoutModification() && modifiedEntities.isEmpty()) {
+      return
+    }
+
     // let's keep the persistent context small
     entityManager.flushAndClear()
 
@@ -155,5 +159,10 @@ class ActivityService(
     val provider =
       ModificationsByRevisionsProvider(applicationContext, projectId, listOf(revisionId), pageable, filterEntityClass)
     return provider.get()
+  }
+
+  private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {
+    val type = this.type ?: return true
+    return type.saveWithoutModification
   }
 }

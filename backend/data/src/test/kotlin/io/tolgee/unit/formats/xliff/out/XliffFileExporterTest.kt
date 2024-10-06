@@ -393,7 +393,7 @@ class XliffFileExporterTest {
     |    <body>
     |      <trans-unit id="item">
     |        <source xml:space="preserve"/>
-    |        <target xml:space="preserve">I will be first '{'icuParam'}' %&lt;hello&gt;d</target>
+    |        <target xml:space="preserve">I will be first {icuParam} %&lt;hello&gt;d</target>
     |      </trans-unit>
     |    </body>
     |  </file>

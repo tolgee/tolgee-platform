@@ -16,8 +16,11 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
     return baseToCLikePlaceholderConvertor.convert(node)
   }
 
-  override fun convertText(string: String): String {
-    return baseToCLikePlaceholderConvertor.convertText(string)
+  override fun convertText(
+    node: MessagePatternUtil.TextNode,
+    keepEscaping: Boolean,
+  ): String {
+    return baseToCLikePlaceholderConvertor.convertText(node.getText(keepEscaping))
   }
 
   override fun convertReplaceNumber(

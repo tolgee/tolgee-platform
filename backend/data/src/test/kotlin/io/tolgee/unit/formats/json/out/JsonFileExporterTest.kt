@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.dataProvider.ExportKeyView
@@ -100,14 +101,36 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3" : "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
-    |  "item" : "I will be first {icuParam, number}"
+    |  "key3": "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
+    |  "item": "I will be first {icuParam, number} '{hey}'"
     |}
       """.trimMargin(),
     )
   }
 
-  private fun getIcuPlaceholdersDisabledExporter(): JsonFileExporter {
+  @Test
+  fun `exports with placeholders (ICU placeholders disabled - Java)`() {
+    val exporter =
+      getIcuPlaceholdersDisabledExporter(
+        exportParams = ExportParams(messageFormat = ExportMessageFormat.JAVA_STRING_FORMAT),
+      )
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "key3": {
+    |    "one": "# den {icuParam}",
+    |    "few": "# dny",
+    |    "other": "# dní"
+    |  },
+    |  "item": "I will be first {icuParam, number} '{hey}'"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  private fun getIcuPlaceholdersDisabledExporter(exportParams: ExportParams = ExportParams()): JsonFileExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -120,10 +143,10 @@ class JsonFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "item",
-          text = "I will be first {icuParam, number}",
+          text = "I will be first {icuParam, number} '{hey}'",
         )
       }
-    return getExporter(built.translations, false)
+    return getExporter(built.translations, false, exportParams = exportParams)
   }
 
   @Test
@@ -134,11 +157,37 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3" : "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
-    |  "item" : "I will be first '{'icuParam'}' {hello, number}"
+    |  "key3": "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
+    |  "item": "I will be first '{'icuParam'}' {hello, number}"
     |}
       """.trimMargin(),
     )
+  }
+
+  @Test
+  fun `correct exports translation with colon`() {
+    val exporter = getExporter(getTranslationWithColon())
+    val data = getExported(exporter)
+    data.assertFile(
+      "cs.json",
+      """
+    |{
+    |  "item": "name : {name}"
+    |}
+      """.trimMargin(),
+    )
+  }
+
+  private fun getTranslationWithColon(): MutableList<ExportTranslationView> {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "cs",
+          keyName = "item",
+          text = "name : {name}",
+        )
+      }
+    return built.translations
   }
 
   private fun getIcuPlaceholdersEnabledExporter(): JsonFileExporter {
@@ -180,7 +229,7 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "item" : "I will be first '{'icuParam'}' %<hello>d"
+    |  "item": "I will be first {icuParam} %<hello>d"
     |}
       """.trimMargin(),
     )
@@ -285,6 +334,7 @@ class JsonFileExporterTest {
       exportParams = exportParams,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
+      customPrettyPrinter = CustomPrettyPrinter(),
     )
   }
 }

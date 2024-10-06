@@ -1,8 +1,11 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.key.Key
 
 class ResolvableImportTestData : BaseTestData() {
   lateinit var key1and2Screenshot: Screenshot
@@ -11,10 +14,11 @@ class ResolvableImportTestData : BaseTestData() {
   lateinit var viewOnlyUser: UserAccount
   lateinit var keyCreateOnlyUser: UserAccount
   lateinit var translateOnlyUser: UserAccount
+  lateinit var secondLanguage: Language
 
   init {
     projectBuilder.apply {
-      addGerman()
+      secondLanguage = addGerman().self
 
       addKey("namespace-1", "key-1") {
         addTranslation("de", "existing translation")
@@ -34,6 +38,23 @@ class ResolvableImportTestData : BaseTestData() {
       }
       addKey("test") {
         addTranslation("en", "existing translation")
+      }
+
+      addKey("keyWith2Translations") {
+        addTranslation("en", "existing translation")
+        addTranslation {
+          this.language = secondLanguage
+          this.text = "existing translation"
+          this.outdated = false
+          this.state = TranslationState.REVIEWED
+        }
+      }
+
+      addAutoTranslationConfig {
+        usingTm = true
+        usingPrimaryMtService = true
+        enableForImport = true
+        targetLanguage = secondLanguage
       }
     }
 
@@ -81,6 +102,14 @@ class ResolvableImportTestData : BaseTestData() {
       type = null
       scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
       translateLanguages = mutableSetOf(englishLanguage)
+    }
+  }
+
+  fun addLotOfKeys(count: Int): List<Key> {
+    return (1..count).map {
+      projectBuilder.addKey(keyName = "key-lot-$it") {
+        addTranslation("en", "existing translation")
+      }.self
     }
   }
 }

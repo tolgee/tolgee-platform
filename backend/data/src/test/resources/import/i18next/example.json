@@ -1,0 +1,24 @@
+{
+  "key": "value",
+  "keyDeep": {
+    "inner": "value"
+  },
+  "keyNesting": "reuse $t(keyDeep.inner) (is not supported)",
+  "keyInterpolate": "replace this {{value}}",
+  "keyInterpolateUnescaped": "replace this {{- value}} (we don't support unescaped flag)",
+  "keyInterpolateUnescapedMultiple": "replace this {{- value}} and also don't escape {{- value}}",
+  "keyInterpolateUnescapedConflict": "replace this {{- value}} but escape this {{value}}",
+  "keyInterpolateUnescapedConflictInverted": "replace this {{value}} but don't escape this {{- value}}",
+  "keyInterpolateWithFormatting": "replace this {{value, number}} (only number is supported)",
+  "keyContext_male": "the male variant (is parsed as normal key and context is ignored)",
+  "keyContext_female": "the female variant (is parsed as normal key and context is ignored)",
+  "keyPluralSimple_one": "the singular (is parsed as plural under one key - keyPluralSimple)",
+  "keyPluralSimple_other": "the plural (is parsed as plural under one key - keyPluralSimple)",
+  "keyPluralMultipleEgArabic_one": "the plural form 1",
+  "keyPluralMultipleEgArabic_two": "the plural form 2",
+  "keyPluralMultipleEgArabic_few": "the plural form 3",
+  "keyPluralMultipleEgArabic_many": "the plural form 4",
+  "keyPluralMultipleEgArabic_other": "the plural form 5",
+  "keyWithArrayValue": ["multipe", "things"],
+  "keyWithObjectValue": { "valueA": "valueA", "valueB": "more text" }
+}

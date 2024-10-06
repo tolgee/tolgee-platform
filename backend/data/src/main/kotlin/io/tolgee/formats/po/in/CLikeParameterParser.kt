@@ -1,5 +1,7 @@
 package io.tolgee.formats.po.`in`
 
+import io.tolgee.formats.getGroupOrNull
+
 class CLikeParameterParser {
   fun parse(match: MatchResult): ParsedCLikeParam? {
     val specifierGroup = match.groups["specifier"]
@@ -17,16 +19,5 @@ class CLikeParameterParser {
       flags = match.groups.getGroupOrNull("flags")?.value,
       fullMatch = match.value,
     )
-  }
-
-  private fun MatchGroupCollection.getGroupOrNull(name: String): MatchGroup? {
-    try {
-      return this[name]
-    } catch (e: IllegalArgumentException) {
-      if (e.message?.contains("No group with name") != true) {
-        throw e
-      }
-      return null
-    }
   }
 }

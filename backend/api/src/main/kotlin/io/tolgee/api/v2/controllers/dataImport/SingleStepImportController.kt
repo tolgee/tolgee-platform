@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.parameters.RequestBody
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.model.enums.Scope
@@ -61,6 +63,7 @@ class SingleStepImportController(
   )
   @AllowApiAccess
   @OpenApiOrderExtension(1)
+  @RequestActivity(ActivityType.IMPORT)
   fun doImport(
     @RequestPart("files")
     files: Array<MultipartFile>,

@@ -9,22 +9,16 @@ class ContentDeliveryCachePurgingProvider(
   private val applicationContext: AbstractApplicationContext,
   private val configs: List<ContentDeliveryPurgingConfig>,
 ) {
-  val defaultPurging by lazy {
+  val purgings by lazy {
     getDefaultFactory()
   }
 
-  private fun getDefaultFactory(): ContentDeliveryCachePurging? {
-    val purgings =
-      configs.mapNotNull {
-        if (!it.enabled) {
-          return@mapNotNull null
-        }
-        applicationContext.getBean(it.contentDeliveryCachePurgingType.factory.java).create(it)
+  private fun getDefaultFactory(): List<ContentDeliveryCachePurging> {
+    return configs.mapNotNull {
+      if (!it.enabled) {
+        return@mapNotNull null
       }
-    if (purgings.size > 1) {
-      throw RuntimeException("Exactly one content delivery purging must be set")
+      applicationContext.getBean(it.contentDeliveryCachePurgingType.factory.java).create(it)
     }
-
-    return purgings.firstOrNull()
   }
 }

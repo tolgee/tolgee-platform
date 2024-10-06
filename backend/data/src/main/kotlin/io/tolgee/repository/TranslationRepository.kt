@@ -6,6 +6,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
+@Lazy
 interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """select t.text as text, l.tag as languageTag, k.name as key 

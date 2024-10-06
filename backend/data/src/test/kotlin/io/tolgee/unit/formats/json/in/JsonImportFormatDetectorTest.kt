@@ -20,6 +20,11 @@ class JsonImportFormatDetectorTest {
   }
 
   @Test
+  fun `detected i18next`() {
+    "src/test/resources/import/i18next/example.json".assertDetected(ImportFormat.JSON_I18NEXT)
+  }
+
+  @Test
   fun `detected icu`() {
     "src/test/resources/import/json/icu.json".assertDetected(ImportFormat.JSON_ICU)
   }

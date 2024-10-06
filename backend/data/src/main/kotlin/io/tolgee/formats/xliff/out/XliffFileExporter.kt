@@ -2,7 +2,7 @@ package io.tolgee.formats.xliff.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
-import io.tolgee.formats.NoOpFromIcuPlaceholderConvertor
+import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.xliff.model.XliffFile
 import io.tolgee.formats.xliff.model.XliffModel
@@ -70,10 +70,12 @@ class XliffFileExporter(
       text,
       plural,
       projectIcuPlaceholdersSupport,
-      paramConvertorFactory =
-        exportParams.messageFormat?.paramConvertorFactory
-          ?: { NoOpFromIcuPlaceholderConvertor() },
+      paramConvertorFactory = messageFormat.paramConvertorFactory,
     ).convert()
+  }
+
+  private val messageFormat by lazy {
+    exportParams.messageFormat ?: ExportMessageFormat.ICU
   }
 
   private fun getResultXliffFile(translation: ExportTranslationView): XliffFile {

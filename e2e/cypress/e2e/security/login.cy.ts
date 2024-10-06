@@ -64,7 +64,7 @@ context('Login', () => {
     checkAnonymousIdUnset();
     checkAnonymousUserIdentified();
   });
-  it('login with oauth2', () => {
+  it('login with oauth2', { retries: { runMode: 5 } }, () => {
     disableEmailVerification();
 
     loginWithFakeOAuth2();

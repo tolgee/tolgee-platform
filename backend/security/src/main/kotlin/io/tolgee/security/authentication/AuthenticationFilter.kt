@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
+@Lazy
 class AuthenticationFilter(
   private val authenticationProperties: AuthenticationProperties,
   @Lazy
@@ -43,8 +44,11 @@ class AuthenticationFilter(
   private val rateLimitService: RateLimitService,
   @Lazy
   private val jwtService: JwtService,
+  @Lazy
   private val userAccountService: UserAccountService,
+  @Lazy
   private val apiKeyService: ApiKeyService,
+  @Lazy
   private val patService: PatService,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(

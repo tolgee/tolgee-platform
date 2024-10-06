@@ -51,7 +51,7 @@ class RubyYamlFileExporterTest {
     |    one: "# den {icuParam}"
     |    few: "# dny"
     |    other: "# dní"
-    |  item: "I will be first %<icuParam>d"
+    |  item: "I will be first {icuParam, number}"
     |
       """.trimMargin(),
     )
@@ -70,7 +70,7 @@ class RubyYamlFileExporterTest {
     |    one: "%{count} den %<icuParam>d"
     |    few: "%{count} dny"
     |    other: "%{count} dní"
-    |  item: "I will be first '{'icuParam'}' %<hello>d"
+    |  item: "I will be first {icuParam} %<hello>d"
     |
       """.trimMargin(),
     )

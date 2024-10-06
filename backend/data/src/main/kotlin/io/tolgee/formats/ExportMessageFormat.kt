@@ -2,6 +2,7 @@ package io.tolgee.formats
 
 import io.tolgee.formats.paramConvertors.out.IcuToApplePlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToCPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.out.IcuToI18nextPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToJavaPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
@@ -13,6 +14,7 @@ enum class ExportMessageFormat(val paramConvertorFactory: () -> FromIcuPlacehold
   JAVA_STRING_FORMAT(paramConvertorFactory = { IcuToJavaPlaceholderConvertor() }),
   APPLE_SPRINTF(paramConvertorFactory = { IcuToApplePlaceholderConvertor() }),
   RUBY_SPRINTF(paramConvertorFactory = { IcuToRubyPlaceholderConvertor() }),
-  ICU(paramConvertorFactory = { NoOpFromIcuPlaceholderConvertor() }),
+  I18NEXT(paramConvertorFactory = { IcuToI18nextPlaceholderConvertor() }),
+  ICU(paramConvertorFactory = { IcuToIcuPlaceholderConvertor() }),
 //  PYTHON_SPRINTF,
 }

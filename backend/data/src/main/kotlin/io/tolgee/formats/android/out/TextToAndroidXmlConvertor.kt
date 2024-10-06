@@ -4,6 +4,8 @@ import io.tolgee.formats.MobileStringEscaper
 import io.tolgee.formats.android.AndroidParsingConstants
 import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
@@ -21,7 +23,7 @@ import javax.xml.transform.stream.StreamResult
 class TextToAndroidXmlConvertor(
   private val document: Document,
   private val value: AndroidStringValue,
-) {
+) : Logging {
   val string = value.string
 
   fun convert(): ContentToAppend {
@@ -37,6 +39,7 @@ class TextToAndroidXmlConvertor(
         children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
       )
     } catch (ex: java.lang.Exception) {
+      logger.debug("Cannot value '$string'", ex)
       return ContentToAppend(text = string)
     }
   }
@@ -175,14 +178,18 @@ class TextToAndroidXmlConvertor(
     return this.parentNode.nodeName == "root" && this.parentNode.parentNode === this.ownerDocument
   }
 
-  companion object {
-    private val documentBuilder: DocumentBuilder by lazy { DocumentBuilderFactory.newInstance().newDocumentBuilder() }
+  private val documentBuilder: DocumentBuilder by lazy { documentBuilderFactory.newDocumentBuilder() }
 
-    private val xmlTransformer by lazy {
-      val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
-      transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
-      transformer
-    }
+  private val xmlTransformer: Transformer by lazy {
+    val transformer: Transformer = xmlTransformerFactory.newTransformer()
+    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
+    transformer
+  }
+
+  companion object {
+    private val documentBuilderFactory: DocumentBuilderFactory by lazy { DocumentBuilderFactory.newInstance() }
+
+    private val xmlTransformerFactory by lazy { TransformerFactory.newInstance() }
   }
 
   private fun String.escape(

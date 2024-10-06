@@ -14,7 +14,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 21
           distribution: adopt
 
       - name: Setup node
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 21
           distribution: adopt
 
       - name: Setup node
@@ -122,7 +122,7 @@ jobs:
         with:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }} -x classes -x compileKotlin -x compileJava
+          command: ./gradlew ${{ matrix.command }} 
         env:
           SKIP_SERVER_BUILD: true
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
@@ -163,7 +163,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 21
           distribution: adopt
 
       - name: Setup node
@@ -269,7 +269,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 21
           distribution: adopt
 
       - name: Cache Gradle packages
@@ -420,7 +420,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 21
           distribution: adopt
 
       - name: Setup node

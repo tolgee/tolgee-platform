@@ -8,7 +8,7 @@ import {
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { createKey, deleteProject } from '../../common/apiCalls/common';
-import { confirmStandard } from '../../common/shared';
+import { confirmStandard, gcyAdvanced } from '../../common/shared';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
@@ -58,6 +58,27 @@ describe('Translations Base', () => {
       .findDcy('translation-plural-parameter')
       .contains('testValue')
       .should('be.visible');
+  });
+
+  it('shows base and existing exact forms', () => {
+    createKey(
+      project.id,
+      'Test key',
+      {
+        en: 'You have {testValue, plural, one {# item} =2 {Two items} other {# items}}',
+        cs: 'Máte {testValue, plural, one {# položku} =4 {# položky } few {# položky} other {# položek}}',
+      },
+      { isPlural: true }
+    );
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+    getTranslationCell('Test key', 'cs').click();
+    gcyAdvanced({ value: 'translation-editor', variant: '=2' }).should(
+      'be.visible'
+    );
+    gcyAdvanced({ value: 'translation-editor', variant: '=4' }).should(
+      'be.visible'
+    );
   });
 
   it('will change plural parameter name for all translations', () => {

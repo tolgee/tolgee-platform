@@ -93,7 +93,7 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     fileStorageMock = mock()
     doReturn(fileStorageMock).whenever(contentDeliveryFileStorageProvider).getContentStorageWithDefaultClient()
     purgingMock = mock()
-    doReturn(purgingMock).whenever(contentDeliveryCachePurgingProvider).defaultPurging
+    doReturn(listOf(purgingMock)).whenever(contentDeliveryCachePurgingProvider).purgings
 
     // wait for the first invocation happening because of test data saving, then clear invocations
     Thread.sleep(1000)

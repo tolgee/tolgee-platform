@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.yaml.out.YamlFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.util.buildExportTranslationList
@@ -59,7 +60,7 @@ object YamlExportTestData {
           text = "I will be first {param1}, {param2}",
         )
       }
-    return getExporter(built.translations, false, exportParams)
+    return getExporter(built.translations, true, exportParams)
   }
 
   fun getIcuPlaceholdersEnabledExporter(): YamlFileExporter {
@@ -96,6 +97,7 @@ object YamlExportTestData {
         },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = ObjectMapper(YAMLFactory()),
+      customPrettyPrinter = CustomPrettyPrinter(),
     )
   }
 }

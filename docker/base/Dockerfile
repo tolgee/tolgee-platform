@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.20
 
 ########################################################################################
 ### Postgres from postgres official Dockerfile                                         #
@@ -175,7 +175,7 @@ VOLUME /var/lib/postgresql/data
 COPY postgres-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/postgres-entrypoint.sh
 
-RUN apk --no-cache add openjdk17
+RUN apk --no-cache add openjdk21
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
 # calls "Fast Shutdown mode" wherein new connections are disallowed and any

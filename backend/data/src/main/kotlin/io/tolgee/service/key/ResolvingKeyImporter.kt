@@ -53,6 +53,7 @@ class ResolvingKeyImporter(
   private var importedKeys: List<Key> = emptyList()
   private val updatedTranslationIds = mutableListOf<Long>()
   private val isPluralChangedForKeys = mutableMapOf<Long, String>()
+  private val outdatedKeys: MutableList<Long> = mutableListOf()
 
   operator fun invoke(): KeyImportResolvableResult {
     importedKeys = tryImport()
@@ -84,6 +85,12 @@ class ResolvingKeyImporter(
 
           if (validate(translationExists, resolvable, key, language.tag)) return@translations
 
+          if (language.base) {
+            if (isNew || existingTranslation?.text != resolvable.text) {
+              outdatedKeys.add(key.id)
+            }
+          }
+
           if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
             translationsToModify.add(TranslationToModify(existingTranslation!!, resolvable.text, false))
             return@translations
@@ -104,6 +111,7 @@ class ResolvingKeyImporter(
       }
 
     translationService.onKeyIsPluralChanged(isPluralChangedForKeys, true, updatedTranslationIds)
+    translationService.setOutdatedBatch(outdatedKeys)
 
     return result
   }

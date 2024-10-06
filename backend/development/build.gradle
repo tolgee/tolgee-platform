@@ -40,7 +40,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 idea {
@@ -80,6 +80,8 @@ sourceSets {
 }
 
 dependencyManagement {
+    applyMavenExclusions = false
+
     imports {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
     }

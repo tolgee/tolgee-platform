@@ -19,6 +19,7 @@ class GenericStructuredFileExporter(
   private val rootKeyIsLanguageTag: Boolean = false,
   private val supportArrays: Boolean,
   private val messageFormat: ExportMessageFormat,
+  private val customPrettyPrinter: CustomPrettyPrinter,
 ) : FileExporter {
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
@@ -26,7 +27,7 @@ class GenericStructuredFileExporter(
     prepare()
     return result.asSequence().map { (fileName, modelBuilder) ->
       fileName to
-        objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(modelBuilder.result)
+        objectMapper.writer(customPrettyPrinter).writeValueAsBytes(modelBuilder.result)
           .inputStream()
     }.toMap()
   }
@@ -54,8 +55,11 @@ class GenericStructuredFileExporter(
     )
   }
 
+  private val pluralsViaSuffixes
+    get() = messageFormat == ExportMessageFormat.I18NEXT
+
   private val pluralsViaNesting
-    get() = messageFormat != ExportMessageFormat.ICU
+    get() = !pluralsViaSuffixes && messageFormat != ExportMessageFormat.ICU
 
   private val placeholderConvertorFactory
     get() = messageFormat.paramConvertorFactory
@@ -63,6 +67,9 @@ class GenericStructuredFileExporter(
   private fun addPluralTranslation(translation: ExportTranslationView) {
     if (pluralsViaNesting) {
       return addNestedPlural(translation)
+    }
+    if (pluralsViaSuffixes) {
+      return addSuffixedPlural(translation)
     }
     return addSingularTranslation(translation)
   }
@@ -81,6 +88,24 @@ class GenericStructuredFileExporter(
       translation.key.name,
       pluralForms,
     )
+  }
+
+  private fun addSuffixedPlural(translation: ExportTranslationView) {
+    val pluralForms =
+      convertMessageForNestedPlural(translation.text) ?: let {
+        // this should never happen, but if it does, it's better to add a null key then crash or ignore it
+        addNullValue(translation)
+        return
+      }
+
+    val builder = getFileContentResultBuilder(translation)
+    pluralForms.forEach { (keyword, form) ->
+      builder.addValue(
+        translation.languageTag,
+        "${translation.key.name}_$keyword",
+        form,
+      )
+    }
   }
 
   private fun addNullValue(translation: ExportTranslationView) {
@@ -105,8 +130,8 @@ class GenericStructuredFileExporter(
   ) = IcuToGenericFormatMessageConvertor(
     text,
     isPlural,
-    projectIcuPlaceholdersSupport,
-    placeholderConvertorFactory,
+    isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
+    paramConvertorFactory = placeholderConvertorFactory,
   )
 
   private fun convertMessageForNestedPlural(text: String?): Map<String, String>? {

@@ -5,6 +5,7 @@ import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.ICU_DETE
 import io.tolgee.formats.genericStructuredFile.`in`.FormatDetectionUtil.detectFromPossibleFormats
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.I18nextToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
@@ -43,6 +44,12 @@ class JsonImportFormatDetector {
             FormatDetectionUtil.regexFactor(
               CToIcuPlaceholderConvertor.C_DETECTION_REGEX,
               0.6,
+            ),
+          ),
+        ImportFormat.JSON_I18NEXT to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              I18nextToIcuPlaceholderConvertor.I18NEXT_DETECTION_REGEX,
             ),
           ),
       )

@@ -1,0 +1,4 @@
+{
+  "key": "{{value, currency}} this is i18next {{count, number}}",
+  "key2": "{{value, currency}} this is i18next"
+}

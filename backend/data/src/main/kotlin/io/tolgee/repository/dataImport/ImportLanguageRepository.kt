@@ -4,6 +4,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.views.ImportLanguageView
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Repository
+@Lazy
 interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
   companion object {
     private const val VIEW_BASE_QUERY = """

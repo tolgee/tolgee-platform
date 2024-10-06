@@ -9,7 +9,6 @@ declare namespace DataCy {
         "activity-detail-dialog" |
         "add-box" |
         "administration-access-message" |
-        "administration-cloud-plan-field-auto-assign-to-selected" |
         "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-mt-credits" |
@@ -23,6 +22,7 @@ declare namespace DataCy {
         "administration-cloud-plan-field-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
+        "administration-cloud-plan-organization-assign-switch" |
         "administration-cloud-plan-submit-button" |
         "administration-cloud-plans-item" |
         "administration-cloud-plans-item-delete" |
