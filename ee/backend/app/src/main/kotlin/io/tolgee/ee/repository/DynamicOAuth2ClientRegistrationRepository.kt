@@ -4,21 +4,18 @@ import io.tolgee.ee.data.DynamicOAuth2ClientRegistration
 import io.tolgee.ee.model.Tenant
 import io.tolgee.ee.service.TenantService
 import org.springframework.security.oauth2.client.registration.ClientRegistration
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.stereotype.Component
 
 @Component
 class DynamicOAuth2ClientRegistrationRepository(
   private val tenantService: TenantService,
-) :
-  ClientRegistrationRepository {
-  private val dynamicClientRegistrations: MutableMap<String, DynamicOAuth2ClientRegistration> = mutableMapOf()
+) {
 
-  override fun findByRegistrationId(registrationId: String): ClientRegistration {
+  fun findByRegistrationId(registrationId: String): DynamicOAuth2ClientRegistration {
     val tenant: Tenant = tenantService.getByDomain(registrationId)
     val dynamicRegistration = createDynamicClientRegistration(tenant)
-    return dynamicRegistration.clientRegistration
+    return dynamicRegistration
   }
 
   private fun createDynamicClientRegistration(tenant: Tenant): DynamicOAuth2ClientRegistration {
@@ -31,24 +28,15 @@ class DynamicOAuth2ClientRegistrationRepository(
         .tokenUri(tenant.tokenUri)
         .jwkSetUri(tenant.jwkSetUri)
         .redirectUri(tenant.redirectUriBase + "/openId/auth_callback/" + tenant.domain)
-        .scope("openid", "profile", "email")
+        .scope("openid", "profile", "email", "roles")
         .build()
 
     val dynamicRegistration =
       DynamicOAuth2ClientRegistration(
-        tenantId = tenant.id.toString(),
+        tenant = tenant,
         clientRegistration = clientRegistration,
       )
 
-    dynamicClientRegistrations[tenant.domain] = dynamicRegistration
     return dynamicRegistration
-  }
-
-  fun String.toLongOrThrow(): Long {
-    return try {
-      this.toLong()
-    } catch (e: NumberFormatException) {
-      throw IllegalArgumentException("Invalid tenant ID: $this")
-    }
   }
 }

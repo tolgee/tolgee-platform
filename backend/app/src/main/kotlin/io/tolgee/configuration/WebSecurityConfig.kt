@@ -27,7 +27,6 @@ import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.web.servlet.FilterRegistrationBean
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
@@ -55,7 +54,6 @@ class WebSecurityConfig(
   private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
   private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
   private val exceptionHandlerFilter: ExceptionHandlerFilter,
-  private val applicationContext: ApplicationContext,
 ) : WebMvcConfigurer {
   @Bean
   fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
