@@ -1,19 +1,16 @@
-import { FunctionComponent, useEffect } from 'react';
-import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
+import {FunctionComponent, useEffect} from 'react';
+import {Redirect, useHistory, useRouteMatch} from 'react-router-dom';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
+import {LINKS, PARAMS} from 'tg.constants/links';
 
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
+import {FullPageLoading} from 'tg.component/common/FullPageLoading';
 
 interface SsoRedirectionHandlerProps {}
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 
 export const SsoRedirectionHandler: FunctionComponent<
-    SsoRedirectionHandlerProps
+  SsoRedirectionHandlerProps
 > = () => {
   const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
   const loginLoadable = useGlobalContext((c) => c.auth.authorizeOAuthLoadable);

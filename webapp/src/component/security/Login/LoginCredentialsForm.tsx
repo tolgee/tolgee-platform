@@ -71,7 +71,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 size="medium"
                 endIcon={
                   <img
-                    src= {remoteConfig.customLoginLogo}
+                    src={remoteConfig.customLoginLogo}
                     alt="Custom Logo"
                     style={{ width: 24, height: 24 }}
                   />
@@ -86,17 +86,17 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
 
             {<Box height="0px" mt={5} />}
             {remoteConfig.nativeEnabled && (
-                <Button
-                    component={Link}
-                    to={LINKS.SSO_LOGIN.build()}
-                    size="medium"
-                    endIcon={<LoginIcon />}
-                    variant="outlined"
-                    style={{ marginBottom: '0.5rem', marginTop: '1rem' }}
-                    color="inherit"
-                >
-                  <T keyName="login_sso" />
-                </Button>
+              <Button
+                component={Link}
+                to={LINKS.SSO_LOGIN.build()}
+                size="medium"
+                endIcon={<LoginIcon />}
+                variant="outlined"
+                style={{ marginBottom: '0.5rem', marginTop: '1rem' }}
+                color="inherit"
+              >
+                <T keyName="login_sso" />
+              </Button>
             )}
 
             {oAuthServices.map((provider) => (

@@ -1,23 +1,17 @@
-import { useState } from 'react';
-import { T } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
+import {useState} from 'react';
+import {T} from '@tolgee/react';
+import {useHistory} from 'react-router-dom';
 
-import { securityService } from 'tg.service/SecurityService';
-import {
-  ADMIN_JWT_LOCAL_STORAGE_KEY,
-  tokenService,
-} from 'tg.service/TokenService';
-import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useInitialDataService } from './useInitialDataService';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import {
-  INVITATION_CODE_STORAGE_KEY,
-  InvitationCodeService,
-} from 'tg.service/InvitationCodeService';
-import { messageService } from 'tg.service/MessageService';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import {securityService} from 'tg.service/SecurityService';
+import {ADMIN_JWT_LOCAL_STORAGE_KEY, tokenService,} from 'tg.service/TokenService';
+import {components} from 'tg.service/apiSchema.generated';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {useInitialDataService} from './useInitialDataService';
+import {LINKS, PARAMS} from 'tg.constants/links';
+import {INVITATION_CODE_STORAGE_KEY, InvitationCodeService,} from 'tg.service/InvitationCodeService';
+import {messageService} from 'tg.service/MessageService';
+import {TranslatedError} from 'tg.translationTools/TranslatedError';
+import {useLocalStorageState} from 'tg.hooks/useLocalStorageState';
 
 type LoginRequest = components['schemas']['LoginRequest'];
 type JwtAuthenticationResponse =
@@ -202,22 +196,22 @@ export const useAuthService = (
         [PARAMS.SERVICE_TYPE]: registrationId,
       });
       const response = await authorizeOpenIdLoadable.mutateAsync(
-          {
-            path: { registrationId: registrationId },
-            query: {
-              code,
-              redirect_uri: redirectUri,
-              invitationCode: invitationCode,
-            },
+        {
+          path: { registrationId: registrationId },
+          query: {
+            code,
+            redirect_uri: redirectUri,
+            invitationCode: invitationCode,
           },
-          {
-            onError: (error) => {
-              if (error.code === 'invitation_code_does_not_exist_or_expired') {
-                setInvitationCode(undefined);
-              }
-              messageService.error(<TranslatedError code={error.code!} />);
-            },
-          }
+        },
+        {
+          onError: (error) => {
+            if (error.code === 'invitation_code_does_not_exist_or_expired') {
+              setInvitationCode(undefined);
+            }
+            messageService.error(<TranslatedError code={error.code!} />);
+          },
+        }
       );
       await handleAfterLogin(response!);
     },

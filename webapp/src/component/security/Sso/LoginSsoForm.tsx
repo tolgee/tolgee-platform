@@ -24,7 +24,6 @@ type LoginViewCredentialsProps = {
 };
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 
-
 export function LoginSsoForm(props: LoginViewCredentialsProps) {
   const { getSsoAuthLinkByDomain } = useGlobalActions();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
@@ -60,7 +59,6 @@ export function LoginSsoForm(props: LoginViewCredentialsProps) {
         localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
         const response = await getSsoAuthLinkByDomain(data.domain, state);
         window.location.href = response.redirectUrl;
-
       }}
     >
       <StyledInputFields>
