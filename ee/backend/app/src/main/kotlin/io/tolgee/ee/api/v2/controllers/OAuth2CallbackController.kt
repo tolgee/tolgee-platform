@@ -1,5 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.tolgee.constants.Message
+import io.tolgee.ee.exceptions.OAuthAuthorizationException
 import io.tolgee.ee.repository.DynamicOAuth2ClientRegistrationRepository
 import io.tolgee.ee.service.OAuthService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -19,6 +21,9 @@ class OAuth2CallbackController(
   ): SsoUrlResponse {
     val registrationId = request.domain
     val dynamicOAuth2ClientRegistration = dynamicOAuth2ClientRegistrationRepository.findByRegistrationId(registrationId)
+    if (!dynamicOAuth2ClientRegistration.tenant.isEnabledForThisOrganization) {
+      throw OAuthAuthorizationException(Message.DOMAIN_NOT_ENABLED, "Domain is not enabled for this organization")
+    }
     val redirectUrl = buildAuthUrl(dynamicOAuth2ClientRegistration.clientRegistration, state = request.state)
 
     return SsoUrlResponse(redirectUrl)

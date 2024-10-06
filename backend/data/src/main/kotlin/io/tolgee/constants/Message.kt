@@ -239,6 +239,7 @@ enum class Message {
   TOKEN_EXCHANGE_FAILED,
   USER_INFO_RETRIEVAL_FAILED,
   ID_TOKEN_EXPIRED,
+  DOMAIN_NOT_ENABLED,
   ;
 
   val code: String
