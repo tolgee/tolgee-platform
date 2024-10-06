@@ -17,7 +17,7 @@ class SsoProviderController(
     @RequestBody request: CreateProviderRequest,
     @PathVariable organizationId: Long,
   ): Tenant {
-    return tenantService.save(request, organizationId)
+    return tenantService.saveOrUpdate(request, organizationId)
   }
 
   @GetMapping("")

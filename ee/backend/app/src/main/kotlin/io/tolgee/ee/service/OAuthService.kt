@@ -128,7 +128,6 @@ class OAuthService(
         throw OAuthAuthorizationException(Message.ID_TOKEN_EXPIRED, null)
       }
 
-
       return GenericUserResponse().apply {
         sub = jwtClaimsSet.subject
         name = jwtClaimsSet.getStringClaim("name")

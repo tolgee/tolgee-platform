@@ -9,6 +9,7 @@ data class TenantDto(
   val redirectUri: String,
   val tokenUri: String,
   val isEnabled: Boolean,
+  val jwkSetUri: String,
 )
 
 fun Tenant.toDto(): TenantDto {
@@ -19,5 +20,6 @@ fun Tenant.toDto(): TenantDto {
     redirectUri = this.redirectUriBase,
     tokenUri = this.tokenUri,
     isEnabled = this.isEnabledForThisOrganization,
+    jwkSetUri = this.jwkSetUri,
   )
 }

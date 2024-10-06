@@ -1,11 +1,11 @@
 import React from 'react';
-import { styled } from '@mui/material';
-import { T } from '@tolgee/react';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { TextField } from 'tg.component/common/form/fields/TextField';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { messageService } from 'tg.service/MessageService';
-import { useOrganization } from 'tg.views/organizations/useOrganization';
+import {styled} from '@mui/material';
+import {T} from '@tolgee/react';
+import {StandardForm} from 'tg.component/common/form/StandardForm';
+import {TextField} from 'tg.component/common/form/fields/TextField';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {messageService} from 'tg.service/MessageService';
+import {useOrganization} from 'tg.views/organizations/useOrganization';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -13,17 +13,6 @@ const StyledInputFields = styled('div')`
   gap: 16px;
   padding-bottom: 32px;
 `;
-
-type Provider = {
-    authorizationUri: string;
-    clientId: string;
-    clientSecret: string;
-    redirectUri: string;
-    tokenUri: string;
-};
-type ProviderProps = {
-  credentialsRef: React.RefObject<Provider>;
-};
 
 export function CreateProviderSsoForm({ credentialsRef, disabled }) {
 
@@ -45,7 +34,7 @@ export function CreateProviderSsoForm({ credentialsRef, disabled }) {
                 providersCreate.mutate(
                     {
                         path: {organizationId: organization.id},
-                        content: {'application/json': {...data}},
+                        content: {'application/json': {...data, isEnabled: !disabled}},
                     },
                     {
                         onSuccess(data) {
@@ -99,6 +88,15 @@ export function CreateProviderSsoForm({ credentialsRef, disabled }) {
                     variant="standard"
                     name="tokenUri"
                     label={<T keyName="organization_sso_token_uri"/>}
+                    minHeight={false}
+                />
+            </StyledInputFields>
+            <StyledInputFields>
+                <TextField
+                    disabled={disabled}
+                    variant="standard"
+                    name="jwkSetUri"
+                    label={<T keyName="organization_sso_jwk_set_uri"/>}
                     minHeight={false}
                 />
             </StyledInputFields>

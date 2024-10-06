@@ -42,7 +42,8 @@ class TenantService(
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
     tenant.redirectUriBase = dto.redirectUri.removeSuffix("/")
-    tenant.isEnabledForThisOrganization = true
+    tenant.isEnabledForThisOrganization = dto.isEnabled
+    tenant.jwkSetUri = dto.jwkSetUri
     return save(tenant)
   }
 
@@ -71,5 +72,22 @@ class TenantService(
 
   fun findTenant(organizationId: Long): Tenant? {
     return tenantRepository.findByOrganizationId(organizationId)
+  }
+
+  fun saveOrUpdate(request: CreateProviderRequest, organizationId: Long): Tenant {
+    val tenant = findTenant(organizationId)
+    return if (tenant == null) {
+      save(request, organizationId)
+    } else {
+      tenant.name = request.name ?: ""
+      tenant.clientId = request.clientId
+      tenant.clientSecret = request.clientSecret
+      tenant.authorizationUri = request.authorizationUri
+      tenant.tokenUri = request.tokenUri
+      tenant.redirectUriBase = request.redirectUri.removeSuffix("/")
+      tenant.jwkSetUri = request.jwkSetUri
+      tenant.isEnabledForThisOrganization = request.isEnabled
+      save(tenant)
+    }
   }
 }

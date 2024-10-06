@@ -7,4 +7,6 @@ data class CreateProviderRequest(
   val authorizationUri: String,
   val redirectUri: String,
   val tokenUri: String,
+  val jwkSetUri: String,
+  val isEnabled: Boolean,
 )
