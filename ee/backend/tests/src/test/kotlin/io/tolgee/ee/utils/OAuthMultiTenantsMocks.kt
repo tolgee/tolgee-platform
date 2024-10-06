@@ -37,7 +37,7 @@ class OAuthMultiTenantsMocks(
 
   fun authorize(registrationId: String) {
     val receivedCode = "fake_access_token"
-    val registration = dynamicOAuth2ClientRegistrationRepository.findByRegistrationId(registrationId)
+    val registration = dynamicOAuth2ClientRegistrationRepository.findByRegistrationId(registrationId).clientRegistration
 
     whenever(
       restTemplate?.exchange(
