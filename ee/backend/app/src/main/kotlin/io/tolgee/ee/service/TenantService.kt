@@ -42,6 +42,7 @@ class TenantService(
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
     tenant.redirectUriBase = dto.redirectUri.removeSuffix("/")
+    tenant.isEnabledForThisOrganization = true
     return save(tenant)
   }
 

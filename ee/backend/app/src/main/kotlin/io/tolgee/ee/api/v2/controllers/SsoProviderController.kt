@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(value = ["/v2/{organizationId:[0-9]+}/sso/providers"])
-class SsoProviderController(private val tenantService: TenantService) {
+class SsoProviderController(
+  private val tenantService: TenantService,
+) {
   @PostMapping("")
   fun addProvider(
     @RequestBody request: CreateProviderRequest,

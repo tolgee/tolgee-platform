@@ -3,6 +3,7 @@ package io.tolgee.ee.model
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(schema = "ee")
@@ -17,4 +18,7 @@ class Tenant : StandardAuditModel() {
   var tokenUri: String = ""
   var redirectUriBase: String = "" // base Tolgee frontend url can be different for different users so need to store it
   var organizationId: Long = 0L
+
+  @ColumnDefault("true")
+  var isEnabledForThisOrganization: Boolean = true
 }

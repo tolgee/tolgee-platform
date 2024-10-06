@@ -8,6 +8,7 @@ data class TenantDto(
   val clientSecret: String,
   val redirectUri: String,
   val tokenUri: String,
+  val isEnabled: Boolean,
 )
 
 fun Tenant.toDto(): TenantDto {
@@ -17,5 +18,6 @@ fun Tenant.toDto(): TenantDto {
     clientSecret = this.clientSecret,
     redirectUri = this.redirectUriBase,
     tokenUri = this.tokenUri,
+    isEnabled = this.isEnabledForThisOrganization,
   )
 }
