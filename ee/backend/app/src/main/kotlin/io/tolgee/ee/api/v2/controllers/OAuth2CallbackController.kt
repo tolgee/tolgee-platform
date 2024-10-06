@@ -18,8 +18,8 @@ class OAuth2CallbackController(
     @RequestBody request: DomainRequest,
   ): SsoUrlResponse {
     val registrationId = request.domain
-    val clientRegistration = dynamicOAuth2ClientRegistrationRepository.findByRegistrationId(registrationId)
-    val redirectUrl = buildAuthUrl(clientRegistration, state = request.state)
+    val dynamicOAuth2ClientRegistration = dynamicOAuth2ClientRegistrationRepository.findByRegistrationId(registrationId)
+    val redirectUrl = buildAuthUrl(dynamicOAuth2ClientRegistration.clientRegistration, state = request.state)
 
     return SsoUrlResponse(redirectUrl)
   }
