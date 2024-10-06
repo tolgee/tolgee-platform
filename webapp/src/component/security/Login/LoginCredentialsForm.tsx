@@ -1,18 +1,21 @@
-import React, {RefObject} from 'react';
-import {Button, Link as MuiLink, styled, Typography} from '@mui/material';
+import React, { RefObject } from 'react';
+import { Button, Link as MuiLink, styled, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
-import {T} from '@tolgee/react';
-import {Link} from 'react-router-dom';
+import { T } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 
-import {LINKS} from 'tg.constants/links';
-import {useConfig} from 'tg.globalContext/helpers';
+import { LINKS } from 'tg.constants/links';
+import { useConfig } from 'tg.globalContext/helpers';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import {StandardForm} from 'tg.component/common/form/StandardForm';
-import {TextField} from 'tg.component/common/form/fields/TextField';
-import {useOAuthServices} from 'tg.hooks/useOAuthServices';
-import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
-import {ApiError} from 'tg.service/http/ApiError';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { useOAuthServices } from 'tg.hooks/useOAuthServices';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { ApiError } from 'tg.service/http/ApiError';
 
 const StyledInputFields = styled('div')`
   display: grid;
