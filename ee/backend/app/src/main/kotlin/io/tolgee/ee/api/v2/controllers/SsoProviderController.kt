@@ -16,14 +16,10 @@ class SsoProviderController(
   fun addProvider(
     @RequestBody request: CreateProviderRequest,
     @PathVariable organizationId: Long,
-  ): Tenant {
-    return tenantService.saveOrUpdate(request, organizationId)
-  }
+  ): Tenant = tenantService.saveOrUpdate(request, organizationId)
 
   @GetMapping("")
   fun getProvider(
     @PathVariable organizationId: Long,
-  ): TenantDto? {
-    return tenantService.findTenant(organizationId)?.toDto()
-  }
+  ): TenantDto? = tenantService.findTenant(organizationId)?.toDto()
 }

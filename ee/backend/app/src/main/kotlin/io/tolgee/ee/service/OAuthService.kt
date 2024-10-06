@@ -186,7 +186,11 @@ class OAuthService(
         newUserAccount.thirdPartyAuthType = clientRegistration.registrationId
         newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
         signUpService.signUp(newUserAccount, invitationCode, null)
-        organizationRoleService.grantRoleToUser(newUserAccount, dynamicOAuth2ClientRegistration.tenant.organizationId, OrganizationRoleType.MEMBER)
+        organizationRoleService.grantRoleToUser(
+          newUserAccount,
+          dynamicOAuth2ClientRegistration.tenant.organizationId,
+          OrganizationRoleType.MEMBER,
+        )
         newUserAccount
       }
     val jwt = jwtService.emitToken(user.id)
@@ -201,7 +205,11 @@ class OAuthService(
   class GenericUserResponse {
     var sub: String? = null
     var name: String? = null
+
+    @Suppress("ktlint:standard:property-naming")
     var given_name: String? = null
+
+    @Suppress("ktlint:standard:property-naming")
     var family_name: String? = null
     var email: String? = null
   }

@@ -48,7 +48,10 @@ class OAuthTest : AbstractControllerTest() {
         organizationId = 0L
       },
     )
-    val clientRegistraion = dynamicOAuth2ClientRegistrationRepository.findByRegistrationId("registrationId").clientRegistration
+    val clientRegistraion =
+      dynamicOAuth2ClientRegistrationRepository
+        .findByRegistrationId("registrationId")
+        .clientRegistration
     oAuthMultiTenantsMocks.authorize(clientRegistraion.registrationId)
     val response = oAuthService.exchangeCodeForToken(clientRegistraion, "code", "redirectUrl")
     response

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component
 class DynamicOAuth2ClientRegistrationRepository(
   private val tenantService: TenantService,
 ) {
-
   fun findByRegistrationId(registrationId: String): DynamicOAuth2ClientRegistration {
     val tenant: Tenant = tenantService.getByDomain(registrationId)
     val dynamicRegistration = createDynamicClientRegistration(tenant)
@@ -20,7 +19,8 @@ class DynamicOAuth2ClientRegistrationRepository(
 
   private fun createDynamicClientRegistration(tenant: Tenant): DynamicOAuth2ClientRegistration {
     val clientRegistration =
-      ClientRegistration.withRegistrationId(tenant.domain)
+      ClientRegistration
+        .withRegistrationId(tenant.domain)
         .clientId(tenant.clientId)
         .clientSecret(tenant.clientSecret)
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)

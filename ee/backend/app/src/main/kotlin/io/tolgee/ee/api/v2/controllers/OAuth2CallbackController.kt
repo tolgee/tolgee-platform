@@ -32,14 +32,13 @@ class OAuth2CallbackController(
   private fun buildAuthUrl(
     clientRegistration: ClientRegistration,
     state: String,
-  ): String {
-    return "${clientRegistration.providerDetails.authorizationUri}?" +
+  ): String =
+    "${clientRegistration.providerDetails.authorizationUri}?" +
       "client_id=${clientRegistration.clientId}&" +
       "redirect_uri=${clientRegistration.redirectUri}&" +
       "response_type=code&" +
       "scope=${clientRegistration.scopes.joinToString(" ")}&" +
       "state=$state"
-  }
 
   @GetMapping("/{registrationId}")
   fun handleCallback(
@@ -50,8 +49,8 @@ class OAuth2CallbackController(
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?,
     response: HttpServletResponse,
     @PathVariable registrationId: String,
-  ): JwtAuthenticationResponse? {
-    return oauthService.handleOAuthCallback(
+  ): JwtAuthenticationResponse? =
+    oauthService.handleOAuthCallback(
       registrationId = registrationId,
       code = code,
       redirectUrl = redirectUrl,
@@ -59,9 +58,13 @@ class OAuth2CallbackController(
       errorDescription = error_description,
       invitationCode = invitationCode,
     )
-  }
 
-  data class DomainRequest(val domain: String, val state: String)
+  data class DomainRequest(
+    val domain: String,
+    val state: String,
+  )
 
-  data class SsoUrlResponse(val redirectUrl: String)
+  data class SsoUrlResponse(
+    val redirectUrl: String,
+  )
 }

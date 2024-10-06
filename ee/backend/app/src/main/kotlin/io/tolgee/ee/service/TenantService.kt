@@ -13,21 +13,13 @@ import java.net.URISyntaxException
 class TenantService(
   private val tenantRepository: TenantRepository,
 ) {
-  fun getById(id: Long): Tenant {
-    return tenantRepository.findById(id).orElseThrow { NotFoundException() }
-  }
+  fun getById(id: Long): Tenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
 
-  fun getByDomain(domain: String): Tenant {
-    return tenantRepository.findByDomain(domain) ?: throw NotFoundException()
-  }
+  fun getByDomain(domain: String): Tenant = tenantRepository.findByDomain(domain) ?: throw NotFoundException()
 
-  fun save(tenant: Tenant): Tenant {
-    return tenantRepository.save(tenant)
-  }
+  fun save(tenant: Tenant): Tenant = tenantRepository.save(tenant)
 
-  fun findAll(): List<Tenant> {
-    return tenantRepository.findAll()
-  }
+  fun findAll(): List<Tenant> = tenantRepository.findAll()
 
   fun save(
     dto: CreateProviderRequest,
@@ -47,8 +39,8 @@ class TenantService(
     return save(tenant)
   }
 
-  private fun extractDomain(authorizationUri: String): String {
-    return try {
+  private fun extractDomain(authorizationUri: String): String =
+    try {
       val uri = URI(authorizationUri)
       val domain = uri.host
       val port = uri.port
@@ -68,13 +60,13 @@ class TenantService(
     } catch (e: URISyntaxException) {
       throw BadRequestException("Invalid authorization uri")
     }
-  }
 
-  fun findTenant(organizationId: Long): Tenant? {
-    return tenantRepository.findByOrganizationId(organizationId)
-  }
+  fun findTenant(organizationId: Long): Tenant? = tenantRepository.findByOrganizationId(organizationId)
 
-  fun saveOrUpdate(request: CreateProviderRequest, organizationId: Long): Tenant {
+  fun saveOrUpdate(
+    request: CreateProviderRequest,
+    organizationId: Long,
+  ): Tenant {
     val tenant = findTenant(organizationId)
     return if (tenant == null) {
       save(request, organizationId)

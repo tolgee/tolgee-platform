@@ -148,7 +148,8 @@ class AuthenticationProperties(
       "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`" +
         "You may need that when you want to log in via third-party SSO options",
   )
-  var customLogoUrl: String? = "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
+  var customLogoUrl: String? =
+    "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
   @DocProperty(
     description = "Custom text for the login button.",
     defaultExplanation = "Defaults to 'Login' if not set.",
