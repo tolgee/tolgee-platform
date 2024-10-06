@@ -300,6 +300,10 @@ export interface paths {
     /** Set's the global role on the Tolgee Platform server. */
     put: operations["setRole"];
   };
+  "/v2/{organizationId}/sso/providers": {
+    get: operations["getProvider"];
+    post: operations["addProvider"];
+  };
   "/v2/user/send-email-verification": {
     /** Resends email verification email to currently authenticated user. */
     post: operations["sendEmailVerification"];
@@ -483,6 +487,9 @@ export interface paths {
      * Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.
      */
     post: operations["connectWorkspace"];
+  };
+  "/v2/oauth2/callback/get-authentication-url": {
+    post: operations["getAuthenticationUrl"];
   };
   "/v2/image-upload": {
     post: operations["upload"];
@@ -730,6 +737,9 @@ export interface paths {
   "/v2/organizations/{id}/projects": {
     /** Returns all organization projects the user has access to */
     get: operations["getAllProjects_1"];
+  };
+  "/v2/oauth2/callback/{registrationId}": {
+    get: operations["handleCallback"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
@@ -1040,6 +1050,11 @@ export interface components {
         | "slack_workspace_already_connected"
         | "slack_connection_error"
         | "email_verification_code_not_valid"
+        | "third_party_auth_failed"
+        | "token_exchange_failed"
+        | "user_info_retrieval_failed"
+        | "id_token_expired"
+        | "domain_not_enabled"
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
@@ -1117,6 +1132,14 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1126,19 +1149,6 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1171,6 +1181,11 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
       )[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1699,8 +1714,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1972,10 +1987,10 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
     };
@@ -2143,9 +2158,9 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -2289,11 +2304,10 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
+      description: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
-      description: string;
       username?: string;
       scopes: string[];
       /** Format: int64 */
@@ -2302,6 +2316,39 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      userFullName?: string;
+    };
+    CreateProviderRequest: {
+      name?: string;
+      clientId: string;
+      clientSecret: string;
+      authorizationUri: string;
+      redirectUri: string;
+      tokenUri: string;
+      jwkSetUri: string;
+      isEnabled: boolean;
+    };
+    Tenant: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      ssoProvider: string;
+      clientId: string;
+      clientSecret: string;
+      authorizationUri: string;
+      domain: string;
+      jwkSetUri: string;
+      tokenUri: string;
+      redirectUriBase: string;
+      /** Format: int64 */
+      organizationId: number;
+      isEnabledForThisOrganization: boolean;
+      enabledForThisOrganization?: boolean;
+      disableActivityLogging: boolean;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2691,6 +2738,11 @@ export interface components {
         | "slack_workspace_already_connected"
         | "slack_connection_error"
         | "email_verification_code_not_valid"
+        | "third_party_auth_failed"
+        | "token_exchange_failed"
+        | "user_info_retrieval_failed"
+        | "id_token_expired"
+        | "domain_not_enabled"
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
@@ -3122,6 +3174,13 @@ export interface components {
     ConnectToSlackDto: {
       code: string;
     };
+    DomainRequest: {
+      domain: string;
+      state: string;
+    };
+    SsoUrlResponse: {
+      redirectUrl: string;
+    };
     ImageUploadInfoDto: {
       location?: string;
     };
@@ -3245,6 +3304,15 @@ export interface components {
       username: string;
       password: string;
       otp?: string;
+    };
+    TenantDto: {
+      authorizationUri: string;
+      clientId: string;
+      clientSecret: string;
+      redirectUri: string;
+      tokenUri: string;
+      isEnabled: boolean;
+      jwkSetUri: string;
     };
     CollectionModelSimpleOrganizationModel: {
       _embedded?: {
@@ -3371,22 +3439,22 @@ export interface components {
         | "SLACK_INTEGRATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3412,6 +3480,9 @@ export interface components {
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
       chatwootToken?: string;
+      nativeEnabled: boolean;
+      customLoginLogo?: string;
+      customLoginText: string;
       capterraTracker?: string;
       ga4Tag?: string;
       postHogApiKey?: string;
@@ -3448,9 +3519,9 @@ export interface components {
       defaultFileStructureTemplate: string;
     };
     DocItem: {
+      description?: string;
       name: string;
       displayName?: string;
-      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -3521,23 +3592,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
-      description?: string;
       translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
+      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
-      description?: string;
       translation?: string;
+      namespace?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4081,9 +4152,9 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
+      description: string;
       /** Format: int64 */
       id: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -4218,11 +4289,10 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
+      description: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
       projectName: string;
-      description: string;
       username?: string;
       scopes: string[];
       /** Format: int64 */
@@ -4231,6 +4301,7 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      userFullName?: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -9304,6 +9375,105 @@ export interface operations {
       };
     };
   };
+  getProvider: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TenantDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  addProvider: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Tenant"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProviderRequest"];
+      };
+    };
+  };
   /** Resends email verification email to currently authenticated user. */
   sendEmailVerification: {
     responses: {
@@ -12388,6 +12558,53 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ConnectToSlackDto"];
+      };
+    };
+  };
+  getAuthenticationUrl: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SsoUrlResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DomainRequest"];
       };
     };
   };
@@ -15862,6 +16079,60 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  handleCallback: {
+    parameters: {
+      query: {
+        code: string;
+        redirect_uri: string;
+        error?: string;
+        error_description?: string;
+        invitationCode?: string;
+      };
+      path: {
+        registrationId: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
