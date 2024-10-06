@@ -84,7 +84,7 @@ class WebSecurityConfig(
             }
           },
         )
-        it.requestMatchers("/api/public/**", "/v2/public/**").permitAll()
+        it.requestMatchers("/api/public/**", "/v2/public/**", "v2/oauth2/callback/**").permitAll()
         it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
         it.requestMatchers("/api/**", "/v2/**").authenticated()
         it.anyRequest().permitAll()
@@ -97,7 +97,8 @@ class WebSecurityConfig(
         headers.referrerPolicy {
           it.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
         }
-      }.build()
+      }
+      .build()
   }
 
   @Bean
