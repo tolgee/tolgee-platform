@@ -20,7 +20,7 @@ enum class ImportFormat(
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,
-        toIcuPlaceholderConvertorFactory = null
+        toIcuPlaceholderConvertorFactory = null,
       ),
   ),
   CSV_JAVA(

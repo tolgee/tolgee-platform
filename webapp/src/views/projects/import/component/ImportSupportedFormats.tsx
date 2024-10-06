@@ -57,7 +57,7 @@ const FORMATS = [
   { name: 'i18next', logo: <I18nextLogo /> },
   {
     name: 'CSV',
-    logo: <TolgeeLogo />,
+    logo: <TolgeeLogo />, // TODO: replace with proper icon?
     logoHeight: '24px',
     logoWidth: '24px',
   },

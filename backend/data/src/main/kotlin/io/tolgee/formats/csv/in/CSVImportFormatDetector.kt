@@ -40,7 +40,7 @@ class CSVImportFormatDetector {
       )
   }
 
-  fun detectFormat(data: List<Array<String>>): ImportFormat {
+  fun detectFormat(data: Any?): ImportFormat {
     return detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.CSV_ICU
   }
 }
