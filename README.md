@@ -10,7 +10,13 @@
 
 [![Logo](https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg)](https://tolgee.io)
 
-An open-source alternative to Crowdin, Phrase or Lokalise
+An open-source alternative to Crowdin, Phrase, or Lokalise
+
+<h2 align="center" style="border-bottom: none">
+
+[**Français**](Readme/README.fr.md)
+
+</h2>
 
 ![example workflow](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
