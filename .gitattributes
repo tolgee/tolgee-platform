@@ -1,3 +1,4 @@
 *.mdx linguist-vendored
 *.java linguist-vendored
 ee/backend/** linguist-vendored
+*.kt linguist-vendored
