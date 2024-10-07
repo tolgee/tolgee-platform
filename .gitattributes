@@ -1,4 +1,7 @@
 *.mdx linguist-vendored
 *.java linguist-vendored
 ee/backend/** linguist-vendored
-*.kt linguist-vendored
+/backend/misc/** linguist-vendored
+/backend/testing/** linguist-vendored
+/backend/development/** linguist-vendored
+/backend/security/** linguist-vendored
