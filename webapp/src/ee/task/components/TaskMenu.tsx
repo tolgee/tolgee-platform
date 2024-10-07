@@ -41,7 +41,7 @@ export const TaskMenu = ({
   const [taskDetail, setTaskDetail] = useState<TaskModel>();
   const closeMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/close',
-    method: 'post',
+    method: 'put',
     invalidatePrefix: [
       '/v2/projects/{projectId}/translations',
       '/v2/projects/{projectId}/tasks',
@@ -51,7 +51,7 @@ export const TaskMenu = ({
 
   const reopenMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/reopen',
-    method: 'post',
+    method: 'put',
     invalidatePrefix: [
       '/v2/projects/{projectId}/translations',
       '/v2/projects/{projectId}/tasks',
@@ -61,7 +61,7 @@ export const TaskMenu = ({
 
   const finishMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/finish',
-    method: 'post',
+    method: 'put',
     invalidatePrefix: [
       '/v2/projects/{projectId}/translations',
       '/v2/projects/{projectId}/tasks',
