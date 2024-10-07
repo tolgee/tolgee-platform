@@ -39,7 +39,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.TaskServiceInterface
+import io.tolgee.service.ITaskService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.CursorUtil
@@ -102,7 +102,7 @@ class TranslationsController(
   private val activityService: ActivityService,
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
-  private val taskService: TaskServiceInterface,
+  private val taskService: ITaskService,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(

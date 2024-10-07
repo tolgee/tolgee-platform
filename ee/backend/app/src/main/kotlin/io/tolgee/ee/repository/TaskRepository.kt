@@ -12,16 +12,15 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-import java.util.Optional
 
-const val TASK_SEARCH = """
+private const val TASK_SEARCH = """
     (
         cast(:search as text) is null
         or lower(tk.name) like lower(concat('%', cast(:search as text),'%'))
     )
 """
 
-const val TASK_FILTERS = """
+private const val TASK_FILTERS = """
     (
         :#{#filters.filterNotState} is null
         or tk.state not in :#{#filters.filterNotState}
@@ -378,5 +377,5 @@ interface TaskRepository : JpaRepository<Task, Long> {
   fun findByNumber(
     projectId: Long,
     taskNumber: Long,
-  ): Optional<Task>
+  ): Task?
 }

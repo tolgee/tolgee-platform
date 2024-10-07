@@ -5,7 +5,7 @@ import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
 import io.tolgee.model.views.TranslationToTaskView
 
-interface TaskServiceInterface {
+interface ITaskService {
   fun deleteAll(tasks: List<Task>)
 
   fun findAssigneeById(

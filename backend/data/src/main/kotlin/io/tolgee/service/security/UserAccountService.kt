@@ -355,7 +355,7 @@ class UserAccountService(
       pageable,
       search = search,
       exceptUserId,
-      filters ?: UserAccountFilters(),
+      filters,
     )
   }
 
@@ -570,7 +570,7 @@ class UserAccountService(
       userAccountRepository.findUsersWithMinimalPermissions(
         filters.filterId ?: listOf(),
         filters.filterMinimalScopeExtended,
-        filters.filterMinimalRole,
+        filters.filterMinimalPermissionType,
         projectId,
         filters.filterViewLanguageId,
         filters.filterEditLanguageId,

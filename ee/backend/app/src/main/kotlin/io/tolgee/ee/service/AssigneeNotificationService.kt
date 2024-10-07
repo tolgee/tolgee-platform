@@ -16,14 +16,6 @@ class AssigneeNotificationService(
   private val tolgeeEmailSender: TolgeeEmailSender,
   private val frontendUrlProvider: FrontendUrlProvider,
 ) : Logging {
-  fun getTaskTypeName(type: TaskType): String {
-    return if (type === TaskType.TRANSLATE) {
-      "translate"
-    } else {
-      "review"
-    }
-  }
-
   fun notifyNewAssignee(
     user: UserAccount,
     task: Task,
@@ -56,6 +48,14 @@ class AssigneeNotificationService(
     } catch (e: Exception) {
       logger.error(e.message)
       Sentry.captureException(e)
+    }
+  }
+
+  private fun getTaskTypeName(type: TaskType): String {
+    return if (type === TaskType.TRANSLATE) {
+      "translate"
+    } else {
+      "review"
     }
   }
 }
