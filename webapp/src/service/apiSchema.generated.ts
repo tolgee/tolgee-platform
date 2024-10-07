@@ -2111,12 +2111,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -2289,8 +2289,6 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       description: string;
@@ -2684,7 +2682,7 @@ export interface components {
     };
     CalculateScopeRequest: {
       /** Format: int64 */
-      language: number;
+      languageId: number;
       type: "TRANSLATE" | "REVIEW";
       keys: number[];
     };
@@ -4463,8 +4461,6 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       description: string;
