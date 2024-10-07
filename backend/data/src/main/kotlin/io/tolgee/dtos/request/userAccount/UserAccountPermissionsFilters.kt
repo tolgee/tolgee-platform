@@ -32,11 +32,11 @@ open class UserAccountPermissionsFilters {
 
   val filterMinimalScopeExtended get(): String? {
     return filterMinimalScope?.let {
-      "{${Scope.outer(Scope.valueOf(it)).joinToString(",")}}"
+      "{${Scope.selfAndAncestors(Scope.valueOf(it)).joinToString(",")}}"
     }
   }
 
-  val filterMinimalRole get(): List<String> {
+  val filterMinimalPermissionType get(): List<String> {
     return filterMinimalScope?.let {
       ProjectPermissionType.findByScope(Scope.valueOf(it)).map { it.toString() }
     } ?: listOf()

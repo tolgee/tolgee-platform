@@ -18,9 +18,10 @@ import io.tolgee.model.task.TaskKeyId
 import io.tolgee.model.views.*
 import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.TaskServiceInterface
+import io.tolgee.service.ITaskService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.apache.commons.io.output.ByteArrayOutputStream
@@ -31,6 +32,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 import java.util.*
 
 @Component
@@ -46,14 +48,16 @@ class TaskService(
   @Autowired
   private val taskService: TaskService,
   private val assigneeNotificationService: AssigneeNotificationService,
-) : TaskServiceInterface {
+  @Autowired
+  val platformTransactionManager: PlatformTransactionManager,
+) : ITaskService {
   fun getAllPaged(
-    project: Project,
+    projectId: Long,
     pageable: Pageable,
     search: String?,
     filters: TaskFilters,
   ): Page<TaskWithScopeView> {
-    val pagedTasks = taskRepository.getAllByProjectId(project.id, pageable, search, filters)
+    val pagedTasks = taskRepository.getAllByProjectId(projectId, pageable, search, filters)
     val withPrefetched = getPrefetchedTasks(pagedTasks.content)
     return PageImpl(getTasksWithScope(withPrefetched), pageable, pagedTasks.totalElements)
   }
@@ -78,18 +82,18 @@ class TaskService(
 
   @Transactional
   fun createMultipleTasks(
-    project: Project,
+    projectId: Long,
     dtos: Collection<CreateTaskRequest>,
     filters: TranslationScopeFilters,
   ) {
     dtos.forEach {
-      createTask(project, it, filters)
+      createTask(projectId, it, filters)
     }
   }
 
   @Transactional
   fun createTask(
-    project: Project,
+    projectId: Long,
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
   ): TaskWithScopeView {
@@ -97,12 +101,14 @@ class TaskService(
     repeat(100) {
       // necessary for proper transaction creation
       try {
-        val task = taskService.createTaskInTransaction(project, dto, filters)
-        entityManager.flush()
-        task.assignees.forEach {
-          assigneeNotificationService.notifyNewAssignee(it, task)
+        return executeInNewRepeatableTransaction(platformTransactionManager) {
+          val task = taskService.createTaskInTransaction(projectId, dto, filters)
+          entityManager.flush()
+          task.assignees.forEach {
+            assigneeNotificationService.notifyNewAssignee(it, task)
+          }
+          getTaskWithScope(task)
         }
-        return getTasksWithScope(listOf(task)).first()
       } catch (e: DataIntegrityViolationException) {
         lastErr = e
       }
@@ -110,21 +116,27 @@ class TaskService(
     throw lastErr
   }
 
+  fun getNextTaskNumber(projectId: Long): Long {
+    val lastTask =
+      taskRepository.findByProjectOrderByNumberDesc(
+        entityManager.getReference(Project::class.java, projectId),
+      ).firstOrNull()
+    return (lastTask?.number ?: 0L) + 1
+  }
+
   @Transactional()
   fun createTaskInTransaction(
-    project: Project,
+    projectId: Long,
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
   ): Task {
-    // Find the maximum ID for the given project
-    val lastTask = taskRepository.findByProjectOrderByNumberDesc(project).firstOrNull()
-    val newNumber = (lastTask?.number ?: 0L) + 1
+    val newNumber = getNextTaskNumber(projectId)
 
-    val language = checkLanguage(dto.languageId!!, project)
-    val assignees = checkAssignees(dto.assignees ?: mutableSetOf(), project)
+    val language = checkLanguage(dto.languageId!!, projectId)
+    val assignees = checkAssignees(dto.assignees ?: mutableSetOf(), projectId)
     val keys =
       getOnlyProjectKeys(
-        project,
+        projectId,
         dto.languageId!!,
         dto.type,
         dto.keys ?: mutableSetOf(),
@@ -134,7 +146,7 @@ class TaskService(
     val task = Task()
 
     task.number = newNumber
-    task.project = project
+    task.project = entityManager.getReference(Project::class.java, projectId)
     task.name = dto.name
     task.type = dto.type
     task.description = dto.description
@@ -142,7 +154,6 @@ class TaskService(
     task.language = language
     task.assignees = assignees
     task.author = entityManager.getReference(UserAccount::class.java, authenticationFacade.authenticatedUser.id)
-    task.createdAt = Date()
     task.state = TaskState.NEW
     taskRepository.saveAndFlush(task)
 
@@ -155,14 +166,12 @@ class TaskService(
 
   @Transactional
   fun updateTask(
-    projectEntity: Project,
+    projectId: Long,
     taskNumber: Long,
     dto: UpdateTaskRequest,
   ): TaskWithScopeView {
     val task =
-      taskRepository.findByNumber(projectEntity.id, taskNumber).or {
-        throw NotFoundException(Message.TASK_NOT_FOUND)
-      }.get()
+      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException()
 
     dto.name?.let {
       task.name = it
@@ -181,7 +190,7 @@ class TaskService(
     }
 
     dto.assignees?.let {
-      val newAssignees = checkAssignees(dto.assignees!!, projectEntity)
+      val newAssignees = checkAssignees(dto.assignees!!, projectId)
       newAssignees.forEach {
         if (!task.assignees.contains(it)) {
           assigneeNotificationService.notifyNewAssignee(it, task)
@@ -192,20 +201,18 @@ class TaskService(
 
     taskRepository.saveAndFlush(task)
 
-    return getTasksWithScope(listOf(task)).first()
+    return getTaskWithScope(task)
   }
 
   @Transactional
   fun setTaskState(
-    projectEntity: Project,
+    projectId: Long,
     taskNumber: Long,
     state: TaskState,
   ): TaskWithScopeView {
     val task =
-      taskRepository.findByNumber(projectEntity.id, taskNumber).or {
-        throw NotFoundException(Message.TASK_NOT_FOUND)
-      }.get()
-    val taskWithScope = getTasksWithScope(listOf(task)).first()
+      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException()
+    val taskWithScope = getTaskWithScope(task)
     if (state == TaskState.DONE && taskWithScope.doneItems != taskWithScope.totalItems) {
       throw BadRequestException(Message.TASK_NOT_FINISHED)
     }
@@ -216,31 +223,27 @@ class TaskService(
       task.state = state
     }
     taskRepository.saveAndFlush(task)
-    return getTask(projectEntity, taskNumber)
+    return getTask(projectId, taskNumber)
   }
 
   @Transactional
   fun getTask(
-    projectEntity: Project,
+    projectId: Long,
     taskNumber: Long,
   ): TaskWithScopeView {
     val task =
-      taskRepository.findByNumber(projectEntity.id, taskNumber).or {
-        throw NotFoundException(Message.TASK_NOT_FOUND)
-      }.get()
-    return getTasksWithScope(listOf(task)).first()
+      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException(Message.TASK_NOT_FOUND)
+    return getTaskWithScope(task)
   }
 
   @Transactional
   fun updateTaskKeys(
-    projectEntity: Project,
+    projectId: Long,
     taskNumber: Long,
     dto: UpdateTaskKeysRequest,
   ) {
     val task =
-      taskRepository.findByNumber(projectEntity.id, taskNumber).or {
-        throw NotFoundException(Message.TASK_NOT_FOUND)
-      }.get()
+      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException(Message.TASK_NOT_FOUND)
 
     dto.removeKeys?.let { toRemove ->
       val taskKeysToRemove =
@@ -267,21 +270,19 @@ class TaskService(
 
   @Transactional
   fun updateTaskKey(
-    projectEntity: Project,
+    projectId: Long,
     taskNumber: Long,
     keyId: Long,
     dto: UpdateTaskKeyRequest,
   ): UpdateTaskKeyResponse {
     val task =
-      taskRepository.findByNumber(projectEntity.id, taskNumber).or {
-        throw NotFoundException(Message.TASK_NOT_FOUND)
-      }.get()
+      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException(Message.TASK_NOT_FOUND)
 
     if (task.state == TaskState.CLOSED || task.state == TaskState.DONE) {
       throw BadRequestException(Message.TASK_NOT_OPEN)
     }
 
-    val taskWithScope = getTasksWithScope(listOf(task)).first()
+    val taskWithScope = getTaskWithScope(task)
 
     val taskKey =
       taskKeyRepository.findById(
@@ -383,17 +384,17 @@ class TaskService(
 
   @Transactional
   fun getTaskKeys(
-    projectEntity: Project,
+    projectId: Long,
     taskNumber: Long,
   ): List<Long> {
-    return taskRepository.getTaskKeys(projectEntity.id, taskNumber)
+    return taskRepository.getTaskKeys(projectId, taskNumber)
   }
 
   fun getBlockingTasks(
-    projectEntity: Project,
+    projectId: Long,
     taskNumber: Long,
   ): List<Long> {
-    return taskRepository.getBlockingTaskNumbers(projectEntity.id, taskNumber)
+    return taskRepository.getBlockingTaskNumbers(projectId, taskNumber)
   }
 
   override fun getKeysWithTasks(
@@ -422,14 +423,14 @@ class TaskService(
   }
 
   private fun getOnlyProjectKeys(
-    project: Project,
+    projectId: Long,
     languageId: Long,
     type: TaskType,
     keys: Collection<Long>,
     filters: TranslationScopeFilters,
   ): MutableSet<Long> {
     return taskRepository.getKeysWithoutConflicts(
-      project.id,
+      projectId,
       languageId,
       type.toString(),
       keys,
@@ -439,10 +440,10 @@ class TaskService(
 
   private fun checkAssignees(
     assignees: MutableSet<Long>,
-    project: Project,
+    projectId: Long,
   ): MutableSet<UserAccount> {
     return assignees.map {
-      val permission = securityService.getProjectPermissionScopesNoApiKey(project.id, it)
+      val permission = securityService.getProjectPermissionScopesNoApiKey(projectId, it)
       if (permission.isNullOrEmpty()) {
         throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
       }
@@ -452,9 +453,9 @@ class TaskService(
 
   private fun checkLanguage(
     language: Long,
-    project: Project,
+    projectId: Long,
   ): Language {
-    val allLanguages = languageService.findAll(project.id).associateBy { it.id }
+    val allLanguages = languageService.findAll(projectId).associateBy { it.id }
     if (allLanguages[language] == null) {
       throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
     } else {
@@ -488,12 +489,21 @@ class TaskService(
     }
   }
 
+  private fun getTaskWithScope(task: Task): TaskWithScopeView {
+    val result = getTasksWithScope(listOf(task))
+    if (result.isNotEmpty()) {
+      return result.first()
+    } else {
+      throw NotFoundException()
+    }
+  }
+
   fun getExcelFile(
-    projectEntity: Project,
+    project: Project,
     taskNumber: Long,
   ): ByteArray {
-    val task = getTask(projectEntity, taskNumber)
-    val report = getReport(projectEntity, taskNumber)
+    val task = getTask(project.id, taskNumber)
+    val report = getReport(project, taskNumber)
 
     val workbook = TaskReportHelper(task, report).generateExcelReport()
 

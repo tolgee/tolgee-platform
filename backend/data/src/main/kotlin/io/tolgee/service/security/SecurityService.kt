@@ -15,7 +15,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.TaskServiceInterface
+import io.tolgee.service.ITaskService
 import io.tolgee.service.language.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -39,7 +39,7 @@ class SecurityService(
 
   @set:Autowired
   @Lazy
-  lateinit var taskService: TaskServiceInterface
+  lateinit var taskService: ITaskService
 
   fun checkAnyProjectPermission(projectId: Long) {
     if (
@@ -112,7 +112,7 @@ class SecurityService(
     }
   }
 
-  fun translationInTask(
+  private fun translationInTask(
     keyId: Long,
     languageId: Long,
     taskType: TaskType? = null,
@@ -213,6 +213,29 @@ class SecurityService(
     ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
   }
 
+  private fun translationsInTask(
+    projectId: Long,
+    taskType: TaskType,
+    languageIds: Collection<Long>,
+    keyId: Long? = null,
+  ): Boolean {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
+    checkLanguagePermission(
+      projectId,
+    ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
+
+    if (keyId != null && languageIds.isNotEmpty()) {
+      languageIds.forEach {
+        if (!translationInTask(keyId, it, taskType)) {
+          return false
+        }
+      }
+    } else {
+      return false
+    }
+    return true
+  }
+
   fun checkLanguageTranslatePermission(
     projectId: Long,
     languageIds: Collection<Long>,
@@ -224,18 +247,7 @@ class SecurityService(
         projectId,
       ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
     } catch (e: PermissionException) {
-      checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-      checkLanguagePermission(
-        projectId,
-      ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
-
-      if (keyId != null && languageIds.isNotEmpty()) {
-        languageIds.forEach {
-          if (!translationInTask(keyId, it, TaskType.TRANSLATE)) {
-            throw e
-          }
-        }
-      } else {
+      if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
         throw e
       }
     }
@@ -252,18 +264,7 @@ class SecurityService(
         projectId,
       ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
     } catch (e: PermissionException) {
-      checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-      checkLanguagePermission(
-        projectId,
-      ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
-
-      if (keyId != null && languageIds.isNotEmpty()) {
-        languageIds.forEach {
-          if (!translationInTask(keyId, it, TaskType.REVIEW)) {
-            throw e
-          }
-        }
-      } else {
+      if (!translationsInTask(projectId, TaskType.REVIEW, languageIds, keyId)) {
         throw e
       }
     }

@@ -14,7 +14,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
 
-const val USER_FILTERS = """
+private const val USER_FILTERS = """
     (
         :#{#filters.filterId} is null
         or ua.id in :#{#filters.filterId}
@@ -25,7 +25,7 @@ const val USER_FILTERS = """
     )
 """
 
-const val PROJECT_PERMISSIONS_CTE = """
+private const val PROJECT_PERMISSIONS_CTE = """
     with projectPermissions as (
         select
             pe.id,
@@ -43,7 +43,7 @@ const val PROJECT_PERMISSIONS_CTE = """
         where pe.project_id = :projectId
         group by pe.id, pe.user_id, pe.scopes, pe.project_id, pe.type
     )"""
-const val PROJECT_PERMISSIONS_MAIN = """
+private const val PROJECT_PERMISSIONS_MAIN = """
     from user_account ua
         left join projectPermissions pe on pe.user_id = ua.id
         left join project p on p.id = :projectId
@@ -205,7 +205,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     pageable: Pageable,
     search: String? = "",
     exceptUserId: Long? = null,
-    filters: UserAccountFilters,
+    filters: UserAccountFilters? = null,
   ): Page<UserAccountInProjectView>
 
   @Query(

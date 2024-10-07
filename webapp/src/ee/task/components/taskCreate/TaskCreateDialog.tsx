@@ -114,7 +114,7 @@ export const TaskCreateDialog = ({
   const translateTaskType = useTaskTypeTranslation();
 
   const createTasksLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/tasks/create-multiple',
+    url: '/v2/projects/{projectId}/tasks/create-multiple-tasks',
     method: 'post',
     invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });

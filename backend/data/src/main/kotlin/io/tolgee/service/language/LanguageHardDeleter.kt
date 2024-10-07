@@ -5,7 +5,7 @@ import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.service.TaskServiceInterface
+import io.tolgee.service.ITaskService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
@@ -85,6 +85,6 @@ class LanguageHardDeleter(
   }
 
   private val taskService by lazy {
-    applicationContext.getBean(TaskServiceInterface::class.java)
+    applicationContext.getBean(ITaskService::class.java)
   }
 }

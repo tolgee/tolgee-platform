@@ -84,9 +84,9 @@ export const BoardItem = ({
   const formatDate = useDateFormatter();
 
   return (
-    // @ts-ignore
     <StyledContainer
       component={Link}
+      // @ts-ignore
       to={getTaskRedirect(project, task.number)}
     >
       <StyledRow>

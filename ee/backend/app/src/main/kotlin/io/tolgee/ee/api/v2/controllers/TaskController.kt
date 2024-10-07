@@ -6,7 +6,6 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
-import io.tolgee.dtos.request.task.*
 import io.tolgee.dtos.request.userAccount.UserAccountPermissionsFilters
 import io.tolgee.ee.api.v2.hateoas.assemblers.TaskModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.TaskPerUserReportModelAssembler
@@ -41,6 +40,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@Suppress("MVCPathVariableInspection")
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.*
   ],
 )
 @Tag(name = "Tasks", description = "Manipulates tasks")
-@OpenApiOrderExtension(7)
+@OpenApiOrderExtension(3)
 class TaskController(
   private val taskService: TaskService,
   private val taskModelAssembler: TaskModelAssembler,
@@ -74,7 +74,7 @@ class TaskController(
     @RequestParam("search", required = false)
     search: String?,
   ): PagedModel<TaskModel> {
-    val tasks = taskService.getAllPaged(projectHolder.projectEntity, pageable, search, filters)
+    val tasks = taskService.getAllPaged(projectHolder.project.id, pageable, search, filters)
     return pagedTaskResourcesAssembler.toModel(tasks, taskModelAssembler)
   }
 
@@ -93,11 +93,11 @@ class TaskController(
       projectHolder.project.organizationOwnerId,
       Feature.TASKS,
     )
-    val task = taskService.createTask(projectHolder.projectEntity, dto, filters)
+    val task = taskService.createTask(projectHolder.project.id, dto, filters)
     return taskModelAssembler.toModel(task)
   }
 
-  @PostMapping("/create-multiple")
+  @PostMapping("/create-multiple-tasks")
   @Operation(summary = "Create multiple tasks")
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
@@ -113,20 +113,21 @@ class TaskController(
       Feature.TASKS,
     )
 
-    taskService.createMultipleTasks(projectHolder.projectEntity, dto.tasks, filters)
+    taskService.createMultipleTasks(projectHolder.project.id, dto.tasks, filters)
   }
 
   @GetMapping("/{taskNumber}")
   @Operation(summary = "Get task")
+  // permissions checked inside
   @UseDefaultPermissions
   @AllowApiAccess
   fun getTask(
     @PathVariable
     taskNumber: Long,
   ): TaskModel {
-    // user can view tasks assigned to him
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.projectEntity.id, taskNumber)
-    val task = taskService.getTask(projectHolder.projectEntity, taskNumber)
+    // users can view tasks assigned to them
+    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    val task = taskService.getTask(projectHolder.project.id, taskNumber)
     return taskModelAssembler.toModel(task)
   }
 
@@ -146,38 +147,46 @@ class TaskController(
       Feature.TASKS,
     )
 
-    val task = taskService.updateTask(projectHolder.projectEntity, taskNumber, dto)
+    val task = taskService.updateTask(projectHolder.project.id, taskNumber, dto)
     return taskModelAssembler.toModel(task)
   }
 
   @GetMapping("/{taskNumber}/per-user-report")
-  @Operation(summary = "Report who did what")
+  @Operation(
+    summary = "Get report",
+    description = "Detailed statistics for every assignee",
+  )
+  // permissions checked inside
   @UseDefaultPermissions
   @AllowApiAccess
   fun getPerUserReport(
     @PathVariable
     taskNumber: Long,
   ): List<TaskPerUserReportModel> {
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.projectEntity.id, taskNumber)
+    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
 
     val result = taskService.getReport(projectHolder.projectEntity, taskNumber)
     return result.map { taskPerUserReportModelAssembler.toModel(it) }
   }
 
   @GetMapping("/{taskNumber}/xlsx-report")
-  @Operation(summary = "Report who did what")
+  @Operation(
+    summary = "Get report in XLSX",
+    description = "Detailed statistics about the task results",
+  )
+  // permissions checked inside
   @UseDefaultPermissions
   @AllowApiAccess
   fun getXlsxReport(
     @PathVariable
     taskNumber: Long,
   ): ResponseEntity<ByteArrayResource> {
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.projectEntity.id, taskNumber)
+    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
     val byteArray = taskService.getExcelFile(projectHolder.projectEntity, taskNumber)
     val resource = ByteArrayResource(byteArray)
 
     val headers = HttpHeaders()
-    headers.contentType = MediaType.APPLICATION_OCTET_STREAM
+    headers.contentType = MediaType("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     headers.setContentDispositionFormData("attachment", "report.xlsx")
     headers.contentLength = byteArray.size.toLong()
 
@@ -186,15 +195,16 @@ class TaskController(
 
   @GetMapping("/{taskNumber}/keys")
   @Operation(summary = "Get task keys")
+  // permissions checked inside
   @UseDefaultPermissions
   @AllowApiAccess
   fun getTaskKeys(
     @PathVariable
     taskNumber: Long,
   ): TaskKeysResponse {
-    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.projectEntity.id, taskNumber)
+    securityService.hasTaskViewScopeOrIsAssigned(projectHolder.project.id, taskNumber)
     return TaskKeysResponse(
-      keys = taskService.getTaskKeys(projectHolder.projectEntity, taskNumber),
+      keys = taskService.getTaskKeys(projectHolder.project.id, taskNumber),
     )
   }
 
@@ -209,21 +219,24 @@ class TaskController(
     @RequestBody @Valid
     dto: UpdateTaskKeysRequest,
   ) {
-    taskService.updateTaskKeys(projectHolder.projectEntity, taskNumber, dto)
+    taskService.updateTaskKeys(projectHolder.project.id, taskNumber, dto)
   }
 
   @GetMapping("/{taskNumber}/blocking-tasks")
-  @Operation(summary = "Get task ids which block this task")
+  @Operation(
+    summary = "Get blocking task numbers",
+    description = "If the tasks is blocked by other tasks, it returns numbers of these tasks.",
+  )
   @UseDefaultPermissions
   @AllowApiAccess
   fun getBlockingTasks(
     @PathVariable
     taskNumber: Long,
   ): List<Long> {
-    return taskService.getBlockingTasks(projectHolder.projectEntity, taskNumber)
+    return taskService.getBlockingTasks(projectHolder.project.id, taskNumber)
   }
 
-  @PostMapping("/{taskNumber}/finish")
+  @PutMapping("/{taskNumber}/finish")
   @Operation(summary = "Finish task")
   // permissions checked inside
   @UseDefaultPermissions
@@ -233,13 +246,13 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): TaskModel {
-    // user can only finish tasks assigned to him
-    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.projectEntity.id, taskNumber)
-    val task = taskService.setTaskState(projectHolder.projectEntity, taskNumber, TaskState.DONE)
+    // users can only finish tasks assigned to them
+    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.DONE)
     return taskModelAssembler.toModel(task)
   }
 
-  @PostMapping("/{taskNumber}/close")
+  @PutMapping("/{taskNumber}/close")
   @Operation(summary = "Close task")
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
@@ -248,11 +261,11 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): TaskModel {
-    val task = taskService.setTaskState(projectHolder.projectEntity, taskNumber, TaskState.CLOSED)
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.CLOSED)
     return taskModelAssembler.toModel(task)
   }
 
-  @PostMapping("/{taskNumber}/reopen")
+  @PutMapping("/{taskNumber}/reopen")
   @Operation(summary = "Reopen task")
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
@@ -265,7 +278,7 @@ class TaskController(
       projectHolder.project.organizationOwnerId,
       Feature.TASKS,
     )
-    val task = taskService.setTaskState(projectHolder.projectEntity, taskNumber, TaskState.IN_PROGRESS)
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.IN_PROGRESS)
     return taskModelAssembler.toModel(task)
   }
 
@@ -285,9 +298,9 @@ class TaskController(
     @RequestBody @Valid
     dto: UpdateTaskKeyRequest,
   ): UpdateTaskKeyResponse {
-    // user can only update tasks assigned to him
-    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.projectEntity.id, taskNumber)
-    return taskService.updateTaskKey(projectHolder.projectEntity, taskNumber, keyId, dto)
+    // users can only update tasks assigned to them
+    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    return taskService.updateTaskKey(projectHolder.project.id, taskNumber, keyId, dto)
   }
 
   @PostMapping("/calculate-scope")
@@ -317,7 +330,7 @@ class TaskController(
     val users =
       userAccountService.findWithMinimalPermissions(
         filters,
-        projectHolder.projectEntity.id,
+        projectHolder.project.id,
         search,
         pageable,
       )

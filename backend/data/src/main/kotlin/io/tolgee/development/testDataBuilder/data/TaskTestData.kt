@@ -27,31 +27,35 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
 
   init {
     user.name = "Tasks test user"
-    projectUser = root.addUserAccount {
-      username = "project.user@test.com"
-      name = "Project user"
-    }
+    projectUser =
+      root.addUserAccount {
+        username = "project.user@test.com"
+        name = "Project user"
+      }
 
-    orgMember = root.addUserAccount {
-      username = "organization.member@test.com"
-      name = "Organization member"
-    }
+    orgMember =
+      root.addUserAccount {
+        username = "organization.member@test.com"
+        name = "Organization member"
+      }
 
-    orgAdmin = root.addUserAccount {
-      username = "organization.owner@test.com"
-      name = "Organization owner"
+    orgAdmin =
+      root.addUserAccount {
+        username = "organization.owner@test.com"
+        name = "Organization owner"
+      }
 
-    }
+    projectViewScopeUser =
+      root.addUserAccount {
+        username = "project.view.scope.user@test.com"
+        name = "Project view scope user (en)"
+      }
 
-    projectViewScopeUser = root.addUserAccount {
-      username = "project.view.scope.user@test.com"
-      name = "Project view scope user (en)"
-    }
-
-    projectViewRoleUser = root.addUserAccount {
-      username = "project.view.role.user@test.com"
-      name = "Project view role user (en)"
-    }
+    projectViewRoleUser =
+      root.addUserAccount {
+        username = "project.view.role.user@test.com"
+        name = "Project view role user (en)"
+      }
 
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
@@ -154,13 +158,15 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
       }
     }
 
-    unrelatedOrg = root.addOrganization {
-      name = "Unrelated org"
-    }
+    unrelatedOrg =
+      root.addOrganization {
+        name = "Unrelated org"
+      }
 
-    unrelatedProject = root.addProject {
-      name = "Unrelated project"
-    }
+    unrelatedProject =
+      root.addProject {
+        name = "Unrelated project"
+      }
 
     unrelatedProject.apply {
       unrelatedEnglish = addEnglish()
@@ -171,10 +177,11 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
       baseLanguage = unrelatedEnglish.self
     }
 
-    unrelatedUser = root.addUserAccount {
-      username = "Unrelated user"
-      name = "Unrelated user"
-    }
+    unrelatedUser =
+      root.addUserAccount {
+        username = "Unrelated user"
+        name = "Unrelated user"
+      }
 
     unrelatedProject.apply {
       addPermission {
