@@ -27,7 +27,7 @@ type Props = {
   input: DiffValue<number[]>;
 };
 
-const LanguageIdsComponent: React.FC<Props> = ({ input }) => {
+export const BatchLanguageIdsChange: React.FC<Props> = ({ input }) => {
   const allLangs = useProjectLanguages();
   const newInput = input.new;
   if (newInput) {
@@ -54,8 +54,4 @@ const LanguageIdsComponent: React.FC<Props> = ({ input }) => {
   } else {
     return null;
   }
-};
-
-export const getBatchLanguageIdsChange = (input: DiffValue<number[]>) => {
-  return <LanguageIdsComponent input={input} />;
 };

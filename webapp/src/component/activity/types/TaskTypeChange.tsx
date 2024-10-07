@@ -1,6 +1,10 @@
 import { styled } from '@mui/material';
+import { components } from 'tg.service/apiSchema.generated';
+import { TaskTypeChip } from 'tg.ee/task/components/TaskTypeChip';
+
 import { DiffValue } from '../types';
-import { useDateFormatter } from 'tg.hooks/useLocale';
+
+type Type = components['schemas']['TaskModel']['type'];
 
 const StyledDiff = styled('span')`
   word-break: break-word;
@@ -15,24 +19,19 @@ const StyledArrow = styled('span')`
 `;
 
 type Props = {
-  timestamp: number;
+  input?: DiffValue<Type>;
 };
 
-const DateChange = ({ timestamp }: Props) => {
-  const formatDate = useDateFormatter();
-  return <>{formatDate(timestamp)}</>;
-};
-
-export const getDateChange = (input?: DiffValue<number>) => {
+export const TaskTypeChange = ({ input }: Props) => {
   if (input?.new && input?.old) {
     return (
       <StyledDiff>
         <StyledRemoved>
-          <DateChange timestamp={input.old} />
+          <TaskTypeChip type={input.old} />
         </StyledRemoved>
         <StyledArrow>→</StyledArrow>
         <span>
-          <DateChange timestamp={input.new} />
+          <TaskTypeChip type={input.new} />
         </span>
       </StyledDiff>
     );
@@ -40,14 +39,16 @@ export const getDateChange = (input?: DiffValue<number>) => {
   if (input?.new) {
     return (
       <span>
-        <DateChange timestamp={input.new} />
+        <TaskTypeChip type={input.new} />
       </span>
     );
   } else if (input?.old) {
     return (
       <StyledRemoved>
-        <DateChange timestamp={input.old} />
+        <TaskTypeChip type={input.old} />
       </StyledRemoved>
     );
+  } else {
+    return null;
   }
 };

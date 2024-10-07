@@ -51,7 +51,11 @@ export const getValue = (value: string, type: 'removed' | 'added') => {
   }
 };
 
-export const getCommentStateChange = (input?: DiffValue) => {
+type Props = {
+  input?: DiffValue;
+};
+
+export const CommentStateChange = ({ input }: Props) => {
   const oldInput = input?.old;
   const newInput = input?.new;
 
@@ -59,5 +63,7 @@ export const getCommentStateChange = (input?: DiffValue) => {
     return getValue(newInput, 'added');
   } else if (oldInput) {
     return getValue(oldInput, 'removed');
+  } else {
+    return null;
   }
 };

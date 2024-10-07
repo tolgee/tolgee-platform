@@ -13,10 +13,12 @@ const StyledAdded = styled('span')`
   background: ${({ theme }) => theme.palette.activity.addedHighlight};
 `;
 
-export const getTextDiff = (
-  input?: DiffValue,
-  languageTag?: string | undefined
-) => {
+type Props = {
+  input?: DiffValue;
+  languageTag?: string | undefined;
+};
+
+export const TextDiff = ({ input, languageTag }: Props) => {
   const oldInput = input?.old;
   const newInput = input?.new;
   const dir = languageTag ? getLanguageDirection(languageTag) : undefined;
@@ -47,5 +49,7 @@ export const getTextDiff = (
         <StyledAdded>{newInput}</StyledAdded>
       </span>
     );
+  } else {
+    return null;
   }
 };

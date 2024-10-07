@@ -34,9 +34,11 @@ const formatLanguage = (lang: Language) => {
   );
 };
 
-export const getProjectLanguageChange = (
-  input?: DiffValue<{ data: Language }>
-) => {
+type Props = {
+  input?: DiffValue<{ data: Language }>;
+};
+
+export const ProjectLanguageChange = ({ input }: Props) => {
   const oldInput = input?.old;
   const newInput = input?.new;
   if (oldInput && newInput) {
@@ -59,5 +61,7 @@ export const getProjectLanguageChange = (
         <span>{formatLanguage(newInput.data)}</span>
       </StyledDiff>
     );
+  } else {
+    return null;
   }
 };

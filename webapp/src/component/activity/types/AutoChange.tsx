@@ -36,10 +36,16 @@ const getContent = (auto: boolean | string) => {
   );
 };
 
-export const getAutoChange = (input?: DiffValue<boolean | string>) => {
+type Props = {
+  input?: DiffValue<boolean | string>;
+};
+
+export const AutoChange = ({ input }: Props) => {
   if (input?.new) {
     return <StyledWrapper>{getContent(input.new)}</StyledWrapper>;
   } else if (input?.old) {
     return <StyledRemoved>{getContent(input.old)}</StyledRemoved>;
+  } else {
+    return null;
   }
 };

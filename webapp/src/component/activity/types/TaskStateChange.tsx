@@ -17,7 +17,11 @@ const StyledArrow = styled('span')`
   padding: 0px 6px;
 `;
 
-export const getTaskStateChange = (input?: DiffValue<TaskState>) => {
+type Props = {
+  input?: DiffValue<TaskState>;
+};
+
+export const TaskStateChange = ({ input }: Props) => {
   if (input?.new && input?.old) {
     return (
       <StyledDiff>
@@ -43,5 +47,7 @@ export const getTaskStateChange = (input?: DiffValue<TaskState>) => {
         <TaskState state={input.old} />
       </StyledRemoved>
     );
+  } else {
+    return null;
   }
 };
