@@ -137,7 +137,6 @@ class TranslationCommentController(
     val translation = translationService.get(translationId)
     securityService.checkScopeOrAssignedToTask(
       Scope.TRANSLATIONS_COMMENTS_SET_STATE,
-      projectHolder.project.id,
       translation.language.id,
       translation.key.id,
     )
@@ -189,7 +188,6 @@ class TranslationCommentController(
   ): ResponseEntity<TranslationWithCommentModel> {
     securityService.checkScopeOrAssignedToTask(
       Scope.TRANSLATIONS_COMMENTS_ADD,
-      projectHolder.project.id,
       dto.languageId,
       dto.keyId,
     )

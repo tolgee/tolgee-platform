@@ -81,7 +81,6 @@ class TranslationSuggestionController(
   ): ResponseEntity<StreamingResponseBody> {
     securityService.checkScopeOrAssignedToTask(
       Scope.TRANSLATIONS_EDIT,
-      projectHolder.project.id,
       dto.targetLanguageId,
       dto.keyId ?: -1,
     )
@@ -106,7 +105,6 @@ class TranslationSuggestionController(
   ): PagedModel<TranslationMemoryItemModel> {
     securityService.checkScopeOrAssignedToTask(
       Scope.TRANSLATIONS_EDIT,
-      projectHolder.project.id,
       dto.targetLanguageId,
       dto.keyId ?: -1,
     )

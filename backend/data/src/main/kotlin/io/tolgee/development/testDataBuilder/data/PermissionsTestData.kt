@@ -160,7 +160,7 @@ class PermissionsTestData {
           author = admin.self
         }.self
 
-      keys.take(1).forEach {
+      keys.first().let {
         addTaskKey {
           task = translateTask
           key = it

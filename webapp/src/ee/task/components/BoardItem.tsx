@@ -21,7 +21,7 @@ import { getTaskRedirect } from './utils';
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
-const Container = styled(Box)`
+const StyledContainer = styled(Box)`
   display: grid;
   gap: 8px;
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
@@ -85,7 +85,10 @@ export const BoardItem = ({
 
   return (
     // @ts-ignore
-    <Container component={Link} to={getTaskRedirect(project, task.number)}>
+    <StyledContainer
+      component={Link}
+      to={getTaskRedirect(project, task.number)}
+    >
       <StyledRow>
         <TaskLabel task={task} hideType />
         <Box
@@ -146,6 +149,6 @@ export const BoardItem = ({
           <TaskAssignees task={task} />
         </Box>
       </StyledRow>
-    </Container>
+    </StyledContainer>
   );
 };
