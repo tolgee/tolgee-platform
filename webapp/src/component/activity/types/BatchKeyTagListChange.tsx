@@ -17,7 +17,11 @@ const StyledTag = styled('span')`
   }
 `;
 
-export const getBatchKeyTagListChange = (input?: DiffValue<string[]>) => {
+type Props = {
+  input?: DiffValue<string[]>;
+};
+
+export const BatchKeyTagListChange = ({ input }: Props) => {
   const newInput = input?.new || [];
 
   return (

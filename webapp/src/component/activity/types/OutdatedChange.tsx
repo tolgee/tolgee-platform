@@ -16,7 +16,11 @@ const getTranslation = (value: boolean | undefined) => {
   );
 };
 
-export const getOutdatedChange = (input?: DiffValue<boolean>) => {
+type Props = {
+  input?: DiffValue<boolean>;
+};
+
+export const OutdatedChange = ({ input }: Props) => {
   if (input?.new !== undefined) {
     return (
       <StyledState>
@@ -25,5 +29,7 @@ export const getOutdatedChange = (input?: DiffValue<boolean>) => {
         {getTranslation(input.new)}
       </StyledState>
     );
+  } else {
+    return null;
   }
 };
