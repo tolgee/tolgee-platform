@@ -12,6 +12,12 @@
 
 Une alternative open-source à Crowdin, Phrase ou Lokalise
 
+<h2 align="center" style="border-bottom: none">
+
+[**English**](README.md)
+
+</h2>
+
 ![example workflow](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
 [![docker](https://img.shields.io/docker/v/tolgee/tolgee/latest?label=DockerHub)](https://hub.docker.com/repository/docker/tolgee/tolgee)
