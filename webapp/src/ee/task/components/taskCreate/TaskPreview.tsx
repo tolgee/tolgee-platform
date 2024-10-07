@@ -69,7 +69,7 @@ export const TaskPreview = ({
   const theme = useTheme();
   const translateTaskType = useTaskTypeTranslation();
 
-  const content = { keys, type, language: language.id };
+  const content = { keys, type, languageId: language.id };
   const statsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/calculate-scope',
     method: 'post',

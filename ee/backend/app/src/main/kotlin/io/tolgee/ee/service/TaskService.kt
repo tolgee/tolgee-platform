@@ -1,5 +1,6 @@
 package io.tolgee.ee.service
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.component.TaskReportHelper
 import io.tolgee.ee.data.task.*
@@ -49,7 +50,8 @@ class TaskService(
   private val taskService: TaskService,
   private val assigneeNotificationService: AssigneeNotificationService,
   @Autowired
-  val platformTransactionManager: PlatformTransactionManager,
+  private val platformTransactionManager: PlatformTransactionManager,
+  private val currentDateProvider: CurrentDateProvider,
 ) : ITaskService {
   fun getAllPaged(
     projectId: Long,
@@ -170,8 +172,7 @@ class TaskService(
     taskNumber: Long,
     dto: UpdateTaskRequest,
   ): TaskWithScopeView {
-    val task =
-      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException()
+    val task = findByNumber(projectId, taskNumber)
 
     dto.name?.let {
       task.name = it
@@ -210,8 +211,7 @@ class TaskService(
     taskNumber: Long,
     state: TaskState,
   ): TaskWithScopeView {
-    val task =
-      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException()
+    val task = findByNumber(projectId, taskNumber)
     val taskWithScope = getTaskWithScope(task)
     if (state == TaskState.DONE && taskWithScope.doneItems != taskWithScope.totalItems) {
       throw BadRequestException(Message.TASK_NOT_FINISHED)
@@ -219,7 +219,7 @@ class TaskService(
     if (state == TaskState.NEW || state == TaskState.IN_PROGRESS) {
       task.state = if (taskWithScope.doneItems == 0L) TaskState.NEW else TaskState.IN_PROGRESS
     } else {
-      task.closedAt = Date()
+      task.closedAt = currentDateProvider.date
       task.state = state
     }
     taskRepository.saveAndFlush(task)
@@ -231,8 +231,7 @@ class TaskService(
     projectId: Long,
     taskNumber: Long,
   ): TaskWithScopeView {
-    val task =
-      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException(Message.TASK_NOT_FOUND)
+    val task = findByNumber(projectId, taskNumber)
     return getTaskWithScope(task)
   }
 
@@ -242,8 +241,7 @@ class TaskService(
     taskNumber: Long,
     dto: UpdateTaskKeysRequest,
   ) {
-    val task =
-      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException(Message.TASK_NOT_FOUND)
+    val task = findByNumber(projectId, taskNumber)
 
     dto.removeKeys?.let { toRemove ->
       val taskKeysToRemove =
@@ -275,8 +273,7 @@ class TaskService(
     keyId: Long,
     dto: UpdateTaskKeyRequest,
   ): UpdateTaskKeyResponse {
-    val task =
-      taskRepository.findByNumber(projectId, taskNumber) ?: throw NotFoundException(Message.TASK_NOT_FOUND)
+    val task = findByNumber(projectId, taskNumber)
 
     if (task.state == TaskState.CLOSED || task.state == TaskState.DONE) {
       throw BadRequestException(Message.TASK_NOT_OPEN)
@@ -284,15 +281,7 @@ class TaskService(
 
     val taskWithScope = getTaskWithScope(task)
 
-    val taskKey =
-      taskKeyRepository.findById(
-        TaskKeyId(
-          task = task,
-          key = entityManager.getReference(Key::class.java, keyId),
-        ),
-      ).or {
-        throw NotFoundException(Message.TASK_NOT_FOUND)
-      }.get()
+    val taskKey = findTaskKey(task.id, keyId)
 
     val previousValue = taskKey.done
     val changed = previousValue != dto.done
@@ -300,22 +289,10 @@ class TaskService(
     val totalDone = taskWithScope.doneItems + if (dto.done) 1 else -1
     val allDone = totalDone == taskWithScope.totalItems
     if (changed) {
-      if (dto.done == true) {
-        taskKey.author =
-          entityManager.getReference(
-            UserAccount::class.java,
-            authenticationFacade.authenticatedUser.id,
-          )
-      } else {
-        taskKey.author = null
-      }
+      taskKey.author = getTaskKeyAuthorByState(dto.done)
       taskKey.done = dto.done
       taskKeyRepository.save(taskKey)
-      if (totalDone == 0L) {
-        task.state = TaskState.NEW
-      } else {
-        task.state = TaskState.IN_PROGRESS
-      }
+      task.state = if (totalDone == 0L) TaskState.NEW else TaskState.IN_PROGRESS
       taskRepository.save(task)
     }
 
@@ -352,12 +329,12 @@ class TaskService(
     dto: CalculateScopeRequest,
     filters: TranslationScopeFilters,
   ): KeysScopeView {
-    val language = languageService.get(dto.language, projectEntity.id)
+    val language = languageService.get(dto.languageId, projectEntity.id)
     val keysIncludingConflicts =
       taskRepository.getKeysIncludingConflicts(
         projectEntity.id,
         language.id,
-        dto.keys!!,
+        dto.keys,
         filters,
       )
     val relevantKeys =
@@ -365,7 +342,7 @@ class TaskService(
         projectEntity.id,
         language.id,
         dto.type.toString(),
-        dto.keys!!,
+        dto.keys,
         filters,
       )
     val result =
@@ -489,12 +466,31 @@ class TaskService(
     }
   }
 
+  private fun findByNumber(
+    projectId: Long,
+    taskNumber: Long,
+  ): Task {
+    return taskRepository.findByNumber(projectId, taskNumber)
+      ?: throw NotFoundException(Message.TASK_NOT_FOUND)
+  }
+
+  private fun findTaskKey(taskId: Long, keyId: Long): TaskKey {
+    return taskKeyRepository.findById(
+      TaskKeyId(
+        task = entityManager.getReference(Task::class.java, taskId),
+        key = entityManager.getReference(Key::class.java, keyId),
+      ),
+    ).or {
+      throw NotFoundException(Message.TASK_NOT_FOUND)
+    }.get()
+  }
+
   private fun getTaskWithScope(task: Task): TaskWithScopeView {
     val result = getTasksWithScope(listOf(task))
     if (result.isNotEmpty()) {
       return result.first()
     } else {
-      throw NotFoundException()
+      throw NotFoundException(Message.TASK_NOT_FOUND)
     }
   }
 
@@ -515,5 +511,15 @@ class TaskService(
 
     val byteArray = byteArrayOutputStream.toByteArray()
     return byteArray
+  }
+
+  private fun getTaskKeyAuthorByState(done: Boolean): UserAccount? {
+    if (done) {
+      return entityManager.getReference(
+        UserAccount::class.java,
+        authenticationFacade.authenticatedUser.id,
+      )
+    }
+    return null
   }
 }

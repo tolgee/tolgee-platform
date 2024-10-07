@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotNull
 
 data class CalculateScopeRequest(
   @field:NotNull
-  var language: Long,
+  var languageId: Long,
   @field:NotNull
   var type: TaskType,
   @field:NotNull
-  var keys: MutableSet<Long>? = null,
+  var keys: MutableSet<Long> = mutableSetOf(),
 )

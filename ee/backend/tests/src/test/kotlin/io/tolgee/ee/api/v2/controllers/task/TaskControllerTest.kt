@@ -34,7 +34,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `task exists`() {
+  fun `return s list of tasks`() {
     performProjectAuthGet("tasks").andAssertThatJson {
       node("_embedded.tasks") {
         node("[0].number").isEqualTo(1)
@@ -264,7 +264,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "tasks/calculate-scope",
       CalculateScopeRequest(
-        language = testData.englishLanguage.id,
+        languageId = testData.englishLanguage.id,
         type = TaskType.TRANSLATE,
         keys = allKeys,
       ),
@@ -282,7 +282,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "tasks/calculate-scope",
       CalculateScopeRequest(
-        language = testData.englishLanguage.id,
+        languageId = testData.englishLanguage.id,
         type = TaskType.TRANSLATE,
         keys = allKeys,
       ),
@@ -300,7 +300,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "tasks/calculate-scope",
       CalculateScopeRequest(
-        language = testData.englishLanguage.id,
+        languageId = testData.englishLanguage.id,
         type = TaskType.REVIEW,
         keys = allKeys,
       ),
