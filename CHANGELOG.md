@@ -1,3 +1,11 @@
+## [3.75.1](https://github.com/tolgee/tolgee-platform/compare/v3.75.0...v3.75.1) (2024-10-07)
+
+
+### Bug Fixes
+
+* **Readme:** update broken link for Hacktobefest2024.md file in READM… ([#2512](https://github.com/tolgee/tolgee-platform/issues/2512)) ([820a558](https://github.com/tolgee/tolgee-platform/commit/820a5585b7b6c278a1c34e40ba9b9b0fb16d97fb))
+* xml export idempotence ([#2502](https://github.com/tolgee/tolgee-platform/issues/2502)) ([b6cecb4](https://github.com/tolgee/tolgee-platform/commit/b6cecb433a577eedf92e599bae2144d04adbc5fe)), closes [#2474](https://github.com/tolgee/tolgee-platform/issues/2474)
+
 # [3.75.0](https://github.com/tolgee/tolgee-platform/compare/v3.74.5...v3.75.0) (2024-10-01)
 
 
