@@ -37,7 +37,7 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 
 [![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
 
-Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktobefest2024.md](Hacktobefest2024.fr.md).
+Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktobefest2024.fr.md](Hacktobefest2024.fr.md).
 
 ### Types de Soumission
 - **Pull Requests** : Soumettez une pull request en traitant des problèmes étiquetés avec #hacktoberfest.
