@@ -20,45 +20,35 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   var keysOutOfTask: MutableSet<KeyBuilder> = mutableSetOf()
   lateinit var czechLanguage: Language
 
-  var unrelatedOrg = OrganizationBuilder(root)
+  var unrelatedOrg: OrganizationBuilder
   var unrelatedProject: ProjectBuilder
   var unrelatedUser: UserAccountBuilder
   var unrelatedEnglish: LanguageBuilder
 
   init {
     user.name = "Tasks test user"
-    projectUser = UserAccountBuilder(root)
-
-    projectUser.self.apply {
+    projectUser = root.addUserAccount {
       username = "project.user@test.com"
       name = "Project user"
     }
-    root.data.userAccounts.add(projectUser)
 
-    orgMember = UserAccountBuilder(root)
-
-    orgMember.self.apply {
+    orgMember = root.addUserAccount {
       username = "organization.member@test.com"
       name = "Organization member"
     }
 
-    orgAdmin = UserAccountBuilder(root)
-
-    orgAdmin.self.apply {
+    orgAdmin = root.addUserAccount {
       username = "organization.owner@test.com"
       name = "Organization owner"
+
     }
 
-    projectViewScopeUser = UserAccountBuilder(root)
-
-    projectViewScopeUser.self.apply {
+    projectViewScopeUser = root.addUserAccount {
       username = "project.view.scope.user@test.com"
       name = "Project view scope user (en)"
     }
 
-    projectViewRoleUser = UserAccountBuilder(root)
-
-    projectViewRoleUser.self.apply {
+    projectViewRoleUser = root.addUserAccount {
       username = "project.view.role.user@test.com"
       name = "Project view role user (en)"
     }
@@ -164,25 +154,24 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
       }
     }
 
-    unrelatedOrg.self.apply {
+    unrelatedOrg = root.addOrganization {
       name = "Unrelated org"
     }
 
-    unrelatedProject = ProjectBuilder(unrelatedOrg.self, root)
+    unrelatedProject = root.addProject {
+      name = "Unrelated project"
+    }
 
     unrelatedProject.apply {
       unrelatedEnglish = addEnglish()
     }
 
     unrelatedProject.self.apply {
-      name = "Unrelated project"
       languages = mutableSetOf(unrelatedEnglish.self)
       baseLanguage = unrelatedEnglish.self
     }
 
-    unrelatedUser = UserAccountBuilder(root)
-
-    unrelatedUser.self.apply {
+    unrelatedUser = root.addUserAccount {
       username = "Unrelated user"
       name = "Unrelated user"
     }
@@ -193,13 +182,5 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
         type = ProjectPermissionType.EDIT
       }
     }
-
-    root.data.userAccounts.add(orgMember)
-    root.data.userAccounts.add(orgAdmin)
-    root.data.organizations.add(unrelatedOrg)
-    root.data.projects.add(unrelatedProject)
-    root.data.userAccounts.add(unrelatedUser)
-    root.data.userAccounts.add(projectViewScopeUser)
-    root.data.userAccounts.add(projectViewRoleUser)
   }
 }

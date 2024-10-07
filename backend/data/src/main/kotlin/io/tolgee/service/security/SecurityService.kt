@@ -271,15 +271,14 @@ class SecurityService(
 
   fun checkScopeOrAssignedToTask(
     scope: Scope,
-    projectId: Long,
     languageId: Long,
     keyId: Long,
     taskType: TaskType? = null,
   ) {
     try {
-      checkProjectPermission(projectId, scope)
+      checkProjectPermission(projectHolder.project.id, scope)
     } catch (e: PermissionException) {
-      checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
+      checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
       if (!translationInTask(keyId, languageId, taskType)) {
         throw e
       }
