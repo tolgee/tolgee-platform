@@ -5,4 +5,6 @@ ee/backend/** linguist-vendored
 /backend/testing/** linguist-vendored
 /backend/development/** linguist-vendored
 /backend/security/** linguist-vendored
-/backend/data/** linguist-vendored
+/backend/data/**/test/** linguist-vendored
+/backend/api/**/test/** linguist-vendored
+/backend/app/**/test/** linguist-vendored
