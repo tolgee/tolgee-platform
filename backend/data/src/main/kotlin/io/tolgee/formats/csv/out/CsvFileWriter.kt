@@ -30,6 +30,6 @@ class CsvFileWriter(
           }.toTypedArray(),
       )
     }
-    return writer.toString().byteInputStream()
+    return output.toString().byteInputStream()
   }
 }
