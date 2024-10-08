@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 @Component
-class BusinessEventReporter(
+class PostHogBusinessEventReporter(
   private val postHog: PostHog?,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
@@ -22,7 +22,7 @@ class BusinessEventReporter(
 ) {
   @Lazy
   @Autowired
-  private lateinit var selfProxied: BusinessEventReporter
+  private lateinit var selfProxied: PostHogBusinessEventReporter
 
   @Async
   fun captureAsync(data: OnBusinessEventToCaptureEvent) {

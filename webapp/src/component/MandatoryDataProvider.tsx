@@ -6,6 +6,7 @@ import { useIdentify } from 'tg.hooks/useIdentify';
 import { useIsFetching, useIsMutating } from 'react-query';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { usePosthog } from 'tg.hooks/usePosthog';
+import { usePlausible } from 'tg.hooks/plausible';
 
 export const MandatoryDataProvider = (props: any) => {
   const userData = useUser();
@@ -35,6 +36,7 @@ export const MandatoryDataProvider = (props: any) => {
   }, [config?.clientSentryDsn]);
 
   usePosthog();
+  usePlausible();
 
   useEffect(() => {
     if (userData) {

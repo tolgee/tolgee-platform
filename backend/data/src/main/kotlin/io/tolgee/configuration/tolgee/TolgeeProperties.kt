@@ -120,4 +120,6 @@ open class TolgeeProperties(
   var telemetry: TelemetryProperties = TelemetryProperties(),
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
   var slack: SlackProperties = SlackProperties(),
+  @DocProperty(hidden = true)
+  var plausible: PlausibleProperties = PlausibleProperties(),
 )
