@@ -3516,4 +3516,39 @@
     <changeSet author="stepangranat (generated)" id="1725024344449-1">
         <addUniqueConstraint columnNames="project_id, number" constraintName="project_number_unique" tableName="task"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-3">
+        <addColumn tableName="task_key">
+            <column name="created_at" type="timestamp(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-4">
+        <addColumn tableName="task_key">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-5">
+        <addColumn tableName="task_key">
+            <column name="updated_at" type="timestamp(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-6">
+        <addUniqueConstraint columnNames="task_id, key_id" constraintName="task_key_unique" tableName="task_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-7">
+        <createIndex indexName="IX_task_keyPK" tableName="task_key" unique="true">
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-1">
+        <dropPrimaryKey tableName="task_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-2">
+        <addPrimaryKey columnNames="id" constraintName="task_keyPK" tableName="task_key"/>
+    </changeSet>
 </databaseChangeLog>
