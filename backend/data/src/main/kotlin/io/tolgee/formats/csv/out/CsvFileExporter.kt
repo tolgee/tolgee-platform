@@ -56,11 +56,10 @@ class CsvFileExporter(
   }
 
   private fun List<CsvEntry>.toCsv(): InputStream {
-    // TODO: make delimiter configurable
     return CsvFileWriter(
       languageTags = exportParams.languages?.sorted()?.toTypedArray() ?: emptyArray(),
       data = entries,
-      delimiter = ';',
+      delimiter = ',',
     ).produceFiles()
   }
 }

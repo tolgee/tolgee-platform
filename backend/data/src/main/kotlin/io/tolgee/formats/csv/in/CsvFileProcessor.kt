@@ -43,8 +43,12 @@ class CsvFileProcessor(
 
   private fun parse() =
     try {
-      // TODO: make delimiter configurable
-      CsvFileParser(context.file.data.inputStream(), ';', firstLanguageTagGuessOrUnknown).parse()
+      val detector = CsvDelimiterDetector(context.file.data.inputStream())
+      CsvFileParser(
+        inputStream = context.file.data.inputStream(),
+        delimiter = detector.delimiter,
+        languageFallback = firstLanguageTagGuessOrUnknown,
+      ).parse()
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
     }
