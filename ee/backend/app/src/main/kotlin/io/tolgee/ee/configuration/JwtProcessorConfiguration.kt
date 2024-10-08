@@ -7,9 +7,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class JWTProcessorConfiguration {
+class JwtProcessorConfiguration {
   @Bean
-  fun jwtProcessor(): ConfigurableJWTProcessor<SecurityContext> {
-    return DefaultJWTProcessor()
-  }
+  fun jwtProcessor(): ConfigurableJWTProcessor<SecurityContext> = DefaultJWTProcessor()
 }
