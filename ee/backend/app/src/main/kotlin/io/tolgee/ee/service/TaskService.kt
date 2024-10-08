@@ -89,7 +89,7 @@ class TaskService(
     filters: TranslationScopeFilters,
   ) {
     dtos.forEach {
-      createTask(projectId, it, filters)
+      createSingleTask(projectId, it, filters)
     }
   }
 
@@ -99,6 +99,17 @@ class TaskService(
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
   ): TaskWithScopeView {
+    val task = taskService.createSingleTask(projectId, dto, filters)
+    val prefetched = taskService.getPrefetchedTasks(listOf(task)).first()
+    return getTaskWithScope(prefetched)
+  }
+
+  @Transactional
+  fun createSingleTask(
+    projectId: Long,
+    dto: CreateTaskRequest,
+    filters: TranslationScopeFilters,
+  ): Task {
     var lastErr = DataIntegrityViolationException("Error")
     repeat(100) {
       // necessary for proper transaction creation
@@ -109,7 +120,7 @@ class TaskService(
           task.assignees.forEach {
             assigneeNotificationService.notifyNewAssignee(it, task)
           }
-          getTaskWithScope(task)
+          task
         }
       } catch (e: DataIntegrityViolationException) {
         lastErr = e
