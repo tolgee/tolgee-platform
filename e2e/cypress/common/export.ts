@@ -224,6 +224,13 @@ export const testExportFormats = (
       structureDelimiter: '.',
     },
   });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'CSV',
+    expectedParams: {
+      format: 'CSV',
+    },
+  });
 };
 
 const testFormat = (

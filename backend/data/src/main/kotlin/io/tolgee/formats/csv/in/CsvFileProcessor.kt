@@ -23,17 +23,16 @@ class CsvFileProcessor(
     index: Int,
     format: ImportFormat,
   ) {
-    val selectedLanguage = language ?: firstLanguageTagGuessOrUnknown
     val converted =
       format.messageConvertor.convert(
         value,
-        selectedLanguage,
+        language,
         convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
         isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
       )
     context.addTranslation(
       key,
-      selectedLanguage,
+      language,
       converted.message,
       index,
       pluralArgName = converted.pluralArgName,
@@ -45,7 +44,7 @@ class CsvFileProcessor(
   private fun parse() =
     try {
       // TODO: make delimiter configurable
-      CsvFileParser(context.file.data.inputStream(), ';').parse()
+      CsvFileParser(context.file.data.inputStream(), ';', firstLanguageTagGuessOrUnknown).parse()
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
     }
