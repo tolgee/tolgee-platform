@@ -1,8 +1,8 @@
 package io.tolgee.ee.data
 
-import io.tolgee.ee.model.Tenant
+import io.tolgee.ee.model.SsoTenant
 
-data class TenantDto(
+data class SsoTenantDto(
   val authorizationUri: String,
   val clientId: String,
   val clientSecret: String,
@@ -12,8 +12,8 @@ data class TenantDto(
   val jwkSetUri: String,
 )
 
-fun Tenant.toDto(): TenantDto {
-  return TenantDto(
+fun SsoTenant.toDto(): SsoTenantDto =
+  SsoTenantDto(
     authorizationUri = this.authorizationUri,
     clientId = this.clientId,
     clientSecret = this.clientSecret,
@@ -22,4 +22,3 @@ fun Tenant.toDto(): TenantDto {
     isEnabled = this.isEnabledForThisOrganization,
     jwkSetUri = this.jwkSetUri,
   )
-}

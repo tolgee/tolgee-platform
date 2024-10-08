@@ -10,9 +10,8 @@ import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import com.posthog.java.shaded.org.json.JSONObject
 import io.tolgee.constants.Message
-import io.tolgee.ee.data.DynamicOAuth2ClientRegistration
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
-import io.tolgee.ee.repository.DynamicOAuth2ClientRegistrationRepository
+import io.tolgee.ee.model.SsoTenant
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
@@ -24,7 +23,6 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.http.*
-import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -35,13 +33,13 @@ import java.util.*
 
 @Service
 class OAuthService(
-  private val dynamicOAuth2ClientRegistrationRepository: DynamicOAuth2ClientRegistrationRepository,
   private val jwtService: JwtService,
   private val userAccountService: UserAccountService,
   private val signUpService: SignUpService,
   private val restTemplate: RestTemplate,
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
   private val organizationRoleService: OrganizationRoleService,
+  private val tenantService: TenantService,
 ) : Logging {
   fun handleOAuthCallback(
     registrationId: String,
@@ -59,25 +57,21 @@ class OAuthService(
       )
     }
 
-    val dynamicOAuth2ClientRegistration =
-      dynamicOAuth2ClientRegistrationRepository
-        .findByRegistrationId(registrationId)
-
-    val clientRegistration = dynamicOAuth2ClientRegistration.clientRegistration
+    val tenant = tenantService.getByDomain(registrationId)
 
     val tokenResponse =
-      exchangeCodeForToken(clientRegistration, code, redirectUrl)
+      exchangeCodeForToken(tenant, code, redirectUrl)
         ?: throw OAuthAuthorizationException(
           Message.TOKEN_EXCHANGE_FAILED,
           null,
         )
 
-    val userInfo = verifyAndDecodeIdToken(tokenResponse.id_token, clientRegistration.providerDetails.jwkSetUri)
-    return register(userInfo, dynamicOAuth2ClientRegistration, invitationCode)
+    val userInfo = verifyAndDecodeIdToken(tokenResponse.id_token, tenant.jwkSetUri)
+    return register(userInfo, tenant, invitationCode)
   }
 
   fun exchangeCodeForToken(
-    clientRegistration: ClientRegistration,
+    tenant: SsoTenant,
     code: String,
     redirectUrl: String,
   ): OAuth2TokenResponse? {
@@ -90,15 +84,15 @@ class OAuthService(
     body.add("grant_type", "authorization_code")
     body.add("code", code)
     body.add("redirect_uri", redirectUrl)
-    body.add("client_id", clientRegistration.clientId)
-    body.add("client_secret", clientRegistration.clientSecret)
+    body.add("client_id", tenant.clientId)
+    body.add("client_secret", tenant.clientSecret)
     body.add("scope", "openid")
 
     val request = HttpEntity(body, headers)
     return try {
       val response: ResponseEntity<OAuth2TokenResponse> =
         restTemplate.exchange(
-          clientRegistration.providerDetails.tokenUri,
+          tenant.tokenUri,
           HttpMethod.POST,
           request,
           OAuth2TokenResponse::class.java,
@@ -154,17 +148,16 @@ class OAuthService(
 
   private fun register(
     userResponse: GenericUserResponse,
-    dynamicOAuth2ClientRegistration: DynamicOAuth2ClientRegistration,
+    tenant: SsoTenant,
     invitationCode: String?,
   ): JwtAuthenticationResponse {
-    val clientRegistration = dynamicOAuth2ClientRegistration.clientRegistration
     val email =
       userResponse.email ?: let {
         logger.info("Third party user email is null. Missing scope email?")
         throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
       }
 
-    val userAccountOptional = userAccountService.findByThirdParty(clientRegistration.registrationId, userResponse.sub!!)
+    val userAccountOptional = userAccountService.findByThirdParty(tenant.domain, userResponse.sub!!)
     val user =
       userAccountOptional.orElseGet {
         userAccountService.findActive(email)?.let {
@@ -184,12 +177,12 @@ class OAuthService(
         }
         newUserAccount.name = name
         newUserAccount.thirdPartyAuthId = userResponse.sub
-        newUserAccount.thirdPartyAuthType = clientRegistration.registrationId
+        newUserAccount.thirdPartyAuthType = tenant.domain
         newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
         signUpService.signUp(newUserAccount, invitationCode, null)
         organizationRoleService.grantRoleToUser(
           newUserAccount,
-          dynamicOAuth2ClientRegistration.tenant.organizationId,
+          tenant.organizationId,
           OrganizationRoleType.MEMBER,
         )
         newUserAccount

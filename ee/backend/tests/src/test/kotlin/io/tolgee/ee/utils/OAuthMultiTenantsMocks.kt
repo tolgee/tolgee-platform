@@ -7,8 +7,8 @@ import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
-import io.tolgee.ee.repository.DynamicOAuth2ClientRegistrationRepository
 import io.tolgee.ee.service.OAuthService
+import io.tolgee.ee.service.TenantService
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -25,7 +25,7 @@ import java.util.*
 class OAuthMultiTenantsMocks(
   private var authMvc: MockMvc? = null,
   private val restTemplate: RestTemplate? = null,
-  private val dynamicOAuth2ClientRegistrationRepository: DynamicOAuth2ClientRegistrationRepository,
+  private val tenantService: TenantService? = null,
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>?,
 ) {
   companion object {
@@ -71,11 +71,10 @@ class OAuthMultiTenantsMocks(
 
   fun authorize(registrationId: String): MvcResult {
     val receivedCode = "fake_access_token"
-    val registration = dynamicOAuth2ClientRegistrationRepository.findByRegistrationId(registrationId).clientRegistration
-
+    val tenant = tenantService?.getByDomain(registrationId)!!
     whenever(
       restTemplate?.exchange(
-        eq(registration.providerDetails.tokenUri),
+        eq(tenant.tokenUri),
         eq(HttpMethod.POST),
         any(),
         eq(OAuthService.OAuth2TokenResponse::class.java),
@@ -85,7 +84,9 @@ class OAuthMultiTenantsMocks(
 
     return authMvc!!
       .perform(
-        MockMvcRequestBuilders.get("/v2/oauth2/callback/$registrationId?code=$receivedCode&redirect_uri=redirect_uri"),
+        MockMvcRequestBuilders.get(
+          "/v2/public/oauth2/callback/$registrationId?code=$receivedCode&redirect_uri=redirect_uri",
+        ),
       ).andReturn()
   }
 

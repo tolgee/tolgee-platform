@@ -6,8 +6,8 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
-@Table(schema = "ee")
-class Tenant : StandardAuditModel() {
+@Table(schema = "ee", name = "tenant")
+class SsoTenant : StandardAuditModel() {
   var name: String = ""
   var ssoProvider: String = ""
   var clientId: String = ""

@@ -3,8 +3,7 @@ package io.tolgee.ee
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
-import io.tolgee.ee.model.Tenant
-import io.tolgee.ee.repository.DynamicOAuth2ClientRegistrationRepository
+import io.tolgee.ee.model.SsoTenant
 import io.tolgee.ee.service.OAuthService
 import io.tolgee.ee.service.TenantService
 import io.tolgee.ee.utils.OAuthMultiTenantsMocks
@@ -32,16 +31,13 @@ class OAuthTest : AbstractControllerTest() {
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>? = null
 
   @Autowired
-  private lateinit var dynamicOAuth2ClientRegistrationRepository: DynamicOAuth2ClientRegistrationRepository
-
-  @Autowired
   private lateinit var oAuthService: OAuthService
 
   @Autowired
   private lateinit var tenantService: TenantService
 
   private val oAuthMultiTenantsMocks: OAuthMultiTenantsMocks by lazy {
-    OAuthMultiTenantsMocks(authMvc, restTemplate, dynamicOAuth2ClientRegistrationRepository, jwtProcessor)
+    OAuthMultiTenantsMocks(authMvc, restTemplate, tenantService, jwtProcessor)
   }
 
   @BeforeEach
@@ -53,7 +49,7 @@ class OAuthTest : AbstractControllerTest() {
 
   private fun addTenant() {
     tenantService.save(
-      Tenant().apply {
+      SsoTenant().apply {
         name = "tenant1"
         domain = "registrationId"
         clientId = "clientId"
@@ -69,11 +65,7 @@ class OAuthTest : AbstractControllerTest() {
 
   @Test
   fun authorize() {
-    val clientRegistraion =
-      dynamicOAuth2ClientRegistrationRepository
-        .findByRegistrationId("registrationId")
-        .clientRegistration
-    val response = oAuthMultiTenantsMocks.authorize(clientRegistraion.registrationId)
+    val response = oAuthMultiTenantsMocks.authorize("registrationId")
     assertThat(response.response.status).isEqualTo(200)
   }
 }

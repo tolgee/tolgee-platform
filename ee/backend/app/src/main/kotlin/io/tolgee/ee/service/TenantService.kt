@@ -1,7 +1,7 @@
 package io.tolgee.ee.service
 
 import io.tolgee.ee.data.CreateProviderRequest
-import io.tolgee.ee.model.Tenant
+import io.tolgee.ee.model.SsoTenant
 import io.tolgee.ee.repository.TenantRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -13,19 +13,19 @@ import java.net.URISyntaxException
 class TenantService(
   private val tenantRepository: TenantRepository,
 ) {
-  fun getById(id: Long): Tenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
+  fun getById(id: Long): SsoTenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
 
-  fun getByDomain(domain: String): Tenant = tenantRepository.findByDomain(domain) ?: throw NotFoundException()
+  fun getByDomain(domain: String): SsoTenant = tenantRepository.findByDomain(domain) ?: throw NotFoundException()
 
-  fun save(tenant: Tenant): Tenant = tenantRepository.save(tenant)
+  fun save(tenant: SsoTenant): SsoTenant = tenantRepository.save(tenant)
 
-  fun findAll(): List<Tenant> = tenantRepository.findAll()
+  fun findAll(): List<SsoTenant> = tenantRepository.findAll()
 
   fun save(
     dto: CreateProviderRequest,
     organizationId: Long,
-  ): Tenant {
-    val tenant = Tenant()
+  ): SsoTenant {
+    val tenant = SsoTenant()
     tenant.name = dto.name ?: ""
     tenant.organizationId = organizationId
     tenant.domain = extractDomain(dto.authorizationUri)
@@ -61,12 +61,14 @@ class TenantService(
       throw BadRequestException("Invalid authorization uri")
     }
 
-  fun findTenant(organizationId: Long): Tenant? = tenantRepository.findByOrganizationId(organizationId)
+  fun findTenant(organizationId: Long): SsoTenant? = tenantRepository.findByOrganizationId(organizationId)
+
+  fun getTenant(organizationId: Long): SsoTenant = findTenant(organizationId) ?: throw NotFoundException()
 
   fun saveOrUpdate(
     request: CreateProviderRequest,
     organizationId: Long,
-  ): Tenant {
+  ): SsoTenant {
     val tenant = findTenant(organizationId)
     return if (tenant == null) {
       save(request, organizationId)
