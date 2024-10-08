@@ -160,10 +160,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
     """
       select t
       from Task t
-        left join t.language l
       where
         t.project = :project
-        and l.deletedAt is null
       order by t.number desc
     """,
   )
