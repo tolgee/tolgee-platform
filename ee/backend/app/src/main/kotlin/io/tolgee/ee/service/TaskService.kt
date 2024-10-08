@@ -156,7 +156,7 @@ class TaskService(
   fun createTaskInTransaction(
     projectId: Long,
     dto: CreateTaskRequest,
-    filters: TranslationScopeFilters
+    filters: TranslationScopeFilters,
   ): Task {
     val newNumber = getNextTaskNumber(projectId)
     val language = checkLanguage(dto.languageId!!, projectId)

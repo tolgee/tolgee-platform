@@ -460,7 +460,10 @@ class ProjectService(
       .mapValues { it.value.map { it.second } }
   }
 
-  fun updateLastTaskNumber(projectId: Long, taskNumber: Long) {
+  fun updateLastTaskNumber(
+    projectId: Long,
+    taskNumber: Long,
+  ) {
     val project = get(projectId)
     project.lastTaskNumber = taskNumber
     projectRepository.saveAndFlush(project)
