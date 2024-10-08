@@ -348,7 +348,7 @@ class UserAccountService(
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null,
-    filters: UserAccountFilters? = null,
+    filters: UserAccountFilters = UserAccountFilters(),
   ): Page<UserAccountInProjectView> {
     return userAccountRepository.getAllInProject(
       projectId,
@@ -364,7 +364,7 @@ class UserAccountService(
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null,
-    filters: UserAccountFilters? = null,
+    filters: UserAccountFilters = UserAccountFilters(),
   ): Page<ExtendedUserAccountInProject> {
     val users = getAllInProject(projectId, pageable, search, exceptUserId, filters)
     val organizationBasePermission = organizationService.getProjectOwner(projectId = projectId).basePermission
