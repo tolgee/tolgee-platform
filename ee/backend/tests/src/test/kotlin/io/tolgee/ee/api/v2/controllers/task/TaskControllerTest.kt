@@ -207,6 +207,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}",
       UpdateTaskRequest(
+        name = testData.translateTask.self.name,
         assignees = mutableSetOf(testData.unrelatedUser.self.id),
       ),
     ).andIsBadRequest.andAssertThatJson {
