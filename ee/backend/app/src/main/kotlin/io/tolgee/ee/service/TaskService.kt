@@ -474,7 +474,10 @@ class TaskService(
       ?: throw NotFoundException(Message.TASK_NOT_FOUND)
   }
 
-  private fun findTaskKey(taskId: Long, keyId: Long): TaskKey {
+  private fun findTaskKey(
+    taskId: Long,
+    keyId: Long,
+  ): TaskKey {
     return taskKeyRepository.findById(
       TaskKeyId(
         task = entityManager.getReference(Task::class.java, taskId),
