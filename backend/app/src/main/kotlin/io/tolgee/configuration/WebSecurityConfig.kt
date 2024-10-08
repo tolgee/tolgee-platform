@@ -84,7 +84,7 @@ class WebSecurityConfig(
             }
           },
         )
-        it.requestMatchers("/api/public/**", "/v2/public/**", "v2/oauth2/callback/**").permitAll()
+        it.requestMatchers("/api/public/**", "/v2/public/**").permitAll()
         it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
         it.requestMatchers("/api/**", "/v2/**").authenticated()
         it.anyRequest().permitAll()
@@ -97,30 +97,30 @@ class WebSecurityConfig(
         headers.referrerPolicy {
           it.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
         }
-      }
-      .build()
+      }.build()
   }
 
   @Bean
   @Order(10)
   @ConditionalOnProperty(value = ["tolgee.internal.controller-enabled"], havingValue = "false", matchIfMissing = true)
-  fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
-    return httpSecurity
+  fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain =
+    httpSecurity
       .securityMatcher("/internal/**")
       .authorizeRequests()
       .anyRequest()
       .denyAll()
       .and()
       .build()
-  }
 
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(rateLimitInterceptor)
     registry.addInterceptor(authenticationInterceptor)
 
-    registry.addInterceptor(organizationAuthorizationInterceptor)
+    registry
+      .addInterceptor(organizationAuthorizationInterceptor)
       .addPathPatterns("/v2/organizations/**")
-    registry.addInterceptor(projectAuthorizationInterceptor)
+    registry
+      .addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns("/v2/projects/**", "/api/project/**", "/api/repository/**")
   }
 

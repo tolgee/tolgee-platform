@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("v2/oauth2/callback/")
+@RequestMapping("v2/public/oauth2/callback/")
 class OAuth2CallbackController(
   private val dynamicOAuth2ClientRegistrationRepository: DynamicOAuth2ClientRegistrationRepository,
   private val oauthService: OAuthService,
