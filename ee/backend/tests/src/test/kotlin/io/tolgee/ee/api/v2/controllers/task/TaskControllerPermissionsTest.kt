@@ -82,6 +82,12 @@ class TaskControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/")
       "tasks/${testData.translateTask.self.number}",
       UpdateTaskRequest(name = "Test"),
     ).andIsForbidden
+    performProjectAuthPut(
+      "tasks/${testData.translateTask.self.number}/close",
+    ).andIsForbidden
+    performProjectAuthPut(
+      "tasks/${testData.translateTask.self.number}/reopen",
+    ).andIsForbidden
   }
 
   @Test
