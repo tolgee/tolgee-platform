@@ -5,13 +5,13 @@ import jakarta.validation.constraints.Size
 
 data class UpdateTaskRequest(
   @field:Size(min = 3, max = 255)
-  var name: String? = null,
+  var name: String = "",
   @field:Size(min = 0, max = 2000)
-  var description: String? = "",
+  var description: String = "",
   @Schema(
     description = "Due to date in epoch format (milliseconds).",
     example = "1661172869000",
   )
-  var dueDate: Long? = -1,
-  var assignees: MutableSet<Long>? = null,
+  var dueDate: Long? = null,
+  var assignees: MutableSet<Long> = mutableSetOf(),
 )

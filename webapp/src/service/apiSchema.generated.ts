@@ -1447,15 +1447,15 @@ export interface components {
       removeKeys?: number[];
     };
     UpdateTaskRequest: {
-      name?: string;
-      description?: string;
+      name: string;
+      description: string;
       /**
        * Format: int64
        * @description Due to date in epoch format (milliseconds).
        * @example 1661172869000
        */
       dueDate?: number;
-      assignees?: number[];
+      assignees: number[];
     };
     AutoTranslationSettingsDto: {
       /** Format: int64 */
@@ -1838,8 +1838,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2432,6 +2432,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       username?: string;
+      scopes: string[];
       /** Format: int64 */
       lastUsedAt?: number;
       scopes: string[];
@@ -4584,6 +4585,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       username?: string;
+      scopes: string[];
       /** Format: int64 */
       lastUsedAt?: number;
       scopes: string[];

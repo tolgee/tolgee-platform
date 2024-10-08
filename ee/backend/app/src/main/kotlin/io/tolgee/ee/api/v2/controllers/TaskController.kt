@@ -66,7 +66,6 @@ import org.springframework.web.bind.annotation.RestController
   ],
 )
 @Tag(name = "Tasks", description = "Manipulates tasks")
-@OpenApiOrderExtension(3)
 class TaskController(
   private val taskService: TaskService,
   private val taskModelAssembler: TaskModelAssembler,
@@ -79,27 +78,12 @@ class TaskController(
   private val securityService: SecurityService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
-  @GetMapping("")
-  @Operation(summary = "Get tasks")
-  @RequiresProjectPermissions([Scope.TASKS_VIEW])
-  @AllowApiAccess
-  fun getTasks(
-    @ParameterObject
-    filters: TaskFilters,
-    @ParameterObject
-    pageable: Pageable,
-    @RequestParam("search", required = false)
-    search: String?,
-  ): PagedModel<TaskModel> {
-    val tasks = taskService.getAllPaged(projectHolder.project.id, pageable, search, filters)
-    return pagedTaskResourcesAssembler.toModel(tasks, taskModelAssembler)
-  }
-
   @PostMapping("")
   @Operation(summary = "Create task")
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
   @RequestActivity(ActivityType.TASK_CREATE)
+  @OpenApiOrderExtension(1)
   fun createTask(
     @RequestBody @Valid
     dto: CreateTaskRequest,
@@ -119,6 +103,7 @@ class TaskController(
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
   @RequestActivity(ActivityType.TASKS_CREATE)
+  @OpenApiOrderExtension(2)
   fun createTasks(
     @RequestBody @Valid
     dto: CreateMultipleTasksRequest,
@@ -138,6 +123,7 @@ class TaskController(
   // permissions checked inside
   @UseDefaultPermissions
   @AllowApiAccess
+  @OpenApiOrderExtension(3)
   fun getTask(
     @PathVariable
     taskNumber: Long,
@@ -148,11 +134,29 @@ class TaskController(
     return taskModelAssembler.toModel(task)
   }
 
+  @GetMapping("")
+  @Operation(summary = "Get tasks")
+  @RequiresProjectPermissions([Scope.TASKS_VIEW])
+  @OpenApiOrderExtension(4)
+  @AllowApiAccess
+  fun getTasks(
+    @ParameterObject
+    filters: TaskFilters,
+    @ParameterObject
+    pageable: Pageable,
+    @RequestParam("search", required = false)
+    search: String?,
+  ): PagedModel<TaskModel> {
+    val tasks = taskService.getAllPaged(projectHolder.project.id, pageable, search, filters)
+    return pagedTaskResourcesAssembler.toModel(tasks, taskModelAssembler)
+  }
+
   @PutMapping("/{taskNumber}")
   @Operation(summary = "Update task")
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
   @RequestActivity(ActivityType.TASK_UPDATE)
+  @OpenApiOrderExtension(5)
   fun updateTask(
     @PathVariable
     taskNumber: Long,
@@ -165,6 +169,55 @@ class TaskController(
     )
 
     val task = taskService.updateTask(projectHolder.project.id, taskNumber, dto)
+    return taskModelAssembler.toModel(task)
+  }
+
+  @PutMapping("/{taskNumber}/finish")
+  @Operation(summary = "Finish task")
+  // permissions checked inside
+  @UseDefaultPermissions
+  @AllowApiAccess
+  @RequestActivity(ActivityType.TASK_FINISH)
+  @OpenApiOrderExtension(6)
+  fun finishTask(
+    @PathVariable
+    taskNumber: Long,
+  ): TaskModel {
+    // users can only finish tasks assigned to them
+    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.project.id, taskNumber)
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.DONE)
+    return taskModelAssembler.toModel(task)
+  }
+
+  @PutMapping("/{taskNumber}/close")
+  @Operation(summary = "Close task")
+  @RequiresProjectPermissions([Scope.TASKS_EDIT])
+  @AllowApiAccess
+  @RequestActivity(ActivityType.TASK_CLOSE)
+  @OpenApiOrderExtension(7)
+  fun closeTask(
+    @PathVariable
+    taskNumber: Long,
+  ): TaskModel {
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.CLOSED)
+    return taskModelAssembler.toModel(task)
+  }
+
+  @PutMapping("/{taskNumber}/reopen")
+  @Operation(summary = "Reopen task")
+  @RequiresProjectPermissions([Scope.TASKS_EDIT])
+  @AllowApiAccess
+  @RequestActivity(ActivityType.TASK_REOPEN)
+  @OpenApiOrderExtension(8)
+  fun reopenTask(
+    @PathVariable
+    taskNumber: Long,
+  ): TaskModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TASKS,
+    )
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.IN_PROGRESS)
     return taskModelAssembler.toModel(task)
   }
 
@@ -251,52 +304,6 @@ class TaskController(
     taskNumber: Long,
   ): List<Long> {
     return taskService.getBlockingTasks(projectHolder.project.id, taskNumber)
-  }
-
-  @PutMapping("/{taskNumber}/finish")
-  @Operation(summary = "Finish task")
-  // permissions checked inside
-  @UseDefaultPermissions
-  @AllowApiAccess
-  @RequestActivity(ActivityType.TASK_FINISH)
-  fun finishTask(
-    @PathVariable
-    taskNumber: Long,
-  ): TaskModel {
-    // users can only finish tasks assigned to them
-    securityService.hasTaskEditScopeOrIsAssigned(projectHolder.project.id, taskNumber)
-    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.DONE)
-    return taskModelAssembler.toModel(task)
-  }
-
-  @PutMapping("/{taskNumber}/close")
-  @Operation(summary = "Close task")
-  @RequiresProjectPermissions([Scope.TASKS_EDIT])
-  @AllowApiAccess
-  @RequestActivity(ActivityType.TASK_CLOSE)
-  fun closeTask(
-    @PathVariable
-    taskNumber: Long,
-  ): TaskModel {
-    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.CLOSED)
-    return taskModelAssembler.toModel(task)
-  }
-
-  @PutMapping("/{taskNumber}/reopen")
-  @Operation(summary = "Reopen task")
-  @RequiresProjectPermissions([Scope.TASKS_EDIT])
-  @AllowApiAccess
-  @RequestActivity(ActivityType.TASK_REOPEN)
-  fun reopenTask(
-    @PathVariable
-    taskNumber: Long,
-  ): TaskModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.TASKS,
-    )
-    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.IN_PROGRESS)
-    return taskModelAssembler.toModel(task)
   }
 
   @PutMapping("/{taskNumber}/keys/{keyId}")

@@ -195,34 +195,20 @@ class TaskService(
   ): TaskWithScopeView {
     val task = findByNumber(projectId, taskNumber)
 
-    dto.name?.let {
-      task.name = it
-    }
+    task.name = dto.name
+    task.description = dto.description
 
-    dto.description?.let {
-      task.description = it
-    }
+    task.dueDate = dto.dueDate?.let { Date(it) }
 
-    dto.dueDate?.let {
-      if (it < 0L) {
-        task.dueDate = null
-      } else {
-        task.dueDate = Date(it)
+    val newAssignees = checkAssignees(dto.assignees, projectId)
+    newAssignees.forEach {
+      if (!task.assignees.contains(it)) {
+        assigneeNotificationService.notifyNewAssignee(it, task)
       }
     }
-
-    dto.assignees?.let {
-      val newAssignees = checkAssignees(dto.assignees!!, projectId)
-      newAssignees.forEach {
-        if (!task.assignees.contains(it)) {
-          assigneeNotificationService.notifyNewAssignee(it, task)
-        }
-      }
-      task.assignees = newAssignees
-    }
+    task.assignees = newAssignees
 
     taskRepository.saveAndFlush(task)
-
     return getTaskWithScope(task)
   }
 
