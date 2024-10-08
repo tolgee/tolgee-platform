@@ -56,9 +56,12 @@ class CsvFileExporter(
   }
 
   private fun List<CsvEntry>.toCsv(): InputStream {
+    val languageTags =
+      exportParams.languages?.sorted()?.toTypedArray()
+        ?: this.map { it.language }.distinct().sorted().toTypedArray()
     return CsvFileWriter(
-      languageTags = exportParams.languages?.sorted()?.toTypedArray() ?: emptyArray(),
-      data = entries,
+      languageTags = languageTags,
+      data = this,
       delimiter = ',',
     ).produceFiles()
   }
