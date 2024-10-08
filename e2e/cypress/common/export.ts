@@ -226,7 +226,7 @@ export const testExportFormats = (
   });
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
     {
       format: 'CSV',
       expectedParams: {
