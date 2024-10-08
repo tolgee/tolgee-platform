@@ -35,6 +35,7 @@ import { useStateService } from './services/useStateService';
 import { useWebsocketService } from './services/useWebsocketService';
 import { PrefilterType } from '../prefilters/usePrefilter';
 import { useTaskService } from './services/useTaskService';
+import { usePositionService } from './services/usePositionService';
 
 type Props = {
   projectId: number;
@@ -107,8 +108,15 @@ export const [
     taskService,
     prefilter: props.prefilter,
   });
-  const editService = useEditService({
+
+  const positionService = usePositionService({
     translations: translationService,
+    viewRefs,
+  });
+
+  const editService = useEditService({
+    positionService,
+    translationService,
     viewRefs,
     taskService,
     prefilter: props.prefilter,
@@ -123,13 +131,13 @@ export const [
   });
 
   const handleTranslationsReset = () => {
-    editService.clearPosition();
+    positionService.clearPosition();
     selectionService.clear();
   };
 
   useEffect(() => {
     // prevent leaving the page when there are unsaved changes
-    if (editService.position?.changed) {
+    if (positionService.position?.changed) {
       const handler = (e) => {
         e.preventDefault();
         e.returnValue = '';
@@ -137,7 +145,7 @@ export const [
       window.addEventListener('beforeunload', handler);
       return () => window.removeEventListener('beforeunload', handler);
     }
-  }, [editService.position?.changed]);
+  }, [positionService.position?.changed]);
 
   // actions
 
@@ -151,15 +159,15 @@ export const [
       return handleTranslationsReset();
     },
     async setFilters(filters: Filters) {
-      if (await editService.confirmUnsavedChanges()) {
+      if (await positionService.confirmUnsavedChanges()) {
         translationService.setFilters(filters);
         return handleTranslationsReset();
       }
     },
     async setEdit(edit: EditorProps | undefined) {
-      if (await editService.confirmUnsavedChanges(edit)) {
+      if (await positionService.confirmUnsavedChanges(edit)) {
         setSidePanelOpen(true);
-        return editService.setPositionAndFocus(edit);
+        return positionService.setPositionAndFocus(edit);
       }
     },
     async setEditValue(value: TolgeeFormat) {
@@ -171,11 +179,11 @@ export const [
       editService.setEditValueString(value);
     },
     setEditForce(edit: EditorProps | undefined) {
-      return editService.setPositionAndFocus(edit);
+      return positionService.setPositionAndFocus(edit);
     },
     async updateEdit(edit: Partial<Edit>) {
-      if (await editService.confirmUnsavedChanges(edit)) {
-        return editService.updatePosition(edit);
+      if (await positionService.confirmUnsavedChanges(edit)) {
+        return positionService.updatePosition(edit);
       }
     },
     toggleSelect(index: number) {
@@ -281,7 +289,7 @@ export const [
     search: translationService.search as string,
     urlSearch: translationService.urlSearch,
     filters: translationService.filters,
-    cursor: editService.position,
+    cursor: positionService.position,
     selection: selectionService.data,
     view: view as ViewMode,
     elementsRef: viewRefs.elementsRef,
