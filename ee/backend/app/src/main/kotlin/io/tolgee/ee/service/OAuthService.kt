@@ -1,5 +1,6 @@
 package io.tolgee.ee.service
 
+import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.jwk.source.RemoteJWKSet
 import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector
@@ -118,7 +119,7 @@ class OAuthService(
 
       val jwkSource: JWKSource<SecurityContext> = RemoteJWKSet(URL(jwkSetUri))
 
-      val keySelector = JWSAlgorithmFamilyJWSKeySelector.fromJWKSource(jwkSource)
+      val keySelector = JWSAlgorithmFamilyJWSKeySelector(JWSAlgorithm.Family.RSA, jwkSource)
       jwtProcessor.jwsKeySelector = keySelector
 
       val jwtClaimsSet: JWTClaimsSet = jwtProcessor.process(signedJWT, null)
