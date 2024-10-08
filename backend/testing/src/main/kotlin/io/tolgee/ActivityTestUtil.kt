@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ActivityTestUtil(
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
   fun getLastRevision(): ActivityRevision? {
     return entityManager.createQuery(

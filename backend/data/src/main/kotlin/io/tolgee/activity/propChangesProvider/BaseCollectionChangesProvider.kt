@@ -5,7 +5,7 @@ import io.tolgee.activity.data.PropertyModification
 class BaseCollectionChangesProvider(
   private val old: Collection<Any?>?,
   private val new: Collection<Any?>?,
-  private val extractTargetFromEntity: (Any?) -> Any?
+  private val extractTargetFromEntity: (Any?) -> Any?,
 ) {
   fun provide(): PropertyModification? {
     if (old === new) {
@@ -21,8 +21,7 @@ class BaseCollectionChangesProvider(
     return PropertyModification(oldIds, newIds)
   }
 
-  private fun mapSetToIds(collection: Collection<*>?) =
-    collection?.mapNotNull { extractTargetFromEntity(it) }
+  private fun mapSetToIds(collection: Collection<*>?) = collection?.mapNotNull { extractTargetFromEntity(it) }
 
   private fun Collection<*>?.containsAll(other: Collection<*>?): Boolean {
     val thisSet = this?.toSet() ?: emptySet()

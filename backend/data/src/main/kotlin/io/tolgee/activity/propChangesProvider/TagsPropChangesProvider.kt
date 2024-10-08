@@ -10,10 +10,11 @@ class TagsPropChangesProvider : PropChangesProvider {
     old: Any?,
     new: Any?,
   ): PropertyModification? {
-    val baseCollectionChangesProvider = BaseCollectionChangesProvider(
-      old as Collection<Any?>?,
-      new as Collection<Any?>?
-    ) { (it as? Tag)?.name }
+    val baseCollectionChangesProvider =
+      BaseCollectionChangesProvider(
+        old as Collection<Any?>?,
+        new as Collection<Any?>?,
+      ) { (it as? Tag)?.name }
     return baseCollectionChangesProvider.provide()
   }
 }

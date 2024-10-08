@@ -10,10 +10,11 @@ class EntityWithIdCollectionPropChangesProvider : PropChangesProvider {
     old: Any?,
     new: Any?,
   ): PropertyModification? {
-    val baseCollectionChangesProvider = BaseCollectionChangesProvider(
-      old as Collection<Any?>?,
-      new as Collection<Any?>?
-    ) { (it as EntityWithId).id }
+    val baseCollectionChangesProvider =
+      BaseCollectionChangesProvider(
+        old as Collection<Any?>?,
+        new as Collection<Any?>?,
+      ) { (it as EntityWithId).id }
     return baseCollectionChangesProvider.provide()
   }
 }

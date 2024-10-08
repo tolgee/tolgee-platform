@@ -62,7 +62,7 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
       "tasks/${testData.translateTask.self.number}/keys",
       UpdateTaskKeysRequest(
         addKeys = testData.keysOutOfTask.map { it.self.id }.toMutableSet(),
-        removeKeys = testData.keysInTask.map { it.self.id }.toMutableSet()
+        removeKeys = testData.keysInTask.map { it.self.id }.toMutableSet(),
       ),
     ).andIsOk
 
@@ -86,19 +86,19 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
     testData.createManyOutOfTaskKeys()
     saveTestDataAndPrepare()
 
-    val (_, statementCount) = withStatementCount {
-      performProjectAuthPut(
-        "tasks/${testData.translateTask.self.number}/keys",
-        UpdateTaskKeysRequest(
-          addKeys = testData.keysOutOfTask.map { it.self.id }.toMutableSet(),
-          removeKeys = testData.keysInTask.map { it.self.id }.toMutableSet()
-        ),
-      ).andIsOk
-    }
+    val (_, statementCount) =
+      withStatementCount {
+        performProjectAuthPut(
+          "tasks/${testData.translateTask.self.number}/keys",
+          UpdateTaskKeysRequest(
+            addKeys = testData.keysOutOfTask.map { it.self.id }.toMutableSet(),
+            removeKeys = testData.keysInTask.map { it.self.id }.toMutableSet(),
+          ),
+        ).andIsOk
+      }
 
     statementCount.assert.isLessThan(50)
   }
-
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -111,7 +111,7 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
         name = "Updated task",
         description = "updated description",
         assignees = mutableSetOf(testData.user.id),
-        dueDate = newDueDate.time
+        dueDate = newDueDate.time,
       ),
     ).andIsOk
 
@@ -119,7 +119,7 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
       val (old, new) = getLastRevisionTaskAssignees()
       old.assert.containsExactlyInAnyOrder(
         testData.projectUser.self.id,
-        testData.user.id
+        testData.user.id,
       )
       new.assert.containsExactlyInAnyOrder(testData.user.id)
 
@@ -143,9 +143,9 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
         type = TaskType.TRANSLATE,
         languageId = testData.englishLanguage.id,
         assignees =
-        mutableSetOf(
-          testData.orgMember.self.id,
-        ),
+          mutableSetOf(
+            testData.orgMember.self.id,
+          ),
         keys = keys,
       ),
     )

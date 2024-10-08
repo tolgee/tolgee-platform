@@ -225,26 +225,27 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   }
 
   fun createManyOutOfTaskKeys(): List<KeyBuilder> {
-    val keys = (1 until 200).map {
-      projectBuilder.run {
-        addKey(null, "key in many $it") {
-          addTranslation("en", "Translation in many $it")
+    val keys =
+      (1 until 200).map {
+        projectBuilder.run {
+          addKey(null, "key in many $it") {
+            addTranslation("en", "Translation in many $it")
+          }
         }
       }
-    }
     keysOutOfTask.addAll(keys)
     return keys
   }
 
-
   fun createManyInTaskKeys(): List<KeyBuilder> {
-    val keys = (1 until 200).map {
-      projectBuilder.run {
-        addKey(null, "key out many $it") {
-          addTranslation("en", "Translation out many $it")
+    val keys =
+      (1 until 200).map {
+        projectBuilder.run {
+          addKey(null, "key out many $it") {
+            addTranslation("en", "Translation out many $it")
+          }
         }
       }
-    }
     keys.forEach {
       projectBuilder.addTaskKey {
         task = translateTask.self

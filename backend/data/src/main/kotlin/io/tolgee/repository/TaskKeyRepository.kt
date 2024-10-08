@@ -6,5 +6,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface TaskKeyRepository : JpaRepository<TaskKey, Long> {
-  fun findByTaskIdAndKeyId(taskId: Long, keyId: Long): TaskKey?
+  fun findByTaskIdAndKeyId(
+    taskId: Long,
+    keyId: Long,
+  ): TaskKey?
 }
