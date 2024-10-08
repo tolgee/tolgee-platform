@@ -30,6 +30,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ITaskService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
@@ -44,6 +45,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import java.util.*
+import kotlin.math.max
 
 @Component
 class TaskService(
@@ -62,6 +64,7 @@ class TaskService(
   private val platformTransactionManager: PlatformTransactionManager,
   private val currentDateProvider: CurrentDateProvider,
   private val keyService: KeyService,
+  private val projectService: ProjectService,
 ) : ITaskService {
   fun getAllPaged(
     projectId: Long,
@@ -114,6 +117,16 @@ class TaskService(
     return getTaskWithScope(prefetched)
   }
 
+  fun getNextTaskNumber(projectId: Long): Long {
+    val lastTaskNumber =
+      taskRepository.findByProjectOrderByNumberDesc(
+        entityManager.getReference(Project::class.java, projectId),
+      ).firstOrNull()?.number ?: 0L
+    val projectLastTaskNumber = projectService.get(projectId).lastTaskNumber
+    // use whichever is larger
+    return max(lastTaskNumber, projectLastTaskNumber) + 1
+  }
+
   @Transactional
   fun createSingleTask(
     projectId: Long,
@@ -121,7 +134,7 @@ class TaskService(
     filters: TranslationScopeFilters,
   ): Task {
     var lastErr = DataIntegrityViolationException("Error")
-    repeat(100) {
+    repeat(10) {
       // necessary for proper transaction creation
       try {
         return executeInNewRepeatableTransaction(platformTransactionManager) {
@@ -139,22 +152,13 @@ class TaskService(
     throw lastErr
   }
 
-  fun getNextTaskNumber(projectId: Long): Long {
-    val lastTask =
-      taskRepository.findByProjectOrderByNumberDesc(
-        entityManager.getReference(Project::class.java, projectId),
-      ).firstOrNull()
-    return (lastTask?.number ?: 0L) + 1
-  }
-
   @Transactional()
   fun createTaskInTransaction(
     projectId: Long,
     dto: CreateTaskRequest,
-    filters: TranslationScopeFilters,
+    filters: TranslationScopeFilters
   ): Task {
     val newNumber = getNextTaskNumber(projectId)
-
     val language = checkLanguage(dto.languageId!!, projectId)
     val assignees = checkAssignees(dto.assignees ?: mutableSetOf(), projectId)
     val keyIds =
@@ -184,6 +188,7 @@ class TaskService(
     task.keys = taskKeys
     taskKeyRepository.saveAll(taskKeys)
 
+    projectService.updateLastTaskNumber(projectId, newNumber)
     return task
   }
 
@@ -311,7 +316,10 @@ class TaskService(
   }
 
   override fun deleteAll(tasks: List<Task>) {
-    taskRepository.deleteAll(tasks)
+    for (task in tasks) {
+      taskKeyRepository.deleteAll(task.keys)
+      taskRepository.delete(task)
+    }
   }
 
   override fun findAssigneeById(

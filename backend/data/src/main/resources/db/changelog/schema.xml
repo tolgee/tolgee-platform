@@ -3551,4 +3551,11 @@
     <changeSet author="jenik (generated)" id="1728369764999-2">
         <addPrimaryKey columnNames="id" constraintName="task_keyPK" tableName="task_key"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1728390455632-1">
+        <addColumn tableName="project">
+            <column defaultValueNumeric="0" name="last_task_number" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

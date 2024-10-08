@@ -114,6 +114,9 @@ class Project(
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
 
+  @ColumnDefault("0")
+  var lastTaskNumber: Long = 0
+
   override var deletedAt: Date? = null
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
