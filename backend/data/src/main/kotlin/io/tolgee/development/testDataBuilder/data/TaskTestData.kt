@@ -25,6 +25,8 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   var unrelatedUser: UserAccountBuilder
   var unrelatedEnglish: LanguageBuilder
 
+  lateinit var blockedTask: TaskBuilder
+
   init {
     user.name = "Tasks test user"
     projectUser =
@@ -187,6 +189,32 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
       addPermission {
         user = unrelatedUser.self
         type = ProjectPermissionType.EDIT
+      }
+    }
+  }
+
+  fun addBlockedTask() {
+    projectBuilder.apply {
+      blockedTask =
+        addTask {
+          number = 3
+          name = "Blocked task"
+          type = TaskType.REVIEW
+          assignees =
+            mutableSetOf(
+              projectUser.self,
+              user,
+            )
+          project = projectBuilder.self
+          language = englishLanguage
+          author = projectUser.self
+        }
+
+      keysInTask.forEach { it ->
+        addTaskKey {
+          task = blockedTask.self
+          key = it.self
+        }
       }
     }
   }

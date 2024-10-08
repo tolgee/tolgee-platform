@@ -6,10 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.task.*
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.enums.TaskType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -340,6 +337,21 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk.andAssertThatJson {
       node("page").node("totalElements").isEqualTo(1)
       node("_embedded.tasks[0].name").isEqualTo("Translate task")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `close and reopen task`() {
+    performProjectAuthPut(
+      "tasks/${testData.translateTask.self.number}/close",
+    ).andIsOk.andAssertThatJson {
+      node("state").isEqualTo("CLOSED")
+    }
+    performProjectAuthPut(
+      "tasks/${testData.translateTask.self.number}/reopen",
+    ).andIsOk.andAssertThatJson {
+      node("state").isEqualTo("NEW")
     }
   }
 }
