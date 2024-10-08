@@ -34,7 +34,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `return s list of tasks`() {
+  fun `returns list of tasks`() {
     performProjectAuthGet("tasks").andAssertThatJson {
       node("_embedded.tasks") {
         node("[0].number").isEqualTo(1)
@@ -91,7 +91,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `creates multiple new tasks`() {
     val keys = testData.keysOutOfTask.map { it.self.id }.toMutableSet()
     performProjectAuthPost(
-      "tasks/create-multiple",
+      "tasks/create-multiple-tasks",
       CreateMultipleTasksRequest(
         mutableSetOf(
           CreateTaskRequest(

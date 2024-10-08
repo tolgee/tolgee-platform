@@ -66,7 +66,7 @@ class TaskControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/")
         UpdateTaskKeyRequest(done = true),
       ).andIsOk
     }
-    performProjectAuthPost("tasks/${testData.translateTask.self.number}/finish").andIsOk
+    performProjectAuthPut("tasks/${testData.translateTask.self.number}/finish").andIsOk
   }
 
   @Test
@@ -97,7 +97,7 @@ class TaskControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/")
       "tasks/${testData.reviewTask.self.number}/keys/${testData.keysInTask.first().self.id}",
       UpdateTaskKeyRequest(done = true),
     ).andIsForbidden
-    performProjectAuthPost("tasks/${testData.reviewTask.self.number}/finish").andIsForbidden
+    performProjectAuthPut("tasks/${testData.reviewTask.self.number}/finish").andIsForbidden
     performProjectAuthPut(
       "tasks/${testData.reviewTask.self.number}/keys",
       UpdateTaskKeysRequest(addKeys = mutableSetOf(testData.keysOutOfTask.first().self.id)),
