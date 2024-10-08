@@ -2113,10 +2113,10 @@ export interface components {
     ImportSettingsModel: {
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     /** @description User who created the comment */
     SimpleUserAccountModel: {
@@ -2286,9 +2286,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       description: string;
@@ -2431,7 +2429,10 @@ export interface components {
       description: string;
       /** Format: int64 */
       id: number;
+      projectName: string;
       username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       lastUsedAt?: number;
@@ -3628,7 +3629,8 @@ export interface components {
         | "NEW_PRICING"
         | "FEATURE_AI_CUSTOMIZATION"
         | "FEATURE_VISUAL_EDITOR"
-        | "FEATURE_CLI_2";
+        | "FEATURE_CLI_2"
+        | "FEATURE_TASKS";
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -4023,7 +4025,8 @@ export interface components {
         | "TASK_KEYS_UPDATE"
         | "TASK_FINISH"
         | "TASK_CLOSE"
-        | "TASK_REOPEN";
+        | "TASK_REOPEN"
+        | "TASK_KEY_UPDATE";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -4459,9 +4462,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       description: string;
@@ -4584,7 +4585,10 @@ export interface components {
       description: string;
       /** Format: int64 */
       id: number;
+      projectName: string;
       username?: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
       scopes: string[];
       /** Format: int64 */
       lastUsedAt?: number;
