@@ -225,12 +225,15 @@ export const testExportFormats = (
     },
   });
 
-  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-    format: 'CSV',
-    expectedParams: {
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    {
       format: 'CSV',
-    },
-  });
+      expectedParams: {
+        format: 'CSV',
+      },
+    }
+  );
 };
 
 const testFormat = (
