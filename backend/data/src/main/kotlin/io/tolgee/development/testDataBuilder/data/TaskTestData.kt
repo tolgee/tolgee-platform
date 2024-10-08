@@ -1,6 +1,11 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.builders.*
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
+import io.tolgee.development.testDataBuilder.builders.LanguageBuilder
+import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.development.testDataBuilder.builders.TaskBuilder
+import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -217,5 +222,35 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
         }
       }
     }
+  }
+
+  fun createManyOutOfTaskKeys(): List<KeyBuilder> {
+    val keys = (1 until 200).map {
+      projectBuilder.run {
+        addKey(null, "key in many $it") {
+          addTranslation("en", "Translation in many $it")
+        }
+      }
+    }
+    keysOutOfTask.addAll(keys)
+    return keys
+  }
+
+
+  fun createManyInTaskKeys(): List<KeyBuilder> {
+    val keys = (1 until 200).map {
+      projectBuilder.run {
+        addKey(null, "key out many $it") {
+          addTranslation("en", "Translation out many $it")
+        }
+      }
+    }
+    keys.forEach {
+      projectBuilder.addTaskKey {
+        task = translateTask.self
+        key = it.self
+      }
+    }
+    return keys
   }
 }

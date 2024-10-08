@@ -1,11 +1,11 @@
 package io.tolgee.activity.propChangesProvider
 
 import io.tolgee.activity.data.PropertyModification
-import io.tolgee.model.key.Tag
+import io.tolgee.model.EntityWithId
 import org.springframework.stereotype.Service
 
 @Service
-class TagsPropChangesProvider : PropChangesProvider {
+class EntityWithIdCollectionPropChangesProvider : PropChangesProvider {
   override fun getChanges(
     old: Any?,
     new: Any?,
@@ -13,7 +13,7 @@ class TagsPropChangesProvider : PropChangesProvider {
     val baseCollectionChangesProvider = BaseCollectionChangesProvider(
       old as Collection<Any?>?,
       new as Collection<Any?>?
-    ) { (it as? Tag)?.name }
+    ) { (it as EntityWithId).id }
     return baseCollectionChangesProvider.provide()
   }
 }

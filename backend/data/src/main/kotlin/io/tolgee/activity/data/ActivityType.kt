@@ -72,4 +72,5 @@ enum class ActivityType(
   TASK_FINISH,
   TASK_CLOSE,
   TASK_REOPEN,
+  TASK_KEY_UPDATE(hideInList = true),
 }

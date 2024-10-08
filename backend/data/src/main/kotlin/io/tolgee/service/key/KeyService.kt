@@ -474,4 +474,11 @@ class KeyService(
   fun getViewsByKeyIds(ids: List<Long>): List<KeyView> {
     return keyRepository.getViewsByKeyIds(ids)
   }
+
+  fun getByIds(ids: Collection<Long>): List<Key> {
+    return ids
+      // limit of postgres in clause size
+      .chunked(32000)
+      .flatMap { keyRepository.findAllByIdIn(it) }
+  }
 }

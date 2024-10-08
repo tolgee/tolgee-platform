@@ -3,7 +3,14 @@ package io.tolgee.ee.service
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.component.TaskReportHelper
-import io.tolgee.ee.data.task.*
+import io.tolgee.ee.data.task.CalculateScopeRequest
+import io.tolgee.ee.data.task.CreateTaskRequest
+import io.tolgee.ee.data.task.TaskFilters
+import io.tolgee.ee.data.task.TranslationScopeFilters
+import io.tolgee.ee.data.task.UpdateTaskKeyRequest
+import io.tolgee.ee.data.task.UpdateTaskKeyResponse
+import io.tolgee.ee.data.task.UpdateTaskKeysRequest
+import io.tolgee.ee.data.task.UpdateTaskRequest
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -12,14 +19,16 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
-import io.tolgee.model.key.Key
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
-import io.tolgee.model.task.TaskKeyId
-import io.tolgee.model.views.*
+import io.tolgee.model.views.KeysScopeView
+import io.tolgee.model.views.TaskPerUserReportView
+import io.tolgee.model.views.TaskWithScopeView
+import io.tolgee.model.views.TranslationToTaskView
 import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ITaskService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -52,6 +61,7 @@ class TaskService(
   @Autowired
   private val platformTransactionManager: PlatformTransactionManager,
   private val currentDateProvider: CurrentDateProvider,
+  private val keyService: KeyService,
 ) : ITaskService {
   fun getAllPaged(
     projectId: Long,
@@ -147,7 +157,7 @@ class TaskService(
 
     val language = checkLanguage(dto.languageId!!, projectId)
     val assignees = checkAssignees(dto.assignees ?: mutableSetOf(), projectId)
-    val keys =
+    val keyIds =
       getOnlyProjectKeys(
         projectId,
         dto.languageId!!,
@@ -169,8 +179,8 @@ class TaskService(
     task.author = entityManager.getReference(UserAccount::class.java, authenticationFacade.authenticatedUser.id)
     task.state = TaskState.NEW
     taskRepository.saveAndFlush(task)
-
-    val taskKeys = keys.map { TaskKey(task, entityManager.getReference(Key::class.java, it)) }.toMutableSet()
+    val keys = keyService.getByIds(keyIds)
+    val taskKeys = keys.map { TaskKey(task, it) }.toMutableSet()
     task.keys = taskKeys
     taskKeyRepository.saveAll(taskKeys)
 
@@ -268,10 +278,11 @@ class TaskService(
     dto.addKeys?.let { toAdd ->
       val existingKeys = task.keys.map { it.key.id }.toMutableSet()
       val nonExistingKeyIds = toAdd.subtract(existingKeys).toMutableSet()
+      val keysToAdd = keyService.getByIds(nonExistingKeyIds)
       val taskKeysToAdd =
-        toAdd
-          .filter { nonExistingKeyIds.contains(it) }
-          .map { TaskKey(task, entityManager.getReference(Key::class.java, it)) }
+        keysToAdd
+          .filter { key -> nonExistingKeyIds.contains(key.id) }
+          .map { key -> TaskKey(task, key) }
       task.keys = task.keys.union(taskKeysToAdd).toMutableSet()
       taskKeyRepository.saveAll(taskKeysToAdd)
     }
@@ -489,14 +500,8 @@ class TaskService(
     taskId: Long,
     keyId: Long,
   ): TaskKey {
-    return taskKeyRepository.findById(
-      TaskKeyId(
-        task = entityManager.getReference(Task::class.java, taskId),
-        key = entityManager.getReference(Key::class.java, keyId),
-      ),
-    ).or {
-      throw NotFoundException(Message.TASK_NOT_FOUND)
-    }.get()
+    return taskKeyRepository.findByTaskIdAndKeyId(taskId, keyId)
+      ?: throw NotFoundException(Message.TASK_NOT_FOUND)
   }
 
   private fun getTaskWithScope(task: Task): TaskWithScopeView {
