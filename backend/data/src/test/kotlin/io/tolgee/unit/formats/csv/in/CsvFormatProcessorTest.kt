@@ -88,6 +88,140 @@ class CsvFormatProcessorTest {
   }
 
   @Test
+  fun `returns correct parsed result (semicolon delimiter)`() {
+    mockUtil.mockIt("example.csv", "src/test/resources/import/csv/example_semicolon.csv")
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(2)
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("value")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+      .assertSingle {
+        hasText("hodnota")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyDeep.inner")
+      .assertSingle {
+        hasText("value")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyDeep.inner")
+      .assertSingle {
+        hasText("hodnota")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolate")
+      .assertSingle {
+        hasText("replace this {value}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolate")
+      .assertSingle {
+        hasText("nahradit toto {value}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolateWithFormatting")
+      .assertSingle {
+        hasText("replace this {value, number}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolateWithFormatting")
+      .assertSingle {
+        hasText("nahradit toto {value, number}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyPluralSimple")
+      .assertSinglePlural {
+        hasText(
+          """
+          {value, plural,
+          one { the singular}
+          other { the plural {value}}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyPluralSimple")
+      .assertSinglePlural {
+        hasText(
+          """
+          {value, plural,
+          one { jednotné číslo}
+          other { množné číslo {value}}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertKey("keyPluralSimple") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
+  }
+
+  @Test
+  fun `returns correct parsed result (tab delimiter)`() {
+    mockUtil.mockIt("example.csv", "src/test/resources/import/csv/example_tab.csv")
+    processFile()
+    mockUtil.fileProcessorContext.assertLanguagesCount(2)
+    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+      .assertSingle {
+        hasText("value")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+      .assertSingle {
+        hasText("hodnota")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyDeep.inner")
+      .assertSingle {
+        hasText("value")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyDeep.inner")
+      .assertSingle {
+        hasText("hodnota")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolate")
+      .assertSingle {
+        hasText("replace this {value}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolate")
+      .assertSingle {
+        hasText("nahradit toto {value}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolateWithFormatting")
+      .assertSingle {
+        hasText("replace this {value, number}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolateWithFormatting")
+      .assertSingle {
+        hasText("nahradit toto {value, number}")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "keyPluralSimple")
+      .assertSinglePlural {
+        hasText(
+          """
+          {value, plural,
+          one { the singular}
+          other { the plural {value}}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "keyPluralSimple")
+      .assertSinglePlural {
+        hasText(
+          """
+          {value, plural,
+          one { jednotné číslo}
+          other { množné číslo {value}}
+          }
+          """.trimIndent(),
+        )
+        isPluralOptimized()
+      }
+    mockUtil.fileProcessorContext.assertKey("keyPluralSimple") {
+      custom.assert.isNull()
+      description.assert.isNull()
+    }
+  }
+
+  @Test
   fun `import with placeholder conversion (disabled ICU)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
