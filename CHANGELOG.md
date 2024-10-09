@@ -1,3 +1,10 @@
+# [3.76.0](https://github.com/tolgee/tolgee-platform/compare/v3.75.1...v3.76.0) (2024-10-09)
+
+
+### Features
+
+* Add Plausible to the app ([#2550](https://github.com/tolgee/tolgee-platform/issues/2550)) ([23f9348](https://github.com/tolgee/tolgee-platform/commit/23f93481f6c701f9d541203aa4b15017cdf034c3))
+
 ## [3.75.1](https://github.com/tolgee/tolgee-platform/compare/v3.75.0...v3.75.1) (2024-10-07)
 
 
