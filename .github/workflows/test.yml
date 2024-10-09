@@ -122,7 +122,8 @@ jobs:
         with:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }} 
+          # Print free memory for debugging purposes
+          command: free -h && ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
