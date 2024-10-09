@@ -7,6 +7,7 @@ import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.android.out.AndroidStringsXmlExporter
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
+import io.tolgee.formats.csv.out.CsvFileExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
@@ -34,6 +35,13 @@ class FileExporterFactory(
     projectIcuPlaceholdersSupport: Boolean,
   ): FileExporter {
     return when (exportParams.format) {
+      ExportFormat.CSV ->
+        CsvFileExporter(
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+        )
+
       ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT ->
         JsonFileExporter(
           data,

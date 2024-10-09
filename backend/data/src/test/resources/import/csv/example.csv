@@ -1,0 +1,12 @@
+"key","en","cs"
+"key","value",hodnota
+"keyDeep.inner","value","hodnota"
+"keyInterpolate","replace this {value}",nahradit toto {value}
+"keyInterpolateWithFormatting","replace this {value, number}","nahradit toto {value, number}"
+"keyPluralSimple"," {value, plural, one {the singular} other {the plural {value}}}"," {value, plural, one {jednotné číslo} other {množné číslo {value}}}"
+"escapedCharacters","this is a \"quote\"","toto je \"citace\""
+"escapedCharacters2","this is a
+new line","toto je
+nový řádek"
+"escapedCharacters3","this is a \\ backslash","toto je zpětné \\ lomítko"
+"escapedCharacters4","this is a , comma","toto je , čárka"

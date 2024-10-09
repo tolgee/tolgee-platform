@@ -143,6 +143,19 @@ export const formatGroups: FormatGroup[] = [
           'C_SPRINTF',
         ],
       },
+      {
+        id: 'generic_csv',
+        extension: 'csv',
+        name: <T keyName="export-format-csv" />,
+        format: 'CSV',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
+      },
     ],
   },
   {

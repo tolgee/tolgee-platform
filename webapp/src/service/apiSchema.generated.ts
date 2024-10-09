@@ -1169,6 +1169,29 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1202,29 +1225,6 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1814,8 +1814,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1865,6 +1865,7 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
+        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
         | "JSON_I18NEXT"
@@ -1964,6 +1965,7 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
+        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
         | "JSON_I18NEXT"
@@ -2087,12 +2089,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2249,17 +2251,17 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      description: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2396,19 +2398,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      description: string;
       /** Format: int64 */
       id: number;
+      userFullName?: string;
       projectName: string;
+      description: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      userFullName?: string;
+      lastUsedAt?: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2951,6 +2953,10 @@ export interface components {
        * It is recommended to provide these values to prevent any issues with format detection.
        */
       format?:
+        | "CSV_ICU"
+        | "CSV_JAVA"
+        | "CSV_PHP"
+        | "CSV_RUBY"
         | "JSON_I18NEXT"
         | "JSON_ICU"
         | "JSON_JAVA"
@@ -3100,6 +3106,7 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
+        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
         | "JSON_I18NEXT"
@@ -3571,15 +3578,10 @@ export interface components {
         | "TASKS"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
       /**
        * @description The role of currently authorized user.
        *
@@ -3587,6 +3589,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3632,6 +3639,7 @@ export interface components {
     };
     ExportFormatModel: {
       format:
+        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
         | "JSON_I18NEXT"
@@ -3649,9 +3657,9 @@ export interface components {
       defaultFileStructureTemplate: string;
     };
     DocItem: {
-      description?: string;
       name: string;
       displayName?: string;
+      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -3746,23 +3754,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
-      translation?: string;
       baseTranslation?: string;
+      namespace?: string;
+      description?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      namespace?: string;
-      translation?: string;
       baseTranslation?: string;
+      namespace?: string;
+      description?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4329,17 +4337,17 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      description: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4456,19 +4464,19 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
-      description: string;
       /** Format: int64 */
       id: number;
+      userFullName?: string;
       projectName: string;
+      description: string;
       username?: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
       scopes: string[];
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      userFullName?: string;
+      lastUsedAt?: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -12257,6 +12265,7 @@ export interface operations {
         languages?: string[];
         /** Format to export to */
         format?:
+          | "CSV"
           | "JSON"
           | "JSON_TOLGEE"
           | "JSON_I18NEXT"

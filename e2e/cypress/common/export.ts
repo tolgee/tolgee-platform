@@ -224,6 +224,16 @@ export const testExportFormats = (
       structureDelimiter: '.',
     },
   });
+
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
+      format: 'CSV',
+      expectedParams: {
+        format: 'CSV',
+      },
+    }
+  );
 };
 
 const testFormat = (

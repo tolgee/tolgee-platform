@@ -7,6 +7,7 @@ enum class ExportFormat(
   val mediaType: String,
   val defaultFileStructureTemplate: String = ExportFilePathProvider.DEFAULT_TEMPLATE,
 ) {
+  CSV("csv", "text/csv"),
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
   JSON_I18NEXT("json", "application/json"),
