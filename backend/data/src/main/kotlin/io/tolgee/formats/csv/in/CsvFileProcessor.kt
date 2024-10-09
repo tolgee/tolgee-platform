@@ -43,11 +43,12 @@ class CsvFileProcessor(
   private fun parse(): Pair<Iterable<CsvEntry>, ImportFormat> {
     try {
       val detector = CsvDelimiterDetector(context.file.data.inputStream())
-      val parser = CsvFileParser(
-        inputStream = context.file.data.inputStream(),
-        delimiter = detector.delimiter,
-        languageFallback = firstLanguageTagGuessOrUnknown,
-      )
+      val parser =
+        CsvFileParser(
+          inputStream = context.file.data.inputStream(),
+          delimiter = detector.delimiter,
+          languageFallback = firstLanguageTagGuessOrUnknown,
+        )
       val data = parser.parse()
       val format = getFormat(parser.rows)
       return data to format
