@@ -1,8 +1,8 @@
 package io.tolgee.formats.csv.`in`
 
-import java.io.ByteArrayInputStream
+import java.io.InputStream
 
-class CsvDelimiterDetector(private val inputStream: ByteArrayInputStream) {
+class CsvDelimiterDetector(private val inputStream: InputStream) {
   companion object {
     val DELIMITERS = listOf(',', ';', '\t')
   }

@@ -88,6 +88,38 @@ class CsvFormatProcessorTest {
         )
         isPluralOptimized()
       }
+    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters")
+      .assertSingle {
+        hasText("this is a \"quote\"")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters")
+      .assertSingle {
+        hasText("toto je \"citace\"")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters2")
+      .assertSingle {
+        hasText("this is a\nnew line")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters2")
+      .assertSingle {
+        hasText("toto je\nnový řádek")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters3")
+      .assertSingle {
+        hasText("this is a \\ backslash")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters3")
+      .assertSingle {
+        hasText("toto je zpětné \\ lomítko")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters4")
+      .assertSingle {
+        hasText("this is a , comma")
+      }
+    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters4")
+      .assertSingle {
+        hasText("toto je , čárka")
+      }
     mockUtil.fileProcessorContext.assertKey("keyPluralSimple") {
       custom.assert.isNull()
       description.assert.isNull()

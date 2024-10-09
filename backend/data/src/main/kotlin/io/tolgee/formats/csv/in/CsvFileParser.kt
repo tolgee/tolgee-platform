@@ -3,10 +3,10 @@ package io.tolgee.formats.csv.`in`
 import com.opencsv.CSVParserBuilder
 import com.opencsv.CSVReaderBuilder
 import io.tolgee.formats.csv.CsvEntry
-import java.io.ByteArrayInputStream
+import java.io.InputStream
 
 class CsvFileParser(
-  private val inputStream: ByteArrayInputStream,
+  private val inputStream: InputStream,
   private val delimiter: Char,
   private val languageFallback: String,
 ) {
