@@ -1,22 +1,6 @@
 import { useEffect } from 'react';
 import { useConfig } from 'tg.globalContext/helpers';
 
-export const appendPlausibleUrlScript = (config: {
-  domain?: string;
-  url: string;
-  scriptUrl: string;
-}) => {
-  return appendScript(config.scriptUrl, false, { domain: config.domain });
-};
-
-export const appendPlausibleInlineScript = () => {
-  const innerHTML = `
-  window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }
-  `;
-
-  return appendScript(undefined, false, {}, innerHTML);
-};
-
 export const usePlausible = () => {
   const publicConfig = useConfig();
 
@@ -30,6 +14,22 @@ export const usePlausible = () => {
       };
     }
   }, []);
+};
+
+const appendPlausibleUrlScript = (config: {
+  domain?: string;
+  url: string;
+  scriptUrl: string;
+}) => {
+  return appendScript(config.scriptUrl, false, { domain: config.domain });
+};
+
+const appendPlausibleInlineScript = () => {
+  const innerHTML = `
+  window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }
+  `;
+
+  return appendScript(undefined, false, {}, innerHTML);
 };
 
 const appendScript = (

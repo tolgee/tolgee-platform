@@ -76,7 +76,7 @@ export const PlansCloud = () => {
     if (isSuccess) {
       reportEvent('UI_CLOUD_SUBSCRIPTION_UPDATE_SUCCESS');
     }
-  });
+  }, [isSuccess]);
 
   return (
     <>
