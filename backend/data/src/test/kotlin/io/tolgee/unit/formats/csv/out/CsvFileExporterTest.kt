@@ -20,7 +20,7 @@ class CsvFileExporterTest {
     |"key3","{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}"
     |"item","I will be first {icuParam, number}"
     |"key","Text with multiple lines
-    |and , commas and \"quotes\""
+    |and , commas and ""quotes"" "
     |
       """.trimMargin(),
     )
@@ -44,7 +44,7 @@ class CsvFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "key",
-          text = "Text with multiple lines\nand , commas and \"quotes\"",
+          text = "Text with multiple lines\nand , commas and \"quotes\" ",
         )
       }
     return getExporter(built.translations, false)
