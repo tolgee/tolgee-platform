@@ -1,3 +1,10 @@
+# [3.78.0](https://github.com/tolgee/tolgee-platform/compare/v3.77.0...v3.78.0) (2024-10-09)
+
+
+### Features
+
+* allow import and export CSV ([#2475](https://github.com/tolgee/tolgee-platform/issues/2475)) ([f1782c9](https://github.com/tolgee/tolgee-platform/commit/f1782c914a70d5df39e144ce41fcdcd7b750bc9a)), closes [#2444](https://github.com/tolgee/tolgee-platform/issues/2444)
+
 # [3.77.0](https://github.com/tolgee/tolgee-platform/compare/v3.76.0...v3.77.0) (2024-10-09)
 
 
