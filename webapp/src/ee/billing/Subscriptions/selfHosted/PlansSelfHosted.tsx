@@ -96,6 +96,7 @@ export const PlansSelfHosted = () => {
           },
         }
       );
+      reportEvent('UI_SELF_HOSTED_SUBSCRIPTION_CREATED');
     }
   }, [isSuccess]);
 
