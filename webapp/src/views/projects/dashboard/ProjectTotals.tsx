@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem, styled } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Edit02 } from '@untitled-ui/icons-react';
 import { useHistory } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -146,9 +146,9 @@ export const ProjectTotals: React.FC<{
     setAnchorEl(null);
   };
 
-  const redirectToLanguages = () => {
+  const redirectToTasks = () => {
     history.push(
-      LINKS.PROJECT_LANGUAGES.build({ [PARAMS.PROJECT_ID]: project.id })
+      LINKS.PROJECT_TASKS.build({ [PARAMS.PROJECT_ID]: project.id })
     );
   };
 
@@ -182,9 +182,9 @@ export const ProjectTotals: React.FC<{
   const { satisfiesPermission } = useProjectPermissions();
 
   const canViewMembers = satisfiesPermission('members.view');
-  const canEditLanguages = satisfiesPermission('languages.edit');
   const canViewKeys = satisfiesPermission('keys.view');
   const canEditMembers = satisfiesPermission('members.edit');
+  const canViewTasks = satisfiesPermission('tasks.view');
 
   const tagsPresent = Boolean(stats.tagCount);
   const tagsClickable = tagsPresent && canViewKeys;
@@ -201,25 +201,20 @@ export const ProjectTotals: React.FC<{
       <StyledTiles data-cy="project-dashboard-project-totals">
         <StyledTile
           gridArea="languages"
-          onClick={canEditLanguages ? redirectToLanguages : undefined}
-          className={clsx({ clickable: canEditLanguages })}
-          data-cy="project-dashboard-language-count"
+          onClick={canViewTasks ? redirectToTasks : undefined}
+          className={clsx({ clickable: canViewTasks })}
+          data-cy="project-dashboard-task-count"
         >
           <StyledTileDataItem>
             <StyledTileValue>
-              {Number(stats.languageCount).toLocaleString(locale)}
+              {Number(stats.taskCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_language_count', 'Languages', {
-                count: stats.languageCount,
+              {t('project_dashboard_task_count', {
+                count: stats.taskCount,
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
-          {canEditLanguages && (
-            <StyledTileEdit>
-              <Edit fontSize="small" />
-            </StyledTileEdit>
-          )}
         </StyledTile>
 
         <StyledTile
@@ -306,7 +301,7 @@ export const ProjectTotals: React.FC<{
           </StyledTileDataItem>
           {membersEditable && (
             <StyledTileEdit>
-              <Edit fontSize="small" />
+              <Edit02 width={20} height={20} />
             </StyledTileEdit>
           )}
         </StyledTile>

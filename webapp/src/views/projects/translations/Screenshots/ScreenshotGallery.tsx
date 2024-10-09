@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Skeleton, styled } from '@mui/material';
 import Box from '@mui/material/Box';
-import AddIcon from '@mui/icons-material/Add';
+import { Plus } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -28,8 +28,9 @@ export interface ScreenshotGalleryProps {
   keyId: number;
 }
 
-const StyledAddIcon = styled(AddIcon)`
-  font-size: 50px;
+const StyledAddIcon = styled(Plus)`
+  width: 50px;
+  height: 50px;
 `;
 
 const StyledAddBox = styled('div')`

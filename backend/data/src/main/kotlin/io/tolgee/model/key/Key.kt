@@ -12,6 +12,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -55,6 +56,9 @@ class Key(
 
   @OneToMany(mappedBy = "key")
   var translations: MutableList<Translation> = mutableListOf()
+
+  @OneToMany(mappedBy = "key", orphanRemoval = true)
+  var tasks: MutableList<TaskKey> = mutableListOf()
 
   @OneToOne(mappedBy = "key", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   override var keyMeta: KeyMeta? = null

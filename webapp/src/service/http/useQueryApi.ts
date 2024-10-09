@@ -47,6 +47,13 @@ export type InfiniteQueryProps<
   >;
 } & RequestParamsType<Url, Method, Paths>;
 
+type Split<S extends string> = S extends `${infer Prefix}/${infer Rest}`
+  ? Prefix | `${Prefix}/${Split<Rest>}`
+  : S;
+
+// Create a union of all possible prefixes for all paths
+type Prefix = Split<keyof (paths & billingPaths)> | '/';
+
 export type MutationProps<
   Url extends keyof Paths,
   Method extends keyof Paths[Url],
@@ -60,7 +67,7 @@ export type MutationProps<
     ApiError,
     RequestParamsType<Url, Method, Paths>
   >;
-  invalidatePrefix?: string;
+  invalidatePrefix?: Prefix | Prefix[];
 };
 
 export const useApiInfiniteQuery = <
@@ -128,7 +135,7 @@ function autoErrorHandling(
 }
 
 function getApiMutationOptions(
-  invalidatePrefix: string | undefined,
+  invalidatePrefix: undefined | string | string[],
   queryClient: QueryClient
 ) {
   return (options: UseQueryOptions<any, ApiError> | undefined) => ({
@@ -217,8 +224,18 @@ export const matchUrlPrefix = (prefix: string) => {
   };
 };
 
-export const invalidateUrlPrefix = (queryClient: QueryClient, prefix: string) =>
-  queryClient.invalidateQueries(matchUrlPrefix(prefix));
+export const invalidateUrlPrefix = (
+  queryClient: QueryClient,
+  prefix: string | string[]
+) => {
+  if (typeof prefix === 'string') {
+    queryClient.invalidateQueries(matchUrlPrefix(prefix));
+  } else if (Array.isArray(prefix)) {
+    prefix.forEach((p) => {
+      queryClient.invalidateQueries(matchUrlPrefix(p));
+    });
+  }
+};
 
 export const useBillingApiQuery = <
   Url extends keyof billingPaths,

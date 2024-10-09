@@ -4,13 +4,17 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.TaskState
+import io.tolgee.model.enums.TaskType
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.task.Task
 
 class ProjectsTestData : BaseTestData() {
   lateinit var project2English: Language
   lateinit var project2Deutsch: Language
   lateinit var project2: Project
   lateinit var userWithTranslatePermission: UserAccount
+  lateinit var task: Task
 
   init {
     root.apply {
@@ -53,9 +57,21 @@ class ProjectsTestData : BaseTestData() {
           translateLanguages = mutableSetOf(project2Deutsch, project2English)
         }
 
+        task =
+          addTask {
+            number = 1
+            name = "Translate task"
+            type = TaskType.TRANSLATE
+            state = TaskState.NEW
+            project = project2
+            language = englishLanguage
+            author = userWithTranslatePermission
+          }.self
+
         addKey {
           name = "Untranslated"
         }
+
         addKey {
           name = "Translated to both"
         }.build keyBuilder@{

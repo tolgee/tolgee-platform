@@ -9,8 +9,9 @@ import {
   DialogTitle,
   styled,
   Tooltip,
+  useTheme,
 } from '@mui/material';
-import { ErrorOutlineOutlined } from '@mui/icons-material';
+import { AlertCircle } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -50,6 +51,7 @@ type Props = {
 export const WebhookItem = ({ data }: Props) => {
   const project = useProject();
   const messaging = useMessage();
+  const theme = useTheme();
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
   const [formOpen, setFormOpen] = useState(false);
@@ -93,7 +95,9 @@ export const WebhookItem = ({ data }: Props) => {
         )}
         {data.firstFailed && (
           <Tooltip title={t('webhooks_failing_hint')}>
-            <ErrorOutlineOutlined color="error" fontSize="small" />
+            <Box color={theme.palette.error.main}>
+              <AlertCircle width={18} height={18} />
+            </Box>
           </Tooltip>
         )}
       </Box>

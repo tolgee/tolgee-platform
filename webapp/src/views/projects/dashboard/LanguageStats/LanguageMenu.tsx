@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IconButton, Menu, MenuItem } from '@mui/material';
-import { MoreVert } from '@mui/icons-material';
+import { DotsVertical } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -63,7 +63,7 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
           onClick={handleOpen}
           data-cy="project-dashboard-language-menu"
         >
-          <MoreVert />
+          <DotsVertical />
         </IconButton>
       )}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeWith()}>

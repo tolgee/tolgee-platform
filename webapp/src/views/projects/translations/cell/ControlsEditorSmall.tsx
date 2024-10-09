@@ -1,7 +1,7 @@
 import React from 'react';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
-import { Code, ContentCopy } from '@mui/icons-material';
+import { Code01, ClipboardCheck, Copy06 } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateInType } from 'tg.constants/translationStates';
@@ -10,8 +10,10 @@ import { StateTransitionButtons } from './StateTransitionButtons';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useProject } from 'tg.hooks/useProject';
+import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
 
 type State = components['schemas']['TranslationViewModel']['state'];
+type TaskModel = components['schemas']['KeyTaskViewModel'];
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -34,6 +36,8 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onModeToggle?: () => void;
   controlsProps?: React.ComponentProps<typeof Box>;
+  tasks?: TaskModel[];
+  onTaskStateChange?: (done: boolean) => void;
 };
 
 export const ControlsEditorSmall: React.FC<ControlsProps> = ({
@@ -45,6 +49,8 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
   onModeToggle,
   onStateChange,
   controlsProps,
+  tasks,
+  onTaskStateChange,
 }) => {
   const project = useProject();
   const { t } = useTranslate();
@@ -53,10 +59,17 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
   const baseLanguage = useTranslationsSelector((c) =>
     c.languages?.find((l) => l.base)
   );
+  const translateTransition = useTaskTransitionTranslation();
   const displayInsertBase =
     onInsertBase &&
     !isBaseLanguage &&
     satisfiesLanguageAccess('translations.view', baseLanguage?.id);
+
+  const task = tasks?.[0];
+
+  const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
+  const displayTaskButton =
+    task && task.number === prefilteredTask && task.userAssigned;
 
   const displayEditorMode = project.icuPlaceholders;
 
@@ -80,7 +93,7 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
                 : t('translations_editor_switch_hide_code')
             }
           >
-            <Code fontSize="small" />
+            <Code01 />
           </ControlsButton>
         )}
 
@@ -92,9 +105,21 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
             }}
             color="default"
             data-cy="translations-cell-insert-base-button"
-            tooltip={<T keyName="translations_cell_insert_base" />}
+            tooltip={t('translations_cell_insert_base')}
           >
-            <ContentCopy fontSize="small" />
+            <Copy06 />
+          </ControlsButton>
+        )}
+
+        {displayTaskButton && onTaskStateChange && (
+          <ControlsButton
+            style={{ gridArea: 'task' }}
+            data-cy="translations-cell-task-button"
+            onClick={() => onTaskStateChange(!task?.done)}
+            color={task?.done ? 'secondary' : 'primary'}
+            tooltip={translateTransition(task.type, task.done)}
+          >
+            <ClipboardCheck />
           </ControlsButton>
         )}
       </StyledIcons>

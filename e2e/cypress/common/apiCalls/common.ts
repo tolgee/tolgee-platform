@@ -342,6 +342,19 @@ export const addScreenshot = (
   });
 };
 
+export const getAssignedEmailNotification = () =>
+  getAllEmails().then((r) => {
+    const content = r[0].html;
+    const result = [...content.matchAll(/href="(.*?)"/g)];
+    return {
+      taskLink: result[0][1],
+      myTasksLink: result[1][1],
+      fromAddress: r[0].from.value[0].address,
+      toAddress: r[0].to.value[0].address,
+      text: r[0].text,
+    };
+  });
+
 export const getParsedEmailVerification = () =>
   getAllEmails().then((r) => {
     return {

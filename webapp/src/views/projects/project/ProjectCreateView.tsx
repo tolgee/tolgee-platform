@@ -109,7 +109,7 @@ export const ProjectCreateView: FunctionComponent = () => {
                 </Typography>
               </Box>
               <CreateProjectLanguagesArrayField />
-              <Box mt={4}>
+              <Box mt={4} mb={4} maxWidth={200}>
                 <Typography variant="h6">
                   <T keyName="project_create_base_language_label" />
                 </Typography>

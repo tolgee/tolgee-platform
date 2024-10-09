@@ -1,7 +1,7 @@
 import { Box, styled } from '@mui/material';
 import { PanelConfig, PanelContentProps } from './types';
 import { useState } from 'react';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -67,27 +67,33 @@ export const Panel = ({
   name,
   component,
   data,
-  itemsCountComponent,
+  itemsCountFunction,
+  hideWhenCountZero,
+  hideCount,
   onToggle,
   open,
 }: Props) => {
   const [itemsCount, setItemsCount] = useState<number | undefined>(undefined);
   const Component = component;
-  const ItemsCountComponent = itemsCountComponent;
+  const countContent =
+    itemsCount !== undefined && itemsCount !== null
+      ? itemsCount
+      : itemsCountFunction?.(data) ?? null;
+
+  const hidden = countContent === 0 && hideWhenCountZero;
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <StyledContainer data-cy="translation-panel" data-cy-id={id}>
       <StyledHeader onMouseDown={(e) => e.preventDefault()}>
         {icon}
         <StyledName>{name}</StyledName>
-        {typeof itemsCount === 'number' || ItemsCountComponent ? (
-          <StyledBadge>
-            {ItemsCountComponent ? (
-              <ItemsCountComponent {...data} />
-            ) : (
-              itemsCount
-            )}
-          </StyledBadge>
+        {!hideCount &&
+        (typeof itemsCount === 'number' || itemsCountFunction) ? (
+          <StyledBadge>{countContent}</StyledBadge>
         ) : (
           <div />
         )}
@@ -98,9 +104,9 @@ export const Panel = ({
           data-cy-id={id}
         >
           {open ? (
-            <KeyboardArrowUp fontSize="small" />
+            <ChevronUp width={20} height={20} />
           ) : (
-            <KeyboardArrowDown fontSize="small" />
+            <ChevronDown width={20} height={20} />
           )}
         </StyledToggle>
       </StyledHeader>

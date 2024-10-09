@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { OpenInNew } from '@mui/icons-material';
+import { Share04 } from '@untitled-ui/icons-react';
 import { Box, Link, SxProps, css, styled } from '@mui/material';
 
 const buttonStyle = css`
@@ -21,8 +21,9 @@ const StyledButton = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-const StyledIcon = styled(OpenInNew)`
-  font-size: 15px;
+const StyledIcon = styled(Share04)`
+  width: 15px;
+  height: 15px;
   position: relative;
   top: 2px;
 `;

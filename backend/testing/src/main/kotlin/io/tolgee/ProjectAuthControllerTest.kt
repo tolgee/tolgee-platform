@@ -39,7 +39,7 @@ abstract class ProjectAuthControllerTest(
 
   private var _projectAuthRequestPerformer: ProjectAuthRequestPerformer? = null
 
-  private var projectAuthRequestPerformer: ProjectAuthRequestPerformer
+  var projectAuthRequestPerformer: ProjectAuthRequestPerformer
     get() {
       return _projectAuthRequestPerformer
         ?: throw Exception("Method not annotated with ApiKeyAccessTestMethod nor ProjectJWTAuthTestMethod?")

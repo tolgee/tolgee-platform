@@ -143,9 +143,11 @@ export const useTranslationsService = (props: Props) => {
     search: urlSearch as string,
     filterRevisionId:
       props.prefilter?.activity !== undefined
-        ? [props.prefilter?.activity]
+        ? [props.prefilter.activity]
         : undefined,
     filterFailedKeysOfJob: props.prefilter?.failedJob,
+    filterTaskNumber:
+      props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
   };
 
   const translations = useApiInfiniteQuery({

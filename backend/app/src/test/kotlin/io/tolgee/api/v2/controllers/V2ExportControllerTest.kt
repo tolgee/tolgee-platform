@@ -68,13 +68,15 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to json`() {
-    executeInNewTransaction {
-      initBaseData()
-    }
-    val parsed = performExport()
+    retryingOnCommonIssues {
+      executeInNewTransaction {
+        initBaseData()
+      }
+      val parsed = performExport()
 
-    assertThatJson(parsed["en.json"]!!) {
-      node("Z key").isEqualTo("A translation")
+      assertThatJson(parsed["en.json"]!!) {
+        node("Z key").isEqualTo("A translation")
+      }
     }
   }
 

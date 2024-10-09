@@ -7,6 +7,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.LanguageRequest
+import io.tolgee.dtos.request.language.LanguageFilters
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
@@ -338,8 +339,9 @@ class LanguageService(
   fun getPaged(
     projectId: Long,
     pageable: Pageable,
+    filters: LanguageFilters?,
   ): Page<LanguageDto> {
-    return this.languageRepository.findAllByProjectId(projectId, pageable)
+    return this.languageRepository.findAllByProjectId(projectId, pageable, filters ?: LanguageFilters())
   }
 
   fun findByIdIn(ids: Iterable<Long>): List<Language> {

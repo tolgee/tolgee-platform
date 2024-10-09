@@ -123,6 +123,17 @@ export const usePermissionsStructure = (options?: Scope[]) => {
         ],
       },
       {
+        label: t('permissions_tasks'),
+        children: [
+          {
+            value: 'tasks.view',
+          },
+          {
+            value: 'tasks.edit',
+          },
+        ],
+      },
+      {
         value: 'webhooks.manage',
       },
       {

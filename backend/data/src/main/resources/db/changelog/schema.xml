@@ -3440,4 +3440,122 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-1">
+        <createTable tableName="task">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="taskPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="closed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="description" type="VARCHAR(2000)"/>
+            <column name="due_date" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="number" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="author_id" type="BIGINT"/>
+            <column name="language_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-2">
+        <createTable tableName="task_assignees">
+            <column name="tasks_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_assigneesPK"/>
+            </column>
+            <column name="assignees_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_assigneesPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-3">
+        <createTable tableName="task_key">
+            <column name="done" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_keyPK"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_keyPK"/>
+            </column>
+            <column name="author_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-4">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="task" constraintName="FK7ixsl6anocypa3fn8wghhb6d1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-5">
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="task" constraintName="FKc1s19fj1byr8uwyb176qm0s2j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-6">
+        <addForeignKeyConstraint baseColumnNames="assignees_id" baseTableName="task_assignees" constraintName="FKcpb7bbiipjo0kkvccsi4uflmk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-7">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="task_key" constraintName="FKeastey70m3vpk2vbh23kt01xl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="task" constraintName="FKk8qrwowg31kx7hp93sru1pdqa" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-9">
+        <addForeignKeyConstraint baseColumnNames="task_id" baseTableName="task_key" constraintName="FKkvf74ngoesu5ld4unx462xyg8" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-10">
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="task_key" constraintName="FKm50a9numg7m79ind8mraymtg9" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-11">
+        <addForeignKeyConstraint baseColumnNames="tasks_id" baseTableName="task_assignees" constraintName="FKn0exxrx5h7t0vc109xw9fc11s" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725024344449-1">
+        <addUniqueConstraint columnNames="project_id, number" constraintName="project_number_unique" tableName="task"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-3">
+        <addColumn tableName="task_key">
+            <column name="created_at" type="timestamp(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-4">
+        <addColumn tableName="task_key">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-5">
+        <addColumn tableName="task_key">
+            <column name="updated_at" type="timestamp(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-6">
+        <addUniqueConstraint columnNames="task_id, key_id" constraintName="task_key_unique" tableName="task_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-7">
+        <createIndex indexName="IX_task_keyPK" tableName="task_key" unique="true">
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-1">
+        <dropPrimaryKey tableName="task_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-2">
+        <addPrimaryKey columnNames="id" constraintName="task_keyPK" tableName="task_key"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1728390455632-1">
+        <addColumn tableName="project">
+            <column defaultValueNumeric="0" name="last_task_number" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

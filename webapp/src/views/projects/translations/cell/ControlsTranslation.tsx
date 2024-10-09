@@ -1,16 +1,24 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Badge, Box, styled } from '@mui/material';
-import { Check, Comment, Edit } from '@mui/icons-material';
-import { T } from '@tolgee/react';
+import {
+  Check,
+  MessageTextSquare02,
+  Edit02,
+  ClipboardCheck,
+} from '@untitled-ui/icons-react';
+import { useTranslate } from '@tolgee/react';
 
 import { StateInType } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
+import { useTranslationsSelector } from '../context/TranslationsContext';
+import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
 
 type State = components['schemas']['TranslationViewModel']['state'];
+type TaskModel = components['schemas']['KeyTaskViewModel'];
 
 const StyledControlsWrapper = styled(Box)`
   display: grid;
@@ -48,7 +56,8 @@ const StyledBadge = styled(Badge)`
 
 const StyledCheckIcon = styled(Check)`
   color: ${({ theme }) => theme.palette.emphasis[100]};
-  font-size: 14px;
+  width: 14px !important;
+  height: 14px !important;
   margin: -5px;
 `;
 
@@ -60,6 +69,8 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
   commentsCount: number | undefined;
+  tasks: TaskModel[] | undefined;
+  onTaskStateChange: (done: boolean) => void;
   unresolvedCommentCount: number | undefined;
   // render last focusable button
   lastFocusable: boolean;
@@ -75,6 +86,8 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   onEdit,
   onStateChange,
   onComments,
+  tasks,
+  onTaskStateChange,
   commentsCount,
   unresolvedCommentCount,
   lastFocusable,
@@ -83,11 +96,16 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
 }) => {
   const spots: string[] = [];
 
+  const translateTransition = useTaskTransitionTranslation();
   const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
+  const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
+  const task = tasks?.[0];
+  const displayTaskButton =
+    task && task.number === prefilteredTask && task.userAssigned;
 
   if (displayTransitionButtons) {
     spots.push('state');
@@ -98,15 +116,21 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   if (displayComments) {
     spots.push('comments');
   }
+  if (displayTaskButton) {
+    spots.push('task');
+  }
 
   const inDomTransitionButtons = displayTransitionButtons && active;
   const inDomEdit = displayEdit && active;
   const inDomComments = displayComments || active || lastFocusable;
+  const inDomTask = displayTaskButton;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
   const gridTemplateColumns = spots
     .map((spot) => (spot === 'state' ? 'auto' : '28px'))
     .join(' ');
+
+  const { t } = useTranslate();
 
   return (
     <StyledControlsWrapper
@@ -131,9 +155,9 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           onClick={onEdit}
           data-cy="translations-cell-edit-button"
           className={CELL_SHOW_ON_HOVER}
-          tooltip={<T keyName="translations_cell_edit" />}
+          tooltip={t('translations_cell_edit')}
         >
-          <Edit fontSize="small" />
+          <Edit02 />
         </ControlsButton>
       )}
       {inDomComments && (
@@ -145,16 +169,16 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
             [CELL_SHOW_ON_HOVER]: !commentsPresent,
             [CELL_HIGHLIGHT_ON_HOVER]: onlyResolved,
           })}
-          tooltip={<T keyName="translation_cell_comments" />}
+          tooltip={t('translation_cell_comments')}
         >
           {onlyResolved ? (
             <StyledBadge
-              badgeContent={<StyledCheckIcon fontSize="small" />}
+              badgeContent={<StyledCheckIcon />}
               classes={{
                 badge: 'resolved',
               }}
             >
-              <Comment fontSize="small" />
+              <MessageTextSquare02 />
             </StyledBadge>
           ) : (
             <StyledBadge
@@ -162,9 +186,26 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
               color="primary"
               classes={{ badge: 'unresolved' }}
             >
-              <Comment fontSize="small" />
+              <MessageTextSquare02 />
             </StyledBadge>
           )}
+        </ControlsButton>
+      )}
+      {inDomTask && (
+        <ControlsButton
+          style={{ gridArea: 'task' }}
+          onClick={() => onTaskStateChange(!task?.done)}
+          data-cy="translations-cell-task-button"
+          color={
+            task?.userAssigned
+              ? task?.done
+                ? 'secondary'
+                : 'primary'
+              : undefined
+          }
+          tooltip={translateTransition(task.type, task.done)}
+        >
+          <ClipboardCheck />
         </ControlsButton>
       )}
     </StyledControlsWrapper>

@@ -20,6 +20,7 @@ data class KeyWithTranslationsView(
 ) {
   lateinit var keyTags: List<Tag>
   var screenshots: Collection<Screenshot>? = null
+  var tasks: List<KeyTaskView>? = null
 
   companion object {
     fun of(

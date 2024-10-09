@@ -3,7 +3,7 @@ import { T, useTranslate } from '@tolgee/react';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { MoreVert } from '@mui/icons-material';
+import { DotsVertical } from '@untitled-ui/icons-react';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useLeaveProject } from './useLeaveProject';
@@ -33,7 +33,7 @@ export const ProjectListItemMenu: FC<{
           aria-label={t('project_list_more_button')}
           size="small"
         >
-          <MoreVert />
+          <DotsVertical />
         </IconButton>
       </Tooltip>
 

@@ -9,6 +9,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
@@ -259,8 +260,13 @@ class ProjectService(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
-    languageService.evictCacheForProject(project.id)
-    project.deletedAt = currentDateProvider.date
+    val languages = project.languages
+    val currentDate = currentDateProvider.date
+    languages.forEach {
+      it.deletedAt = currentDate
+    }
+    languageService.saveAll(languages)
+    project.deletedAt = currentDate
     save(project)
   }
 
@@ -364,12 +370,14 @@ class ProjectService(
     pageable: Pageable,
     search: String?,
     organizationId: Long? = null,
+    filters: ProjectFilters? = null,
   ): Page<ProjectWithLanguagesView> {
     return findPermittedInOrganizationPaged(
       pageable = pageable,
       search = search,
       organizationId = organizationId,
       userAccountId = authenticationFacade.authenticatedUser.id,
+      filters = filters,
     )
   }
 
@@ -378,6 +386,7 @@ class ProjectService(
     search: String?,
     organizationId: Long? = null,
     userAccountId: Long,
+    filters: ProjectFilters? = ProjectFilters(),
   ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages =
       projectRepository.findAllPermitted(
@@ -385,6 +394,7 @@ class ProjectService(
         pageable,
         search,
         organizationId,
+        filters ?: ProjectFilters(),
       )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages, userAccountId)
   }
@@ -448,5 +458,14 @@ class ProjectService(
       .map { it[0] as Long to it[1] as Project }
       .groupBy { it.first }
       .mapValues { it.value.map { it.second } }
+  }
+
+  fun updateLastTaskNumber(
+    projectId: Long,
+    taskNumber: Long,
+  ) {
+    val project = get(projectId)
+    project.lastTaskNumber = taskNumber
+    projectRepository.saveAndFlush(project)
   }
 }

@@ -1,4 +1,4 @@
-import { Check } from '@mui/icons-material';
+import { Check } from '@untitled-ui/icons-react';
 import { Box, SxProps, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 import { StyledBillingLink } from 'tg.component/billing/Decorations';
@@ -32,7 +32,7 @@ export function PlanFeature({ name, link, bold, title, sx, className }: Props) {
 
   return (
     <Box display="flex" gap={0.5} alignItems="center" {...{ sx, className }}>
-      <Check style={{ fontSize: 15 }} />
+      <Check style={{ width: 18, height: 18 }} />
       <Typography sx={{ wordBreak: 'break-word' }} fontSize={14}>
         {item}
       </Typography>

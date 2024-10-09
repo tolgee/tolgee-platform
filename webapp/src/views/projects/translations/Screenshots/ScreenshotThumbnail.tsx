@@ -1,6 +1,6 @@
 import { FunctionComponent, useState } from 'react';
 import { Box, IconButton, styled, Tooltip } from '@mui/material';
-import ClearIcon from '@mui/icons-material/Clear';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
@@ -71,8 +71,9 @@ const StyledDeleteIconButton = styled(IconButton)`
   }
 `;
 
-const StyledDeleteIcon = styled(ClearIcon)`
-  font-size: 20px;
+const StyledDeleteIcon = styled(XClose)`
+  width: 20px;
+  height: 20px;
 `;
 
 export const ScreenshotThumbnail: FunctionComponent<

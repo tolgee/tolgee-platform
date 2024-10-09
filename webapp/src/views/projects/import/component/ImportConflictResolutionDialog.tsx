@@ -6,7 +6,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
-import CloseIcon from '@mui/icons-material/Close';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useTheme } from '@mui/material';
 
@@ -51,7 +51,7 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
               data-cy="import-resolution-dialog-close-button"
               size="large"
             >
-              <CloseIcon />
+              <XClose />
             </IconButton>
             <StyledTitle variant="h6">
               <T keyName="import_resolve_conflicts_title" />

@@ -31,6 +31,7 @@ import io.tolgee.hateoas.translations.TranslationModelAssembler
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.KeyTaskView
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -38,6 +39,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.ITaskService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.CursorUtil
@@ -100,6 +102,7 @@ class TranslationsController(
   private val activityService: ActivityService,
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
+  private val taskService: ITaskService,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -176,7 +179,7 @@ When null, resulting file will be a flat key-value object.
   @PutMapping("")
   @Operation(summary = "Update translations for existing key", description = "Sets translations for existing key")
   @RequestActivity(ActivityType.SET_TRANSLATIONS)
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @UseDefaultPermissions
   @AllowApiAccess
   @OpenApiOrderExtension(2)
   fun setTranslations(
@@ -206,7 +209,7 @@ When null, resulting file will be a flat key-value object.
   @PutMapping("/{translationId}/set-state/{state}")
   @Operation(summary = "Set translation state")
   @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
+  @UseDefaultPermissions
   @AllowApiAccess
   fun setTranslationState(
     @PathVariable translationId: Long,
@@ -253,6 +256,7 @@ When null, resulting file will be a flat key-value object.
         .getViewData(projectHolder.project.id, pageableWithSort, params, languages)
 
     addScreenshotsToResponse(data)
+    addTasksToResponse(data)
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
@@ -268,6 +272,27 @@ When null, resulting file will be a flat key-value object.
     val keysWithScreenshots = screenshotService.getScreenshotsForKeys(data.map { it.keyId }.content)
 
     data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
+  }
+
+  private fun addTasksToResponse(data: Page<KeyWithTranslationsView>) {
+    val user = authenticationFacade.authenticatedUser
+    val keyIds = data.content.map { key -> key.keyId }
+
+    val translationsWithTasks = taskService.getKeysWithTasks(user.id, keyIds)
+
+    data.content.forEach { key ->
+      key.tasks =
+        translationsWithTasks[key.keyId]?.map {
+          KeyTaskView(
+            it.taskNumber,
+            it.languageId,
+            it.languageTag,
+            it.taskDone,
+            it.taskAssigned,
+            it.taskType,
+          )
+        }
+    }
   }
 
   @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])

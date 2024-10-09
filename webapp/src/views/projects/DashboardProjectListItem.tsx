@@ -7,12 +7,13 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
+import { Translate01 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory } from 'react-router-dom';
+
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
-import { TranslationIcon } from 'tg.component/CustomIcons';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
@@ -186,7 +187,7 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
                 size="small"
                 className="translationIconButton"
               >
-                <TranslationIcon />
+                <Translate01 />
               </IconButton>
             </Tooltip>
             <ProjectListItemMenu

@@ -15,6 +15,7 @@ enum class Announcement(
   FEATURE_AI_CUSTOMIZATION(parseTime("2024-03-05 00:00 UTC"), AnnouncementTarget.CLOUD),
   FEATURE_VISUAL_EDITOR(parseTime("2024-05-01 00:00 UTC")),
   FEATURE_CLI_2(parseTime("2024-08-01 00:00 UTC")),
+  FEATURE_TASKS(parseTime("2024-11-01 00:00 UTC")),
   ;
 
   companion object {

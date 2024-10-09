@@ -1,6 +1,6 @@
 import { FunctionComponent, useState } from 'react';
 import { Alert, Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { Warning } from '@mui/icons-material';
+import { AlertTriangle } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
@@ -61,7 +61,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                 sortBy={[]}
                 renderItem={(i) => (
                   <>
-                    <Alert severity="warning" icon={<Warning />}>
+                    <Alert severity="warning" icon={<AlertTriangle />}>
                       {i.type && translateFileIssue(i.type.toLowerCase())}
                       &nbsp;(
                       {i.params &&

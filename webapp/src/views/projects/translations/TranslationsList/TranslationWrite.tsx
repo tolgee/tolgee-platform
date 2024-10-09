@@ -14,7 +14,7 @@ import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
-import { Help } from '@mui/icons-material';
+import { HelpCircle } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled('div')`
@@ -75,6 +75,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     handleInsertBase,
     editEnabled,
     disabled,
+    setAssignedTaskState,
   } = tools;
   const { t } = useTranslate();
   const editVal = tools.editVal!;
@@ -143,6 +144,8 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
         onInsertBase={editEnabled ? handleInsertBase : undefined}
         onStateChange={setState}
         onModeToggle={editEnabled ? handleModeToggle : undefined}
+        tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
+        onTaskStateChange={setAssignedTaskState}
       />
       <Box onMouseDown={(e) => e.preventDefault()} className="editor">
         {editEnabled ? (
@@ -168,7 +171,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                   rel="noreferrer noopener"
                   href="https://tolgee.io/platform/projects_and_organizations/editing_translations"
                 >
-                  <Help fontSize="small" />
+                  <HelpCircle width={20} height={20} />
                 </IconButton>
               </Tooltip>
               <MissingPlaceholders
@@ -182,6 +185,9 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
               className="controls-main"
               onSave={handleSave}
               onCancel={() => handleClose(true)}
+              tasks={keyData.tasks?.filter(
+                (t) => t.languageTag === language.tag
+              )}
             />
           </>
         ) : (

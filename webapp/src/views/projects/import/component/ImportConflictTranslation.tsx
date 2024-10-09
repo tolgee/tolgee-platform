@@ -1,9 +1,7 @@
 import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
 import { Box, BoxProps, IconButton, styled } from '@mui/material';
 import { green } from '@mui/material/colors';
-import { KeyboardArrowUp } from '@mui/icons-material';
-import CheckIcon from '@mui/icons-material/Check';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { ChevronUp, ChevronDown, Check } from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
@@ -117,7 +115,7 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
           p={1}
           data-cy="import-resolution-dialog-translation-check"
         >
-          <CheckIcon />
+          <Check />
         </StyledLoading>
       )}
       <BoxWithRef
@@ -147,7 +145,7 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
             }}
             size="large"
           >
-            {!props.expanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowUp />}
+            {!props.expanded ? <ChevronDown /> : <ChevronUp />}
           </StyledToggleButton>
         </Box>
       )}

@@ -49,6 +49,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
       'PROJECT_LEVEL_CONTENT_STORAGES',
       'STANDARD_SUPPORT',
       'WEBHOOKS',
+      'TASKS',
     ],
     free: false,
     hasYearlyPrice: false,

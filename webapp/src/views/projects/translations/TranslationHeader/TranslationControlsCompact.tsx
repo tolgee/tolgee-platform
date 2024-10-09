@@ -1,35 +1,36 @@
 import { useState } from 'react';
 import {
-  Add,
-  AppsRounded,
-  Clear,
-  FilterList,
-  Search,
-  ViewListRounded,
-} from '@mui/icons-material';
+  Plus,
+  XClose,
+  FilterLines,
+  SearchSm,
+  Globe02,
+  LayoutGrid02,
+  LayoutLeft,
+} from '@untitled-ui/icons-react';
 import { Badge, Button, ButtonGroup, IconButton, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import LanguageIcon from '@mui/icons-material/Language';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { getActiveFilters } from 'tg.component/translation/translationFilters/getActiveFilters';
+import { FiltersMenu } from 'tg.component/translation/translationFilters/FiltersMenu';
+import { useFiltersContent } from 'tg.component/translation/translationFilters/useFiltersContent';
+import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 
-import TranslationsSearchField from './TranslationsSearchField';
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
-import { useActiveFilters } from '../Filters/useActiveFilters';
-import { FiltersMenu } from '../Filters/FiltersMenu';
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { StickyHeader } from './StickyHeader';
-import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledContainer = styled('div')`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-left: ${({ theme }) => theme.spacing(-2)};
+  margin-left: ${({ theme }) => theme.spacing(-1)};
   margin-right: ${({ theme }) => theme.spacing(-2)};
   padding: ${({ theme }) => theme.spacing(0, 1.5)};
   z-index: ${({ theme }) => theme.zIndex.appBar + 1};
@@ -46,15 +47,15 @@ const StyledSpaced = styled('div')`
 `;
 
 const StyledSearchSpaced = styled('div')`
-  display: flex;
+  display: grid;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing(0.5)};
-  padding-right: ${({ theme }) => theme.spacing(1)};
   flex-grow: 1;
+  grid-template-columns: 1fr auto;
+  gap: ${({ theme }) => theme.spacing(0.5)};
   position: relative;
 `;
 
-const StyledSearch = styled(TranslationsSearchField)`
+const StyledSearch = styled(HeaderSearchField)`
   min-width: 200px;
 `;
 
@@ -62,6 +63,10 @@ const StyledToggleButton = styled(Button)`
   padding: 0px 2px;
   height: 35px;
   min-height: 35px;
+  & svg {
+    width: 22px;
+    height: 22px;
+  }
 `;
 
 const StyledIconButton = styled(IconButton)`
@@ -97,8 +102,16 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
-
-  const activeFilters = useActiveFilters();
+  const filters = useTranslationsSelector((c) => c.filters);
+  const activeFilters = getActiveFilters(filters);
+  const { setFilters } = useTranslationsActions();
+  const selectedLanguagesMapped =
+    languages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
+  const filtersContent = useFiltersContent(
+    filters,
+    setFilters,
+    selectedLanguagesMapped
+  );
 
   const handleLanguageChange = (languages: string[]) => {
     selectLanguages(languages);
@@ -130,7 +143,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               }}
             />
             <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
-              <Clear />
+              <XClose />
             </StyledIconButton>
           </StyledSearchSpaced>
         ) : (
@@ -142,7 +155,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                     size="small"
                     onClick={() => setSearchOpen(true)}
                   >
-                    <Search />
+                    <SearchSm />
                   </StyledIconButton>
                 </StyledButtonWrapper>
               </Badge>
@@ -153,14 +166,16 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                     size="small"
                     onClick={(e) => setAnchorFiltersEl(e.currentTarget)}
                   >
-                    <FilterList />
+                    <FilterLines />
                   </StyledIconButton>
                 </StyledButtonWrapper>
               </Badge>
-
               <FiltersMenu
+                filters={filters}
                 anchorEl={anchorFiltersEl}
                 onClose={() => setAnchorFiltersEl(null)}
+                filtersContent={filtersContent}
+                onChange={setFilters}
               />
             </StyledSpaced>
 
@@ -169,7 +184,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 size="small"
                 onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
               >
-                <LanguageIcon />
+                <Globe02 />
               </StyledIconButton>
 
               <LanguagesMenu
@@ -186,14 +201,14 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                   onClick={() => handleViewChange('LIST')}
                   data-cy="translations-view-list-button"
                 >
-                  <ViewListRounded />
+                  <LayoutLeft />
                 </StyledToggleButton>
                 <StyledToggleButton
                   color={view === 'TABLE' ? 'primary' : 'default'}
                   onClick={() => handleViewChange('TABLE')}
                   data-cy="translations-view-table-button"
                 >
-                  <AppsRounded />
+                  <LayoutGrid02 />
                 </StyledToggleButton>
               </ButtonGroup>
 
@@ -205,7 +220,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                     onClick={handleAddTranslation}
                     data-cy="translations-add-button"
                   >
-                    <Add />
+                    <Plus />
                   </StyledIconButton>
                 </QuickStartHighlight>
               )}

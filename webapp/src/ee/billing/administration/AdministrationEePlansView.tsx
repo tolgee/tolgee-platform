@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
 import {
   Box,
@@ -8,6 +9,7 @@ import {
   ListItemText,
   Paper,
 } from '@mui/material';
+import { X } from '@untitled-ui/icons-react';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -16,8 +18,6 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { Link } from 'react-router-dom';
-import { Delete } from '@mui/icons-material';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
@@ -110,7 +110,7 @@ export const AdministrationEePlansView = () => {
                     onClick={() => deletePlan(plan)}
                     data-cy="administration-ee-plans-item-delete"
                   >
-                    <Delete />
+                    <X />
                   </IconButton>
                 </Box>
               </Box>

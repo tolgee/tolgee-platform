@@ -74,7 +74,7 @@ export const SlackApp = () => {
   const getUrlMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/slack/get-connect-url',
     method: 'get',
-    invalidatePrefix: '/v2/organizations/{organizationId}/',
+    invalidatePrefix: '/v2/organizations/{organizationId}',
   });
 
   const workspaces = useApiQuery({

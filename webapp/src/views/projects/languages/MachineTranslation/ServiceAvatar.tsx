@@ -1,4 +1,4 @@
-import { Warning } from '@mui/icons-material';
+import { AlertTriangle } from '@untitled-ui/icons-react';
 import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
@@ -6,8 +6,9 @@ import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/
 import { getServiceName } from './getServiceName';
 import { ServiceType } from './types';
 
-const StyledWarning = styled(Warning)`
-  font-size: 16px;
+const StyledWarning = styled(AlertTriangle)`
+  width: 16px;
+  height: 16px;
   position: absolute;
   top: -8px;
   right: -8px;

@@ -75,7 +75,11 @@ class CreateOrUpdateTranslationsFacade(
     key: Key? = null,
   ): SetTranslationsResponseModel {
     val keyNotNull = key ?: keyService.get(projectHolder.project.id, dto.key, dto.namespace)
-    securityService.checkLanguageTranslatePermissionsByTag(dto.translations.keys, projectHolder.project.id)
+    securityService.checkLanguageTranslatePermissionsByTag(
+      dto.translations.keys,
+      projectHolder.project.id,
+      keyNotNull.id,
+    )
 
     val modifiedTranslations = translationService.setForKey(keyNotNull, dto.translations)
 

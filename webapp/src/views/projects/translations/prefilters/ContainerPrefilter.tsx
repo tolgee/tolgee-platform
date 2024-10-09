@@ -1,9 +1,10 @@
-import { FilterList } from '@mui/icons-material';
+import { FilterLines } from '@untitled-ui/icons-react';
 import { Button, styled, useMediaQuery } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { usePrefilter } from './usePrefilter';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import React from 'react';
 
 const StyledContainer = styled('div')`
   margin-top: -4px;
@@ -45,9 +46,16 @@ const StyledClear = styled('div')`
 type Props = {
   title: React.ReactNode;
   content: React.ReactNode;
+  icon?: React.ReactNode;
+  closeButton?: React.ReactNode;
 };
 
-export const PrefilterContainer = ({ content, title }: Props) => {
+export const PrefilterContainer = ({
+  title,
+  content,
+  icon,
+  closeButton,
+}: Props) => {
   const { clear } = usePrefilter();
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
@@ -58,14 +66,16 @@ export const PrefilterContainer = ({ content, title }: Props) => {
   return (
     <StyledContainer>
       <StyledLabel>
-        <FilterList color="inherit" />
+        {icon ?? <FilterLines />}
         <StyledLabelText>{title}</StyledLabelText>
       </StyledLabel>
       {!isSmall && content}
       <StyledClear>
-        <Button size="small" onClick={clear} color="inherit">
-          <T keyName="activity_filter_indicator_clear" />
-        </Button>
+        {closeButton ?? (
+          <Button size="small" onClick={clear} color="inherit">
+            <T keyName="activity_filter_indicator_clear" />
+          </Button>
+        )}
       </StyledClear>
     </StyledContainer>
   );

@@ -10,7 +10,7 @@ import {
   DialogContent,
   Link as MuiLink,
 } from '@mui/material';
-import { Clear, Info } from '@mui/icons-material';
+import { XClose, InfoCircle } from '@untitled-ui/icons-react';
 import { useUser } from 'tg.globalContext/helpers';
 import { Link } from 'react-router-dom';
 
@@ -49,7 +49,7 @@ const StyledItemActions = styled('div')`
   flex-wrap: wrap;
 `;
 
-const StyledInfo = styled(Info)`
+const StyledInfo = styled(InfoCircle)`
   opacity: 0.5;
 `;
 
@@ -101,7 +101,7 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
               onClick={() => leaveOrganization(organizationId)}
               data-cy="organization-member-leave-button"
             >
-              <Clear />
+              <XClose />
             </IconButton>
           </Tooltip>
         ) : (

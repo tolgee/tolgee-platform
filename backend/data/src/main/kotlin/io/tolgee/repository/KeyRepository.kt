@@ -54,6 +54,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   fun deleteAllByIdIn(ids: Collection<Long>)
 
+  fun findAllByProjectIdAndIdIn(
+    projectId: Long,
+    ids: Collection<Long>,
+  ): List<Key>
+
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
 
   @Query(

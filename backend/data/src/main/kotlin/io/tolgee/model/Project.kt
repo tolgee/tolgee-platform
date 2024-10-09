@@ -69,7 +69,7 @@ class Project(
   @Deprecated(message = "Project can be owned only by organization")
   var userOwner: UserAccount? = null
 
-  @ManyToOne(optional = true)
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
   lateinit var organizationOwner: Organization
 
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
@@ -113,6 +113,9 @@ class Project(
 
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
+
+  @ColumnDefault("0")
+  var lastTaskNumber: Long = 0
 
   override var deletedAt: Date? = null
 

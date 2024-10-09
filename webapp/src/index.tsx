@@ -10,7 +10,6 @@ import {
 import { FormatIcu } from '@tolgee/format-icu';
 import ReactDOM from 'react-dom';
 import { QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
 
 import { BrowserRouter } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
@@ -86,7 +85,6 @@ const MainWrapper = () => {
                       </GlobalContext>
                     </SnackbarProvider>
                   </ErrorBoundary>
-                  <ReactQueryDevtools />
                 </QueryClientProvider>
               </BrowserRouter>
             </TolgeeProvider>
