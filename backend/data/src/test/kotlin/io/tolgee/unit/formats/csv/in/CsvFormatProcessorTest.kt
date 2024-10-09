@@ -3,7 +3,14 @@ package io.tolgee.unit.formats.csv.`in`
 import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
-import io.tolgee.util.*
+import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.assertKey
+import io.tolgee.util.assertLanguagesCount
+import io.tolgee.util.assertSingle
+import io.tolgee.util.assertSinglePlural
+import io.tolgee.util.assertTranslations
+import io.tolgee.util.custom
+import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -355,7 +362,7 @@ class CsvFormatProcessorTest {
     // FIXME: Is this correct?
     PlaceholderConversionTestHelper.testFile(
       "import.csv",
-      "src/test/resources/import/csv/simple.csv",
+      "src/test/resources/import/csv/placeholder_conversion.csv",
       assertBeforeSettingsApplication =
         listOf(
           "this is csv {count}",
@@ -364,9 +371,15 @@ class CsvFormatProcessorTest {
           "toto je csv",
         ),
       assertAfterDisablingConversion =
-        listOf(),
+        listOf(
+          "this is csv %d",
+          "toto je csv %d",
+        ),
       assertAfterReEnablingConversion =
-        listOf(),
+        listOf(
+          "this is csv {count}",
+          "toto je csv {count}",
+        ),
     )
   }
 
