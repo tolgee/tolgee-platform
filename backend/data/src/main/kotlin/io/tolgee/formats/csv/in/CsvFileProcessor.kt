@@ -10,8 +10,7 @@ class CsvFileProcessor(
   override val context: FileProcessorContext,
 ) : ImportFileProcessor() {
   override fun process() {
-    val data = parse()
-    val format = getFormat(data)
+    val (data, format) = parse()
     data.importAll(format)
   }
 
@@ -41,17 +40,21 @@ class CsvFileProcessor(
     )
   }
 
-  private fun parse() =
+  private fun parse(): Pair<Iterable<CsvEntry>, ImportFormat> {
     try {
       val detector = CsvDelimiterDetector(context.file.data.inputStream())
-      CsvFileParser(
+      val parser = CsvFileParser(
         inputStream = context.file.data.inputStream(),
         delimiter = detector.delimiter,
         languageFallback = firstLanguageTagGuessOrUnknown,
-      ).parse()
+      )
+      val data = parser.parse()
+      val format = getFormat(parser.rows)
+      return data to format
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
     }
+  }
 
   private fun getFormat(data: Any?): ImportFormat {
     return context.mapping?.format ?: CSVImportFormatDetector().detectFormat(data)

@@ -359,15 +359,14 @@ class CsvFormatProcessorTest {
 
   @Test
   fun `placeholder conversion setting application works`() {
-    // FIXME: Is this correct?
     PlaceholderConversionTestHelper.testFile(
       "import.csv",
       "src/test/resources/import/csv/placeholder_conversion.csv",
       assertBeforeSettingsApplication =
         listOf(
-          "this is csv {count}",
+          "this is csv {0, number}",
           "this is csv",
-          "toto je csv {count}",
+          "toto je csv {0, number}",
           "toto je csv",
         ),
       assertAfterDisablingConversion =
@@ -377,8 +376,8 @@ class CsvFormatProcessorTest {
         ),
       assertAfterReEnablingConversion =
         listOf(
-          "this is csv {count}",
-          "toto je csv {count}",
+          "this is csv {0, number}",
+          "toto je csv {0, number}",
         ),
     )
   }
