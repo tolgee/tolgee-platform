@@ -19,6 +19,7 @@ declare namespace DataCy {
         "administration-cloud-plan-field-price-per-thousand-translations" |
         "administration-cloud-plan-field-price-yearly" |
         "administration-cloud-plan-field-public" |
+        "administration-cloud-plan-field-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
         "administration-cloud-plan-organization-assign-switch" |

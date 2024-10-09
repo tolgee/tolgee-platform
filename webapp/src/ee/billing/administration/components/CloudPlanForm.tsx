@@ -145,6 +145,9 @@ export function CloudPlanForm({
                       label.toLowerCase().includes(prompt.toLowerCase())
                     }
                     SelectProps={{
+                      // @ts-ignore
+                      'data-cy':
+                        'administration-cloud-plan-field-stripe-product',
                       label: t(
                         'administration_cloud_plan_field_stripe_product'
                       ),
