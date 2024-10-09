@@ -11,6 +11,7 @@ import AndroidLogo from 'tg.svgs/logos/android.svg?react';
 import FluttrerLogo from 'tg.svgs/logos/flutter.svg?react';
 import RailsLogo from 'tg.svgs/logos/rails.svg?react';
 import I18nextLogo from 'tg.svgs/logos/i18next.svg?react';
+import CsvLogo from 'tg.svgs/logos/csv.svg?react';
 
 const TechLogo = ({
   svg,
@@ -55,12 +56,7 @@ const FORMATS = [
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
   { name: 'i18next', logo: <I18nextLogo /> },
-  {
-    name: 'CSV',
-    logo: <TolgeeLogo />, // TODO: replace with proper icon?
-    logoHeight: '24px',
-    logoWidth: '24px',
-  },
+  { name: 'CSV', logo: <CsvLogo /> },
 ];
 
 export const ImportSupportedFormats = () => {
