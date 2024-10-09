@@ -1,3 +1,10 @@
+# [3.77.0](https://github.com/tolgee/tolgee-platform/compare/v3.76.0...v3.77.0) (2024-10-09)
+
+
+### Features
+
+* tasks feature + new icons ([#2401](https://github.com/tolgee/tolgee-platform/issues/2401)) ([3976471](https://github.com/tolgee/tolgee-platform/commit/3976471820a04bc407efb7cb2e16b7b10d9ca4ca))
+
 # [3.76.0](https://github.com/tolgee/tolgee-platform/compare/v3.75.1...v3.76.0) (2024-10-09)
 
 
