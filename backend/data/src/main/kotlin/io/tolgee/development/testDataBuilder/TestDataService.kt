@@ -434,9 +434,10 @@ class TestDataService(
     val userAccountBuilders = builder.data.userAccounts
     userAccountService.saveAll(
       userAccountBuilders.map { userBuilder ->
-        userBuilder.self.password = passwordHashCache.computeIfAbsent(userBuilder.rawPassword) {
-          passwordEncoder.encode(userBuilder.rawPassword)
-        }
+        userBuilder.self.password =
+          passwordHashCache.computeIfAbsent(userBuilder.rawPassword) {
+            passwordEncoder.encode(userBuilder.rawPassword)
+          }
         userBuilder.self
       },
     )

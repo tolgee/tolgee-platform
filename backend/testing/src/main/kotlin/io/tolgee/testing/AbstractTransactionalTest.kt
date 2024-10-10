@@ -17,7 +17,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
     DependencyInjectionTestExecutionListener::class,
     CleanDbTestListener::class,
     DirtiesContextTestExecutionListener::class,
-    BatchJobCleanerListener::class
+    BatchJobCleanerListener::class,
   ],
 )
 @ActiveProfiles(profiles = ["local"])
