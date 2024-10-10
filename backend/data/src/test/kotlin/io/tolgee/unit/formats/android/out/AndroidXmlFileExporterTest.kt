@@ -194,7 +194,7 @@ class AndroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "key3",
           text = "{count, plural, one {# den} few {# dny} other {# dní}}",
-          description = "This is a description above plural"
+          description = "This is a description above plural",
         ) {
           key.isPlural = true
         }
@@ -235,7 +235,7 @@ class AndroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "i_am_array_item[20]",
           text = "I will be first",
-          description = "This is a description above array item"
+          description = "This is a description above array item",
         )
 
         add(

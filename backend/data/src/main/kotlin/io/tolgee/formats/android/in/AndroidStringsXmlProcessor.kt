@@ -111,7 +111,6 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     arrayUnit.items.forEachIndexed { index, item ->
       val keyNameWithIndex = "$keyName[$index]"
 
-
       val text = item.value?.string
       context.addKeyDescription(keyName, item.comment)
       context.addTranslation(

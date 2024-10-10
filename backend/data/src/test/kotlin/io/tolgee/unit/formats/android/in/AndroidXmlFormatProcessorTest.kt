@@ -79,19 +79,19 @@ class AndroidXmlFormatProcessorTest {
       .assertSingle {
         hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d")
       }
-    mockUtil.fileProcessorContext.assertKey("app_name"){
+    mockUtil.fileProcessorContext.assertKey("app_name") {
       custom.assert.isNull()
       description.assert.isEqualTo("This is a comment")
     }
-    mockUtil.fileProcessorContext.assertKey("dogs_count"){
+    mockUtil.fileProcessorContext.assertKey("dogs_count") {
       custom.assert.isNull()
       description.assert.isEqualTo("This is a comment above a plural")
     }
-    mockUtil.fileProcessorContext.assertKey("string_array"){
+    mockUtil.fileProcessorContext.assertKey("string_array") {
       custom.assert.isNull()
       description.assert.isEqualTo("This is a comment above an array item #2")
     }
-    mockUtil.fileProcessorContext.assertKey("with_spaces"){
+    mockUtil.fileProcessorContext.assertKey("with_spaces") {
       custom.assert.isNull()
       description.assert.isEqualTo("and only the last one will be kept")
     }
