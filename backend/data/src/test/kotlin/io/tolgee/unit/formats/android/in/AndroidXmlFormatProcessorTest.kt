@@ -91,6 +91,10 @@ class AndroidXmlFormatProcessorTest {
       custom.assert.isNull()
       description.assert.isEqualTo("This is a comment above an array item #2")
     }
+    mockUtil.fileProcessorContext.assertKey("with_spaces"){
+      custom.assert.isNull()
+      description.assert.isEqualTo("and only the last one will be kept")
+    }
   }
 
   @Test

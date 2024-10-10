@@ -14,6 +14,8 @@
         <!-- This is a comment above an array item #2 -->
         <item>Second item</item>
     </string-array>
+    <!-- Multiple comments will be ignored -->
+    <!-- and only the last one will be kept -->
     <string name="with_spaces">
         <!-- This is a comment inside a string and will be ignored -->Hello!
     </string>
