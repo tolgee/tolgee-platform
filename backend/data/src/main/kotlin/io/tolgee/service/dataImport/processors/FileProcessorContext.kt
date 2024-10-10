@@ -134,13 +134,14 @@ data class FileProcessorContext(
       return
     }
 
-    if (text.length > KeyMeta.DESCRIPTION_MAX_LEN) {
+    var validText = text.trim()
+    if (validText.length > KeyMeta.DESCRIPTION_MAX_LEN) {
       fileEntity.addIssue(FileIssueType.DESCRIPTION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to key))
-      return
+      validText = validText.substring(0, KeyMeta.DESCRIPTION_MAX_LEN).trim()
     }
 
     val keyMeta = getOrCreateKeyMeta(key)
-    keyMeta.description = text.trim()
+    keyMeta.description = validText
   }
 
   fun addKeyCodeReference(
