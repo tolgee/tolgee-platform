@@ -4004,7 +4004,8 @@ export interface components {
         | "TRANSLATION_TOO_LONG"
         | "KEY_IS_BLANK"
         | "TRANSLATION_DEFINED_IN_ANOTHER_FILE"
-        | "INVALID_CUSTOM_VALUES";
+        | "INVALID_CUSTOM_VALUES"
+        | "DESCRIPTION_TOO_LONG";
       params: components["schemas"]["ImportFileIssueParamModel"][];
     };
     ImportFileIssueParamModel: {

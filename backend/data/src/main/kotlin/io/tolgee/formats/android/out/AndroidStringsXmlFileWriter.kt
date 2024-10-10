@@ -21,10 +21,7 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
   private fun Element.addToElement(unit: Map.Entry<String, AndroidXmlNode>) {
     when (val node = unit.value) {
       is StringUnit -> {
-        val comment = node.comment
-        if (!comment.isNullOrEmpty()) {
-          comment(comment)
-        }
+        optionalComment(node.comment)
         element("string") {
           attr("name", unit.key)
           appendXmlIfEnabledOrText((unit.value as StringUnit).value)
@@ -35,10 +32,7 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
         element("string-array") {
           attr("name", unit.key)
           node.items.sortedBy { it.index }.forEach {
-            val comment = it.comment
-            if (!comment.isNullOrEmpty()) {
-              comment(comment)
-            }
+            optionalComment(it.comment)
             element("item") {
               appendXmlIfEnabledOrText(it.value)
             }
@@ -47,10 +41,7 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
       }
 
       is PluralUnit -> {
-        val comment = node.comment
-        if (!comment.isNullOrEmpty()) {
-          comment(comment)
-        }
+        optionalComment(node.comment)
         element("plurals") {
           attr("name", unit.key)
           node.items.forEach {
@@ -75,11 +66,13 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
       this.textContent = contentToAppend.text
     }
 
-    if (contentToAppend.children != null) {
-      contentToAppend.children.forEach {
-        val imported = this.ownerDocument.importNode(it, true)
-        this.appendChild(imported)
-      }
+    contentToAppend.children?.forEach {
+      val imported = this.ownerDocument.importNode(it, true)
+      this.appendChild(imported)
     }
+  }
+
+  private fun Element.optionalComment(comment: String?) {
+    comment?.let { comment(it) }
   }
 }

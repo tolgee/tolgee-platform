@@ -133,6 +133,12 @@ data class FileProcessorContext(
     if (text.isNullOrBlank()) {
       return
     }
+
+    if (text.length > KeyMeta.DESCRIPTION_MAX_LEN) {
+      fileEntity.addIssue(FileIssueType.DESCRIPTION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to key))
+      return
+    }
+
     val keyMeta = getOrCreateKeyMeta(key)
     keyMeta.description = text.trim()
   }

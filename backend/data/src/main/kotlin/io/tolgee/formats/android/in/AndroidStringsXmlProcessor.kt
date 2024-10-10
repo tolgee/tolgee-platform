@@ -41,6 +41,9 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     if (keyName.isBlank()) {
       return
     }
+    it.comment?.let {
+      context.addKeyDescription(keyName, it)
+    }
     val text = it.value?.string
     context.addTranslation(
       keyName,
@@ -77,6 +80,9 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     if (keyName.isBlank()) {
       return
     }
+    it.comment?.let {
+      context.addKeyDescription(keyName, it)
+    }
 
     val rawData = it.items.map { it.key to it.value.string }.toMap()
 
@@ -109,6 +115,10 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     }
     arrayUnit.items.forEachIndexed { index, item ->
       val keyNameWithIndex = "$keyName[$index]"
+
+      item.comment?.let {
+        context.addKeyDescription(keyNameWithIndex, it)
+      }
 
       val text = item.value?.string
       context.addTranslation(

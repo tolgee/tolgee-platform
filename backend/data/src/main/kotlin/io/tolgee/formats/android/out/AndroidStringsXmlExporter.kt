@@ -45,7 +45,7 @@ class AndroidStringsXmlExporter(
       val arrayMatch = KEY_IS_ARRAY_REGEX.matchEntire(translation.key.name)
       val isArray = arrayMatch != null
       when {
-        isArray -> buildStringArrayUnit(translation, arrayMatch!!)
+        isArray -> buildStringArrayUnit(translation, arrayMatch)
         else -> {
           val converted = getConvertedMessage(translation, translation.key.isPlural)
           when {
