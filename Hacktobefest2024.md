@@ -1,6 +1,6 @@
 # Welcome to Hacktoberfest 2024 with Tolgee
 
-Join the community this Hacktoberfest by contributing to Tolgee!
+Join the community at Hacktoberfest by contributing to Tolgee!
 
 ![Hacktobefest 2024](https://github.com/user-attachments/assets/ac1bd9c1-fc1f-4375-9bf5-8e8c9b41cc15)
 
