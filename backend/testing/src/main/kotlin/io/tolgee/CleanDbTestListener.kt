@@ -77,29 +77,50 @@ class CleanDbTestListener : TestExecutionListener {
       val ignoredTablesString = ignoredTables.joinToString(", ") { "'$it'" }
       try {
         val rs: ResultSet =
-          stmt.executeQuery(
-            String.format(
-              "SELECT table_schema, table_name" +
-                " FROM information_schema.tables" +
-                " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
-                "   and table_name not in ($ignoredTablesString)",
-              databaseName,
-            ),
-          )
-        val tables: MutableList<Pair<String, String>> = ArrayList()
-        while (rs.next()) {
-          tables.add(rs.getString(1) to rs.getString(2))
-        }
-        stmt.execute(
-          java.lang.String.format(
-            "TRUNCATE TABLE %s",
-            tables.joinToString(",") { it.first + "." + it.second },
+        stmt.executeQuery(
+          String.format(
+            "SELECT table_schema, table_name" +
+              " FROM information_schema.tables" +
+              " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
+              "   and table_name not in ($ignoredTablesString)",
+            databaseName,
           ),
         )
-      } catch (e: InterruptedException) {
-        stmt.cancel()
-        throw e
+      val tables: MutableList<Pair<String, String>> = ArrayList()
+      while (rs.next()) {
+        tables.add(rs.getString(1) to rs.getString(2))
       }
+
+      val disableConstraintsSQL = generateDisableConstraintsSQL(tables)
+      disableConstraintsSQL.forEach { stmt.addBatch(it) }
+      stmt.executeBatch()
+
+      stmt.execute(
+        java.lang.String.format(
+          "TRUNCATE TABLE %s",
+          tables.joinToString(",") { it.first + "." + it.second },
+        ),
+      )
+
+      val enableConstraintsSQL = generateEnableConstraintsSQL(tables)
+      enableConstraintsSQL.forEach { stmt.addBatch(it) }
+      stmt.executeBatch()
+    } catch (e: InterruptedException) {
+      stmt.cancel()
+      throw e
+    }
+  }
+    }
+
+  fun generateDisableConstraintsSQL(tables: List<Pair<String, String>>): List<String> {
+    return tables.map { (schema, table) ->
+      "ALTER TABLE \"$schema\".\"$table\" DISABLE TRIGGER ALL"
+    }
+  }
+
+  fun generateEnableConstraintsSQL(tables: List<Pair<String, String>>): List<String> {
+    return tables.map { (schema, table) ->
+      "ALTER TABLE \"$schema\".\"$table\" ENABLE TRIGGER ALL"
     }
   }
 
