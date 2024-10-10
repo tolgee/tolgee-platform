@@ -1,3 +1,10 @@
+## [3.78.1](https://github.com/tolgee/tolgee-platform/compare/v3.78.0...v3.78.1) (2024-10-10)
+
+
+### Bug Fixes
+
+* task preview key count ([#2556](https://github.com/tolgee/tolgee-platform/issues/2556)) ([720f191](https://github.com/tolgee/tolgee-platform/commit/720f19120ae34af3d389c1fe5955aedb6ff35ce3))
+
 # [3.78.0](https://github.com/tolgee/tolgee-platform/compare/v3.77.0...v3.78.0) (2024-10-09)
 
 
