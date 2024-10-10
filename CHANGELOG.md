@@ -1,3 +1,11 @@
+## [3.78.2](https://github.com/tolgee/tolgee-platform/compare/v3.78.1...v3.78.2) (2024-10-10)
+
+
+### Bug Fixes
+
+* index of export entries ([#2558](https://github.com/tolgee/tolgee-platform/issues/2558)) ([017a594](https://github.com/tolgee/tolgee-platform/commit/017a594b141504f3dad9b33d5ceda8cd2d4013b6))
+* revert activity diffs as functions not components ([8bed91a](https://github.com/tolgee/tolgee-platform/commit/8bed91aab24ef3a421c143d1003292c1fd429fb1))
+
 ## [3.78.1](https://github.com/tolgee/tolgee-platform/compare/v3.78.0...v3.78.1) (2024-10-10)
 
 
