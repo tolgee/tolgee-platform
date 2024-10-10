@@ -8,7 +8,9 @@ import io.tolgee.formats.android.`in`.AndroidXmlValueBlockParser
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLStreamConstants
+import javax.xml.stream.events.Comment
 import javax.xml.stream.events.StartElement
+import javax.xml.stream.events.XMLEvent
 
 class AndroidStringsXmlParser(
   private val xmlEventReader: XMLEventReader,
@@ -29,7 +31,7 @@ class AndroidStringsXmlParser(
       val wasAnyToContentSaveOpenBefore = isAnyToContentSaveOpen
       when {
         event.eventType == XMLStreamConstants.COMMENT -> {
-          currentComment = event.asCharacters().data
+          currentComment = event.asComment().text
         }
         event.isStartElement -> {
           if (!isAnyToContentSaveOpen) {
@@ -134,4 +136,6 @@ class AndroidStringsXmlParser(
     get() {
       return currentStringEntry != null || isArrayItemOpen || currentPluralQuantity != null
     }
+
+  private fun XMLEvent.asComment(): Comment = this as Comment
 }
