@@ -58,7 +58,6 @@ class CleanDbTestListener : TestExecutionListener {
                 }
               }
             }
-
             i++
           }
         }
@@ -90,16 +89,37 @@ class CleanDbTestListener : TestExecutionListener {
         while (rs.next()) {
           tables.add(rs.getString(1) to rs.getString(2))
         }
+
+        val disableConstraintsSQL = generateDisableConstraintsSQL(tables)
+        disableConstraintsSQL.forEach { stmt.addBatch(it) }
+        stmt.executeBatch()
+
         stmt.execute(
           java.lang.String.format(
             "TRUNCATE TABLE %s",
             tables.joinToString(",") { it.first + "." + it.second },
           ),
         )
+
+        val enableConstraintsSQL = generateEnableConstraintsSQL(tables)
+        enableConstraintsSQL.forEach { stmt.addBatch(it) }
+        stmt.executeBatch()
       } catch (e: InterruptedException) {
         stmt.cancel()
         throw e
       }
+    }
+  }
+
+  private fun generateDisableConstraintsSQL(tables: List<Pair<String, String>>): List<String> {
+    return tables.map { (schema, table) ->
+      "ALTER TABLE \"$schema\".\"$table\" DISABLE TRIGGER ALL"
+    }
+  }
+
+  private fun generateEnableConstraintsSQL(tables: List<Pair<String, String>>): List<String> {
+    return tables.map { (schema, table) ->
+      "ALTER TABLE \"$schema\".\"$table\" ENABLE TRIGGER ALL"
     }
   }
 

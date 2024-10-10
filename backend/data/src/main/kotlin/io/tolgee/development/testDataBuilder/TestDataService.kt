@@ -433,9 +433,12 @@ class TestDataService(
   private fun saveAllUsers(builder: TestDataBuilder) {
     val userAccountBuilders = builder.data.userAccounts
     userAccountService.saveAll(
-      userAccountBuilders.map {
-        it.self.password = passwordEncoder.encode(it.rawPassword)
-        it.self
+      userAccountBuilders.map { userBuilder ->
+        userBuilder.self.password =
+          passwordHashCache.computeIfAbsent(userBuilder.rawPassword) {
+            passwordEncoder.encode(userBuilder.rawPassword)
+          }
+        userBuilder.self
       },
     )
     saveUserAvatars(userAccountBuilders)
@@ -499,5 +502,9 @@ class TestDataService(
 
   private fun clearEntityManager() {
     entityManager.clear()
+  }
+
+  companion object {
+    private val passwordHashCache = mutableMapOf<String, String>()
   }
 }
