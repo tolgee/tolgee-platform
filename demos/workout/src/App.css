@@ -1,0 +1,135 @@
+/* App.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #3a1c71 0%, #d76d77 50%, #ffaf7b 100%);
+  color: #333;
+}
+
+.app-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.content {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 450px;
+  width: 100%;
+}
+
+.title {
+  font-size: 2.2rem;
+  color: #3a1c71;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.dice-button {
+  width: 110px;
+  height: 110px;
+  background-color: #d76d77;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.dice-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(215, 109, 119, 0.4);
+}
+
+.dice-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 25px;
+  font-weight: 400;
+}
+
+.result {
+  font-size: 1.4rem;
+  color: #3a1c71;
+  margin-bottom: 20px;
+}
+
+.number {
+  font-weight: 700;
+  color: #d76d77;
+}
+
+.workout {
+  font-size: 1.2rem;
+  color: #ffaf7b;
+  margin-bottom: 25px;
+}
+
+.workout-name {
+  font-weight: 600;
+  color: #d76d77;
+}
+
+.workout-image-container {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.workout-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.workout-image:hover {
+  transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 25px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .dice-button {
+    width: 90px;
+    height: 90px;
+  }
+
+  .workout-image-container {
+    height: 200px;
+  }
+}
