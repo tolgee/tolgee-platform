@@ -368,7 +368,7 @@ class TaskService(
         relevantKeys,
       )
     return KeysScopeView(
-      keyCount = result.keyCount,
+      keyCount = relevantKeys.size.toLong(),
       wordCount = result.wordCount,
       characterCount = result.characterCount,
       keyCountIncludingConflicts = keysIncludingConflicts.size.toLong(),
