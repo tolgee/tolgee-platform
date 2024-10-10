@@ -1,24 +1,24 @@
-import { TextDiff } from './types/TextDiff';
-import { AutoChange } from './types/AutoChange';
-import { StateChange } from './types/StateChange';
 import { DiffValue, FieldOptionsObj } from './types';
-import { GeneralChange } from './types/GeneralChange';
-import { CommentStateChange } from './types/CommentStateChange';
-import { KeyTagsChange } from './types/KeyTagsChange';
-import { LanguageFlagChange } from './types/LanguageFlagChange';
-import { ProjectLanguageChange } from './types/ProjectLanguageChange';
-import { NoDiffChange } from './types/NoDiffChange';
-import { NamespaceChange } from './types/NamespaceChange';
-import { OutdatedChange } from './types/OutdatedChange';
-import { BatchLanguageIdsChange } from './types/BatchLanguageIdsChange';
-import { BatchLanguageIdChange } from './types/BatchLanguageIdChange';
-import { BatchKeyTagListChange } from './types/BatchKeyTagListChange';
-import { BatchNamespaceChange } from './types/BatchNamespaceChange';
-import { BatchStateChange } from './types/BatchStateChange';
-import { DefaultNamespaceChange } from './types/DefaultNamespaceChange';
-import { DateChange } from './types/DateChange';
-import { TaskStateChange } from './types/TaskStateChange';
-import { TaskTypeChange } from './types/TaskTypeChange';
+import { getTextDiff } from './types/getTextDiff';
+import { getAutoChange } from './types/getAutoChange';
+import { getStateChange } from './types/getStateChange';
+import { getGeneralChange } from './types/getGeneralChange';
+import { getCommentStateChange } from './types/getCommentStateChange';
+import { getKeyTagsChange } from './types/getKeyTagsChange';
+import { getLanguageFlagChange } from './types/getLanguageFlagChange';
+import { getProjectLanguageChange } from './types/getProjectLanguageChange';
+import { getNoDiffChange } from './types/getNoDiffChange';
+import { getNamespaceChange } from './types/getNamespaceChange';
+import { getOutdatedChange } from './types/getOutdatedChange';
+import { getBatchLanguageIdsChange } from './types/getBatchLanguageIdsChange';
+import { getBatchLanguageIdChange } from './types/getBatchLanguageIdChange';
+import { getBatchKeyTagListChange } from './types/getBatchKeyTagListChange';
+import { getBatchNamespaceChange } from './types/getBatchNamespaceChange';
+import { getBatchStateChange } from './types/getBatchStateChange';
+import { getDefaultNamespaceChange } from './types/getDefaultNamespaceChange';
+import { getDateChange } from './types/getDateChange';
+import { getTaskStateChange } from './types/getTaskStateChange';
+import { getTaskTypeChange } from './types/getTaskTypeChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -35,51 +35,45 @@ export const formatDiff = ({
 }: Props) => {
   switch (options.type) {
     case 'translation_auto':
-      return <AutoChange input={value} />;
+      return getAutoChange(value);
     case 'translation_state':
-      return <StateChange input={value} />;
+      return getStateChange(value);
     case 'comment_state':
-      return <CommentStateChange input={value} />;
+      return getCommentStateChange(value);
     case 'key_tags':
-      return <KeyTagsChange input={value} />;
+      return getKeyTagsChange(value);
     case 'text':
-      return diffEnabled ? (
-        <TextDiff input={value} languageTag={languageTag} />
-      ) : (
-        <NoDiffChange input={value} languageTag={languageTag} />
-      );
+      return diffEnabled
+        ? getTextDiff(value, languageTag)
+        : getNoDiffChange(value, languageTag);
     case 'language_flag':
-      return <LanguageFlagChange input={value} />;
+      return getLanguageFlagChange(value);
     case 'project_language':
-      return <ProjectLanguageChange input={value} />;
+      return getProjectLanguageChange(value);
     case 'namespace':
-      return <NamespaceChange input={value} diffEnabled={diffEnabled} />;
+      return getNamespaceChange(value, diffEnabled);
     case 'outdated':
-      return <OutdatedChange input={value} />;
+      return getOutdatedChange(value);
     case 'batch_language_ids':
-      return <BatchLanguageIdsChange input={value} />;
+      return getBatchLanguageIdsChange(value);
     case 'batch_language_id':
-      return <BatchLanguageIdChange input={value} />;
+      return getBatchLanguageIdChange(value);
     case 'batch_key_tag_list':
-      return <BatchKeyTagListChange input={value} />;
+      return getBatchKeyTagListChange(value);
     case 'batch_namespace':
-      return <BatchNamespaceChange input={value} />;
+      return getBatchNamespaceChange(value);
     case 'batch_translation_state':
-      return <BatchStateChange input={value} />;
+      return getBatchStateChange(value);
     case 'default_namespace':
-      return <DefaultNamespaceChange input={value} />;
+      return getDefaultNamespaceChange(value);
     case 'date':
-      return <DateChange input={value} />;
+      return getDateChange(value);
     case 'task_state':
-      return <TaskStateChange input={value} />;
+      return getTaskStateChange(value);
     case 'task_type':
-      return <TaskTypeChange input={value} />;
+      return getTaskTypeChange(value);
     default:
-      return diffEnabled ? (
-        <GeneralChange input={value} />
-      ) : (
-        <NoDiffChange input={value} />
-      );
+      return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }
 };
 

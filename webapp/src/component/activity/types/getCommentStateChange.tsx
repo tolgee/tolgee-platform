@@ -33,7 +33,7 @@ export const getValue = (value: string, type: 'removed' | 'added') => {
   if (value === 'RESOLVED') {
     return (
       <StyledResolved className={type}>
-        <Check fontSize="small" />
+        <Check width={20} height={20} />
         <div>
           <T keyName="translations_comments_resolved" />
         </div>
@@ -42,7 +42,7 @@ export const getValue = (value: string, type: 'removed' | 'added') => {
   } else {
     return (
       <StyledNeedsResolution className={type}>
-        <XClose fontSize="small" />
+        <XClose width={20} height={20} />
         <div>
           <T keyName="translations_comments_needs_resolution" />
         </div>
@@ -51,11 +51,7 @@ export const getValue = (value: string, type: 'removed' | 'added') => {
   }
 };
 
-type Props = {
-  input?: DiffValue;
-};
-
-export const CommentStateChange = ({ input }: Props) => {
+export const getCommentStateChange = (input?: DiffValue) => {
   const oldInput = input?.old;
   const newInput = input?.new;
 
@@ -63,7 +59,5 @@ export const CommentStateChange = ({ input }: Props) => {
     return getValue(newInput, 'added');
   } else if (oldInput) {
     return getValue(oldInput, 'removed');
-  } else {
-    return null;
   }
 };

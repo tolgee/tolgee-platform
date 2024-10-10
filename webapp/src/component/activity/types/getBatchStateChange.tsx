@@ -35,14 +35,8 @@ const getTranslation = (state: StateType) => {
   );
 };
 
-type Props = {
-  input?: DiffValue;
-};
-
-export const BatchStateChange = ({ input }: Props) => {
+export const getBatchStateChange = (input?: DiffValue) => {
   if (input?.new) {
     return <StyledState>{getTranslation(input.new as StateType)}</StyledState>;
-  } else {
-    return null;
   }
 };

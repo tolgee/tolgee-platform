@@ -26,11 +26,7 @@ const StyledAdded = styled('span')`
   margin-right: 5px;
 `;
 
-type Props = {
-  input?: DiffValue<string[]>;
-};
-
-export const KeyTagsChange = ({ input }: Props) => {
+export const getKeyTagsChange = (input?: DiffValue<string[]>) => {
   const oldInput = input?.old || [];
   const newInput = input?.new || [];
 

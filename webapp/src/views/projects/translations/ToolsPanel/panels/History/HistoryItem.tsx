@@ -4,14 +4,14 @@ import { DotsVertical } from '@untitled-ui/icons-react';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
-import { TextDiff } from 'tg.component/activity/types/TextDiff';
-import { StateChange } from 'tg.component/activity/types/StateChange';
-import { AutoChange } from 'tg.component/activity/types/AutoChange';
+import { getTextDiff } from 'tg.component/activity/types/getTextDiff';
+import { getStateChange } from 'tg.component/activity/types/getStateChange';
+import { getAutoChange } from 'tg.component/activity/types/getAutoChange';
 import { DiffInput } from './HistoryTypes';
 import { ActivityDetailDialog } from 'tg.component/activity/ActivityDetail/ActivityDetailDialog';
 import { mapHistoryToActivity } from './mapHistoryToActivity';
 import { SmallActionButton } from '../../common/SmallActionButton';
-import { NoDiffChange } from 'tg.component/activity/types/NoDiffChange';
+import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
 import { UserName } from 'tg.component/common/UserName';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
@@ -108,18 +108,13 @@ export const HistoryItem: React.FC<Props> = ({
 
   const textDiff = useMemo(
     () =>
-      showDifferences ? (
-        <TextDiff input={textChanges} languageTag={languageTag} />
-      ) : (
-        <NoDiffChange input={textChanges} languageTag={languageTag} />
-      ),
+      showDifferences
+        ? getTextDiff(textChanges, languageTag)
+        : getNoDiffChange(textChanges, languageTag),
     [textChanges, showDifferences]
   );
-  const stateDiff = useMemo(
-    () => <StateChange input={stateChanges} />,
-    [stateChanges]
-  );
-  const mtProviderDiff = <AutoChange input={mtChanges || autoChanges} />;
+  const stateDiff = useMemo(() => getStateChange(stateChanges), [stateChanges]);
+  const mtProviderDiff = getAutoChange(mtChanges || autoChanges);
 
   return textDiff || stateDiff || mtProviderDiff ? (
     <StyledContainer data-cy="translation-history-item">

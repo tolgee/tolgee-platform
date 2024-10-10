@@ -24,11 +24,7 @@ const StyledArrow = styled('span')`
   padding: 0px 6px;
 `;
 
-type Props = {
-  input?: DiffValue<string>;
-};
-
-export const LanguageFlagChange = ({ input }: Props) => {
+export const getLanguageFlagChange = (input?: DiffValue<string>) => {
   const oldInput = input?.old;
   const newInput = input?.new;
   if (oldInput && newInput) {
@@ -55,7 +51,5 @@ export const LanguageFlagChange = ({ input }: Props) => {
         </span>
       </StyledDiff>
     );
-  } else {
-    return null;
   }
 };

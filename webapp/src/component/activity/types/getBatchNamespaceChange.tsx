@@ -17,7 +17,7 @@ type Props = {
   input: DiffValue<any>;
 };
 
-export const BatchNamespaceChange: React.FC<Props> = ({ input }) => {
+const NamespaceComponent: React.FC<Props> = ({ input }) => {
   const newInput = input.new?.data?.name || input.new;
   if (newInput) {
     return (
@@ -28,4 +28,8 @@ export const BatchNamespaceChange: React.FC<Props> = ({ input }) => {
   } else {
     return null;
   }
+};
+
+export const getBatchNamespaceChange = (input: DiffValue<any>) => {
+  return <NamespaceComponent input={input} />;
 };

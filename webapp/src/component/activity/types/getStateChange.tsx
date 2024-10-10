@@ -35,11 +35,7 @@ const getTranslation = (state: StateType) => {
   );
 };
 
-type Props = {
-  input?: DiffValue;
-};
-
-export const StateChange = ({ input }: Props) => {
+export const getStateChange = (input?: DiffValue) => {
   if (input?.new) {
     return (
       <StyledState>
@@ -48,7 +44,5 @@ export const StateChange = ({ input }: Props) => {
         {getTranslation(input.new as StateType)}
       </StyledState>
     );
-  } else {
-    return null;
   }
 };

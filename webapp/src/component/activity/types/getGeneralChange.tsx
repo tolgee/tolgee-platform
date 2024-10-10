@@ -1,6 +1,6 @@
 import { styled } from '@mui/material';
 import { DiffValue } from '../types';
-import { T } from '@tolgee/react';
+import { valueToText } from '../formatTools';
 
 const StyledDiff = styled('span')`
   word-break: break-word;
@@ -14,17 +14,9 @@ const StyledArrow = styled('span')`
   padding: 0px 6px;
 `;
 
-type NamespaceType = {
-  data: { name: string };
-};
-
-type Props = {
-  input?: DiffValue<NamespaceType>;
-};
-
-export const DefaultNamespaceChange = ({ input }: Props) => {
-  const oldInput = input?.old?.data.name ?? <T keyName="namespace_default" />;
-  const newInput = input?.new?.data.name ?? <T keyName="namespace_default" />;
+export const getGeneralChange = (input?: DiffValue) => {
+  const oldInput = valueToText(input?.old);
+  const newInput = valueToText(input?.new);
   if (oldInput && newInput) {
     return (
       <StyledDiff>
@@ -45,7 +37,5 @@ export const DefaultNamespaceChange = ({ input }: Props) => {
         <span>{newInput}</span>
       </StyledDiff>
     );
-  } else {
-    return null;
   }
 };

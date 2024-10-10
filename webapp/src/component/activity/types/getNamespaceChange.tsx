@@ -28,7 +28,7 @@ type Props = {
   diffEnabled: boolean;
 };
 
-export const NamespaceChange: React.FC<Props> = ({ input }) => {
+const NamespaceComponent: React.FC<Props> = ({ input }) => {
   const oldInput = input.old?.data?.name || input.old;
   const newInput = input.new?.data?.name || input.new;
   if (oldInput && newInput) {
@@ -54,4 +54,11 @@ export const NamespaceChange: React.FC<Props> = ({ input }) => {
   } else {
     return null;
   }
+};
+
+export const getNamespaceChange = (
+  input: DiffValue<any>,
+  diffEnabled: boolean
+) => {
+  return <NamespaceComponent input={input} diffEnabled={diffEnabled} />;
 };

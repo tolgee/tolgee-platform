@@ -1,10 +1,9 @@
 import { styled } from '@mui/material';
-import { components } from 'tg.service/apiSchema.generated';
-import { TaskTypeChip } from 'tg.ee/task/components/TaskTypeChip';
-
 import { DiffValue } from '../types';
+import { components } from 'tg.service/apiSchema.generated';
+import { TaskState } from 'tg.ee/task/components/TaskState';
 
-type Type = components['schemas']['TaskModel']['type'];
+type TaskState = components['schemas']['TaskModel']['state'];
 
 const StyledDiff = styled('span')`
   word-break: break-word;
@@ -18,20 +17,16 @@ const StyledArrow = styled('span')`
   padding: 0px 6px;
 `;
 
-type Props = {
-  input?: DiffValue<Type>;
-};
-
-export const TaskTypeChange = ({ input }: Props) => {
+export const getTaskStateChange = (input?: DiffValue<TaskState>) => {
   if (input?.new && input?.old) {
     return (
       <StyledDiff>
         <StyledRemoved>
-          <TaskTypeChip type={input.old} />
+          <TaskState state={input.old} />
         </StyledRemoved>
         <StyledArrow>→</StyledArrow>
         <span>
-          <TaskTypeChip type={input.new} />
+          <TaskState state={input.new} />
         </span>
       </StyledDiff>
     );
@@ -39,13 +34,13 @@ export const TaskTypeChange = ({ input }: Props) => {
   if (input?.new) {
     return (
       <span>
-        <TaskTypeChip type={input.new} />
+        <TaskState state={input.new} />
       </span>
     );
   } else if (input?.old) {
     return (
       <StyledRemoved>
-        <TaskTypeChip type={input.old} />
+        <TaskState state={input.old} />
       </StyledRemoved>
     );
   } else {
