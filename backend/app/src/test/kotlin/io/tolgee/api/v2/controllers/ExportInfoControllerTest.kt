@@ -14,19 +14,19 @@ class ExportInfoControllerTest : AbstractControllerTest() {
       .andAssertThatJson {
         node("_embedded.exportFormats") {
           isArray.hasSizeGreaterThan(5)
+          node("[0]") {
+            node("extension").isEqualTo("json")
+            node("mediaType").isEqualTo("application/json")
+            node("defaultFileStructureTemplate")
+              .isString.isEqualTo("{namespace}/{languageTag}.{extension}")
+          }
           node("[1]") {
             node("extension").isEqualTo("json")
             node("mediaType").isEqualTo("application/json")
             node("defaultFileStructureTemplate")
               .isString.isEqualTo("{namespace}/{languageTag}.{extension}")
           }
-          node("[2]") {
-            node("extension").isEqualTo("json")
-            node("mediaType").isEqualTo("application/json")
-            node("defaultFileStructureTemplate")
-              .isString.isEqualTo("{namespace}/{languageTag}.{extension}")
-          }
-          node("[6]") {
+          node("[4]") {
             node("extension").isEqualTo("")
             node("mediaType").isEqualTo("")
             node("defaultFileStructureTemplate")
