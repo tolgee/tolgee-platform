@@ -7,6 +7,7 @@ fun buildExportTranslation(
   languageTag: String,
   keyName: String,
   text: String?,
+  description: String? = null,
   fn: (ExportTranslationView.() -> Unit)? = null,
 ): ExportTranslationView {
   val translation =
@@ -15,6 +16,7 @@ fun buildExportTranslation(
       text = text,
       key = ExportKeyView(name = keyName),
       languageTag = languageTag,
+      description = description,
     )
   fn?.invoke(translation)
   return translation
@@ -36,15 +38,17 @@ class BuildExportTranslationListContext(
     keyName: String,
     text: String?,
     baseText: String? = null,
+    description: String? = null,
     fn: (BuildExportTranslationContext.() -> Unit)? = null,
   ): BuildExportTranslationListContext {
-    val translation = buildExportTranslation(languageTag, keyName, text)
+    val translation = buildExportTranslation(languageTag, keyName, text, description)
     val baseTranslation =
       ExportTranslationView(
         id = null,
         text = baseText,
         key = translation.key,
         languageTag = baseLanguageTag,
+        description = description,
       )
     baseTranslations.add(baseTranslation)
     translations.add(translation)

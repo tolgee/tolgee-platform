@@ -1,5 +1,6 @@
 package io.tolgee.util
 
+import org.w3c.dom.Comment
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -51,6 +52,12 @@ inline fun Document.element(
   this.appendChild(element)
   builder(element)
   return element
+}
+
+fun Element.comment(comment: String): Comment {
+  val commentNode = this.ownerDocument.createComment(comment)
+  this.appendChild(commentNode)
+  return commentNode
 }
 
 inline fun Element.element(

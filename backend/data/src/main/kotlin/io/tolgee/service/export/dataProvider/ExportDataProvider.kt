@@ -202,6 +202,7 @@ class ExportDataProvider(
           state = dataView.translationState ?: TranslationState.UNTRANSLATED,
           key = keyView,
           languageTag = dataView.languageTag,
+          description = dataView.keyDescription,
         )
     }
     return keyMap

@@ -45,7 +45,7 @@ class KeyMeta(
 
   @ActivityLoggedProp
   @Column(columnDefinition = "text")
-  @Size(max = 2000)
+  @Size(max = DESCRIPTION_MAX_LEN)
   var description: String? = null
 
   @ActivityLoggedProp
@@ -86,6 +86,8 @@ class KeyMeta(
   }
 
   companion object {
+    const val DESCRIPTION_MAX_LEN = 2000
+
     class KeyMetaListener {
       @PrePersist
       @PreUpdate

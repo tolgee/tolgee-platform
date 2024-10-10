@@ -26,6 +26,8 @@ export const useFileIssueTranslation = () => {
         return t('key_is_blank');
       case 'multiple_values_for_key_and_language':
         return t('multiple_values_for_key_and_language');
+      case 'description_too_long':
+        return t('file_issue_type_description_too_long');
       default:
         return type;
     }

@@ -23,8 +23,9 @@ class AndroidXmlFileExporterTest {
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="key1">Ahoj! I%d, %s, %e, %f</string>
     |  <string name="percent_no_placeholders">I am just a percent \% sign!</string>
-    |  <string name="percent_and_paceholders">I am not just a percent %s %% sign!</string>
-    |  <string name="percent_and_paceholders_and_tags"><![CDATA[I am not just a percent <b>%s</b> %% sign!]]></string>
+    |  <!-- This is a description -->
+    |  <string name="percent_and_placeholders">I am not just a percent %s %% sign!</string>
+    |  <string name="percent_and_placeholders_and_tags"><![CDATA[I am not just a percent <b>%s</b> %% sign!]]></string>
     |  <string name="forced_CDATA"><![CDATA[Forced CDATA <b>Hey!</b> sign!]]></string>
     |  <plurals name="Empty_plural">
     |    <item quantity="one"/>
@@ -32,6 +33,7 @@ class AndroidXmlFileExporterTest {
     |    <item quantity="many"/>
     |    <item quantity="other"/>
     |  </plurals>
+    |  <!-- This is a description above plural -->
     |  <plurals name="key3">
     |    <item quantity="one">%d den</item>
     |    <item quantity="few">%d dny</item>
@@ -42,6 +44,7 @@ class AndroidXmlFileExporterTest {
     |  <string name="key_with_unsupported_characters">OK!</string>
     |  <string name="unsupported_key_will_be_replaced">I have exact key name</string>
     |  <string-array name="i_am_array_item">
+    |    <!-- This is a description above array item -->
     |    <item>I will be first</item>
     |    <item>I will be second</item>
     |  </string-array>
@@ -160,13 +163,13 @@ class AndroidXmlFileExporterTest {
         )
         add(
           languageTag = "cs",
-          keyName = "percent and paceholders",
-          text =
-            "I am not just a percent {name} % sign!",
+          keyName = "percent and placeholders",
+          text = "I am not just a percent {name} % sign!",
+          description = "This is a description",
         )
         add(
           languageTag = "cs",
-          keyName = "percent and paceholders and tags",
+          keyName = "percent and placeholders and tags",
           text =
             "I am not just a percent <b>{name}</b> % sign!",
         )
@@ -191,6 +194,7 @@ class AndroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "key3",
           text = "{count, plural, one {# den} few {# dny} other {# dní}}",
+          description = "This is a description above plural",
         ) {
           key.isPlural = true
         }
@@ -231,6 +235,7 @@ class AndroidXmlFileExporterTest {
           languageTag = "cs",
           keyName = "i_am_array_item[20]",
           text = "I will be first",
+          description = "This is a description above array item",
         )
 
         add(

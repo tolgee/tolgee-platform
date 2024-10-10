@@ -8,4 +8,5 @@ class ExportTranslationView(
   val state: TranslationState = TranslationState.TRANSLATED,
   val key: ExportKeyView,
   val languageTag: String = "en",
+  val description: String? = null,
 )
