@@ -206,6 +206,7 @@ test {
 }
 
 tasks.register('runContextRecreatingTests', Test) {
+    outputs.upToDateWhen { false }
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
@@ -214,6 +215,7 @@ tasks.register('runContextRecreatingTests', Test) {
 }
 
 tasks.register('runStandardTests', Test) {
+    outputs.upToDateWhen { false }
     useJUnitPlatform {
         excludeTags "contextRecreating", "websocket"
     }
@@ -222,6 +224,7 @@ tasks.register('runStandardTests', Test) {
 }
 
 tasks.register('runWebsocketTests', Test) {
+    outputs.upToDateWhen { false }
     useJUnitPlatform {
         includeTags "websocket"
     }

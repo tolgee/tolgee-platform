@@ -26,20 +26,21 @@ class CleanDbTestListener : TestExecutionListener {
     )
 
   override fun beforeTestMethod(testContext: TestContext) {
-    val appContext: ApplicationContext = testContext.applicationContext
-    val batchJobConcurrentLauncher = appContext.getBean(BatchJobConcurrentLauncher::class.java)
-    val batchJobQueue = appContext.getBean(BatchJobChunkExecutionQueue::class.java)
-
     if (!shouldClenBeforeClass(testContext)) {
-      batchJobConcurrentLauncher.pause = true
-      batchJobQueue.clear()
       cleanWithRetries(testContext)
-      batchJobConcurrentLauncher.pause = false
     }
   }
 
   private fun cleanWithRetries(testContext: TestContext) {
     logger.info("Cleaning DB")
+
+    val appContext: ApplicationContext = testContext.applicationContext
+    val batchJobConcurrentLauncher = appContext.getBean(BatchJobConcurrentLauncher::class.java)
+    val batchJobQueue = appContext.getBean(BatchJobChunkExecutionQueue::class.java)
+
+    batchJobConcurrentLauncher.pause = true
+    batchJobQueue.clear()
+
     val time =
       measureTimeMillis {
         var i = 0
@@ -62,6 +63,8 @@ class CleanDbTestListener : TestExecutionListener {
           }
         }
       }
+
+    batchJobConcurrentLauncher.pause = false
     logger.info("DB cleaned in ${time}ms")
   }
 
@@ -72,26 +75,31 @@ class CleanDbTestListener : TestExecutionListener {
       val stmt = conn.createStatement()
       val databaseName: Any = "postgres"
       val ignoredTablesString = ignoredTables.joinToString(", ") { "'$it'" }
-      val rs: ResultSet =
-        stmt.executeQuery(
-          String.format(
-            "SELECT table_schema, table_name" +
-              " FROM information_schema.tables" +
-              " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
-              "   and table_name not in ($ignoredTablesString)",
-            databaseName,
+      try {
+        val rs: ResultSet =
+          stmt.executeQuery(
+            String.format(
+              "SELECT table_schema, table_name" +
+                " FROM information_schema.tables" +
+                " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
+                "   and table_name not in ($ignoredTablesString)",
+              databaseName,
+            ),
+          )
+        val tables: MutableList<Pair<String, String>> = ArrayList()
+        while (rs.next()) {
+          tables.add(rs.getString(1) to rs.getString(2))
+        }
+        stmt.execute(
+          java.lang.String.format(
+            "TRUNCATE TABLE %s",
+            tables.joinToString(",") { it.first + "." + it.second },
           ),
         )
-      val tables: MutableList<Pair<String, String>> = ArrayList()
-      while (rs.next()) {
-        tables.add(rs.getString(1) to rs.getString(2))
+      } catch (e: InterruptedException) {
+        stmt.cancel()
+        throw e
       }
-      stmt.execute(
-        java.lang.String.format(
-          "TRUNCATE TABLE %s",
-          tables.joinToString(",") { it.first + "." + it.second },
-        ),
-      )
     }
   }
 
