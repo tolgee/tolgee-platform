@@ -21,9 +21,9 @@ English | [**Français**](README.fr.md)
 ![示例工作流程](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
 [![docker](https://img.shields.io/docker/v/tolgee/tolgee/latest?label=DockerHub)](https://hub.docker.com/repository/docker/tolgee/tolgee)
-[![github 发布](https://img.shields.io/github/v/release/tolgee/tolgee-platform?label=GitHub%20Release)](https://github.com/tolgee/tolgee-platform /发布/最新）
+[![github 发布](https://img.shields.io/github/v/release/tolgee/tolgee-platform?label=GitHub%20Release)](https://github.com/tolgee/tolgee-platform/releases/latest)
 ![许可证](https://img.shields.io/badge/license-Apache%202%20%2F%20Tolgee%20EL-blue)
-[![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js ）
+[![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js)
 [![github stars](https://img.shields.io/github/stars/tolgee/tolgee-platform?style=social&label=Tolgee%20Platform)](https://github.com/tolgee/tolgee-platform) ）
 [![Github 讨论](https://img.shields.io/github/discussions/tolgee/tolgee-platform)](https://github.com/tolgee/tolgee-platform/discussions)
 </div>
