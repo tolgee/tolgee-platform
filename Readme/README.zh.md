@@ -14,7 +14,7 @@ Crowdin、Phrase 或 Lokalise 的开源替代方案
 
 <h2 align="center" style="border-bottom: none">
 
-[**English**](../README.md) | [**Français**](README.fr.md) | [**中国人**]
+[**English**](../README.md) | [**Français**](README.fr.md) | **中国人**
 
 </h2>
 
