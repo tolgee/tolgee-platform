@@ -21,6 +21,7 @@ class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun createData() {
     testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }

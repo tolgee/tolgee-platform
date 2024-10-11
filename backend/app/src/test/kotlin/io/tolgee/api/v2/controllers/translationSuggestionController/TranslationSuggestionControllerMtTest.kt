@@ -25,6 +25,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.model.mtServiceConfig.Formality
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -53,6 +54,7 @@ import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import java.util.*
 import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
+@ContextRecreatingTest
 class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 
@@ -185,6 +187,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   private fun initTestData() {
     testData = SuggestionTestData()
+    testData.root.makeUsernamesUnique = true
     projectSupplier = { testData.projectBuilder.self }
   }
 

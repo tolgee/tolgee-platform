@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.batch
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
@@ -87,6 +88,7 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `cancels a job`() {
     batchDumper.finallyDump {
       val keys = testData.addTranslationOperationData(100)
@@ -143,6 +145,7 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `cannot cancel other's job`() {
     saveAndPrepare()
 
@@ -158,6 +161,7 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `stuck job can be cancelled`() {
     saveAndPrepare()
     batchJobConcurrentLauncher.pause = true

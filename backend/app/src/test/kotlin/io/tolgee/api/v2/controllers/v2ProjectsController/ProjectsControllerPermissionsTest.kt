@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
@@ -23,6 +24,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   private val permissionTestUtil: PermissionTestUtil by lazy { PermissionTestUtil(this, applicationContext) }
 
   @Test
+  @CleanDbBeforeMethod
   fun `sets user permissions`() {
     permissionTestUtil.withPermissionsTestData { project, user ->
       performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
@@ -33,6 +35,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectJWTAuthTestMethod
   fun `changes from none to other`() {
     val testData = PermissionsTestData()
@@ -44,6 +47,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectJWTAuthTestMethod
   fun `cannot set permission to user outside of project or organization`() {
     val testData = PermissionsTestData()
@@ -59,6 +63,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectJWTAuthTestMethod
   fun `sets user permissions to organization base`() {
     val testData = PermissionsTestData()
@@ -82,6 +87,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `sets user's permissions with languages`() {
     permissionTestUtil.checkSetPermissionsWithLanguages("TRANSLATE", { getLang ->
       "languages=${getLang("en")}&" +
@@ -96,6 +102,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `cannot save stateChangeLanguages when translate`() {
     permissionTestUtil.performSetPermissions("TRANSLATE") { getLang ->
       "stateChangeLanguages=${getLang("de")}"
@@ -103,6 +110,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `cannot save viewLanguages when none`() {
     permissionTestUtil.performSetPermissions("NONE") { getLang ->
       "viewLanguages=${getLang("de")}"
@@ -110,6 +118,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `cannot save stateChangeLanguages when view`() {
     permissionTestUtil.performSetPermissions("VIEW") { getLang ->
       "stateChangeLanguages=${getLang("de")}"
@@ -117,6 +126,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `cannot save translationEditLangueges when view`() {
     permissionTestUtil.performSetPermissions("VIEW") { getLang ->
       "translateLanguages=${getLang("de")}"

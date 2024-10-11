@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.fixtures.AuthorizedRequestFactory
@@ -17,11 +18,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   private val languageDTO =
     LanguageRequest(
@@ -61,6 +60,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun createProject() {
     dbPopulator.createBase("test")
     testCreateValidationSizeShort()
@@ -69,6 +69,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun createProjectOrganization() {
     val userAccount = dbPopulator.createUserIfNotExists("testuser")
     val organization = dbPopulator.createOrganization("Test Organization", userAccount)
@@ -86,6 +87,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testCreateValidationEmptyLanguages() {
     val request =
       CreateProjectRequest(
@@ -96,6 +98,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `validates languages`() {
     val request =
       CreateProjectRequest(
@@ -116,7 +119,10 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   private fun testCreateCorrectRequest() {
-    val organization = dbPopulator.createOrganizationIfNotExist("nice", userAccount = userAccount!!)
+    val organization =
+      executeInNewTransaction {
+        dbPopulator.createOrganizationIfNotExist("nice", userAccount = userAccount!!)
+      }
     val request = CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id)
     mvc.perform(
       AuthorizedRequestFactory.loggedPost("/v2/projects")
@@ -126,16 +132,19 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     )
       .andExpect(MockMvcResultMatchers.status().isOk)
       .andReturn()
-    val projectDto = projectService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
-    assertThat(projectDto).isNotNull
-    val project = projectService.get(projectDto!!.id!!)
-    assertThat(project.languages).isNotEmpty
-    val language = project.languages.stream().findFirst().orElse(null)
-    assertThat(language).isNotNull
-    assertThat(language.tag).isEqualTo("en")
-    assertThat(language.name).isEqualTo("English")
-    assertThat(language.originalName).isEqualTo("Original English")
-    assertThat(language.flagEmoji).isEqualTo("\uD83C\uDDEC\uD83C\uDDE7")
+
+    executeInNewTransaction {
+      val projectDto = projectService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
+      assertThat(projectDto).isNotNull
+      val project = projectService.get(projectDto!!.id!!)
+      assertThat(project.languages).isNotEmpty
+      val language = project.languages.stream().findFirst().orElse(null)
+      assertThat(language).isNotNull
+      assertThat(language.tag).isEqualTo("en")
+      assertThat(language.name).isEqualTo("English")
+      assertThat(language.originalName).isEqualTo("Original English")
+      assertThat(language.flagEmoji).isEqualTo("\uD83C\uDDEC\uD83C\uDDE7")
+    }
   }
 
   private fun testCreateValidationSizeShort() {
@@ -155,26 +164,33 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `sets proper baseLanguage on create when provided`() {
     performAuthPost("/v2/projects", createForLanguagesDto).andPrettyPrint.andIsOk.andAssertThatJson {
       node("id").asNumber().satisfies {
-        assertThat(projectService.get(it.toLong()).baseLanguage!!.tag)!!.isEqualTo("cs")
+        executeInNewTransaction { _ ->
+          assertThat(projectService.get(it.toLong()).baseLanguage!!.tag)!!.isEqualTo("cs")
+        }
       }
     }
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `sets proper baseLanguage on create when not provided`() {
     performAuthPost("/v2/projects", createForLanguagesDto.copy(baseLanguageTag = null))
       .andIsOk.andAssertThatJson {
         node("id").asNumber().satisfies {
-          assertThat(projectService.get(it.toLong()).baseLanguage!!.tag)!!
-            .isEqualTo("en")
+          executeInNewTransaction { _ ->
+            assertThat(projectService.get(it.toLong()).baseLanguage!!.tag)!!
+              .isEqualTo("en")
+          }
         }
       }
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `sets proper baseLanguage on create when not exists`() {
     performAuthPost("/v2/projects", createForLanguagesDto.apply { this.baseLanguageTag = "not_exists" })
       .andIsBadRequest

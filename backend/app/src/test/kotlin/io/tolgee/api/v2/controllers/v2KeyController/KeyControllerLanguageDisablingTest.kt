@@ -24,6 +24,7 @@ class KeyControllerLanguageDisablingTest : ProjectAuthControllerTest("/v2/projec
   @BeforeEach
   fun setup() {
     testData = KeyLanguageDisablingTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.project.self }

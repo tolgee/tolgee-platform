@@ -34,6 +34,7 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
   @BeforeEach
   fun setup() {
     testData = ResolvableImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user

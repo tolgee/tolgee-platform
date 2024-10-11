@@ -1,6 +1,7 @@
 package io.tolgee.jobs.migration.translationStats
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -18,6 +19,7 @@ class TranslationStatsJobTest : AbstractSpringTest() {
   lateinit var translationRepository: TranslationRepository
 
   @Test
+  @CleanDbBeforeMethod
   fun `it adds the stats`() {
     prepareData(10)
     val instance = translationsStatsUpdateJobRunner.run()
@@ -26,6 +28,7 @@ class TranslationStatsJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it does not run multiple times for same params`() {
     prepareData()
 
@@ -39,6 +42,7 @@ class TranslationStatsJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it runs again when new translation without stats is created`() {
     val testData = prepareData()
 

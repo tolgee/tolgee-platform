@@ -47,6 +47,8 @@ class OrganizationRoleCachingTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     testData = OrganizationTestData()
+    testData.root.makeUsernamesUnique = true
+
     testDataService.saveTestData(testData.root)
     clearCaches()
     Mockito.reset(organizationRoleRepository)

@@ -12,6 +12,7 @@ class ActivityVIewByRevisionsProviderTest : ProjectAuthControllerTest() {
   @Test
   fun `it returns limited number of modified entities`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)

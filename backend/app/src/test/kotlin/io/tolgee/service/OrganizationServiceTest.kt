@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.hibernate.SessionFactory
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional
     "spring.jpa.show-sql=true",
   ],
 )
+@ContextRecreatingTest
 class OrganizationServiceTest : AbstractSpringTest() {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -28,6 +30,7 @@ class OrganizationServiceTest : AbstractSpringTest() {
   @Test
   fun `deletes organization with preferences`() {
     val testData = OrganizationTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     organizationService.delete(testData.jirinaOrg)
     entityManager.flush()
@@ -39,6 +42,7 @@ class OrganizationServiceTest : AbstractSpringTest() {
   @Test
   fun `fetches organization without mt bucket (tests the one-to-one lazy initialization)`() {
     val testData = OrganizationTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     val organization =
@@ -55,6 +59,7 @@ class OrganizationServiceTest : AbstractSpringTest() {
   @Test
   fun `mt bucket fetches only mt bucket (tests the one-to-one lazy initialization)`() {
     val testData = OrganizationTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     executeInNewTransaction {

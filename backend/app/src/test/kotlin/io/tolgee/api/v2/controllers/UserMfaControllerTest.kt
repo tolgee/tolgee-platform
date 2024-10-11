@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
@@ -28,6 +29,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it enables MFA`() {
     retry {
       val requestDto =
@@ -44,6 +46,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it disables MFA`() {
     enableMfa()
     val requestDto =
@@ -56,6 +59,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it regenerates MFA recovery codes`() {
     enableMfa()
     val requestDto =
@@ -72,6 +76,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it requires valid TOTP code for activation`() {
     retry {
       val requestDto =
@@ -93,6 +98,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it requires valid password`() {
     val enableRequestDto =
       UserTotpEnableRequestDto(
@@ -129,6 +135,7 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it invalidates tokens generated prior a mfa status change`() {
     retry {
       loginAsAdminIfNotLogged()

@@ -26,6 +26,7 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     this.projectSupplier = { testData.project }
   }
 

@@ -39,6 +39,7 @@ class LanguageCachingTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     testData = BaseTestData()
+    testData.root.makeUsernamesUnique = true
     germanLanguage = testData.projectBuilder.addGerman().self
     testDataService.saveTestData(testData.root)
     clearCaches()

@@ -34,6 +34,7 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
   private fun initTestData() {
     testData = MtSettingsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user

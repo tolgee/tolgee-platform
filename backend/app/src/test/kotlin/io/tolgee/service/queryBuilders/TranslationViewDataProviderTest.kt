@@ -102,6 +102,7 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
   @Test
   fun `returns failed keys`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     val job = testData.addFailedBatchJob()
     testDataService.saveTestData(testData.root)
     val result =
@@ -124,6 +125,7 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
 
   private fun generateCommentStatesTestData(): TranslationsTestData {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addCommentStatesData()
     testDataService.saveTestData(testData.root)
     return testData
@@ -131,6 +133,7 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
 
   private fun prepareLotOfData(): TranslationsTestData {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)
     return testData

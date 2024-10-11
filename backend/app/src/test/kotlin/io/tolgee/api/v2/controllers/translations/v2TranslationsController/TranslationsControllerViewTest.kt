@@ -35,6 +35,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     this.projectSupplier = { testData.project }
   }
 
@@ -299,6 +300,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `returns all translations by ns`() {
     val testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
@@ -318,6 +320,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `returns all translations by default ns`() {
     val testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
@@ -448,6 +451,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
 
   private fun prepareImportData() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addManyTranslations()
     testData.setAllResolved()
     testData.setAllOverride()

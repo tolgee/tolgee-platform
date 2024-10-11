@@ -286,6 +286,7 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `correctly computes conflicts on import`() {
     val testData = ImportCleanTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     loginAsUser(testData.userAccount.username)

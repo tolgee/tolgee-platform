@@ -13,6 +13,7 @@ import io.tolgee.model.Project
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.thirdParty.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.util.GitHubAuthUtil
 import io.tolgee.util.GoogleAuthUtil
 import io.tolgee.util.OAuth2AuthUtil
@@ -33,6 +34,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Transactional
+@ContextRecreatingTest
 class AuthTest : AbstractControllerTest() {
   @Autowired
   private val publicController: PublicController? = null
@@ -65,6 +67,7 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun generatesTokenForValidUser() {
     val response = doAuthentication(initialUsername, initialPassword)
     println(response.andReturn().response.contentAsString)
@@ -81,6 +84,7 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun userWithTokenHasAccess() {
     val response =
       doAuthentication(initialUsername, initialPassword)

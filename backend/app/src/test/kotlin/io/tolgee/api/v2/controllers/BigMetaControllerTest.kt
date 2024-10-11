@@ -25,6 +25,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
   @BeforeEach
   fun setup() {
     testData = BigMetaTestData()
+    testData.root.makeUsernamesUnique = true
   }
 
   private fun saveTestDataAndPrepare() {

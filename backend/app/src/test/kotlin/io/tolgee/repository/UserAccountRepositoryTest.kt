@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -21,6 +22,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
   lateinit var dbPopulatorReal: DbPopulatorReal
 
   @Test
+  @CleanDbBeforeMethod
   fun getAllInOrganizationHasMemberRole() {
     val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
     val org = usersAndOrganizations[1].organizationRoles[0].organization
@@ -30,6 +32,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun getAllInOrganizationCorrectAccounts() {
     val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
     val user = entityManager.merge(usersAndOrganizations[2])
@@ -41,6 +44,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun getAllInProjectSearch() {
     val franta = dbPopulatorReal.createUserIfNotExists("franta")
     val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()

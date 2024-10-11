@@ -19,6 +19,7 @@ class ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `doesn't transfer to organization when not permitted`() {
     val testData = ProjectTransferringTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user2
     projectSupplier = { testData.project }
@@ -29,6 +30,7 @@ class ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `provides transfer options`() {
     val testData = ProjectTransferringTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }

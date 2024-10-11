@@ -21,6 +21,7 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     testData = TagsTestData()
+    testData.root.makeUsernamesUnique = true
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

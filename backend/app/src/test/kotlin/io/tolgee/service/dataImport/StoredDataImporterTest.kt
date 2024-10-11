@@ -31,6 +31,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
+    importTestData.root.makeUsernamesUnique = true
     storedDataImporter =
       StoredDataImporter(
         applicationContext,

@@ -25,6 +25,7 @@ class ImportServiceTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
+    importTestData.root.makeUsernamesUnique = true
     importTestData.addFrenchTranslations()
   }
 
@@ -52,6 +53,7 @@ class ImportServiceTest : AbstractSpringTest() {
     val testData =
       executeInNewTransaction {
         val testData = ImportTestData()
+        testData.root.makeUsernamesUnique = true
         testDataService.saveTestData(testData.root)
         assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
         testData
@@ -71,6 +73,7 @@ class ImportServiceTest : AbstractSpringTest() {
   @Test
   fun `hard deletes import`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     executeInNewTransaction {
       testData.addFileIssues()
       testData.addKeyMetadata()
@@ -94,6 +97,7 @@ class ImportServiceTest : AbstractSpringTest() {
   @Test
   fun `soft deletes import`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     executeInNewTransaction {
       testData.addFileIssues()
       testData.addKeyMetadata()
@@ -119,6 +123,7 @@ class ImportServiceTest : AbstractSpringTest() {
     val testData =
       executeInNewTransaction {
         val testData = ImportNamespacesTestData()
+        testData.root.makeUsernamesUnique = true
         testDataService.saveTestData(testData.root)
         SecurityContextHolder.getContext().authentication =
           TolgeeAuthentication(

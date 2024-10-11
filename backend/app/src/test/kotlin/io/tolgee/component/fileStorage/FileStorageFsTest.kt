@@ -4,6 +4,7 @@
 
 package io.tolgee.component.fileStorage
 
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -14,6 +15,7 @@ import java.io.File
 @SpringBootTest(
   properties = ["tolgee.internal.use-in-memory-file-storage=false"],
 )
+@ContextRecreatingTest
 class FileStorageFsTest : AbstractFileStorageServiceTest() {
   lateinit var file: File
 

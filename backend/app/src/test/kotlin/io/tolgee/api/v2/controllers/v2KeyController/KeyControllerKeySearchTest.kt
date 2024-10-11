@@ -29,6 +29,7 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
   @BeforeEach
   fun setup() {
     testData = KeySearchTestData()
+    testData.root.makeUsernamesUnique = true
   }
 
   fun saveAndPrepare() {

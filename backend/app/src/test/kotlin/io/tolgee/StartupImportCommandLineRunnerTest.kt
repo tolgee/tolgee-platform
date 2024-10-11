@@ -8,6 +8,7 @@ import io.tolgee.commandLineRunners.StartupImportCommandLineRunner
 import io.tolgee.configuration.tolgee.ImportProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.Base
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
@@ -20,6 +21,7 @@ import org.springframework.core.io.Resource
 
 @Suppress("LateinitVarOverridesLateinitVar")
 @CleanDbBeforeClass
+@ContextRecreatingTest
 class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
   private lateinit var base: Base
 

@@ -28,6 +28,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @BeforeEach
   fun setup() {
     testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addManyTranslations()
     testData.setAllResolved()
     testData.setAllOverride()

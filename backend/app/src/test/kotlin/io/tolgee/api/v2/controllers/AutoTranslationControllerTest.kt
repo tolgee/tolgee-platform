@@ -2,14 +2,20 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.MachineTranslationTest
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@ContextRecreatingTest
 class AutoTranslationControllerTest : MachineTranslationTest() {
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
@@ -20,6 +26,7 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   @BeforeEach
   fun setup() {
     testData = AutoTranslateTestData()
+    testData.root.makeUsernamesUnique = true
     testData.disableAutoTranslating()
     this.projectSupplier = { testData.project }
     initMachineTranslationMocks()

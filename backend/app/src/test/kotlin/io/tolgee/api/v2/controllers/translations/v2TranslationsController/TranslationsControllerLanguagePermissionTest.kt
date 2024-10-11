@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -20,8 +21,14 @@ class TranslationsControllerLanguagePermissionTest : ProjectAuthControllerTest("
   @BeforeEach
   fun setup() {
     testData = LanguagePermissionsTestData()
+    testData.root.makeUsernamesUnique = true
     this.projectSupplier = { testData.project }
     testDataService.saveTestData(testData.root)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanApiKeys(testData.root)
   }
 
   @ProjectJWTAuthTestMethod

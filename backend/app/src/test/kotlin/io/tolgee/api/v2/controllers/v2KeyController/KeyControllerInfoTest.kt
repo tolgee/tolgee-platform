@@ -24,6 +24,7 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
   fun setup() {
     executeInNewTransaction {
       testData = KeysInfoTestData()
+      testData.root.makeUsernamesUnique = true
       testDataService.saveTestData(testData.root)
       projectSupplier = { testData.projectBuilder.self }
       userAccount = testData.user

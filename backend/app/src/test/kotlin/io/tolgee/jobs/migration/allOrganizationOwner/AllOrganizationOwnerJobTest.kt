@@ -1,6 +1,7 @@
 package io.tolgee.jobs.migration.allOrganizationOwner
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.testDataBuilder.data.AllOrganizationOwnerMigrationTestData
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -78,6 +79,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `creates organizations and moves projects`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
@@ -92,6 +94,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `deletes permission`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
@@ -101,6 +104,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `reuses existing organization`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
@@ -110,6 +114,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `creates the organization for user with no organization membership`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
@@ -121,6 +126,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it keeps user direct permissions`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
@@ -130,6 +136,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it does not run multiple times for same params`() {
     // first - it really runs
     val instance = allOrganizationOwnerJobRunner.run()

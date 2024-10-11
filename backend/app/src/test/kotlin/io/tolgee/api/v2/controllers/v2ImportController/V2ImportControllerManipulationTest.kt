@@ -15,6 +15,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it deletes import`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -28,6 +29,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it deletes import language`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -40,6 +42,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it resolves import translation conflict (override)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -56,6 +59,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it resolves import translation conflict (keep)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -72,6 +76,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it resolves all language translation conflicts (override)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -86,6 +91,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it resolves all language translation conflicts (keep)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -102,6 +108,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it selects language`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)
@@ -120,6 +127,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `it selects namespace, resets conflicts`() {
     val testData = ImportNamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.project }
     userAccount = testData.userAccount
@@ -144,6 +152,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `returns all namespaces`() {
     val testData = ImportNamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.project }
     userAccount = testData.userAccount
@@ -159,6 +168,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it selects same language for different namespaces`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     // assign the existing french to the import french
     testData.importFrench.existingLanguage = testData.french
     val nsData = testData.addFilesWithNamespaces()
@@ -178,6 +188,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `conflicts are refreshed when changing namespace`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     // assign the existing french to the import french
     testData.importFrench.existingLanguage = testData.french
     val nsData = testData.addFilesWithNamespaces()
@@ -197,6 +208,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   fun `it resets selected language`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)

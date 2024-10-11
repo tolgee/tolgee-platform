@@ -49,6 +49,7 @@ class TranslationServiceTest : AbstractSpringTest() {
     val testData =
       executeInNewTransaction {
         val testData = TranslationsTestData()
+        testData.root.makeUsernamesUnique = true
         testDataService.saveTestData(testData.root)
         val translation = testData.aKeyGermanTranslation
         assertThat(translation.wordCount).isEqualTo(2)
@@ -72,6 +73,7 @@ class TranslationServiceTest : AbstractSpringTest() {
   @Test
   fun `clears auto translation when set empty`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     translationService.setForKey(testData.aKey, mapOf("de" to ""))
     val translation = translationService.get(testData.aKeyGermanTranslation.id)

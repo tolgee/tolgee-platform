@@ -14,6 +14,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.fixtures.verifyWebhookSignatureHeader
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addSeconds
@@ -44,6 +45,7 @@ import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @MockBean
   @Autowired
@@ -87,6 +89,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `publishes to Content Delivery`() {
     currentDateProvider.forcedDate = currentDateProvider.date
     val testData = ContentDeliveryConfigTestData()
+    testData.root.makeUsernamesUnique = true
+
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
@@ -114,6 +118,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it executes webhook`() {
     val testData = WebhooksTestData()
+    testData.root.makeUsernamesUnique = true
+
     currentDateProvider.forcedDate = currentDateProvider.date
 
     testDataService.saveTestData(testData.root)
@@ -130,6 +136,8 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it updates webhook config when failing`() {
     val testData = WebhooksTestData()
+    testData.root.makeUsernamesUnique = true
+
     currentDateProvider.forcedDate = currentDateProvider.date
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

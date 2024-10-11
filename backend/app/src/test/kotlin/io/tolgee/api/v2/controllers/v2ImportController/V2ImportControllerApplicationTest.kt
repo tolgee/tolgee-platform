@@ -20,6 +20,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
     val testData = ImportTestData()
     testData.setAllResolved()
     testData.setAllOverride()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -34,6 +35,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it applies the import with force override`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -48,6 +50,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it applies the import with force keep`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -60,6 +63,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   fun `it imports empty keys`() {
     val testData = ImportTestData()
     testData.addEmptyKey()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -75,7 +79,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it checks permissions`() {
     val testData = ImportTestData()
-
+    testData.root.makeUsernamesUnique = true
     val user = testData.useTranslateOnlyUser()
 
     testDataService.saveTestData(testData.root)
@@ -93,6 +97,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it checks language permissions`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
     val resolveFrench = testData.addFrenchTranslations()
     resolveFrench()
@@ -100,6 +105,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
     val user = testData.useTranslateOnlyUser()
 
     testDataService.saveTestData(testData.root)
+    testData.root.makeUsernamesUnique = true
     val projectId = testData.project.id
     loginAsUser(user.username)
 
@@ -116,6 +122,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it checks permissions (view only)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
     val resolveFrench = testData.addFrenchTranslations()
     resolveFrench()
@@ -134,6 +141,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `it checks permissions with API key (view only)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.importBuilder.data.importFiles[0].data.importKeys.removeIf { it.self == testData.newLongKey }
     val resolveFrench = testData.addFrenchTranslations()
     resolveFrench()
@@ -149,6 +157,7 @@ class V2ImportControllerApplicationTest : ProjectAuthControllerTest("/v2/project
   @Test
   fun `it sets outdated on update`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id

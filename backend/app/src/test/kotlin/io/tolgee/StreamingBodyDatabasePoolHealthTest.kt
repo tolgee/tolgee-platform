@@ -21,6 +21,7 @@ import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.retry
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +37,7 @@ import javax.sql.DataSource
     "tolgee.rate-limits.authentication-limits = false",
   ],
 )
+@ContextRecreatingTest
 class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 
@@ -45,6 +47,7 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
   @BeforeEach
   fun setupData() {
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     userAccount = testData.user

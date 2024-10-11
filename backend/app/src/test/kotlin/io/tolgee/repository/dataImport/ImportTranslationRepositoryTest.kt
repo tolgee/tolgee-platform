@@ -16,6 +16,7 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
   @Test
   fun `view returns correct data`() {
     val importTestData = ImportTestData()
+    importTestData.root.makeUsernamesUnique = true
     testDataService.saveTestData(importTestData.root)
 
     val result =
@@ -37,6 +38,7 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
   @Test
   fun `view filters`() {
     val importTestData = ImportTestData()
+    importTestData.root.makeUsernamesUnique = true
     testDataService.saveTestData(importTestData.root)
 
     val result =

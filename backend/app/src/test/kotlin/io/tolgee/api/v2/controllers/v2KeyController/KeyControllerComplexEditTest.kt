@@ -51,6 +51,7 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
   @BeforeEach
   fun setup() {
     testData = KeysTestData()
+    testData.root.makeUsernamesUnique = true
     testData.projectBuilder.addCzech()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

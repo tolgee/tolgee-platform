@@ -32,6 +32,7 @@ class V2ImportControllerPluralizationTest : ProjectAuthControllerTest("/v2/proje
 
   private fun saveTestDataAndApplyImport() {
     testData = ImportPluralizationTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.userAccount
     projectSupplier = { testData.projectBuilder.self }

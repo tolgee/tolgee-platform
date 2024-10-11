@@ -20,6 +20,7 @@ class ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `user can leave project`() {
     val testData = ProjectLeavingTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.project1nonOwner
     projectSupplier = { testData.projectBuilder.self }
@@ -34,6 +35,7 @@ class ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `cannot leave project with organization role`() {
     val testData = ProjectLeavingTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.userWithOrganizationRole
     projectSupplier = { testData.organizationOwnedProject }
@@ -46,6 +48,7 @@ class ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `resets user preferred organization when leaves organization project with only base permissions`() {
     val testData = OrganizationTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.kvetoslav
     projectSupplier = { testData.projectBuilder.self }

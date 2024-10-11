@@ -15,6 +15,7 @@ class AnnouncementControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun createData() {
     testData = ProjectsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
   }

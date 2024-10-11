@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.organizationController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
@@ -50,6 +51,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGetAllInvitations() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
@@ -73,6 +75,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testInviteUser() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
     loginAsUser(helloUser.username)
@@ -89,6 +92,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testAcceptInvitation() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
@@ -112,6 +116,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it prevents accepting invitation again already a member`() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
@@ -131,6 +136,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testDeleteInvitation() {
     val organization = prepareTestOrganization()
 
@@ -154,6 +160,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `stores name and e-mail with invitation`() {
     val organization = prepareTestOrganization()
 
@@ -164,6 +171,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `sends invitation e-mail`() {
     val organization = prepareTestOrganization()
 
@@ -177,6 +185,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `e-mail is sanitized`() {
     dummyDto.name = "Test org <a href='https://evil.local'>test</a>"
     val organization = prepareTestOrganization()
@@ -190,6 +199,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `does not invite when email already invited`() {
     val organization = prepareTestOrganization()
     performCreateInvitation(organization.id).andIsOk
@@ -197,6 +207,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `does not invite when email already member`() {
     val organization = prepareTestOrganization()
     performAuthPut(

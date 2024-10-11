@@ -6,6 +6,7 @@ import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.component.machineTranslation.providers.tolgee.CloudTolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -32,6 +33,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest
+@ContextRecreatingTest
 class TolgeeTranslatorWithBatchTest {
   @Autowired
   @SpyBean

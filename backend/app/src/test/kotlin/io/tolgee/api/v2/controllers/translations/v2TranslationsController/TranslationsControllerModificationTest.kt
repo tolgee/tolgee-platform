@@ -31,6 +31,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
   }
 
   @ProjectJWTAuthTestMethod

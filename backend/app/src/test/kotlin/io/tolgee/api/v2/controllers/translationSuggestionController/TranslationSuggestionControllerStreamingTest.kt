@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Language
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 
+@ContextRecreatingTest
 class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("/v2/projects/") {
   @Suppress("LateinitVarOverridesLateinitVar")
   @SpyBean
@@ -48,6 +50,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
         czechLanguage = projectBuilder.addCzech().self
         hindiLanguage = projectBuilder.addHindi().self
       }
+    testData.root.makeUsernamesUnique = true
 
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

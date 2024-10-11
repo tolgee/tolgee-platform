@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.organizationController
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.fixtures.andAssertError
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageRequest
 @AutoConfigureMockMvc
 class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
   @Test
+  @CleanDbBeforeMethod
   fun testLeaveOrganization() {
     val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
     organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), testOrg)
@@ -29,6 +31,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
     organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content
 
   @Test
+  @CleanDbBeforeMethod
   fun `leave will reset preferred`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
@@ -46,6 +49,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `removes all direct permissions when leaving`() {
     val testData = PermissionsTestData()
     val me = testData.addUserWithPermissions(type = ProjectPermissionType.MANAGE)
@@ -66,6 +70,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testLeaveOrganizationNoOtherOwner() {
     val organization = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
     organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {

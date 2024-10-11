@@ -29,7 +29,9 @@ class TagServiceTest : AbstractSpringTest() {
   fun `deletes many keys fast enough`() {
     val tagsTestData = TagsTestData()
     tagsTestData.generateVeryLotOfData()
+    tagsTestData.root.makeUsernamesUnique = true
     testDataService.saveTestData(tagsTestData.root)
+
     entityManager.flush()
     entityManager.clear()
     val start = System.currentTimeMillis()

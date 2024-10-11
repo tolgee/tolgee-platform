@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.testDataBuilder.data.AdministrationTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
@@ -24,11 +25,13 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun createData() {
     testData = AdministrationTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `returns organizations`() {
     performAuthGet("/v2/administration/organizations").andPrettyPrint.andIsOk.andAssertThatJson {
       node("_embedded.organizations") {
@@ -41,6 +44,7 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `returns users`() {
     performAuthGet("/v2/administration/users").andPrettyPrint.andAssertThatJson {
       node("_embedded.users") {

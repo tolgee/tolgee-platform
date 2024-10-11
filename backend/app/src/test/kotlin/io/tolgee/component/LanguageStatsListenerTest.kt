@@ -19,6 +19,7 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
   @Test
   fun `updates stats when added key`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     val projectLanguages = languageService.getProjectLanguages(testData.project.id).associateBy { it.id }

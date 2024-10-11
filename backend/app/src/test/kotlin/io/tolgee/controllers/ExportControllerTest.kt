@@ -70,6 +70,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `exports only permitted langs`() {
     val testData = LanguagePermissionsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.viewEnOnlyUser
     projectSupplier = { testData.project }
