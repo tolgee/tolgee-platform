@@ -73,6 +73,6 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
   }
 
   private fun Element.optionalComment(comment: String?) {
-    comment?.let { comment(" $it ") }
+    comment?.takeIf { it.isNotBlank() }?.let { comment(" $it ") }
   }
 }
