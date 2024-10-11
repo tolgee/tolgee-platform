@@ -1,12 +1,12 @@
 import React from 'react';
-import {styled} from '@mui/material';
-import {T, TFnType, useTranslate} from '@tolgee/react';
-import {StandardForm} from 'tg.component/common/form/StandardForm';
-import {TextField} from 'tg.component/common/form/fields/TextField';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {messageService} from 'tg.service/MessageService';
-import {useOrganization} from 'tg.views/organizations/useOrganization';
-import {Validation} from "tg.constants/GlobalValidationSchema";
+import { styled } from '@mui/material';
+import { T, TFnType, useTranslate } from '@tolgee/react';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { messageService } from 'tg.service/MessageService';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -18,7 +18,6 @@ const StyledInputFields = styled('div')`
 export function CreateProviderSsoForm({ credentialsRef, disabled }) {
   const organization = useOrganization();
   const { t } = useTranslate();
-
 
   if (!organization) {
     return null;
@@ -35,7 +34,7 @@ export function CreateProviderSsoForm({ credentialsRef, disabled }) {
       initialValues={credentialsRef.current!}
       validationSchema={Validation.SSO_PROVIDER(t as TFnType)}
       onSubmit={async (data) => {
-        console.log(data)
+        console.log(data);
         providersCreate.mutate(
           {
             path: { organizationId: organization.id },
