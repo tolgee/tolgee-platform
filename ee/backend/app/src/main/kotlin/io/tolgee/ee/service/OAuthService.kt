@@ -10,6 +10,8 @@ import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import com.posthog.java.shaded.org.json.JSONObject
 import io.tolgee.constants.Message
+import io.tolgee.ee.data.GenericUserResponse
+import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
 import io.tolgee.ee.model.SsoTenant
 import io.tolgee.exceptions.AuthenticationException
@@ -164,22 +166,5 @@ class OAuthService(
     val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, tenant.domain)
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
-  }
-
-  class OAuth2TokenResponse(
-    val id_token: String,
-    val scope: String,
-  )
-
-  class GenericUserResponse {
-    var sub: String? = null
-    var name: String? = null
-
-    @Suppress("ktlint:standard:property-naming")
-    var given_name: String? = null
-
-    @Suppress("ktlint:standard:property-naming")
-    var family_name: String? = null
-    var email: String? = null
   }
 }

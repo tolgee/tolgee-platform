@@ -7,7 +7,7 @@ import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
-import io.tolgee.ee.service.OAuthService
+import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.service.TenantService
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -30,7 +30,7 @@ class OAuthMultiTenantsMocks(
 ) {
   companion object {
     val defaultToken =
-      OAuthService.OAuth2TokenResponse(id_token = generateTestJwt(), scope = "scope")
+      OAuth2TokenResponse(id_token = generateTestJwt(), scope = "scope")
 
     val defaultTokenResponse =
       ResponseEntity(
@@ -77,7 +77,7 @@ class OAuthMultiTenantsMocks(
         eq(tenant.tokenUri),
         eq(HttpMethod.POST),
         any(),
-        eq(OAuthService.OAuth2TokenResponse::class.java),
+        eq(OAuth2TokenResponse::class.java),
       ),
     ).thenReturn(defaultTokenResponse)
     mockJwk()
