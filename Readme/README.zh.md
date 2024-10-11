@@ -14,7 +14,7 @@ Crowdin、Phrase 或 Lokalise 的开源替代方案
 
 <h2 align="center" style="border-bottom: none">
 
-English | [**Français**](README.fr.md)
+[**English**](../README.md) | [**Français**](README.fr.md) | [**中国人**]
 
 </h2>
 
@@ -24,10 +24,9 @@ English | [**Français**](README.fr.md)
 [![github 发布](https://img.shields.io/github/v/release/tolgee/tolgee-platform?label=GitHub%20Release)](https://github.com/tolgee/tolgee-platform/releases/latest)
 ![许可证](https://img.shields.io/badge/license-Apache%202%20%2F%20Tolgee%20EL-blue)
 [![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js)
-[![github stars](https://img.shields.io/github/stars/tolgee/tolgee-platform?style=social&label=Tolgee%20Platform)](https://github.com/tolgee/tolgee-platform) ）
+[![github stars](https://img.shields.io/github/stars/tolgee/tolgee-platform?style=social&label=Tolgee%20Platform)](https://github.com/tolgee/tolgee-platform)
 [![Github 讨论](https://img.shields.io/github/discussions/tolgee/tolgee-platform)](https://github.com/tolgee/tolgee-platform/discussions)
 </div>
-
 
 <div align="center">
 
@@ -65,7 +64,7 @@ English | [**Français**](README.fr.md)
 
 有关完整信息，请查看我们的 [Hacktobefest2024.md](./Hacktobefest2024.md)
 
-加入 Tolgee 社区 [Tolgee Slack 社区 <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack .com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) 分享您的想法、建议或问题并与其他用户和贡献者联系。
+加入 Tolgee 社区 [Tolgee Slack 社区 <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) 分享您的想法、建议或问题并与其他用户和贡献者联系。
 
 ![托尔吉](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
