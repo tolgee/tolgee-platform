@@ -1,11 +1,11 @@
-import React, {FunctionComponent, useEffect, useState} from 'react';
-import {useTranslate} from '@tolgee/react';
-import {BaseOrganizationSettingsView} from '../components/BaseOrganizationSettingsView';
-import {LINKS, PARAMS} from 'tg.constants/links';
-import {useOrganization} from '../useOrganization';
-import {CreateProviderSsoForm} from 'tg.views/organizations/sso/CreateProviderSsoForm';
-import {useApiQuery} from 'tg.service/http/useQueryApi';
-import {FormControlLabel, Switch} from '@mui/material';
+import React, { FunctionComponent, useEffect, useState } from 'react';
+import { useTranslate } from '@tolgee/react';
+import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useOrganization } from '../useOrganization';
+import { CreateProviderSsoForm } from 'tg.views/organizations/sso/CreateProviderSsoForm';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { FormControlLabel, Switch } from '@mui/material';
 import Box from '@mui/material/Box';
 
 export const OrganizationSsoView: FunctionComponent = () => {
@@ -49,7 +49,9 @@ export const OrganizationSsoView: FunctionComponent = () => {
       maxWidth="normal"
     >
       <FormControlLabel
-        control={<Switch checked={toggleFormState} onChange={handleSwitchChange} />}
+        control={
+          <Switch checked={toggleFormState} onChange={handleSwitchChange} />
+        }
         label={t('organization_sso_switch')}
       />
       <Box sx={{ marginTop: '16px' }}>

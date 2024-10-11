@@ -1,10 +1,10 @@
-import {LINKS, PARAMS} from 'tg.constants/links';
-import {messageService} from 'tg.service/MessageService';
-import {TranslatedError} from 'tg.translationTools/TranslatedError';
-import {useGlobalActions} from 'tg.globalContext/GlobalContext';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {useLocalStorageState} from 'tg.hooks/useLocalStorageState';
-import {INVITATION_CODE_STORAGE_KEY} from 'tg.service/InvitationCodeService';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { messageService } from 'tg.service/MessageService';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import { INVITATION_CODE_STORAGE_KEY } from 'tg.service/InvitationCodeService';
 
 export const useSsoService = () => {
   const { handleAfterLogin, setInvitationCode } = useGlobalActions();

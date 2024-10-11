@@ -1,12 +1,12 @@
 import React from 'react';
-import {styled} from '@mui/material';
-import {T, useTranslate} from '@tolgee/react';
-import {StandardForm} from 'tg.component/common/form/StandardForm';
-import {TextField} from 'tg.component/common/form/fields/TextField';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {messageService} from 'tg.service/MessageService';
-import {useOrganization} from 'tg.views/organizations/useOrganization';
-import {Validation} from 'tg.constants/GlobalValidationSchema';
+import { styled } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { messageService } from 'tg.service/MessageService';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -16,13 +16,13 @@ const StyledInputFields = styled('div')`
 `;
 
 type FormValues = {
-    authorizationUri: string;
-    clientId: string;
-    clientSecret: string;
-    redirectUri: string;
-    tokenUri: string;
-    jwkSetUri: string;
-    domainName: string;
+  authorizationUri: string;
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  tokenUri: string;
+  jwkSetUri: string;
+  domainName: string;
 };
 
 export function CreateProviderSsoForm({ data, disabled }) {
@@ -36,7 +36,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
     tokenUri: data?.tokenUri ?? '',
     jwkSetUri: data?.jwkSetUri ?? '',
     domainName: data?.domainName ?? '',
-  }
+  };
 
   if (!organization) {
     return null;
@@ -71,11 +71,11 @@ export function CreateProviderSsoForm({ data, disabled }) {
     >
       <StyledInputFields>
         <TextField
-            disabled={disabled}
-            variant="standard"
-            name="domainName"
-            label={<T keyName="organization_sso_domain_name" />}
-            minHeight={false}
+          disabled={disabled}
+          variant="standard"
+          name="domainName"
+          label={<T keyName="organization_sso_domain_name" />}
+          minHeight={false}
         />
       </StyledInputFields>
       <StyledInputFields>
