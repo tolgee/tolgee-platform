@@ -1,6 +1,7 @@
 package io.tolgee.controllers
 
 import com.posthog.java.PostHog
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
@@ -48,6 +49,7 @@ class PublicControllerTest :
   lateinit var postHog: PostHog
 
   @Test
+  @CleanDbBeforeMethod
   fun `creates organization`() {
     val dto =
       SignUpDto(
@@ -61,6 +63,7 @@ class PublicControllerTest :
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `creates organization when no invitation`() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
     performPost("/api/public/sign_up", dto).andIsOk
@@ -68,6 +71,7 @@ class PublicControllerTest :
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `logs event to external monitor`() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
     performPost(
@@ -98,6 +102,7 @@ class PublicControllerTest :
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `doesn't create organization when invitation provided`() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
@@ -117,6 +122,7 @@ class PublicControllerTest :
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `doesn't create orgs when disabled`() {
     tolgeeProperties.authentication.userCanCreateOrganizations = false
     val dto =
@@ -131,6 +137,7 @@ class PublicControllerTest :
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testSignUpValidationBlankEmail() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaa", email = "")
     performPost("/api/public/sign_up", dto)
@@ -139,6 +146,7 @@ class PublicControllerTest :
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testSignUpValidationBlankName() {
     val dto = SignUpDto(name = "", password = "aaaa", email = "aaa@aaa.cz")
     performPost("/api/public/sign_up", dto)
@@ -147,6 +155,7 @@ class PublicControllerTest :
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testSignUpValidationInvalidEmail() {
     val dto = SignUpDto(name = "", password = "aaaa", email = "aaaaaa.cz")
     performPost("/api/public/sign_up", dto)

@@ -1,5 +1,6 @@
 package io.tolgee.controllers
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.component.emailContacts.EmailServiceManager
 import io.tolgee.component.emailContacts.MailJetEmailServiceManager
 import io.tolgee.component.emailContacts.SendInBlueEmailServiceManager
@@ -10,6 +11,7 @@ import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.util.GitHubAuthUtil
 import jakarta.servlet.http.HttpServletRequest
@@ -34,6 +36,7 @@ import org.springframework.web.client.RestTemplate
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 class MarketingEmailingTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var sendInBlueProperties: SendInBlueProperties
@@ -89,6 +92,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   val testName = "Pavel Novak"
 
   @Test
+  @CleanDbBeforeMethod
   fun `adds contact on user sign up `() {
     val dto = SignUpDto(name = testName, password = "aaaaaaaaaa", email = testMail)
     performPost("/api/public/sign_up", dto)
@@ -97,6 +101,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `adds contact after verification when needs-verification is on`() {
     tolgeeProperties.frontEndUrl = "https://aaa"
     tolgeeProperties.authentication.needsEmailVerification = true
@@ -114,6 +119,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `updates contact when user is updated`() {
     val user = dbPopulator.createUserIfNotExists(username = testMail, name = testName)
     userAccount = user
@@ -123,6 +129,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `updates contact email when verified`() {
     tolgeeProperties.authentication.needsEmailVerification = true
     val user = dbPopulator.createUserIfNotExists(username = testMail, name = testName)
@@ -143,6 +150,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `adds contact when registered via github`() {
     gitHubAuthUtil.authorizeGithubUser()
     verifyCreateContactCalled("fake_email@email.com", "fakeName")

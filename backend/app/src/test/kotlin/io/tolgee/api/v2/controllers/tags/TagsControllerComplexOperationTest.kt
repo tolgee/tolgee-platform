@@ -15,6 +15,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
   @BeforeEach
   fun setup() {
     testData = TagsTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addNamespacedKey()
     projectSupplier = { testData.projectBuilder.self }
   }

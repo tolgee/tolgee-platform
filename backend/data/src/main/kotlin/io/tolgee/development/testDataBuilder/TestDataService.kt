@@ -46,6 +46,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.atomic.AtomicLong
 
 @Service
 class TestDataService(
@@ -433,9 +434,15 @@ class TestDataService(
   private fun saveAllUsers(builder: TestDataBuilder) {
     val userAccountBuilders = builder.data.userAccounts
     userAccountService.saveAll(
-      userAccountBuilders.map {
-        it.self.password = passwordEncoder.encode(it.rawPassword)
-        it.self
+      userAccountBuilders.map { userBuilder ->
+        if (builder.makeUsernamesUnique) {
+          userBuilder.self.username = userBuilder.self.username.getUniqueUsername()
+        }
+        userBuilder.self.password =
+          passwordHashCache.computeIfAbsent(userBuilder.rawPassword) {
+            passwordEncoder.encode(userBuilder.rawPassword)
+          }
+        userBuilder.self
       },
     )
     saveUserAvatars(userAccountBuilders)
@@ -499,5 +506,27 @@ class TestDataService(
 
   private fun clearEntityManager() {
     entityManager.clear()
+  }
+
+  fun cleanApiKeys(testData: TestDataBuilder) {
+    val ids = testData.data.projects.flatMap { project -> project.data.apiKeys.map { apiKey -> apiKey.self.id } }
+    executeInNewTransaction(transactionManager) {
+      entityManager.createNativeQuery("DELETE FROM postgres.public.api_key_scopes_enum WHERE api_key_id IN (:ids)")
+        .setParameter("ids", ids)
+        .executeUpdate()
+      entityManager.createNativeQuery("DELETE FROM api_key WHERE id IN (:ids)")
+        .setParameter("ids", ids)
+        .executeUpdate()
+    }
+  }
+
+  companion object {
+    private val userUniqueCounter by lazy { AtomicLong() }
+
+    private fun String.getUniqueUsername(): String {
+      return "${this}_${userUniqueCounter.incrementAndGet()}"
+    }
+
+    private val passwordHashCache = mutableMapOf<String, String>()
   }
 }

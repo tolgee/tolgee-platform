@@ -14,6 +14,7 @@ internal class ProjectStatsServiceTest : AbstractSpringTest() {
   @Test
   fun getProjectStats() {
     val testData = ProjectStatsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val data = projectStatsService.getProjectStats(testData.projectBuilder.self.id)
     assertThat(data.id).isPositive

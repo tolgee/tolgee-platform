@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.organizationController
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 @AutoConfigureMockMvc
 class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
+  @CleanDbBeforeMethod
   fun `returns all`() {
     val users = dbPopulator.createUsersAndOrganizations()
     loginAsUser(users[1].name)
@@ -34,6 +36,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `return all with pagination`() {
     val users = dbPopulator.createUsersAndOrganizations()
     loginAsUser(users[1].name)
@@ -47,6 +50,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `get all returns also organizations with project with direct permission`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
@@ -62,6 +66,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `returns all project in organization without checking for permissions`() {
     val testData = OrganizationTestData()
 
@@ -81,6 +86,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGetAllFilterOwned() {
     val users = dbPopulator.createUsersAndOrganizations()
 
@@ -98,6 +104,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGetAllSort() {
     val users = dbPopulator.createUsersAndOrganizations()
 
@@ -111,6 +118,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGetOneWithUrl() {
     createOrganization(dummyDto).let {
       performAuthGet("/v2/organizations/${it.slug}").andIsOk.andAssertThatJson {
@@ -121,6 +129,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `returns one only with project base permission`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
@@ -130,6 +139,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `doesn't return without permission`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
@@ -139,6 +149,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGetOneWithId() {
     createOrganization(dummyDto).let { organization ->
       performAuthGet("/v2/organizations/${organization.id}").andIsOk.andAssertThatJson {
@@ -154,6 +165,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGetOnePermissions() {
     val organization = createOrganization(dummyDto)
     performAuthGet("/v2/organizations/${organization.id}").andIsOk.andAssertThatJson {
@@ -163,6 +175,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testCreate() {
     performAuthPost(
       "/v2/organizations",
@@ -178,6 +191,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testCreateSlugValidation() {
     createOrganization(dummyDto2.also { it.slug = "hello-1" })
 
@@ -188,6 +202,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testCreateNotAllowed() {
     this.tolgeeProperties.authentication.userCanCreateOrganizations = false
     loginAsUserIfNotLogged()
@@ -199,6 +214,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testCreateValidation() {
     performAuthPost(
       "/v2/organizations",
@@ -229,6 +245,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testCreateGeneratesSlug() {
     performAuthPost(
       "/v2/organizations",
@@ -237,6 +254,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testEdit() {
     executeInNewTransaction {
       this.organizationService.create(dummyDto, userAccount!!).let {
@@ -261,6 +279,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `slug validation`() {
     createOrganization(dummyDto2.also { it.slug = "hello-1" })
     val organization = createOrganization(dummyDto)
@@ -273,6 +292,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it deletes organization`() {
     val organization2 = createOrganization(dummyDto2)
     createOrganization(dummyDto).let {
@@ -291,6 +311,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     }
 
   @Test
+  @CleanDbBeforeMethod
   @Transactional
   fun `sets user role`() {
     withOwnerInOrganization { organization, owner, role ->
@@ -303,6 +324,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @Transactional
   fun `sets base permissions`() {
     withOwnerInOrganization { organization, owner, role ->

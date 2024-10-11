@@ -25,7 +25,7 @@ class PatAuthTest : AbstractControllerTest() {
         add("X-API-Key", "tgpat_${pat.token}")
       },
     ).andIsOk.andAssertThatJson {
-      node("username").isEqualTo("franta")
+      node("username").isString.contains("franta")
     }
 
     val lastUsedAt = patService.get(pat.id).lastUsedAt
@@ -94,6 +94,7 @@ class PatAuthTest : AbstractControllerTest() {
   private fun createUserWithPat(expiresAt: Date? = Date(Date().time + 10000)): Pat {
     var pat: Pat? = null
     testDataService.saveTestData {
+      makeUsernamesUnique = true
       addUserAccount {
         username = "franta"
       }.build {

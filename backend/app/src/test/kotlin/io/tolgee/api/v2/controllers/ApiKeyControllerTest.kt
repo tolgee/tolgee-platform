@@ -15,6 +15,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -31,8 +32,14 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun createData() {
     testData = ApiKeysTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanApiKeys(testData.root)
   }
 
   @Test
@@ -45,7 +52,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
-      node("username").isEqualTo("test_username")
+      node("username").isString.contains("test_username")
       node("userFullName").isEqualTo("")
       node("projectId").isNumber.isGreaterThan(BigDecimal(0))
       node("id").isValidId
@@ -64,7 +71,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("key").isString.hasSizeGreaterThan(10)
-      node("username").isEqualTo("test_username")
+      node("username").isString.contains("test_username")
       node("userFullName").isEqualTo("")
       node("projectId").isNumber.isGreaterThan(BigDecimal(0))
       node("id").isValidId
@@ -131,7 +138,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
         node("[0]") {
           node("key").isAbsent()
           node("description").isEqualTo("test_......ta_39")
-          node("username").isEqualTo("franta")
+          node("username").isString.contains("franta")
           node("userFullName").isEqualTo("Franta Dobrota")
           node("projectId").isNumber.isGreaterThan(BigDecimal(0))
           node("id").isValidId
@@ -151,7 +158,7 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
           isArray.hasSize(1)
           node("[0]") {
             node("key").isAbsent()
-            node("username").isEqualTo("franta")
+            node("username").isString.contains("franta")
             node("userFullName").isEqualTo("Franta Dobrota")
             node("projectId").isNumber.isGreaterThan(BigDecimal(0))
             node("id").isValidId

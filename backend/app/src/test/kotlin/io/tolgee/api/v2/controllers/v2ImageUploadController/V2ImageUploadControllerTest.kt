@@ -4,6 +4,7 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.component.MaxUploadedFilesByUserProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -58,6 +59,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `does not upload more then user limit`() {
     whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 3L }
     repeat((1..4).count()) {
@@ -76,6 +78,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `returns file`() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
     val result =
@@ -91,6 +94,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun delete() {
     whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 30L }
     val list =

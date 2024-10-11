@@ -97,6 +97,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   private fun initTestData() {
     testData = SuggestionTestData()
+    testData.root.makeUsernamesUnique = true
     projectSupplier = { testData.projectBuilder.self }
   }
 

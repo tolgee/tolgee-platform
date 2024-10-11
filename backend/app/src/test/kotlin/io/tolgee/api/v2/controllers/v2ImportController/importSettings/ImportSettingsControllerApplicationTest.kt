@@ -217,6 +217,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
   }
 
   private fun saveAndPrepare() {
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }

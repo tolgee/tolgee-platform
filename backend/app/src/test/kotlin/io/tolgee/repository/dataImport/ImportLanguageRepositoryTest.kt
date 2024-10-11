@@ -16,6 +16,7 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
   @Test
   fun `view query returns correct result`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addFileIssues()
     testDataService.saveTestData(testData.root)
     val result =

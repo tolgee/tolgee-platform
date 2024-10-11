@@ -7,6 +7,7 @@ package io.tolgee.service
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.AbstractSpringTest
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.TelemetryReportRequest
@@ -59,6 +60,7 @@ class TelemetryServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `reports when enabled`() {
     telemetryProperties.enabled = true
     val testData =
@@ -73,6 +75,7 @@ class TelemetryServiceTest : AbstractSpringTest() {
           }
         }
       }
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     mockHttpRequest(restTemplate) {
       whenReq {

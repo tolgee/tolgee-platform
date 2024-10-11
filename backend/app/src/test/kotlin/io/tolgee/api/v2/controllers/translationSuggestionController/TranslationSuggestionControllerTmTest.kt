@@ -24,6 +24,7 @@ class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/pro
   @BeforeEach
   fun initTestData() {
     testData = SuggestionTestData()
+    testData.root.makeUsernamesUnique = true
     projectSupplier = { testData.projectBuilder.self }
   }
 

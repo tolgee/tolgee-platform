@@ -24,6 +24,7 @@ class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testData.generateLotOfData(100)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

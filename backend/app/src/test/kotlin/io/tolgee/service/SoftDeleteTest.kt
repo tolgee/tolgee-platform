@@ -10,6 +10,8 @@ class SoftDeleteTest : AbstractSpringTest() {
   @Test
   fun `project is soft deleted`() {
     val testData = BaseTestData()
+    testData.root.makeUsernamesUnique = true
+
     executeInNewTransaction {
       testDataService.saveTestData(testData.root)
     }
@@ -27,6 +29,7 @@ class SoftDeleteTest : AbstractSpringTest() {
   @Test
   fun `queries don't return deleted projects`() {
     val testData = BaseTestData()
+    testData.root.makeUsernamesUnique = true
     executeInNewTransaction {
       testDataService.saveTestData(testData.root)
     }

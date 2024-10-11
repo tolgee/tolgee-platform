@@ -25,6 +25,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     this.projectSupplier = { testData.project }
   }
 
@@ -78,6 +79,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
   @Test
   fun `filters by namespace`() {
     val testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
@@ -105,6 +107,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `it filters by empty namespace`() {
     val testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
@@ -119,6 +122,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `it doesn't filter when no namespace is provided`() {
     val testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
@@ -335,6 +339,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
   @Test
   fun `filters by outdated`() {
     val testData = TranslationSourceChangeStateTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }

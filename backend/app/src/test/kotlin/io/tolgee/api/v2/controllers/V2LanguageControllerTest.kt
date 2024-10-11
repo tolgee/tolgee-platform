@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.PropertyModification
@@ -30,6 +31,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private val languageDTOCorrect = LanguageRequest("Spanish", "Espanol", "es")
 
   @Test
+  @CleanDbBeforeMethod
   fun createLanguage() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
@@ -38,6 +40,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun editLanguage() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
@@ -63,6 +66,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun findAllLanguages() {
     val project = dbPopulator.createBase(generateUniqueString(), "ben", "pwd").project
     loginAsUser("ben")
@@ -74,6 +78,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun deleteLanguage() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
@@ -86,6 +91,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.LANGUAGES_EDIT])
   fun `deletes language with API key`() {
     val base = dbPopulator.createBase(generateUniqueString())
@@ -101,6 +107,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   fun `does not delete language with API key (permissions)`() {
     val base = dbPopulator.createBase(generateUniqueString())
@@ -113,6 +120,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `cannot delete base language`() {
     val base = dbPopulator.createBase(generateUniqueString())
     executeInNewTransaction {
@@ -128,6 +136,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `automatically sets base language`() {
     val base = dbPopulator.createBase(generateUniqueString())
 
@@ -151,6 +160,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun createLanguageTestValidationComa() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
@@ -187,6 +197,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectApiKeyAuthTestMethod
   fun findAllLanguagesApiKey() {
     performProjectAuthGet("languages").andIsOk.andAssertThatJson {

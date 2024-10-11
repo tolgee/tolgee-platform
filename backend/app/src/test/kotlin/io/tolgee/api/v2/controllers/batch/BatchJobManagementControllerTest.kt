@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.batch
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
@@ -88,6 +89,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
   fun setup() {
     batchJobChunkExecutionQueue.clear()
     testData = BatchJobsTestData()
+    testData.root.makeUsernamesUnique = true
     batchJobChunkExecutionQueue.populateQueue()
     Mockito.reset(
       mtCreditBucketService,
@@ -107,6 +109,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `exception from inner transaction doesn't break it`() {
     batchDumper.finallyDump {
       val keys = testData.addTranslationOperationData(100)
@@ -148,6 +151,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `returns list of jobs`() {
     saveAndPrepare()
 
@@ -214,6 +218,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `returns list of my jobs`() {
     saveAndPrepare()
 
@@ -242,6 +247,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `returns list of current jobs`() {
     saveAndPrepare()
 
@@ -303,6 +309,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `returns single job`() {
     saveAndPrepare()
 
@@ -320,6 +327,7 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `cannot get other's job`() {
     saveAndPrepare()
 

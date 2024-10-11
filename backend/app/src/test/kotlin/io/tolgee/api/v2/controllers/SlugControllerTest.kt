@@ -1,5 +1,7 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.CleanDbBeforeClass
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.dtos.request.GenerateSlugDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -8,6 +10,7 @@ import io.tolgee.model.Project
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
 
+@CleanDbBeforeClass
 class SlugControllerTest : AuthorizedControllerTest() {
   @Test
   fun testValidateOrganizationSlug() {
@@ -42,6 +45,7 @@ class SlugControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGenerateOrganizationSlug() {
     performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world"))
       .andIsOk.andAssertThatJson {

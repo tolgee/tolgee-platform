@@ -15,6 +15,7 @@ class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     testData = OrganizationTestData()
+    testData.root.makeUsernamesUnique = true
     tolgeeProperties.authentication.userCanCreateOrganizations = true
     testDataService.saveTestData(testData.root)
   }

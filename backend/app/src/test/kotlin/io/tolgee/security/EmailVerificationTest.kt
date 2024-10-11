@@ -1,5 +1,6 @@
 package io.tolgee.security
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
@@ -43,6 +44,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun loginWhenNotVerified() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     emailVerificationService.createForUser(createUser)
@@ -52,6 +54,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun doesLoginWhenVerified() {
     dbPopulator.createUserIfNotExists(initialUsername)
     val result = doAuthentication(initialUsername, initialPassword)
@@ -59,6 +62,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun verifiesEmail() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
@@ -69,6 +73,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @Transactional
   fun verifiesNewEmail() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
@@ -80,6 +85,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun doesNotVerifyWithWrongCode() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
@@ -90,6 +96,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @Transactional
   fun doesNotVerifyWithWrongUser() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
@@ -113,6 +120,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun signUpSavesVerification() {
     perform()
     val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
@@ -126,6 +134,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `uses frontend url over provided callback url`() {
     signUpDto.callbackUrl = "dummyCallbackUrl"
     perform()
@@ -142,6 +151,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `uses callback url when no frontendUrl provided`() {
     signUpDto.callbackUrl = "dummyCallbackUrl"
     tolgeeProperties.frontEndUrl = null

@@ -14,6 +14,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
@@ -32,6 +33,7 @@ import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import java.util.function.Consumer
 
+@ContextRecreatingTest
 class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
@@ -55,6 +57,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
         name = "key"
       }
     }
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
@@ -97,6 +100,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `it returns params for batch job activity`() {
     val testData = BatchJobsTestData()
     val keys = testData.addTranslationOperationData(10)
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }
@@ -171,7 +175,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
         text = "t"
         state = TranslationState.REVIEWED
       }.self
-
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier =
@@ -201,7 +205,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun JsonAssert.isValidAuthor() {
     node("id").isNumber
-    node("username").isEqualTo("test_username")
+    node("username").isString.contains("test_username")
     node("name").isEqualTo("Franta")
   }
 

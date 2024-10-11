@@ -15,6 +15,7 @@ class ImportSettingsControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   @ProjectJWTAuthTestMethod
   fun `stores settings`() {
     val testData = BaseTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }
@@ -46,6 +47,7 @@ class ImportSettingsControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       overrideKeyDescriptions = true
       convertPlaceholdersToIcu = false
     }
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }

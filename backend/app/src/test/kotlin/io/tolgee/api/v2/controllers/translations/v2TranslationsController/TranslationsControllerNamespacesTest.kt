@@ -22,6 +22,7 @@ class TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/proj
   @ProjectJWTAuthTestMethod
   fun `it returns namespaces`() {
     val testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
@@ -43,6 +44,7 @@ class TranslationsControllerNamespacesTest : ProjectAuthControllerTest("/v2/proj
   @ProjectJWTAuthTestMethod
   fun `creates key in namespace on set or create`() {
     val testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }

@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsOk
@@ -26,6 +27,7 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectJWTAuthTestMethod
   fun `auto translates on import`() {
     val keyName = "test"
@@ -35,6 +37,7 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @ProjectJWTAuthTestMethod
   fun `sets outdated flag on base changed`() {
     val keyName = "keyWith2Translations"
@@ -61,6 +64,7 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
   }
 
   fun saveTestData() {
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
   }

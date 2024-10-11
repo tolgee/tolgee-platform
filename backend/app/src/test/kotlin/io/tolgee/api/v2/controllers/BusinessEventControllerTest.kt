@@ -29,6 +29,7 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     testData = BaseTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user

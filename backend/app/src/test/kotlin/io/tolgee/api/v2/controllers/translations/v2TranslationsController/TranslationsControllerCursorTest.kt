@@ -21,6 +21,7 @@ class TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     this.projectSupplier = { testData.project }
   }
 

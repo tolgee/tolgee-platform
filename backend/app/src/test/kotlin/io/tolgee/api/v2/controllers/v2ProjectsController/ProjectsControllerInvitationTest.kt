@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -77,6 +78,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `invites user to project with languages (translate)`() {
     val result =
       invitationTestUtil.perform { getLang ->
@@ -92,6 +94,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `invites user to project with languages (review)`() {
     val result =
       invitationTestUtil.perform { getLang ->
@@ -108,6 +111,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `cannot set different languages (review)`() {
     val result =
       invitationTestUtil.perform { getLang ->
@@ -123,6 +127,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `validates languages and permission (lower)`() {
     invitationTestUtil.perform { getLang ->
       type = ProjectPermissionType.VIEW
@@ -132,6 +137,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
+  @CleanDbBeforeMethod
   fun `validates languages and permission (higher)`() {
     invitationTestUtil.perform { getLang ->
       type = ProjectPermissionType.EDIT

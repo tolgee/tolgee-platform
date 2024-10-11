@@ -25,6 +25,12 @@ class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
 
   val data = DATA()
 
+  /**
+   * If true, testDataSaver will make the usernames unique for each user account,
+   * so we don't need to clean the database each time
+   */
+  var makeUsernamesUnique = false
+
   fun addUserAccountWithoutOrganization(ft: UserAccount.() -> Unit): UserAccountBuilder {
     val builder = UserAccountBuilder(this)
     data.userAccounts.add(builder)

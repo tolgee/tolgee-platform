@@ -32,6 +32,7 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
   @BeforeEach
   fun setup() {
     testDataService.saveTestData {
+      this.makeUsernamesUnique = true
       addUserAccount {
         username = "franta"
         name = "Frantisek"
@@ -93,7 +94,7 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
           node("revisionType").isEqualTo("MOD")
           node("author") {
             node("id").isNumber.isGreaterThan(0.toBigDecimal())
-            node("username").isEqualTo("franta")
+            node("username").isString.contains("franta")
             node("name").isEqualTo("Frantisek")
             node("avatar") {
               node("large").isString.contains(".png")

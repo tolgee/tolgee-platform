@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
@@ -47,6 +48,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `get all has language permissions`() {
     val baseTestData = BaseTestData()
+    baseTestData.root.makeUsernamesUnique = true
 
     var franta: UserAccount? = null
     baseTestData.root.apply {
@@ -71,6 +73,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun getAllWithStats() {
     val testData = ProjectsTestData()
     testDataService.saveTestData(testData.root)
@@ -106,6 +109,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `with-stats returns permitted languages`() {
     val testData = ProjectsTestData()
     testDataService.saveTestData(testData.root)
@@ -154,6 +158,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun getAllUsers() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val directPermissionProject = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
@@ -185,6 +190,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun setUsersPermissionsNoAccess() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
@@ -199,6 +205,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun setUsersPermissionsOwner() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
@@ -214,6 +221,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun setUsersPermissionsOwn() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo =
@@ -231,6 +239,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun revokeUsersAccess() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
@@ -257,6 +266,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun revokeUsersAccessIsOrganizationMember() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]

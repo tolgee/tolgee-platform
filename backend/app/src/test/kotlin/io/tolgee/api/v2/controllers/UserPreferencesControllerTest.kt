@@ -14,6 +14,7 @@ class UserPreferencesControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     testData = OrganizationTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
   }
 

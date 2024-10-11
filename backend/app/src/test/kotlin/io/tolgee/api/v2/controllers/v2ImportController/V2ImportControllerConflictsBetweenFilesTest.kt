@@ -260,6 +260,7 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
 
   private fun prepareTestData(): ImportCleanTestData {
     val testData = ImportCleanTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.userAccount.username)
     projectSupplier = { testData.projectBuilder.self }

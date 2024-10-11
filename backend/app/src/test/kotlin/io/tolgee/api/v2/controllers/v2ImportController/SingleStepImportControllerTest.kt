@@ -362,6 +362,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   private fun saveAndPrepare() {
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }

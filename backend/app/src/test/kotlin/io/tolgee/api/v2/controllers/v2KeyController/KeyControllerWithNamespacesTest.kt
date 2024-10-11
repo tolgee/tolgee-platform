@@ -30,6 +30,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @BeforeEach
   fun setup() {
     testData = NamespacesTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.projectBuilder.self }

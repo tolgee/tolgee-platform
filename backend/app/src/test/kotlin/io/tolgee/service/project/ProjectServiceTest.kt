@@ -5,6 +5,7 @@
 package io.tolgee.service.project
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -40,6 +41,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   private lateinit var bigMetaService: BigMetaService
 
   @Test
+  @CleanDbBeforeMethod
   fun testFindAllPermitted() {
     executeInNewTransaction {
       val users = dbPopulator.createUsersAndOrganizations()
@@ -50,6 +52,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testFindAllEmpty() {
     executeInNewTransaction {
       dbPopulator.createUsersAndOrganizations() // create some data
@@ -60,6 +63,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testFindAllSingleProject() {
     executeInNewTransaction {
       dbPopulator.createUsersAndOrganizations() // create some data
@@ -71,6 +75,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testFindMultiple() {
     executeInNewTransaction {
       val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("helga") // create some data
@@ -91,6 +96,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testFindMultiplePermissions() {
     executeInNewTransaction(platformTransactionManager) {
       val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") // create some data
@@ -130,6 +136,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testDeleteProjectWithTags() {
     executeInNewTransaction(platformTransactionManager) {
       val testData = TagsTestData()
@@ -147,6 +154,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `deletes project with MT Settings`() {
     val testData =
       executeInNewTransaction {
@@ -160,6 +168,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `deletes project with batch jobs`() {
     val testData = BatchJobsTestData()
     val keys = testData.addTranslationOperationData(10)
@@ -192,6 +201,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `deletes project with big meta`() {
     val testData = BaseTestData()
     val key1 = testData.projectBuilder.addKey(keyName = "hello").self
@@ -217,6 +227,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `deletes project with Content Delivery Configs`() {
     val testData = ContentDeliveryConfigTestData()
     testDataService.saveTestData(testData.root)
@@ -226,6 +237,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `deletes project with webhooks`() {
     val testData = WebhooksTestData()
     testDataService.saveTestData(testData.root)

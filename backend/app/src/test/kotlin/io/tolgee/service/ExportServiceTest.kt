@@ -19,6 +19,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `returns correct export data`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
 
     testDataService.saveTestData(testData.root)
     val exportParams = ExportParams(filterState = null)
@@ -33,6 +34,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `returns empty translations correct export data`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     val exportParams = ExportParams(filterState = listOf(TranslationState.UNTRANSLATED))
 
@@ -47,6 +49,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `selects languages for export data`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(languages = setOf("de"))
@@ -60,6 +63,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `filters keyIdIn for export data`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id))
@@ -74,6 +78,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `filters keyNotIdIn for export data`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(filterKeyIdNot = listOf(testData.aKey.id))
@@ -87,6 +92,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `filters export data by tag`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     val tag = "Cool tag"
@@ -103,6 +109,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `filters export data by tag in`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     var result = getResultFilteredByTagIn(testData, listOf("Cool tag", "Lame tag"))
@@ -117,6 +124,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `filters export data by tag not in`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     var result = getResultFilteredByTagNotIn(testData, listOf("Cool tag", "Lame tag"))
@@ -150,6 +158,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `filters export data by key prefix`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     val exportParams = ExportParams(filterKeyPrefix = "A")
@@ -163,6 +172,7 @@ class ExportServiceTest : AbstractSpringTest() {
   @Test
   fun `filters export data by state`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addTranslationsWithStates()
     testDataService.saveTestData(testData.root)
 

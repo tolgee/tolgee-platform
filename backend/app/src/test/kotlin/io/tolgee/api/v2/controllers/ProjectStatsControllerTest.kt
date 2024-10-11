@@ -26,6 +26,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun setup() {
     mockDate("2022-03-20")
     testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addTranslationsWithStates()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

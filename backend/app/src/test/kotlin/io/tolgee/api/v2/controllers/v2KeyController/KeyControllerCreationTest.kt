@@ -49,6 +49,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     testData = KeysTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.project }
@@ -371,6 +372,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
     stateChangeTags: List<String>?,
   ) {
     val testData = PermissionsTestData()
+    testData.root.makeUsernamesUnique = true
     val user =
       testData.addUserWithPermissions(
         scopes = scopes,

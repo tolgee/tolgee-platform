@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.organizationController
 
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional
 @AutoConfigureMockMvc
 class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   @Test
+  @CleanDbBeforeMethod
   fun testGetAllUsers() {
     val users = dbPopulator.createUsersAndOrganizations()
     loginAsUser(users[0].username)
@@ -43,6 +45,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `it returns also users with direct permissions on some project`() {
     val testData = PermissionsTestData()
     testData.addUserWithPermissions(type = ProjectPermissionType.MANAGE)
@@ -85,6 +88,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testGetAllUsersNotPermitted() {
     val users = dbPopulator.createUsersAndOrganizations()
     val organizationId = users[1].organizationRoles[0].organization!!.id
@@ -92,6 +96,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   @Transactional
   fun `cannot set own permission`() {
     withOwnerInOrganization { organization, owner, role ->
@@ -109,6 +114,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun testRemoveUser() {
     withOwnerInOrganization { organization, owner, role ->
       organizationRoleRepository.save(role)
@@ -120,6 +126,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `removes user with all permissions`() {
     val testData = PermissionsTestData()
     val me = testData.addUserWithPermissions(type = ProjectPermissionType.MANAGE)
@@ -135,6 +142,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `remove user resets preferred`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
@@ -146,6 +154,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `doesn't create new preferred when cannot create organizations`() {
     tolgeeProperties.authentication.userCanCreateOrganizations = false
     val testData = OrganizationTestData()

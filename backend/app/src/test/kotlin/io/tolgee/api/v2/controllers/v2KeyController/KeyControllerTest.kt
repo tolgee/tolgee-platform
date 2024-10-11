@@ -402,6 +402,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun saveTestDataAndPrepare() {
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.project }

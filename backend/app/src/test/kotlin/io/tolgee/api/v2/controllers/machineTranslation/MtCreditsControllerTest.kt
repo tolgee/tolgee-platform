@@ -17,6 +17,7 @@ class MtCreditsControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     testData = MtCreditsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
   }

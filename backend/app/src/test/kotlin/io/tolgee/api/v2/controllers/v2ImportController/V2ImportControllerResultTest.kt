@@ -28,6 +28,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it returns correct result data`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -50,6 +51,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it removes expired import`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     setForcedDate(DateUtils.addHours(Date(), 2))
@@ -66,6 +68,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it returns correct specific language`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -86,6 +89,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it paginates result`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -97,6 +101,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it return correct translation data (all)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addPluralImport()
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -121,6 +126,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it return correct translation data (only conflicts)`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addPluralImport()
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -150,6 +156,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it searches for translation data`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -186,6 +193,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it pages translation data`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -200,6 +208,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `onlyConflict filter on translations works`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -220,6 +229,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `onlyUnresolved filter on translations works`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.translationWithConflict.resolve()
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.root.data.userAccounts[0].self.username)
@@ -241,12 +251,14 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `import is isolated`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result").andIsOk
 
     val testData2 = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData2.userAccount.username = "user2"
     testDataService.saveTestData(testData2.root)
     loginAsUser(testData2.root.data.userAccounts[0].self.username)
@@ -275,6 +287,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Test
   fun `it returns correct file issues`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testData.addManyFileIssues()
     testData.setAllResolved()
     testData.setAllOverride()

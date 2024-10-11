@@ -1,10 +1,12 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.CleanDbBeforeMethod
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.util.StuckBatchJobTestUtil
 import org.junit.jupiter.api.AfterEach
@@ -12,12 +14,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest(
   properties = ["tolgee.batch.scheduled-handle-stuck-job-delay=200"],
 )
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextRecreatingTest
 class BatchJobsCleanerTest : AbstractSpringTest() {
   @Autowired
   lateinit var jobConcurrentLauncher: BatchJobConcurrentLauncher
@@ -42,6 +43,7 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
   }
 
   @Test
+  @CleanDbBeforeMethod
   fun `fixes the batch job state`() {
     val cancelledJob = createCancelledJob()
     val failedJob = createFailedJob()

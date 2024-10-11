@@ -40,6 +40,7 @@ class LanguageServiceTest : AbstractSpringTest() {
   @Transactional
   fun `remove of language removes existing language reference from import language`() {
     val testData = ImportTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     var foundImportLanguage = importService.findLanguages(testData.import).first()
@@ -55,6 +56,8 @@ class LanguageServiceTest : AbstractSpringTest() {
   @Transactional
   fun `deletes language with MT Service Config`() {
     val testData = MtSettingsTestData()
+    testData.root.makeUsernamesUnique = true
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     languageService.hardDeleteLanguage(testData.germanLanguage.id)
@@ -65,6 +68,7 @@ class LanguageServiceTest : AbstractSpringTest() {
   @Transactional
   fun `deletes language with Comments`() {
     val testData = TranslationCommentsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     languageService.hardDeleteLanguage(testData.englishLanguage.id)
@@ -74,6 +78,7 @@ class LanguageServiceTest : AbstractSpringTest() {
   @Test
   fun `hard deletes language`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testDataService.saveTestData(testData.root)
 
     executeInNewTransaction {
@@ -92,6 +97,7 @@ class LanguageServiceTest : AbstractSpringTest() {
   @Test
   fun `hard deletes language without n+1s`() {
     val testData = TranslationsTestData()
+    testData.root.makeUsernamesUnique = true
     testData.generateLotOfData(100)
     testDataService.saveTestData(testData.root)
 
