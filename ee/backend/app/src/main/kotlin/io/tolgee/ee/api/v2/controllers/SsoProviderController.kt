@@ -4,6 +4,7 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.ee.data.toDto
 import io.tolgee.ee.service.TenantService
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.RequiresSuperAuthentication
@@ -29,7 +30,13 @@ class SsoProviderController(
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @GetMapping("")
   @RequiresSuperAuthentication
-  fun getProvider(
+  fun findProvider(
     @PathVariable organizationId: Long,
-  ): SsoTenantModel = ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
+  ): SsoTenantModel? {
+    return try {
+      ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
+    } catch (e: NotFoundException) {
+      null
+    }
+  }
 }

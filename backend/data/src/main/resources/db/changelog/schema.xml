@@ -3440,4 +3440,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1728668758700-1">
+        <addColumn tableName="user_account">
+            <column name="sso_domain" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

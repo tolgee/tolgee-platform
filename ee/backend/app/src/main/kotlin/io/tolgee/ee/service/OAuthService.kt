@@ -163,7 +163,7 @@ class OAuthService(
         domain = tenant.domain,
         organizationId = tenant.organizationId,
       )
-    val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, tenant.domain)
+    val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, "sso")
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
   }

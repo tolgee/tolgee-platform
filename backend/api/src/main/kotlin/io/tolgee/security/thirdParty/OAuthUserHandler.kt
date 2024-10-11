@@ -41,6 +41,7 @@ class OAuthUserHandler(
         }
       newUserAccount.name = name
       newUserAccount.thirdPartyAuthId = userResponse.sub
+      newUserAccount.ssoDomain = userResponse.domain
       newUserAccount.thirdPartyAuthType = thirdPartyAuthType
       newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
 
