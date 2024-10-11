@@ -1,23 +1,17 @@
-import { useState } from 'react';
-import { T } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
+import {useState} from 'react';
+import {T} from '@tolgee/react';
+import {useHistory} from 'react-router-dom';
 
-import { securityService } from 'tg.service/SecurityService';
-import {
-  ADMIN_JWT_LOCAL_STORAGE_KEY,
-  tokenService,
-} from 'tg.service/TokenService';
-import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useInitialDataService } from './useInitialDataService';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import {
-  INVITATION_CODE_STORAGE_KEY,
-  InvitationCodeService,
-} from 'tg.service/InvitationCodeService';
-import { messageService } from 'tg.service/MessageService';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import {securityService} from 'tg.service/SecurityService';
+import {ADMIN_JWT_LOCAL_STORAGE_KEY, tokenService,} from 'tg.service/TokenService';
+import {components} from 'tg.service/apiSchema.generated';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {useInitialDataService} from './useInitialDataService';
+import {LINKS, PARAMS} from 'tg.constants/links';
+import {INVITATION_CODE_STORAGE_KEY, InvitationCodeService,} from 'tg.service/InvitationCodeService';
+import {messageService} from 'tg.service/MessageService';
+import {TranslatedError} from 'tg.translationTools/TranslatedError';
+import {useLocalStorageState} from 'tg.hooks/useLocalStorageState';
 
 type LoginRequest = components['schemas']['LoginRequest'];
 type JwtAuthenticationResponse =
@@ -52,16 +46,6 @@ export const useAuthService = (
   const authorizeOAuthLoadable = useApiMutation({
     url: '/api/public/authorize_oauth/{serviceType}',
     method: 'get',
-  });
-
-  const authorizeOpenIdLoadable = useApiMutation({
-    url: '/v2/public/oauth2/callback/{registrationId}',
-    method: 'get',
-  });
-
-  const openIdAuthUrlLoadable = useApiMutation({
-    url: '/v2/public/oauth2/callback/get-authentication-url',
-    method: 'post',
   });
 
   const acceptInvitationLoadable = useApiMutation({
@@ -195,44 +179,6 @@ export const useAuthService = (
       );
       setInvitationCode(undefined);
       await handleAfterLogin(response!);
-    },
-
-    async loginWithOAuthCodeOpenId(registrationId: string, code: string) {
-      const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({
-        [PARAMS.SERVICE_TYPE]: registrationId,
-      });
-      const response = await authorizeOpenIdLoadable.mutateAsync(
-        {
-          path: { registrationId: registrationId },
-          query: {
-            code,
-            redirect_uri: redirectUri,
-            invitationCode: invitationCode,
-          },
-        },
-        {
-          onError: (error) => {
-            if (error.code === 'invitation_code_does_not_exist_or_expired') {
-              setInvitationCode(undefined);
-            }
-            messageService.error(<TranslatedError code={error.code!} />);
-          },
-        }
-      );
-      await handleAfterLogin(response!);
-    },
-
-    async getSsoAuthLinkByDomain(domain: string, state: string) {
-      return await openIdAuthUrlLoadable.mutateAsync(
-        {
-          content: { 'application/json': { domain, state } },
-        },
-        {
-          onError: (error) => {
-            messageService.error(<TranslatedError code={error.code!} />);
-          },
-        }
-      );
     },
 
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {

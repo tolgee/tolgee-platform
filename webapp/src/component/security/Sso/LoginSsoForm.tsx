@@ -1,18 +1,16 @@
-import React, { RefObject } from 'react';
-import { Link as MuiLink, styled, Typography } from '@mui/material';
+import React, {RefObject} from 'react';
+import {Link as MuiLink, styled, Typography} from '@mui/material';
 import Box from '@mui/material/Box';
-import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
+import {T} from '@tolgee/react';
+import {Link} from 'react-router-dom';
 
-import { LINKS } from 'tg.constants/links';
+import {LINKS} from 'tg.constants/links';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { TextField } from 'tg.component/common/form/fields/TextField';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { v4 as uuidv4 } from 'uuid';
+import {StandardForm} from 'tg.component/common/form/StandardForm';
+import {TextField} from 'tg.component/common/form/fields/TextField';
+import {useGlobalContext,} from 'tg.globalContext/GlobalContext';
+import {v4 as uuidv4} from 'uuid';
+import {useSsoService} from 'tg.component/security/SsoService';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -28,7 +26,7 @@ type LoginViewCredentialsProps = {
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 
 export function LoginSsoForm(props: LoginViewCredentialsProps) {
-  const { getSsoAuthLinkByDomain } = useGlobalActions();
+  const { getSsoAuthLinkByDomain } = useSsoService();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
   return (
