@@ -13,13 +13,10 @@ import io.tolgee.constants.Message
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
 import io.tolgee.ee.model.SsoTenant
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.service.organization.OrganizationRoleService
-import io.tolgee.service.security.SignUpService
-import io.tolgee.service.security.UserAccountService
+import io.tolgee.security.thirdParty.OAuthUserHandler
+import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.http.*
@@ -34,12 +31,10 @@ import java.util.*
 @Service
 class OAuthService(
   private val jwtService: JwtService,
-  private val userAccountService: UserAccountService,
-  private val signUpService: SignUpService,
   private val restTemplate: RestTemplate,
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
-  private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
+  private val oAuthUserHandler: OAuthUserHandler,
 ) : Logging {
   fun handleOAuthCallback(
     registrationId: String,
@@ -156,37 +151,17 @@ class OAuthService(
         logger.info("Third party user email is null. Missing scope email?")
         throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
       }
-
-    val userAccountOptional = userAccountService.findByThirdParty(tenant.domain, userResponse.sub!!)
-    val user =
-      userAccountOptional.orElseGet {
-        userAccountService.findActive(email)?.let {
-          throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
-        }
-
-        val newUserAccount = UserAccount()
-        newUserAccount.username =
-          userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
-
-        // build name for userAccount based on available fields by third party
-        var name = userResponse.email!!.split("@")[0]
-        if (userResponse.name != null) {
-          name = userResponse.name!!
-        } else if (userResponse.given_name != null && userResponse.family_name != null) {
-          name = "${userResponse.given_name} ${userResponse.family_name}"
-        }
-        newUserAccount.name = name
-        newUserAccount.thirdPartyAuthId = userResponse.sub
-        newUserAccount.thirdPartyAuthType = tenant.domain
-        newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-        signUpService.signUp(newUserAccount, invitationCode, null)
-        organizationRoleService.grantRoleToUser(
-          newUserAccount,
-          tenant.organizationId,
-          OrganizationRoleType.MEMBER,
-        )
-        newUserAccount
-      }
+    val userData =
+      OAuthUserDetails(
+        sub = userResponse.sub!!,
+        name = userResponse.name,
+        givenName = userResponse.given_name,
+        familyName = userResponse.family_name,
+        email = email,
+        domain = tenant.domain,
+        organizationId = tenant.organizationId,
+      )
+    val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, tenant.domain)
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
   }
