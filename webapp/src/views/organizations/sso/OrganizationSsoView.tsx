@@ -1,11 +1,11 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
-import { useTranslate } from '@tolgee/react';
-import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { useOrganization } from '../useOrganization';
-import { CreateProviderSsoForm } from 'tg.views/organizations/sso/CreateProviderSsoForm';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { FormControlLabel, Switch } from '@mui/material';
+import React, {FunctionComponent, useEffect, useState} from 'react';
+import {useTranslate} from '@tolgee/react';
+import {BaseOrganizationSettingsView} from '../components/BaseOrganizationSettingsView';
+import {LINKS, PARAMS} from 'tg.constants/links';
+import {useOrganization} from '../useOrganization';
+import {CreateProviderSsoForm} from 'tg.views/organizations/sso/CreateProviderSsoForm';
+import {useApiQuery} from 'tg.service/http/useQueryApi';
+import {FormControlLabel, Switch} from '@mui/material';
 import Box from '@mui/material/Box';
 
 export const OrganizationSsoView: FunctionComponent = () => {
@@ -22,33 +22,14 @@ export const OrganizationSsoView: FunctionComponent = () => {
       organizationId: organization.id,
     },
   });
-
-  const credentialsRef = useRef({
-    authorizationUri: '',
-    clientId: '',
-    clientSecret: '',
-    redirectUri: '',
-    tokenUri: '',
-    jwkSetUri: '',
-  });
-  const [showForm, setShowForm] = useState(false);
+  const [toggleFormState, setToggleFormState] = useState(false);
 
   useEffect(() => {
-    if (providersLoadable.data) {
-      credentialsRef.current = {
-        authorizationUri: providersLoadable.data.authorizationUri || '',
-        clientId: providersLoadable.data.clientId || '',
-        clientSecret: providersLoadable.data.clientSecret || '',
-        redirectUri: providersLoadable.data.redirectUri || '',
-        tokenUri: providersLoadable.data.tokenUri || '',
-        jwkSetUri: providersLoadable.data.jwkSetUri || '',
-      };
-
-      setShowForm(providersLoadable.data.isEnabled);
-    }
+    setToggleFormState(providersLoadable.data?.isEnabled || false);
   }, [providersLoadable.data]);
+
   const handleSwitchChange = (event) => {
-    setShowForm(event.target.checked);
+    setToggleFormState(event.target.checked);
   };
 
   return (
@@ -68,13 +49,13 @@ export const OrganizationSsoView: FunctionComponent = () => {
       maxWidth="normal"
     >
       <FormControlLabel
-        control={<Switch checked={showForm} onChange={handleSwitchChange} />}
+        control={<Switch checked={toggleFormState} onChange={handleSwitchChange} />}
         label={t('organization_sso_switch')}
       />
       <Box sx={{ marginTop: '16px' }}>
         <CreateProviderSsoForm
-          credentialsRef={credentialsRef}
-          disabled={!showForm}
+          initialValues={providersLoadable.data}
+          disabled={!toggleFormState}
         />
       </Box>
     </BaseOrganizationSettingsView>

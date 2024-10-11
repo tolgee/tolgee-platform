@@ -29,12 +29,7 @@ class SsoProviderController(
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @GetMapping("")
   @RequiresSuperAuthentication
-  fun findProvider(
+  fun getProvider(
     @PathVariable organizationId: Long,
-  ): SsoTenantModel? =
-    try {
-      ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
-    } catch (e: Exception) {
-      null
-    }
+  ): SsoTenantModel = ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
 }

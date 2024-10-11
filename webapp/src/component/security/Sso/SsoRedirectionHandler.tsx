@@ -21,9 +21,9 @@ export const SsoRedirectionHandler: FunctionComponent<
   const history = useHistory();
 
   useEffect(() => {
-    const url = new URLSearchParams(window.location.search);
-    const code = url.get('code');
-    const state = url.get('state');
+    const searchParam = new URLSearchParams(window.location.search);
+    const code = searchParam.get('code');
+    const state = searchParam.get('state');
     const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
     if (storedState !== state) {
       history.replace(LINKS.LOGIN.build());
