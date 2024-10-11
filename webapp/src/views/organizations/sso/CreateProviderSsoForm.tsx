@@ -22,6 +22,7 @@ type FormValues = {
     redirectUri: string;
     tokenUri: string;
     jwkSetUri: string;
+    domainName: string;
 };
 
 export function CreateProviderSsoForm({ data, disabled }) {
@@ -34,6 +35,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
     redirectUri: data?.redirectUri ?? '',
     tokenUri: data?.tokenUri ?? '',
     jwkSetUri: data?.jwkSetUri ?? '',
+    domainName: data?.domainName ?? '',
   }
 
   if (!organization) {
@@ -49,7 +51,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
   return (
     <StandardForm
       initialValues={initialValues}
-        validationSchema={Validation.SSO_PROVIDER(t)}
+      validationSchema={Validation.SSO_PROVIDER(t)}
       onSubmit={async (data) => {
         console.log(data);
         providersCreate.mutate(
@@ -67,6 +69,15 @@ export function CreateProviderSsoForm({ data, disabled }) {
         );
       }}
     >
+      <StyledInputFields>
+        <TextField
+            disabled={disabled}
+            variant="standard"
+            name="domainName"
+            label={<T keyName="organization_sso_domain_name" />}
+            minHeight={false}
+        />
+      </StyledInputFields>
       <StyledInputFields>
         <TextField
           disabled={disabled}

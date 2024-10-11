@@ -21,5 +21,6 @@ class SsoTenantAssembler :
       tokenUri = entity.tokenUri,
       isEnabled = entity.isEnabled,
       jwkSetUri = entity.jwkSetUri,
+      domainName = entity.domainName,
     )
 }

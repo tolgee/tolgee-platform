@@ -19,4 +19,6 @@ data class CreateProviderRequest(
   @field:NotEmpty
   val jwkSetUri: String,
   val isEnabled: Boolean,
+  @field:NotEmpty
+  val domainName: String,
 )

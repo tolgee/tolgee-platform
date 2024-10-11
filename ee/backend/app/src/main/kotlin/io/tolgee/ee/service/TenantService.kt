@@ -62,7 +62,7 @@ class TenantService(
   ): SsoTenant {
     tenant.name = dto.name ?: ""
     tenant.organizationId = organizationId
-    tenant.domain = extractDomain(dto.authorizationUri)
+    tenant.domain = dto.domainName
     tenant.clientId = dto.clientId
     tenant.clientSecret = dto.clientSecret
     tenant.authorizationUri = dto.authorizationUri

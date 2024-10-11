@@ -1,11 +1,11 @@
-import { DefaultParamType, T, TFnType, TranslationKey } from '@tolgee/react';
+import {DefaultParamType, T, TFnType, TranslationKey} from '@tolgee/react';
 import * as Yup from 'yup';
 
-import { components } from 'tg.service/apiSchema.generated';
-import { organizationService } from '../service/OrganizationService';
-import { signUpService } from '../service/SignUpService';
-import { checkParamNameIsValid } from '@tginternal/editor';
-import { validateObject } from 'tg.fixtures/validateObject';
+import {components} from 'tg.service/apiSchema.generated';
+import {organizationService} from '../service/OrganizationService';
+import {signUpService} from '../service/SignUpService';
+import {checkParamNameIsValid} from '@tginternal/editor';
+import {validateObject} from 'tg.fixtures/validateObject';
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -407,7 +407,8 @@ export class Validation {
 
   static readonly SSO_PROVIDER = (t: TFnType) =>
     Yup.object().shape({
-      clientId: Yup.string().required().min(2).max(255),
+      clientId: Yup.string().required().max(255),
+      domainName: Yup.string().required().max(255),
       clientSecret: Yup.string().required().max(255),
       authorizationUri: Yup.string()
         .required()

@@ -10,6 +10,7 @@ data class SsoTenantDto(
   val tokenUri: String,
   val isEnabled: Boolean,
   val jwkSetUri: String,
+  val domainName: String,
 )
 
 fun SsoTenant.toDto(): SsoTenantDto =
@@ -21,4 +22,5 @@ fun SsoTenant.toDto(): SsoTenantDto =
     tokenUri = this.tokenUri,
     isEnabled = this.isEnabledForThisOrganization,
     jwkSetUri = this.jwkSetUri,
+    domainName = this.domain,
   )

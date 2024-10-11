@@ -14,5 +14,6 @@ class SsoTenantModel(
   val tokenUri: String,
   val isEnabled: Boolean,
   val jwkSetUri: String,
+  val domainName: String,
 ) : RepresentationModel<SsoTenantModel>(),
   Serializable
