@@ -1,3 +1,11 @@
+## [3.78.3](https://github.com/tolgee/tolgee-platform/compare/v3.78.2...v3.78.3) (2024-10-11)
+
+
+### Bug Fixes
+
+* disable test report for pull requests from external repositories ([#2552](https://github.com/tolgee/tolgee-platform/issues/2552)) ([5ed52e0](https://github.com/tolgee/tolgee-platform/commit/5ed52e0c5d6fdbb978433cea66c89feaf01ebef4)), closes [#2466](https://github.com/tolgee/tolgee-platform/issues/2466)
+* only show api keys from non-deleted projects ([#2578](https://github.com/tolgee/tolgee-platform/issues/2578)) ([ae0cfa5](https://github.com/tolgee/tolgee-platform/commit/ae0cfa52dbad19cbd3401869c4b44b7cadcb366e)), closes [#2571](https://github.com/tolgee/tolgee-platform/issues/2571)
+
 ## [3.78.2](https://github.com/tolgee/tolgee-platform/compare/v3.78.1...v3.78.2) (2024-10-10)
 
 

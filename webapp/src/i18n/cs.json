@@ -562,6 +562,7 @@
   "feature_not_enabled": "Funkce není povolena",
   "Field should have at least n chars": "Toto pole musí obsahovat minimálně {min, plural, few {# znaky} other {# znaků}}",
   "Field should have maximum of n chars": "Toto pole může obsahovat maximálně {max, plural, few {# znaky} other {# znaků}}",
+  "file_issue_type_description_too_long": "Popis je příliš dlouhý",
   "file_issue_type_id_attribute_not_provided": "Atribut id překladu nebyl poskytnut",
   "file_issue_type_key_is_empty": "Klíč je prázdný",
   "file_issue_type_key_is_not_string": "Klíč není řetězec",

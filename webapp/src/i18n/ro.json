@@ -562,6 +562,7 @@
   "feature_not_enabled": "Funcția nu este activată",
   "Field should have at least n chars": "Acest câmp trebuie să conțină cel puțin {min} caractere",
   "Field should have maximum of n chars": "Acest câmp poate conține maximum {max} caractere",
+  "file_issue_type_description_too_long": "Descrierea este prea lungă",
   "file_issue_type_id_attribute_not_provided": "Atributul Id al traducerii nu a fost furnizat",
   "file_issue_type_key_is_empty": "Cheia este goală",
   "file_issue_type_key_is_not_string": "Cheia nu este un șir de caractere",
