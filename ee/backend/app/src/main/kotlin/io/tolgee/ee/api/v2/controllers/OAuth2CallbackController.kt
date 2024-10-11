@@ -1,6 +1,8 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.constants.Message
+import io.tolgee.ee.data.DomainRequest
+import io.tolgee.ee.data.SsoUrlResponse
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
 import io.tolgee.ee.model.SsoTenant
 import io.tolgee.ee.service.OAuthService
@@ -58,13 +60,4 @@ class OAuth2CallbackController(
       errorDescription = error_description,
       invitationCode = invitationCode,
     )
-
-  data class DomainRequest(
-    val domain: String,
-    val state: String,
-  )
-
-  data class SsoUrlResponse(
-    val redirectUrl: String,
-  )
 }
