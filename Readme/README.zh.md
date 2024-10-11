@@ -1,4 +1,4 @@
-<h1align=“center”style=“border-bottom：无”>
+<h1 align="center" style="border-bottom: none">
     <b>
         <a href="https://tolgee.io">托尔吉</a><br>
     </b>
@@ -6,13 +6,13 @@
     <br>
 </h1>
 
-<div对齐=“中心”>
+<div align="center">
 
 [![标志](https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg)](https://tolgee.io)
 
 Crowdin、Phrase 或 Lokalise 的开源替代方案
 
-<h2align=“center”style=“border-bottom：无”>
+<h2 align="center" style="border-bottom: none">
 
 English | [**Français**](README.fr.md)
 
@@ -29,7 +29,7 @@ English | [**Français**](README.fr.md)
 </div>
 
 
-<div对齐=“中心”>
+<div align="center">
 
 [<img src="https://img.shields.io/badge/-Facebook-424549?style=social&logo=facebook" height=25 />](https://www.facebook.com/Tolgee.i18n)
 [<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
