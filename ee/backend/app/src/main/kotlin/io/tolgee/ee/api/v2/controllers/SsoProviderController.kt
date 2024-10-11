@@ -6,6 +6,7 @@ import io.tolgee.ee.data.toDto
 import io.tolgee.ee.service.TenantService
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import org.springframework.web.bind.annotation.*
 
@@ -18,6 +19,7 @@ class SsoProviderController(
 ) {
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @PutMapping("")
+  @RequiresSuperAuthentication
   fun setProvider(
     @RequestBody request: CreateProviderRequest,
     @PathVariable organizationId: Long,
@@ -25,7 +27,13 @@ class SsoProviderController(
 
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @GetMapping("")
-  fun getProvider(
+  @RequiresSuperAuthentication
+  fun findProvider(
     @PathVariable organizationId: Long,
-  ): SsoTenantModel = ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
+  ): SsoTenantModel? =
+    try {
+      ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
+    } catch (e: Exception) {
+      null
+    }
 }
