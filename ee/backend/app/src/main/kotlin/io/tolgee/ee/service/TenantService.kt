@@ -21,24 +21,6 @@ class TenantService(
 
   fun findAll(): List<SsoTenant> = tenantRepository.findAll()
 
-  fun save(
-    dto: CreateProviderRequest,
-    organizationId: Long,
-  ): SsoTenant {
-    val tenant = SsoTenant()
-    tenant.name = dto.name ?: ""
-    tenant.organizationId = organizationId
-    tenant.domain = extractDomain(dto.authorizationUri)
-    tenant.clientId = dto.clientId
-    tenant.clientSecret = dto.clientSecret
-    tenant.authorizationUri = dto.authorizationUri
-    tenant.tokenUri = dto.tokenUri
-    tenant.redirectUriBase = dto.redirectUri.removeSuffix("/")
-    tenant.isEnabledForThisOrganization = dto.isEnabled
-    tenant.jwkSetUri = dto.jwkSetUri
-    return save(tenant)
-  }
-
   private fun extractDomain(authorizationUri: String): String =
     try {
       val uri = URI(authorizationUri)
@@ -69,19 +51,25 @@ class TenantService(
     request: CreateProviderRequest,
     organizationId: Long,
   ): SsoTenant {
-    val tenant = findTenant(organizationId)
-    return if (tenant == null) {
-      save(request, organizationId)
-    } else {
-      tenant.name = request.name ?: ""
-      tenant.clientId = request.clientId
-      tenant.clientSecret = request.clientSecret
-      tenant.authorizationUri = request.authorizationUri
-      tenant.tokenUri = request.tokenUri
-      tenant.redirectUriBase = request.redirectUri.removeSuffix("/")
-      tenant.jwkSetUri = request.jwkSetUri
-      tenant.isEnabledForThisOrganization = request.isEnabled
-      save(tenant)
-    }
+    val tenant = findTenant(organizationId) ?: SsoTenant()
+    return setAndSaveTenantsFields(tenant, request, organizationId)
+  }
+
+  private fun setAndSaveTenantsFields(
+    tenant: SsoTenant,
+    dto: CreateProviderRequest,
+    organizationId: Long,
+  ): SsoTenant {
+    tenant.name = dto.name ?: ""
+    tenant.organizationId = organizationId
+    tenant.domain = extractDomain(dto.authorizationUri)
+    tenant.clientId = dto.clientId
+    tenant.clientSecret = dto.clientSecret
+    tenant.authorizationUri = dto.authorizationUri
+    tenant.tokenUri = dto.tokenUri
+    tenant.redirectUriBase = dto.redirectUri.removeSuffix("/")
+    tenant.jwkSetUri = dto.jwkSetUri
+    tenant.isEnabledForThisOrganization = dto.isEnabled
+    return save(tenant)
   }
 }
