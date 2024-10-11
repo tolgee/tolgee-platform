@@ -53,7 +53,6 @@ export function CreateProviderSsoForm({ data, disabled }) {
       initialValues={initialValues}
       validationSchema={Validation.SSO_PROVIDER(t)}
       onSubmit={async (data) => {
-        console.log(data);
         providersCreate.mutate(
           {
             path: { organizationId: organization.id },

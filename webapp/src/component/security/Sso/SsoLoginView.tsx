@@ -15,7 +15,6 @@ import { LoginSsoForm } from 'tg.component/security/Sso/LoginSsoForm';
 export const SsoLoginView: FunctionComponent = () => {
   const { t } = useTranslate();
   const credentialsRef = useRef({ domain: '' });
-  const [mfaRequired, setMfaRequired] = useState(false);
 
   const error = useGlobalContext((c) => c.auth.loginLoadable.error);
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
