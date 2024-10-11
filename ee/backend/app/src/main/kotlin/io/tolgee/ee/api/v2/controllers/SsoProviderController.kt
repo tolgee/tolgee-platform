@@ -8,6 +8,7 @@ import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -21,7 +22,7 @@ class SsoProviderController(
   @PutMapping("")
   @RequiresSuperAuthentication
   fun setProvider(
-    @RequestBody request: CreateProviderRequest,
+    @RequestBody @Valid request: CreateProviderRequest,
     @PathVariable organizationId: Long,
   ): SsoTenantModel = ssoTenantAssembler.toModel(tenantService.saveOrUpdate(request, organizationId).toDto())
 
