@@ -1,4 +1,4 @@
-import { FunctionComponent, useRef, useState } from 'react';
+import { FunctionComponent, useRef } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Alert, useMediaQuery } from '@mui/material';
 
