@@ -49,7 +49,7 @@ class OAuthService(
     if (error.isNotBlank()) {
       logger.info("Third party auth failed: $errorDescription $error")
       throw OAuthAuthorizationException(
-        Message.THIRD_PARTY_AUTH_FAILED,
+        Message.SSO_THIRD_PARTY_AUTH_FAILED,
         "$errorDescription $error",
       )
     }
@@ -59,7 +59,7 @@ class OAuthService(
     val tokenResponse =
       exchangeCodeForToken(tenant, code, redirectUrl)
         ?: throw OAuthAuthorizationException(
-          Message.TOKEN_EXCHANGE_FAILED,
+          Message.SSO_TOKEN_EXCHANGE_FAILED,
           null,
         )
 
@@ -117,7 +117,7 @@ class OAuthService(
 
       val expirationTime: Date = jwtClaimsSet.expirationTime
       if (expirationTime.before(Date())) {
-        throw OAuthAuthorizationException(Message.ID_TOKEN_EXPIRED, null)
+        throw OAuthAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED, null)
       }
 
       return GenericUserResponse().apply {
@@ -129,7 +129,7 @@ class OAuthService(
       }
     } catch (e: Exception) {
       logger.info(e.stackTraceToString())
-      throw OAuthAuthorizationException(Message.USER_INFO_RETRIEVAL_FAILED, null)
+      throw OAuthAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED, null)
     }
   }
 
