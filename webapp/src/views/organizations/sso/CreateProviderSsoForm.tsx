@@ -1,6 +1,6 @@
 import React from 'react';
 import {styled} from '@mui/material';
-import {T, TFnType, useTranslate} from '@tolgee/react';
+import {T, useTranslate} from '@tolgee/react';
 import {StandardForm} from 'tg.component/common/form/StandardForm';
 import {TextField} from 'tg.component/common/form/fields/TextField';
 import {useApiMutation} from 'tg.service/http/useQueryApi';
@@ -15,9 +15,26 @@ const StyledInputFields = styled('div')`
   padding-bottom: 32px;
 `;
 
-export function CreateProviderSsoForm({ initialValues, disabled }) {
+type FormValues = {
+    authorizationUri: string;
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+    tokenUri: string;
+    jwkSetUri: string;
+};
+
+export function CreateProviderSsoForm({ data, disabled }) {
   const organization = useOrganization();
   const { t } = useTranslate();
+  const initialValues: FormValues = {
+    authorizationUri: data?.authorizationUri ?? '',
+    clientId: data?.clientId ?? '',
+    clientSecret: data?.clientSecret ?? '',
+    redirectUri: data?.redirectUri ?? '',
+    tokenUri: data?.tokenUri ?? '',
+    jwkSetUri: data?.jwkSetUri ?? '',
+  }
 
   if (!organization) {
     return null;
@@ -32,7 +49,7 @@ export function CreateProviderSsoForm({ initialValues, disabled }) {
   return (
     <StandardForm
       initialValues={initialValues}
-      validationSchema={Validation.SSO_PROVIDER(t as TFnType)}
+        validationSchema={Validation.SSO_PROVIDER(t)}
       onSubmit={async (data) => {
         console.log(data);
         providersCreate.mutate(

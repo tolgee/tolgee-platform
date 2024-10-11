@@ -54,7 +54,7 @@ export const OrganizationSsoView: FunctionComponent = () => {
       />
       <Box sx={{ marginTop: '16px' }}>
         <CreateProviderSsoForm
-          initialValues={providersLoadable.data}
+          data={providersLoadable.data}
           disabled={!toggleFormState}
         />
       </Box>
