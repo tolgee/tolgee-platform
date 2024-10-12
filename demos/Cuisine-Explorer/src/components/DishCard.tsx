@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import dishesData from "../../public/dishes.json";
+import { T, useTranslate } from "@tolgee/react"; 
 
 interface Dish {
   name: string;
@@ -16,10 +17,11 @@ const DishCard: React.FC = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [filteredDishes, setFilteredDishes] = useState<Dish[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [dishesPerPage] = useState(6); 
+  const [dishesPerPage] = useState(6);
   const [selectedDish, setSelectedDish] = useState<string | null>(null);
   const [filterTag, setFilterTag] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const { t } = useTranslate();
 
   useEffect(() => {
     setDishes(dishesData.dishes);
@@ -45,7 +47,7 @@ const DishCard: React.FC = () => {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value;
     setSearchTerm(term);
-    setCurrentPage(1); 
+    setCurrentPage(1);
     if (term === "") {
       setFilteredDishes(dishes);
     } else {
@@ -62,7 +64,7 @@ const DishCard: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0">
         <input
           type="text"
-          placeholder="Search for a dish..."
+          placeholder={t("search_placeholder", "Search for a dish...")}
           className="p-3 border rounded-md w-full md:w-1/3"
           value={searchTerm}
           onChange={handleSearch}
@@ -73,24 +75,27 @@ const DishCard: React.FC = () => {
               filterTag === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
             }`}
             onClick={() => handleFilterChange("all")}
+            aria-label={t("filter_all", "Show all dishes")}
           >
-            All
+            <T keyName="all" defaultValue="All" />
           </button>
           <button
             className={`p-2 rounded-md ${
               filterTag === "veg" ? "bg-green-500 text-white" : "bg-gray-200"
             }`}
             onClick={() => handleFilterChange("veg")}
+            aria-label={t("filter_veg", "Show vegetarian dishes")}
           >
-            Vegetarian
+            <T keyName="vegetarian" defaultValue="Vegetarian" />
           </button>
           <button
             className={`p-2 rounded-md ${
               filterTag === "nonveg" ? "bg-red-500 text-white" : "bg-gray-200"
             }`}
             onClick={() => handleFilterChange("nonveg")}
+            aria-label={t("filter_nonveg", "Show non-vegetarian dishes")}
           >
-            Non-Vegetarian
+            <T keyName="non_vegetarian" defaultValue="Non-Vegetarian" />
           </button>
         </div>
       </div>
@@ -120,7 +125,9 @@ const DishCard: React.FC = () => {
                   dish.tags.includes("veg") ? "text-green-500" : "text-red-500"
                 }`}
               >
-                {dish.tags.includes("veg") ? "Vegetarian" : "Non-Vegetarian"}
+                {dish.tags.includes("veg")
+                  ? t("vegetarian", "Vegetarian")
+                  : t("non_vegetarian", "Non-Vegetarian")}
               </p>
             </div>
             {selectedDish === dish.name && (
@@ -130,7 +137,12 @@ const DishCard: React.FC = () => {
                 className="p-4 bg-gray-100"
               >
                 <p>{dish.description}</p>
-                <p className="text-sm font-semibold mt-2">Main Ingredients:</p>
+                <p className="text-sm font-semibold mt-2">
+                  <T
+                    keyName="main_ingredients"
+                    defaultValue="Main Ingredients:"
+                  />
+                </p>
                 <ul className="list-disc ml-6">
                   {dish.mainIngredients.map((ingredient, idx) => (
                     <li key={idx}>{ingredient}</li>

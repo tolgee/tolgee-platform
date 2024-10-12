@@ -1,10 +1,11 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+import React from "react";
 import { Tolgee, TolgeeProvider, BackendFetch, DevTools } from "@tolgee/react";
 import { FormatIcu } from "@tolgee/format-icu";
 import "../src/style.css";
 import DishCard from "./components/DishCard";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
-const tolgee = Tolgee()
+export const tolgee = Tolgee()
   .use(DevTools())
   .use(FormatIcu())
   .use(BackendFetch())
@@ -20,7 +21,12 @@ const tolgee = Tolgee()
 export const App = () => {
   return (
     <TolgeeProvider tolgee={tolgee}>
-      <DishCard />
+      <div>
+        <LanguageSwitcher />
+        <DishCard />
+      </div>
     </TolgeeProvider>
   );
 };
+
+export default App;
