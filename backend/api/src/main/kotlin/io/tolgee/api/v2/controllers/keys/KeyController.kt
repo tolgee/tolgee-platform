@@ -42,6 +42,7 @@ import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.util.withoutSort
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.context.ApplicationContext
@@ -268,7 +269,9 @@ class KeyController(
     summary = "Search for keys",
     description =
       "This endpoint helps you to find desired key by keyName, " +
-        "base translation or translation in specified language.",
+        "base translation or translation in specified language." +
+        "\n\n" +
+        "Sort is ignored for this request.",
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
@@ -287,7 +290,7 @@ class KeyController(
     projectHolder.projectEntity.baseLanguage?.let {
       securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
     }
-    val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable)
+    val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable.withoutSort)
     return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
   }
 
