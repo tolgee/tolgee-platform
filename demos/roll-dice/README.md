@@ -29,8 +29,14 @@ Here I am uploading the English & Hindi translated Version of the application ho
 ![Hindi Version](https://github.com/user-attachments/assets/eb589477-76a0-41a0-8b98-2c8fb23c3bf4)
 
 
+Video Demo
 
 https://github.com/user-attachments/assets/7d8b9c8e-11b6-41af-85e5-1520cc321efb
+
+Blog Link: 
+https://dev.to/akash_parmar/starting-the-roll-dice-project-with-vite-4hkf
+
+Thank You for the read
 
 
 
