@@ -72,7 +72,7 @@ class OAuthMultiTenantsMocks(
 
   fun authorize(
     registrationId: String,
-    tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse
+    tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse,
   ): MvcResult {
     val receivedCode = "fake_access_token"
     val tenant = tenantService?.getByDomain(registrationId)!!
@@ -97,21 +97,21 @@ class OAuthMultiTenantsMocks(
       ).andReturn()
   }
 
-  fun getAuthLink(registrationId: String): MvcResult {
-    return authMvc!!
+  fun getAuthLink(registrationId: String): MvcResult =
+    authMvc!!
       .perform(
-        MockMvcRequestBuilders.post("/v2/public/oauth2/callback/get-authentication-url")
+        MockMvcRequestBuilders
+          .post("/v2/public/oauth2/callback/get-authentication-url")
           .contentType(MediaType.APPLICATION_JSON)
           .content(
             """
-                    {
-                        "domain": "$registrationId",
-                        "state": "state"
-                    }
-                    """.trimIndent()
-          )
+            {
+                "domain": "$registrationId",
+                "state": "state"
+            }
+            """.trimIndent(),
+          ),
       ).andReturn()
-  }
 
   private fun mockJwk() {
     whenever(
