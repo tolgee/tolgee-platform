@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import * as totp from 'totp-generator';
-import {HOST, PASSWORD, USERNAME} from '../../common/constants';
-import {getAnyContainingText} from '../../common/xPath';
+import { HOST, PASSWORD, USERNAME } from '../../common/constants';
+import { getAnyContainingText } from '../../common/xPath';
 import {
   createUser,
   deleteAllEmails,
@@ -14,7 +14,7 @@ import {
   userDisableMfa,
   userEnableMfa,
 } from '../../common/apiCalls/common';
-import {assertMessage, getPopover} from '../../common/shared';
+import { assertMessage, getPopover } from '../../common/shared';
 import {
   checkAnonymousIdSet,
   checkAnonymousIdUnset,
@@ -24,7 +24,7 @@ import {
   loginWithFakeOAuth2,
   loginWithFakeSso,
 } from '../../common/login';
-import {waitForGlobalLoading} from '../../common/loading';
+import { waitForGlobalLoading } from '../../common/loading';
 
 context('Login', () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ context('Login', () => {
       cy.visit(HOST);
       cy.contains('Log in with SSO').click();
       cy.xpath("//*[@name='domain']").type('domain.com');
-      loginWithFakeSso()
+      loginWithFakeSso();
     });
 
     afterEach(() => {
@@ -50,7 +50,6 @@ context('Login', () => {
       logout();
     });
   });
-
 
   it('login', () => {
     checkAnonymousIdSet();
