@@ -1,16 +1,16 @@
-import React, { RefObject } from 'react';
-import { Link as MuiLink, styled, Typography } from '@mui/material';
+import React, {RefObject} from 'react';
+import {Link as MuiLink, styled, Typography} from '@mui/material';
 import Box from '@mui/material/Box';
-import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
+import {T} from '@tolgee/react';
+import {Link} from 'react-router-dom';
 
-import { LINKS } from 'tg.constants/links';
+import {LINKS} from 'tg.constants/links';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { TextField } from 'tg.component/common/form/fields/TextField';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { v4 as uuidv4 } from 'uuid';
-import { useSsoService } from 'tg.component/security/SsoService';
+import {StandardForm} from 'tg.component/common/form/StandardForm';
+import {TextField} from 'tg.component/common/form/fields/TextField';
+import {useGlobalContext} from 'tg.globalContext/GlobalContext';
+import {v4 as uuidv4} from 'uuid';
+import {useSsoService} from 'tg.component/security/SsoService';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -42,7 +42,7 @@ export function LoginSsoForm(props: LoginViewCredentialsProps) {
               type="submit"
               data-cy="login-button"
             >
-              <T keyName="login_login_button" />
+              <T keyName="login_sso_login_button" />
             </LoadingButton>
 
             <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>

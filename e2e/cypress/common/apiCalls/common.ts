@@ -1,6 +1,6 @@
-import { API_URL, PASSWORD, USERNAME } from '../constants';
-import { ArgumentTypes, Scope } from '../types';
-import { components } from '../../../../webapp/src/service/apiSchema.generated';
+import {API_URL, HOST, PASSWORD, USERNAME} from '../constants';
+import {ArgumentTypes, Scope} from '../types';
+import {components} from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 
@@ -194,6 +194,27 @@ export const setTranslations = (
     body: { key, translations },
     method: 'POST',
   });
+
+
+export const setSsoProvider = () => {
+    const sql = `insert into ee.tenant (id, organization_id, domain, client_id, client_secret, authorization_uri,
+                                        jwk_set_uri, token_uri, redirect_uri_base, is_enabled_for_this_organization,
+                                        name, sso_provider, created_at, updated_at)
+                 values ('1', 1, 'domain.com', 'clientId', 'clientSecret', 'http://authorizationUri',
+                         'http://jwkSetUri', 'http://tokenUri', '${HOST}', true, 'name', 'sso', CURRENT_TIMESTAMP,
+                         CURRENT_TIMESTAMP)`;
+    internalFetch(`sql/execute`, {method: 'POST', body: sql});
+}
+
+export const deleteSso = () => {
+    const sql = `
+        delete
+        from ee.tenant
+        where organization_id = 1
+    `;
+
+    return internalFetch(`sql/execute`, {method: 'POST', body: sql});
+}
 
 export const deleteProject = (id: number) => {
   return v2apiFetch(`projects/${id}`, { method: 'DELETE' });

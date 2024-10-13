@@ -1,17 +1,20 @@
 /// <reference types="cypress" />
 import * as totp from 'totp-generator';
-import { HOST, PASSWORD, USERNAME } from '../../common/constants';
-import { getAnyContainingText } from '../../common/xPath';
+import {HOST, PASSWORD, USERNAME} from '../../common/constants';
+import {getAnyContainingText} from '../../common/xPath';
 import {
   createUser,
   deleteAllEmails,
+  deleteSso,
   disableEmailVerification,
   getParsedResetPasswordEmail,
   login,
+  logout,
+  setSsoProvider,
   userDisableMfa,
   userEnableMfa,
 } from '../../common/apiCalls/common';
-import { assertMessage, getPopover } from '../../common/shared';
+import {assertMessage, getPopover} from '../../common/shared';
 import {
   checkAnonymousIdSet,
   checkAnonymousIdUnset,
@@ -19,8 +22,9 @@ import {
   loginViaForm,
   loginWithFakeGithub,
   loginWithFakeOAuth2,
+  loginWithFakeSso,
 } from '../../common/login';
-import { waitForGlobalLoading } from '../../common/loading';
+import {waitForGlobalLoading} from '../../common/loading';
 
 context('Login', () => {
   beforeEach(() => {
@@ -30,6 +34,23 @@ context('Login', () => {
   it('can change language', () => {
     cy.gcy('global-language-menu').should('be.visible');
   });
+
+  describe('Test Suite for SSO Login', () => {
+    it('login with sso', { retries: { runMode: 5 } }, () => {
+      disableEmailVerification();
+      setSsoProvider();
+      cy.visit(HOST);
+      cy.contains('Log in with SSO').click();
+      cy.xpath("//*[@name='domain']").type('domain.com');
+      loginWithFakeSso()
+    });
+
+    afterEach(() => {
+      deleteSso();
+      logout();
+    });
+  });
+
 
   it('login', () => {
     checkAnonymousIdSet();
@@ -66,7 +87,6 @@ context('Login', () => {
   });
   it('login with oauth2', { retries: { runMode: 5 } }, () => {
     disableEmailVerification();
-
     loginWithFakeOAuth2();
   });
 
