@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/{organizationId:[0-9]+}/sso/provider"])
+@RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/sso"])
 class SsoProviderController(
   private val tenantService: TenantService,
   private val ssoTenantAssembler: SsoTenantAssembler,
@@ -32,11 +32,10 @@ class SsoProviderController(
   @RequiresSuperAuthentication
   fun findProvider(
     @PathVariable organizationId: Long,
-  ): SsoTenantModel? {
-    return try {
+  ): SsoTenantModel? =
+    try {
       ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
     } catch (e: NotFoundException) {
       null
     }
-  }
 }
