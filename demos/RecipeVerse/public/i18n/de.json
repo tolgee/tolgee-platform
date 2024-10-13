@@ -1,0 +1,12 @@
+{
+  "add-item-add-button" : "Einfügen",
+  "add-item-input-placeholder" : "Neuer Eintrag",
+  "app-title" : "Was mitnehmen",
+  "delete-item-button" : "Löschen",
+  "menu-item-translation-methods" : "Übersetzungsmethoden",
+  "send-via-email" : "Per Email abschicken",
+  "share-button" : "Teilen",
+  "this_is_a_key" : "Dies ist ein Schlüssel",
+  "this_is_a_key_with_params" : "Dies ist ein Schlüssel mit den Parametern {key} {key2}",
+  "this_is_a_key_with_tags" : "Dies ist ein Schlüssel mit den Tags <b>bold</b> <b><i>{key}</i></b>"
+}
