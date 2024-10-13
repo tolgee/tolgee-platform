@@ -15,6 +15,7 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
@@ -69,9 +70,13 @@ class OAuthMultiTenantsMocks(
     }
   }
 
-  fun authorize(registrationId: String): MvcResult {
+  fun authorize(
+    registrationId: String,
+    tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse
+  ): MvcResult {
     val receivedCode = "fake_access_token"
     val tenant = tenantService?.getByDomain(registrationId)!!
+    // mock token exchange
     whenever(
       restTemplate?.exchange(
         eq(tenant.tokenUri),
@@ -79,7 +84,9 @@ class OAuthMultiTenantsMocks(
         any(),
         eq(OAuth2TokenResponse::class.java),
       ),
-    ).thenReturn(defaultTokenResponse)
+    ).thenReturn(tokenResponse)
+
+    // mock parsing of jwt
     mockJwk()
 
     return authMvc!!
@@ -87,6 +94,22 @@ class OAuthMultiTenantsMocks(
         MockMvcRequestBuilders.get(
           "/v2/public/oauth2/callback/$registrationId?code=$receivedCode&redirect_uri=redirect_uri",
         ),
+      ).andReturn()
+  }
+
+  fun getAuthLink(registrationId: String): MvcResult {
+    return authMvc!!
+      .perform(
+        MockMvcRequestBuilders.post("/v2/public/oauth2/callback/get-authentication-url")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(
+            """
+                    {
+                        "domain": "$registrationId",
+                        "state": "state"
+                    }
+                    """.trimIndent()
+          )
       ).andReturn()
   }
 
