@@ -22,6 +22,15 @@ Approach
 
     Complete Workout Routine: After the user rolls the dice for all exercises, a comprehensive workout routine is compiled and displayed in a randomized order. A "Restart" button allows users to initiate a new game easily.
 
-Project Demo:
+Project Demo: 
+Here I am uploading the English & Hindi translated Version of the application however do explore for German and French language too
+
+![English Version](https://github.com/user-attachments/assets/af47d440-7deb-4463-bd29-ef4728211180)
+![Hindi Version](https://github.com/user-attachments/assets/eb589477-76a0-41a0-8b98-2c8fb23c3bf4)
+
+
+
+https://github.com/user-attachments/assets/7d8b9c8e-11b6-41af-85e5-1520cc321efb
+
 
 
