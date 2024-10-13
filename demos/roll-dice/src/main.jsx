@@ -10,17 +10,9 @@ const tolgee = Tolgee()
   .use(FormatSimple())
   .init({
     language: "en",
-
-    // for development
-    // apiUrl: process.env.VITE_APP_TOLGEE_API_URL,
     apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL,
-    // apiKey: process.env.VITE_APP_TOLGEE_API_KEY,
     apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY,
 
-    // for production
-    // staticData: {
-    //   ...
-    // }
   });
 
 createRoot(document.getElementById("root")).render(
