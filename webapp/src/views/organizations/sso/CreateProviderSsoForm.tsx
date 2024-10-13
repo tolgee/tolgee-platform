@@ -1,12 +1,12 @@
 import React from 'react';
-import {styled} from '@mui/material';
-import {T, useTranslate} from '@tolgee/react';
-import {StandardForm} from 'tg.component/common/form/StandardForm';
-import {TextField} from 'tg.component/common/form/fields/TextField';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {messageService} from 'tg.service/MessageService';
-import {useOrganization} from 'tg.views/organizations/useOrganization';
-import {Validation} from 'tg.constants/GlobalValidationSchema';
+import { styled } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { messageService } from 'tg.service/MessageService';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 const StyledInputFields = styled('div')`
   display: grid;
