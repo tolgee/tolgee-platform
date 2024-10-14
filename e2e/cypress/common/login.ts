@@ -1,12 +1,8 @@
-import { HOST, PASSWORD, USERNAME } from '../common/constants';
-import { waitForGlobalLoading } from './loading';
-import { getInput } from './xPath';
-import { gcy } from './shared';
-import {
-  deleteUserSql,
-  enableEmailVerification,
-  enableRegistration,
-} from './apiCalls/common';
+import {HOST, PASSWORD, USERNAME} from '../common/constants';
+import {waitForGlobalLoading} from './loading';
+import {getInput} from './xPath';
+import {gcy} from './shared';
+import {deleteUserSql, enableEmailVerification, enableRegistration,} from './apiCalls/common';
 
 export const loginWithFakeGithub = () => {
   cy.intercept('https://github.com/login/oauth/**', {
@@ -68,7 +64,7 @@ export const loginWithFakeSso = () => {
 
     cy.visit(
       HOST +
-        `/openId/auth-callback/domain.com?code=this_is_dummy_code&redirect_uri=https%3A%2F%2Fdummy-url.com%2Fcallback&state=${params.get(
+        `/open-id/auth-callback/domain.com?code=this_is_dummy_code&redirect_uri=https%3A%2F%2Fdummy-url.com%2Fcallback&state=${params.get(
           'state'
         )}`
     );
