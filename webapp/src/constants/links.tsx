@@ -79,7 +79,7 @@ export class LINKS {
 
   static OPENID_RESPONSE = Link.ofParent(
      LINKS.LOGIN,
-    'open-id/auth-callback/' + p(PARAMS.SERVICE_TYPE)
+    'open-id/auth-callback'
   );
 
   static SSO_LOGIN = Link.ofRoot('sso');

@@ -64,7 +64,7 @@ export const loginWithFakeSso = () => {
 
     cy.visit(
       HOST +
-        `/login/open-id/auth-callback/domain.com?code=this_is_dummy_code&redirect_uri=https%3A%2F%2Fdummy-url.com%2Fcallback&state=${params.get(
+        `/login/open-id/auth-callback?code=this_is_dummy_code&redirect_uri=https%3A%2F%2Fdummy-url.com%2Fcallback&state=${params.get(
           'state'
         )}`
     );

@@ -1,10 +1,13 @@
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { messageService } from 'tg.service/MessageService';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
-import { INVITATION_CODE_STORAGE_KEY } from 'tg.service/InvitationCodeService';
+import {LINKS} from 'tg.constants/links';
+import {messageService} from 'tg.service/MessageService';
+import {TranslatedError} from 'tg.translationTools/TranslatedError';
+import {useGlobalActions} from 'tg.globalContext/GlobalContext';
+import {useApiMutation} from 'tg.service/http/useQueryApi';
+import {useLocalStorageState} from 'tg.hooks/useLocalStorageState';
+import {INVITATION_CODE_STORAGE_KEY} from 'tg.service/InvitationCodeService';
+
+const LOCAL_STORAGE_DOMAIN_KEY = 'oauth2Domain';
+
 
 export const useSsoService = () => {
   const { handleAfterLogin, setInvitationCode } = useGlobalActions();
@@ -28,9 +31,7 @@ export const useSsoService = () => {
 
   return {
     async loginWithOAuthCodeOpenId(registrationId: string, code: string) {
-      const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({
-        [PARAMS.SERVICE_TYPE]: registrationId,
-      });
+      const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({});
       const response = await authorizeOpenIdLoadable.mutateAsync(
         {
           path: { registrationId: registrationId },
@@ -49,6 +50,7 @@ export const useSsoService = () => {
           },
         }
       );
+      localStorage.removeItem(LOCAL_STORAGE_DOMAIN_KEY);
       await handleAfterLogin(response!);
     },
 
@@ -61,6 +63,11 @@ export const useSsoService = () => {
           onError: (error) => {
             messageService.error(<TranslatedError code={error.code!} />);
           },
+          onSuccess: (response) => {
+            if (response.redirectUrl) {
+              localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain);
+            }
+          }
         }
       );
     },
