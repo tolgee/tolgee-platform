@@ -1,3 +1,10 @@
+## [3.78.4](https://github.com/tolgee/tolgee-platform/compare/v3.78.3...v3.78.4) (2024-10-14)
+
+
+### Bug Fixes
+
+* Ignore sort for key search or it throws 500 ([#2583](https://github.com/tolgee/tolgee-platform/issues/2583)) ([3119354](https://github.com/tolgee/tolgee-platform/commit/3119354f01e4f2016ca0aa13ff5d74e1fb02a6d2))
+
 ## [3.78.3](https://github.com/tolgee/tolgee-platform/compare/v3.78.2...v3.78.3) (2024-10-11)
 
 

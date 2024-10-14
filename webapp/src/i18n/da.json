@@ -804,6 +804,8 @@
   "login_password_label": "Adgangskode",
   "login_reset_password_button": "Nulstil adgangskode",
   "login_sign_up": "Tilmeld dig",
+  "login_sso": "Log ind med SSO",
+  "login_sso_login_button": "Log ind via SSO",
   "login_subtitle": "Har du ikke en konto? <link>Tilmeld dig her</link>",
   "login_title": "Log ind",
   "login_tolgee_documentation_link": "Lær mere i <link>dokumentationen</link>",

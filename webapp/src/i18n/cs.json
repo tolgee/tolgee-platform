@@ -805,6 +805,8 @@
   "login_password_label": "Heslo",
   "login_reset_password_button": "Resetovat heslo",
   "login_sign_up": "Vytvořit účet",
+  "login_sso": "Přihlásit se pomocí SSO",
+  "login_sso_login_button": "Přihlásit se přes SSO",
   "login_subtitle": "Nemáte účet? <link>Zaregistrujte se zde</link>",
   "login_title": "Přihlášení",
   "login_tolgee_documentation_link": "Další informace najdete v <link>dokumentaci</link>",

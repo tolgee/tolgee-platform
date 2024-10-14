@@ -805,6 +805,8 @@
   "login_password_label": "Password",
   "login_reset_password_button": "Reset password",
   "login_sign_up": "Sign up",
+  "login_sso": "Log in with SSO",
+  "login_sso_login_button": "Log in via SSO",
   "login_subtitle": "Don't have an account? <link>Sign up here</link>",
   "login_title": "Login",
   "login_tolgee_documentation_link": "Learn more in the <link>documentation</link>",
