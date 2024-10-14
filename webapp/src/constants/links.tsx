@@ -77,7 +77,8 @@ export class LINKS {
     'auth_callback/' + p(PARAMS.SERVICE_TYPE)
   );
 
-  static OPENID_RESPONSE = Link.ofRoot(
+  static OPENID_RESPONSE = Link.ofParent(
+     LINKS.LOGIN,
     'open-id/auth-callback/' + p(PARAMS.SERVICE_TYPE)
   );
 

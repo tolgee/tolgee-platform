@@ -42,7 +42,7 @@ class OAuth2CallbackController(
   ): String =
     "${tenant.authorizationUri}?" +
       "client_id=${tenant.clientId}&" +
-      "redirect_uri=${tenant.redirectUriBase + "/open-id/auth-callback/" + tenant.domain}&" +
+      "redirect_uri=${tenant.redirectUriBase + "/login/open-id/auth-callback/" + tenant.domain}&" +
       "response_type=code&" +
       "scope=openid profile email roles&" +
       "state=$state"
