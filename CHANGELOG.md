@@ -1,3 +1,15 @@
+# [3.79.0](https://github.com/tolgee/tolgee-platform/compare/v3.78.4...v3.79.0) (2024-10-14)
+
+
+### Bug Fixes
+
+* Update redisson to 3.27.0 ([#2592](https://github.com/tolgee/tolgee-platform/issues/2592)) ([24773bf](https://github.com/tolgee/tolgee-platform/commit/24773bf47f14699a4360bf3032295c47ccd7d5c5))
+
+
+### Features
+
+* export and import comments as description for Android XML ([#2560](https://github.com/tolgee/tolgee-platform/issues/2560)) ([a4cb047](https://github.com/tolgee/tolgee-platform/commit/a4cb04798aee483656b8cff685d81adfa89f5f20)), closes [#2472](https://github.com/tolgee/tolgee-platform/issues/2472) [#2391](https://github.com/tolgee/tolgee-platform/issues/2391) [#2464](https://github.com/tolgee/tolgee-platform/issues/2464)
+
 ## [3.78.4](https://github.com/tolgee/tolgee-platform/compare/v3.78.3...v3.78.4) (2024-10-14)
 
 
