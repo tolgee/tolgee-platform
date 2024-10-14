@@ -12,7 +12,7 @@ const tolgee = Tolgee()
         // ## you should never leak your API key                     ##
         // ## remove it in for production publicly accessible site   ##
         // ############################################################
-        apiKey: 'tgpak_geydkmrul43tgmtjmizgqnlknb3hc3jymfvgg23eozwgcm3qnfxq',
+        apiKey: 'your_api_key',
         apiUrl: 'https://app.tolgee.io',
         defaultLanguage: 'en',
         observerType: 'text',
