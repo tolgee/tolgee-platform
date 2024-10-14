@@ -1,3 +1,10 @@
+## [3.79.1](https://github.com/tolgee/tolgee-platform/compare/v3.79.0...v3.79.1) (2024-10-14)
+
+
+### Bug Fixes
+
+* Add Arabic support for DeepL ([#2593](https://github.com/tolgee/tolgee-platform/issues/2593)) ([01d58d1](https://github.com/tolgee/tolgee-platform/commit/01d58d14563ba8a96133947975be0328973b1feb))
+
 # [3.79.0](https://github.com/tolgee/tolgee-platform/compare/v3.78.4...v3.79.0) (2024-10-14)
 
 
