@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeySearchTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.retry
@@ -61,6 +62,23 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
         node("[1].name").isEqualTo("this-is-key-2")
       }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `pageable sort is ignored`() {
+    saveAndPrepare()
+    performProjectAuthGet("keys/search?search=thi&languageTag=de&sort=id")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].name").isEqualTo("this-is-key")
+      }
+
+    performProjectAuthGet("keys/search?search=thi&languageTag=de&sort=id,desc")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].name").isEqualTo("this-is-key")
+      }
   }
 
   @Test
