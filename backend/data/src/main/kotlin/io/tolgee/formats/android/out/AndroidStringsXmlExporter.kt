@@ -45,7 +45,7 @@ class AndroidStringsXmlExporter(
       val arrayMatch = KEY_IS_ARRAY_REGEX.matchEntire(translation.key.name)
       val isArray = arrayMatch != null
       when {
-        isArray -> buildStringArrayUnit(translation, arrayMatch!!)
+        isArray -> buildStringArrayUnit(translation, arrayMatch)
         else -> {
           val converted = getConvertedMessage(translation, translation.key.isPlural)
           when {
@@ -64,6 +64,7 @@ class AndroidStringsXmlExporter(
     val stringUnit =
       StringUnit().apply {
         this.value = AndroidStringValue(text, translation.isWrappedWithCdata())
+        this.comment = translation.description
       }
     addToUnits(translation, stringUnit)
   }
@@ -98,7 +99,13 @@ class AndroidStringsXmlExporter(
         stringsArrayWrapper == null || (!stringsArrayWrapper.isExactKeyName && isExactKeyName) -> {
           NodeWrapper(
             StringArrayUnit().apply {
-              this.items.add(StringArrayItem(AndroidStringValue(text, translation.isWrappedWithCdata()), index))
+              this.items.add(
+                StringArrayItem(
+                  AndroidStringValue(text, translation.isWrappedWithCdata()),
+                  index,
+                  comment = translation.description,
+                ),
+              )
             },
             isExactKeyName,
             keyNameWithoutIndex,
@@ -111,6 +118,7 @@ class AndroidStringsXmlExporter(
             StringArrayItem(
               AndroidStringValue(text, translation.isWrappedWithCdata()),
               index,
+              comment = translation.description,
             ),
           )
           stringsArrayWrapper
@@ -136,6 +144,7 @@ class AndroidStringsXmlExporter(
     val pluralUnit =
       PluralUnit().apply {
         this.items.putAll(pluralMap)
+        this.comment = translation.description
       }
 
     addToUnits(translation, pluralUnit)

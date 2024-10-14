@@ -42,6 +42,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       return
     }
     val text = it.value?.string
+    context.addKeyDescription(keyName, it.comment)
     context.addTranslation(
       keyName,
       guessedLanguage,
@@ -77,7 +78,6 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     if (keyName.isBlank()) {
       return
     }
-
     val rawData = it.items.map { it.key to it.value.string }.toMap()
 
     val converted =
@@ -88,6 +88,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
         context.projectIcuPlaceholdersEnabled,
       )
 
+    context.addKeyDescription(keyName, it.comment)
     context.addTranslation(
       keyName,
       guessedLanguage,
@@ -111,6 +112,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       val keyNameWithIndex = "$keyName[$index]"
 
       val text = item.value?.string
+      context.addKeyDescription(keyName, item.comment)
       context.addTranslation(
         keyNameWithIndex,
         guessedLanguage,
