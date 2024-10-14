@@ -13,6 +13,7 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.UserAccountService
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("v2/public/oauth2/callback/")
@@ -36,13 +37,19 @@ class OAuth2CallbackController(
     return SsoUrlResponse(redirectUrl)
   }
 
+  fun encodeDomain(domain: String): String =
+    Base64.getUrlEncoder().encode(domain.toByteArray()).toString(Charsets.UTF_8)
+
+  fun decodeDomain(encodedDomain: String): String =
+    Base64.getUrlDecoder().decode(encodedDomain).toString(Charsets.UTF_8)
+
   private fun buildAuthUrl(
     tenant: SsoTenant,
     state: String,
   ): String =
     "${tenant.authorizationUri}?" +
       "client_id=${tenant.clientId}&" +
-      "redirect_uri=${tenant.redirectUriBase + "/login/open-id/auth-callback/" + tenant.domain}&" +
+      "redirect_uri=${tenant.redirectUriBase + "/login/open-id/auth-callback/" + encodeDomain(tenant.domain)}&" +
       "response_type=code&" +
       "scope=openid profile email roles&" +
       "state=$state"
@@ -63,7 +70,7 @@ class OAuth2CallbackController(
     }
 
     return oauthService.handleOAuthCallback(
-      registrationId = registrationId,
+      registrationId = decodeDomain(registrationId),
       code = code,
       redirectUrl = redirectUrl,
       error = error,
