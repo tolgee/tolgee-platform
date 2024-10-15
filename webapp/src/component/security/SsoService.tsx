@@ -1,13 +1,12 @@
-import {LINKS} from 'tg.constants/links';
-import {messageService} from 'tg.service/MessageService';
-import {TranslatedError} from 'tg.translationTools/TranslatedError';
-import {useGlobalActions} from 'tg.globalContext/GlobalContext';
-import {useApiMutation} from 'tg.service/http/useQueryApi';
-import {useLocalStorageState} from 'tg.hooks/useLocalStorageState';
-import {INVITATION_CODE_STORAGE_KEY} from 'tg.service/InvitationCodeService';
+import { LINKS } from 'tg.constants/links';
+import { messageService } from 'tg.service/MessageService';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import { INVITATION_CODE_STORAGE_KEY } from 'tg.service/InvitationCodeService';
 
 const LOCAL_STORAGE_DOMAIN_KEY = 'oauth2Domain';
-
 
 export const useSsoService = () => {
   const { handleAfterLogin, setInvitationCode } = useGlobalActions();
@@ -46,7 +45,11 @@ export const useSsoService = () => {
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
-            messageService.error(<TranslatedError code={error.code!} />);
+            let errorCode = error.code;
+            if (errorCode && errorCode.endsWith(': null')) {
+              errorCode = errorCode.replace(': null', '');
+            }
+            messageService.error(<TranslatedError code={errorCode!} />);
           },
         }
       );
@@ -67,7 +70,7 @@ export const useSsoService = () => {
             if (response.redirectUrl) {
               localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain);
             }
-          }
+          },
         }
       );
     },

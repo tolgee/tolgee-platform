@@ -1,11 +1,11 @@
-import {FunctionComponent, useEffect} from 'react';
-import {useHistory} from 'react-router-dom';
+import { FunctionComponent, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
-import {LINKS} from 'tg.constants/links';
+import { LINKS } from 'tg.constants/links';
 
-import {useGlobalContext} from 'tg.globalContext/GlobalContext';
-import {FullPageLoading} from 'tg.component/common/FullPageLoading';
-import {useSsoService} from 'tg.component/security/SsoService';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { useSsoService } from 'tg.component/security/SsoService';
 
 interface SsoRedirectionHandlerProps {}
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
