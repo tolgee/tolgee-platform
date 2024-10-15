@@ -4,15 +4,23 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./App.css"; // Ensure this imports your CSS file
 import { LanguageSelect } from "./LanguageSelect";
+import enTranslations from "../public/locales/en.json";
+import esTranslations from "../public/locales/es.json";
+import frTranslations from "../public/locales/fr.json";
+import hiTranslations from "../public/locales/hi.json";
 
 // Initialize Tolgee
 export const tolgee = Tolgee()
   .use(DevTools())
   .use(FormatSimple())
   .init({
-    apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL, // Ensure you use VITE_ prefix for Vite
-    apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY, // Ensure you use VITE_ prefix for Vite
-    language: "en",
+    staticData: {
+      en: enTranslations,
+      es: esTranslations,
+      hi: hiTranslations,
+      fr: frTranslations,
+    },
+    defaultLanguage: "en",
     fallbackLanguage: "en",
     preloadFallback: true,
   });
