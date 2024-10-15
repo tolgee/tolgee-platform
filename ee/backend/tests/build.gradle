@@ -43,6 +43,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
 
+    testImplementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(project(":testing"))
     testImplementation(project(":ee-app"))

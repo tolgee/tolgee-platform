@@ -244,6 +244,10 @@ export interface paths {
     /** Sets user role in organization. Owner or Member. */
     put: operations["setUserRole"];
   };
+  "/v2/organizations/{organizationId}/sso": {
+    get: operations["findProvider"];
+    put: operations["setProvider"];
+  };
   "/v2/organizations/{organizationId}/set-base-permissions": {
     /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
     put: operations["setBasePermissions"];
@@ -332,6 +336,9 @@ export interface paths {
      * Heads up! The events have to be configured via Slack App configuration in Event Subscription section.
      */
     post: operations["fetchBotEvent"];
+  };
+  "/v2/public/oauth2/callback/get-authentication-url": {
+    post: operations["getAuthenticationUrl"];
   };
   "/v2/public/business-events/report": {
     post: operations["report"];
@@ -545,6 +552,9 @@ export interface paths {
   };
   "/v2/public/scope-info/hierarchy": {
     get: operations["getHierarchy"];
+  };
+  "/v2/public/oauth2/callback/{registrationId}": {
+    get: operations["handleCallback"];
   };
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
@@ -1040,6 +1050,11 @@ export interface components {
         | "slack_workspace_already_connected"
         | "slack_connection_error"
         | "email_verification_code_not_valid"
+        | "sso_third_party_auth_failed"
+        | "sso_token_exchange_failed"
+        | "sso_user_info_retrieval_failed"
+        | "sso_id_token_expired"
+        | "sso_domain_not_enabled"
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
@@ -2158,6 +2173,27 @@ export interface components {
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
+    CreateProviderRequest: {
+      name?: string;
+      clientId: string;
+      clientSecret: string;
+      authorizationUri: string;
+      redirectUri: string;
+      tokenUri: string;
+      jwkSetUri: string;
+      isEnabled: boolean;
+      domainName: string;
+    };
+    SsoTenantModel: {
+      authorizationUri: string;
+      clientId: string;
+      clientSecret: string;
+      redirectUri: string;
+      tokenUri: string;
+      isEnabled: boolean;
+      jwkSetUri: string;
+      domainName: string;
+    };
     OrganizationDto: {
       /** @example Beautiful organization */
       name: string;
@@ -2291,9 +2327,8 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
       description: string;
+      userFullName?: string;
       username?: string;
       scopes: string[];
       /** Format: int64 */
@@ -2302,6 +2337,7 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2324,6 +2360,13 @@ export interface components {
       text: string;
       trigger_id?: string;
       team_domain: string;
+    };
+    DomainRequest: {
+      domain: string;
+      state: string;
+    };
+    SsoUrlResponse: {
+      redirectUrl: string;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -2691,6 +2734,11 @@ export interface components {
         | "slack_workspace_already_connected"
         | "slack_connection_error"
         | "email_verification_code_not_valid"
+        | "sso_third_party_auth_failed"
+        | "sso_token_exchange_failed"
+        | "sso_user_info_retrieval_failed"
+        | "sso_id_token_expired"
+        | "sso_domain_not_enabled"
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
@@ -3375,6 +3423,8 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
@@ -3382,8 +3432,6 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
@@ -3412,6 +3460,9 @@ export interface components {
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
       chatwootToken?: string;
+      nativeEnabled: boolean;
+      customLoginLogo?: string;
+      customLoginText: string;
       capterraTracker?: string;
       ga4Tag?: string;
       postHogApiKey?: string;
@@ -3524,20 +3575,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
       description?: string;
+      baseTranslation?: string;
       translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
       description?: string;
+      baseTranslation?: string;
       translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4220,9 +4271,8 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
       description: string;
+      userFullName?: string;
       username?: string;
       scopes: string[];
       /** Format: int64 */
@@ -4231,6 +4281,7 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -8454,6 +8505,105 @@ export interface operations {
       };
     };
   };
+  findProvider: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SsoTenantModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setProvider: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SsoTenantModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProviderRequest"];
+      };
+    };
+  };
   /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
   setBasePermissions: {
     parameters: {
@@ -9691,6 +9841,53 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": string;
+      };
+    };
+  };
+  getAuthenticationUrl: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SsoUrlResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DomainRequest"];
       };
     };
   };
@@ -13170,6 +13367,60 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["HierarchyItem"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  handleCallback: {
+    parameters: {
+      query: {
+        code: string;
+        redirect_uri: string;
+        error?: string;
+        error_description?: string;
+        invitationCode?: string;
+      };
+      path: {
+        registrationId: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */

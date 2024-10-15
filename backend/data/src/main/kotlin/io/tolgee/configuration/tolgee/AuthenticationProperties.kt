@@ -143,6 +143,19 @@ class AuthenticationProperties(
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
+  @DocProperty(
+    description =
+      "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`" +
+        "You may need that when you want to enable login via your custom SSO (the default logo is Tolgee's logo," +
+        " which is stored in the webapp/public directory).",
+  )
+  var customLogoUrl: String? =
+    "/favicon.svg",
+  @DocProperty(
+    description = "Custom text for the login button.",
+    defaultExplanation = "Defaults to 'SSO Login' if not set.",
+  )
+  var customButtonText: String = "SSO Login",
 ) {
   fun checkAllowedRegistrations() {
     if (!this.registrationsAllowed) {

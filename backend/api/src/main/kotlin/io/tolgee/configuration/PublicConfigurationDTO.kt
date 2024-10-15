@@ -28,6 +28,9 @@ class PublicConfigurationDTO(
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val chatwootToken = properties.chatwootToken
+  val nativeEnabled = properties.authentication.nativeEnabled
+  val customLoginLogo = properties.authentication.customLogoUrl
+  val customLoginText = properties.authentication.customButtonText
   val capterraTracker = properties.capterraTracker
   val ga4Tag = properties.ga4Tag
   val postHogApiKey: String? = properties.postHog.apiKey
