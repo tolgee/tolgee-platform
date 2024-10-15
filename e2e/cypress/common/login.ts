@@ -1,8 +1,12 @@
-import {HOST, PASSWORD, USERNAME} from '../common/constants';
-import {waitForGlobalLoading} from './loading';
-import {getInput} from './xPath';
-import {gcy} from './shared';
-import {deleteUserSql, enableEmailVerification, enableRegistration,} from './apiCalls/common';
+import { HOST, PASSWORD, USERNAME } from '../common/constants';
+import { waitForGlobalLoading } from './loading';
+import { getInput } from './xPath';
+import { gcy } from './shared';
+import {
+  deleteUserSql,
+  enableEmailVerification,
+  enableRegistration,
+} from './apiCalls/common';
 
 export const loginWithFakeGithub = () => {
   cy.intercept('https://github.com/login/oauth/**', {
