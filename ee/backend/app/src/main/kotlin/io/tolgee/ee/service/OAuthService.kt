@@ -8,7 +8,6 @@ import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
-import com.posthog.java.shaded.org.json.JSONObject
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
@@ -97,7 +96,7 @@ class OAuthService(
       response.body
     } catch (e: HttpClientErrorException) {
       logger.info("Failed to exchange code for token: ${e.message}")
-      null // todo throw exception
+      null
     }
   }
 
@@ -131,16 +130,6 @@ class OAuthService(
       logger.info(e.stackTraceToString())
       throw OAuthAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED, null)
     }
-  }
-
-  fun decodeJwt(jwt: String): JSONObject {
-    val parts = jwt.split(".")
-    if (parts.size != 3) throw IllegalArgumentException("JWT does not have 3 parts") // todo change exception type
-
-    val payload = parts[1]
-    val decodedPayload = String(Base64.getUrlDecoder().decode(payload))
-
-    return JSONObject(decodedPayload)
   }
 
   private fun register(

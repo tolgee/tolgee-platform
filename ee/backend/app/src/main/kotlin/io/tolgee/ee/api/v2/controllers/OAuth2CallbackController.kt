@@ -13,7 +13,6 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.UserAccountService
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.*
-import java.util.*
 
 @RestController
 @RequestMapping("v2/public/oauth2/callback/")
@@ -36,12 +35,6 @@ class OAuth2CallbackController(
 
     return SsoUrlResponse(redirectUrl)
   }
-
-  fun encodeDomain(domain: String): String =
-    Base64.getUrlEncoder().encode(domain.toByteArray()).toString(Charsets.UTF_8)
-
-  fun decodeDomain(encodedDomain: String): String =
-    Base64.getUrlDecoder().decode(encodedDomain).toString(Charsets.UTF_8)
 
   private fun buildAuthUrl(
     tenant: SsoTenant,
