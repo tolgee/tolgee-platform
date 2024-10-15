@@ -25,7 +25,7 @@ import java.util.*
       name = "import_translation_language_id_id",
       columnList = "language_id",
     ),
-  ]
+  ],
 )
 class ImportTranslation(
   @Column(columnDefinition = "text")
