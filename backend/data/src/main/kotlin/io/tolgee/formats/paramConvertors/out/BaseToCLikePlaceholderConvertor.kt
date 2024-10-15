@@ -7,10 +7,11 @@ import io.tolgee.formats.escapePercentSign
 class BaseToCLikePlaceholderConvertor(
   private val defaultSpecifier: String = "s",
   private val numberSpecifier: String = "d",
+  numberAllArgs: Boolean = false,
   private val argNameStringProvider: (BaseToCLikePlaceholderConvertor.(MessagePatternUtil.ArgNode) -> String)? = null,
 ) {
   private var argIndex = -1
-  private var wasNumberedArg = false
+  private var wasNumberedArg = numberAllArgs
 
   fun convert(node: MessagePatternUtil.ArgNode): String {
     argIndex++
