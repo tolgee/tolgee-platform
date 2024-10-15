@@ -59,8 +59,8 @@ class AndroidXmlFileExporterTest {
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="i_am_array_english">This is english!</string>
     |  <plurals name="plural_with_placeholders">
-    |    <item quantity="one">%s dog</item>
-    |    <item quantity="other">%s dogs</item>
+    |    <item quantity="one">%1${'$'}s dog</item>
+    |    <item quantity="other">%1${'$'}s dogs</item>
     |  </plurals>
     |</resources>
     |

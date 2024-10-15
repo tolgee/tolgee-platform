@@ -3,6 +3,7 @@ package io.tolgee.formats.android.`in`
 import AndroidStringsXmlParser
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
+import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
 import io.tolgee.formats.android.AndroidStringValue
 import io.tolgee.formats.android.PluralUnit
@@ -46,7 +47,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     context.addTranslation(
       keyName,
       guessedLanguage,
-      convertMessage(text),
+      convertText(text),
       pluralArgName = null,
       rawData = text,
       convertedBy = ImportFormat.ANDROID_XML,
@@ -80,13 +81,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     }
     val rawData = it.items.map { it.key to it.value.string }.toMap()
 
-    val converted =
-      messageConvertor.convert(
-        rawData = rawData,
-        languageTag = guessedLanguage,
-        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
-        context.projectIcuPlaceholdersEnabled,
-      )
+    val converted = convertMessage(rawData)
 
     context.addKeyDescription(keyName, it.comment)
     context.addTranslation(
@@ -116,7 +111,7 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
       context.addTranslation(
         keyNameWithIndex,
         guessedLanguage,
-        convertMessage(text),
+        convertText(text),
         pluralArgName = null,
         rawData = text,
         convertedBy = importFormat,
@@ -138,16 +133,17 @@ class AndroidStringsXmlProcessor(override val context: FileProcessorContext) : I
     inputFactory.createXMLEventReader(context.file.data.inputStream())
   }
 
-  private fun convertMessage(message: String?): String? {
-    if (message == null) {
-      return null
-    }
+  private fun convertMessage(message: Any): MessageConvertorResult {
     return messageConvertor.convert(
       message,
       guessedLanguage,
       context.importSettings.convertPlaceholdersToIcu,
       context.projectIcuPlaceholdersEnabled,
-    ).message
+    )
+  }
+
+  private fun convertText(text: String?): String? {
+    return text?.let { convertMessage(it).message }
   }
 
   companion object {
