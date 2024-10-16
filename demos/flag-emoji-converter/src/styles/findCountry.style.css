@@ -1,0 +1,40 @@
+.root {
+	max-width: 32rem;
+	margin-top: 1rem;
+}
+
+.navbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.navbar__title {
+	width: 100%;
+}
+
+.navbar__dropdown {
+	width: fit-content;
+}
+
+.flag-container {
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.8rem;
+	justify-content: space-evenly;
+	margin-top: 1rem;
+}
+
+.flag {
+	width: 5rem;
+	aspect-ratio: 4 / 3;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0.4rem;
+}
+
+input[name="search"] {
+	margin: 0.6rem 0;
+}
