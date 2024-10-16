@@ -50,7 +50,7 @@ export class CountryTrie {
 			if (alphabet in cur.children) {
 				cur = cur.children[alphabet];
 			} else {
-				break;
+				return [];
 			}
 		}
 
