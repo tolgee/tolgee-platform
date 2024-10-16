@@ -3,6 +3,7 @@ package io.tolgee.hateoas.userAccount
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
+import io.tolgee.hateoas.permission.PermissionWithAgencyModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.service.AvatarService
@@ -16,6 +17,7 @@ class UserAccountInProjectModelAssembler(
   private val permissionModelAssembler: PermissionModelAssembler,
   private val computedPermissionModelAssembler: ComputedPermissionModelAssembler,
   private val avatarService: AvatarService,
+  private val permissionWithAgencyModelAssembler: PermissionWithAgencyModelAssembler,
 ) : RepresentationModelAssemblerSupport<ExtendedUserAccountInProject, UserAccountInProjectModel>(
     V2UserController::class.java,
     UserAccountInProjectModel::class.java,
@@ -35,7 +37,7 @@ class UserAccountInProjectModelAssembler(
       name = view.name,
       organizationRole = view.organizationRole,
       organizationBasePermission = permissionModelAssembler.toModel(view.organizationBasePermission),
-      directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
+      directPermission = view.directPermission?.let { permissionWithAgencyModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       avatar = avatar,
     )

@@ -84,15 +84,17 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
           <StyledPermission>{translateRole(invitation.type)}</StyledPermission>
         </Tooltip>
 
-        <Tooltip title={t('invite_user_invitation_copy_button')}>
-          <IconButton
-            data-cy="organization-invitation-copy-button"
-            size="small"
-            onClick={handleGetLink}
-          >
-            <Link02 />
-          </IconButton>
-        </Tooltip>
+        {invitation.code && (
+          <Tooltip title={t('invite_user_invitation_copy_button')}>
+            <IconButton
+              data-cy="organization-invitation-copy-button"
+              size="small"
+              onClick={handleGetLink}
+            >
+              <Link02 />
+            </IconButton>
+          </Tooltip>
+        )}
 
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
           <IconButton

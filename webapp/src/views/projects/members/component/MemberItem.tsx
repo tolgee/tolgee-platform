@@ -1,6 +1,7 @@
 import { T, useTranslate } from '@tolgee/react';
 import { Chip, styled } from '@mui/material';
 
+import { AgencyLabel } from 'tg.ee';
 import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
@@ -34,6 +35,10 @@ const StyledListItem = styled('div')`
 const StyledItemText = styled('div')`
   flex-grow: 1;
   padding: ${({ theme }) => theme.spacing(1)};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 `;
 
 const StyledItemActions = styled('div')`
@@ -93,6 +98,9 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           {user.name} ({user.username}){' '}
           {user.organizationRole && (
             <Chip size="small" label={project.organizationOwner?.name} />
+          )}
+          {user.directPermission?.agency && (
+            <AgencyLabel agency={user.directPermission.agency} />
           )}
         </StyledItemText>
       </StyledItemUser>

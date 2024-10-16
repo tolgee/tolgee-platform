@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { T } from '@tolgee/react';
-import { AvatarEdit } from './AvatarEdit';
+import { AvatarEdit, CropperOptions } from './AvatarEdit';
 import Button from '@mui/material/Button';
 import LoadingButton from '../form/LoadingButton';
 
@@ -17,13 +17,18 @@ export const AvatarEditDialog = (props: {
   onCancel: () => void;
   onSave: () => void;
   isUploading: boolean;
+  cropperProps?: Partial<CropperOptions>;
 }) => (
   <Dialog open={true} onClose={props.onCancel}>
     <DialogTitle id="transfer-dialog-title">
       <T keyName="user-profile.edit-avatar" />
     </DialogTitle>
     <DialogContent>
-      <AvatarEdit src={props.src} cropperRef={props.cropperRef} />
+      <AvatarEdit
+        src={props.src}
+        cropperRef={props.cropperRef}
+        cropperProps={props.cropperProps}
+      />
     </DialogContent>
     <DialogActions>
       <Button

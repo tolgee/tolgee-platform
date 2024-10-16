@@ -22,12 +22,14 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -46,6 +48,7 @@ class PermissionService(
   private val userPreferencesService: UserPreferencesService,
   @Lazy
   private val applicationContext: ApplicationContext,
+  private val entityManager: EntityManager,
 ) {
   @set:Autowired
   @set:Lazy
@@ -58,6 +61,19 @@ class PermissionService(
   @set:Lazy
   @set:Autowired
   lateinit var projectService: ProjectService
+
+  @Transactional
+  fun findPermissionNonCached(
+    projectId: Long? = null,
+    userId: Long? = null,
+    organizationId: Long? = null,
+  ): Permission? {
+    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
+      projectId = projectId,
+      userId = userId,
+      organizationId = organizationId,
+    )
+  }
 
   fun getAllOfProject(project: Project?): Set<Permission> {
     return permissionRepository.getAllByProjectAndUserNotNull(project)
@@ -107,6 +123,13 @@ class PermissionService(
       computedPermissions = computed,
       directPermissions = projectPermission,
     )
+  }
+
+  fun getUserProjectPermission(
+    projectId: Long,
+    userId: Long,
+  ): PermissionDto? {
+    return find(projectId, userId)
   }
 
   fun getPermittedTranslateLanguagesForUserIds(
@@ -229,6 +252,10 @@ class PermissionService(
         invitation = invitation,
         project = params.project,
         type = type,
+        agency =
+          params.agencyId?.let {
+            entityManager.getReference(TranslationAgency::class.java, it)
+          },
       )
 
     setPermissionLanguages(permission, params.languagePermissions, params.project.id)
@@ -460,5 +487,13 @@ class PermissionService(
     val permissions = permissionRepository.findAllByOrganizationAndUserId(organizationId, userId)
     permissions.forEach { delete(it) }
     return permissions
+  }
+
+  fun deleteAll(permissions: List<Permission>) {
+    permissionRepository.deleteAll(permissions)
+  }
+
+  fun getAgencyPermissions(agencyId: Long): List<Permission> {
+    return permissionRepository.findAllByAgencyId(agencyId)
   }
 }

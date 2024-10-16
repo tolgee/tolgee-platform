@@ -1,6 +1,7 @@
 package io.tolgee.component.enabledFeaturesProvider
 
 import io.tolgee.constants.Feature
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.stereotype.Component
 
 @Component

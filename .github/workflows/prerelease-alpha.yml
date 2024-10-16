@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [ "tolgee-3" ]
+    branches: ["tolgee-3"]
 
 jobs:
   main:
@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          token: '${{ secrets.TOLGEE_MACHINE_PAT }}'
+          token: "${{ secrets.TOLGEE_MACHINE_PAT }}"
 
       - uses: actions/setup-java@v3
         with:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 
       - name: Install node modules
         run: npm ci

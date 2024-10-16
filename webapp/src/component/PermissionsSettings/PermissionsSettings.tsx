@@ -25,6 +25,7 @@ type Props = {
   height?: number;
   allLangs?: LanguageModel[];
   hideNone?: boolean;
+  disabled?: boolean;
 };
 
 export const PermissionsSettings: React.FC<Props> = ({
@@ -33,6 +34,7 @@ export const PermissionsSettings: React.FC<Props> = ({
   onChange,
   allLangs,
   hideNone,
+  disabled,
 }) => {
   const [tab, setTab] = useState<TabsType>(
     permissions.type ? 'basic' : 'advanced'
@@ -104,7 +106,7 @@ export const PermissionsSettings: React.FC<Props> = ({
         mb={2}
       >
         <Typography variant="h5">{title}</Typography>
-        <ButtonGroup size="small">
+        <ButtonGroup size="small" disabled={disabled}>
           <Button
             color={tab === 'basic' ? 'primary' : 'default'}
             onClick={handleChange('basic')}
@@ -130,6 +132,7 @@ export const PermissionsSettings: React.FC<Props> = ({
             roles={rolesLoadable.data as RolesMap}
             allLangs={allLangs}
             hideNone={hideNone}
+            disabled={disabled}
           />
         )}
         {tab === 'advanced' && (
