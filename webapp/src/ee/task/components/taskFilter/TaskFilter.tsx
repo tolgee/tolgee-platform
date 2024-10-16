@@ -12,7 +12,9 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { filterEmpty } from './taskFilterUtils';
 import { stopBubble } from 'tg.fixtures/eventHandler';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import { AgencyLabel } from 'tg.ee';
+import { useConfig } from 'tg.globalContext/helpers';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
@@ -64,6 +66,7 @@ export const TaskFilter = ({
   const anchorEl = useRef(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslate();
+  const config = useConfig();
 
   const usersLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/possible-assignees',
@@ -93,6 +96,19 @@ export const TaskFilter = ({
     query: { size: 10000, filterId: value.projects },
     options: {
       enabled: !project && Boolean(value.projects?.length),
+      keepPreviousData: true,
+    },
+  });
+
+  const agenciesLoadable = useBillingApiQuery({
+    url: '/v2/billing/translation-agency',
+    method: 'get',
+    query: {
+      size: 1000,
+    },
+    options: {
+      enabled:
+        !project && Boolean(value.agencies?.length) && config.billing.enabled,
       keepPreviousData: true,
     },
   });
@@ -145,6 +161,11 @@ export const TaskFilter = ({
                 size={24}
               />
             </FilterTooltip>
+          ))}
+        {agenciesLoadable.data?._embedded?.translationAgencies
+          ?.filter((a) => value.agencies?.includes(a.id))
+          .map((agency) => (
+            <AgencyLabel key={agency.id} agency={agency} />
           ))}
         {value.types?.map((type) => (
           <TaskTypeChip key={type} type={type} />

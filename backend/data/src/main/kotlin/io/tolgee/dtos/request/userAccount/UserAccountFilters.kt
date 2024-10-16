@@ -12,4 +12,9 @@ open class UserAccountFilters {
     description = """Filter users without id""",
   )
   var filterNotId: List<Long>? = null
+
+  @field:Parameter(
+    description = """Filter users from agency""",
+  )
+  var filterAgency: List<Long>? = null
 }

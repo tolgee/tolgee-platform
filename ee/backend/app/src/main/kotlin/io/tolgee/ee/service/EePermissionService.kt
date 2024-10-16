@@ -7,8 +7,10 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.PermissionService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class EePermissionService(
   private val permissionService: PermissionService,
   private val organizationService: OrganizationService,
+  private val entityManager: EntityManager,
 ) {
   @Transactional
   fun setUserDirectPermission(
@@ -63,6 +66,10 @@ class EePermissionService(
         invitation = invitation,
         project = params.project,
         scopes = scopes.toTypedArray(),
+        agency =
+          params.agencyId?.let {
+            entityManager.getReference(TranslationAgency::class.java, it)
+          },
       )
 
     permissionService.setPermissionLanguages(permission, params.languagePermissions, params.project.id)

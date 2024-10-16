@@ -36,4 +36,8 @@ class TaskServiceOssImpl : ITaskService {
   ): Map<Long, List<TranslationToTaskView>> {
     return emptyMap()
   }
+
+  override fun getAgencyTasks(agencyId: Long): List<Task> {
+    throw BadRequestException("Not implemented")
+  }
 }

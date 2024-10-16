@@ -5,9 +5,11 @@ import { LoadingButton } from '@mui/lab';
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useTaskStateTranslation } from 'tg.translationTools/useTaskStateTranslation';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
+import { useStateColor } from 'tg.component/task/TaskState';
 
 import { useProjectBoardTasks } from '../views/projectTasks/useProjectBoardTasks';
-import { useStateColor } from 'tg.component/task/TaskState';
 import { BoardColumn } from './BoardColumn';
 
 type TaskModel = components['schemas']['TaskModel'];
@@ -50,6 +52,9 @@ export const TasksBoard = ({
   const { t } = useTranslate();
   const translateState = useTaskStateTranslation();
   const stateColor = useStateColor();
+  const { isEnabled } = useEnabledFeatures();
+
+  const tasksFeature = isEnabled('TASKS');
 
   const canFetchMore =
     newTasks.hasNextPage ||
@@ -61,16 +66,28 @@ export const TasksBoard = ({
     inProgressTasks.hasNextPage && inProgressTasks.fetchNextPage();
     doneTasks.hasNextPage && doneTasks.fetchNextPage();
   }
+  const loadables = [newTasks, inProgressTasks, doneTasks];
 
-  const isLoading =
-    newTasks.isLoading || inProgressTasks.isLoading || doneTasks.isLoading;
-  const isFetching =
-    newTasks.isFetching || inProgressTasks.isFetching || doneTasks.isFetching;
+  const isLoading = loadables.some((l) => l.isLoading);
+  const isFetching = loadables.some((l) => l.isFetching);
 
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center">
         <BoxLoading />
+      </Box>
+    );
+  }
+
+  const allReady = loadables.every((l) => l.isFetched);
+  const allEmpty = loadables.every(
+    (l) => l.data?.pages?.[0].page?.totalElements === 0
+  );
+
+  if (allReady && allEmpty && !tasksFeature) {
+    return (
+      <Box>
+        <DisabledFeatureBanner customMessage={t('tasks_feature_description')} />
       </Box>
     );
   }

@@ -73,4 +73,5 @@ enum class ActivityType(
   TASK_CLOSE,
   TASK_REOPEN,
   TASK_KEY_UPDATE(hideInList = true),
+  ORDER_TRANSLATION,
 }

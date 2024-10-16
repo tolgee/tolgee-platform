@@ -9,6 +9,7 @@ import { AvatarEditMenu } from './AvatarEditMenu';
 import { AvatarEditDialog } from './AvatarEditDialog';
 import { useConfig } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
+import { CropperOptions } from './AvatarEdit';
 
 export type AvatarOwner = {
   name?: string;
@@ -60,6 +61,8 @@ export const ProfileAvatar: FC<{
   onUpload: (blob: Blob) => Promise<any>;
   onRemove: () => Promise<any>;
   owner: AvatarOwner;
+  cropperProps?: Partial<CropperOptions>;
+  preview?: (props: AvatarOwner) => React.ReactNode;
 }> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
   const [uploaded, setUploaded] = useState(null as string | null | undefined);
@@ -127,7 +130,11 @@ export const ProfileAvatar: FC<{
         }}
         sx={{ cursor: props.disabled ? 'default' : 'pointer' }}
       >
-        <AvatarImg owner={props.owner} size={200} />
+        {props.preview ? (
+          props.preview(props.owner)
+        ) : (
+          <AvatarImg owner={props.owner} size={200} />
+        )}
         {!props.disabled && (
           <EditButtonWrapper>
             <StyledEditButton
@@ -159,6 +166,7 @@ export const ProfileAvatar: FC<{
           src={uploaded}
           cropperRef={cropperRef as any}
           isUploading={uploading}
+          cropperProps={props.cropperProps}
           onCancel={() => {
             setUploaded(undefined);
           }}

@@ -1131,7 +1131,9 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open";
+        | "task_not_open"
+        | "translation_agency_not_found"
+        | "this_feature_is_not_implemented_in_oss";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -1223,6 +1225,11 @@ export interface components {
        */
       stateChangeLanguageIds?: number[];
       /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1256,11 +1263,6 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1442,6 +1444,14 @@ export interface components {
       /** Format: int64 */
       closedAt?: number;
       state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
+      agency?: components["schemas"]["TranslationAgencySimpleModel"];
+    };
+    TranslationAgencySimpleModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      url?: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     UpdateTaskKeyRequest: {
       done: boolean;
@@ -1821,18 +1831,85 @@ export interface components {
       email?: string;
       /** @description Name of invited user */
       name?: string;
+      /**
+       * Format: int64
+       * @description Id of invited agency
+       */
+      agencyId?: number;
+    };
+    PermissionWithAgencyModel: {
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
+      )[];
+      /** @description The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      agency?: components["schemas"]["TranslationAgencySimpleModel"];
     };
     ProjectInvitationModel: {
       /** Format: int64 */
       id: number;
-      code: string;
+      code?: string;
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       permittedLanguageIds?: number[];
       /** Format: date-time */
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
-      permission: components["schemas"]["PermissionModel"];
+      permission: components["schemas"]["PermissionWithAgencyModel"];
     };
     AzureContentStorageConfigDto: {
       connectionString?: string;
@@ -1850,8 +1927,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2291,13 +2368,13 @@ export interface components {
       id: number;
       description: string;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2368,6 +2445,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "ORDER_TRANSLATION"
       )[];
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -2436,17 +2514,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
+      userFullName?: string;
       projectName: string;
-      username?: string;
       description: string;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       scopes: string[];
-      /** Format: int64 */
-      expiresAt?: number;
-      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2556,6 +2634,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "ORDER_TRANSLATION"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -3046,7 +3125,9 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open";
+        | "task_not_open"
+        | "translation_agency_not_found"
+        | "this_feature_is_not_implemented_in_oss";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3705,17 +3786,13 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "ORDER_TRANSLATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
       basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
@@ -3723,6 +3800,11 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      /** @example btforg */
+      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3816,7 +3898,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationRole?: "MEMBER" | "OWNER";
       organizationBasePermission: components["schemas"]["PermissionModel"];
-      directPermission?: components["schemas"]["PermissionModel"];
+      directPermission?: components["schemas"]["PermissionWithAgencyModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
     };
     CollectionModelUsedNamespaceModel: {
@@ -3886,20 +3968,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
-      translation?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
+      translation?: string;
       namespace?: string;
       description?: string;
-      translation?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4064,7 +4146,8 @@ export interface components {
         | "TASK_FINISH"
         | "TASK_CLOSE"
         | "TASK_REOPEN"
-        | "TASK_KEY_UPDATE";
+        | "TASK_KEY_UPDATE"
+        | "ORDER_TRANSLATION";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -4501,13 +4584,13 @@ export interface components {
       id: number;
       description: string;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4626,17 +4709,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
+      userFullName?: string;
       projectName: string;
-      username?: string;
       description: string;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       scopes: string[];
-      /** Format: int64 */
-      expiresAt?: number;
-      userFullName?: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -11348,6 +11431,8 @@ export interface operations {
         filterLanguage?: number[];
         /** Filter tasks by key */
         filterKey?: number[];
+        /** Filter tasks by agency */
+        filterAgency?: number[];
         /** Exclude "done" tasks which are older than specified timestamp */
         filterDoneMinClosedAt?: number;
         /** Zero-based page index (0..N) */
@@ -14351,6 +14436,8 @@ export interface operations {
         filterLanguage?: number[];
         /** Filter tasks by key */
         filterKey?: number[];
+        /** Filter tasks by agency */
+        filterAgency?: number[];
         /** Exclude "done" tasks which are older than specified timestamp */
         filterDoneMinClosedAt?: number;
         /** Zero-based page index (0..N) */
@@ -14903,6 +14990,12 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        /** Filter users by id */
+        filterId?: number[];
+        /** Filter users without id */
+        filterNotId?: number[];
+        /** Filter users from agency */
+        filterAgency?: number[];
       };
     };
     responses: {

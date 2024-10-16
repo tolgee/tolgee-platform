@@ -7,22 +7,35 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import SearchField from 'tg.component/common/form/fields/SearchField';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { AgencyFilter } from './component/AgencyFilter';
 import { MemberItem } from './component/MemberItem';
 import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
 import { BaseProjectView } from '../BaseProjectView';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useReportEvent } from 'tg.hooks/useReportEvent';
-import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { useConfig, useEnabledFeatures } from 'tg.globalContext/helpers';
 
 export const ProjectMembersView: FunctionComponent = () => {
   const project = useProject();
+  const config = useConfig();
+  const { isEnabled } = useEnabledFeatures();
+  const showAgencyFilter =
+    config.billing.enabled && isEnabled('ORDER_TRANSLATION');
 
   const { t } = useTranslate();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
+  const [filterAgecy, setFilterAgency] = useUrlSearchState('agency', {
+    array: true,
+    defaultVal: [],
+  });
+
   const membersLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/users',
     method: 'get',
@@ -31,6 +44,7 @@ export const ProjectMembersView: FunctionComponent = () => {
       page,
       sort: ['name'],
       search,
+      filterAgency: filterAgecy?.map((a) => Number(a)),
     },
     options: {
       keepPreviousData: true,
@@ -128,11 +142,36 @@ export const ProjectMembersView: FunctionComponent = () => {
             offset={10}
           >
             <Box>
+              <Box
+                mb={1}
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography variant="h6">
+                  {t('project_menu_members')}
+                </Typography>
+                <Box
+                  display="flex"
+                  gap={2}
+                  justifyContent="end"
+                  mb={1}
+                  alignItems="stretch"
+                >
+                  {showAgencyFilter && (
+                    <AgencyFilter
+                      value={filterAgecy?.map((a) => Number(a))}
+                      onChange={(value) =>
+                        setFilterAgency(value.map((a) => String(a)))
+                      }
+                    />
+                  )}
+                  <SearchField onSearch={setSearch} />
+                </Box>
+              </Box>
               <PaginatedHateoasList
-                title={t('project_menu_members')}
                 loadable={membersLoadable}
                 onPageChange={setPage}
-                onSearchChange={setSearch}
                 emptyPlaceholder={
                   <Box m={4} display="flex" justifyContent="center">
                     <Typography color="textSecondary">

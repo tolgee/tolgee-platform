@@ -61,6 +61,7 @@ export enum PARAMS {
   ORGANIZATION_SLUG = 'slug',
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
+  TA_ID = 'taId',
 }
 
 export class LINKS {
@@ -179,6 +180,21 @@ export class LINKS {
   static ADMINISTRATION_EE_LICENSE = Link.ofParent(
     LINKS.ADMINISTRATION,
     'ee-license'
+  );
+
+  static ADMINISTRATION_EE_TA = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'ee-translation-agencies'
+  );
+
+  static ADMINISTRATION_EE_TA_CREATE = Link.ofParent(
+    LINKS.ADMINISTRATION_EE_TA,
+    'create'
+  );
+
+  static ADMINISTRATION_EE_TA_EDIT = Link.ofParent(
+    LINKS.ADMINISTRATION_EE_TA,
+    p(PARAMS.TA_ID) + '/edit'
   );
 
   static ADMINISTRATION_BILLING_CLOUD_PLANS = Link.ofParent(

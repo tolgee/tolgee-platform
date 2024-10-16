@@ -27,4 +27,8 @@ data class ProjectInviteUserDto(
   )
   @field:Size(max = 250)
   val name: String? = null,
+  @Schema(
+    description = """Id of invited agency""",
+  )
+  val agencyId: Long? = null,
 ) : RequestWithLanguagePermissions

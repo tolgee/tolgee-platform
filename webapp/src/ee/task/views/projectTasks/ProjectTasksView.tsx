@@ -16,11 +16,11 @@ import { TasksHeader } from 'tg.ee.module/task/components/tasksHeader/TasksHeade
 import { TaskView } from 'tg.ee.module/task/components/tasksHeader/TasksHeaderBig';
 import { TaskCreateDialog } from 'tg.ee.module/task/components/taskCreate/TaskCreateDialog';
 import { TaskDetail } from 'tg.ee.module/task/components/TaskDetail';
-
-import { TasksList } from './TasksList';
-import { ProjectTasksBoard } from './ProjectTasksBoard';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
+
+import { ProjectTasksBoard } from './ProjectTasksBoard';
+import { ProjectTasksList } from './ProjectTasksList';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -135,7 +135,7 @@ export const ProjectTasksView = () => {
             />
 
             {view === 'LIST' && !isSmall ? (
-              <TasksList
+              <ProjectTasksList
                 search={search}
                 filter={filter}
                 showClosed={showClosed === 'true'}

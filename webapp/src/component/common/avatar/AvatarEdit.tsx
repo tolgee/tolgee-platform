@@ -1,20 +1,25 @@
 import React, { FC } from 'react';
-import Cropper, { ReactCropperElement } from 'react-cropper';
+import Cropper, { ReactCropperElement, ReactCropperProps } from 'react-cropper';
 import { styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import 'cropperjs/dist/cropper.css';
+import clsx from 'clsx';
 
 const StyledBox = styled(Box)`
-  .cropper-crop-box,
-  .cropper-view-box {
+  &.rounded .cropper-crop-box,
+  &.rounded .cropper-view-box {
     border-radius: 50%;
   }
 `;
 
+export type CropperOptions = ReactCropperProps & { rounded: boolean };
+
 export const AvatarEdit: FC<{
   src: string;
   cropperRef: React.RefObject<ReactCropperElement>;
-}> = ({ src, cropperRef }) => {
+  cropperProps?: Partial<CropperOptions>;
+}> = ({ src, cropperRef, cropperProps }) => {
+  const { rounded, ...other } = { ...cropperProps, rounded: true };
   return (
     <StyledBox>
       <Cropper
@@ -25,6 +30,8 @@ export const AvatarEdit: FC<{
         viewMode={3}
         guides={false}
         ref={cropperRef}
+        className={clsx({ rounded })}
+        {...other}
       />
     </StyledBox>
   );
