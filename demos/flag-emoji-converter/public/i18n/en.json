@@ -1,0 +1,11 @@
+{
+  "app-description": "Locate the flags of countries based on their names.",
+  "app-title": "Find country flag",
+  "input-placeholder": "Search country flag",
+  "option-chinese": "Chinese",
+  "option-english": "English",
+  "option-french": "French",
+  "option-german": "German",
+  "option-hindi": "Hindi",
+  "option-spanish": "Spanish"
+}

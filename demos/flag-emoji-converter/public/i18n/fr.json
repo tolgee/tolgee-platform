@@ -1,0 +1,11 @@
+{
+  "app-description": "Localisez les drapeaux des pays en fonction de leur nom.",
+  "app-title": "Trouver le drapeau du pays",
+  "input-placeholder": "Rechercher le drapeau du pays",
+  "option-chinese": "Chinois",
+  "option-english": "Anglais",
+  "option-french": "Français",
+  "option-german": "Allemand",
+  "option-hindi": "Hindi",
+  "option-spanish": "Espagnol"
+}
