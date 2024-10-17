@@ -10,6 +10,15 @@
     <link rel="stylesheet" href="thecss.css">
 </head>
 <body>
+    <div class="language-switcher">
+        <label for="language-select">{{Select Language}}</label>
+        <select id="language-select" onchange="switchLanguage(this.value)">
+            <option value="en">{{English}}</option>
+            <option value="hi-IN">{{Hindi}}</option>
+            <option value="mr-IN">{{Marathi}}</option>
+        </select>
+    </div>
+
     <div class="theme-toggle">
         <button class="theme-button darkk" id="dark-mode-toggle">D</button>
         <button class="theme-button" id="purple-theme-toggle">P</button>

@@ -90,7 +90,7 @@ body {
 }
 
 
-body.dark-mode {
+body.dark-theme {
     background-color: #110f0f;
     color: #fff;
 }
@@ -114,4 +114,30 @@ body.brown-theme {
 
 body.yellow-theme {
     background: linear-gradient(to right, #f7f28b, #f5d765);
+}
+
+.language-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.language-switcher select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.language-switcher select:hover {
+    border-color: #007bff;
+}
+
+.language-switcher select:focus {
+    outline: none;
+    border-color: #007bff;
 }

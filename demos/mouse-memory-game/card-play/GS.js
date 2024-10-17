@@ -137,4 +137,10 @@ cardBacks.forEach((cardBack, index) => {
 });
 
 
-
+const body = document.body;
+const savedTheme = localStorage.getItem('selectedTheme');
+if (savedTheme) {
+    body.className = savedTheme;
+} else{
+    saveTheme("")
+}

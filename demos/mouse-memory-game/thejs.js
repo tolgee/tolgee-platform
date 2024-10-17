@@ -6,20 +6,26 @@ const { Tolgee, InContextTools, FormatSimple, BackendFetch } =
 const tolgee = Tolgee()
     .use(InContextTools())
     .use(FormatSimple())
-    .use(BackendFetch())
+    .use(BackendFetch({ prefix: "./i18n/"}))
     .init({
         // ############################################################
         // ## you should never leak your API key                     ##
         // ## remove it in for production publicly accessible site   ##
         // ############################################################
-        apiKey: 'tgpak_geydkmrul43tgmtjmizgqnlknb3hc3jymfvgg23eozwgcm3qnfxq',
-        apiUrl: 'https://app.tolgee.io',
+        availableLanguages: ['en', 'hi-IN', 'mr-IN'],
+        // apiKey: 'your_api_key',
+        // apiUrl: 'https://app.tolgee.io',
         defaultLanguage: 'en',
         observerType: 'text',
         observerOptions: { inputPrefix: '{{', inputSuffix: '}}' },
     });
 
 tolgee.run();
+
+function switchLanguage(language) {
+    tolgee.changeLanguage(language);
+}
+
 
 
 const startButton = document.getElementById('start-button');
@@ -80,31 +86,39 @@ const brownThemeToggle = document.getElementById('brown-theme-toggle');
 const yellowThemeToggle = document.getElementById('yellow-theme-toggle');
 const body = document.body;
 
-darkModeToggle.addEventListener('click', () => {
+function saveTheme(theme) {
+    localStorage.setItem('selectedTheme', theme);
     body.classList.remove('purple-theme', 'orange-theme', 'brown-theme', 'yellow-theme');
-    body.classList.toggle('dark-mode');
+    body.className = theme;
+}
+
+const savedTheme = localStorage.getItem('selectedTheme');
+if (savedTheme) {
+    body.className = savedTheme;
+} else{
+    saveTheme("")
+}
+
+darkModeToggle.addEventListener('click', () => {
+    saveTheme('dark-theme');
 });
 
 purpleThemeToggle.addEventListener('click', () => {
-    body.classList.remove('dark-mode', 'orange-theme', 'brown-theme', 'yellow-theme');
-    body.classList.toggle('purple-theme');
+    saveTheme('purple-theme');
 });
 
 orangeThemeToggle.addEventListener('click', () => {
-    body.classList.remove('dark-mode', 'purple-theme', 'brown-theme', 'yellow-theme');
-    body.classList.toggle('orange-theme');
+    saveTheme('orange-theme');
 });
 
 brownThemeToggle.addEventListener('click', () => {
-    body.classList.remove('dark-mode', 'purple-theme', 'orange-theme', 'yellow-theme');
-    body.classList.toggle('brown-theme');
+    saveTheme('brown-theme');
 });
 
 yellowThemeToggle.addEventListener('click', () => {
-    body.classList.remove('dark-mode', 'purple-theme', 'orange-theme', 'brown-theme');
-    body.classList.toggle('yellow-theme');
+    saveTheme('yellow-theme');
 });
 
 lightThemeToggle.addEventListener('click', () => {
-    body.classList.remove('dark-mode', 'purple-theme', 'orange-theme', 'brown-theme', 'yellow-theme');
+    saveTheme("");
 });
