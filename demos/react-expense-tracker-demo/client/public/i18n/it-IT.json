@@ -1,0 +1,20 @@
+{
+  "addExpense": "Aggiungi Spesa",
+  "addNewExpense": "Aggiungi Nuova Spesa",
+  "amount": "Importo",
+  "category": "Categoria",
+  "description": "descrizione (Opzionale)",
+  "email": "Email",
+  "expenseList": "Elenco Spese",
+  "expense_tracker": "Controllo Spese",
+  "failedToAddExpense": "Impossibile aggiungere la spesa. Riprova.",
+  "invalid_email_or_password": "Email o password non validi",
+  "login": "Accedi",
+  "login_to_your_account": "Accedi al tuo account",
+  "logout": "Disconnetti",
+  "name": "Nome",
+  "password": "Password",
+  "register": "Registrati",
+  "register_new_account": "Registrati per un nuovo account",
+  "user_already_exists": "L'utente esiste già"
+}

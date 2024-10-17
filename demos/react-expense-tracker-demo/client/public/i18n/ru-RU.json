@@ -1,0 +1,20 @@
+{
+  "addExpense": "Добавить расход",
+  "addNewExpense": "Добавить новый расход",
+  "amount": "Сумма",
+  "category": "Категория",
+  "description": "описание (необязательно)",
+  "email": "Электронная почта",
+  "expenseList": "Список расходов",
+  "expense_tracker": "Трекер расходов",
+  "failedToAddExpense": "Не удалось добавить расход. Пожалуйста, попробуйте еще раз.",
+  "invalid_email_or_password": "Неверный адрес электронной почты или пароль",
+  "login": "Вход",
+  "login_to_your_account": "Войти в аккаунт",
+  "logout": "Выйти",
+  "name": "Имя",
+  "password": "Пароль",
+  "register": "Зарегистрироваться",
+  "register_new_account": "Зарегистрировать новый аккаунт",
+  "user_already_exists": "Пользователь уже существует"
+}

@@ -1,0 +1,20 @@
+{
+  "addExpense": "व्यय जोड़ें",
+  "addNewExpense": "नया खर्च जोड़ें",
+  "amount": "राशि",
+  "category": "श्रेणी",
+  "description": "विवरण (वैकल्पिक)",
+  "email": "ईमेल",
+  "expenseList": "व्यय सूची",
+  "expense_tracker": "व्यय ट्रैकर",
+  "failedToAddExpense": "व्यय जोड़ने में विफल। कृपया पुनः प्रयास करें।",
+  "invalid_email_or_password": "अमान्य ईमेल या पासवर्ड",
+  "login": "लॉगिन",
+  "login_to_your_account": "अपने खाते में लॉगिन करें",
+  "logout": "लॉगआउट",
+  "name": "नाम",
+  "password": "पासवर्ड",
+  "register": "रजिस्टर करें",
+  "register_new_account": "नया खाता पंजीकृत करें",
+  "user_already_exists": "उपयोगकर्ता पहले से मौजूद है"
+}

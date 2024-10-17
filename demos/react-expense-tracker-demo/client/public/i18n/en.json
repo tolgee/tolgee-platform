@@ -1,0 +1,20 @@
+{
+  "addExpense": "Add Expense",
+  "addNewExpense": "Add New Expense",
+  "amount": "Amount",
+  "category": "Category",
+  "description": "description (Optional)",
+  "email": "Email",
+  "expenseList": "Expense List",
+  "expense_tracker": "Expense Tracker",
+  "failedToAddExpense": "Failed to add expense. Please try again.",
+  "invalid_email_or_password": "Invalid email or password",
+  "login": "Login",
+  "login_to_your_account": "Login to your account",
+  "logout": "Logout",
+  "name": "Name",
+  "password": "Password",
+  "register": "Register",
+  "register_new_account": "Register a new account",
+  "user_already_exists": "User already exists"
+}
