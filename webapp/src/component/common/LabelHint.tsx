@@ -18,7 +18,7 @@ export const LabelHint = ({ children, title, size = 15 }: Props) => {
     <Tooltip title={title} disableInteractive>
       <StyledLabelBody>
         {children}
-        <HelpCircle style={{ width: size }} />
+        <HelpCircle style={{ width: size, height: size }} />
       </StyledLabelBody>
     </Tooltip>
   );
