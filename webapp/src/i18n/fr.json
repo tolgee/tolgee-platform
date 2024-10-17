@@ -789,6 +789,8 @@
   "organization_role_type_OWNER": "PROPRIÉTAIRE",
   "organization_role_type_OWNER_hint": "Gère l'organisation et ses projets",
   "organizations_add_new": "Ajouter une organisation",
+  "organization_sso_switch": "Activer",
+  "organization_sso_title": "Paramètres de connexion unique",
   "organizations_title": "Organisations",
   "organization_subscriptions_cloud_button": "Cloud",
   "organization_subscriptions_self_hosted_ee_button": "Auto-hébergé",

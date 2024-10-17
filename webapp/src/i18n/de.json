@@ -812,6 +812,8 @@
   "organization_role_type_OWNER": "EIGENTÜMER",
   "organization_role_type_OWNER_hint": "Verwalten der Organisation und ihrer Projekte",
   "organizations_add_new": "Organisation hinzufügen",
+  "organization_sso_switch": "Aktivieren",
+  "organization_sso_title": "Single-Sign-On-Einstellungen",
   "organizations_title": "Organisationen",
   "organization_subscriptions_cloud_button": "Cloud",
   "organization_subscriptions_self_hosted_ee_button": "Selbständig gehostet",
