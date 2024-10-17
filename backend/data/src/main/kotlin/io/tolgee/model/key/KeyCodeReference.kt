@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull
 @Entity
 @Table(
   indexes = [
-    Index(columnList = "keyMeta_id"),
+    Index(columnList = "key_meta_id"),
   ],
 )
 class KeyCodeReference(
