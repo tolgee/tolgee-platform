@@ -3648,4 +3648,9 @@
             <column name="project_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="anty (generated)" id="1729175496815-1">
+        <createIndex indexName="IDX4cddet1537jrmqnxfog70s081" tableName="import_file">
+            <column name="import_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
