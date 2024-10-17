@@ -1,0 +1,11 @@
+{
+  "app-title": "Recipe Generator",
+  "close-button": "Close",
+  "delete-button": "Delete",
+  "ingredients-title": "Ingredients",
+  "input-text": "Dish Name",
+  "instructions-title": "Instructions",
+  "select-lang": "Choose Language",
+  "tips-title": "Tips",
+  "view-button": "View"
+}
