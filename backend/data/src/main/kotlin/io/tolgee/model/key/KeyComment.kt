@@ -15,7 +15,7 @@ import jakarta.validation.constraints.NotNull
 @Table(
   indexes = [
     Index(columnList = "key_meta_id"),
-  ]
+  ],
 )
 class KeyComment(
   @ManyToOne(optional = false)

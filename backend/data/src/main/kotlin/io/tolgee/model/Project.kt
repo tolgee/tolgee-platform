@@ -30,7 +30,7 @@ import kotlin.jvm.Transient
   uniqueConstraints = [
     UniqueConstraint(
       columnNames = ["address_part"],
-      name = "project_address_part_unique"
+      name = "project_address_part_unique",
     ),
   ],
   indexes = [

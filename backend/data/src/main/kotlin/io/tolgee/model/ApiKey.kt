@@ -27,7 +27,7 @@ import java.util.*
   indexes = [
     Index(columnList = "project_id"),
     Index(columnList = "user_account_id"),
-  ]
+  ],
 )
 class ApiKey(
   @Column(updatable = false, insertable = false, nullable = true)

@@ -43,7 +43,7 @@ import java.util.*
     Index(
       columnList = "project_id",
       name = "index_project_id",
-    )
+    ),
   ],
 )
 @ActivityLoggedEntity
