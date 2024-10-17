@@ -82,7 +82,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     where l.project.id = :projectId and l.id in :languageIds and l.deletedAt is null
   """,
   )
-  fun findAllByProjectIdAndIdInOrderById(
+  fun findAllByProjectIdAndIds(
     projectId: Long,
     languageIds: List<Long>,
   ): List<Language>

@@ -204,7 +204,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     from Language l
     join l.translations t
-    where t.id in (select t.id from Key k join k.translations t where k.id = :keyId)
+    where t.key.id = :keyId
       and l.project.id = :projectId
       and t.state = io.tolgee.model.enums.TranslationState.DISABLED
    order by l.id

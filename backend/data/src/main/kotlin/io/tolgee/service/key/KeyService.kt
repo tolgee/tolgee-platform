@@ -461,8 +461,8 @@ class KeyService(
     languageIds: List<Long>,
     key: Key,
   ): List<Language> {
-    val languages = languageRepository.findAllByProjectIdAndIdInOrderById(projectId, languageIds)
-    languages.map { language ->
+    val languages = languageRepository.findAllByProjectIdAndIds(projectId, languageIds)
+    languages.forEach { language ->
       val translation = translationService.getOrCreate(key, language)
       translation.clear()
       translation.state = TranslationState.DISABLED

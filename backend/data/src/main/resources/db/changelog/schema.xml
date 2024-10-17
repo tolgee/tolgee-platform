@@ -3559,8 +3559,8 @@
         </addColumn>
     </changeSet>
     <changeSet author="anty (generated)" id="1729020991123-1">
-        <createIndex indexName="import_translation_language_id_id" tableName="import_translation">
-            <column name="language_id"/>
-        </createIndex>
+        <sql>
+            create index if not exists import_translation_language_id_id on import_translation (language_id);
+        </sql>
     </changeSet>
 </databaseChangeLog>

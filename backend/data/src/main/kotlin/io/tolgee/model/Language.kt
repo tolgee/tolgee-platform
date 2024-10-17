@@ -40,6 +40,10 @@ import java.util.*
       columnList = "tag, project_id",
       name = "index_tag_project",
     ),
+    Index(
+      columnList = "project_id",
+      name = "index_project_id",
+    )
   ],
 )
 @ActivityLoggedEntity

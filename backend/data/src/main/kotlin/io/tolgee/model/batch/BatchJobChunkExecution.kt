@@ -9,6 +9,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
@@ -20,8 +21,9 @@ import java.util.*
 @Table(
   name = "tolgee_batch_job_chunk_execution",
   indexes = [
-    jakarta.persistence.Index(columnList = "chunkNumber"),
-    jakarta.persistence.Index(columnList = "status"),
+    Index(columnList = "batch_job_id"),
+    Index(columnList = "chunkNumber"),
+    Index(columnList = "status"),
   ],
 )
 class BatchJobChunkExecution : StandardAuditModel() {
