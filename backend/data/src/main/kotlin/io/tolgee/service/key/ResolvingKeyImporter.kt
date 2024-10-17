@@ -12,7 +12,11 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
-import io.tolgee.model.*
+import io.tolgee.model.Language
+import io.tolgee.model.Project
+import io.tolgee.model.Project_
+import io.tolgee.model.Screenshot
+import io.tolgee.model.UploadedImage
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -89,14 +93,14 @@ class ResolvingKeyImporter(
           }
 
           if (resolvable.resolution == ImportTranslationResolution.FORCE_OVERRIDE) {
-            addOrUpdateTranslation(
-              key,
-              language,
-              resolvable.text,
-              translationsToModify::add,
-              isNew,
-              existingTranslation,
-            )
+            val updated =
+              forceAddOrUpdateTranslation(
+                key,
+                language,
+                resolvable.text,
+                existingTranslation,
+              )
+            translationsToModify.add(updated)
             return@translations
           }
 
@@ -125,26 +129,22 @@ class ResolvingKeyImporter(
     return result
   }
 
-  private fun addOrUpdateTranslation(
+  private fun forceAddOrUpdateTranslation(
     key: Key,
     language: LanguageDto,
     translationText: String,
-    addToList: (TranslationToModify) -> Boolean,
-    new: Boolean,
     existingTranslation: Translation?,
-  ) {
-    if (new) {
+  ): TranslationToModify {
+    if (existingTranslation == null) {
       val translation =
         Translation(translationText).apply {
           this.key = key
           this.language = entityManager.getReference(Language::class.java, language.id)
         }
-      addToList(TranslationToModify(translation, translationText, true))
-    } else {
-      if (existingTranslation != null) {
-        addToList(TranslationToModify(existingTranslation, translationText, false))
-      }
+      return TranslationToModify(translation, translationText, true)
     }
+
+    return TranslationToModify(existingTranslation, translationText, false)
   }
 
   private fun handlePluralizationAndSave(
