@@ -8,6 +8,11 @@ import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "file_id"),
+  ],
+)
 class ImportKey(
   @field:NotBlank
   @field:Size(max = 2000)

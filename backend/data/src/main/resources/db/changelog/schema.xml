@@ -3558,4 +3558,99 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="anty (generated)" id="1729020991123-1">
+        <sql>
+            create index if not exists import_translation_language_id_id on import_translation (language_id);
+        </sql>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-1">
+        <createIndex indexName="IDX2i3yx2idx8unp1318an4ko9uh" tableName="api_key">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-2">
+        <createIndex indexName="IDX36jc7xjy9os6gpk6a1itnc4oc" tableName="translation">
+            <column name="language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-3">
+        <createIndex indexName="IDX3bevu8kvpirhwtua7bqny8mc5" tableName="tolgee_batch_job">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-4">
+        <createIndex indexName="IDX3gv8wpf7vosi0kiky55etxxka" tableName="auto_translation_config">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-5">
+        <createIndex indexName="IDX6p3mx8al2w4f7ltqiwf1j88fm" tableName="permission">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-6">
+        <createIndex indexName="IDX8o82rss5686hnbidsbpe69jf6" tableName="key_comment">
+            <column name="key_meta_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-7">
+        <createIndex indexName="IDX8s40n0n4m3rcfo66vi8fl9b2f" tableName="tolgee_batch_job">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-8">
+        <createIndex indexName="IDX9uwg4sei1gso5jc8l0fi5gt31" tableName="key">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-9">
+        <createIndex indexName="IDXchpsdpcytt8o0nub8sw9ayx1k" tableName="permission">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-10">
+        <createIndex indexName="IDXe67q4k71yrg8d5d91wlauwu7r" tableName="import_key">
+            <column name="file_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-11">
+        <createIndex indexName="IDXhhp7il8c4o1galygoy3exfii8" tableName="key_code_reference">
+            <column name="key_meta_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-12">
+        <createIndex indexName="IDXkrh888rhj0c4mm455al08el84" tableName="translation">
+            <column name="key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-13">
+        <createIndex indexName="IDXr4bj1d6iqsmid4bevm9i3b555" tableName="key">
+            <column name="namespace_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-14">
+        <createIndex indexName="IDXs7dpucbxy0uf9xic0crc2a2uv" tableName="tolgee_batch_job_chunk_execution">
+            <column name="batch_job_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-15">
+        <createIndex indexName="IDXtedxl9xhocgey7ll6wh8lb945" tableName="project">
+            <column name="organization_owner_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-16">
+        <createIndex indexName="IDXterdfiw1uvbri2wn9kd0jl04v" tableName="api_key">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-17">
+        <createIndex indexName="index_project_id" tableName="language">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729175496815-1">
+        <createIndex indexName="IDX4cddet1537jrmqnxfog70s081" tableName="import_file">
+            <column name="import_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

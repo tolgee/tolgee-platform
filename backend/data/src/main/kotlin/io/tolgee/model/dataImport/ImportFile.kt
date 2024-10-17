@@ -7,12 +7,19 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "import_id"),
+  ],
+)
 class ImportFile(
   @field:Size(max = 2000)
   @Column(length = 2000)
