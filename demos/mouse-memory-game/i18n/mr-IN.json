@@ -1,0 +1,21 @@
+{
+    "Choose Difficulty": "अडचण निवडा",
+    "Choose the number of cards you want to play with": {
+        "": "तुम्हाला ज्या कार्ड्ससह खेळायचे आहे त्यांची संख्या निवडा."
+    },
+    "Click on a card to reveal its image": {
+        "": "कार्डची प्रतिमा उघड करण्यासाठी त्यावर क्लिक करा."
+    },
+    "How to Play": "कसे खेळायचे",
+    "If you don't find a match": "जर तुम्हाला जुळणी सापडली नाही, तर कार्डे परत उलटतील.",
+    "If you find a match": "जर तुम्हाला जुळणी सापडली तर, कार्डे उघड राहतील.",
+    "Mouse Memory Game": "उंदीर स्मरणशक्ती खेळ",
+    "Start Game": "गेम सुरू करा",
+    "The game ends when you've successfully matched all pairs": {
+        "": "तुम्ही सर्व जोड्या यशस्वीरीत्या जुळवल्यावर गेम संपेल."
+    },
+    "Try to find the matching pair within a limited time": {
+        "": "मर्यादित वेळेत जुळणारी जोडी शोधण्याचा प्रयत्न करा."
+    },
+    "Welcome to the exciting world of memory challenges!": "स्मृती आव्हानांच्या रोमांचक जगात आपले स्वागत आहे"
+}

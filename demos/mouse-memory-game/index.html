@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Memory Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tolgee/web/dist/tolgee-web.umd.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="thecss.css">
+</head>
+<body>
+    <div class="language-switcher">
+        <label for="language-select">{{Select Language}}</label>
+        <select id="language-select" onchange="switchLanguage(this.value)">
+            <option value="en">{{English}}</option>
+            <option value="hi-IN">{{Hindi}}</option>
+            <option value="mr-IN">{{Marathi}}</option>
+        </select>
+    </div>
+
+    <div class="theme-toggle">
+        <button class="theme-button darkk" id="dark-mode-toggle">D</button>
+        <button class="theme-button" id="purple-theme-toggle">P</button>
+        <button class="theme-button" id="orange-theme-toggle">O</button>
+        <button class="theme-button" id="brown-theme-toggle">B</button>
+        <button class="theme-button" id="yellow-theme-toggle">Y</button>
+        <button class="theme-button lightt" id="light-theme-toggle">l</button>
+    </div>
+    <div class="container">
+        
+            <div class="col-md-6">
+                <h1 class="text-center mb-4">{{Mouse Memory Game}}</h1>
+                <p class="text-center">{{Welcome to the exciting world of memory challenges!}}</p>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{How to Play}}</h5>
+                        <p class="card-text">
+                            1. {{Choose the number of cards you want to play with.}}
+                            2. {{Click on a card to reveal its image.}}
+                            3. {{Try to find the matching pair within a limited time.}}
+                            4. {{If you find a match, the cards will stay revealed.}}
+                            5. {{If you don't find a match, the cards will flip back over.}}
+                            6. {{The game ends when you've successfully matched all pairs.}}
+                        </p>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{{Choose Difficulty}}</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item" value="4">4 Cards (2 Pairs)</li>
+                            <li class="list-group-item" value="6">6 Cards (3 Pairs)</li>
+                            <li class="list-group-item" value="8">8 Cards (4 Pairs)</li>
+                            <li class="list-group-item" value="10">10 Cards (5 Pairs)</li>
+                            <li class="list-group-item" value="12">12 Cards (6 Pairs)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                        <form action="./card-play/index.php" method="POST" id="myForm">
+                            <input type="hidden" name="noCards" id="noCardsInput" value="">
+                            <input hidden type="text" name="theme" id="theme" value="">
+                            <button id="start-button" class="btn btn-primary">{{Start Game}}</button>
+                        </form>
+                </div>
+            </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="thejs.js"></script>
+</body>
+</html>
+
