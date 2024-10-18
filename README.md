@@ -1,4 +1,4 @@
-<h1 align="center" style="border-bottom: none">
+<h1 id="back-to-top" align="center" style="border-bottom: none">
     <b>
         <a href="https://tolgee.io">Tolgee</a><br>
     </b>
@@ -28,6 +28,22 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [![Github discussions](https://img.shields.io/github/discussions/tolgee/tolgee-platform)](https://github.com/tolgee/tolgee-platform/discussions)
 </div>
 
+## Table of Contents
+- [Submission Types](#submission-types)
+- [Quality Criteria](#quality-criteria)
+- [Repository Star ⭐](#repository-star-⭐)
+- [Why use Tolgee?](#why-use-tolgee)
+- [In context translating & One click screenshots](#in-context-translating--one-click-screenshots)
+- [Translating on production](#translating-on-production)
+- [True integrations](#true-integrations)
+- [Machine translation](#machine-translation)
+- [Translation memory](#translation-memory)
+- [Auto translation](#auto-translation)
+- [Activity log](#activity-log)
+- [Comment on translations](#comment-on-translations)
+- [Translation history](#translation-history)
+- [Quickstart 🚀](#quickstart-🚀)
+- [Contributors](#contributors)
 
 <div align="center">
 
@@ -68,24 +84,6 @@ For complete information, check our [Hacktobefest2024.md](./Hacktobefest2024.md)
 Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) to share your ideas, suggestions, or questions and connect with other users and contributors.
 
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
-
-## Quick links
-- [Tolgee Website](https://tolgee.io)
-
-  - Product (Learn more about the great features)
-    - [Dev tools](https://tolgee.io/features/dev-tools)
-    - [Translation assistance](https://tolgee.io/features/translation-assistance)
-    - [Collaboration](https://tolgee.io/features/collaboration)
-- Integrations (Learn how to integrate Tolgee with you favourite technology)
-  - [React](https://tolgee.io/integrations/react)
-  - [Angular](https://tolgee.io/integrations/angular)
-  - [Vue](https://tolgee.io/integrations/vue)
-  - [Svelte](https://tolgee.io/integrations/svelte)
-  - [Next.js](https://tolgee.io/integrations/next)
-  - [More...](https://tolgee.io/integrations/all)
-- [Tolgee platform docs](https://tolgee.io/docs/platform)
-  - [Self-hosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
-- [Development notes (How to develop Tolgee locally)](https://github.com/tolgee/tolgee-platform/wiki/Development)
 
 ## Why use Tolgee?
 
@@ -149,7 +147,9 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 ## Contributors
 
 <a href="https://github.com/tolgee/tolgee-platform/graphs/contributors">
-  <img alt="contributors" src="https://contrib.rocks/image?repo=tolgee/tolgee-platform"/>
+  <img alt="contributors" src="https://contrib.rocks/image?repo=tolgee/tolgee-platform" />
 </a>
 
 Let us know what you think! #feedbackwanted ❤️
+
+[Back to Top](#back-to-top)
