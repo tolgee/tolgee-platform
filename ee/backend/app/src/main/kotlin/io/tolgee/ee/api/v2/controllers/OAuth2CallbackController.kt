@@ -44,7 +44,7 @@ class OAuth2CallbackController(
       "client_id=${tenant.clientId}&" +
       "redirect_uri=${tenant.redirectUriBase + "/login/open-id/auth-callback"}&" +
       "response_type=code&" +
-      "scope=openid profile email roles&" +
+      "scope=openid profile email&" +
       "state=$state"
 
   @GetMapping("/{registrationId}")
