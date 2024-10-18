@@ -855,6 +855,7 @@
   "operation_not_permitted_error": "Your permissions are not sufficient for this operation.",
   "order_translation_choose_translation_agency_title": "Choose translation agency",
   "order_translation_create_task_title": "Create task",
+  "order_translation_next_button": "Next",
   "order_translations_keys_subtitle": "{value, plural, one {# key} other {# keys}}",
   "order_translations_title": "Order professional translation",
   "order_translation_submit_button": "Order translation",

@@ -1,3 +1,10 @@
+## [3.80.1](https://github.com/tolgee/tolgee-platform/compare/v3.80.0...v3.80.1) (2024-10-18)
+
+
+### Bug Fixes
+
+* avoid sub-queries when searching for data to be deleted ([#2606](https://github.com/tolgee/tolgee-platform/issues/2606)) ([c1eaf91](https://github.com/tolgee/tolgee-platform/commit/c1eaf91b6bbbfb342dec01448612858c72868ec9))
+
 # [3.80.0](https://github.com/tolgee/tolgee-platform/compare/v3.79.2...v3.80.0) (2024-10-18)
 
 

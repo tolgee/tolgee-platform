@@ -758,6 +758,7 @@
   "no_screenshots_yet": "Aucune capture d'écran n'a encore été ajoutée.",
   "operation_not_permitted": "Vos autorisations ne sont pas suffisantes pour cette opération.",
   "operation_not_permitted_error": "Vos autorisations ne sont pas suffisantes pour cette opération.",
+  "order_translation_next_button": "Suivant",
   "organization_already_subscribed": "L'organisation est déjà abonnée à un plan.",
   "organization-billing-self-hosted-active-subscriptions": "Abonnements actifs",
   "organization-billing-self-hosted-cancel-subscription-button": "Annuler",

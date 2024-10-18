@@ -854,6 +854,7 @@
   "operation_not_permitted_error": "Dine tilladelser er ikke tilstrækkelige til denne handling.",
   "order_translation_choose_translation_agency_title": "Vælg oversættelsesbureau",
   "order_translation_create_task_title": "Opret opgave",
+  "order_translation_next_button": "Næste",
   "order_translations_keys_subtitle": "{value, plural, one {# nøgle} other {# nøgler}}",
   "order_translations_title": "Bestil professionel oversættelse",
   "order_translation_submit_button": "Bestil oversættelse",

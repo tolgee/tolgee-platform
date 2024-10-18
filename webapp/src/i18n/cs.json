@@ -855,6 +855,7 @@
   "operation_not_permitted_error": "Nemáte dostatečná oprávnění pro tuto operaci.",
   "order_translation_choose_translation_agency_title": "Vyberte překladatelskou agenturu",
   "order_translation_create_task_title": "Vytvořit úkol",
+  "order_translation_next_button": "Další",
   "order_translations_keys_subtitle": "{value, plural, one {# klíč} few {# klíče} many {# klíče} other {# klíčů}}",
   "order_translations_title": "Pořadí profesionálního překladu",
   "order_translation_submit_button": "Pořadí překladu",
