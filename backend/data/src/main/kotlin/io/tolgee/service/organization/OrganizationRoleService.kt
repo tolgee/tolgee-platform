@@ -240,6 +240,16 @@ class OrganizationRoleService(
     self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
   }
 
+  fun grantRoleToUser(
+    user: UserAccount,
+    organizationId: Long,
+    organizationRoleType: OrganizationRoleType,
+  ) {
+    val organization = organizationRepository.findById(organizationId).orElseThrow { NotFoundException() }
+
+    self.grantRoleToUser(user, organization, organizationRoleType = organizationRoleType)
+  }
+
   fun grantOwnerRoleToUser(
     user: UserAccount,
     organization: Organization,
