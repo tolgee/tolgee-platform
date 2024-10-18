@@ -1,0 +1,17 @@
+{
+  "add-item-add-button": "Ajouter",
+  "add-item-input-placeholder": "Nouvel élément de la liste",
+  "app_title": "Flagmoji | Convertisseur de pays en emoji de drapeau",
+  "button_fetch_flag": "Voir",
+  "delete-item-button": "Supprimer",
+  "flag_emoji_short_text": "Tapez un nom de pays pour voir son emoji de drapeau",
+  "hello_world": "bonjour famille",
+  "items-count": "{count, plural, one {Affiche # élément} other {Affiche # éléments}}",
+  "label": "Changer la langue de l'application",
+  "menu-item-translation-methods": "Méthodes de traduction",
+  "placeholder_country_name": "Entrez le nom du pays",
+  "send-via-email": "Envoyer par courriel",
+  "share-button": "Partager",
+  "terms-conditions-agreement": "J'accepte les <a>Conditions générales</a>",
+  "welcome-message": "Bonjour {name}!"
+}
