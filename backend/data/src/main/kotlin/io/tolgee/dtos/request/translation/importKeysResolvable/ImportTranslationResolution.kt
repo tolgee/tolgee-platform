@@ -4,4 +4,5 @@ enum class ImportTranslationResolution {
   KEEP,
   OVERRIDE,
   NEW,
+  FORCE_OVERRIDE,
 }
