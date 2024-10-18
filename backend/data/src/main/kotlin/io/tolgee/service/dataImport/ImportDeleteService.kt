@@ -45,7 +45,7 @@ class ImportDeleteService(
         "select it.id from import_translation it " +
         "join import_language il on il.id = it.language_id " +
         "join import_file if on il.file_id = if.id where if.import_id = ?)" +
-      "delete from import_translation " +
+        "delete from import_translation " +
         "where id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
@@ -57,7 +57,7 @@ class ImportDeleteService(
     val query =
       "with keys as (select il.id from import_language il " +
         "join import_file if on il.file_id = if.id where if.import_id = ?) " +
-      "delete from import_language " +
+        "delete from import_language " +
         "where id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
@@ -69,7 +69,7 @@ class ImportDeleteService(
     val query =
       "with keys as (select ik.id from import_key ik " +
         "join import_file if on ik.file_id = if.id where if.import_id = ?) " +
-      "delete from import_key where id in (select id from keys)"
+        "delete from import_key where id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
 
@@ -79,9 +79,9 @@ class ImportDeleteService(
   ) {
     val query =
       "with keys as (select ikm.id from key_meta ikm " +
-    "join import_key ik on ikm.import_key_id = ik.id " +
-      "join import_file if on ik.file_id = if.id where if.import_id = ?)" +
-      "delete from key_meta_tags " +
+        "join import_key ik on ikm.import_key_id = ik.id " +
+        "join import_file if on ik.file_id = if.id where if.import_id = ?)" +
+        "delete from key_meta_tags " +
         "where key_metas_id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
@@ -94,7 +94,7 @@ class ImportDeleteService(
       "with keys as (select ikm.id from key_meta ikm " +
         "join import_key ik on ikm.import_key_id = ik.id " +
         "join import_file if on ik.file_id = if.id where if.import_id = ?)" +
-      "delete from key_comment " +
+        "delete from key_comment " +
         "where key_meta_id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
@@ -107,7 +107,7 @@ class ImportDeleteService(
       "with keys as (select ikm.id from key_meta ikm " +
         "join import_key ik on ikm.import_key_id = ik.id " +
         "join import_file if on ik.file_id = if.id where if.import_id = ?)" +
-      "delete from key_code_reference " +
+        "delete from key_code_reference " +
         "where key_meta_id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
@@ -120,7 +120,7 @@ class ImportDeleteService(
       "with keys as (select ikm.id from key_meta ikm " +
         "join import_key ik on ikm.import_key_id = ik.id " +
         "join import_file if on ik.file_id = if.id where if.import_id = ?)" +
-      "delete from key_meta " +
+        "delete from key_meta " +
         "where id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
@@ -132,7 +132,7 @@ class ImportDeleteService(
     val query =
       "with keys as (select ifi.id from import_file_issue ifi " +
         "join import_file if on ifi.file_id = if.id where if.import_id = ?)" +
-      "delete from import_file_issue_param " +
+        "delete from import_file_issue_param " +
         "where import_file_issue_param.issue_id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
@@ -144,7 +144,7 @@ class ImportDeleteService(
     val query =
       "with keys as (select ifi.id from import_file_issue ifi " +
         "join import_file if on ifi.file_id = if.id where if.import_id = ?)" +
-      "delete from import_file_issue " +
+        "delete from import_file_issue " +
         "where id in (select id from keys)"
     executeUpdate(connection, query, importId)
   }
