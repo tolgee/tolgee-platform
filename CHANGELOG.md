@@ -1,3 +1,15 @@
+# [3.80.0](https://github.com/tolgee/tolgee-platform/compare/v3.79.2...v3.80.0) (2024-10-18)
+
+
+### Bug Fixes
+
+* incorrect hint icon size ([#2601](https://github.com/tolgee/tolgee-platform/issues/2601)) ([8bf8bd6](https://github.com/tolgee/tolgee-platform/commit/8bf8bd62ed4ab788874c756392ea4b8df8db7011))
+
+
+### Features
+
+* import resolvable force override ([#2599](https://github.com/tolgee/tolgee-platform/issues/2599)) ([6f402d6](https://github.com/tolgee/tolgee-platform/commit/6f402d63a50b37b9fe39e5d8ce15527a21536e3e))
+
 ## [3.79.2](https://github.com/tolgee/tolgee-platform/compare/v3.79.1...v3.79.2) (2024-10-17)
 
 
