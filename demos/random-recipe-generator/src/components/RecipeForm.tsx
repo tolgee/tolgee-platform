@@ -20,7 +20,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ addRecipe, isrunnig }) => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
+    console.log("here"+input)
     try {
       setIsFocused(false);  // Remove focus when form is submitted
       await addRecipe(input); // Ensure the addRecipe call awaits
@@ -34,6 +34,8 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ addRecipe, isrunnig }) => {
 
     try {
       setIsFocused(false);  // Remove focus when form is submitted
+      
+    console.log("here random")
       await addRecipe("Random"); // Ensure the addRecipe call awaits
       setInput(''); // Clear input after adding the recipe
     } catch (error) {
@@ -51,7 +53,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ addRecipe, isrunnig }) => {
       >
 
         <div className="flex gap-3 items-center bg-[#171d2f] py-2 border-[1px] border-[#2828b5] rounded-full shadow-md overflow-hidden transition-all duration-300 ease-in-out px-4 mx-auto">
-          <button
+          <button type='button'
             className={`flex items-center justify-center hover:bg-[#0f131f] rounded-xl px-2 py-2`} onClick={handleRandombutton}
           >
             <img src="/img/shuffle.svg" alt="Submit" className="min-w-[24px] min-h-[24px]" />
