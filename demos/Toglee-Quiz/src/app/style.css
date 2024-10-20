@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400');
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: white;
+  }
+  
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+  
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 2em;
+    margin: 0 5em;
+  }
+  
+  /* .option {
+    appearance: button;
+    border: none;
+    border-radius: 2.5%;
+    background-color: rgb(55, 47, 171);
+    color: #fff;
+    padding: 1em;
+    width: 100%;
+  } */
+  
+
+  .option {
+    width : full;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding:0.5rem ; /* p-4 in Tailwind (1rem = 16px padding) */
+    background-color: #374151; /* bg-gray-700 in Tailwind */
+    text-align: left; /* text-left in Tailwind */
+    color: #fff; /* text-white in Tailwind */
+    border-radius: 0.5rem; /* rounded-lg in Tailwind (0.5rem = 8px border-radius) */
+    transition: background-color 0.2s ease-in-out; /* transition duration-200 */
+  }
+
+  .option:hover {
+    background-color: #7c3aed; /* hover:bg-purple-600 in Tailwind */
+  }
+  
+  .correct-answer {
+    visibility: hidden;
+  }
+  
+  .restart-button {
+    appearance: button;
+    border: none;
+    border-radius: 2.5%;
+    background-color: rgb(55, 47, 171);
+    color: #fff;
+    padding: 1em;
+  }
+  
+  @media screen and (min-width: 1100px) {
+    .option {
+      padding: 1.75rem;
+    }
+  }
+  

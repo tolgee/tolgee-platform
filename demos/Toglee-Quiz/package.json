@@ -1,0 +1,42 @@
+{
+  "name": "@tolgee/next-app-testapp",
+  "version": "5.29.5",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "develop": "next dev",
+    "build": "next build",
+    "build:e2e": "NEXT_BUILD_DIR=dist-e2e next build",
+    "start": "next start",
+    "clean": "rm -rf .next dist-e2e"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@tolgee/format-icu": "5.29.5",
+    "@tolgee/react": "^5.29.5",
+    "@tolgee/web": "5.29.5",
+    "@types/jest": "^27.5.2",
+    "axios": "^1.7.7",
+    "next": "^14.2.15",
+    "next-intl": "^3.21.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^3.0.1",
+    "react-toastify": "^10.0.6",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@tolgee/cli": "^2.3.0",
+    "@types/node": "^16.18.3",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "prettier": "^2.7.1",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3"
+  }
+}
