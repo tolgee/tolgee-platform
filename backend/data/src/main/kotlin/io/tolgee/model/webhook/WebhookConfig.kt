@@ -21,7 +21,7 @@ import java.util.*
 @Table(
   indexes = [
     Index(columnList = "project_id"),
-  ]
+  ],
 )
 class WebhookConfig(
   @ManyToOne(fetch = FetchType.LAZY)

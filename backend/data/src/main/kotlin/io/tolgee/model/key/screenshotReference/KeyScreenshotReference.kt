@@ -18,7 +18,7 @@ import org.hibernate.annotations.Type
   indexes = [
     Index(columnList = "key_id"),
     Index(columnList = "screenshot_id"),
-  ]
+  ],
 )
 class KeyScreenshotReference {
   @ManyToOne(optional = false)

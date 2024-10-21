@@ -15,7 +15,7 @@ import jakarta.persistence.Table
 @Table(
   indexes = [
     Index(columnList = "preferred_organization_id"),
-  ]
+  ],
 )
 class UserPreferences(
   @OneToOne

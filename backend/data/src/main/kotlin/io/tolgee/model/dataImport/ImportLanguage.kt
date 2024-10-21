@@ -15,7 +15,7 @@ import jakarta.validation.constraints.Size
   indexes = [
     Index(columnList = "file_id"),
     Index(columnList = "existing_language_id"),
-  ]
+  ],
 )
 class ImportLanguage(
   @Size(max = 2000)

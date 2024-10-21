@@ -17,7 +17,7 @@ import org.hibernate.annotations.Type
 @Table(
   indexes = [
     Index(columnList = "organization_id"),
-  ]
+  ],
 )
 data class QuickStart(
   @OneToOne

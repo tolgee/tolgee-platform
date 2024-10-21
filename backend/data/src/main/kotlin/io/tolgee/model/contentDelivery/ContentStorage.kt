@@ -17,8 +17,8 @@ import jakarta.validation.constraints.NotBlank
 @ActivityLoggedEntity
 @Table(
   indexes = [
-    Index(columnList = "project_id")
-  ]
+    Index(columnList = "project_id"),
+  ],
 )
 class ContentStorage(
   @ManyToOne(fetch = FetchType.LAZY)

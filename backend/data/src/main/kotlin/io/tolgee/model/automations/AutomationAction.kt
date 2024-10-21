@@ -17,7 +17,7 @@ import jakarta.persistence.Table
     Index(columnList = "content_delivery_config_id"),
     Index(columnList = "webhook_config_id"),
     Index(columnList = "slack_config_id"),
-  ]
+  ],
 )
 class AutomationAction(
   @ManyToOne(fetch = FetchType.LAZY)

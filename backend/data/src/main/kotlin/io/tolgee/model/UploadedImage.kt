@@ -15,11 +15,11 @@ import org.hibernate.annotations.ColumnDefault
 @Entity
 @Table(
   uniqueConstraints = [
-    UniqueConstraint(columnNames = ["filename"], name = "uploaded_image_filename")
+    UniqueConstraint(columnNames = ["filename"], name = "uploaded_image_filename"),
   ],
   indexes = [
     Index(columnList = "user_account_id"),
-  ]
+  ],
 )
 class UploadedImage(
   var filename: String,

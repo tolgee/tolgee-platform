@@ -31,7 +31,7 @@ import java.util.*
   indexes = [
     Index(columnList = "project_id"),
     Index(columnList = "content_storage_id"),
-  ]
+  ],
 )
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)

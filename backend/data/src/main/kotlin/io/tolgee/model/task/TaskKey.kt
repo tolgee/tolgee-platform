@@ -26,7 +26,7 @@ import jakarta.persistence.UniqueConstraint
   indexes = [
     Index(columnList = "task_id"),
     Index(columnList = "key_id"),
-  ]
+  ],
 )
 class TaskKey(
   @ManyToOne(fetch = FetchType.LAZY)

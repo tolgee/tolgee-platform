@@ -17,7 +17,7 @@ import java.util.*
   indexes = [
     Index(columnList = "project_id"),
     Index(columnList = "author_id"),
-  ]
+  ],
 )
 class Import(
   @field:NotNull
