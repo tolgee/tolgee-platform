@@ -2259,6 +2259,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "SSO"
       )[];
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -2332,11 +2333,11 @@ export interface components {
       username?: string;
       scopes: string[];
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
       projectName: string;
     };
     SuperTokenRequest: {
@@ -3231,6 +3232,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -3417,6 +3419,7 @@ export interface components {
         | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
+        | "SSO"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
       /** @example Beautiful organization */
@@ -3432,9 +3435,9 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
+      avatar?: components["schemas"]["Avatar"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3577,8 +3580,8 @@ export interface components {
       id: number;
       description?: string;
       baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -3587,8 +3590,8 @@ export interface components {
       id: number;
       description?: string;
       baseTranslation?: string;
-      translation?: string;
       namespace?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4276,11 +4279,11 @@ export interface components {
       username?: string;
       scopes: string[];
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
       projectName: string;
     };
     PagedModelUserAccountModel: {
