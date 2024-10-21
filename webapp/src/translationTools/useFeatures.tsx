@@ -1,6 +1,6 @@
-import { useTranslate } from '@tolgee/react';
-import { FeatureLink } from 'tg.component/billing/FeatureLink';
-import { components } from 'tg.service/apiSchema.generated';
+import {useTranslate} from '@tolgee/react';
+import {FeatureLink} from 'tg.component/billing/FeatureLink';
+import {components} from 'tg.service/apiSchema.generated';
 
 type Feature =
   components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
@@ -33,6 +33,7 @@ export function useFeatures() {
       'billing_subscriptions_prioritized_feature_requests'
     ),
     SLACK_INTEGRATION: t('billing_subscriptions_slack_integration'),
+    SSO: t('billing_subscriptions_sso'),
   } as const satisfies Record<Feature, string>;
 }
 
