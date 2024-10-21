@@ -58,6 +58,10 @@ class SignUpService(
       invitationService.accept(invitation.code, user)
     }
 
+    if (user.thirdPartyAuthType == "sso") {
+      return user
+    }
+
     val canCreateOrganization = tolgeeProperties.authentication.userCanCreateOrganizations
     if (canCreateOrganization && (invitation == null || !organizationName.isNullOrBlank())) {
       val name = if (organizationName.isNullOrBlank()) user.name else organizationName
