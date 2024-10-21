@@ -1,6 +1,6 @@
-import {useTranslate} from '@tolgee/react';
-import {FeatureLink} from 'tg.component/billing/FeatureLink';
-import {components} from 'tg.service/apiSchema.generated';
+import { useTranslate } from '@tolgee/react';
+import { FeatureLink } from 'tg.component/billing/FeatureLink';
+import { components } from 'tg.service/apiSchema.generated';
 
 type Feature =
   components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
