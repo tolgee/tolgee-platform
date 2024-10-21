@@ -1,0 +1,21 @@
+{
+    "Choose Difficulty": "कठिनाई चुनें",
+    "Choose the number of cards you want to play with": {
+        "": "आप जितने कार्ड के साथ खेलना चाहते हैं, उनकी संख्या चुनें।"
+    },
+    "Click on a card to reveal its image": {
+        "": "किसी कार्ड पर क्लिक करके उसकी छवि देखें"
+    },
+    "How to Play": "कैसे खेलें",
+    "If you don't find a match": "यदि आपको कोई मिलान नहीं मिलता है, तो कार्ड वापस पलट जाएंगे।",
+    "If you find a match": "यदि आपको कोई मिलान मिल जाता है, तो कार्ड खुले रहेंगे।",
+    "Mouse Memory Game": "चूहा स्मृति खेल",
+    "Start Game": "खेल शुरू",
+    "The game ends when you've successfully matched all pairs": {
+        "": "जब आप सभी जोड़ों का सफलतापूर्वक मिलान कर लेते हैं, तो खेल समाप्त हो जाता है।"
+    },
+    "Try to find the matching pair within a limited time": {
+        "": "सीमित समय के भीतर मिलान करने वाली जोड़ी को खोजने का प्रयास करें।"
+    },
+    "Welcome to the exciting world of memory challenges!": "स्मृति चुनौतियों की रोमांचक दुनिया में आपका स्वागत है"
+}
