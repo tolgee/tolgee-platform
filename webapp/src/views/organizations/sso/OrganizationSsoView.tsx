@@ -1,14 +1,14 @@
-import React, {FunctionComponent, useEffect, useState} from 'react';
-import {useTranslate} from '@tolgee/react';
-import {BaseOrganizationSettingsView} from '../components/BaseOrganizationSettingsView';
-import {LINKS, PARAMS} from 'tg.constants/links';
-import {useOrganization} from '../useOrganization';
-import {CreateProviderSsoForm} from 'tg.views/organizations/sso/CreateProviderSsoForm';
-import {useApiQuery} from 'tg.service/http/useQueryApi';
-import {FormControlLabel, styled, Switch} from '@mui/material';
+import React, { FunctionComponent, useEffect, useState } from 'react';
+import { useTranslate } from '@tolgee/react';
+import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useOrganization } from '../useOrganization';
+import { CreateProviderSsoForm } from 'tg.views/organizations/sso/CreateProviderSsoForm';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { FormControlLabel, styled, Switch } from '@mui/material';
 import Box from '@mui/material/Box';
-import {useEnabledFeatures} from "tg.globalContext/helpers";
-import {PaidFeatureBanner} from "tg.ee/common/PaidFeatureBanner";
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 
 const StyledContainer = styled('div')`
   background: ${({ theme }) => theme.palette.background.paper};
@@ -23,8 +23,8 @@ export const OrganizationSsoView: FunctionComponent = () => {
   }
 
   const providersLoadable = featureNotEnabled
-      ? null
-      : useApiQuery({
+    ? null
+    : useApiQuery({
         url: `/v2/organizations/{organizationId}/sso`,
         method: 'get',
         path: {
@@ -58,18 +58,24 @@ export const OrganizationSsoView: FunctionComponent = () => {
       maxWidth="normal"
     >
       {featureNotEnabled ? (
-          <Box>
-              <PaidFeatureBanner />
-          </Box>
+        <Box>
+          <PaidFeatureBanner />
+        </Box>
       ) : (
-          <><FormControlLabel
-              control={<Switch checked={toggleFormState} onChange={handleSwitchChange}/>}
-              label={t('organization_sso_switch')}/>
-            <Box sx={{marginTop: '16px'}}>
+        <>
+          <FormControlLabel
+            control={
+              <Switch checked={toggleFormState} onChange={handleSwitchChange} />
+            }
+            label={t('organization_sso_switch')}
+          />
+          <Box sx={{ marginTop: '16px' }}>
             <CreateProviderSsoForm
-                data={providersLoadable?.data}
-                disabled={!toggleFormState}/>
-          </Box></>
+              data={providersLoadable?.data}
+              disabled={!toggleFormState}
+            />
+          </Box>
+        </>
       )}
     </BaseOrganizationSettingsView>
   );
