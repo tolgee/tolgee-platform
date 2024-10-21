@@ -13,13 +13,13 @@ import org.springframework.stereotype.Repository
 interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
   @Query(
     """FROM Screenshot s where s.id in
-      (select ksr.screenshot.id from Key k join k.keyScreenshotReferences ksr where k = :key)
+      (select ksr.screenshot.id from KeyScreenshotReference ksr where ksr.key = :key)
    """,
   )
   fun findAllByKey(key: Key): List<Screenshot>
 
   @Query(
-    """FROM Screenshot s join fetch s.keyScreenshotReferences ksr 
+    """FROM Screenshot s join fetch s.keyScreenshotReferences ksr
     where s.id in (select ksr.screenshot.id from Key k join k.keyScreenshotReferences ksr where k.project.id = :projectId)
     """,
   )
@@ -27,13 +27,13 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
 
   @Query(
     """SELECT count(s.id) FROM Screenshot s where s.id in
-    (select ksr.screenshot.id from Key k join k.keyScreenshotReferences ksr where k = :key)""",
+    (select ksr.screenshot.id from KeyScreenshotReference ksr where ksr.key = :key)""",
   )
   fun countByKey(key: Key): Long
 
   @Query(
     """
-    from Key k 
+    from Key k
       join fetch k.keyScreenshotReferences ksr
       join fetch ksr.screenshot s
       left join fetch k.namespace n

@@ -25,6 +25,8 @@ import java.util.*
       name = "import_translation_language_id_id",
       columnList = "language_id",
     ),
+    Index(columnList = "key_id"),
+    Index(columnList = "conflict_id"),
   ],
 )
 class ImportTranslation(

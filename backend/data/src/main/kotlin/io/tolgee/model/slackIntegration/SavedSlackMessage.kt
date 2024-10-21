@@ -6,6 +6,11 @@ import jakarta.persistence.*
 import org.hibernate.annotations.Type
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "slack_config_id"),
+  ],
+)
 class SavedSlackMessage(
   val messageTimestamp: String = "",
   @ManyToOne(fetch = FetchType.LAZY)
