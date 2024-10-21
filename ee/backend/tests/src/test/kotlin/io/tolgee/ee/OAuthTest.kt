@@ -14,6 +14,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -113,5 +114,16 @@ class OAuthTest : AbstractControllerTest() {
     assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)
     val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
     assertThrows<NotFoundException> { userAccountService.get(userName) }
+  }
+
+  @Transactional
+  @Test
+  fun `sso auth doesn't create demo project and user organization`() {
+    addTenant()
+    oAuthMultiTenantsMocks.authorize("registrationId")
+    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val user = userAccountService.get(userName)
+    assertThat(user.organizationRoles.size).isEqualTo(1)
+    assertThat(user.organizationRoles[0].organization?.id).isEqualTo(testData.organization.id)
   }
 }
