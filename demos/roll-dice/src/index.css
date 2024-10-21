@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    color: var(--dark-text);
+    --primary-blue: #4E8098;
+    --secondary-red: #A31621;
+    --white-text: #FCF7F8;
+    --dark-text: #1e1e1e;
+}
+.primary-color{
+    color: var(--primary-blue);
+}
+.primary-fill{
+    fill: var(--primary-blue);
+}
+.primary-back{
+    background: var(--primary-blue);
+}
+.secondary-color{
+    color: var(--secondary-red);
+}
+.secondary-fill{
+    fill: var(--secondary-red);
+}
+.secondary-back{
+    background: var(--secondary-red);
+}
+
+.white-text{
+    color: var(--white-text);
+}
+.dark-text{
+    color: var(--dark-text);
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    min-height: auto;
+    width: 100%;
+}
+.main{
+    height: 100vh;
+    width: 100%;
+    background: url('/RollBack.svg');
+    background-position: left;
+    background-repeat: no-repeat;
+}
+.box{
+    background: var(--white-text);
+    padding-inline: 24px;
+    padding-block: 20px;
+    box-shadow: 0 0 20px 0  rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+}
