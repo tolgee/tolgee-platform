@@ -87,7 +87,7 @@ class OAuthMultiTenantsMocks(
     ).thenReturn(tokenResponse)
 
     // mock parsing of jwt
-    mockJwk()
+    mockJwt()
 
     return authMvc!!
       .perform(
@@ -113,7 +113,7 @@ class OAuthMultiTenantsMocks(
           ),
       ).andReturn()
 
-  private fun mockJwk() {
+  private fun mockJwt() {
     whenever(
       jwtProcessor?.process(
         any<SignedJWT>(),

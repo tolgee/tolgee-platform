@@ -13,9 +13,9 @@ import io.tolgee.ee.utils.OAuthMultiTenantsMocks
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import jakarta.transaction.Transactional
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -76,8 +76,8 @@ class OAuthTest : AbstractControllerTest() {
     val response = oAuthMultiTenantsMocks.authorize("registrationId")
     assertThat(response.response.status).isEqualTo(200)
     val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)
-    Assertions.assertThat(result["accessToken"]).isNotNull
-    Assertions.assertThat(result["tokenType"]).isEqualTo("Bearer")
+    result["accessToken"].assert.isNotNull
+    result["tokenType"].assert.isEqualTo("Bearer")
     val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
     assertThat(userAccountService.get(userName)).isNotNull
   }
