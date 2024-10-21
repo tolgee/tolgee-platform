@@ -1,0 +1,20 @@
+{
+  "addExpense": "खर्च जोडा",
+  "addNewExpense": "नवीन खर्च जोडा",
+  "amount": "रक्कम",
+  "category": "वर्ग",
+  "description": "वर्णन (ऐच्छिक)",
+  "email": "ईमेल",
+  "expenseList": "खर्च यादी",
+  "expense_tracker": "खर्च ट्रॅकर",
+  "failedToAddExpense": "खर्च जोडण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.",
+  "invalid_email_or_password": "अवैध ईमेल किंवा पासवर्ड",
+  "login": "लॉगिन",
+  "login_to_your_account": "तुमच्या खात्यात लॉगिन करा",
+  "logout": "बाहेर पडा",
+  "name": "नाव",
+  "password": "पासवर्ड",
+  "register": "नोंदणी करा",
+  "register_new_account": "नवीन खाते नोंदणी करा",
+  "user_already_exists": "वापरकर्ता आधीच अस्तित्वात आहे"
+}

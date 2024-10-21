@@ -4,7 +4,11 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.formats.CollisionHandler
 import io.tolgee.formats.isSamePossiblePlural
 import io.tolgee.model.Language
-import io.tolgee.model.dataImport.*
+import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportFile
+import io.tolgee.model.dataImport.ImportKey
+import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
@@ -236,7 +240,7 @@ class ImportDataManager(
 
   fun resetCollisionsBetweenFiles(
     editedLanguage: ImportLanguage,
-    oldExistingLanguage: Language?,
+    oldExistingLanguage: Language? = null,
   ) {
     val affectedLanguages =
       storedLanguages.filter {
@@ -314,7 +318,7 @@ class ImportDataManager(
       )
 
     storedTranslations.firstOrNull {
-      it.isSelectedToImport && it.text != newTranslation.text
+      it.isSelectedToImport
     }?.let { collision ->
       val handled = tryHandleUsingCollisionHandlers(listOf(newTranslation) + storedTranslations)
       if (handled) {

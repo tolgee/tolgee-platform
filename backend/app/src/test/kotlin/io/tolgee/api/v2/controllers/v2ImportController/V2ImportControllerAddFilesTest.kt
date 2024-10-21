@@ -301,6 +301,28 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     }
   }
 
+  @Test
+  fun `correctly reports collisions between files`() {
+    val testData = ImportCleanTestData()
+    testDataService.saveTestData(testData.root)
+
+    loginAsUser(testData.userAccount.username)
+    performImport(
+      projectId = testData.project.id,
+      listOf(
+        Pair("en.json", simpleJson),
+      ),
+    ).andIsOk
+    performImport(
+      projectId = testData.project.id,
+      listOf(
+        Pair("en.json", simpleJson),
+      ),
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("result._embedded.languages[1].importFileIssueCount").isEqualTo(1)
+    }
+  }
+
   private fun validateSavedJsonImportData(
     project: Project,
     userAccount: UserAccount,

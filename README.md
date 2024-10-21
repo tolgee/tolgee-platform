@@ -2,7 +2,7 @@
     <b>
         <a href="https://tolgee.io">Tolgee</a><br>
     </b>
-    An open-source localization platform<br/> developers enjoy to work with
+    An open-source localization platform<br/> developers enjoy to working with
     <br>
 </h1>
 
@@ -36,7 +36,7 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
 
-[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
+[![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktoberfest2024.md)
 
 We are sending swags for awesome demos merged PRs! For complete information, check
 our [Hacktobefest2024.md](./Hacktobefest2024.md)
@@ -76,7 +76,7 @@ Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/b
     - [Dev tools](https://tolgee.io/features/dev-tools)
     - [Translation assistance](https://tolgee.io/features/translation-assistance)
     - [Collaboration](https://tolgee.io/features/collaboration)
-- Integrations (Learn how to integrate Tolgee with you favourite technology)
+- Integrations (Learn how to integrate Tolgee with your favourite technology)
   - [React](https://tolgee.io/integrations/react)
   - [Angular](https://tolgee.io/integrations/angular)
   - [Vue](https://tolgee.io/integrations/vue)
@@ -97,7 +97,7 @@ Because it saves a lot of time you would spend on localization tasks without it.
 
 Add translations in the code, and translate them directly in the app with the Tolgee i18n tool. Clicking an element while holding the ALT/option key opens a dialog where you can simply modify your strings. No need to edit large .json/.po/.whatever file. In-context translating works great also in the production environment.
 
-Once. That's how many times you have to click to take a screenshot from your application with highlighted phrases to translate. Just ALT + click a string and hit the camera button. Boom! Screenshot generated.
+Once. That's how many times you have to click to take a screenshot from your application with highlighted phrases to translate. Just ALT + click a string and hit the camera button. Boom! Screenshot is generated.
 
 ![Sep-06-2022 16-38-49](https://user-images.githubusercontent.com/18496315/188672133-064d2a26-e414-4f5e-ab43-549af8cb2145.gif)
 
@@ -129,7 +129,7 @@ See who modified, reviewed, or commented on the phrases in your project. Clearly
 
 ### Comment on translations
 
-Something look off? Tell others what you would change. You can comment on every translation on Tolgee platform.
+Does something look off? Tell others what you would change. You can comment on every translation on Tolgee platform.
 
 ### Translation history
 
@@ -152,4 +152,4 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
   <img alt="contributors" src="https://contrib.rocks/image?repo=tolgee/tolgee-platform"/>
 </a>
 
-Let us know what you think! #feedbackwanted ❤️
+Let us know what you think! #FeedbackWanted ❤️
