@@ -87,8 +87,8 @@ const App = () => {
   const { t } = useTranslate();
 
   return (
-    <div className="App  flex flex-col items-center justify-center p-10 h-[700px] text-white">
-      <h1 className="text-4xl font-bold mb-6">{t('quiz-name')}</h1>
+    <div className="App  flex flex-col items-center justify-center h-[660px]  min-sm:h-[500px] max-md:h-[600px] max-lg:h-[604px] max-xl:h-[670px] max-2xl:h-[740px] top-0 text-white">
+      <h1 className="text-4xl font-bold mb-5 max-md:text-2xl">{t('quiz-name')}</h1>
       {countryIds.length > 0 ? (
         <Quiz
           options={options}

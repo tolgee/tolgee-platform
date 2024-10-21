@@ -16,7 +16,6 @@ const Guess: React.FC<GuessInterface> = ({
 
   return (
     <button className='option' disabled={disableGuess} onClick={() => handleAnswer(capital)}>
-      {/* {t('capital')} */}
       {capital}
     </button>
   );

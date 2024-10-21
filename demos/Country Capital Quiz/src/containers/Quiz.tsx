@@ -52,8 +52,8 @@ const Quiz: React.FC<QuizInterface> = ({
   const { t } = useTranslate();
 
   return (
-    <div className="w-full max-w-2xl bg-gray-800 py-6 px-10 rounded-xl shadow-lg z-1">
-      <h2 className="text-2xl font-semibold text-center mb-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg">
+    <div className="w-full max-w-2xl bg-gray-800 py-6 px-10 max-md:px-4 rounded-xl shadow-lg z-1">
+      <h2 className="text-2xl font-semibold text-center mb-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg max-md:text-lg">
         {t('guess')} {currentCountry.name} ?
       </h2>
 
