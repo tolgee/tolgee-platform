@@ -1096,6 +1096,7 @@
   "spending_limit_dialog_close": "Fermer",
   "spending_limit_dialog_description": "Contactez le service d'assistance sur <email>billing@tolgee.io</email> pour augmenter votre limite de dépenses.",
   "spending_limit_dialog_title": "Limite de dépenses dépassée",
+  "sso_user_cannot_create_organization": "L'utilisateur connecté via SSO ne peut pas créer ses propres organisations",
   "standard_search_label": "Rechercher...",
   "storage_add_item": "Stockage",
   "storage_create_success": "Stockage créé avec succès!",

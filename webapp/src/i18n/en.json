@@ -1239,6 +1239,7 @@
   "spending_limit_dialog_title": "Spending limit exceeded",
   "sso_invalid_url_format": "This field must contain a valid URL",
   "sso_token_exchange_failed": "Failed to exchange the token",
+  "sso_user_cannot_create_organization": "User logged in through SSO cannot create their own organizations",
   "standard_search_label": "Search...",
   "storage_add_item": "Storage",
   "storage_create_success": "Storage successfully created!",

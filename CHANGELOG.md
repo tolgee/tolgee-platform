@@ -1,3 +1,10 @@
+## [3.80.3](https://github.com/tolgee/tolgee-platform/compare/v3.80.2...v3.80.3) (2024-10-22)
+
+
+### Bug Fixes
+
+* add missing indexes for FKs (second part) ([#2613](https://github.com/tolgee/tolgee-platform/issues/2613)) ([1158f79](https://github.com/tolgee/tolgee-platform/commit/1158f79f78d4ad1acd25c04c2431ca0d071c54ff))
+
 ## [3.80.2](https://github.com/tolgee/tolgee-platform/compare/v3.80.1...v3.80.2) (2024-10-21)
 
 
