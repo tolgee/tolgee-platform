@@ -21,7 +21,12 @@ class OAuthUserHandler(
     invitationCode: String?,
     thirdPartyAuthType: String,
   ): UserAccount {
-    val userAccountOptional = userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
+    val userAccountOptional =
+      if (thirdPartyAuthType == "sso" && userResponse.domain != null) {
+        userAccountService.findByDomainSso(userResponse.domain, userResponse.sub!!)
+      } else {
+        userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
+      }
 
     return userAccountOptional.orElseGet {
       userAccountService.findActive(userResponse.email)?.let {
