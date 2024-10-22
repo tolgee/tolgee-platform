@@ -16,6 +16,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
@@ -31,6 +32,10 @@ import java.util.*
       columnNames = ["project_id", "number"],
       name = "project_number_unique",
     ),
+  ],
+  indexes = [
+    Index(columnList = "author_id"),
+    Index(columnList = "language_id"),
   ],
 )
 @ActivityLoggedEntity
