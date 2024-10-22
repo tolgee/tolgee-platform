@@ -45,6 +45,7 @@ class SignUpService(
     return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
   }
 
+  @Transactional
   fun signUp(
     entity: UserAccount,
     invitationCode: String?,
@@ -55,6 +56,10 @@ class SignUpService(
     val user = userAccountService.createUser(entity, userSource)
     if (invitation != null) {
       invitationService.accept(invitation.code, user)
+    }
+
+    if (user.thirdPartyAuthType == "sso") {
+      return user
     }
 
     val canCreateOrganization = tolgeeProperties.authentication.userCanCreateOrganizations

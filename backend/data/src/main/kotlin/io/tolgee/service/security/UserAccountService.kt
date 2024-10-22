@@ -70,40 +70,28 @@ class UserAccountService(
 
   private val emailValidator = EmailValidator()
 
-  fun findActive(username: String): UserAccount? {
-    return userAccountRepository.findActive(username)
-  }
+  fun findActive(username: String): UserAccount? = userAccountRepository.findActive(username)
 
-  operator fun get(username: String): UserAccount {
-    return this.findActive(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
-  }
+  operator fun get(username: String): UserAccount =
+    this.findActive(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
 
   @Transactional
-  fun findActive(id: Long): UserAccount? {
-    return userAccountRepository.findActive(id)
-  }
+  fun findActive(id: Long): UserAccount? = userAccountRepository.findActive(id)
 
   @Transactional
-  fun findInitialUser(): UserAccount? {
-    return userAccountRepository.findInitialUser()
-  }
+  fun findInitialUser(): UserAccount? = userAccountRepository.findInitialUser()
 
-  fun get(id: Long): UserAccount {
-    return this.findActive(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
-  }
+  fun get(id: Long): UserAccount = this.findActive(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
 
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
   @Transactional
-  fun findDto(id: Long): UserAccountDto? {
-    return userAccountRepository.findActive(id)?.let {
+  fun findDto(id: Long): UserAccountDto? =
+    userAccountRepository.findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
-  }
 
   @Transactional
-  fun getDto(id: Long): UserAccountDto {
-    return self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
-  }
+  fun getDto(id: Long): UserAccountDto = self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
 
   fun getOrCreateDemoUsers(demoUsers: List<DemoProjectData.DemoUser>): Map<String, UserAccount> {
     val usernames = demoUsers.map { it.username }
@@ -222,9 +210,12 @@ class UserAccountService(
   fun findByThirdParty(
     type: String,
     id: String,
-  ): Optional<UserAccount> {
-    return userAccountRepository.findThirdByThirdParty(id, type)
-  }
+  ): Optional<UserAccount> = userAccountRepository.findThirdByThirdParty(id, type)
+
+  fun findByDomainSso(
+    type: String,
+    idSub: String,
+  ): Optional<UserAccount> = userAccountRepository.findBySsoDomain(idSub, type)
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
@@ -261,9 +252,7 @@ class UserAccountService(
   fun isResetCodeValid(
     userAccount: UserAccount,
     code: String?,
-  ): Boolean {
-    return passwordEncoder.matches(code, userAccount.resetPasswordCode)
-  }
+  ): Boolean = passwordEncoder.matches(code, userAccount.resetPasswordCode)
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
@@ -336,18 +325,16 @@ class UserAccountService(
     organizationId: Long,
     pageable: Pageable,
     search: String?,
-  ): Page<UserAccountWithOrganizationRoleView> {
-    return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
-  }
+  ): Page<UserAccountWithOrganizationRoleView> =
+    userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
 
   fun getAllInProject(
     projectId: Long,
     pageable: Pageable,
     search: String?,
     exceptUserId: Long? = null,
-  ): Page<UserAccountInProjectView> {
-    return userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId)
-  }
+  ): Page<UserAccountInProjectView> =
+    userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId)
 
   fun getAllInProjectWithPermittedLanguages(
     projectId: Long,
@@ -453,33 +440,22 @@ class UserAccountService(
     userAccountRepository.saveAll(userAccounts)
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun save(user: UserAccount): UserAccount {
-    return userAccountRepository.save(user)
-  }
+  fun save(user: UserAccount): UserAccount = userAccountRepository.save(user)
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun saveAndFlush(user: UserAccount): UserAccount {
-    return userAccountRepository.saveAndFlush(user)
-  }
+  fun saveAndFlush(user: UserAccount): UserAccount = userAccountRepository.saveAndFlush(user)
 
-  fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount> {
-    return userAccountRepository.getAllByIdsIncludingDeleted(ids)
-  }
+  fun getAllByIdsIncludingDeleted(ids: Set<Long>): MutableList<UserAccount> =
+    userAccountRepository.getAllByIdsIncludingDeleted(ids)
 
   fun findAllWithDisabledPaged(
     pageable: Pageable,
     search: String?,
-  ): Page<UserAccount> {
-    return userAccountRepository.findAllWithDisabledPaged(search, pageable)
-  }
+  ): Page<UserAccount> = userAccountRepository.findAllWithDisabledPaged(search, pageable)
 
-  fun countAll(): Long {
-    return userAccountRepository.count()
-  }
+  fun countAll(): Long = userAccountRepository.count()
 
-  fun countAllEnabled(): Long {
-    return userAccountRepository.countAllEnabled()
-  }
+  fun countAllEnabled(): Long = userAccountRepository.countAllEnabled()
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")

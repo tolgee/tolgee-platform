@@ -83,6 +83,20 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   ): Optional<UserAccount>
 
   @Query(
+    """
+    from UserAccount ua 
+      where ua.thirdPartyAuthId = :thirdPartyAuthId 
+        and ua.ssoDomain = :domain
+        and ua.deletedAt is null
+        and ua.disabledAt is null
+  """,
+  )
+  fun findBySsoDomain(
+    thirdPartyAuthId: String,
+    domain: String,
+  ): Optional<UserAccount>
+
+  @Query(
     """ select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole,
           ua.avatarHash as avatarHash
         from UserAccount ua 

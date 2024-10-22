@@ -1,6 +1,6 @@
 import { FunctionComponent, useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Alert, useMediaQuery, Link as MuiLink } from '@mui/material';
+import { Alert, Link as MuiLink, useMediaQuery } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 
@@ -33,6 +33,10 @@ export const LoginView: FunctionComponent = () => {
       c.auth.allowRegistration
   );
 
+  const nativeEnabled = useGlobalContext(
+    (c) => c.initialData.serverConfiguration.nativeEnabled
+  );
+
   useReportOnce('LOGIN_PAGE_OPENED');
 
   if (mfaRequired) {
@@ -54,7 +58,7 @@ export const LoginView: FunctionComponent = () => {
         windowTitle={t('login_title')}
         title={t('login_title')}
         subtitle={
-          registrationAllowed ? (
+          registrationAllowed && nativeEnabled ? (
             <T
               keyName="login_subtitle"
               params={{
