@@ -146,11 +146,11 @@ class AuthenticationProperties(
   @DocProperty(
     description =
       "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`" +
-        "You may need that when you want to enable login via your custom SSO (the default logo is Tolgee's logo," +
+        "You may need that when you want to enable login via your custom SSO (the default logo is sso_login.svg," +
         " which is stored in the webapp/public directory).",
   )
   var customLogoUrl: String? =
-    "/favicon.svg",
+    "/sso_login.svg",
   @DocProperty(
     description = "Custom text for the login button.",
     defaultExplanation = "Defaults to 'SSO Login' if not set.",
