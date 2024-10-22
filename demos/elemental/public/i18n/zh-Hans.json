@@ -1,0 +1,16 @@
+{
+  "days": {
+    "fri": "周五",
+    "mon": "周一",
+    "sat": "星期六",
+    "sun": "星期日",
+    "thurs": "星期四",
+    "tue": "周二",
+    "wed": "结婚"
+  },
+  "forecast": "未来三天天气预报",
+  "humidity": "湿度",
+  "label": "更改语言",
+  "search_city": "搜索城市",
+  "wind_speed": "风速"
+}
