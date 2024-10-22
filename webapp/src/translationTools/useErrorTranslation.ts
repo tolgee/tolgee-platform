@@ -1,4 +1,4 @@
-import { useTranslate } from '@tolgee/react';
+import {useTranslate} from '@tolgee/react';
 
 export function useErrorTranslation() {
   const { t } = useTranslate();
@@ -137,6 +137,8 @@ export function useErrorTranslation() {
         return t('sso_user_info_retrieval_failed');
       case 'sso_domain_not_enabled':
         return t('sso_domain_not_enabled');
+      case 'sso_user_cannot_create_organization':
+        return t('sso_user_cannot_create_organization');
       default:
         return code;
     }
