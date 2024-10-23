@@ -1,3 +1,10 @@
+## [3.80.2](https://github.com/tolgee/tolgee-platform/compare/v3.80.1...v3.80.2) (2024-10-21)
+
+
+### Bug Fixes
+
+* Import -> Collisions between files handling ([#2612](https://github.com/tolgee/tolgee-platform/issues/2612)) ([8f085a6](https://github.com/tolgee/tolgee-platform/commit/8f085a67ccd96ce7ec6657490dfa2580118dac9b))
+
 ## [3.80.1](https://github.com/tolgee/tolgee-platform/compare/v3.80.0...v3.80.1) (2024-10-18)
 
 
