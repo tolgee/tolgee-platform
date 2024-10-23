@@ -6,9 +6,7 @@ Welcome to the Country Matching Game! This is a fun and educational Flutter app 
 - [Features](#features)
 - [Technologies Used](#technologies-used)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
+- [Blog Post](#blog)
 
 ## Features
 - **Interactive Gameplay**: Drag and drop to match countries with their capitals, languages, or cultural symbols.
@@ -39,6 +37,9 @@ Use the following command to run the app on an emulator or physical device:
 ```bash
 flutter run
 ```
+## Blog Post
+Check out the detailed blog post about this project on [Hashnode](https://marstech.hashnode.dev/building-a-country-matching-game-in-flutter-with-tolgee-for-localization).
+
 
 
 
