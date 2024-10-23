@@ -1,16 +1,47 @@
-# country_matching_game
+# Country Matching Game
 
-A new Flutter project.
+Welcome to the Country Matching Game! This is a fun and educational Flutter app designed to help users learn about countries, their capitals, languages, and cultural symbols. The game challenges players to match countries with their respective attributes while improving their knowledge in a playful way.
 
-## Getting Started
+## Table of Contents
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
 
-This project is a starting point for a Flutter application.
+## Features
+- **Interactive Gameplay**: Drag and drop to match countries with their capitals, languages, or cultural symbols.
+- **Scoring System**: Earn points for correct matches and lose points for incorrect ones.
+- **Localized Experience**: Available in multiple languages, allowing users to play in their preferred language.
+- **Dynamic Game Logic**: Randomize the items to ensure a different experience every time you play.
+- **User-Friendly Interface**: Simple and engaging UI suitable for players of all ages.
 
-A few resources to get you started if this is your first Flutter project:
+## Technologies Used
+- **Flutter**: A UI toolkit for building natively compiled applications for mobile, web, and desktop from a single codebase.
+- **Tolgee**: An open-source localization framework that helps manage translations and supports multilingual applications.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Installation
+To get started with the Country Matching Game, follow these steps:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/country-matching-game.git
+   cd country-matching-game
+   ```
+2. Install dependencies:
+Make sure you have Flutter installed on your machine. Then run:
+ ```bash
+  flutter pub get
+```
+3. Run the app:
+Use the following command to run the app on an emulator or physical device:
+```bash
+flutter run
+```
+
+
+
+
+
+   
