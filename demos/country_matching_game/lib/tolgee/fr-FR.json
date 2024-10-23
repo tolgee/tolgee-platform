@@ -1,0 +1,17 @@
+{
+  "China": "Le dragon est un symbole de puissance dans la culture chinoise.",
+  "country_china": "Chine",
+  "country_france": "France",
+  "country_india": "Inde",
+  "country_russia": "Russie",
+  "country_USA": "USA",
+  "France": "La tour Eiffel est un symbole de la riche culture de la France.",
+  "got it": "Compris !",
+  "How to Play": "Comment jouer",
+  "india": "La fleur de lotus représente la pureté et la beauté en Inde.",
+  "Instruction": "Faites glisser les éléments de la colonne de gauche et associez-les aux éléments correspondants dans la colonne de droite. Vous gagnez des points pour les correspondances correctes et perdez des points pour les incorrectes. Essayez de marquer le plus de points possible !",
+  "russia": "Les poupées Matryoshka symbolisent la famille et l'unité en Russie.",
+  "USA": "L'aigle chauve représente la force et la liberté aux États-Unis.",
+  "congrats": "Félicitations! Vous avez marqué {score} points !",
+  "loose": "Votre score est {score}. Réessayez pour vous améliorer !"
+}
