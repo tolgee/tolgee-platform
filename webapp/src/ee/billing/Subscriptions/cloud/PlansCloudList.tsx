@@ -14,13 +14,8 @@ import { PlanAction } from './CloudPlanAction';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
-const StyledPlanWrapper = styled('div')`
-  display: grid;
-`;
-
 const StyledFreePlanWrapper = styled('div')`
   grid-column: 1 / -1;
-  display: grid;
 `;
 
 type BillingPlansProps = {
@@ -118,36 +113,35 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
 
         const parentPlan = previousPlanName;
         return (
-          <StyledPlanWrapper key={plan.id}>
-            {activeSubscription && (
-              <Plan
-                plan={plan}
-                active={isActive(plan)}
-                ended={isEnded(plan)}
-                onPeriodChange={onPeriodChange}
-                period={period}
-                filteredFeatures={filteredFeatures}
-                featuresMinHeight="155px"
-                custom={custom}
-                topFeature={
-                  parentPlan && <AllFromPlanFeature planName={parentPlan} />
-                }
-                action={
-                  <PlanAction
-                    active={isActive(plan)}
-                    ended={isEnded(plan)}
-                    custom={custom}
-                    show={!plan.free}
-                    organizationHasSomeSubscription={
-                      !activeSubscription.plan.free
-                    }
-                    period={period}
-                    planId={plan.id}
-                  />
-                }
-              />
-            )}
-          </StyledPlanWrapper>
+          activeSubscription && (
+            <Plan
+              key={plan.id}
+              plan={plan}
+              active={isActive(plan)}
+              ended={isEnded(plan)}
+              onPeriodChange={onPeriodChange}
+              period={period}
+              filteredFeatures={filteredFeatures}
+              featuresMinHeight="155px"
+              custom={custom}
+              topFeature={
+                parentPlan && <AllFromPlanFeature planName={parentPlan} />
+              }
+              action={
+                <PlanAction
+                  active={isActive(plan)}
+                  ended={isEnded(plan)}
+                  custom={custom}
+                  show={!plan.free}
+                  organizationHasSomeSubscription={
+                    !activeSubscription.plan.free
+                  }
+                  period={period}
+                  planId={plan.id}
+                />
+              }
+            />
+          )
         );
       })}
     </>
