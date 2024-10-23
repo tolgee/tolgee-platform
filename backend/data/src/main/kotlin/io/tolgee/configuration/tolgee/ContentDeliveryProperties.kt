@@ -8,7 +8,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
   displayName = "Content Delivery",
   description =
     "These properties are used to configure " +
-      "default server content delivery storage.",
+      "default server content delivery storage." +
+      "\n \n" +
+      "To get content delivery working, " +
+      "you have to configure the Storage (e.g. S3 or Blob).",
 )
 class ContentDeliveryProperties {
   @DocProperty(
@@ -22,6 +25,7 @@ class ContentDeliveryProperties {
   var storage: ContentStorageProperties = ContentStorageProperties()
 
   @DocProperty(
+    displayName = "Cache purging",
     description =
       "Several services can be used as cache. Tolgee is able to purge the cache when " +
         "new files are published when this configuration is set.",
