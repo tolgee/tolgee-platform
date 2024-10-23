@@ -7,7 +7,7 @@ export const ContactUsButton = () => {
       size="medium"
       variant="outlined"
       color="primary"
-      sx={{ justifySelf: 'center' }}
+      sx={{ alignSelf: 'center' }}
       href="mailto:info@tolgee.io"
     >
       <T keyName="billing_plan_contact_us" />
