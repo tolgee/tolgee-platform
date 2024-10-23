@@ -1239,6 +1239,7 @@
   "spending_limit_dialog_title": "Limita de cheltuieli a fost depășită",
   "sso_invalid_url_format": "Acest câmp trebuie să conțină un URL valid",
   "sso_token_exchange_failed": "Eșec la schimbarea tokenului",
+  "sso_user_cannot_create_organization": "Utilizatorul conectat prin SSO nu poate crea propriile organizații",
   "standard_search_label": "Căutare...",
   "storage_add_item": "Stocare",
   "storage_create_success": "Stocare creată cu succes!",

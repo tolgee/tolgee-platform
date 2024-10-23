@@ -34,6 +34,7 @@ import kotlin.jvm.Transient
     ),
   ],
   indexes = [
+    Index(columnList = "user_owner_id"),
     Index(columnList = "organization_owner_id"),
   ],
 )

@@ -25,6 +25,7 @@ class ImportFile(
   @Column(length = 2000)
   var name: String?,
   @field:ManyToOne(optional = false)
+  @get:ManyToOne(optional = false)
   val import: Import,
 ) : StandardAuditModel() {
   @OneToMany(mappedBy = "file", orphanRemoval = true)

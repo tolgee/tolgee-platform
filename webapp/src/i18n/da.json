@@ -1238,6 +1238,7 @@
   "spending_limit_dialog_title": "Grænse for forbrug overskredet",
   "sso_invalid_url_format": "Dette felt skal indeholde en gyldig URL",
   "sso_token_exchange_failed": "Kunne ikke udveksle tokenen",
+  "sso_user_cannot_create_organization": "Bruger logget ind via SSO kan ikke oprette deres egne organisationer",
   "standard_search_label": "Søg...",
   "storage_add_item": "Lager",
   "storage_create_success": "Lagerpladsen blev oprettet med succes!",

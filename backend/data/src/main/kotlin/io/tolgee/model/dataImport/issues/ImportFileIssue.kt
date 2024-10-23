@@ -5,11 +5,18 @@ import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import jakarta.persistence.Entity
 import jakarta.persistence.Enumerated
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "file_id"),
+  ],
+)
 class ImportFileIssue(
   @ManyToOne(optional = false)
   @field:NotNull

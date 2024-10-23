@@ -10,11 +10,18 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+  ],
+)
 class MtServiceConfig : StandardAuditModel() {
   @ManyToOne
   lateinit var project: Project

@@ -7,7 +7,8 @@ import { PlanFeature } from 'tg.component/billing/PlanFeature';
 type Features = components['schemas']['EeSubscriptionModel']['enabledFeatures'];
 
 const StyledListWrapper = styled(Box)`
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 4px 8px;
   align-content: start;
 `;

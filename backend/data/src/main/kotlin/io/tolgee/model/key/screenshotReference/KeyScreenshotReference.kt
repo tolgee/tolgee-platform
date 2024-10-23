@@ -7,11 +7,19 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.Type
 
 @Entity
 @IdClass(KeyScreenshotReferenceId::class)
+@Table(
+  indexes = [
+    Index(columnList = "key_id"),
+    Index(columnList = "screenshot_id"),
+  ],
+)
 class KeyScreenshotReference {
   @ManyToOne(optional = false)
   @Id

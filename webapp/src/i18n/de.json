@@ -1134,6 +1134,7 @@
   "spending_limit_dialog_close": "Schließen",
   "spending_limit_dialog_description": "Kontaktieren Sie den Support unter <email>billing@tolgee.io</email>, um Ihr Ausgabenlimit zu erhöhen",
   "spending_limit_dialog_title": "Ausgabenlimit überschritten",
+  "sso_user_cannot_create_organization": "Benutzer, die sich über SSO angemeldet haben, können keine eigenen Organisationen erstellen",
   "standard_search_label": "Suche...",
   "storage_add_item": "Speicher",
   "storage_create_success": "Speicher erfolgreich erstellt!",

@@ -1239,6 +1239,7 @@
   "spending_limit_dialog_title": "Výdajový limit překročen",
   "sso_invalid_url_format": "Toto pole musí obsahovat platnou URL",
   "sso_token_exchange_failed": "Nepodařilo se vyměnit token",
+  "sso_user_cannot_create_organization": "Uživatel přihlášený přes SSO nemůže vytvářet vlastní organizace",
   "standard_search_label": "Hledat...",
   "storage_add_item": "Úložiště",
   "storage_create_success": "Úložiště úspěšně vytvořeno!",
