@@ -1,3 +1,10 @@
+## [3.80.4](https://github.com/tolgee/tolgee-platform/compare/v3.80.3...v3.80.4) (2024-10-24)
+
+
+### Bug Fixes
+
+* use less grid (safari performance) ([#2618](https://github.com/tolgee/tolgee-platform/issues/2618)) ([eb35e76](https://github.com/tolgee/tolgee-platform/commit/eb35e766a6d9bec390164ea1c12b2946f120165b))
+
 ## [3.80.3](https://github.com/tolgee/tolgee-platform/compare/v3.80.2...v3.80.3) (2024-10-22)
 
 

@@ -763,6 +763,7 @@
   "order_translation_invite_to_project_label": "Inviter au projet avec des droits en lecture seule",
   "order_translation_next_button": "Suivant",
   "order_translation_sharing_details_label": "J'accepte le partage des détails avec l'agence de traduction",
+  "order_translation_success_message": "Commande de traduction créée",
   "organization_already_subscribed": "L'organisation est déjà abonnée à un plan.",
   "organization-billing-self-hosted-active-subscriptions": "Abonnements actifs",
   "organization-billing-self-hosted-cancel-subscription-button": "Annuler",

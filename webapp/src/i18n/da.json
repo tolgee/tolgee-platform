@@ -862,6 +862,7 @@
   "order_translations_keys_subtitle": "{value, plural, one {# nøgle} other {# nøgler}}",
   "order_translations_title": "Bestil professionel oversættelse",
   "order_translation_submit_button": "Bestil oversættelse",
+  "order_translation_success_message": "Oversættelsesordre oprettet",
   "organization_add_provider_success_message": "Din SSO-udbyder er blevet tilføjet",
   "organization_already_subscribed": "Organisationen har allerede en aktiv plan.",
   "organization_apps_title": "Applikationer",
