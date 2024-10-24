@@ -1,0 +1,16 @@
+{
+  "add-item-add-button": "Einfügen",
+  "add-item-input-placeholder": "Neuer Eintrag",
+  "app_title": "Flagmoji | Länder-zu-Flaggen-Emoji-Konverter",
+  "button_fetch_flag": "Ansehen",
+  "delete-item-button": "Löschen",
+  "flag_emoji_short_text": "Geben Sie einen Ländernamen ein, um das Flaggen-Emoji zu sehen",
+  "hello_world": "Hallo Familie",
+  "items-count": "{count, plural, one {Zeige # Eintrag} other {Zeige # Einträge}}",
+  "menu-item-translation-methods": "Übersetzungsmethoden",
+  "placeholder_country_name": "Ländernamen eingeben",
+  "send-via-email": "Per Email abschicken",
+  "share-button": "Teilen",
+  "terms-conditions-agreement": "Ich stimme den <a>Allgemeinen Geschäftsbedingungen</a> zu",
+  "welcome-message": "Hallo {name}!"
+}
