@@ -36,6 +36,10 @@ export const BaseAdministrationView: React.FC<Props> = ({
 
   if (config.billing.enabled) {
     menuItems.push({
+      link: LINKS.ADMINISTRATION_EE_TA.build(),
+      label: t('administration_ee_translation_agencies'),
+    });
+    menuItems.push({
       link: LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
       label: t('administration_cloud_plans'),
     });

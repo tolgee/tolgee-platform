@@ -21,6 +21,7 @@ import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
+import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.model.views.KeysScopeView
 import io.tolgee.model.views.TaskPerUserReportView
 import io.tolgee.model.views.TaskWithScopeView
@@ -100,9 +101,10 @@ class TaskService(
     projectId: Long,
     dtos: Collection<CreateTaskRequest>,
     filters: TranslationScopeFilters,
+    agencyId: Long? = null,
   ) {
     dtos.forEach {
-      createSingleTask(projectId, it, filters)
+      createSingleTask(projectId, it, filters, agencyId)
     }
   }
 
@@ -132,13 +134,14 @@ class TaskService(
     projectId: Long,
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
+    agencyId: Long? = null,
   ): Task {
     var lastErr = DataIntegrityViolationException("Error")
     repeat(10) {
       // necessary for proper transaction creation
       try {
         return executeInNewRepeatableTransaction(platformTransactionManager) {
-          val task = taskService.createTaskInTransaction(projectId, dto, filters)
+          val task = taskService.createTaskInTransaction(projectId, dto, filters, agencyId)
           entityManager.flush()
           task.assignees.forEach {
             assigneeNotificationService.notifyNewAssignee(it, task)
@@ -157,6 +160,7 @@ class TaskService(
     projectId: Long,
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
+    agencyId: Long? = null,
   ): Task {
     val newNumber = getNextTaskNumber(projectId)
     val language = checkLanguage(dto.languageId!!, projectId)
@@ -181,6 +185,7 @@ class TaskService(
     task.language = language
     task.assignees = assignees
     task.author = entityManager.getReference(UserAccount::class.java, authenticationFacade.authenticatedUser.id)
+    task.agency = agencyId?.let { entityManager.getReference(TranslationAgency::class.java, it) }
     task.state = TaskState.NEW
     taskRepository.saveAndFlush(task)
     val keys = keyService.getByIds(keyIds)
@@ -478,6 +483,7 @@ class TaskService(
         doneItems = scope.doneItems,
         baseWordCount = scope.baseWordCount,
         baseCharacterCount = scope.baseCharacterCount,
+        agency = task.agency,
       )
     }
   }

@@ -4,14 +4,17 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
-import { AdministrationEeLicenseView } from 'tg.ee/billing/administration/AdministrationEeLicenseView';
-import { AdministrationCloudPlansView } from 'tg.ee/billing/administration/AdministrationCloudPlansView';
-import { AdministrationCloudPlanEditView } from 'tg.ee/billing/administration/AdministrationCloudPlanEditView';
-import { AdministrationCloudPlanCreateView } from 'tg.ee/billing/administration/AdministrationCloudPlanCreateView';
-import { AdministrationEePlansView } from 'tg.ee/billing/administration/AdministrationEePlansView';
-import { AdministrationEePlanEditView } from 'tg.ee/billing/administration/AdministrationEePlanEditView';
-import { AdministrationEePlanCreateView } from 'tg.ee/billing/administration/AdministrationEePlanCreateView';
+import { AdministrationEeLicenseView } from 'tg.ee/billing/administration/subscriptionPlans/AdministrationEeLicenseView';
+import { AdministrationCloudPlansView } from 'tg.ee/billing/administration/subscriptionPlans/AdministrationCloudPlansView';
+import { AdministrationCloudPlanEditView } from 'tg.ee/billing/administration/subscriptionPlans/AdministrationCloudPlanEditView';
+import { AdministrationCloudPlanCreateView } from 'tg.ee/billing/administration/subscriptionPlans/AdministrationCloudPlanCreateView';
+import { AdministrationEePlansView } from 'tg.ee/billing/administration/subscriptionPlans/AdministrationEePlansView';
+import { AdministrationEePlanEditView } from 'tg.ee/billing/administration/subscriptionPlans/AdministrationEePlanEditView';
+import { AdministrationEePlanCreateView } from 'tg.ee/billing/administration/subscriptionPlans/AdministrationEePlanCreateView';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { AdministrationEeTAView } from 'tg.ee/billing/administration/translationAgencies/AdministrationEeTAView';
+import { AdministrationEeTACreateView } from 'tg.ee/billing/administration/translationAgencies/AdministrationEeTACreateView';
+import { AdministrationEeTAEditView } from 'tg.ee/billing/administration/translationAgencies/AdministrationEeTAEditView';
 
 export const AdministrationView = () => {
   const [search, setSearch] = useUrlSearchState('search');
@@ -33,6 +36,15 @@ export const AdministrationView = () => {
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
           <AdministrationEeLicenseView />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA.template}>
+          <AdministrationEeTAView />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA_CREATE.template}>
+          <AdministrationEeTACreateView />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA_EDIT.template}>
+          <AdministrationEeTAEditView />
         </PrivateRoute>
         <PrivateRoute
           exact

@@ -48,6 +48,7 @@ type Props = {
   filter: TaskFilterType;
   onFilterChange: (value: TaskFilterType) => void;
   onAddTask?: () => void;
+  onOrderTranslation?: () => void;
   view: TaskView;
   onViewChange: (view: TaskView) => void;
   project?: SimpleProjectModel;
@@ -62,6 +63,7 @@ export const TasksHeaderBig = ({
   filter,
   onFilterChange,
   onAddTask,
+  onOrderTranslation,
   view,
   onViewChange,
   project,
@@ -110,7 +112,7 @@ export const TasksHeaderBig = ({
           }
         />
       </Box>
-      <Box sx={{ display: 'flex', gap: '16px' }}>
+      <Box sx={{ display: 'flex', gap: '12px' }}>
         <ButtonGroup>
           <StyledToggleButton
             color={view === 'LIST' ? 'primary' : 'default'}
@@ -127,6 +129,18 @@ export const TasksHeaderBig = ({
             <BarChartSquare01 style={{ rotate: '180deg' }} />
           </StyledToggleButton>
         </ButtonGroup>
+
+        {onOrderTranslation && (
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<Plus width={19} height={19} />}
+            onClick={onOrderTranslation}
+            data-cy="tasks-header-order-translation"
+          >
+            {t('tasks_order_translation')}
+          </Button>
+        )}
 
         {onAddTask && (
           <Button

@@ -32,6 +32,7 @@ declare namespace DataCy {
         "administration-debug-customer-exit-button" |
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
+        "administration-ee-plan-cancel-button" |
         "administration-ee-plan-field-feature" |
         "administration-ee-plan-field-free" |
         "administration-ee-plan-field-included-mt-credits" |
@@ -48,6 +49,10 @@ declare namespace DataCy {
         "administration-ee-plans-item-delete" |
         "administration-ee-plans-item-edit" |
         "administration-ee-plans-item-public-badge" |
+        "administration-ee-translation-agencies-field-description" |
+        "administration-ee-translation-agencies-field-name" |
+        "administration-ee-translation-agencies-field-services" |
+        "administration-ee-translation-agencies-field-url" |
         "administration-frame" |
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
@@ -327,6 +332,8 @@ declare namespace DataCy {
         "namespaces-select-text-field" |
         "namespaces-selector" |
         "navigation-item" |
+        "order-translation-next" |
+        "order-translation-submit" |
         "organization-address-part-field" |
         "organization-description-field" |
         "organization-invitation-cancel-button" |
@@ -520,6 +527,7 @@ declare namespace DataCy {
         "tasks-filter-menu" |
         "tasks-header-add-task" |
         "tasks-header-filter-select" |
+        "tasks-header-order-translation" |
         "tasks-header-show-closed" |
         "tasks-view-board-button" |
         "tasks-view-list-button" |

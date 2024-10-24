@@ -1,7 +1,10 @@
 import { ListProps, PaperProps, styled } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 import { TaskFilterType } from 'tg.ee/task/components/taskFilter/TaskFilterPopover';
 import { TaskItem } from 'tg.ee/task/components/TaskItem';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
@@ -28,6 +31,8 @@ export const MyTasksList = ({
   onOpenDetail,
 }: Props) => {
   const [page, setPage] = useUrlSearchState('page', { defaultVal: '0' });
+  const { features } = useEnabledFeatures();
+  const { t } = useTranslate();
 
   const tasksLoadable = useApiQuery({
     url: '/v2/user-tasks',
@@ -47,10 +52,17 @@ export const MyTasksList = ({
     },
   });
 
+  const taskFeature = features.includes('TASKS');
+
   return (
     <PaginatedHateoasList
       loadable={tasksLoadable}
       onPageChange={(val) => setPage(String(val))}
+      emptyPlaceholder={
+        !taskFeature ? (
+          <PaidFeatureBanner customMessage={t('tasks_feature_description')} />
+        ) : undefined
+      }
       listComponentProps={
         {
           sx: {

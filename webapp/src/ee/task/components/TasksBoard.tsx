@@ -9,6 +9,7 @@ import { useTaskStateTranslation } from 'tg.translationTools/useTaskStateTransla
 import { useProjectBoardTasks } from '../views/projectTasks/useProjectBoardTasks';
 import { useStateColor } from './TaskState';
 import { BoardColumn } from './BoardColumn';
+import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -61,16 +62,28 @@ export const TasksBoard = ({
     inProgressTasks.hasNextPage && inProgressTasks.fetchNextPage();
     doneTasks.hasNextPage && doneTasks.fetchNextPage();
   }
+  const loadables = [newTasks, inProgressTasks, doneTasks];
 
-  const isLoading =
-    newTasks.isLoading || inProgressTasks.isLoading || doneTasks.isLoading;
-  const isFetching =
-    newTasks.isFetching || inProgressTasks.isFetching || doneTasks.isFetching;
+  const isLoading = loadables.some((l) => l.isLoading);
+  const isFetching = loadables.some((l) => l.isFetching);
 
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center">
         <BoxLoading />
+      </Box>
+    );
+  }
+
+  const allReady = loadables.every((l) => l.isFetched);
+  const allEmpty = loadables.every(
+    (l) => l.data?.pages?.[0].page?.totalElements === 0
+  );
+
+  if (allReady && allEmpty) {
+    return (
+      <Box>
+        <PaidFeatureBanner customMessage={t('tasks_feature_description')} />
       </Box>
     );
   }

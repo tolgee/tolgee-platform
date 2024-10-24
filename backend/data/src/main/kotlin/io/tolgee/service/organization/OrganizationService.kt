@@ -39,6 +39,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.awt.Dimension
 import java.io.InputStream
 import io.tolgee.dtos.cacheable.OrganizationDto as CachedOrganizationDto
 
@@ -301,7 +302,7 @@ class OrganizationService(
     organization: Organization,
     avatar: InputStream,
   ) {
-    avatarService.setAvatar(organization, avatar)
+    avatarService.setAvatar(organization, avatar, Dimension(300, 60))
   }
 
   /**

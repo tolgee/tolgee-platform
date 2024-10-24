@@ -3,11 +3,11 @@ import { Box, styled } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { SetupLicenceKey } from '../../eeLicense/SetupLicenceKey';
-import { ActiveEeLicense } from '../../eeLicense/ActiveEeLicense';
+import { SetupLicenceKey } from '../../../eeLicense/SetupLicenceKey';
+import { ActiveEeLicense } from '../../../eeLicense/ActiveEeLicense';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { LINKS } from 'tg.constants/links';
-import { EeLicenseHint } from '../../eeLicense/EeLicenseHint';
+import { EeLicenseHint } from '../../../eeLicense/EeLicenseHint';
 
 const StyledWrapper = styled('div')`
   display: flex;

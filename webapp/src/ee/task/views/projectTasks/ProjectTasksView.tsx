@@ -16,11 +16,11 @@ import { TasksHeader } from 'tg.ee/task/components/tasksHeader/TasksHeader';
 import { TaskView } from 'tg.ee/task/components/tasksHeader/TasksHeaderBig';
 import { TaskCreateDialog } from 'tg.ee/task/components/taskCreate/TaskCreateDialog';
 import { TaskDetail } from 'tg.ee/task/components/TaskDetail';
+import { OrderTranslationsDialog } from 'tg.ee/orderTranslations/OrderTranslationsDialog';
+import { useConfig } from 'tg.globalContext/helpers';
 
-import { TasksList } from './TasksList';
+import { ProjectTasksList } from './ProjectTasksList';
 import { ProjectTasksBoard } from './ProjectTasksBoard';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
-import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -28,6 +28,7 @@ const DAY = 1000 * 60 * 60 * 24;
 
 export const ProjectTasksView = () => {
   const project = useProject();
+  const config = useConfig();
   const { t } = useTranslate();
   const [search, setSearch] = useUrlSearchState('search', { defaultVal: '' });
   const [showClosed, setShowClosed] = useUrlSearchState('showClosed', {
@@ -38,6 +39,8 @@ export const ProjectTasksView = () => {
     defaultVal: 'LIST',
   });
   const [minus30Days] = useState(Date.now() - DAY * 30);
+
+  const billlingEnabled = config.billing.enabled;
 
   const canEditTasks = satisfiesPermission('tasks.edit');
 
@@ -82,6 +85,7 @@ export const ProjectTasksView = () => {
 
   const [detail, setDetail] = useState<TaskModel>();
   const [addDialog, setAddDialog] = useState(false);
+  const [orderDialog, setOrderDialog] = useState(false);
 
   const allLanguages = languagesLoadable.data?._embedded?.languages ?? [];
 
@@ -92,9 +96,6 @@ export const ProjectTasksView = () => {
   const languagesPreference = projectPreferencesService.getForProject(
     project.id
   );
-
-  const { features } = useEnabledFeatures();
-  const taskFeature = features.includes('TASKS');
 
   return (
     <BaseProjectView
@@ -111,71 +112,81 @@ export const ProjectTasksView = () => {
         ],
       ]}
     >
-      {!taskFeature ? (
-        <Box>
-          <PaidFeatureBanner customMessage={t('tasks_feature_description')} />
-        </Box>
-      ) : (
-        <>
-          <Box display="grid" gridTemplateRows="auto 1fr">
-            <TasksHeader
-              sx={{ mb: '20px', mt: '-12px' }}
-              onSearchChange={setSearch}
-              showClosed={showClosed === 'true'}
-              onShowClosedChange={(val) => setShowClosed(String(val))}
-              filter={filter}
-              onFilterChange={setFilter}
-              onAddTask={canEditTasks ? () => setAddDialog(true) : undefined}
-              view={view as TaskView}
-              onViewChange={setView}
-              isSmall={isSmall}
-              project={project}
-            />
+      <Box display="grid" gridTemplateRows="auto 1fr">
+        <TasksHeader
+          sx={{ mb: '20px', mt: '-12px' }}
+          onSearchChange={setSearch}
+          showClosed={showClosed === 'true'}
+          onShowClosedChange={(val) => setShowClosed(String(val))}
+          filter={filter}
+          onFilterChange={setFilter}
+          onAddTask={canEditTasks ? () => setAddDialog(true) : undefined}
+          view={view as TaskView}
+          onViewChange={setView}
+          isSmall={isSmall}
+          project={project}
+          onOrderTranslation={
+            billlingEnabled ? () => setOrderDialog(true) : undefined
+          }
+        />
 
-            {view === 'LIST' && !isSmall ? (
-              <TasksList
-                search={search}
-                filter={filter}
-                showClosed={showClosed === 'true'}
-                onOpenDetail={setDetail}
-                newTaskActions={true}
-              />
-            ) : (
-              <ProjectTasksBoard
-                search={search}
-                filter={filter}
-                showClosed={showClosed === 'true'}
-                onOpenDetail={setDetail}
-              />
-            )}
-            {detail !== undefined && (
-              <Dialog open={true} onClose={handleDetailClose} maxWidth="xl">
-                <TaskDetail
-                  taskNumber={detail.number}
-                  onClose={handleDetailClose}
-                  projectId={project.id}
-                  task={detail}
-                />
-              </Dialog>
-            )}
-            {addDialog && (
-              <TaskCreateDialog
-                open={addDialog}
-                onClose={() => setAddDialog(false)}
-                onFinished={() => setAddDialog(false)}
-                initialValues={{
-                  languages: allLanguages
-                    .filter((l) => languagesPreference.includes(l.tag))
-                    .filter((l) => !l.base)
-                    .map((l) => l.id),
-                }}
-                projectId={project.id}
-                allLanguages={allLanguages}
-              />
-            )}
-          </Box>
-        </>
-      )}
+        {view === 'LIST' && !isSmall ? (
+          <ProjectTasksList
+            search={search}
+            filter={filter}
+            showClosed={showClosed === 'true'}
+            onOpenDetail={setDetail}
+            newTaskActions={true}
+          />
+        ) : (
+          <ProjectTasksBoard
+            search={search}
+            filter={filter}
+            showClosed={showClosed === 'true'}
+            onOpenDetail={setDetail}
+          />
+        )}
+        {detail !== undefined && (
+          <Dialog open={true} onClose={handleDetailClose} maxWidth="xl">
+            <TaskDetail
+              taskNumber={detail.number}
+              onClose={handleDetailClose}
+              projectId={project.id}
+              task={detail}
+            />
+          </Dialog>
+        )}
+        {addDialog && (
+          <TaskCreateDialog
+            open={addDialog}
+            onClose={() => setAddDialog(false)}
+            onFinished={() => setAddDialog(false)}
+            initialValues={{
+              languages: allLanguages
+                .filter((l) => languagesPreference.includes(l.tag))
+                .filter((l) => !l.base)
+                .map((l) => l.id),
+            }}
+            projectId={project.id}
+            allLanguages={allLanguages}
+          />
+        )}
+        {orderDialog && (
+          <OrderTranslationsDialog
+            open={orderDialog}
+            onClose={() => setOrderDialog(false)}
+            onFinished={() => setOrderDialog(false)}
+            initialValues={{
+              languages: allLanguages
+                .filter((l) => languagesPreference.includes(l.tag))
+                .filter((l) => !l.base)
+                .map((l) => l.id),
+            }}
+            projectId={project.id}
+            allLanguages={allLanguages}
+          />
+        )}
+      </Box>
     </BaseProjectView>
   );
 };

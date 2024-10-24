@@ -24,6 +24,11 @@ const StyledTaskName = styled(Box)`
   font-size: 16px;
 `;
 
+const StyledAgencyName = styled(Box)`
+  font-size: 16px;
+  font-weight: 500;
+`;
+
 type Props = {
   task: TaskModel;
   project?: SimpleProjectModel;
@@ -58,6 +63,18 @@ export const TaskLabel = ({
         <TaskNumber taskNumber={task.number} />
       )}
       {!hideType && <TaskTypeChip type={task.type} />}
+      {task.agency &&
+        (task.agency.avatar ? (
+          <img
+            src={task.agency.avatar?.thumbnail}
+            alt={task.agency.name}
+            width={75}
+          />
+        ) : (
+          <StyledAgencyName style={{ margin: 0 }}>
+            {task.agency.name}
+          </StyledAgencyName>
+        ))}
     </StyledContainer>
   );
 };

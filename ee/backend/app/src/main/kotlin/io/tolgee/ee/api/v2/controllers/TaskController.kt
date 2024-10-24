@@ -9,16 +9,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.userAccount.UserAccountPermissionsFilters
 import io.tolgee.ee.api.v2.hateoas.assemblers.TaskModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.TaskPerUserReportModelAssembler
-import io.tolgee.ee.data.task.CalculateScopeRequest
-import io.tolgee.ee.data.task.CreateMultipleTasksRequest
-import io.tolgee.ee.data.task.CreateTaskRequest
-import io.tolgee.ee.data.task.TaskFilters
-import io.tolgee.ee.data.task.TaskKeysResponse
-import io.tolgee.ee.data.task.TranslationScopeFilters
-import io.tolgee.ee.data.task.UpdateTaskKeyRequest
-import io.tolgee.ee.data.task.UpdateTaskKeyResponse
-import io.tolgee.ee.data.task.UpdateTaskKeysRequest
-import io.tolgee.ee.data.task.UpdateTaskRequest
+import io.tolgee.ee.data.task.*
 import io.tolgee.ee.service.TaskService
 import io.tolgee.hateoas.task.TaskModel
 import io.tolgee.hateoas.task.TaskPerUserReportModel
@@ -116,6 +107,21 @@ class TaskController(
     )
 
     taskService.createMultipleTasks(projectHolder.project.id, dto.tasks, filters)
+  }
+
+  @PostMapping("/create-translation-order")
+  @Operation(summary = "Create multiple tasks with assigned agency")
+  @RequiresProjectPermissions([Scope.TASKS_EDIT])
+  @AllowApiAccess
+  @RequestActivity(ActivityType.TASKS_CREATE)
+  @OpenApiOrderExtension(2)
+  fun createTranslationOrder(
+    @RequestBody @Valid
+    dto: CreateTranslationOrderRequest,
+    @ParameterObject
+    filters: TranslationScopeFilters,
+  ) {
+    taskService.createMultipleTasks(projectHolder.project.id, dto.tasks, filters, dto.agencyId)
   }
 
   @GetMapping("/{taskNumber}")

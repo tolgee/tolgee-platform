@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component
 class TaskModelAssembler(
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
   private val languageModelAssembler: LanguageModelAssembler,
+  private val translationAgencySimpleModelAssembler: TranslationAgencySimpleModelAssembler
 ) : RepresentationModelAssemblerSupport<TaskWithScopeView, TaskModel>(
     TaskController::class.java,
     TaskModel::class.java,
@@ -42,6 +43,7 @@ class TaskModelAssembler(
       baseWordCount = entity.baseWordCount,
       baseCharacterCount = entity.baseCharacterCount,
       state = entity.state,
+      agency = entity.agency?.let { translationAgencySimpleModelAssembler.toModel(it) }
     )
   }
 }
