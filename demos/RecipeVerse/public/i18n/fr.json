@@ -1,0 +1,12 @@
+{
+  "add-item-add-button" : "Ajouter",
+  "add-item-input-placeholder" : "Nouveau élément de la liste",
+  "app-title" : "Quoi emballer",
+  "delete-item-button" : "Supprimer",
+  "menu-item-translation-methods" : "Méthodes de la traduction",
+  "send-via-email" : "Envoyer par e-mail",
+  "share-button" : "Partager",
+  "this_is_a_key" : "C'est un clé",
+  "this_is_a_key_with_params" : "C'est la clé avec paramètres {key} {key2}",
+  "this_is_a_key_with_tags" : "C'est la clé avec des tags <b>bold</b> <b><i>{key}</i></b>"
+}
