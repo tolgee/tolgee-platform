@@ -1,0 +1,166 @@
+{
+  "dishes": [
+    {
+      "name": "Sushi",
+      "description": "A Japanese dish of prepared vinegared rice, accompanied by various ingredients such as seafood, vegetables, and occasionally tropical fruits.",
+      "country": "Japan",
+      "region": "Asia",
+      "image": "/dish/sushi.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["rice", "fish", "seaweed"]
+    },
+    {
+      "name": "Pizza Margherita",
+      "description": "Classic Italian pizza topped with tomatoes, fresh mozzarella cheese, and basil leaves.",
+      "country": "Italy",
+      "region": "Europe",
+      "image": "/dish/pizza.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["tomato", "mozzarella", "basil"]
+    },
+    {
+      "name": "Tacos al Pastor",
+      "description": "Traditional Mexican dish featuring marinated pork, typically served in corn tortillas with pineapple and cilantro.",
+      "country": "Mexico",
+      "region": "North America",
+      "image": "/dish/tacco.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["pork", "pineapple", "cilantro"]
+    },
+    {
+      "name": "Pad Thai",
+      "description": "A popular Thai street food, stir-fried rice noodles served with tofu, peanuts, and bean sprouts.",
+      "country": "Thailand",
+      "region": "Asia",
+      "image": "/dish/thai.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["rice noodles", "tofu", "peanuts"]
+    },
+    {
+      "name": "Beef Bourguignon",
+      "description": "French stew of beef braised in red wine, traditionally from the Burgundy region.",
+      "country": "France",
+      "region": "Europe",
+      "image": "/dish/beef.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["beef", "red wine", "mushrooms"]
+    },
+    {
+      "name": "Falafel",
+      "description": "Middle Eastern deep-fried balls made from ground chickpeas or fava beans.",
+      "country": "Israel",
+      "region": "Middle East",
+      "image": "/dish/falafal.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["chickpeas", "herbs", "spices"]
+    },
+    {
+      "name": "Peking Duck",
+      "description": "A famous dish from Beijing that features roasted duck served with thin pancakes, hoisin sauce, and spring onions.",
+      "country": "China",
+      "region": "Asia",
+      "image": "/dish/duck.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["duck", "hoisin sauce", "pancakes"]
+    },
+    {
+      "name": "Moussaka",
+      "description": "A Greek dish made of layers of eggplant, potatoes, and minced meat, topped with béchamel sauce.",
+      "country": "Greece",
+      "region": "Europe",
+      "image": "/dish/moussaka.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["eggplant", "potatoes", "minced meat"]
+    },
+    {
+      "name": "Ceviche",
+      "description": "A seafood dish popular in the coastal regions of Latin America, typically made from fresh raw fish cured in citrus juices.",
+      "country": "Peru",
+      "region": "South America",
+      "image": "/dish/ceviche.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["fish", "lime", "cilantro"]
+    },
+    {
+      "name": "Borscht",
+      "description": "A beet soup commonly found in Eastern Europe, often served with sour cream.",
+      "country": "Ukraine",
+      "region": "Europe",
+      "image": "/dish/borscht.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["beets", "cabbage", "potatoes"]
+    },
+    {
+      "name": "Ratatouille",
+      "description": "A French Provençal stewed vegetable dish, originating in Nice, made of zucchini, eggplant, peppers, and tomatoes.",
+      "country": "France",
+      "region": "Europe",
+      "image": "/dish/ratatouille.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["zucchini", "eggplant", "tomatoes"]
+    },
+    {
+      "name": "Paella",
+      "description": "A Spanish rice dish originally from Valencia, traditionally made with seafood, chicken, and vegetables.",
+      "country": "Spain",
+      "region": "Europe",
+      "image": "/dish/paella.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["rice", "seafood", "saffron"]
+    },
+    {
+      "name": "Kimchi",
+      "description": "A traditional Korean side dish made from fermented vegetables, typically napa cabbage and Korean radish.",
+      "country": "Korea",
+      "region": "Asia",
+      "image": "/dish/kimchi.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["napa cabbage", "radish", "chili powder"]
+    },
+    {
+      "name": "Pho",
+      "description": "A Vietnamese soup consisting of broth, rice noodles, herbs, and meat, usually beef or chicken.",
+      "country": "Vietnam",
+      "region": "Asia",
+      "image": "/dish/pho.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["broth", "rice noodles", "beef"]
+    },
+    {
+      "name": "Shepherd's Pie",
+      "description": "A British dish made of ground meat topped with mashed potatoes and baked until golden.",
+      "country": "United Kingdom",
+      "region": "Europe",
+      "image": "/dish/shepherds_pie.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["ground meat", "potatoes", "vegetables"]
+    },
+    {
+      "name": "Pierogi",
+      "description": "Dumplings of unleavened dough, stuffed with fillings like potatoes, cheese, and meat, popular in Eastern Europe.",
+      "country": "Poland",
+      "region": "Europe",
+      "image": "/dish/pierogi.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["flour", "potatoes", "cheese"]
+    },
+    {
+      "name": "Hummus",
+      "description": "A creamy Middle Eastern dip made from blended chickpeas, tahini, olive oil, and lemon juice.",
+      "country": "Lebanon",
+      "region": "Middle East",
+      "image": "/dish/hummus.jpeg",
+      "tags": ["veg"],
+      "mainIngredients": ["chickpeas", "tahini", "lemon"]
+    },
+    {
+      "name": "Bibimbap",
+      "description": "A Korean dish of mixed rice with vegetables, beef, a fried egg, and chili paste.",
+      "country": "Korea",
+      "region": "Asia",
+      "image": "/dish/bibimbap.jpeg",
+      "tags": ["nonveg"],
+      "mainIngredients": ["rice", "beef", "vegetables"]
+    }
+  ]
+}
