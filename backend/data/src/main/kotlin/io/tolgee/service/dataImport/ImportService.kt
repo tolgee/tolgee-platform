@@ -137,6 +137,7 @@ class ImportService(
         // author, project, file issues, etc
         import = import,
         params = params,
+        projectIcuPlaceholdersEnabled = project.icuPlaceholders,
         importSettings = params,
         saveData = false,
       )
