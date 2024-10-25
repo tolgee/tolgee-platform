@@ -31,7 +31,7 @@ class OAuthMultiTenantsMocks(
 ) {
   companion object {
     val defaultToken =
-      OAuth2TokenResponse(id_token = generateTestJwt(), scope = "scope")
+      OAuth2TokenResponse(id_token = generateTestJwt(), scope = "scope", refresh_token = "refresh_token")
 
     val defaultTokenResponse =
       ResponseEntity(
@@ -120,5 +120,19 @@ class OAuthMultiTenantsMocks(
         isNull(),
       ),
     ).thenReturn(jwtClaimsSet)
+  }
+
+  fun mockTokenExchange(
+    tokenUri: String,
+    tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse,
+  ) {
+    whenever(
+      restTemplate?.exchange(
+        eq(tokenUri),
+        eq(HttpMethod.POST),
+        any(),
+        eq(OAuth2TokenResponse::class.java),
+      ),
+    ).thenReturn(tokenResponse)
   }
 }

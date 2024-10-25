@@ -45,7 +45,7 @@ class AuthenticationDisabledFilterTest {
   private val userAccount = mock(UserAccount::class.java)
 
   private val authenticationDisabledFilter =
-    AuthenticationFilter(authProperties, mock(), mock(), mock(), userAccountService, mock(), mock())
+    AuthenticationFilter(authProperties, mock(), mock(), mock(), userAccountService, mock(), mock(), mock())
 
   @BeforeEach
   fun setupMocksAndSecurityCtx() {

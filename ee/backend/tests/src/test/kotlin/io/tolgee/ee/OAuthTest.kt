@@ -3,6 +3,8 @@ package io.tolgee.ee
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
+import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
@@ -21,13 +23,25 @@ import jakarta.transaction.Transactional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.times
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.web.client.RestTemplate
+import java.util.*
 
+@SpringBootTest(
+  properties = [
+    "tolgee.cache.enabled=true",
+  ],
+)
 class OAuthTest : AuthorizedControllerTest() {
   private lateinit var testData: OAuthTestData
 
@@ -52,8 +66,12 @@ class OAuthTest : AuthorizedControllerTest() {
     OAuthMultiTenantsMocks(authMvc, restTemplate, tenantService, jwtProcessor)
   }
 
+  @Autowired
+  private lateinit var cacheWithExpirationManager: CacheWithExpirationManager
+
   @BeforeEach
   fun setup() {
+    currentDateProvider.forcedDate = currentDateProvider.date
     testData = OAuthTestData()
     testDataService.saveTestData(testData.root)
   }
@@ -138,6 +156,53 @@ class OAuthTest : AuthorizedControllerTest() {
       "/v2/organizations",
       organizationDto(),
     ).andIsForbidden
+  }
+
+  @Test
+  fun `sso auth saves refresh token`() {
+    loginAsSsoUser()
+    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val user = userAccountService.get(userName)
+    assertThat(user.ssoRefreshToken).isNotNull
+    assertThat(user.ssoDomain).isNotNull
+    assertThat(user.thirdPartyAuthType).isEqualTo("sso")
+    val isValid =
+      cacheWithExpirationManager
+        .getCache(
+          Caches.IS_SSO_USER_VALID,
+        )?.getWrapper(user.id)
+        ?.get() as? Boolean
+
+    assertThat(isValid).isTrue
+  }
+
+  @Test
+  fun `user is employee validation works`() {
+    loginAsSsoUser()
+    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val user = userAccountService.get(userName)
+    assertThat(
+      oAuthService.verifyUserIsStillEmployed(user.ssoDomain, user.id, user.ssoRefreshToken, user.thirdPartyAuthType),
+    ).isTrue
+  }
+
+  @Test
+  fun `after timeout should call token endpoint `() {
+    loginAsSsoUser()
+    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val user = userAccountService.get(userName)
+    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 600_000)
+
+    oAuthMultiTenantsMocks.mockTokenExchange("http://tokenUri")
+    assertThat(
+      oAuthService.verifyUserIsStillEmployed(user.ssoDomain, user.id, user.ssoRefreshToken, user.thirdPartyAuthType),
+    ).isTrue
+    verify(restTemplate, times(2))?.exchange( // first call is in loginAsSsoUser
+      anyString(),
+      eq(HttpMethod.POST),
+      any(HttpEntity::class.java),
+      eq(OAuth2TokenResponse::class.java),
+    )
   }
 
   fun organizationDto() =
