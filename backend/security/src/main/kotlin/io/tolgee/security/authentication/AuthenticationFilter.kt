@@ -23,6 +23,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.security.service.OAuthServiceEe
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -50,6 +51,8 @@ class AuthenticationFilter(
   private val apiKeyService: ApiKeyService,
   @Lazy
   private val patService: PatService,
+  @Lazy
+  private val oAuthService: OAuthServiceEe,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(
     request: HttpServletRequest,
@@ -70,15 +73,15 @@ class AuthenticationFilter(
     filterChain.doFilter(request, response)
   }
 
-  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return request.method == "OPTIONS"
-  }
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean = request.method == "OPTIONS"
 
   private fun doAuthenticate(request: HttpServletRequest) {
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val auth = jwtService.validateToken(authorization.substring(7))
+        checkIfSsoUserStillExists(auth.principal)
+
         SecurityContextHolder.getContext().authentication = auth
         return
       }
@@ -111,6 +114,18 @@ class AuthenticationFilter(
     }
   }
 
+  private fun checkIfSsoUserStillExists(userDto: UserAccountDto) {
+    if (!oAuthService.verifyUserIsStillEmployed(
+        userDto.ssoDomain,
+        userDto.id,
+        userDto.ssoRefreshToken,
+        userDto.thirdPartyAuth,
+      )
+    ) {
+      throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
+    }
+  }
+
   private fun pakAuth(key: String) {
     val parsed =
       apiKeyService.parseApiKey(key)
@@ -128,6 +143,8 @@ class AuthenticationFilter(
     val userAccount =
       userAccountService.findDto(pak.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+
+    checkIfSsoUserStillExists(userAccount)
 
     apiKeyService.updateLastUsedAsync(pak.id)
     SecurityContextHolder.getContext().authentication =
@@ -151,6 +168,8 @@ class AuthenticationFilter(
     val userAccount =
       userAccountService.findDto(pat.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+
+    checkIfSsoUserStillExists(userAccount)
 
     patService.updateLastUsedAsync(pat.id)
     SecurityContextHolder.getContext().authentication =

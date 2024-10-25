@@ -8,4 +8,5 @@ data class OAuthUserDetails(
   var email: String = "",
   val domain: String? = null,
   val organizationId: Long? = null,
+  val refreshToken: String? = null,
 )

@@ -14,6 +14,9 @@ data class UserAccountDto(
   val deleted: Boolean,
   val tokensValidNotBefore: Date?,
   val emailVerified: Boolean,
+  val thirdPartyAuth: String?,
+  val ssoRefreshToken: String?,
+  val ssoDomain: String?,
 ) : Serializable {
   companion object {
     fun fromEntity(entity: UserAccount) =
@@ -27,10 +30,11 @@ data class UserAccountDto(
         deleted = entity.deletedAt != null,
         tokensValidNotBefore = entity.tokensValidNotBefore,
         emailVerified = entity.emailVerification == null,
+        thirdPartyAuth = entity.thirdPartyAuthType,
+        ssoRefreshToken = entity.ssoRefreshToken,
+        ssoDomain = entity.ssoDomain,
       )
   }
 
-  override fun toString(): String {
-    return username
-  }
+  override fun toString(): String = username
 }

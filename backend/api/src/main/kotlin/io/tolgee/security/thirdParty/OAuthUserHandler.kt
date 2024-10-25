@@ -1,5 +1,7 @@
 package io.tolgee.security.thirdParty
 
+import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
@@ -15,6 +17,7 @@ class OAuthUserHandler(
   private val signUpService: SignUpService,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
+  private val cacheWithExpirationManager: CacheWithExpirationManager,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -27,6 +30,11 @@ class OAuthUserHandler(
       } else {
         userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
       }
+
+    if (userAccountOptional.isPresent && thirdPartyAuthType == "sso") {
+      updateRefreshToken(userAccountOptional.get(), userResponse.refreshToken)
+      cacheSsoUser(userAccountOptional.get().id, thirdPartyAuthType)
+    }
 
     return userAccountOptional.orElseGet {
       userAccountService.findActive(userResponse.email)?.let {
@@ -48,6 +56,7 @@ class OAuthUserHandler(
       newUserAccount.thirdPartyAuthId = userResponse.sub
       newUserAccount.ssoDomain = userResponse.domain
       newUserAccount.thirdPartyAuthType = thirdPartyAuthType
+      newUserAccount.ssoRefreshToken = userResponse.refreshToken
       newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
 
       signUpService.signUp(newUserAccount, invitationCode, null)
@@ -61,7 +70,28 @@ class OAuthUserHandler(
         )
       }
 
+      cacheSsoUser(newUserAccount.id, thirdPartyAuthType)
+
       newUserAccount
+    }
+  }
+
+  private fun updateRefreshToken(
+    userAccount: UserAccount,
+    refreshToken: String?,
+  ) {
+    if (userAccount.ssoRefreshToken != refreshToken) {
+      userAccount.ssoRefreshToken = refreshToken
+      userAccountService.save(userAccount)
+    }
+  }
+
+  private fun cacheSsoUser(
+    userId: Long,
+    thirdPartyAuthType: String,
+  ) {
+    if (thirdPartyAuthType == "sso") {
+      cacheWithExpirationManager.putCache(Caches.IS_SSO_USER_VALID, userId, true)
     }
   }
 }

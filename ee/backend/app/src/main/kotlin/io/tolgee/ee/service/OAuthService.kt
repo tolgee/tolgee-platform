@@ -8,6 +8,8 @@ import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
+import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
@@ -16,6 +18,7 @@ import io.tolgee.ee.model.SsoTenant
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
+import io.tolgee.security.service.OAuthServiceEe
 import io.tolgee.security.thirdParty.OAuthUserHandler
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.util.Logging
@@ -36,7 +39,9 @@ class OAuthService(
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
-) : Logging {
+  private val cacheWithExpirationManager: CacheWithExpirationManager,
+) : OAuthServiceEe,
+  Logging {
   fun handleOAuthCallback(
     registrationId: String,
     code: String,
@@ -63,7 +68,7 @@ class OAuthService(
         )
 
     val userInfo = verifyAndDecodeIdToken(tokenResponse.id_token, tenant.jwkSetUri)
-    return register(userInfo, tenant, invitationCode)
+    return register(userInfo, tenant, invitationCode, tokenResponse.refresh_token)
   }
 
   fun exchangeCodeForToken(
@@ -136,6 +141,7 @@ class OAuthService(
     userResponse: GenericUserResponse,
     tenant: SsoTenant,
     invitationCode: String?,
+    refreshToken: String,
   ): JwtAuthenticationResponse {
     val email =
       userResponse.email ?: let {
@@ -151,9 +157,68 @@ class OAuthService(
         email = email,
         domain = tenant.domain,
         organizationId = tenant.organizationId,
+        refreshToken = refreshToken,
       )
     val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, "sso")
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
+  }
+
+  override fun verifyUserIsStillEmployed(
+    ssoDomain: String?,
+    userId: Long,
+    refreshToken: String?,
+    thirdPartyAuth: String?,
+  ): Boolean {
+    if (thirdPartyAuth != "sso") {
+      return true
+    }
+
+    if (ssoDomain == null || refreshToken == null) {
+      throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
+    }
+
+    val isValid =
+      cacheWithExpirationManager
+        .getCache(
+          Caches.IS_SSO_USER_VALID,
+        )?.getWrapper(userId)
+        ?.get() as? Boolean
+
+    if (isValid == true) {
+      return true
+    }
+
+    val tenant = tenantService.getByDomain(ssoDomain)
+    val headers =
+      HttpHeaders().apply {
+        contentType = MediaType.APPLICATION_FORM_URLENCODED
+      }
+
+    val body: MultiValueMap<String, String> = LinkedMultiValueMap()
+    body.add("grant_type", "refresh_token")
+    body.add("client_id", tenant.clientId)
+    body.add("client_secret", tenant.clientSecret)
+    body.add("scope", "offline_access openid")
+    body.add("refresh_token", refreshToken)
+
+    val request = HttpEntity(body, headers)
+    return try {
+      val response: ResponseEntity<OAuth2TokenResponse> =
+        restTemplate.exchange(
+          tenant.tokenUri,
+          HttpMethod.POST,
+          request,
+          OAuth2TokenResponse::class.java,
+        )
+      if (response.body?.refresh_token == refreshToken) {
+        cacheWithExpirationManager.putCache(Caches.IS_SSO_USER_VALID, userId, true)
+        return true
+      }
+      false
+    } catch (e: HttpClientErrorException) {
+      logger.info("Failed to refresh token: ${e.message}")
+      false
+    }
   }
 }

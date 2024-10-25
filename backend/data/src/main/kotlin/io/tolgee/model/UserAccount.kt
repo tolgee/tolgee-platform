@@ -49,6 +49,8 @@ data class UserAccount(
   @Column(name = "sso_domain")
   var ssoDomain: String? = null
 
+  var ssoRefreshToken: String? = null
+
   @Column(name = "third_party_auth_id")
   var thirdPartyAuthId: String? = null
 
