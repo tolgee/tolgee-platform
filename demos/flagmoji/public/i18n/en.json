@@ -1,0 +1,17 @@
+{
+  "add-item-add-button": "Add",
+  "add-item-input-placeholder": "New list item",
+  "app_title": "Flagmoji | Country to Flag Emoji Converter",
+  "button_fetch_flag": "View",
+  "delete-item-button": "Delete",
+  "flag_emoji_short_text": "Type a country name to see its flag emoji",
+  "hello_world": "hello family",
+  "items-count": "{count, plural, one {Showing # item} other {Showing # items}}",
+  "label": "Change App Language",
+  "menu-item-translation-methods": "Translation methods",
+  "placeholder_country_name": "Enter country name",
+  "send-via-email": "Send via e-mail",
+  "share-button": "Share",
+  "terms-conditions-agreement": "I agree with the <a>Terms and Conditions</a>",
+  "welcome-message": "Hello {name}!"
+}
