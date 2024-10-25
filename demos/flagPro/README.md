@@ -46,15 +46,16 @@ To get started with the project, run the following commands in your terminal:
 
 1. Clone the Repository
 
-````bash
+```bash
     git clone https://github.com/Vaishali785/FlagPro.git
     cd FlagPro
 ```
+
 2. Install the dependencies
 
 ```bash
 npm install
-````
+```
 
 3. Create a `.env` file in the root directory and add the following environment variables:
 
