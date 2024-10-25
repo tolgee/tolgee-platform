@@ -26,7 +26,18 @@ import java.util.*
 import kotlin.jvm.Transient
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
+@Table(
+  uniqueConstraints = [
+    UniqueConstraint(
+      columnNames = ["address_part"],
+      name = "project_address_part_unique",
+    ),
+  ],
+  indexes = [
+    Index(columnList = "user_owner_id"),
+    Index(columnList = "organization_owner_id"),
+  ],
+)
 @EntityListeners(Project.Companion.ProjectListener::class)
 @ActivityLoggedEntity
 class Project(

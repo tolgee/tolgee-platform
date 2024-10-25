@@ -23,7 +23,12 @@ export const IncludedUsage = ({
   className,
 }: Props) => {
   return (
-    <Box display="grid" justifySelf="center" {...{ sx, className }}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifySelf="center"
+      {...{ sx, className }}
+    >
       {isLegacy ? (
         <IncludedStringSlots
           className="strings"

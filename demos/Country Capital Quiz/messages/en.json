@@ -1,0 +1,16 @@
+{
+  "app-title": "Capital Quiz",
+  "capital": "capital",
+  "correct": "Correct !",
+  "correct-ans": "Correct Answer :",
+  "game-over": "Game Over!",
+  "guess": "Guess the capital - ",
+  "incorrect": "Incorrect !",
+  "question": "Question",
+  "quiz-name": "Country Capital Quiz",
+  "restart-quiz": "Restart Quiz",
+  "select-lang": "Select Language",
+  "you-lose": "You Lose !",
+  "your-score": "Your Score :",
+  "you-win": "You Win !"
+}

@@ -1,0 +1,16 @@
+{
+  "app-title": "Quiz sur les capitales",
+  "capital": "capitale",
+  "correct": "C'est exact !",
+  "correct-ans": "Bonne réponse :",
+  "game-over": "Jeu terminé!",
+  "guess": "Devinez la capitale - ",
+  "incorrect": "C'est faux !",
+  "question": "Question",
+  "quiz-name": "Quiz sur les capitales nationales",
+  "restart-quiz": "Redémarrer le quiz",
+  "select-lang": "Sélectionnez la langue",
+  "you-lose": "Tu perds !",
+  "your-score": "Votre score :",
+  "you-win": "Tu gagnes !"
+}

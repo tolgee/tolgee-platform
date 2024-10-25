@@ -8,6 +8,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
@@ -21,6 +22,10 @@ import jakarta.persistence.UniqueConstraint
       columnNames = ["task_id", "key_id"],
       name = "task_key_unique",
     ),
+  ],
+  indexes = [
+    Index(columnList = "task_id"),
+    Index(columnList = "key_id"),
   ],
 )
 class TaskKey(

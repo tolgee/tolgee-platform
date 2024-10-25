@@ -7,6 +7,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
@@ -22,6 +23,10 @@ import java.util.*
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["keyHash"], name = "api_key_hash_unique"),
     UniqueConstraint(columnNames = ["key"], name = "api_key_unique"),
+  ],
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "user_account_id"),
   ],
 )
 class ApiKey(

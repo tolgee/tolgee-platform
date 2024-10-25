@@ -19,11 +19,13 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreRemove
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
@@ -38,6 +40,12 @@ import org.springframework.context.ApplicationEventPublisher
 @ActivityReturnsExistence
 @ActivityEntityDescribingPaths(["namespace"])
 @EntityListeners(Key.Companion.KeyListeners::class)
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "namespace_id"),
+  ],
+)
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)

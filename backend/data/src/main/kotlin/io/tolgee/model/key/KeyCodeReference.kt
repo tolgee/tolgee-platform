@@ -5,11 +5,19 @@ import io.tolgee.model.UserAccount
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "key_meta_id"),
+    Index(columnList = "author_id"),
+  ],
+)
 class KeyCodeReference(
   @ManyToOne(optional = false)
   override var keyMeta: KeyMeta,

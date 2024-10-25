@@ -1,3 +1,50 @@
+## [3.80.4](https://github.com/tolgee/tolgee-platform/compare/v3.80.3...v3.80.4) (2024-10-24)
+
+
+### Bug Fixes
+
+* use less grid (safari performance) ([#2618](https://github.com/tolgee/tolgee-platform/issues/2618)) ([eb35e76](https://github.com/tolgee/tolgee-platform/commit/eb35e766a6d9bec390164ea1c12b2946f120165b))
+
+## [3.80.3](https://github.com/tolgee/tolgee-platform/compare/v3.80.2...v3.80.3) (2024-10-22)
+
+
+### Bug Fixes
+
+* add missing indexes for FKs (second part) ([#2613](https://github.com/tolgee/tolgee-platform/issues/2613)) ([1158f79](https://github.com/tolgee/tolgee-platform/commit/1158f79f78d4ad1acd25c04c2431ca0d071c54ff))
+
+## [3.80.2](https://github.com/tolgee/tolgee-platform/compare/v3.80.1...v3.80.2) (2024-10-21)
+
+
+### Bug Fixes
+
+* Import -> Collisions between files handling ([#2612](https://github.com/tolgee/tolgee-platform/issues/2612)) ([8f085a6](https://github.com/tolgee/tolgee-platform/commit/8f085a67ccd96ce7ec6657490dfa2580118dac9b))
+
+## [3.80.1](https://github.com/tolgee/tolgee-platform/compare/v3.80.0...v3.80.1) (2024-10-18)
+
+
+### Bug Fixes
+
+* avoid sub-queries when searching for data to be deleted ([#2606](https://github.com/tolgee/tolgee-platform/issues/2606)) ([c1eaf91](https://github.com/tolgee/tolgee-platform/commit/c1eaf91b6bbbfb342dec01448612858c72868ec9))
+
+# [3.80.0](https://github.com/tolgee/tolgee-platform/compare/v3.79.2...v3.80.0) (2024-10-18)
+
+
+### Bug Fixes
+
+* incorrect hint icon size ([#2601](https://github.com/tolgee/tolgee-platform/issues/2601)) ([8bf8bd6](https://github.com/tolgee/tolgee-platform/commit/8bf8bd62ed4ab788874c756392ea4b8df8db7011))
+
+
+### Features
+
+* import resolvable force override ([#2599](https://github.com/tolgee/tolgee-platform/issues/2599)) ([6f402d6](https://github.com/tolgee/tolgee-platform/commit/6f402d63a50b37b9fe39e5d8ce15527a21536e3e))
+
+## [3.79.2](https://github.com/tolgee/tolgee-platform/compare/v3.79.1...v3.79.2) (2024-10-17)
+
+
+### Bug Fixes
+
+* add missing indexes for FKs (first part) ([#2600](https://github.com/tolgee/tolgee-platform/issues/2600)) ([a49331e](https://github.com/tolgee/tolgee-platform/commit/a49331e70b71c1eb16557f7c53ae73e1a892ff0f))
+
 ## [3.79.1](https://github.com/tolgee/tolgee-platform/compare/v3.79.0...v3.79.1) (2024-10-14)
 
 

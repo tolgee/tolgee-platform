@@ -8,7 +8,9 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.codec.digest.MurmurHash3
 import org.hibernate.annotations.ColumnDefault
@@ -17,6 +19,16 @@ import java.nio.ByteBuffer
 import java.util.*
 
 @Entity
+@Table(
+  indexes = [
+    Index(
+      name = "import_translation_language_id_id",
+      columnList = "language_id",
+    ),
+    Index(columnList = "key_id"),
+    Index(columnList = "conflict_id"),
+  ],
+)
 class ImportTranslation(
   @Column(columnDefinition = "text")
   var text: String?,
