@@ -16,6 +16,7 @@ import io.tolgee.ee.utils.OAuthMultiTenantsMocks
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.service.SsoConfigService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.times
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -61,6 +63,9 @@ class OAuthTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var tenantService: TenantService
+
+  @Autowired
+  lateinit var ssoConfigService: SsoConfigService
 
   private val oAuthMultiTenantsMocks: OAuthMultiTenantsMocks by lazy {
     OAuthMultiTenantsMocks(authMvc, restTemplate, tenantService, jwtProcessor)
@@ -164,7 +169,7 @@ class OAuthTest : AuthorizedControllerTest() {
     val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(user.ssoRefreshToken).isNotNull
-    assertThat(user.ssoDomain).isNotNull
+    assertThat(user.ssoConfig).isNotNull
     assertThat(user.thirdPartyAuthType).isEqualTo("sso")
     val isValid =
       cacheWithExpirationManager
@@ -182,12 +187,18 @@ class OAuthTest : AuthorizedControllerTest() {
     val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(
-      oAuthService.verifyUserIsStillEmployed(user.ssoDomain, user.id, user.ssoRefreshToken, user.thirdPartyAuthType),
+      oAuthService.verifyUserIsStillEmployed(
+        user.ssoConfig?.domainName,
+        user.id,
+        user.ssoRefreshToken,
+        user.thirdPartyAuthType,
+      ),
     ).isTrue
   }
 
   @Test
   fun `after timeout should call token endpoint `() {
+    clearInvocations(restTemplate)
     loginAsSsoUser()
     val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
@@ -195,7 +206,12 @@ class OAuthTest : AuthorizedControllerTest() {
 
     oAuthMultiTenantsMocks.mockTokenExchange("http://tokenUri")
     assertThat(
-      oAuthService.verifyUserIsStillEmployed(user.ssoDomain, user.id, user.ssoRefreshToken, user.thirdPartyAuthType),
+      oAuthService.verifyUserIsStillEmployed(
+        user.ssoConfig?.domainName,
+        user.id,
+        user.ssoRefreshToken,
+        user.thirdPartyAuthType,
+      ),
     ).isTrue
     verify(restTemplate, times(2))?.exchange( // first call is in loginAsSsoUser
       anyString(),
