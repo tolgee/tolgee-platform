@@ -28,7 +28,7 @@ class UserCredentialsService(
     }
 
     if (userAccount.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
-      throw AuthenticationException(Message.SSO_USER_CANT_LOGIN_WITH_NATIVE)
+      throw AuthenticationException(Message.SSO_USER_OPERATION_UNAVAILABLE)
     }
 
     checkNativeUserCredentials(userAccount, password)

@@ -400,6 +400,10 @@ class UserAccountService(
       throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 
+    if (userAccount.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
+      throw BadRequestException(Message.SSO_USER_OPERATION_UNAVAILABLE)
+    }
+
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
