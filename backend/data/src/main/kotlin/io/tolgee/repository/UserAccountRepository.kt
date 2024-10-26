@@ -83,13 +83,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   ): Optional<UserAccount>
 
   @Query(
-    """
-    from UserAccount ua 
-      where ua.thirdPartyAuthId = :thirdPartyAuthId 
-        and ua.ssoDomain = :domain
-        and ua.deletedAt is null
-        and ua.disabledAt is null
-  """,
+    "SELECT u FROM UserAccount u JOIN u.ssoConfig s WHERE s.domainName = :domain AND u.thirdPartyAuthId = :thirdPartyAuthId",
   )
   fun findBySsoDomain(
     thirdPartyAuthId: String,

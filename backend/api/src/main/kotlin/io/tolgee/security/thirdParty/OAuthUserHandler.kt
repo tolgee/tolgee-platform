@@ -7,6 +7,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.service.SsoConfigService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -17,6 +18,7 @@ class OAuthUserHandler(
   private val signUpService: SignUpService,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
+  private val ssoConfService: SsoConfigService,
   private val cacheWithExpirationManager: CacheWithExpirationManager,
 ) {
   fun findOrCreateUser(
@@ -54,7 +56,9 @@ class OAuthUserHandler(
         }
       newUserAccount.name = name
       newUserAccount.thirdPartyAuthId = userResponse.sub
-      newUserAccount.ssoDomain = userResponse.domain
+      if (userResponse.domain != null) {
+        newUserAccount.ssoConfig = ssoConfService.save(newUserAccount, userResponse.domain!!)
+      }
       newUserAccount.thirdPartyAuthType = thirdPartyAuthType
       newUserAccount.ssoRefreshToken = userResponse.refreshToken
       newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY

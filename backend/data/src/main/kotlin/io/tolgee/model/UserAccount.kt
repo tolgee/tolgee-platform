@@ -46,8 +46,8 @@ data class UserAccount(
   @Column(name = "third_party_auth_type")
   var thirdPartyAuthType: String? = null
 
-  @Column(name = "sso_domain")
-  var ssoDomain: String? = null
+  @ManyToOne()
+  var ssoConfig: SsoConfig? = null
 
   var ssoRefreshToken: String? = null
 
