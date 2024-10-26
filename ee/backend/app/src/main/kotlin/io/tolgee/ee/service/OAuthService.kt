@@ -16,6 +16,7 @@ import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
 import io.tolgee.ee.model.SsoTenant
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.OAuthServiceEe
@@ -159,7 +160,7 @@ class OAuthService(
         organizationId = tenant.organizationId,
         refreshToken = refreshToken,
       )
-    val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, "sso")
+    val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, ThirdPartyAuthType.SSO)
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
   }
@@ -170,7 +171,12 @@ class OAuthService(
     refreshToken: String?,
     thirdPartyAuth: String?,
   ): Boolean {
-    if (thirdPartyAuth != "sso") {
+    val thirdPartyAuthType =
+      thirdPartyAuth?.let {
+        runCatching { ThirdPartyAuthType.valueOf(it.uppercase()) }.getOrNull()
+      }
+
+    if (thirdPartyAuthType != ThirdPartyAuthType.SSO) {
       return true
     }
 

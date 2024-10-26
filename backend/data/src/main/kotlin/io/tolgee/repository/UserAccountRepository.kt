@@ -2,6 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.context.annotation.Lazy
@@ -79,7 +80,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   )
   fun findThirdByThirdParty(
     thirdPartyAuthId: String,
-    thirdPartyAuthType: String,
+    thirdPartyAuthType: ThirdPartyAuthType,
   ): Optional<UserAccount>
 
   @Query(

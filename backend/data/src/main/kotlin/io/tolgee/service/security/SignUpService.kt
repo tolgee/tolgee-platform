@@ -7,6 +7,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
@@ -58,7 +59,7 @@ class SignUpService(
       invitationService.accept(invitation.code, user)
     }
 
-    if (user.thirdPartyAuthType == "sso") {
+    if (user.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
       return user
     }
 

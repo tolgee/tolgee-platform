@@ -17,6 +17,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -78,7 +79,7 @@ class OrganizationService(
       throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
-    if (userAccount.thirdPartyAuthType == "sso") {
+    if (userAccount.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
       throw PermissionException(Message.SSO_USER_CANNOT_CREATE_ORGANIZATION)
     }
 

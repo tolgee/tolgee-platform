@@ -18,6 +18,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -208,7 +209,7 @@ class UserAccountService(
   }
 
   fun findByThirdParty(
-    type: String,
+    type: ThirdPartyAuthType,
     id: String,
   ): Optional<UserAccount> = userAccountRepository.findThirdByThirdParty(id, type)
 

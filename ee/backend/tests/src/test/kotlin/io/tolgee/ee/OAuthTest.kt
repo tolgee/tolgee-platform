@@ -170,7 +170,7 @@ class OAuthTest : AuthorizedControllerTest() {
     val user = userAccountService.get(userName)
     assertThat(user.ssoRefreshToken).isNotNull
     assertThat(user.ssoConfig).isNotNull
-    assertThat(user.thirdPartyAuthType).isEqualTo("sso")
+    assertThat(user.thirdPartyAuthType?.code()).isEqualTo("sso")
     val isValid =
       cacheWithExpirationManager
         .getCache(
@@ -191,7 +191,7 @@ class OAuthTest : AuthorizedControllerTest() {
         user.ssoConfig?.domainName,
         user.id,
         user.ssoRefreshToken,
-        user.thirdPartyAuthType,
+        user.thirdPartyAuthType?.code(),
       ),
     ).isTrue
   }
@@ -210,7 +210,7 @@ class OAuthTest : AuthorizedControllerTest() {
         user.ssoConfig?.domainName,
         user.id,
         user.ssoRefreshToken,
-        user.thirdPartyAuthType,
+        user.thirdPartyAuthType?.code(),
       ),
     ).isTrue
     verify(restTemplate, times(2))?.exchange( // first call is in loginAsSsoUser

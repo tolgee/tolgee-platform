@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.SignUpService
@@ -76,7 +77,7 @@ class GoogleOAuthDelegate(
 
         val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-        val userAccountOptional = userAccountService.findByThirdParty("google", userResponse!!.sub!!)
+        val userAccountOptional = userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse!!.sub!!)
         val user =
           userAccountOptional.orElseGet {
             userAccountService.findActive(googleEmail)?.let {
@@ -88,7 +89,7 @@ class GoogleOAuthDelegate(
               ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
             newUserAccount.name = userResponse.name ?: (userResponse.given_name + " " + userResponse.family_name)
             newUserAccount.thirdPartyAuthId = userResponse.sub
-            newUserAccount.thirdPartyAuthType = "google"
+            newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
             newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
             signUpService.signUp(newUserAccount, invitationCode, null)
 

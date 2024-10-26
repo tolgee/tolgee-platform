@@ -30,9 +30,9 @@ data class UserAccountDto(
         deleted = entity.deletedAt != null,
         tokensValidNotBefore = entity.tokensValidNotBefore,
         emailVerified = entity.emailVerification == null,
-        thirdPartyAuth = entity.thirdPartyAuthType,
+        thirdPartyAuth = entity.thirdPartyAuthType?.code(),
         ssoRefreshToken = entity.ssoRefreshToken,
-        ssoDomain = entity.ssoConfig?.domainName ?: "",
+        ssoDomain = entity.ssoConfig?.domainName,
       )
   }
 

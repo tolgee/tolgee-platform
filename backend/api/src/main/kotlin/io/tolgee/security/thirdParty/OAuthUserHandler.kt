@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.service.SsoConfigService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -24,16 +25,16 @@ class OAuthUserHandler(
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
     invitationCode: String?,
-    thirdPartyAuthType: String,
+    thirdPartyAuthType: ThirdPartyAuthType,
   ): UserAccount {
     val userAccountOptional =
-      if (thirdPartyAuthType == "sso" && userResponse.domain != null) {
+      if (thirdPartyAuthType == ThirdPartyAuthType.SSO && userResponse.domain != null) {
         userAccountService.findByDomainSso(userResponse.domain, userResponse.sub!!)
       } else {
         userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
       }
 
-    if (userAccountOptional.isPresent && thirdPartyAuthType == "sso") {
+    if (userAccountOptional.isPresent && thirdPartyAuthType == ThirdPartyAuthType.SSO) {
       updateRefreshToken(userAccountOptional.get(), userResponse.refreshToken)
       cacheSsoUser(userAccountOptional.get().id, thirdPartyAuthType)
     }
@@ -66,7 +67,7 @@ class OAuthUserHandler(
       signUpService.signUp(newUserAccount, invitationCode, null)
 
       // grant role to user only if request is not from oauth2 delegate
-      if (userResponse.organizationId != null && thirdPartyAuthType != "oauth2") {
+      if (userResponse.organizationId != null && thirdPartyAuthType != ThirdPartyAuthType.OAUTH2) {
         organizationRoleService.grantRoleToUser(
           newUserAccount,
           userResponse.organizationId,
@@ -92,9 +93,9 @@ class OAuthUserHandler(
 
   private fun cacheSsoUser(
     userId: Long,
-    thirdPartyAuthType: String,
+    thirdPartyAuthType: ThirdPartyAuthType,
   ) {
-    if (thirdPartyAuthType == "sso") {
+    if (thirdPartyAuthType == ThirdPartyAuthType.SSO) {
       cacheWithExpirationManager.putCache(Caches.IS_SSO_USER_VALID, userId, true)
     }
   }
