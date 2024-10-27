@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
+import io.tolgee.configuration.tolgee.SsoGlobalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
@@ -66,6 +67,9 @@ class OAuthTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var ssoConfigService: SsoConfigService
+
+  @Autowired
+  lateinit var ssoGlobalProperties: SsoGlobalProperties
 
   private val oAuthMultiTenantsMocks: OAuthMultiTenantsMocks by lazy {
     OAuthMultiTenantsMocks(authMvc, restTemplate, tenantService, jwtProcessor)
@@ -219,6 +223,19 @@ class OAuthTest : AuthorizedControllerTest() {
       any(HttpEntity::class.java),
       eq(OAuth2TokenResponse::class.java),
     )
+  }
+
+  @Test
+  fun `sso auth works via global config`() {
+    ssoGlobalProperties.enabled = true
+    ssoGlobalProperties.domain = "registrationId"
+    ssoGlobalProperties.clientId = "clientId"
+    ssoGlobalProperties.clientSecret = "clientSecret"
+    ssoGlobalProperties.authorizationUrl = "authorizationUri"
+    ssoGlobalProperties.tokenUrl = "http://tokenUri"
+    ssoGlobalProperties.redirectUriBase = "http://redirectUriBase"
+    ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
+    oAuthMultiTenantsMocks.authorize("registrationId")
   }
 
   fun organizationDto() =
