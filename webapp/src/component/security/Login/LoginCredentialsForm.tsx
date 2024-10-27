@@ -1,21 +1,18 @@
-import React, { RefObject } from 'react';
-import { Button, Link as MuiLink, styled, Typography } from '@mui/material';
+import React, {RefObject} from 'react';
+import {Button, Link as MuiLink, styled, Typography} from '@mui/material';
 import Box from '@mui/material/Box';
-import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
+import {T, useTranslate} from '@tolgee/react';
+import {Link} from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 
-import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.globalContext/helpers';
+import {LINKS} from 'tg.constants/links';
+import {useConfig} from 'tg.globalContext/helpers';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { TextField } from 'tg.component/common/form/fields/TextField';
-import { useOAuthServices } from 'tg.hooks/useOAuthServices';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { ApiError } from 'tg.service/http/ApiError';
+import {StandardForm} from 'tg.component/common/form/StandardForm';
+import {TextField} from 'tg.component/common/form/fields/TextField';
+import {useOAuthServices} from 'tg.hooks/useOAuthServices';
+import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
+import {ApiError} from 'tg.service/http/ApiError';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -33,6 +30,7 @@ type LoginViewCredentialsProps = {
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
   const { login } = useGlobalActions();
+  const t = useTranslate();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
   const oAuthServices = useOAuthServices();
 
@@ -73,17 +71,25 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 to={LINKS.SSO_LOGIN.build()}
                 size="medium"
                 endIcon={
-                  <img
-                    src={remoteConfig.customLoginLogo}
-                    alt="Custom Logo"
-                    style={{ width: 24, height: 24 }}
-                  />
+                  remoteConfig.customLoginLogo ? (
+                      <img
+                          src={remoteConfig.customLoginLogo}
+                          alt="Custom Logo"
+                          style={{ width: 24, height: 24 }}
+                      />
+                  ) : (
+                      <LoginIcon />
+                  )
                 }
                 variant="outlined"
                 style={{ marginBottom: '0.5rem' }}
                 color="inherit"
               >
-                {remoteConfig.customLoginText}
+                {remoteConfig.customLoginText ? (
+                    <span>{remoteConfig.customLoginText}</span>
+                ) : (
+                    <T keyName="login_sso" />
+                )}
               </Button>
             )}
 

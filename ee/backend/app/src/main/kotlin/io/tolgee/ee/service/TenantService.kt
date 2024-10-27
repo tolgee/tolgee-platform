@@ -1,6 +1,9 @@
 package io.tolgee.ee.service
 
+import io.tolgee.configuration.tolgee.SsoGlobalProperties
+import io.tolgee.constants.Message
 import io.tolgee.ee.data.CreateProviderRequest
+import io.tolgee.ee.exceptions.OAuthAuthorizationException
 import io.tolgee.ee.model.SsoTenant
 import io.tolgee.ee.repository.TenantRepository
 import io.tolgee.exceptions.BadRequestException
@@ -12,10 +15,36 @@ import java.net.URISyntaxException
 @Service
 class TenantService(
   private val tenantRepository: TenantRepository,
+  private val ssoGlobalProperties: SsoGlobalProperties,
 ) {
   fun getById(id: Long): SsoTenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
 
-  fun getByDomain(domain: String): SsoTenant = tenantRepository.findByDomain(domain) ?: throw NotFoundException()
+  fun getByDomain(domain: String): SsoTenant =
+    if (ssoGlobalProperties.enabled) {
+      buildGlobalTenant()
+    } else {
+      tenantRepository.findByDomain(domain) ?: throw NotFoundException()
+    }
+
+  private fun buildGlobalTenant(): SsoTenant =
+    SsoTenant().apply {
+      domain = validateProperty(ssoGlobalProperties.domain, "domain")
+      clientId = validateProperty(ssoGlobalProperties.clientId, "clientId")
+      clientSecret = validateProperty(ssoGlobalProperties.clientSecret, "clientSecret")
+      authorizationUri = validateProperty(ssoGlobalProperties.authorizationUrl, "authorizationUrl")
+      tokenUri = validateProperty(ssoGlobalProperties.tokenUrl, "tokenUrl")
+      redirectUriBase = validateProperty(ssoGlobalProperties.redirectUriBase, "redirectUriBase")
+      jwkSetUri = validateProperty(ssoGlobalProperties.jwkSetUri, "jwkSetUri")
+    }
+
+  private fun validateProperty(
+    property: String?,
+    propertyName: String,
+  ): String =
+    property ?: throw OAuthAuthorizationException(
+      Message.SSO_GLOBAL_CONFIG_MISSING_PROPERTIES,
+      "$propertyName is missing in global SSO configuration",
+    )
 
   fun save(tenant: SsoTenant): SsoTenant = tenantRepository.save(tenant)
 

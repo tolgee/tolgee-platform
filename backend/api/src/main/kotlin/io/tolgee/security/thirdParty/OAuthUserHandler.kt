@@ -67,7 +67,10 @@ class OAuthUserHandler(
       signUpService.signUp(newUserAccount, invitationCode, null)
 
       // grant role to user only if request is not from oauth2 delegate
-      if (userResponse.organizationId != null && thirdPartyAuthType != ThirdPartyAuthType.OAUTH2) {
+      if (userResponse.organizationId != null &&
+        thirdPartyAuthType != ThirdPartyAuthType.OAUTH2 &&
+        invitationCode == null
+      ) {
         organizationRoleService.grantRoleToUser(
           newUserAccount,
           userResponse.organizationId,
@@ -81,10 +84,22 @@ class OAuthUserHandler(
     }
   }
 
-  private fun updateRefreshToken(
+  fun updateRefreshToken(
     userAccount: UserAccount,
     refreshToken: String?,
   ) {
+    if (userAccount.ssoRefreshToken != refreshToken) {
+      userAccount.ssoRefreshToken = refreshToken
+      userAccountService.save(userAccount)
+    }
+  }
+
+  fun updateRefreshToken(
+    userAccountId: Long,
+    refreshToken: String?,
+  ) {
+    val userAccount = userAccountService.get(userAccountId)
+
     if (userAccount.ssoRefreshToken != refreshToken) {
       userAccount.ssoRefreshToken = refreshToken
       userAccountService.save(userAccount)

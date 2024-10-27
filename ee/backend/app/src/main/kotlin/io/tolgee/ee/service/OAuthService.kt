@@ -217,8 +217,9 @@ class OAuthService(
           request,
           OAuth2TokenResponse::class.java,
         )
-      if (response.body?.refresh_token == refreshToken) {
+      if (response.body?.refresh_token != null) {
         cacheWithExpirationManager.putCache(Caches.IS_SSO_USER_VALID, userId, true)
+        oAuthUserHandler.updateRefreshToken(userId, response.body?.refresh_token)
         return true
       }
       false

@@ -51,6 +51,7 @@ data class UserAccount(
   @ManyToOne()
   var ssoConfig: SsoConfig? = null
 
+  @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
   var ssoRefreshToken: String? = null
 
   @Column(name = "third_party_auth_id")
