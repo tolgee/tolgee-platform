@@ -1,0 +1,79 @@
+body {
+    /* background-color: #1c2d43; */
+    color: white;
+    font-family: 'Poppins', sans-serif;
+}
+.container, .listing-section {
+    background: linear-gradient(to bottom right, rgba(173, 58, 105, 0.8), rgba(28, 45, 67, 0.8)); /* Gradient background */
+    backdrop-filter: blur(15px); /* Blurred effect */
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 11px;
+    width: 100%;
+    max-width: 1080px; /* Set a max width */
+}
+.listing-section{
+    margin: 6px auto;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.section {
+    margin-top: 20px;
+}
+.form-control {
+    background-color: #ffffff;
+    color: #000000;
+}
+.navbar {
+    /* background-color: transparent; Transparent navbar */
+}
+
+.gradient-btn {
+    color: #9d9595; /* Change text color on hover */
+    
+    background-color: #ffffff; /* Default button color */
+    transition: background 0.3s ease;
+    border: none; /* Remove default border */
+    background: linear-gradient(to bottom right, #ad3a69, #1c2d43); /* Gradient on hover */
+}
+
+.gradient-btn:hover {
+    background: #3e3e3e;
+    color: rgb(255, 255, 255); /* Change text color on hover */
+    font-weight: 500;
+    border: 1px solid #fff;
+}
+.heading{
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 2px solid #9d9595;
+    opacity: 70%;
+}
+#bucket-list-items{
+    max-height: 50vh; /* Set your desired max height */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    border: 1px solid #ccc; /* Optional: add a border for better visibility */
+    padding: 10px; /* Optional: add some padding */
+    background-color: #343a40; /* Match the background color */
+}
+.list-item:hover{
+    background-color: #8f9192; /* Match the background color */
+
+}
+.main-container{
+    background: #fafafa;
+    padding: 2px;
+}
+.heading.company-name{
+    border: none;
+    color: #ad3a69;
+    font-weight: bolder;
+}
+
+.checked {
+    text-decoration: line-through; /* This will add a line through the text */
+    color: gray; /* Optional: Change the color to indicate it's checked */
+}
