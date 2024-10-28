@@ -48,7 +48,7 @@ Welcome to **CineCue** - your ultimate movie finder based on genres in multiple 
 
 4. **Set Up Tolgee API Key**:
     - Sign up for an API key on [tolgee.io](https://tolgee.io/)
-    - Start a new project and upload the `tolgee.json` file into the project.
+    - Start a new project and upload the `.json` files from the folder `tolgee-json` into the project.
     - Add the API key to the `app/controllers/application_controller.rb` file in the `api_key` variable on the 11ᵗʰ line.
     - Add the Project ID to the `app/controllers/application_controller.rb` file in the `project_id` variable on the 12ᵗʰ line.
 

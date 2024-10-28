@@ -1,0 +1,23 @@
+{
+  "bookmark": "Marque-page",
+  "books": "Vos favoris",
+  "change_lang": "Changez votre langue ici :",
+  "change_pass": "Changez votre mot de passe ici:",
+  "error": "Erreur interne du serveur,Oups! Le serveur a rencontré un problème.",
+  "findmov": "Trouvez votre prochain film",
+  "genre": "Action,Aventure,Animation,Comédie,Crime,Documentaire,Drame,Famille,Fantastique,Histoire,Horreur,Musique,Mystère,Romance,Science-fiction,Téléfilm,Thriller,Guerre,Western",
+  "get_sug": "Obtenez des suggestions!",
+  "login": "Se connecter",
+  "logout": "Déconnexion",
+  "mov_sug": "Suggestions de films",
+  "no_books": "Aucun film ajouté à vos favoris pour le moment !",
+  "no_mov": "Sélectionnez un genre pour commencer !",
+  "not_found": "Page non trouvée,La page que vous recherchez n'existe pas.",
+  "pass": "Changer le mot de passe",
+  "sel_genre": "Sélectionnez vos genres préférés:",
+  "set_lang": "Définir la langue",
+  "set_pass": "Définir le mot de passe",
+  "signup": "S'inscrire",
+  "signup_page": "Nom d'utilisateur,Email,Langue,Mot de passe,Le mot de passe doit contenir entre 8 et 32 caractères,Confirmer le mot de passe,Répéter le mot de passe",
+  "unbookmark": "Supprimer des favoris"
+}
