@@ -7,17 +7,18 @@ Welcome to **CineCue** - your ultimate movie finder based on genres in multiple 
 - [Features](#features)
 - [Technologies Used](#technologies-used)
 - [Installation](#installation)
+- [Article](#article)
 
 ## Screenshots
-![HomepageEN](path/to/screenshot1.png)
-![LoginHI](path/to/screenshot2.png)
+![HomepageEN](screenshots/en.png)
 
 <details>
-  <summary>Additional Screenshots</summary>
+    <summary>Additional Screenshots</summary>
 
-  ![HomepageTR](path/to/screenshot3.png)
-  ![PassUR](path/to/screenshot4.png)
-  ![SignupFR](path/to/screenshot5.png)
+![LoginHI](screenshots/hi.png)
+![HomepageTR](screenshots/tr.png)
+![PassUR](screenshots/ur.png)
+![SignupFR](screenshots/fr.png)
 
 </details>
 
@@ -68,6 +69,6 @@ Welcome to **CineCue** - your ultimate movie finder based on genres in multiple 
 7. **Access the App**:
     - Open [http://localhost:8080/](http://localhost:8080/) in your browser to start using CineCue!
 
----
+# Article
 
-Enjoy your movie search experience with CineCue!
+Here is my article on [DEV.to](https://dev.to/sixzix/cinecue-a-seamless-localization-demo-with-ror-360j)
