@@ -7,10 +7,6 @@ import enPhrases from '@/data/en-phrases.json';
 import esPhrases from '@/data/es-phrases.json';
 import hiPhrases from '@/data/hi-phrases.json';
 import jaPhrases from '@/data/ja-phrases.json';
-
-// import { LangSelector } from './LangSelector';
-// import { getTranslate } from '@/tolgee/server';
-// import { useTolgee } from '@tolgee/react';
 import { useTranslate } from '@tolgee/react';
 
 
@@ -48,7 +44,7 @@ export default function Book() {
     if (currentPage > 0) {
       setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentPage(currentPage - 1);
+        setCurrentPage(currentPage - 2);
         setIsTransitioning(false);
       }, 300);
     }
@@ -58,7 +54,7 @@ export default function Book() {
     if (currentPage < resultPhrases.length - 1) {
       setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentPage(currentPage + 1);
+        setCurrentPage(currentPage + 2);
         setIsTransitioning(false);
       }, 300);
     }
