@@ -68,14 +68,14 @@ class RegistrationsController < ApplicationController
   def edit_lang_form
     if @user
       if @user.update(lang_params)
-        redirect_to root_path
+        redirect_to request.referer || root_path
       else
         flash[:alert] = "Could not save new language!"
         render :edit_pass
       end
     else
       cookies[:lang] = lang_params()[:lang]
-      redirect_to root_path
+      redirect_to request.referer || root_path
     end
   end
 
