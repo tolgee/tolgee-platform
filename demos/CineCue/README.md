@@ -35,11 +35,7 @@ Welcome to **CineCue** - your ultimate movie finder based on genres in multiple 
 - **TMDb API**: Provides the latest movie data, enabling real-time genre-based recommendations and up-to-date information.
 
 ## Installation
-1. **Clone the Repository**:
-    ```bash
-    git clone https://github.com/your-username/cinecue.git
-    cd cinecue
-    ```
+1. **Clone the Repository**: clone the tolgee repo and see the demo under the folder `demos/CineCue`
 
 2. **Install Dependancies**:
     ```bash
