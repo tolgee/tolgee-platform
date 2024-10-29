@@ -1,7 +1,5 @@
 package io.tolgee.model.enums
 
-import io.mockk.InternalPlatformDsl.toArray
-
 enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
   NONE(arrayOf()),
   VIEW(
