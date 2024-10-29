@@ -37,10 +37,10 @@ Eine Open-Source-Alternative zu Crowdin, Phrase oder Lokalise
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
 
-[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.de.md)
+[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktoberfest2024.de.md)
 
 Wir verschicken Swags für tolle Demos zusammengeführte PRs! Ausführliche Informationen finden Sie in
-unserem [Hacktobefest2024.de.md](./Hacktobefest2024.de.md)
+unserem [Hacktoberfest2024.de.md](./Hacktoberfest2024.de.md)
 
 ### Übermittlungsarten
 - **Pull Requests**: Senden Sie einen Pull Request zu Problemen, die mit #hacktoberfest markiert sind
@@ -64,7 +64,7 @@ Je nach den Punkten erhältst du eine bestimmte Menge an Beute:
 
 Bitte starten Sie das [Tolgee-Repository](https://github.com/tolgee/tolgee-platform) als Teil Ihres Beitrags!
 
-Ausführliche Informationen finden Sie in unserem [Hacktobefest2024.de.md](./Hacktobefest2024.de.md)
+Ausführliche Informationen finden Sie in unserem [Hacktoberfest2024.de.md](./Hacktoberfest2024.de.md)
 
 Treten Sie der Tolgee-Community bei [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ), um Ihre Ideen, Vorschläge oder Fragen zu teilen und sich mit anderen Benutzern und Mitwirkenden zu vernetzen.
 
