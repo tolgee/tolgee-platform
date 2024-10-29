@@ -218,7 +218,9 @@ class OAuthTest : AuthorizedControllerTest() {
         user.thirdPartyAuthType?.code(),
       ),
     ).isTrue
-    verify(restTemplate, times(2))?.exchange( // first call is in loginAsSsoUser
+
+    // first call is in loginAsSsoUser
+    verify(restTemplate, times(2))?.exchange(
       anyString(),
       eq(HttpMethod.POST),
       any(HttpEntity::class.java),
