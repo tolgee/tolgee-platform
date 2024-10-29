@@ -58,19 +58,29 @@ export const Plan: FC<Props> = ({
           {plan.name}
         </PlanTitle>
 
-        <PlanFeaturesBox sx={{ gap: '18px' }}>
-          <IncludedFeatures
-            sx={{ minHeight: featuresMinHeight }}
-            features={filteredFeatures}
-            topFeature={topFeature}
-          />
-          {plan.public && <ShowAllFeaturesLink />}
-          <IncludedUsage
-            includedUsage={plan.includedUsage}
-            isLegacy={isPlanLegacy(plan)}
-            highlightColor={highlightColor}
-          />
-        </PlanFeaturesBox>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="stretch"
+          flexGrow={1}
+        >
+          <PlanFeaturesBox sx={{ gap: '18px' }}>
+            <IncludedFeatures
+              sx={{ minHeight: featuresMinHeight }}
+              features={filteredFeatures}
+              topFeature={topFeature}
+            />
+            {plan.public && (
+              <ShowAllFeaturesLink sx={{ alignSelf: 'center' }} />
+            )}
+            <IncludedUsage
+              includedUsage={plan.includedUsage}
+              isLegacy={isPlanLegacy(plan)}
+              highlightColor={highlightColor}
+              sx={{ alignSelf: 'center' }}
+            />
+          </PlanFeaturesBox>
+        </Box>
 
         {plan.prices && (
           <PlanPrice
@@ -82,7 +92,7 @@ export const Plan: FC<Props> = ({
           />
         )}
 
-        <Box sx={{ paddingTop: '20px', justifySelf: 'center' }}>
+        <Box sx={{ paddingTop: '20px', alignSelf: 'center' }}>
           {plan.type === 'CONTACT_US' ? <ContactUsButton /> : action}
         </Box>
       </PlanContent>

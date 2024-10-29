@@ -1,0 +1,16 @@
+{
+  "app-title": "首都クイズ",
+  "capital": "首都",
+  "correct": "正しい!",
+  "correct-ans": "正解:",
+  "game-over": "ゲームオーバー！",
+  "guess": "首都を当ててください -",
+  "incorrect": "正しくない ！",
+  "question": "質問",
+  "quiz-name": "国の首都クイズ",
+  "restart-quiz": "クイズを再開",
+  "select-lang": "言語選択",
+  "you-lose": "あなたの負け！",
+  "your-score": "あなたのスコア:",
+  "you-win": "あなたの勝ち！"
+}

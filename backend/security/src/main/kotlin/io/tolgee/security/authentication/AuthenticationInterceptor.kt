@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authentication
 
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
 import jakarta.servlet.DispatcherType
@@ -33,6 +34,7 @@ import org.springframework.web.servlet.HandlerInterceptor
 @Component
 class AuthenticationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
+  private val authenticationProperties: AuthenticationProperties,
 ) : HandlerInterceptor, Ordered {
   override fun preHandle(
     request: HttpServletRequest,
@@ -67,6 +69,7 @@ class AuthenticationInterceptor(
 
     if (
       requiresSuperAuth &&
+      authenticationProperties.enabled &&
       authenticationFacade.authenticatedUser.needsSuperJwt &&
       !authenticationFacade.isUserSuperAuthenticated
     ) {

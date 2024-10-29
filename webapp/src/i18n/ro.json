@@ -863,6 +863,7 @@
   "order_translations_keys_subtitle": "{value, plural, one {# cheie} few {# chei} other {# de chei}}",
   "order_translations_title": "Ordonați traducerea profesională",
   "order_translation_submit_button": "Ordonați traducerea",
+  "order_translation_success_message": "Comandă de traducere creată",
   "organization_add_provider_success_message": "Furnizorul dvs. SSO a fost adăugat",
   "organization_already_subscribed": "Organizația este deja abonată la un plan.",
   "organization_apps_title": "Aplicații",

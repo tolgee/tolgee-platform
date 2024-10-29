@@ -39,7 +39,7 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktoberfest2024.md)
 
 We are sending swags for awesome demos merged PRs! For complete information, check
-our [Hacktobefest2024.md](./Hacktoberfest2024.md)
+our [Hacktoberfest2024.md](./Hacktoberfest2024.md)
 
 ### Submission Types
 - **Pull Requests**: Submit a pull request addressing issues tagged with #hacktoberfest
@@ -63,7 +63,7 @@ According to the points, you'll get an amount of swag:
 
 Please start the [Tolgee repository](https://github.com/tolgee/tolgee-platform) as part of your contribution!
 
-For complete information, check our [Hacktobefest2024.md](./Hacktoberfest2024.md)
+For complete information, check our [Hacktoberfest2024.md](./Hacktoberfest2024.md)
 
 Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) to share your ideas, suggestions, or questions and connect with other users and contributors.
 

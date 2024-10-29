@@ -1,0 +1,16 @@
+{
+  "days": {
+    "fri": "Vie",
+    "mon": "Lun",
+    "sat": "Sáb",
+    "sun": "Dom",
+    "thurs": "Jue",
+    "tue": "Mar",
+    "wed": "Mié"
+  },
+  "forecast": "Pronóstico para los próximos 3 días",
+  "humidity": "Humedad",
+  "label": "Cambiar idioma",
+  "search_city": "Buscar ciudad",
+  "wind_speed": "Velocidad del viento"
+}

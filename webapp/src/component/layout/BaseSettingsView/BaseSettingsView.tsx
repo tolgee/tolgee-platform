@@ -9,19 +9,17 @@ import { SettingsMenu, SettingsMenuItem } from './SettingsMenu';
 import { BaseViewAddButton } from '../BaseViewAddButton';
 
 const StyledWrapper = styled('div')`
-  display: grid;
-  grid-template: auto / auto 1fr;
+  display: flex;
   gap: 32px;
   @container main-container (max-width: 800px) {
-    grid-template: auto auto / auto;
+    flex-direction: column;
   }
 `;
 
 const StyledContainer = styled(Container)`
-  display: grid;
+  display: flex;
   padding: 0px !important;
   container: main-container / inline-size;
-  grid-template-rows: auto 1fr;
 `;
 
 const StyledMenu = styled('div')`
@@ -29,7 +27,7 @@ const StyledMenu = styled('div')`
 `;
 
 const StyledContent = styled(Box)`
-  display: grid;
+  flex-grow: 1;
 `;
 
 type Props = BaseViewProps & {

@@ -1,0 +1,17 @@
+{
+  "China": "The dragon is a symbol of power in Chinese culture.",
+  "country_china": "China",
+  "country_france": "France",
+  "country_india": "India",
+  "country_russia": "Russia",
+  "country_USA": "USA",
+  "France": "The Eiffel Tower is a symbol of France's rich culture.",
+  "got it": "Got it!",
+  "How to Play": "How to Play",
+  "india": "The lotus flower represents purity and beauty in India.",
+  "Instruction": "Drag the items from the left column and match them with the corresponding items in the right column. You gain points for correct matches and lose points for incorrect ones. Try to score as high as you can!",
+  "russia": "Matryoshka dolls symbolize family and unity in Russia.",
+  "USA": "The bald eagle represents strength and freedom in the USA.",
+  "congrats": "Congratulations! You scored {score} points!",
+  "loose": "Your score is {score}. Try again to improve!"
+}
