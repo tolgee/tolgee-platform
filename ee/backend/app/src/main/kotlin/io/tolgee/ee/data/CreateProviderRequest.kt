@@ -13,8 +13,6 @@ data class CreateProviderRequest(
   @field:NotEmpty
   val authorizationUri: String,
   @field:NotEmpty
-  val redirectUri: String,
-  @field:NotEmpty
   val tokenUri: String,
   @field:NotEmpty
   val jwkSetUri: String,

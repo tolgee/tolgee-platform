@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.DomainRequest
 import io.tolgee.ee.data.SsoUrlResponse
@@ -21,6 +22,7 @@ class OAuth2CallbackController(
   private val tenantService: TenantService,
   private val userAccountService: UserAccountService,
   private val jwtService: JwtService,
+  private val frontendUrlProvider: FrontendUrlProvider,
 ) {
   @PostMapping("/get-authentication-url")
   fun getAuthenticationUrl(
@@ -42,7 +44,7 @@ class OAuth2CallbackController(
   ): String =
     "${tenant.authorizationUri}?" +
       "client_id=${tenant.clientId}&" +
-      "redirect_uri=${tenant.redirectUriBase + "/login/open-id/auth-callback"}&" +
+      "redirect_uri=${frontendUrlProvider.url + "/login/open-id/auth-callback"}&" +
       "response_type=code&" +
       "scope=openid profile email offline_access&" +
       "state=$state"

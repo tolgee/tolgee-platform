@@ -88,4 +88,7 @@
             <column name="token_uri" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1730212830679-1">
+        <dropColumn columnName="redirect_uri_base" tableName="tenant"/>
+    </changeSet>
 </databaseChangeLog>

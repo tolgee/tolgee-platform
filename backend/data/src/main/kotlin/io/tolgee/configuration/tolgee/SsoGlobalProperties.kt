@@ -27,8 +27,6 @@ class SsoGlobalProperties {
 
   var domain: String? = null
 
-  var redirectUriBase: String? = null
-
   var jwkSetUri: String? = null
 
   @DocProperty(

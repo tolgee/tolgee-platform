@@ -17,7 +17,6 @@ class SsoTenantAssembler :
       authorizationUri = entity.authorizationUri,
       clientId = entity.clientId,
       clientSecret = entity.clientSecret,
-      redirectUri = entity.redirectUri,
       tokenUri = entity.tokenUri,
       isEnabled = entity.isEnabled,
       jwkSetUri = entity.jwkSetUri,

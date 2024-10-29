@@ -16,7 +16,6 @@ class SsoTenant : StandardAuditModel() {
   var domain: String = ""
   var jwkSetUri: String = ""
   var tokenUri: String = ""
-  var redirectUriBase: String = "" // base Tolgee frontend url can be different for different users so need to store it
   var organizationId: Long = 0L
 
   @ColumnDefault("true")
