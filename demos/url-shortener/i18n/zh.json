@@ -1,0 +1,9 @@
+{
+  "appTitle": "网址缩短器",
+  "enterUrl": "输入网址",
+  "failedToShorten": "缩短URL失败",
+  "selectLang": "选择语言",
+  "shorten": "缩短您的网址",
+  "shortenedUrl": "缩短的URL",
+  "urlCopied": "URL已复制到剪贴板"
+}

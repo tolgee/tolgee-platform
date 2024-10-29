@@ -1,0 +1,1 @@
+curl "https://app.tolgee.io/v2/projects/export?ak=$TOLGEE_API_KEY" --output data.zip && unzip data.zip -d i18n && rm data.zip
