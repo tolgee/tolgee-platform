@@ -1,5 +1,7 @@
 package io.tolgee.model.enums
 
+import io.mockk.InternalPlatformDsl.toArray
+
 enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
   NONE(arrayOf()),
   VIEW(
@@ -60,14 +62,25 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
   ;
 
   companion object {
+    private fun expandAvailableScopes(permission: ProjectPermissionType): Array<Scope> {
+      val result = mutableSetOf<Scope>()
+      permission.availableScopes.forEach {
+        result.add(it)
+        it.expand().forEach { scope ->
+          result.add(scope)
+        }
+      }
+      return result.toTypedArray()
+    }
+
     fun getRoles(): Map<String, Array<Scope>> {
       val result = mutableMapOf<String, Array<Scope>>()
-      values().forEach { value -> result[value.name] = value.availableScopes }
+      values().forEach { value -> result[value.name] = expandAvailableScopes(value) }
       return result.toMap()
     }
 
     fun findByScope(scope: Scope): List<ProjectPermissionType> {
-      return values().filter { it.availableScopes.contains(scope) }
+      return values().filter { expandAvailableScopes(it).contains(scope) }
     }
   }
 }
