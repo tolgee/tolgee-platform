@@ -1,0 +1,9 @@
+{
+  "appTitle": "Acortador de URL",
+  "enterUrl": "Introducir URL",
+  "failedToShorten": "No se pudo acortar la URL",
+  "selectLang": "Seleccionar idioma",
+  "shorten": "Acorta tu URL",
+  "shortenedUrl": "URL acortada",
+  "urlCopied": "URL copiada al portapapeles"
+}

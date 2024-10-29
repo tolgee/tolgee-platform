@@ -1,0 +1,9 @@
+{
+  "appTitle": "URL Shortener",
+  "enterUrl": "Enter URL",
+  "failedToShorten": "Failed to shorten the URL",
+  "selectLang": "Select Language",
+  "shorten": "Short Your URL",
+  "shortenedUrl": "Shortened URL",
+  "urlCopied": "URL copied to clipboard"
+}
