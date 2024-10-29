@@ -28,12 +28,12 @@ class TenantService(
 
   private fun buildGlobalTenant(): SsoTenant =
     SsoTenant().apply {
+      isEnabledForThisOrganization = validateProperty(ssoGlobalProperties.enabled.toString(), "enabled").toBoolean()
       domain = validateProperty(ssoGlobalProperties.domain, "domain")
       clientId = validateProperty(ssoGlobalProperties.clientId, "clientId")
       clientSecret = validateProperty(ssoGlobalProperties.clientSecret, "clientSecret")
       authorizationUri = validateProperty(ssoGlobalProperties.authorizationUrl, "authorizationUrl")
       tokenUri = validateProperty(ssoGlobalProperties.tokenUrl, "tokenUrl")
-      redirectUriBase = validateProperty(ssoGlobalProperties.redirectUriBase, "redirectUriBase")
       jwkSetUri = validateProperty(ssoGlobalProperties.jwkSetUri, "jwkSetUri")
     }
 
@@ -96,7 +96,6 @@ class TenantService(
     tenant.clientSecret = dto.clientSecret
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
-    tenant.redirectUriBase = dto.redirectUri.removeSuffix("/")
     tenant.jwkSetUri = dto.jwkSetUri
     tenant.isEnabledForThisOrganization = dto.isEnabled
     return save(tenant)

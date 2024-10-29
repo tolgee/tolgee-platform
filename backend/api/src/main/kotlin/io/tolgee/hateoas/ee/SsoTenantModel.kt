@@ -10,7 +10,6 @@ class SsoTenantModel(
   val authorizationUri: String,
   val clientId: String,
   val clientSecret: String,
-  val redirectUri: String,
   val tokenUri: String,
   val isEnabled: Boolean,
   val jwkSetUri: String,
