@@ -2,6 +2,7 @@ package io.tolgee.ee
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.proc.SecurityContext
+import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
@@ -14,6 +15,7 @@ import io.tolgee.ee.model.SsoTenant
 import io.tolgee.ee.service.OAuthService
 import io.tolgee.ee.service.TenantService
 import io.tolgee.ee.utils.OAuthMultiTenantsMocks
+import io.tolgee.ee.utils.OAuthMultiTenantsMocks.Companion.jwtClaimsSet
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.model.enums.OrganizationRoleType
@@ -81,6 +83,7 @@ class OAuthTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     currentDateProvider.forcedDate = currentDateProvider.date
+    ssoGlobalProperties.enabled = false
     testData = OAuthTestData()
     testDataService.saveTestData(testData.root)
   }
@@ -95,7 +98,6 @@ class OAuthTest : AuthorizedControllerTest() {
         authorizationUri = "authorizationUri"
         jwkSetUri = "http://jwkSetUri"
         tokenUri = "http://tokenUri"
-        redirectUriBase = "redirectUriBase"
         organizationId = testData.organization.id
       },
     )
@@ -107,7 +109,7 @@ class OAuthTest : AuthorizedControllerTest() {
     val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)
     result["accessToken"].assert.isNotNull
     result["tokenType"].assert.isEqualTo("Bearer")
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val userName = jwtClaimsSet.getStringClaim("email")
     assertThat(userAccountService.get(userName)).isNotNull
   }
 
@@ -124,7 +126,7 @@ class OAuthTest : AuthorizedControllerTest() {
   @Test
   fun `new user belongs to organization associated with the sso issuer`() {
     loginAsSsoUser()
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(organizationRoleService.isUserOfRole(user.id, testData.organization.id, OrganizationRoleType.MEMBER))
       .isEqualTo(true)
@@ -140,16 +142,15 @@ class OAuthTest : AuthorizedControllerTest() {
       )
     assertThat(response.response.status).isEqualTo(400)
     assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val userName = jwtClaimsSet.getStringClaim("email")
     assertThrows<NotFoundException> { userAccountService.get(userName) }
   }
 
   @Transactional
   @Test
   fun `sso auth doesn't create demo project and user organization`() {
-    loginAsSsoUser()
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
-    val user = userAccountService.get(userName)
+    loginAsSsoUser(jwtClaims = OAuthMultiTenantsMocks.jwtClaimsSet2)
+    val user = userAccountService.get("mai2@mail.com")
     assertThat(user.organizationRoles.size).isEqualTo(1)
     assertThat(user.organizationRoles[0].organization?.id).isEqualTo(testData.organization.id)
   }
@@ -158,7 +159,7 @@ class OAuthTest : AuthorizedControllerTest() {
   @Test
   fun `sso user can't create organization`() {
     loginAsSsoUser()
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     loginAsUser(user)
     performAuthPost(
@@ -170,7 +171,7 @@ class OAuthTest : AuthorizedControllerTest() {
   @Test
   fun `sso auth saves refresh token`() {
     loginAsSsoUser()
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(user.ssoRefreshToken).isNotNull
     assertThat(user.ssoConfig).isNotNull
@@ -188,7 +189,7 @@ class OAuthTest : AuthorizedControllerTest() {
   @Test
   fun `user is employee validation works`() {
     loginAsSsoUser()
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(
       oAuthService.verifyUserIsStillEmployed(
@@ -204,7 +205,7 @@ class OAuthTest : AuthorizedControllerTest() {
   fun `after timeout should call token endpoint `() {
     clearInvocations(restTemplate)
     loginAsSsoUser()
-    val userName = OAuthMultiTenantsMocks.jwtClaimsSet.getStringClaim("email")
+    val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 600_000)
 
@@ -233,7 +234,6 @@ class OAuthTest : AuthorizedControllerTest() {
     ssoGlobalProperties.clientSecret = "clientSecret"
     ssoGlobalProperties.authorizationUrl = "authorizationUri"
     ssoGlobalProperties.tokenUrl = "http://tokenUri"
-    ssoGlobalProperties.redirectUriBase = "http://redirectUriBase"
     ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
     oAuthMultiTenantsMocks.authorize("registrationId")
   }
@@ -245,8 +245,8 @@ class OAuthTest : AuthorizedControllerTest() {
       "test-org",
     )
 
-  fun loginAsSsoUser(): MvcResult {
+  fun loginAsSsoUser(jwtClaims: JWTClaimsSet = jwtClaimsSet): MvcResult {
     addTenant()
-    return oAuthMultiTenantsMocks.authorize("registrationId")
+    return oAuthMultiTenantsMocks.authorize("registrationId", jwtClaims = jwtClaims)
   }
 }

@@ -56,6 +56,23 @@ class OAuthMultiTenantsMocks(
         return claimsSet
       }
 
+    val jwtClaimsSet2: JWTClaimsSet
+      get() {
+        val claimsSet =
+          JWTClaimsSet
+            .Builder()
+            .subject("testSubject")
+            .issuer("https://test-oauth-provider.com")
+            .expirationTime(Date(System.currentTimeMillis() + 3600 * 1000)) // Время действия 1 час
+            .claim("name", "Test User2")
+            .claim("given_name", "Test2")
+            .claim("given_name", "Test2")
+            .claim("family_name", "User2")
+            .claim("email", "mai2@mail.com")
+            .build()
+        return claimsSet
+      }
+
     private fun generateTestJwt(): String {
       val header = JWSHeader(JWSAlgorithm.HS256)
 
@@ -73,6 +90,7 @@ class OAuthMultiTenantsMocks(
   fun authorize(
     registrationId: String,
     tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse,
+    jwtClaims: JWTClaimsSet = jwtClaimsSet,
   ): MvcResult {
     val receivedCode = "fake_access_token"
     val tenant = tenantService?.getByDomain(registrationId)!!
@@ -87,7 +105,7 @@ class OAuthMultiTenantsMocks(
     ).thenReturn(tokenResponse)
 
     // mock parsing of jwt
-    mockJwt()
+    mockJwt(jwtClaims)
 
     return authMvc!!
       .perform(
@@ -113,13 +131,13 @@ class OAuthMultiTenantsMocks(
           ),
       ).andReturn()
 
-  private fun mockJwt() {
+  private fun mockJwt(jwtClaims: JWTClaimsSet) {
     whenever(
       jwtProcessor?.process(
         any<SignedJWT>(),
         isNull(),
       ),
-    ).thenReturn(jwtClaimsSet)
+    ).thenReturn(jwtClaims)
   }
 
   fun mockTokenExchange(
