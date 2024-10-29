@@ -1,3 +1,11 @@
+## [3.80.5](https://github.com/tolgee/tolgee-platform/compare/v3.80.4...v3.80.5) (2024-10-29)
+
+
+### Bug Fixes
+
+* Avoid requesting super auth when authentication is disabled ([#2630](https://github.com/tolgee/tolgee-platform/issues/2630)) ([3f7919a](https://github.com/tolgee/tolgee-platform/commit/3f7919ad89b69801370344439e6d1009c57c21b7))
+* Respect project.icuPlaceholders in singleStepImport ([#2629](https://github.com/tolgee/tolgee-platform/issues/2629)) ([5e2b72a](https://github.com/tolgee/tolgee-platform/commit/5e2b72ac5bd07a878b9eedc0989277e66d5e0244)), closes [#2574](https://github.com/tolgee/tolgee-platform/issues/2574)
+
 ## [3.80.4](https://github.com/tolgee/tolgee-platform/compare/v3.80.3...v3.80.4) (2024-10-24)
 
 
