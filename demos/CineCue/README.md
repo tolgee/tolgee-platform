@@ -46,23 +46,17 @@ Welcome to **CineCue** - your ultimate movie finder based on genres in multiple 
     - Sign up for an API key on [The Movie Database (TMDb)](https://themoviedb.org/).
     - Add the API key to the `app/controllers/movies_controller.rb` file in the `@@api_key` variable on the 6ᵗʰ line.
 
-4. **Set Up Tolgee API Key**:
-    - Sign up for an API key on [tolgee.io](https://tolgee.io/)
-    - Start a new project and upload the `.json` files from the folder `tolgee-json` into the project.
-    - Add the API key to the `app/controllers/application_controller.rb` file in the `api_key` variable on the 11ᵗʰ line.
-    - Add the Project ID to the `app/controllers/application_controller.rb` file in the `project_id` variable on the 12ᵗʰ line.
-
-5. **Migrate Database**:
+4. **Migrate Database**:
     ```bash
     rails db:migrate
     ```
 
-6. **Run the App**:
+5. **Run the App**:
     ```bash
     rails server
     ```
 
-7. **Access the App**:
+6. **Access the App**:
     - Open [http://localhost:8080/](http://localhost:8080/) in your browser to start using CineCue!
 
 # Article

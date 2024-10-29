@@ -1,3 +1,6 @@
+require 'json'
+require 'faraday'
+
 class ApplicationController < ActionController::Base
 
   before_action :set_current_user, :tolgit
@@ -8,22 +11,12 @@ class ApplicationController < ActionController::Base
 
   def tolgit
 
-    api_key = "<set tolgee api key here>"
-    project_id = "<set tolgee projectid here>"
-
-    url = "https://app.tolgee.io/v2/projects/"+project_id+"/translations/en,es,fr,ur,ar,tr,hi"
-
-    response = Faraday.get(url) do |req|
-      req.headers['Accept'] = 'application/json'
-      req.headers['X-API-Key'] = api_key
-    end
-
     if @user
       cookies[:lang] = @user.lang
     end
     cookies[:lang] ||= "en"
 
-    @translations = JSON.parse(response.body)[cookies[:lang]]
+    @translations = JSON.parse(Faraday.get('https://cdn.tolg.ee/93411aa4fca9f5c1c79802feb5355105/'+cookies[:lang]+'.json').body)
 
   end
 
