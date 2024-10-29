@@ -13,20 +13,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class SsoGlobalProperties {
   var enabled: Boolean = false
 
-  @DocProperty(description = "SSO Client ID")
+  @DocProperty(description = "Unique identifier for an application")
   var clientId: String? = null
 
-  @DocProperty(description = "SSO Client secret")
+  @DocProperty(description = "Key used to authenticate the application")
   var clientSecret: String? = null
 
-  @DocProperty(description = "URL to SSO authorize API endpoint. This endpoint will be exposed to the frontend.")
+  @DocProperty(description = "URL to redirect users for authentication")
   var authorizationUrl: String? = null
 
-  @DocProperty(description = "URL to SSO token API endpoint.")
+  @DocProperty(description = "URL for exchanging authorization code for tokens")
   var tokenUrl: String? = null
 
+  @DocProperty(description = "Used to identify the organization on login page")
   var domain: String? = null
 
+  @DocProperty(description = "URL to retrieve the JSON Web Key Set (JWKS)")
   var jwkSetUri: String? = null
 
   @DocProperty(
