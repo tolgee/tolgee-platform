@@ -1,0 +1,75 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400..700&family=Noto+Sans+Arabic:wght@100..900&display=swap');
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-Italic.ttf') format('truetype');
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-Medium.ttf') format('truetype');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-MediumItalic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-Light.ttf') format('truetype');
+    font-weight: 200;
+}
+
+@font-face {
+    font-family: 'ubuntu';
+    src: url('./fonts/Ubuntu-LightItalic.ttf') format('truetype');
+    font-weight: 200;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'hurmit';
+    src: url('./fonts/HurmitNerdFont-Regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'hurmit';
+    src: url('./fonts/HurmitNerdFont-Bold.otf') format('opentype');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'hurmit';
+    src: url('./fonts/HurmitNerdFont-BoldItalic.otf') format('opentype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'hurmit';
+    src: url('./fonts/HurmitNerdFont-Italic.otf') format('opentype');
+    font-style: italic;
+}

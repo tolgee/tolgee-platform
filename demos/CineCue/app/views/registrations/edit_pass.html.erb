@@ -1,0 +1,30 @@
+<% flash.each do |key, message| %>
+  <div class="flash-message <%= key %>">
+    <span class="error_message"><%= message %></span><br>
+  </div>
+<% end %>
+
+<% if @user.errors.any? %>
+  <% @user.errors.full_messages.each do |message| %>
+    <span class="error_message"><%= message %></span><br>
+  <% end %>
+<% end %>
+
+<% signup_page = @translations["signup_page"].split(',') %>
+
+<div class="center">
+  <%= form_with url: pass_path, method: :patch, class: "form", data: { turbo: false } do |form| %>
+    <span class="form-title"><%= @translations["change_pass"] %></span>
+    <table class="form-table">
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :password, signup_page[3] %>:</td>
+        <td class="form-field-input"><%= form.password_field :password, placeholder: signup_page[3], class: "form-input" %></td>
+      </tr>
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :password_confirmation, signup_page[5] %>:</td>
+        <td class="form-field-input"><%= form.password_field :password_confirmation, placeholder: signup_page[5] , class: "form-input" %></td>
+      </tr>
+    </table>
+    <%= form.submit @translations["set_pass"], class: "form-submit-btn" %>
+  <% end %>
+</div>

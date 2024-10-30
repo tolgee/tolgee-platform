@@ -1,0 +1,64 @@
+<% genres = @translations["genre"].split(',') %>
+<% signup_page = @translations["signup_page"].split(',') %>
+
+<div class="center-n">
+  <h1>󰿏 <%= @translations["findmov"] %><% if @user %>, @<%= @user.username %><% end %>.</h1>
+  <div class="searchbar">
+    <%= form_with url: root_path, method: :get do |form| %>
+      <%= label_tag :genre, @translations["sel_genre"] %><br>
+      <div class="searchdiv">
+        <%= select_tag :genre, options_for_select([
+          [genres[0], "Action"],
+          [genres[1], "Adventure"],
+          [genres[2], "Animation"],
+          [genres[3], "Comedy"],
+          [genres[4], "Crime"],
+          [genres[5], "Documentary"],
+          [genres[6], "Drama"],
+          [genres[7], "Family"],
+          [genres[8], "Fantasy"],
+          [genres[9], "History"],
+          [genres[10], "Horror"],
+          [genres[11], "Music"],
+          [genres[12], "Mystery"],
+          [genres[13], "Romance"],
+          [genres[14], "Science Fiction"],
+          [genres[15], "TV Movie"],
+          [genres[16], "Thriller"],
+          [genres[17], "War"],
+          [genres[18], "Western"]
+        ]), multiple: true, required: true, class: "gen-sel" %>
+        <div class="xbtn">
+          <%= submit_tag @translations["get_sug"], class: "get-btn get-xbtn" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<h2><%= @translations["mov_sug"] %></h2>
+<div class="movies-cont">
+  <% if @movies.any? %>
+    <div class="movies">
+      <% @movies.each do |movie| %>
+        <div class="movie">
+          <strong class="mov-title"><%= movie['title'] %></strong> (<%= movie['vote_average'].round(1) %>/10)
+          <% if @user %><%= button_to @translations["bookmark"], book_path(movie['id']), method: :post, remote: true, class: 'bookmark-btn' %><% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= @translations["no_mov"] %>
+  <% end %>
+  <% if @movies2.any? %>
+    <div class="movies">
+      <% @movies2.each do |movie| %>
+        <div class="movie">
+          <strong class="mov-title"><%= movie['title'] %></strong> (<%= movie['vote_average'].round(1) %>/10)
+          <% if @user %><%= button_to @translations["bookmark"], book_path(movie['id']), method: :post, remote: true, class: 'bookmark-btn' %><% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
