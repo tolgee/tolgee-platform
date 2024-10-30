@@ -53,6 +53,7 @@ const FORMATS = [
   { name: 'Apple Stringsdict', logo: <AppleLogo /> },
   { name: 'Apple XLIFF', logo: <AppleLogo /> },
   { name: 'Android XML', logo: <AndroidLogo /> },
+  // TODO: Compose multiplatform logo
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
   { name: 'i18next', logo: <I18nextLogo /> },
