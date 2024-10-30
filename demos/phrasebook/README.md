@@ -1,6 +1,9 @@
 # Multilingual Phrasebook using Tolgee
 [<img src="https://raw.githubusercontent.com/tolgee/documentation/main/tolgee_logo_text.svg" alt="Tolgee" width="100" />](https://tolgee.io)
 
+## Link
+[Live Link](https://phrase-book-five.vercel.app/)
+[dev.to](https://dev.to/mayank_mohapatra/phrasebook-with-tolgee-563g)
 
 ##
 Here i used `tolgee` with `next.js` app router.
