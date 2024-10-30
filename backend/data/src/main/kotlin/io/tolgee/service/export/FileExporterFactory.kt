@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.ExportFormat
-import io.tolgee.formats.xmlResources.out.AndroidStringsXmlExporter
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.formats.csv.out.CsvFileExporter
@@ -14,6 +13,7 @@ import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
+import io.tolgee.formats.xmlResources.out.AndroidStringsXmlExporter
 import io.tolgee.formats.yaml.out.YamlFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter

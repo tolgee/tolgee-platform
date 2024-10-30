@@ -1,11 +1,11 @@
 package io.tolgee.formats.xmlResources.`in`
 
-import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
-import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.blockXmlParser.BlockXmlParser
 import io.tolgee.formats.blockXmlParser.ModelCharacters
 import io.tolgee.formats.blockXmlParser.ModelElement
 import io.tolgee.formats.blockXmlParser.ModelNode
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import javax.xml.stream.events.XMLEvent
 
 /**
