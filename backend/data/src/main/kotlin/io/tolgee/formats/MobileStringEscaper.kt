@@ -1,6 +1,6 @@
 package io.tolgee.formats
 
-import io.tolgee.formats.android.AndroidParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 
 class MobileStringEscaper(
   private val string: String,
@@ -46,7 +46,7 @@ class MobileStringEscaper(
   }
 
   private val relevantSpaces =
-    if (escapeNewLines) AndroidParsingConstants.spacesWithoutNewLines else AndroidParsingConstants.spaces
+    if (escapeNewLines) XmlResourcesParsingConstants.spacesWithoutNewLines else XmlResourcesParsingConstants.spaces
 
   private fun handleChar(char: Char) {
     when (state) {
@@ -99,7 +99,7 @@ class MobileStringEscaper(
       }
 
       State.SPACES -> {
-        if (char in AndroidParsingConstants.spaces) {
+        if (char in XmlResourcesParsingConstants.spaces) {
           spaces.append(char)
         } else {
           handleSpacesEnd(char)

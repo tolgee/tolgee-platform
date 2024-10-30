@@ -1,6 +1,6 @@
-package io.tolgee.formats.android.`in`
+package io.tolgee.formats.xmlResources.`in`
 
-import io.tolgee.formats.android.AndroidParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 
 class AndroidStringUnescaper(private val string: String, private val isFirst: Boolean, private val isLast: Boolean) {
   companion object {
@@ -13,7 +13,7 @@ class AndroidStringUnescaper(private val string: String, private val isFirst: Bo
         'u' to "\\u",
         '\\' to "\\",
       )
-    private val spacesToTrim = AndroidParsingConstants.spaces
+    private val spacesToTrim = XmlResourcesParsingConstants.spaces
   }
 
   val unescaped: String by lazy {
