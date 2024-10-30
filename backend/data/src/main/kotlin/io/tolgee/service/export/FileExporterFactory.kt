@@ -80,6 +80,8 @@ class FileExporterFactory(
 
       ExportFormat.ANDROID_XML -> AndroidStringsXmlExporter(data, exportParams, projectIcuPlaceholdersSupport)
 
+      ExportFormat.COMPOSE_XML -> AndroidStringsXmlExporter(data, exportParams, projectIcuPlaceholdersSupport) // TODO: Compose XML exporter
+
       ExportFormat.PO ->
         PoFileExporter(
           data,

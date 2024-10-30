@@ -1865,19 +1865,20 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
         | "ANDROID_XML"
+        | "COMPOSE_XML"
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       /**
        * @description Delimiter to structure file content.
        *
@@ -1965,19 +1966,20 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
         | "ANDROID_XML"
+        | "COMPOSE_XML"
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       /**
        * @description Delimiter to structure file content.
        *
@@ -3107,19 +3109,20 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
         | "ANDROID_XML"
+        | "COMPOSE_XML"
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       /**
        * @description Delimiter to structure file content.
        *
@@ -3640,19 +3643,20 @@ export interface components {
     };
     ExportFormatModel: {
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
         | "ANDROID_XML"
+        | "COMPOSE_XML"
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       extension: string;
       mediaType: string;
       defaultFileStructureTemplate: string;
@@ -12267,19 +12271,20 @@ export interface operations {
         languages?: string[];
         /** Format to export to */
         format?:
-          | "CSV"
           | "JSON"
           | "JSON_TOLGEE"
-          | "JSON_I18NEXT"
           | "XLIFF"
           | "PO"
           | "APPLE_STRINGS_STRINGSDICT"
           | "APPLE_XLIFF"
           | "ANDROID_XML"
+          | "COMPOSE_XML"
           | "FLUTTER_ARB"
           | "PROPERTIES"
           | "YAML_RUBY"
-          | "YAML";
+          | "YAML"
+          | "JSON_I18NEXT"
+          | "CSV";
         /**
          * Delimiter to structure file content.
          *
