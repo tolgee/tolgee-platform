@@ -5,9 +5,10 @@ import io.tolgee.formats.MessagePatternUtil
 import io.tolgee.formats.escapePercentSign
 
 class IcuToJavaPlaceholderConvertor : FromIcuPlaceholderConvertor {
-  private val baseToCLikePlaceholderConvertor = BaseToCLikePlaceholderConvertor(
-    numberAllArgs = true,
-  )
+  private val baseToCLikePlaceholderConvertor =
+    BaseToCLikePlaceholderConvertor(
+      numberAllArgs = true,
+    )
 
   override fun convert(node: MessagePatternUtil.ArgNode): String {
     return baseToCLikePlaceholderConvertor.convert(node)

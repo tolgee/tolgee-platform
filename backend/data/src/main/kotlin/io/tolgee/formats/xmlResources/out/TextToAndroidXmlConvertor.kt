@@ -1,9 +1,9 @@
 package io.tolgee.formats.xmlResources.out
 
 import io.tolgee.formats.MobileStringEscaper
+import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
-import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.w3c.dom.Document
