@@ -3117,6 +3117,7 @@ export interface components {
         | "PROPERTIES_JAVA"
         | "PROPERTIES_UNKNOWN"
         | "ANDROID_XML"
+        | "COMPOSE_XML"
         | "FLUTTER_ARB"
         | "YAML_RUBY"
         | "YAML_JAVA"
