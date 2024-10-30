@@ -1,6 +1,5 @@
 package io.tolgee.formats.xmlResources.`in`
 
-import XmlResourcesParser
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult

@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.android.`in`
 
-import XmlResourcesParser
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesParser
 import io.tolgee.formats.android.`in`.AndroidStringUnescaper
 import io.tolgee.formats.xmlResources.StringUnit
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
