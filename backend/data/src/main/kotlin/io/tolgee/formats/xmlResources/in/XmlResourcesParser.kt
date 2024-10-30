@@ -4,7 +4,8 @@ import io.tolgee.formats.xmlResources.PluralUnit
 import io.tolgee.formats.xmlResources.StringArrayItem
 import io.tolgee.formats.xmlResources.StringArrayUnit
 import io.tolgee.formats.xmlResources.StringUnit
-import io.tolgee.formats.xmlResources.`in`.AndroidXmlValueBlockParser
+import io.tolgee.formats.xmlResources.`in`.StringUnescaper
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesValueBlockParser
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLStreamConstants
@@ -14,6 +15,7 @@ import javax.xml.stream.events.XMLEvent
 
 class XmlResourcesParser(
   private val xmlEventReader: XMLEventReader,
+  private val stringUnescaper: StringUnescaper,
 ) {
   private val result = XmlResourcesStringsModel()
   private var currentComment: String? = null
@@ -21,7 +23,7 @@ class XmlResourcesParser(
   private var currentArrayEntry: StringArrayUnit? = null
   private var currentPluralEntry: PluralUnit? = null
   private var currentPluralQuantity: String? = null
-  private var blockParser: AndroidXmlValueBlockParser? = null
+  private var blockParser: XmlResourcesValueBlockParser? = null
   private var isArrayItemOpen = false
   private var arrayItemComment: String? = null
 
@@ -30,12 +32,12 @@ class XmlResourcesParser(
       val event = xmlEventReader.nextEvent()
       val wasAnyToContentSaveOpenBefore = isAnyToContentSaveOpen
       when {
-        event.eventType == XMLStreamConstants.COMMENT -> {
+        event.isComment -> {
           currentComment = event.asComment().text
         }
         event.isStartElement -> {
           if (!isAnyToContentSaveOpen) {
-            blockParser = AndroidXmlValueBlockParser()
+            blockParser = XmlResourcesValueBlockParser(stringUnescaper)
           }
           val startElement = event as StartElement
           when (startElement.name.localPart.lowercase()) {
@@ -136,6 +138,9 @@ class XmlResourcesParser(
     get() {
       return currentStringEntry != null || isArrayItemOpen || currentPluralQuantity != null
     }
+
+  private val XMLEvent.isComment: Boolean
+    get() = this.eventType == XMLStreamConstants.COMMENT
 
   private fun XMLEvent.asComment(): Comment = this as Comment
 }

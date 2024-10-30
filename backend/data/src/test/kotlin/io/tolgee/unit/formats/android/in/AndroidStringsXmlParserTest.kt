@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats.android.`in`
 
 import XmlResourcesParser
+import io.tolgee.formats.android.`in`.AndroidStringUnescaper
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
 import io.tolgee.formats.xmlResources.StringUnit
@@ -80,7 +81,7 @@ class AndroidStringsXmlParserTest {
   }
 
   private fun parse(reader: XMLEventReader): XmlResourcesStringsModel {
-    val parser = XmlResourcesParser(reader)
+    val parser = XmlResourcesParser(reader, AndroidStringUnescaper.defaultFactory)
     return parser.parse()
   }
 

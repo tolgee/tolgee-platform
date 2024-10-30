@@ -19,7 +19,7 @@ import javax.xml.stream.events.XMLEvent
  *  - removes unsupported tags
  *  - replaces CDATA nodes with inner text
  */
-class AndroidXmlValueBlockParser {
+class XmlResourcesValueBlockParser(private val stringUnescaper: StringUnescaper) {
   private val blockXmlParser = BlockXmlParser()
 
   fun onXmlEvent(event: XMLEvent) {
@@ -61,7 +61,7 @@ class AndroidXmlValueBlockParser {
 
   private fun unescapeText(node: ModelNode) {
     if (node !is ModelCharacters) return
-    node.characters = AndroidStringUnescaper(node.characters, node.isFirstChild, node.isLastChild).unescaped
+    node.characters = stringUnescaper(node.characters, node.isFirstChild, node.isLastChild)
   }
 
   private fun getRootSingleChild(): ModelNode? {

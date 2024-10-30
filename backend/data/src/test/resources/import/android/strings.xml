@@ -31,4 +31,6 @@
     <string name="with_params">
         %d %4$s %.2f %e %+d
     </string>
+    <string name="escape_sequence_within_quoted_spaces">Test"\        n"test</string>
+    <string name="backslash_at_the_end">Test\</string>
 </resources>

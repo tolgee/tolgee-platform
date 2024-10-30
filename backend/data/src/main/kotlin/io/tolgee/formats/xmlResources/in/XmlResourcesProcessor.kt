@@ -4,6 +4,8 @@ import XmlResourcesParser
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
+import io.tolgee.formats.android.`in`.AndroidStringUnescaper
+import io.tolgee.formats.compose.`in`.ComposeStringUnescaper
 import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.xmlResources.PluralUnit
@@ -14,7 +16,9 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 
-class XmlResourcesProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
+class XmlResourcesProcessor(
+  override val context: FileProcessorContext,
+) : ImportFileProcessor() {
   override fun process() {
     val parsed = parse()
 
@@ -30,7 +34,7 @@ class XmlResourcesProcessor(override val context: FileProcessorContext) : Import
 
   private fun parse() =
     try {
-      XmlResourcesParser(xmlEventReader).parse()
+      XmlResourcesParser(xmlEventReader, stringUnescaper).parse()
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
     }
@@ -50,7 +54,7 @@ class XmlResourcesProcessor(override val context: FileProcessorContext) : Import
       convertText(text),
       pluralArgName = null,
       rawData = text,
-      convertedBy = ImportFormat.ANDROID_XML,
+      convertedBy = importFormat,
     )
     setCustomWrappedWithCdata(keyName, it.value)
   }
@@ -146,11 +150,17 @@ class XmlResourcesProcessor(override val context: FileProcessorContext) : Import
     return text?.let { convertMessage(it).message }
   }
 
+  private val importFormat = context.mapping?.format ?: ImportFormat.ANDROID_XML
+
+  private val messageConvertor = importFormat.messageConvertor
+
+  private val stringUnescaper = if (importFormat == ImportFormat.COMPOSE_XML) {
+    ComposeStringUnescaper.defaultFactory
+  } else {
+    AndroidStringUnescaper.defaultFactory
+  }
+
   companion object {
     val LANGUAGE_GUESS_REGEX = Regex("values-(?<language>[a-zA-Z]{2,3})(-r(?<region>[a-zA-Z]{2,3}))?")
-
-    private val importFormat = ImportFormat.ANDROID_XML
-
-    private val messageConvertor = importFormat.messageConvertor
   }
 }

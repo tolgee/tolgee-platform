@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.android.`in`
 
-import io.tolgee.formats.xmlResources.`in`.AndroidStringUnescaper
+import io.tolgee.formats.android.`in`.AndroidStringUnescaper
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -50,6 +50,6 @@ class AndroidStringsUnescaperTest {
     isFirst: Boolean = true,
     isLast: Boolean = true,
   ) {
-    AndroidStringUnescaper(this, isFirst = isFirst, isLast = isLast).unescaped.assert.isEqualTo(expected)
+    AndroidStringUnescaper(this.asSequence(), isFirst = isFirst, isLast = isLast).result.assert.isEqualTo(expected)
   }
 }
