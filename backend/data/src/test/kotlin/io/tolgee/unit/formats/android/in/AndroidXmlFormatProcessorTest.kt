@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.android.`in`
 
-import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -228,6 +228,6 @@ class AndroidXmlFormatProcessorTest {
   }
 
   private fun processFile() {
-    AndroidStringsXmlProcessor(mockUtil.fileProcessorContext).process()
+    XmlResourcesProcessor(mockUtil.fileProcessorContext).process()
   }
 }

@@ -1,4 +1,4 @@
-package io.tolgee.formats.android.out
+package io.tolgee.formats.xmlResources.out
 
 import io.tolgee.formats.MessageConvertorFactory
 import io.tolgee.formats.PossiblePluralConversionResult

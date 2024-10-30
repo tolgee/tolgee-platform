@@ -1,15 +1,15 @@
-package io.tolgee.formats.android.out
+package io.tolgee.formats.xmlResources.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.PossiblePluralConversionResult
-import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
-import io.tolgee.formats.android.AndroidStringValue
-import io.tolgee.formats.android.AndroidStringsXmlModel
-import io.tolgee.formats.android.AndroidXmlNode
-import io.tolgee.formats.android.PluralUnit
-import io.tolgee.formats.android.StringArrayItem
-import io.tolgee.formats.android.StringArrayUnit
-import io.tolgee.formats.android.StringUnit
+import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
+import io.tolgee.formats.xmlResources.XmlResourcesNode
+import io.tolgee.formats.xmlResources.PluralUnit
+import io.tolgee.formats.xmlResources.StringArrayItem
+import io.tolgee.formats.xmlResources.StringArrayUnit
+import io.tolgee.formats.xmlResources.StringUnit
 import io.tolgee.formats.populateForms
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -26,11 +26,11 @@ class AndroidStringsXmlExporter(
    */
   private val fileUnits = mutableMapOf<String, MutableMap<String, NodeWrapper>>()
 
-  private fun getModels(): Map<String, AndroidStringsXmlModel> {
+  private fun getModels(): Map<String, XmlResourcesStringsModel> {
     prepare()
 
     return fileUnits.map { (pathToFile, units) ->
-      val model = AndroidStringsXmlModel()
+      val model = XmlResourcesStringsModel()
 
       units.forEach {
         model.items[it.key] = it.value.node
@@ -63,14 +63,14 @@ class AndroidStringsXmlExporter(
   ) {
     val stringUnit =
       StringUnit().apply {
-        this.value = AndroidStringValue(text, translation.isWrappedWithCdata())
+        this.value = XmlResourcesStringValue(text, translation.isWrappedWithCdata())
         this.comment = translation.description
       }
     addToUnits(translation, stringUnit)
   }
 
   private fun ExportTranslationView.isWrappedWithCdata(): Boolean {
-    return this.key.custom?.get(ANDROID_CDATA_CUSTOM_KEY) == true
+    return this.key.custom?.get(XML_RESOURCES_CDATA_CUSTOM_KEY) == true
   }
 
   private fun buildStringArrayUnit(
@@ -101,7 +101,7 @@ class AndroidStringsXmlExporter(
             StringArrayUnit().apply {
               this.items.add(
                 StringArrayItem(
-                  AndroidStringValue(text, translation.isWrappedWithCdata()),
+                  XmlResourcesStringValue(text, translation.isWrappedWithCdata()),
                   index,
                   comment = translation.description,
                 ),
@@ -116,7 +116,7 @@ class AndroidStringsXmlExporter(
         (stringsArrayWrapper.node is StringArrayUnit && keyNameWithoutIndex == stringsArrayWrapper.exactKeyName) -> {
           stringsArrayWrapper.node.items.add(
             StringArrayItem(
-              AndroidStringValue(text, translation.isWrappedWithCdata()),
+              XmlResourcesStringValue(text, translation.isWrappedWithCdata()),
               index,
               comment = translation.description,
             ),
@@ -138,7 +138,7 @@ class AndroidStringsXmlExporter(
     // Assuming your translation view contain a map of plural forms as value
     val pluralMap =
       populateForms(translation.languageTag, pluralForms).map {
-        it.key to AndroidStringValue(it.value, translation.isWrappedWithCdata())
+        it.key to XmlResourcesStringValue(it.value, translation.isWrappedWithCdata())
       }.toMap()
 
     val pluralUnit =
@@ -152,7 +152,7 @@ class AndroidStringsXmlExporter(
 
   private fun addToUnits(
     translation: ExportTranslationView,
-    node: AndroidXmlNode,
+    node: XmlResourcesNode,
   ) {
     val keyName = translation.key.name
     val normalizedName = keyName.normalizedKeyName()
@@ -171,7 +171,7 @@ class AndroidStringsXmlExporter(
   private fun String.normalizedKeyName() = replace(KEY_REPLACE_REGEX, "_")
 
   private class NodeWrapper(
-    val node: AndroidXmlNode,
+    val node: XmlResourcesNode,
     // is the keyName same as before normalization
     val isExactKeyName: Boolean,
     // the key name before normalization

@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.android.`in`
 
-import io.tolgee.formats.android.`in`.AndroidStringUnescaper
+import io.tolgee.formats.xmlResources.`in`.AndroidStringUnescaper
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 

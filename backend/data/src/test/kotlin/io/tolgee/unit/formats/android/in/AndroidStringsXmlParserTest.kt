@@ -1,9 +1,9 @@
 package io.tolgee.unit.formats.android.`in`
 
-import AndroidStringsXmlParser
-import io.tolgee.formats.android.AndroidStringValue
-import io.tolgee.formats.android.AndroidStringsXmlModel
-import io.tolgee.formats.android.StringUnit
+import XmlResourcesParser
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
+import io.tolgee.formats.xmlResources.StringUnit
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import javax.xml.stream.XMLEventReader
@@ -79,12 +79,12 @@ class AndroidStringsXmlParserTest {
     )
   }
 
-  private fun parse(reader: XMLEventReader): AndroidStringsXmlModel {
-    val parser = AndroidStringsXmlParser(reader)
+  private fun parse(reader: XMLEventReader): XmlResourcesStringsModel {
+    val parser = XmlResourcesParser(reader)
     return parser.parse()
   }
 
-  private fun parseSingleStringUnit(data: String): AndroidStringValue? {
+  private fun parseSingleStringUnit(data: String): XmlResourcesStringValue? {
     val unit = parse(getReaderWithSingleStringUnit(data)).items["name"] as StringUnit
     unit.value.assert.isNotNull()
     return unit.value
