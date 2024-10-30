@@ -1,3 +1,10 @@
+## [3.80.6](https://github.com/tolgee/tolgee-platform/compare/v3.80.5...v3.80.6) (2024-10-30)
+
+
+### Bug Fixes
+
+* task possible assignees ([#2644](https://github.com/tolgee/tolgee-platform/issues/2644)) ([89b0000](https://github.com/tolgee/tolgee-platform/commit/89b00009b83128d4ea4edb39d6cee57e88fd8654))
+
 ## [3.80.5](https://github.com/tolgee/tolgee-platform/compare/v3.80.4...v3.80.5) (2024-10-29)
 
 
