@@ -4,7 +4,7 @@ import StringsdictFileProcessor
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
-import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
@@ -58,7 +58,7 @@ class ImportFileProcessorFactory(
       ImportFileFormat.STRINGSDICT -> StringsdictFileProcessor(context)
       ImportFileFormat.XLIFF -> XliffFileProcessor(context)
       ImportFileFormat.PROPERTIES -> PropertiesFileProcessor(context)
-      ImportFileFormat.XML -> AndroidStringsXmlProcessor(context)
+      ImportFileFormat.XML -> XmlResourcesProcessor(context)
       ImportFileFormat.ARB -> FlutterArbFileProcessor(context, objectMapper)
       ImportFileFormat.YAML -> YamlFileProcessor(context, yamlObjectMapper)
       ImportFileFormat.CSV -> CsvFileProcessor(context)

@@ -1,8 +1,8 @@
-package io.tolgee.formats.android.out
+package io.tolgee.formats.xmlResources.out
 
 import io.tolgee.formats.MobileStringEscaper
-import io.tolgee.formats.android.AndroidParsingConstants
-import io.tolgee.formats.android.AndroidStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -22,7 +22,7 @@ import javax.xml.transform.stream.StreamResult
 
 class TextToAndroidXmlConvertor(
   private val document: Document,
-  private val value: AndroidStringValue,
+  private val value: XmlResourcesStringValue,
 ) : Logging {
   val string = value.string
 
@@ -127,7 +127,7 @@ class TextToAndroidXmlConvertor(
         textNodes.add(node)
       }
       if (node.nodeType == Node.ELEMENT_NODE) {
-        if (node.nodeName.lowercase() !in AndroidParsingConstants.supportedTags) {
+        if (node.nodeName.lowercase() !in XmlResourcesParsingConstants.supportedTags) {
           unsupportedTagNodes.add(node)
         } else {
           containsTags = true

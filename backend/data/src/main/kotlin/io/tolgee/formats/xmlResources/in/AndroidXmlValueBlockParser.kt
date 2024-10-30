@@ -1,7 +1,7 @@
-package io.tolgee.formats.android.`in`
+package io.tolgee.formats.xmlResources.`in`
 
-import io.tolgee.formats.android.AndroidParsingConstants
-import io.tolgee.formats.android.AndroidStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.blockXmlParser.BlockXmlParser
 import io.tolgee.formats.blockXmlParser.ModelCharacters
 import io.tolgee.formats.blockXmlParser.ModelElement
@@ -33,14 +33,14 @@ class AndroidXmlValueBlockParser {
     if (singleTextResult != null) {
       // we just need to bypass the xml escaping, since if the text doesn't contain XML, we handle it as a text,
       // which can contain characters like &, <, >
-      return@lazy AndroidStringValue(singleTextResult, false)
+      return@lazy XmlResourcesStringValue(singleTextResult, false)
     }
 
     val children = rootModel.children
     val text = children.joinToString("") { it.toXmlString() }
     val singleChild = getRootSingleChild()
     val isWrappedCharacterData = singleChild is ModelCharacters && singleChild.isCdata
-    AndroidStringValue(text, isWrappedCharacterData)
+    XmlResourcesStringValue(text, isWrappedCharacterData)
   }
 
   private val rootModel get() = blockXmlParser.rootModel
@@ -73,7 +73,7 @@ class AndroidXmlValueBlockParser {
 
   private fun replaceWithTextIfUnsupported(node: ModelNode) {
     if (node !is ModelElement) return
-    if (node.name !in AndroidParsingConstants.supportedTags) {
+    if (node.name !in XmlResourcesParsingConstants.supportedTags) {
       val parentsChildren = node.parent?.children
       val index = parentsChildren?.indexOf(node) ?: return
       parentsChildren[index] = ModelCharacters(node.getText(), false, blockXmlParser.getAndIncrementId(), node.parent)
