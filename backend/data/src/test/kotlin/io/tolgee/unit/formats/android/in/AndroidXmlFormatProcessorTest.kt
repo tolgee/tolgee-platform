@@ -79,6 +79,16 @@ class AndroidXmlFormatProcessorTest {
       .assertSingle {
         hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d")
       }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "escape_sequence_within_quoted_spaces")
+      .assertSingle {
+        hasText("Test        ntest")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "backslash_at_the_end")
+      .assertSingle {
+        hasText("Test")
+      }
     mockUtil.fileProcessorContext.assertKey("app_name") {
       custom.assert.isNull()
       description.assert.isEqualTo("This is a comment")
