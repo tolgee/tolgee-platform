@@ -9,9 +9,8 @@ class AndroidStringUnescaper(
   private val quotationMark: Char = '"',
   private val escapeMark: Char = '\\',
   private val spacesToTrim: Set<Char> = XmlResourcesParsingConstants.spaces,
-  private val toUnescape: Map<Char, String> = toUnescapeDefault
+  private val toUnescape: Map<Char, String> = toUnescapeDefault,
 ) {
-
   private val initialState
     get() = if (isFirst) State.AFTER_SPACE else State.NORMAL
 
@@ -42,41 +41,46 @@ class AndroidStringUnescaper(
   }
 
   private val resultSeq: Sequence<Char>
-    get() = sequence {
-      for (char in string) {
-        state = handleCharacter(state, char)
+    get() =
+      sequence {
+        for (char in string) {
+          state = handleCharacter(state, char)
+        }
+
+        when (state) {
+          State.NORMAL -> {}
+          State.AFTER_SPACE -> {
+            val lastSpace = space
+            if (lastSpace != null && !isLast) yield(lastSpace)
+          }
+          State.ESCAPED -> {
+            // Android deletes the last backslash if it is the last character
+          }
+          State.QUOTED -> {
+            // Quoted text was not closed
+          }
+          State.QUOTED_ESCAPED -> {}
+        }
       }
 
-      when (state) {
-        State.NORMAL -> {}
-        State.AFTER_SPACE -> {
-          val lastSpace = space
-          if (lastSpace != null && !isLast) yield(lastSpace)
-        }
-        State.ESCAPED -> {
-          // Android deletes the last backslash if it is the last character
-        }
-        State.QUOTED -> {
-          // Quoted text was not closed
-        }
-        State.QUOTED_ESCAPED -> {}
-      }
-    }
-
-  private suspend fun SequenceScope<Char>.handleCharacter(state: State, char: Char): State {
+  private suspend fun SequenceScope<Char>.handleCharacter(
+    state: State,
+    char: Char,
+  ): State {
     return when (state) {
-      State.NORMAL -> when (char) {
-        escapeMark -> State.ESCAPED
-        quotationMark -> State.QUOTED
-        in spacesToTrim -> {
-          space = char
-          State.AFTER_SPACE
+      State.NORMAL ->
+        when (char) {
+          escapeMark -> State.ESCAPED
+          quotationMark -> State.QUOTED
+          in spacesToTrim -> {
+            space = char
+            State.AFTER_SPACE
+          }
+          else -> {
+            yield(char)
+            State.NORMAL
+          }
         }
-        else -> {
-          yield(char)
-          State.NORMAL
-        }
-      }
       State.AFTER_SPACE -> {
         when (char) {
           in spacesToTrim -> State.AFTER_SPACE
@@ -97,14 +101,15 @@ class AndroidStringUnescaper(
           else -> State.NORMAL
         }
       }
-      State.QUOTED -> when (char) {
-        escapeMark -> State.QUOTED_ESCAPED
-        quotationMark -> State.NORMAL
-        else -> {
-          yield(char)
-          State.QUOTED
+      State.QUOTED ->
+        when (char) {
+          escapeMark -> State.QUOTED_ESCAPED
+          quotationMark -> State.NORMAL
+          else -> {
+            yield(char)
+            State.QUOTED
+          }
         }
-      }
       State.QUOTED_ESCAPED -> {
         yieldAll(char.unescape().asSequence())
         State.QUOTED

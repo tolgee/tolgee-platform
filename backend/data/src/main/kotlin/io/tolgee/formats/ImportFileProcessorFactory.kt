@@ -4,7 +4,6 @@ import StringsdictFileProcessor
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
-import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
 import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
@@ -13,6 +12,7 @@ import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportArchiveProcessor

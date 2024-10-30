@@ -6,12 +6,12 @@ import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.android.`in`.AndroidStringUnescaper
 import io.tolgee.formats.compose.`in`.ComposeStringUnescaper
-import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
-import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.xmlResources.PluralUnit
 import io.tolgee.formats.xmlResources.StringArrayUnit
 import io.tolgee.formats.xmlResources.StringUnit
-import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
@@ -154,11 +154,12 @@ class XmlResourcesProcessor(
 
   private val messageConvertor = importFormat.messageConvertor
 
-  private val stringUnescaper = if (importFormat == ImportFormat.COMPOSE_XML) {
-    ComposeStringUnescaper.defaultFactory
-  } else {
-    AndroidStringUnescaper.defaultFactory
-  }
+  private val stringUnescaper =
+    if (importFormat == ImportFormat.COMPOSE_XML) {
+      ComposeStringUnescaper.defaultFactory
+    } else {
+      AndroidStringUnescaper.defaultFactory
+    }
 
   companion object {
     val LANGUAGE_GUESS_REGEX = Regex("values-(?<language>[a-zA-Z]{2,3})(-r(?<region>[a-zA-Z]{2,3}))?")

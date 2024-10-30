@@ -2,9 +2,9 @@ package io.tolgee.unit.formats.android.`in`
 
 import XmlResourcesParser
 import io.tolgee.formats.android.`in`.AndroidStringUnescaper
+import io.tolgee.formats.xmlResources.StringUnit
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
-import io.tolgee.formats.xmlResources.StringUnit
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import javax.xml.stream.XMLEventReader

@@ -1,9 +1,9 @@
-import io.tolgee.formats.xmlResources.XmlResourcesStringValue
-import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
 import io.tolgee.formats.xmlResources.PluralUnit
 import io.tolgee.formats.xmlResources.StringArrayItem
 import io.tolgee.formats.xmlResources.StringArrayUnit
 import io.tolgee.formats.xmlResources.StringUnit
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
 import io.tolgee.formats.xmlResources.`in`.StringUnescaper
 import io.tolgee.formats.xmlResources.`in`.XmlResourcesValueBlockParser
 import javax.xml.namespace.QName
