@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400');
+
+/* Moving gradient animation */
+.moving-gradient {
+    background: linear-gradient(90deg, #3b82f6, #a855f7, #8b5cf6, #3b82f6);
+    background-size: 200% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: gradient-move 1s linear infinite;
+  }
+  
+  @keyframes gradient-move {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  
