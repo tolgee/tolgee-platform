@@ -150,10 +150,10 @@ When null, resulting file will be a flat key-value object.
     structureDelimiter: Char?,
     @Parameter(
       description =
-      "Enables filtering of returned keys by their tags.\n" +
-        "Only keys with at least one provided tag will be returned.\n" +
-        "Optional, filtering is not applied if not specified.",
-      example = "?filterTag=productionReady&filterTag=nextRelease",
+        "Enables filtering of returned keys by their tags.\n" +
+          "Only keys with at least one provided tag will be returned.\n" +
+          "Optional, filtering is not applied if not specified.",
+      example = """["productionReady", "nextRelease"]""",
     )
     @RequestParam(value = "filterTag", required = false)
     filterTag: List<String>? = null,
