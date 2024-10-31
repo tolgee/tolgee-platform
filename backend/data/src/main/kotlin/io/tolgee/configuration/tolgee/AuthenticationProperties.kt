@@ -143,6 +143,7 @@ class AuthenticationProperties(
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
+  var sso: SsoGlobalProperties = SsoGlobalProperties(),
 ) {
   fun checkAllowedRegistrations() {
     if (!this.registrationsAllowed) {

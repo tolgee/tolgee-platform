@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.SignUpService
@@ -57,12 +58,13 @@ class GithubOAuthDelegate(
 
       // get github user emails
       val emails =
-        restTemplate.exchange(
-          githubConfigurationProperties.userUrl + "/emails",
-          HttpMethod.GET,
-          entity,
-          Array<GithubEmailResponse>::class.java,
-        ).body
+        restTemplate
+          .exchange(
+            githubConfigurationProperties.userUrl + "/emails",
+            HttpMethod.GET,
+            entity,
+            Array<GithubEmailResponse>::class.java,
+          ).body
           ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
       val verifiedEmails = Arrays.stream(emails).filter { it.verified }.collect(Collectors.toList())
@@ -74,7 +76,7 @@ class GithubOAuthDelegate(
         )?.email
           ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-      val userAccountOptional = userAccountService.findByThirdParty("github", userResponse!!.id!!)
+      val userAccountOptional = userAccountService.findByThirdParty(ThirdPartyAuthType.GITHUB, userResponse!!.id!!)
       val user =
         userAccountOptional.orElseGet {
           userAccountService.findActive(githubEmail)?.let {
@@ -85,7 +87,7 @@ class GithubOAuthDelegate(
           newUserAccount.username = githubEmail
           newUserAccount.name = userResponse.name ?: userResponse.login
           newUserAccount.thirdPartyAuthId = userResponse.id
-          newUserAccount.thirdPartyAuthType = "github"
+          newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GITHUB
           newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
 
           signUpService.signUp(newUserAccount, invitationCode, null)

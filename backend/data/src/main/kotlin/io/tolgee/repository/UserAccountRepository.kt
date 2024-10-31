@@ -2,6 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.context.annotation.Lazy
@@ -79,7 +80,16 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   )
   fun findThirdByThirdParty(
     thirdPartyAuthId: String,
-    thirdPartyAuthType: String,
+    thirdPartyAuthType: ThirdPartyAuthType,
+  ): Optional<UserAccount>
+
+  @Query(
+    "SELECT u FROM UserAccount u JOIN u.ssoConfig s" +
+      " WHERE s.domainName = :domain AND u.thirdPartyAuthId = :thirdPartyAuthId",
+  )
+  fun findBySsoDomain(
+    thirdPartyAuthId: String,
+    domain: String,
   ): Optional<UserAccount>
 
   @Query(

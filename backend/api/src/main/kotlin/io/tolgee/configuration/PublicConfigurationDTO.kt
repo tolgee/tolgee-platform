@@ -28,6 +28,9 @@ class PublicConfigurationDTO(
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val chatwootToken = properties.chatwootToken
+  val nativeEnabled = properties.authentication.nativeEnabled
+  val customLoginLogo = properties.authentication.sso.customLogoUrl
+  val customLoginText = properties.authentication.sso.customButtonText
   val capterraTracker = properties.capterraTracker
   val ga4Tag = properties.ga4Tag
   val postHogApiKey: String? = properties.postHog.apiKey
@@ -49,7 +52,9 @@ class PublicConfigurationDTO(
     val oauth2: OAuthPublicExtendsConfigDTO,
   )
 
-  data class OAuthPublicConfigDTO(val clientId: String?) {
+  data class OAuthPublicConfigDTO(
+    val clientId: String?,
+  ) {
     val enabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 

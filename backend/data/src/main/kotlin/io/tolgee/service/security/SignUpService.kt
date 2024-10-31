@@ -7,6 +7,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
@@ -45,6 +46,7 @@ class SignUpService(
     return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
   }
 
+  @Transactional
   fun signUp(
     entity: UserAccount,
     invitationCode: String?,
@@ -55,6 +57,10 @@ class SignUpService(
     val user = userAccountService.createUser(entity, userSource)
     if (invitation != null) {
       invitationService.accept(invitation.code, user)
+    }
+
+    if (user.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
+      return user
     }
 
     val canCreateOrganization = tolgeeProperties.authentication.userCanCreateOrganizations

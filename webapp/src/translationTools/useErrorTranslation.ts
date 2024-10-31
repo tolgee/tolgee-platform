@@ -1,4 +1,4 @@
-import { useTranslate } from '@tolgee/react';
+import {useTranslate} from '@tolgee/react';
 
 export function useErrorTranslation() {
   const { t } = useTranslate();
@@ -129,6 +129,16 @@ export function useErrorTranslation() {
         return t('verify_email_verification_code_not_valid');
       case 'user_is_subscribed_to_paid_plan':
         return t('user_is_subscribed_to_paid_plan');
+      case 'sso_token_exchange_failed':
+        return t('sso_token_exchange_failed');
+      case 'sso_id_token_expired':
+        return t('sso_id_token_expired');
+      case 'sso_user_info_retrieval_failed':
+        return t('sso_user_info_retrieval_failed');
+      case 'sso_domain_not_enabled':
+        return t('sso_domain_not_enabled');
+      case 'sso_user_cannot_create_organization':
+        return t('sso_user_cannot_create_organization');
       default:
         return code;
     }

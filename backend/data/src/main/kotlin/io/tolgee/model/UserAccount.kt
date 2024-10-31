@@ -2,20 +2,10 @@ package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.OrderBy
+import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
@@ -35,7 +25,9 @@ data class UserAccount(
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   override var accountType: AccountType? = AccountType.LOCAL,
-) : AuditModel(), ModelWithAvatar, IUserAccount {
+) : AuditModel(),
+  ModelWithAvatar,
+  IUserAccount {
   @Column(name = "totp_key", columnDefinition = "bytea")
   override var totpKey: ByteArray? = null
 
@@ -53,7 +45,14 @@ data class UserAccount(
   var emailVerification: EmailVerification? = null
 
   @Column(name = "third_party_auth_type")
-  var thirdPartyAuthType: String? = null
+  @Enumerated(EnumType.STRING)
+  var thirdPartyAuthType: ThirdPartyAuthType? = null
+
+  @ManyToOne()
+  var ssoConfig: SsoConfig? = null
+
+  @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
+  var ssoRefreshToken: String? = null
 
   @Column(name = "third_party_auth_id")
   var thirdPartyAuthId: String? = null
@@ -110,7 +109,7 @@ data class UserAccount(
     permissions: MutableSet<Permission>,
     role: Role = Role.USER,
     accountType: AccountType = AccountType.LOCAL,
-    thirdPartyAuthType: String?,
+    thirdPartyAuthType: ThirdPartyAuthType?,
     thirdPartyAuthId: String?,
     resetPasswordCode: String?,
   ) : this(id = 0L, username = "", password, name = "") {

@@ -1,11 +1,11 @@
-import { DefaultParamType, T, TFnType, TranslationKey } from '@tolgee/react';
+import {DefaultParamType, T, TFnType, TranslationKey} from '@tolgee/react';
 import * as Yup from 'yup';
 
-import { components } from 'tg.service/apiSchema.generated';
-import { organizationService } from '../service/OrganizationService';
-import { signUpService } from '../service/SignUpService';
-import { checkParamNameIsValid } from '@tginternal/editor';
-import { validateObject } from 'tg.fixtures/validateObject';
+import {components} from 'tg.service/apiSchema.generated';
+import {organizationService} from '../service/OrganizationService';
+import {signUpService} from '../service/SignUpService';
+import {checkParamNameIsValid} from '@tginternal/editor';
+import {validateObject} from 'tg.fixtures/validateObject';
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 
@@ -395,6 +395,45 @@ export class Validation {
         t('validation_invalid_custom_values'),
         validateObject
       ),
+    });
+
+  private static readonly validateUrlWithPort = (
+    value: string | undefined
+  ): boolean => {
+    if (!value) return false;
+    const urlPattern = /^(http|https):\/\/[\w.-]+(:\d+)?(\/[^\s]*)?$/;
+    return urlPattern.test(value);
+  };
+
+  static readonly SSO_PROVIDER = (t: TFnType) =>
+    Yup.object().shape({
+      clientId: Yup.string().required().max(255),
+      domainName: Yup.string().required().max(255),
+      clientSecret: Yup.string().required().max(255),
+      authorizationUri: Yup.string()
+        .required()
+        .max(255)
+        .test(
+          'is-valid-url-with-port',
+          t('sso_invalid_url_format'),
+          Validation.validateUrlWithPort
+        ),
+      tokenUri: Yup.string()
+        .required()
+        .max(255)
+        .test(
+          'is-valid-url-with-port',
+          t('sso_invalid_url_format'),
+          Validation.validateUrlWithPort
+        ),
+      jwkSetUri: Yup.string()
+        .required()
+        .max(255)
+        .test(
+          'is-valid-url-with-port',
+          t('sso_invalid_url_format'),
+          Validation.validateUrlWithPort
+        ),
     });
 }
 
