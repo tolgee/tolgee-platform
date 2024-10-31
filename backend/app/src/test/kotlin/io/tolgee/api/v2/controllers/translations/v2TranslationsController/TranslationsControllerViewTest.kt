@@ -1,7 +1,6 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.development.testDataBuilder.data.FIRST_9_KEYS_TAGS
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
@@ -249,18 +248,17 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   @Test
   fun `returns keys filtered by provided tags`() {
-    testData.generateLotOfData()
+    testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    val expectedKeys = IntRange(1, 9).map { "key 0$it" }
-    performProjectAuthGet("/translations/en,de?filterTag=${FIRST_9_KEYS_TAGS}&filterTag=unknownTag")
+    performProjectAuthGet("/translations/en,de?filterTag=Another cool tag&filterTag=Unknown Tag")
       .andPrettyPrint.andIsOk.andAssertThatJson {
         node("en")
           .isObject
-          .containsOnlyKeys(expectedKeys)
+          .containsOnlyKeys("Another key with tag")
         node("de")
           .isObject
-          .containsOnlyKeys(expectedKeys)
+          .containsOnlyKeys("Another key with tag")
       }
   }
 

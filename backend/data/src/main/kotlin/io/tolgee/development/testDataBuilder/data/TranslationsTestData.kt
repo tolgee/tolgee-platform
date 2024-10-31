@@ -19,8 +19,6 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.translation.Translation
 
-const val FIRST_9_KEYS_TAGS = "first9keys"
-
 class TranslationsTestData {
   lateinit var project: Project
   lateinit var englishLanguage: Language
@@ -223,14 +221,10 @@ class TranslationsTestData {
           addTranslation {
             language = germanLanguage
             text = "I am key $padNum's german translation."
-            if (it < 10)
-              addTag(FIRST_9_KEYS_TAGS)
           }
           addTranslation {
             language = englishLanguage
             text = "I am key $padNum's english translation."
-            if (it < 10)
-              addTag(FIRST_9_KEYS_TAGS)
           }
         }
       }
@@ -243,16 +237,40 @@ class TranslationsTestData {
         name = "Key with tag"
       }.build {
         addTag("Cool tag")
+        addTranslation {
+          language = germanLanguage
+          text = "Key with tag DE"
+        }
+        addTranslation {
+          language = englishLanguage
+          text = "Key with tag EN"
+        }
       }
       addKey {
         name = "Another key with tag"
       }.build {
         addTag("Another cool tag")
+        addTranslation {
+          language = germanLanguage
+          text = "Another key with tag DE"
+        }
+        addTranslation {
+          language = englishLanguage
+          text = "Another key with tag EN"
+        }
       }
       addKey {
         name = "Key with tag 2"
       }.build {
         addTag("Cool tag")
+        addTranslation {
+          language = germanLanguage
+          text = "Key with tag 2 DE"
+        }
+        addTranslation {
+          language = englishLanguage
+          text = "Key with tag 2 EN"
+        }
       }
     }
   }
