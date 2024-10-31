@@ -1,0 +1,111 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'io.spring.dependency-management') {
+                useModule("io.spring.gradle:dependency-management-plugin:$springDependencyManagementVersion")
+            }
+
+            if (requested.id.id == 'org.springframework.boot') {
+                useModule("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+            }
+
+            if (requested.id.id == 'kotlin-allopen') {
+                useModule("org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion")
+            }
+
+            if (requested.id.id == 'kotlin-jpa') {
+                useModule("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
+            }
+
+            if (requested.id.id == 'org.liquibase.gradle') {
+                useModule('org.liquibase.gradle:org.liquibase.gradle.gradle.plugin:2.2.1')
+            }
+            if (requested.id.id == 'org.hibernate.orm') {
+                useVersion(hibernateVersion)
+            }
+            if (requested.id.id == 'io.sentry.jvm.gradle') {
+                useVersion('4.11.0')
+            }
+            if(requested.id.id == 'org.gradle.test-retry') {
+                useVersion('1.5.8')
+            }
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            library('stripe', 'com.stripe', 'stripe-java').version('22.11.0')
+            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
+            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version(jacksonVersion)
+            library('jacksonDataFormatXml', 'com.fasterxml.jackson.dataformat', 'jackson-dataformat-xml').version(jacksonVersion)
+            library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)
+            library('kotlinReflect', 'org.jetbrains.kotlin', 'kotlin-reflect').version(kotlinVersion)
+            library('kotlinCoroutines', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').version('1.6.1')
+            library('springDocWebmvcApi', 'org.springdoc', 'springdoc-openapi-starter-webmvc-api').version(springDocVersion)
+            library('springDocOpenApiUi', 'org.springdoc', 'springdoc-openapi-starter-webmvc-ui').version(springDocVersion)
+            library('springDocOpenApiKotlin', 'org.springdoc', 'springdoc-openapi-kotlin').version(springDocVersion)
+            library('springDocOpenApiCommon', 'org.springdoc', 'springdoc-openapi-starter-common').version(springDocVersion)
+            library('jacksonKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.15.3')
+            library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').version(jjwtVersion)
+            library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').version(jjwtVersion)
+            library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
+            library('assertJCore', 'org.assertj:assertj-core:3.19.0')
+            library('springmockk', 'com.ninja-squad:springmockk:3.0.1')
+            library('mockito', 'org.mockito.kotlin:mockito-kotlin:5.0.0')
+            library('commonsCodec', 'commons-codec:commons-codec:1.15')
+            library('icu4j', 'com.ibm.icu:icu4j:74.2')
+            library('jsonUnitAssert', 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0')
+            library('amazonS3', "software.amazon.awssdk:s3:$amazonAwsSdkVersion")
+            library('amazonSTS', "software.amazon.awssdk:sts:$amazonAwsSdkVersion")
+            library('amazonTranslate', "software.amazon.awssdk:translate:$amazonAwsSdkVersion")
+            library('googleCloud', "com.google.cloud:libraries-bom:24.0.0")
+            library('liquibaseCore', "org.liquibase:liquibase-core:4.26.0")
+            library('liquibaseHibernate', "org.liquibase.ext:liquibase-hibernate6:4.26.0")
+            library('liquibasePicoli', "info.picocli:picocli:4.6.3")
+            library('hibernateTypes', "io.hypersistence:hypersistence-utils-hibernate-63:3.7.0")
+            library('redissonSpringBootStarter', "org.redisson:redisson-spring-boot-starter:3.27.0")
+            library('postHog', 'com.posthog.java:posthog:1.1.1')
+            library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.13.3")
+            library('mailjet', "com.mailjet:mailjet-client:5.2.5")
+            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.16.0')
+            library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
+            library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
+            library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
+        }
+    }
+}
+
+include ':server-app'
+project(':server-app').projectDir = new File('backend/app')
+
+include ':data'
+project(':data').projectDir = new File('backend/data')
+
+include ':billing-app'
+project(':billing-app').projectDir = new File('../billing/app')
+
+include ':billing-test'
+project(':billing-test').projectDir = new File('../billing/tests')
+
+include ':testing'
+project(':testing').projectDir = new File('backend/testing')
+
+include ':misc'
+project(':misc').projectDir = new File('backend/misc')
+
+include ':ee-app'
+project(':ee-app').projectDir = new File('ee/backend/app')
+
+include ':ee-test'
+project(':ee-test').projectDir = new File('ee/backend/tests')
+
+include ':development'
+project(':development').projectDir = new File('backend/development')
+
+include ':api'
+project(':api').projectDir = new File('backend/api')
+
+include ':security'
+project(':security').projectDir = new File('backend/security')
