@@ -187,15 +187,15 @@ export const formatGroups: FormatGroup[] = [
     ],
   },
   {
-    name: "Compose Multiplatform",
+    name: 'Compose Multiplatform',
     formats: [
       {
         id: 'compose_xml',
         extension: 'xml',
         name: <T keyName="export-format-compose-xml" />,
         format: 'COMPOSE_XML',
-      }
-    ]
+      },
+    ],
   },
   {
     name: 'Flutter',
