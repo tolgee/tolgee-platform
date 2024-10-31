@@ -1,0 +1,23 @@
+{
+  "bookmark": "Bookmark",
+  "books": "Your Bookmarks",
+  "change_lang": "Change your language here:",
+  "change_pass": "Change your password here:",
+  "error": "Internal Server Error,Oops! The server has encountered a problem.",
+  "findmov": "Find Your Next Movie",
+  "genre": "Action,Adventure,Animation,Comedy,Crime,Documentary,Drama,Family,Fantasy,History,Horror,Music,Mystery,Romance,Science Fiction,TV Movie,Thriller,War,Western",
+  "get_sug": "Get suggestions!",
+  "login": "Login",
+  "logout": "Logout",
+  "mov_sug": "Movie Suggestions",
+  "no_books": "No movies bookmarked yet!",
+  "no_mov": "Select a genre to start!",
+  "not_found": "Page Not Found,The page you are looking for doesn't exist.",
+  "pass": "Change Password",
+  "sel_genre": "Select Your Favorite Genres:",
+  "set_lang": "Set Language",
+  "set_pass": "Set Password",
+  "signup": "Sign Up",
+  "signup_page": "Username,Email,Language,Password,Password must be between 8 and 32 characters,Confirm Password,Repeat Password",
+  "unbookmark": "Unbookmark"
+}

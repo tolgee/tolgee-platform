@@ -18,6 +18,7 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   var orgMember: UserAccountBuilder
   var projectViewScopeUser: UserAccountBuilder
   var projectViewRoleUser: UserAccountBuilder
+  var projectManageRoleUser: UserAccountBuilder
   var translateTask: TaskBuilder
   var reviewTask: TaskBuilder
   var relatedProject: ProjectBuilder
@@ -64,6 +65,12 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
         name = "Project view role user (en)"
       }
 
+    projectManageRoleUser =
+      root.addUserAccount {
+        username = "project.manage.role.user@test.com"
+        name = "Project manage role user (en)"
+      }
+
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
         user = orgMember.self
@@ -89,6 +96,11 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
       addPermission {
         user = projectUser.self
         type = ProjectPermissionType.EDIT
+      }
+
+      addPermission {
+        user = projectManageRoleUser.self
+        type = ProjectPermissionType.MANAGE
       }
 
       addPermission {

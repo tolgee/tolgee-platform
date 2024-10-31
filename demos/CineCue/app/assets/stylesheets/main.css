@@ -1,0 +1,294 @@
+@charset "UTF-8";
+
+body,html {
+    margin: 0;
+    font-family: "ubuntu","Noto Sans Arabic", "hurmit";
+    padding: 0
+}
+
+[dir=rtl] {
+    font-family: "Noto Sans Arabic","hurmit"!important
+}
+
+body {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background-color: var(--bg-light);
+    color: #000
+}
+
+.header {
+    height: 55px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: calc(100% - 10px);
+    padding: 5px;
+    z-index: 999
+}
+
+.center-n {
+    width: 950px;
+    padding: 25px;
+    border-radius: 30px;
+    margin-bottom: 20px
+}
+
+.error_message:not(:empty) {
+    background-color: #ec0b4385;
+    padding: 10px;
+    color: #fff;
+    border-radius: 7px;
+    display: block;
+    margin-bottom: 10px
+}
+
+.form-field-title {
+    width: 120px;
+    text-align: right;
+    vertical-align: middle;
+    padding: 10px
+}
+
+.field_with_errors {
+    display: inline
+}
+
+.form-table {
+    margin-bottom: 5px
+}
+
+.form {
+    text-align: center;
+    border: 1px solid #bdbdbd;
+    border-radius: 3px;
+    width: 380px
+}
+
+.form-input {
+    background-color: inherit;
+    color: inherit;
+    border-radius: 5px;
+    padding: 5px;
+    height: 20px;
+    width: 200px;
+    border: 1px solid #8f8f8f
+}
+
+select.form-input {
+    height: 32px;
+    width: 212px
+}
+
+.form-submit-btn,.form-title {
+    text-align: center;
+    margin-bottom: 20px
+}
+
+.form-title {
+    display: block;
+    width: calc(100% - 20px);
+    height: 30px;
+    padding: 10px;
+    font-size: 24px
+}
+
+.form-submit-btn {
+    width: auto;
+    padding: 0 10px;
+    font-family: inherit;
+    border: 0;
+    height: 40px;
+    font-size: 17px;
+    cursor: pointer
+}
+
+.form-submit-btn:hover {
+    filter: brightness(.9)
+}
+
+.header-space {
+    height: 65px;
+    width: 100%;
+    display: block
+}
+
+.header-logo {
+    float: left
+}
+
+.header-links {
+    display: flex;
+    float: right;
+    margin-top: 13px;
+    margin-bottom: 20px
+}
+
+.header-link {
+    color: #fff;
+    font-size: 25px;
+    font-weight: 700
+}
+
+.header-link:hover {
+    color: #fff;
+    text-decoration: none
+}
+
+.header-link-card {
+    margin-right: 20px
+}
+
+.header-link-underline {
+    background-color: #fff;
+    height: 4px;
+    width: 0%;
+    display: block;
+    transition: width .5s
+}
+
+.header-link:hover+.header-link-underline {
+    width: 100%
+}
+
+.logo-image {
+    height: 55px
+}
+
+.main {
+    padding: 20px
+}
+
+.get-btn {
+    border: 0;
+    background-color: #4accce;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: 700;
+    padding: 10px;
+    cursor: pointer
+}
+
+.get-btn:hover,.lang-sel:hover {
+    box-shadow: 0 0 10px 5px rgba(255,255,255,.2);
+    background-color: #11998e
+}
+
+.gen-sel {
+    font-family: "hurmit","Noto Sans Arabic";
+    border-radius: 5px
+}
+
+.lang-sel {
+    border: 0;
+    background-color: #4accce;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: 700;
+    padding: 10px;
+    cursor: pointer;
+    margin: 20px 20px 0
+}
+
+.lang-div {
+    background: #5e5e5e;
+    border-radius: 9px;
+    width: 370px;
+    padding: 20px;
+    color: #fff;
+    position: fixed;
+    right: 50px;
+    z-index: 99;
+    box-shadow: 0 0 5px 5px #00000049
+}
+
+h2.title {
+    margin: 0;
+    white-space: pre;
+}
+
+.get-xbtn {
+    position: relative
+}
+
+.searchdiv {
+    display: flex
+}
+
+.xbtn {
+    padding: 30px
+}
+
+.searchbar {
+    padding-left: 30px
+}
+
+.movies {
+    width: 50%
+}
+
+.movie {
+    background-color: #ebebeb;
+    border: 2px solid #636363;
+    border-radius: 5px;
+    margin: 20px;
+    padding: 20px
+}
+
+.mov-title {
+    margin-bottom: 9px
+}
+
+.bookmark-btn {
+    font-family: "hurmit","Noto Sans Arabic";
+    border: 0;
+    cursor: pointer
+}
+
+.bookmark-btn::before {
+    content: " "
+}
+
+.movies-cont {
+    display: flex
+}
+
+a {
+    color: var(--suplimentary-light-1);
+    text-decoration: none
+}
+
+a:hover {
+    color: var(--suplimentary-light-2);
+    text-decoration: underline
+}
+
+.header {
+    background: linear-gradient(135deg,#ffd447 10%,#f896d8 90%);
+    box-shadow: 0 1.5px 15px 0 rgba(0,0,0,.2)
+}
+
+.form-input:focus-visible {
+    outline: 0;
+    border: 1px solid var(--suplimentary-light-1)
+}
+
+.form-title {
+    border-bottom: 1px solid #bdbdbd
+}
+
+.form-submit-btn,.form-title {
+    color: #fff;
+    background-color: var(--primary-light)
+}
+
+h1 {
+    font-size: 70px;
+    font-family: "hurmit","Noto Sans Arabic",monospace;
+    margin-top: 150px
+}
+
+.header-links[dir=rtl] {
+    margin-top: 0px;
+}

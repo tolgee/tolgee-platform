@@ -1,5 +1,6 @@
 package io.tolgee.security.authentication
 
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -17,7 +18,9 @@ class AuthenticationInterceptorTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
-  private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade)
+  private val authenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
+
+  private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade, authenticationProperties)
 
   private val mockMvc =
     MockMvcBuilders.standaloneSetup(TestController::class.java)
@@ -26,6 +29,7 @@ class AuthenticationInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
+    Mockito.`when`(authenticationProperties.enabled).thenReturn(true)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
@@ -57,6 +61,13 @@ class AuthenticationInterceptorTest {
 
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
     Mockito.`when`(userAccount.needsSuperJwt).thenReturn(false)
+    mockMvc.perform(get("/requires-super-auth")).andIsOk
+  }
+
+  @Test
+  fun `it ignores super JWT requirement when authentication is disabled`() {
+    mockMvc.perform(get("/requires-super-auth")).andIsForbidden
+    Mockito.`when`(authenticationProperties.enabled).thenReturn(false)
     mockMvc.perform(get("/requires-super-auth")).andIsOk
   }
 

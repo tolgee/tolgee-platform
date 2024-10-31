@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CineCue</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <%= favicon_link_tag 'icon-sm.svg' %>
+  </head>
+  <body dir="<% if %w(ar ur).include?(cookies[:lang]) %>rtl<% else %>ltr<% end %>">
+    <div class="header">
+      <div class="header-logo">
+        <a href="/">
+          <%= image_tag("icon.svg", alt: "CineCue", class: "logo-image") %>
+        </a>
+      </div>
+      <div class="header-links" dir="<% if %w(ar ur).include?(cookies[:lang]) %>rtl<% else %>ltr<% end %>">
+        <% if session[:user_id] %>
+          <div class="header-link-card">
+            <a href="/books" class="header-link" data-method="delete"><%= @translations["books"] %></a>
+            <span class="header-link-underline"></span>
+          </div>
+          <div class="header-link-card">
+            <a href="/pass" class="header-link" data-method="delete"><%= @translations["pass"] %></a>
+            <span class="header-link-underline"></span>
+          </div>
+          <div class="header-link-card">
+            <a href="/logout" class="header-link" data-method="delete"><%= @translations["logout"] %></a>
+            <span class="header-link-underline"></span>
+          </div>
+        <% else %>
+          <div class="header-link-card">
+            <a href="/login" class="header-link" data-method="delete"><%= @translations["login"] %></a>
+            <span class="header-link-underline"></span>
+          </div>
+          <div class="header-link-card">
+            <a href="/signup" class="header-link" data-method="delete"><%= @translations["signup"] %></a>
+            <span class="header-link-underline"></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    <span class="header-space"></span>
+    <div class="main">
+      <% genres = @translations["genre"].split(',') %>
+      <% signup_page = @translations["signup_page"].split(',') %>
+      <div class="lang-div">
+        <h2 class="title">󰗊  <%= @translations["change_lang"] %></h2>
+        <%= form_with url: lang_path, method: :patch, data: { turbo: false } do |form| %>
+          <%= form.label :lang, signup_page[2] %>:
+          <%= form.select :lang,
+            [
+              ['English', 'en'],
+              ['Spanish', 'es'],
+              ['French', 'fr'],
+              ['Hindi', 'hi'],
+              ['Urdu', 'ur'],
+              ['Turkish', 'tr'],
+              ['Arabic', 'ar']
+            ],
+            { selected: 'en' }, class: "lang-sel" %>&nbsp;<%= form.submit @translations["set_lang"], class: "get-btn" %>
+        <% end %>
+      </div>
+      <%= yield %>
+    </div>
+  </body>
+</html>

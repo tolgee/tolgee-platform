@@ -42,6 +42,9 @@ class TaskControllerAssigneesTest : ProjectAuthControllerTest("/v2/projects/") {
         (it as JsonMap).get("name").assert.isEqualTo("Project view role user (en)")
       }
       node("_embedded.users").isArray.anySatisfy {
+        (it as JsonMap).get("name").assert.isEqualTo("Project manage role user (en)")
+      }
+      node("_embedded.users").isArray.anySatisfy {
         (it as JsonMap).get("name").assert.isEqualTo("Organization member")
       }
       node("_embedded.users").isArray.anySatisfy {

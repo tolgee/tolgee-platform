@@ -1,0 +1,53 @@
+<% flash.each do |key, message| %>
+  <span class="error_message"><%= message %></span>
+<% end %>
+
+<% if @user %>
+  <% if @user.errors.any? %>
+    <% @user.errors.full_messages.each do |message| %>
+      <span class="error_message"><%= message %></span>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% signup_page = @translations["signup_page"].split(',') %>
+
+<div class="center">
+  <%= form_with model: @user, class: "form", url: signup_path, method: :post, data: { turbo: false } do |form| %>
+    <span class="form-title"><%= @translations["signup"] %></span>
+    <table class="form-table">
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :username, signup_page[0] %>:</td>
+        <td class="form-field-input"><%= form.text_field :username, placeholder: signup_page[0], class: "form-input" %></td>
+      </tr>
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :email, signup_page[1] %>:</td>
+        <td class="form-field-input"><%= form.text_field :email, placeholder: signup_page[1], class: "form-input" %></td>
+      </tr>
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :lang, signup_page[2] %>:</td>
+        <td class="form-field-input"><%= form.select :lang,
+                                      [
+                                        ['English', 'en'],
+                                        ['Spanish', 'es'],
+                                        ['French', 'fr'],
+                                        ['Hindi', 'hi'],
+                                        ['Urdu', 'ur'],
+                                        ['Turkish', 'tr'],
+                                        ['Arabic', 'ar']
+                                      ],
+                                      { selected: 'en' }, class: "form-input" %></td>
+      </tr>
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :password, signup_page[3] %>:</td>
+        <td class="form-field-input"><%= form.password_field :password, placeholder: signup_page[4], class: "form-input" %></td>
+      </tr>
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :password_confirmation, signup_page[5] %>:</td>
+        <td class="form-field-input"><%= form.password_field :password_confirmation, placeholder: signup_page[6], class: "form-input" %></td>
+      </tr>
+    </table>
+    <%= form.submit @translations["signup"], class: "form-submit-btn" %>
+  <% end %>
+</div>
+
