@@ -132,7 +132,7 @@ class TranslationsController(
       description =
         "Comma-separated language tags to return translations in. " +
           "Languages you are not permitted to see will be silently dropped and not returned.",
-      example = "en,de,fr",
+      example = """["en","de","fr"]""",
     )
     @PathVariable("languages")
     languages: Set<String>,
