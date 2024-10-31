@@ -148,6 +148,15 @@ When null, resulting file will be a flat key-value object.
     )
     @RequestParam(value = "structureDelimiter", defaultValue = ".", required = false)
     structureDelimiter: Char?,
+    @Parameter(
+      description =
+      "Enables filtering of returned keys by their tags.\n" +
+        "Only keys with at least one provided tag will be returned.\n" +
+        "Optional, filtering is not applied if not specified.",
+      example = "?filterTag=productionReady&filterTag=nextRelease",
+    )
+    @RequestParam(value = "filterTag", required = false)
+    filterTag: List<String>? = null,
     request: WebRequest,
   ): ResponseEntity<Map<String, Any>>? {
     val lastModified: Long = projectTranslationLastModifiedManager.getLastModified(projectHolder.project.id)
@@ -166,6 +175,7 @@ When null, resulting file will be a flat key-value object.
         namespace = ns,
         projectId = projectHolder.project.id,
         structureDelimiter = request.getStructureDelimiter(),
+        filterTag = filterTag,
       )
 
     return ResponseEntity.ok()
