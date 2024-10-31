@@ -10,12 +10,8 @@ class FlutterArbFileParser(
   private val objectMapper: ObjectMapper,
 ) {
   fun parse(): FlutterArbModel {
-    try {
       val data = objectMapper.readValue<Map<String, Any>>(bytes)
       return parseArbData(data)
-    } catch (e: Exception) {
-      throw FlutterArbFileParseException(e)
-    }
   }
 
   private fun parseArbData(data: Map<String, Any>): FlutterArbModel {
