@@ -78,7 +78,7 @@ class OAuthService(
     return register(userInfo, tenant, invitationCode, tokenResponse.refresh_token)
   }
 
-  fun exchangeCodeForToken(
+  private fun exchangeCodeForToken(
     tenant: SsoTenant,
     code: String,
     redirectUrl: String,
@@ -112,7 +112,7 @@ class OAuthService(
     }
   }
 
-  fun verifyAndDecodeIdToken(
+  private fun verifyAndDecodeIdToken(
     idToken: String,
     jwkSetUri: String,
   ): GenericUserResponse {
