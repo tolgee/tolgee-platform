@@ -250,9 +250,10 @@ enum class Message {
   SSO_USER_OPERATION_UNAVAILABLE,
   SSO_GLOBAL_CONFIG_MISSING_PROPERTIES,
   SSO_DOMAIN_NOT_FOUND_OR_DISABLED,
-    ;
+  NATIVE_AUTHENTICATION_DISABLED,
+  ;
 
-    val code: String
+  val code: String
     get() = name.lowercase(Locale.getDefault())
 
   @JsonValue
