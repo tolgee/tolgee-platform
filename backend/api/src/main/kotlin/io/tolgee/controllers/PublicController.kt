@@ -168,7 +168,9 @@ class PublicController(
   @OpenApiHideFromPublicDocs
   fun validateEmail(
     @RequestBody email: TextNode,
-  ): Boolean = userAccountService.findActive(email.asText()) == null
+  ): Boolean {
+    return userAccountService.findActive(email.asText()) == null
+  }
 
   @GetMapping("/authorize_oauth/{serviceType}")
   @Operation(
