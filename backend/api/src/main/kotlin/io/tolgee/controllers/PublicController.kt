@@ -97,8 +97,6 @@ class PublicController(
             """.trimIndent(),
         )
 
-
-
       tolgeeEmailSender.sendEmail(params)
       return
     }
