@@ -112,7 +112,7 @@ class OAuthTest : AuthorizedControllerTest() {
   @Test
   fun `does not return auth link when tenant is disabled`() {
     val tenant = addTenant()
-    tenant.isEnabledForThisOrganization = false
+    tenant.enabled = false
     tenantService.save(tenant)
     val response = oAuthMultiTenantsMocks.getAuthLink("registrationId").response
     assertThat(response.status).isEqualTo(400)

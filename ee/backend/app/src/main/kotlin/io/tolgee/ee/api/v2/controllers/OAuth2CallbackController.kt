@@ -30,7 +30,7 @@ class OAuth2CallbackController(
   ): SsoUrlResponse {
     val registrationId = request.domain
     val tenant = tenantService.getByDomain(registrationId)
-    if (!tenant.isEnabledForThisOrganization) {
+    if (!tenant.enabled) {
       throw OAuthAuthorizationException(Message.SSO_DOMAIN_NOT_ENABLED, "Domain is not enabled for this organization")
     }
     val redirectUrl = buildAuthUrl(tenant, state = request.state)

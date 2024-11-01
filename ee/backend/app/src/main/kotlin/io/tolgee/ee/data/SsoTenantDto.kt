@@ -18,7 +18,7 @@ fun SsoTenant.toDto(): SsoTenantDto =
     clientId = this.clientId,
     clientSecret = this.clientSecret,
     tokenUri = this.tokenUri,
-    isEnabled = this.isEnabledForThisOrganization,
+    isEnabled = this.enabled,
     jwkSetUri = this.jwkSetUri,
     domainName = this.domain,
   )

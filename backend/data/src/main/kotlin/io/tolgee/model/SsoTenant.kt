@@ -25,5 +25,5 @@ class SsoTenant : StandardAuditModel() {
   var userAccounts: MutableSet<UserAccount> = mutableSetOf()
 
   @ColumnDefault("true")
-  var isEnabledForThisOrganization: Boolean = true
+  var enabled: Boolean = true
 }

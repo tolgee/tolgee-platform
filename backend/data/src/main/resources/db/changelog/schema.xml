@@ -3552,4 +3552,14 @@
     <changeSet author="huglx (generated)" id="1730458966344-24">
         <dropColumn columnName="sso_config_id" tableName="user_account"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1730460178906-1">
+        <addColumn tableName="tenant">
+            <column defaultValueBoolean="true" name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730460178906-15">
+        <dropColumn columnName="is_enabled_for_this_organization" tableName="tenant"/>
+    </changeSet>
 </databaseChangeLog>

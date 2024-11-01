@@ -48,8 +48,8 @@ data class UserAccount(
   @Enumerated(EnumType.STRING)
   var thirdPartyAuthType: ThirdPartyAuthType? = null
 
-  @ManyToOne()
-  var ssoConfig: SsoConfig? = null
+  @ManyToOne
+  var ssoTenant: SsoTenant? = null
 
   @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
   var ssoRefreshToken: String? = null

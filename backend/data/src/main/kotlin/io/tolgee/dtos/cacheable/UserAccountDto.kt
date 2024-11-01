@@ -32,7 +32,7 @@ data class UserAccountDto(
         emailVerified = entity.emailVerification == null,
         thirdPartyAuth = entity.thirdPartyAuthType?.code(),
         ssoRefreshToken = entity.ssoRefreshToken,
-        ssoDomain = entity.ssoConfig?.domainName,
+        ssoDomain = entity.ssoTenant?.domain,
       )
   }
 
