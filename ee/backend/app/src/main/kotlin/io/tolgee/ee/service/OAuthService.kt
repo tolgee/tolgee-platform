@@ -29,7 +29,7 @@ import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.net.URL
 import java.util.*
@@ -106,7 +106,7 @@ class OAuthService(
           OAuth2TokenResponse::class.java,
         )
       response.body
-    } catch (e: HttpClientErrorException) {
+    } catch (e: RestClientException) {
       logger.info("Failed to exchange code for token: ${e.message}")
       null
     }
@@ -227,7 +227,7 @@ class OAuthService(
         return true
       }
       false
-    } catch (e: HttpClientErrorException) {
+    } catch (e: RestClientException) {
       logger.info("Failed to refresh token: ${e.message}")
       false
     }
