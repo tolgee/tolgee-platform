@@ -1,6 +1,6 @@
 package io.tolgee.ee.data
 
-import io.tolgee.ee.model.SsoTenant
+import io.tolgee.model.SsoTenant
 
 data class SsoTenantDto(
   val authorizationUri: String,

@@ -1,6 +1,6 @@
 package io.tolgee.ee.repository
 
-import io.tolgee.ee.model.SsoTenant
+import io.tolgee.model.SsoTenant
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

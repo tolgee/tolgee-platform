@@ -1,22 +1,28 @@
-package io.tolgee.ee.model
+package io.tolgee.model
 
-import io.tolgee.model.StandardAuditModel
-import jakarta.persistence.Entity
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
-@Table(schema = "ee", name = "tenant")
+@Table(name = "tenant")
 class SsoTenant : StandardAuditModel() {
   var name: String = ""
   var ssoProvider: String = ""
   var clientId: String = ""
   var clientSecret: String = ""
   var authorizationUri: String = ""
+
+  @Column(unique = true, nullable = false)
   var domain: String = ""
   var jwkSetUri: String = ""
   var tokenUri: String = ""
-  var organizationId: Long = 0L
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "organization_id")
+  var organization: Organization? = null
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "ssoTenant")
+  var userAccounts: MutableSet<UserAccount> = mutableSetOf()
 
   @ColumnDefault("true")
   var isEnabledForThisOrganization: Boolean = true

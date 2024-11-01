@@ -11,15 +11,14 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.ee.data.OAuth2TokenResponse
-import io.tolgee.ee.model.SsoTenant
 import io.tolgee.ee.service.OAuthService
 import io.tolgee.ee.service.TenantService
 import io.tolgee.ee.utils.OAuthMultiTenantsMocks
 import io.tolgee.ee.utils.OAuthMultiTenantsMocks.Companion.jwtClaimsSet
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.service.SsoConfigService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -68,9 +67,6 @@ class OAuthTest : AuthorizedControllerTest() {
   private lateinit var tenantService: TenantService
 
   @Autowired
-  lateinit var ssoConfigService: SsoConfigService
-
-  @Autowired
   lateinit var ssoGlobalProperties: SsoGlobalProperties
 
   private val oAuthMultiTenantsMocks: OAuthMultiTenantsMocks by lazy {
@@ -98,7 +94,7 @@ class OAuthTest : AuthorizedControllerTest() {
         authorizationUri = "authorizationUri"
         jwkSetUri = "http://jwkSetUri"
         tokenUri = "http://tokenUri"
-        organizationId = testData.organization.id
+        organization = testData.organization
       },
     )
 
@@ -174,7 +170,7 @@ class OAuthTest : AuthorizedControllerTest() {
     val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(user.ssoRefreshToken).isNotNull
-    assertThat(user.ssoConfig).isNotNull
+    assertThat(user.ssoTenant).isNotNull
     assertThat(user.thirdPartyAuthType?.code()).isEqualTo("sso")
     val isValid =
       cacheWithExpirationManager
@@ -193,7 +189,7 @@ class OAuthTest : AuthorizedControllerTest() {
     val user = userAccountService.get(userName)
     assertThat(
       oAuthService.verifyUserIsStillEmployed(
-        user.ssoConfig?.domainName,
+        user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,
         user.thirdPartyAuthType?.code(),
@@ -212,7 +208,7 @@ class OAuthTest : AuthorizedControllerTest() {
     oAuthMultiTenantsMocks.mockTokenExchange("http://tokenUri")
     assertThat(
       oAuthService.verifyUserIsStillEmployed(
-        user.ssoConfig?.domainName,
+        user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,
         user.thirdPartyAuthType?.code(),

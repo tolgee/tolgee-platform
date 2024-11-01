@@ -8,7 +8,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
-import io.tolgee.service.SsoConfigService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -19,7 +18,6 @@ class OAuthUserHandler(
   private val signUpService: SignUpService,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
-  private val ssoConfService: SsoConfigService,
   private val cacheWithExpirationManager: CacheWithExpirationManager,
 ) {
   fun findOrCreateUser(
@@ -27,9 +25,11 @@ class OAuthUserHandler(
     invitationCode: String?,
     thirdPartyAuthType: ThirdPartyAuthType,
   ): UserAccount {
+    val tenant = userResponse.tenant
+
     val userAccountOptional =
-      if (thirdPartyAuthType == ThirdPartyAuthType.SSO && userResponse.domain != null) {
-        userAccountService.findByDomainSso(userResponse.domain, userResponse.sub!!)
+      if (thirdPartyAuthType == ThirdPartyAuthType.SSO && tenant?.domain != null) {
+        userAccountService.findByDomainSso(tenant.domain, userResponse.sub!!)
       } else {
         userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
       }
@@ -57,8 +57,8 @@ class OAuthUserHandler(
         }
       newUserAccount.name = name
       newUserAccount.thirdPartyAuthId = userResponse.sub
-      if (userResponse.domain != null) {
-        newUserAccount.ssoConfig = ssoConfService.save(newUserAccount, userResponse.domain!!)
+      if (tenant?.domain != null) {
+        newUserAccount.ssoTenant = tenant
       }
       newUserAccount.thirdPartyAuthType = thirdPartyAuthType
       newUserAccount.ssoRefreshToken = userResponse.refreshToken
@@ -67,13 +67,14 @@ class OAuthUserHandler(
       signUpService.signUp(newUserAccount, invitationCode, null)
 
       // grant role to user only if request is not from oauth2 delegate
-      if (userResponse.organizationId != null &&
+      val organization = tenant?.organization
+      if (organization?.id != null &&
         thirdPartyAuthType != ThirdPartyAuthType.OAUTH2 &&
         invitationCode == null
       ) {
         organizationRoleService.grantRoleToUser(
           newUserAccount,
-          userResponse.organizationId,
+          organization.id,
           OrganizationRoleType.MEMBER,
         )
       }

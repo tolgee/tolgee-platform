@@ -14,8 +14,8 @@ import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
-import io.tolgee.ee.model.SsoTenant
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -156,9 +156,8 @@ class OAuthService(
         givenName = userResponse.given_name,
         familyName = userResponse.family_name,
         email = email,
-        domain = tenant.domain,
-        organizationId = tenant.organizationId,
         refreshToken = refreshToken,
+        tenant = tenant,
       )
     val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, ThirdPartyAuthType.SSO)
     val jwt = jwtService.emitToken(user.id)
