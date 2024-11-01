@@ -374,7 +374,10 @@ class OrganizationService(
     currentUserId: Long,
   ): OrganizationView? = organizationRepository.findView(id, currentUserId)
 
-  fun updateSsoProvider(organizationId: Long, tenant: SsoTenant) {
+  fun updateSsoProvider(
+    organizationId: Long,
+    tenant: SsoTenant,
+  ) {
     val organization = get(organizationId)
     organization.ssoTenant = tenant
     save(organization)

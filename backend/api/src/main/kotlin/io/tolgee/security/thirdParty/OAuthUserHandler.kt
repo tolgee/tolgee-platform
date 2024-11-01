@@ -21,7 +21,7 @@ class OAuthUserHandler(
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
-  private val authenticationProperties: AuthenticationProperties
+  private val authenticationProperties: AuthenticationProperties,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -48,7 +48,10 @@ class OAuthUserHandler(
       }
 
       // do not create new user if user is not invited and GLOBAL sso is enabled
-      if(invitationCode == null && thirdPartyAuthType == ThirdPartyAuthType.SSO && authenticationProperties.sso.enabled) {
+      if (invitationCode == null &&
+        thirdPartyAuthType == ThirdPartyAuthType.SSO &&
+        authenticationProperties.sso.enabled
+      ) {
         throw AuthenticationException(Message.SSO_USER_NOT_INVITED)
       }
 

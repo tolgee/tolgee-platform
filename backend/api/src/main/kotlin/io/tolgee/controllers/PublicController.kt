@@ -51,7 +51,7 @@ class PublicController(
   private val signUpService: SignUpService,
   private val mfaService: MfaService,
   private val userCredentialsService: UserCredentialsService,
-  private val authProperties: AuthenticationProperties
+  private val authProperties: AuthenticationProperties,
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -60,7 +60,7 @@ class PublicController(
     @RequestBody @Valid
     loginRequest: LoginRequest,
   ): JwtAuthenticationResponse {
-    if(!authProperties.nativeEnabled) {
+    if (!authProperties.nativeEnabled) {
       throw AuthenticationException(Message.NATIVE_AUTHENTICATION_DISABLED)
     }
 
@@ -168,9 +168,7 @@ class PublicController(
   @OpenApiHideFromPublicDocs
   fun validateEmail(
     @RequestBody email: TextNode,
-  ): Boolean {
-    return userAccountService.findActive(email.asText()) == null
-  }
+  ): Boolean = userAccountService.findActive(email.asText()) == null
 
   @GetMapping("/authorize_oauth/{serviceType}")
   @Operation(

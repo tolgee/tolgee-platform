@@ -12,7 +12,7 @@ interface TenantRepository : JpaRepository<SsoTenant, Long> {
   fun findByOrganizationId(id: Long): SsoTenant?
 
   @Query(
-    "SELECT t FROM SsoTenant t WHERE t.enabled = true AND t.domain = :domain"
+    "SELECT t FROM SsoTenant t WHERE t.enabled = true AND t.domain = :domain",
   )
   fun findEnabledByDomain(domain: String): SsoTenant?
 }

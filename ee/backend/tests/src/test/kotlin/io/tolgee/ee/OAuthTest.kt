@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
-import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
@@ -72,9 +71,6 @@ class OAuthTest : AuthorizedControllerTest() {
     OAuthMultiTenantsMocks(authMvc, restTemplate, tenantService, jwtProcessor)
   }
 
-  @Autowired
-  private lateinit var cacheWithExpirationManager: CacheWithExpirationManager
-
   @BeforeEach
   fun setup() {
     currentDateProvider.forcedDate = currentDateProvider.date
@@ -83,22 +79,19 @@ class OAuthTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
   }
 
-  private fun addTenant(): SsoTenant {
-
-    return tenantService.findTenant(testData.organization.id)
-      ?:
-      SsoTenant().apply {
-        name = "tenant1"
-        domain = "registrationId"
-        clientId = "clientId"
-        clientSecret = "clientSecret"
-        authorizationUri = "authorizationUri"
-        jwkSetUri = "http://jwkSetUri"
-        tokenUri = "http://tokenUri"
-        organization = testData.organization
-      }.let { tenantService.save(it) }
-  }
-
+  private fun addTenant(): SsoTenant =
+    tenantService.findTenant(testData.organization.id)
+      ?: SsoTenant()
+        .apply {
+          name = "tenant1"
+          domain = "registrationId"
+          clientId = "clientId"
+          clientSecret = "clientSecret"
+          authorizationUri = "authorizationUri"
+          jwkSetUri = "http://jwkSetUri"
+          tokenUri = "http://tokenUri"
+          organization = testData.organization
+        }.let { tenantService.save(it) }
 
   @Test
   fun `creates new user account and return access token on sso log in`() {

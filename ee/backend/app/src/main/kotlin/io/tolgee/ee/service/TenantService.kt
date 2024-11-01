@@ -17,7 +17,7 @@ import java.net.URISyntaxException
 class TenantService(
   private val tenantRepository: TenantRepository,
   private val ssoGlobalProperties: SsoGlobalProperties,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
 ) {
   fun getById(id: Long): SsoTenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
 
@@ -37,9 +37,10 @@ class TenantService(
 
   private fun buildGlobalTenant(): SsoTenant {
     val domain = validateProperty(ssoGlobalProperties.domain, "domain")
-    val tenant = tenantRepository.findByDomain(domain) ?: SsoTenant().apply {
-      this.domain = domain
-    }
+    val tenant =
+      tenantRepository.findByDomain(domain) ?: SsoTenant().apply {
+        this.domain = domain
+      }
 
     applyGlobalPropertiesToTenant(tenant)
 
