@@ -59,7 +59,7 @@ class OAuthService(
       )
     }
 
-    val tenant = tenantService.getByDomain(registrationId)
+    val tenant = tenantService.getEnabledByDomain(registrationId)
 
     val tokenResponse =
       exchangeCodeForToken(tenant, code, redirectUrl)
@@ -194,7 +194,7 @@ class OAuthService(
       return true
     }
 
-    val tenant = tenantService.getByDomain(ssoDomain)
+    val tenant = tenantService.getEnabledByDomain(ssoDomain)
     val headers =
       HttpHeaders().apply {
         contentType = MediaType.APPLICATION_FORM_URLENCODED

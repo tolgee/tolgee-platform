@@ -115,8 +115,18 @@ class OAuthTest : AuthorizedControllerTest() {
     tenant.enabled = false
     tenantService.save(tenant)
     val response = oAuthMultiTenantsMocks.getAuthLink("registrationId").response
-    assertThat(response.status).isEqualTo(400)
-    assertThat(response.contentAsString).contains(Message.SSO_DOMAIN_NOT_ENABLED.code)
+    assertThat(response.status).isEqualTo(404)
+    assertThat(response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
+  }
+
+  @Test
+  fun `does not auth user when tenant is disabled`() {
+    val tenant = addTenant()
+    tenant.enabled = false
+    tenantService.save(tenant)
+    val response = oAuthMultiTenantsMocks.authorize("registrationId")
+    assertThat(response.response.status).isEqualTo(404)
+    assertThat(response.response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
   }
 
   @Test

@@ -21,6 +21,13 @@ class TenantService(
 ) {
   fun getById(id: Long): SsoTenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
 
+  fun getEnabledByDomain(domain: String): SsoTenant =
+    if (ssoGlobalProperties.enabled) {
+      buildGlobalTenant()
+    } else {
+      tenantRepository.findEnabledByDomain(domain) ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
+    }
+
   fun getByDomain(domain: String): SsoTenant =
     if (ssoGlobalProperties.enabled) {
       buildGlobalTenant()
