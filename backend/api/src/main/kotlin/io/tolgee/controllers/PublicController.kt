@@ -80,6 +80,9 @@ class PublicController(
     request: ResetPasswordRequest,
   ) {
     val userAccount = userAccountService.findActive(request.email!!) ?: return
+    if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
+      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+    }
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
 
@@ -124,6 +127,9 @@ class PublicController(
     request: ResetPassword,
   ) {
     val userAccount = validateEmailCode(request.code!!, request.email!!)
+    if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
+      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+    }
     if (userAccount.accountType === UserAccount.AccountType.THIRD_PARTY) {
       userAccountService.setAccountType(userAccount, UserAccount.AccountType.LOCAL)
     }

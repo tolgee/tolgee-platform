@@ -27,6 +27,7 @@ class OAuthUserHandler(
     userResponse: OAuthUserDetails,
     invitationCode: String?,
     thirdPartyAuthType: ThirdPartyAuthType,
+    accountType: UserAccount.AccountType,
   ): UserAccount {
     val tenant = userResponse.tenant
 
@@ -73,8 +74,9 @@ class OAuthUserHandler(
       }
       newUserAccount.thirdPartyAuthType = thirdPartyAuthType
       newUserAccount.ssoRefreshToken = userResponse.refreshToken
-      newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
+      newUserAccount.accountType = accountType
       newUserAccount.ssoSessionExpiry = currentDateProvider.date.addMinutes(SSO_SESSION_EXPIRATION_MINUTES)
+
       signUpService.signUp(newUserAccount, invitationCode, null)
 
       // grant role to user only if request is not from oauth2 delegate

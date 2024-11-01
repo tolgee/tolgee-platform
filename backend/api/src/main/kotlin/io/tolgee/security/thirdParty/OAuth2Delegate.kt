@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.OAuth2AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -96,7 +97,13 @@ class OAuth2Delegate(
             familyName = userResponse.family_name,
             email = email,
           )
-        val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, ThirdPartyAuthType.OAUTH2)
+        val user =
+          oAuthUserHandler.findOrCreateUser(
+            userData,
+            invitationCode,
+            ThirdPartyAuthType.OAUTH2,
+            UserAccount.AccountType.THIRD_PARTY,
+          )
 
         val jwt = jwtService.emitToken(user.id)
         return JwtAuthenticationResponse(jwt)
