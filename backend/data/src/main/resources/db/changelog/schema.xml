@@ -3562,4 +3562,9 @@
     <changeSet author="huglx (generated)" id="1730460178906-15">
         <dropColumn columnName="is_enabled_for_this_organization" tableName="tenant"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1730477149327-1">
+        <addColumn tableName="user_account">
+            <column name="sso_session_expiry" type="timestamp(6)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

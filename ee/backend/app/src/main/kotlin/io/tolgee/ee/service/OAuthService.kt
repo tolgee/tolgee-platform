@@ -8,8 +8,7 @@ import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
-import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
-import io.tolgee.constants.Caches
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
@@ -40,7 +39,7 @@ class OAuthService(
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
-  private val cacheWithExpirationManager: CacheWithExpirationManager,
+  private val currentDateProvider: CurrentDateProvider,
 ) : OAuthServiceEe,
   Logging {
   fun handleOAuthCallback(
@@ -169,6 +168,7 @@ class OAuthService(
     userId: Long,
     refreshToken: String?,
     thirdPartyAuth: ThirdPartyAuthType,
+    ssoSessionExpiry: Date?,
   ): Boolean {
     if (thirdPartyAuth != ThirdPartyAuthType.SSO) {
       return true
@@ -178,14 +178,7 @@ class OAuthService(
       throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
     }
 
-    val isValid =
-      cacheWithExpirationManager
-        .getCache(
-          Caches.IS_SSO_USER_VALID,
-        )?.getWrapper(userId)
-        ?.get() as? Boolean
-
-    if (isValid == true) {
+    if (ssoSessionExpiry != null && isSsoUserValid(ssoSessionExpiry)) {
       return true
     }
 
@@ -212,7 +205,7 @@ class OAuthService(
           OAuth2TokenResponse::class.java,
         )
       if (response.body?.refresh_token != null) {
-        cacheWithExpirationManager.putCache(Caches.IS_SSO_USER_VALID, userId, true)
+        oAuthUserHandler.updateSsoSessionExpiry(userId)
         oAuthUserHandler.updateRefreshToken(userId, response.body?.refresh_token)
         return true
       }
@@ -222,4 +215,6 @@ class OAuthService(
       false
     }
   }
+
+  private fun isSsoUserValid(ssoSessionExpiry: Date): Boolean = ssoSessionExpiry.after(currentDateProvider.date)
 }

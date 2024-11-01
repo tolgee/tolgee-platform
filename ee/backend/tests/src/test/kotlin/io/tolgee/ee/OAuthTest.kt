@@ -6,7 +6,6 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
-import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
@@ -84,8 +83,10 @@ class OAuthTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
   }
 
-  private fun addTenant(): SsoTenant =
-    tenantService.save(
+  private fun addTenant(): SsoTenant {
+
+    return tenantService.findTenant(testData.organization.id)
+      ?:
       SsoTenant().apply {
         name = "tenant1"
         domain = "registrationId"
@@ -95,8 +96,9 @@ class OAuthTest : AuthorizedControllerTest() {
         jwkSetUri = "http://jwkSetUri"
         tokenUri = "http://tokenUri"
         organization = testData.organization
-      },
-    )
+      }.let { tenantService.save(it) }
+  }
+
 
   @Test
   fun `creates new user account and return access token on sso log in`() {
@@ -182,14 +184,6 @@ class OAuthTest : AuthorizedControllerTest() {
     assertThat(user.ssoRefreshToken).isNotNull
     assertThat(user.ssoTenant).isNotNull
     assertThat(user.thirdPartyAuthType?.code()).isEqualTo("sso")
-    val isValid =
-      cacheWithExpirationManager
-        .getCache(
-          Caches.IS_SSO_USER_VALID,
-        )?.getWrapper(user.id)
-        ?.get() as? Boolean
-
-    assertThat(isValid).isTrue
   }
 
   @Test
@@ -202,7 +196,8 @@ class OAuthTest : AuthorizedControllerTest() {
         user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,
-        user.thirdPartyAuthType?.code(),
+        user.thirdPartyAuthType!!,
+        user.ssoSessionExpiry,
       ),
     ).isTrue
   }
@@ -221,7 +216,8 @@ class OAuthTest : AuthorizedControllerTest() {
         user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,
-        user.thirdPartyAuthType?.code(),
+        user.thirdPartyAuthType!!,
+        user.ssoSessionExpiry,
       ),
     ).isTrue
 
@@ -243,7 +239,11 @@ class OAuthTest : AuthorizedControllerTest() {
     ssoGlobalProperties.authorizationUrl = "authorizationUri"
     ssoGlobalProperties.tokenUrl = "http://tokenUri"
     ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
-    oAuthMultiTenantsMocks.authorize("registrationId")
+    val response = oAuthMultiTenantsMocks.authorize("registrationId")
+
+    val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)
+    result["accessToken"].assert.isNotNull
+    result["tokenType"].assert.isEqualTo("Bearer")
   }
 
   fun organizationDto() =

@@ -61,6 +61,8 @@ data class UserAccount(
   @Column(name = "reset_password_code")
   var resetPasswordCode: String? = null
 
+  var ssoSessionExpiry: Date? = null
+
   @OrderBy("id ASC")
   @OneToMany(mappedBy = "user", orphanRemoval = true)
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
