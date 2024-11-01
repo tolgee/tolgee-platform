@@ -9,6 +9,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
@@ -41,6 +42,7 @@ class OAuthService(
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
   private val currentDateProvider: CurrentDateProvider,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : OAuthServiceEe,
   Logging {
   fun handleOAuthCallback(
@@ -60,6 +62,10 @@ class OAuthService(
     }
 
     val tenant = tenantService.getEnabledByDomain(registrationId)
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = tenant.organization.id,
+      Feature.SSO,
+    )
 
     val tokenResponse =
       exchangeCodeForToken(tenant, code, redirectUrl)
@@ -190,6 +196,10 @@ class OAuthService(
     }
 
     val tenant = tenantService.getEnabledByDomain(ssoDomain)
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = tenant.organization.id,
+      Feature.SSO,
+    )
     val headers =
       HttpHeaders().apply {
         contentType = MediaType.APPLICATION_FORM_URLENCODED
