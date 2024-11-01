@@ -117,6 +117,9 @@ class AuthenticationFilter(
   }
 
   private fun checkIfSsoUserStillExists(userDto: UserAccountDto) {
+    if(userDto.thirdPartyAuth == null) {
+      return
+    }
     val thirdPartyAuthType =
       userDto.thirdPartyAuth?.let {
         runCatching {
@@ -129,6 +132,7 @@ class AuthenticationFilter(
         userDto.id,
         userDto.ssoRefreshToken,
         thirdPartyAuthType!!,
+        userDto.ssoSessionExpiry
       )
     ) {
       throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
