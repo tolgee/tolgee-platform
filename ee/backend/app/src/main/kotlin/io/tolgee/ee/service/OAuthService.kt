@@ -164,7 +164,7 @@ class OAuthService(
     return JwtAuthenticationResponse(jwt)
   }
 
-  override fun verifyUserIsStillEmployed(
+  override fun verifyUserSsoAccountAvailable(
     ssoDomain: String?,
     userId: Long,
     refreshToken: String?,

@@ -188,7 +188,7 @@ class OAuthTest : AuthorizedControllerTest() {
     val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(
-      oAuthService.verifyUserIsStillEmployed(
+      oAuthService.verifyUserSsoAccountAvailable(
         user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,
@@ -207,7 +207,7 @@ class OAuthTest : AuthorizedControllerTest() {
 
     oAuthMultiTenantsMocks.mockTokenExchange("http://tokenUri")
     assertThat(
-      oAuthService.verifyUserIsStillEmployed(
+      oAuthService.verifyUserSsoAccountAvailable(
         user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,

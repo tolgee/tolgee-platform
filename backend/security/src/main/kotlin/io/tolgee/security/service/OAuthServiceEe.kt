@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component
 
 @Component
 interface OAuthServiceEe {
-  fun verifyUserIsStillEmployed(
+  fun verifyUserSsoAccountAvailable(
     ssoDomain: String?,
     userId: Long,
     refreshToken: String?,

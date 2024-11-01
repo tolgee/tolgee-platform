@@ -115,7 +115,7 @@ class AuthenticationFilter(
   }
 
   private fun checkIfSsoUserStillExists(userDto: UserAccountDto) {
-    if (!oAuthService.verifyUserIsStillEmployed(
+    if (!oAuthService.verifyUserSsoAccountAvailable(
         userDto.ssoDomain,
         userDto.id,
         userDto.ssoRefreshToken,
