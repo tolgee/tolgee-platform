@@ -22,7 +22,7 @@ class TenantService(
   fun getById(id: Long): SsoTenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
 
   fun getEnabledByDomain(domain: String): SsoTenant =
-    if (ssoGlobalProperties.enabled) {
+    if (ssoGlobalProperties.enabled && domain == ssoGlobalProperties.domain) {
       buildGlobalTenant()
     } else {
       tenantRepository.findEnabledByDomain(domain) ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
@@ -35,8 +35,20 @@ class TenantService(
       tenantRepository.findByDomain(domain) ?: throw NotFoundException()
     }
 
-  private fun buildGlobalTenant(): SsoTenant =
-    SsoTenant().apply {
+  private fun buildGlobalTenant(): SsoTenant {
+    val domain = validateProperty(ssoGlobalProperties.domain, "domain")
+    val tenant = tenantRepository.findByDomain(domain) ?: SsoTenant().apply {
+      this.domain = domain
+    }
+
+    applyGlobalPropertiesToTenant(tenant)
+
+    return tenantRepository.save(tenant)
+  }
+
+  // set or update global properties to tenant
+  private fun applyGlobalPropertiesToTenant(tenant: SsoTenant) {
+    tenant.apply {
       enabled = validateProperty(ssoGlobalProperties.enabled.toString(), "enabled").toBoolean()
       domain = validateProperty(ssoGlobalProperties.domain, "domain")
       clientId = validateProperty(ssoGlobalProperties.clientId, "clientId")
@@ -45,6 +57,7 @@ class TenantService(
       tokenUri = validateProperty(ssoGlobalProperties.tokenUrl, "tokenUrl")
       jwkSetUri = validateProperty(ssoGlobalProperties.jwkSetUri, "jwkSetUri")
     }
+  }
 
   private fun validateProperty(
     property: String?,
