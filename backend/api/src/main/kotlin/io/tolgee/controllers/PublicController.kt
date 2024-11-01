@@ -81,8 +81,28 @@ class PublicController(
   ) {
     val userAccount = userAccountService.findActive(request.email!!) ?: return
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
-      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+      val params =
+        EmailParams(
+          to = request.email!!,
+          subject = "Password Reset Request - SSO Managed Account",
+          text =
+            """
+            Hello! 👋<br/><br/>
+            We received a request to reset the password for your account. However, your account is managed by your organization and uses a single sign-on (SSO) service for login.<br/><br/>
+            To access your account, please use the "SSO Login" button on the Tolgee login page. No password reset is needed.<br/><br/>
+            If you did not make this request, you may safely ignore this email.<br/><br/>
+            
+            Regards,<br/>
+            Tolgee
+            """.trimIndent(),
+        )
+
+
+
+      tolgeeEmailSender.sendEmail(params)
+      return
     }
+
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
 
