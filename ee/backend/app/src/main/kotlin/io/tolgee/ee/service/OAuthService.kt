@@ -168,14 +168,9 @@ class OAuthService(
     ssoDomain: String?,
     userId: Long,
     refreshToken: String?,
-    thirdPartyAuth: String?,
+    thirdPartyAuth: ThirdPartyAuthType,
   ): Boolean {
-    val thirdPartyAuthType =
-      thirdPartyAuth?.let {
-        runCatching { ThirdPartyAuthType.valueOf(it.uppercase()) }.getOrNull()
-      }
-
-    if (thirdPartyAuthType != ThirdPartyAuthType.SSO) {
+    if (thirdPartyAuth != ThirdPartyAuthType.SSO) {
       return true
     }
 

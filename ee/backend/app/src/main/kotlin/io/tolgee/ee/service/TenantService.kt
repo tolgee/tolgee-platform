@@ -29,7 +29,7 @@ class TenantService(
     }
 
   fun getByDomain(domain: String): SsoTenant =
-    if (ssoGlobalProperties.enabled) {
+    if (ssoGlobalProperties.enabled && domain == ssoGlobalProperties.domain) {
       buildGlobalTenant()
     } else {
       tenantRepository.findByDomain(domain) ?: throw NotFoundException()
