@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.api.IUserAccount
+import io.tolgee.component.ThirdPartyAuthTypeConverter
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
@@ -45,7 +46,7 @@ data class UserAccount(
   var emailVerification: EmailVerification? = null
 
   @Column(name = "third_party_auth_type")
-  @Enumerated(EnumType.STRING)
+  @Convert(converter = ThirdPartyAuthTypeConverter::class)
   var thirdPartyAuthType: ThirdPartyAuthType? = null
 
   @ManyToOne
