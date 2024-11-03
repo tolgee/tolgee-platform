@@ -85,7 +85,7 @@ Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/b
   - [More...](https://tolgee.io/integrations/all)
 - [Tolgee platform docs](https://tolgee.io/docs/platform)
   - [Self-hosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
-- [Development notes (How to develop Tolgee locally)](https://github.com/tolgee/tolgee-platform/wiki/Development)
+- [How to develop Tolgee locally](DEVELOPMENT.md)
 
 ## Why use Tolgee?
 
@@ -145,6 +145,10 @@ For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.i
 4. Have fun!
 
 ![Integration guides](https://user-images.githubusercontent.com/18496315/188818166-d70d4676-7bd2-4328-91eb-720add935ab6.gif)
+
+## How to contribute
+
+You wanna contribute? Great to hear that! You can start [right away](CONTRIBUTING.md)!
 
 ## Contributors
 
