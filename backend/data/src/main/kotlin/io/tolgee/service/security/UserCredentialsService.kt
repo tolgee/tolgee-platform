@@ -3,7 +3,6 @@ package io.tolgee.service.security
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ThirdPartyAuthType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -25,10 +24,6 @@ class UserCredentialsService(
 
     if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
-    }
-
-    if (userAccount.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
-      throw AuthenticationException(Message.SSO_USER_OPERATION_UNAVAILABLE)
     }
 
     checkNativeUserCredentials(userAccount, password)

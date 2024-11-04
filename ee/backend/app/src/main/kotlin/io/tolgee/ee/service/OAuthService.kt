@@ -9,12 +9,15 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.SsoTenant
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -27,7 +30,7 @@ import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.net.URL
 import java.util.*
@@ -40,6 +43,7 @@ class OAuthService(
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
   private val currentDateProvider: CurrentDateProvider,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : OAuthServiceEe,
   Logging {
   fun handleOAuthCallback(
@@ -59,6 +63,10 @@ class OAuthService(
     }
 
     val tenant = tenantService.getEnabledByDomain(registrationId)
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = tenant.organization?.id,
+      Feature.SSO,
+    )
 
     val tokenResponse =
       exchangeCodeForToken(tenant, code, redirectUrl)
@@ -71,7 +79,7 @@ class OAuthService(
     return register(userInfo, tenant, invitationCode, tokenResponse.refresh_token)
   }
 
-  fun exchangeCodeForToken(
+  private fun exchangeCodeForToken(
     tenant: SsoTenant,
     code: String,
     redirectUrl: String,
@@ -99,13 +107,13 @@ class OAuthService(
           OAuth2TokenResponse::class.java,
         )
       response.body
-    } catch (e: HttpClientErrorException) {
+    } catch (e: RestClientException) {
       logger.info("Failed to exchange code for token: ${e.message}")
       null
     }
   }
 
-  fun verifyAndDecodeIdToken(
+  private fun verifyAndDecodeIdToken(
     idToken: String,
     jwkSetUri: String,
   ): GenericUserResponse {
@@ -158,7 +166,13 @@ class OAuthService(
         refreshToken = refreshToken,
         tenant = tenant,
       )
-    val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, ThirdPartyAuthType.SSO)
+    val user =
+      oAuthUserHandler.findOrCreateUser(
+        userData,
+        invitationCode,
+        ThirdPartyAuthType.SSO,
+        UserAccount.AccountType.MANAGED,
+      )
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
   }
@@ -183,6 +197,10 @@ class OAuthService(
     }
 
     val tenant = tenantService.getEnabledByDomain(ssoDomain)
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = tenant.organization?.id,
+      Feature.SSO,
+    )
     val headers =
       HttpHeaders().apply {
         contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -210,7 +228,7 @@ class OAuthService(
         return true
       }
       false
-    } catch (e: HttpClientErrorException) {
+    } catch (e: RestClientException) {
       logger.info("Failed to refresh token: ${e.message}")
       false
     }
