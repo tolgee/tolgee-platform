@@ -33,12 +33,9 @@ class OAuth2CallbackController(
     val registrationId = request.domain
     val tenant = tenantService.getEnabledByDomain(registrationId)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization.id,
+      organizationId = tenant.organization?.id,
       Feature.SSO,
     )
-    if (!tenant.isEnabledForThisOrganization) {
-      throw OAuthAuthorizationException(Message.SSO_DOMAIN_NOT_ENABLED, "Domain is not enabled for this organization")
-    }
     val redirectUrl = buildAuthUrl(tenant, state = request.state)
 
     return SsoUrlResponse(redirectUrl)

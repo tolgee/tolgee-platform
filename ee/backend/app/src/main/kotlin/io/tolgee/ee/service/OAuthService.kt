@@ -10,6 +10,7 @@ import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
@@ -63,7 +64,7 @@ class OAuthService(
 
     val tenant = tenantService.getEnabledByDomain(registrationId)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization.id,
+      organizationId = tenant.organization?.id,
       Feature.SSO,
     )
 
@@ -197,7 +198,7 @@ class OAuthService(
 
     val tenant = tenantService.getEnabledByDomain(ssoDomain)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization.id,
+      organizationId = tenant.organization?.id,
       Feature.SSO,
     )
     val headers =
