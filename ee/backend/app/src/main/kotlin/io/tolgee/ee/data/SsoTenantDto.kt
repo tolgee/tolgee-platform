@@ -1,6 +1,6 @@
 package io.tolgee.ee.data
 
-import io.tolgee.ee.model.SsoTenant
+import io.tolgee.model.SsoTenant
 
 data class SsoTenantDto(
   val authorizationUri: String,
@@ -18,7 +18,7 @@ fun SsoTenant.toDto(): SsoTenantDto =
     clientId = this.clientId,
     clientSecret = this.clientSecret,
     tokenUri = this.tokenUri,
-    isEnabled = this.isEnabledForThisOrganization,
+    isEnabled = this.enabled,
     jwkSetUri = this.jwkSetUri,
     domainName = this.domain,
   )

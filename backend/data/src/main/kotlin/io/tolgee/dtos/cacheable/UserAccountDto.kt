@@ -17,6 +17,7 @@ data class UserAccountDto(
   val thirdPartyAuth: String?,
   val ssoRefreshToken: String?,
   val ssoDomain: String?,
+  val ssoSessionExpiry: Date?,
 ) : Serializable {
   companion object {
     fun fromEntity(entity: UserAccount) =
@@ -32,7 +33,8 @@ data class UserAccountDto(
         emailVerified = entity.emailVerification == null,
         thirdPartyAuth = entity.thirdPartyAuthType?.code(),
         ssoRefreshToken = entity.ssoRefreshToken,
-        ssoDomain = entity.ssoConfig?.domainName,
+        ssoDomain = entity.ssoTenant?.domain,
+        ssoSessionExpiry = entity.ssoSessionExpiry,
       )
   }
 

@@ -1,17 +1,18 @@
 package io.tolgee.security.thirdParty
 
-import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
-import io.tolgee.constants.Caches
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.security.SSO_SESSION_EXPIRATION_MINUTES
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
-import io.tolgee.service.SsoConfigService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.addMinutes
 import org.springframework.stereotype.Component
 
 @Component
@@ -19,29 +20,39 @@ class OAuthUserHandler(
   private val signUpService: SignUpService,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
-  private val ssoConfService: SsoConfigService,
-  private val cacheWithExpirationManager: CacheWithExpirationManager,
+  private val currentDateProvider: CurrentDateProvider,
+  private val authenticationProperties: AuthenticationProperties,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
     invitationCode: String?,
     thirdPartyAuthType: ThirdPartyAuthType,
   ): UserAccount {
+    val tenant = userResponse.tenant
+
     val userAccountOptional =
-      if (thirdPartyAuthType == ThirdPartyAuthType.SSO && userResponse.domain != null) {
-        userAccountService.findByDomainSso(userResponse.domain, userResponse.sub!!)
+      if (thirdPartyAuthType == ThirdPartyAuthType.SSO && tenant?.domain != null) {
+        userAccountService.findByDomainSso(tenant.domain, userResponse.sub!!)
       } else {
         userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
       }
 
     if (userAccountOptional.isPresent && thirdPartyAuthType == ThirdPartyAuthType.SSO) {
       updateRefreshToken(userAccountOptional.get(), userResponse.refreshToken)
-      cacheSsoUser(userAccountOptional.get().id, thirdPartyAuthType)
+      updateSsoSessionExpiry(userAccountOptional.get())
     }
 
     return userAccountOptional.orElseGet {
       userAccountService.findActive(userResponse.email)?.let {
         throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+      }
+
+      // do not create new user if user is not invited and GLOBAL sso is enabled
+      if (invitationCode == null &&
+        thirdPartyAuthType == ThirdPartyAuthType.SSO &&
+        authenticationProperties.sso.enabled
+      ) {
+        throw AuthenticationException(Message.SSO_USER_NOT_INVITED)
       }
 
       val newUserAccount = UserAccount()
@@ -57,28 +68,27 @@ class OAuthUserHandler(
         }
       newUserAccount.name = name
       newUserAccount.thirdPartyAuthId = userResponse.sub
-      if (userResponse.domain != null) {
-        newUserAccount.ssoConfig = ssoConfService.save(newUserAccount, userResponse.domain!!)
+      if (tenant?.domain != null) {
+        newUserAccount.ssoTenant = tenant
       }
       newUserAccount.thirdPartyAuthType = thirdPartyAuthType
       newUserAccount.ssoRefreshToken = userResponse.refreshToken
       newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-
+      newUserAccount.ssoSessionExpiry = currentDateProvider.date.addMinutes(SSO_SESSION_EXPIRATION_MINUTES)
       signUpService.signUp(newUserAccount, invitationCode, null)
 
       // grant role to user only if request is not from oauth2 delegate
-      if (userResponse.organizationId != null &&
+      val organization = tenant?.organization
+      if (organization?.id != null &&
         thirdPartyAuthType != ThirdPartyAuthType.OAUTH2 &&
         invitationCode == null
       ) {
         organizationRoleService.grantRoleToUser(
           newUserAccount,
-          userResponse.organizationId,
+          organization.id,
           OrganizationRoleType.MEMBER,
         )
       }
-
-      cacheSsoUser(newUserAccount.id, thirdPartyAuthType)
 
       newUserAccount
     }
@@ -106,12 +116,14 @@ class OAuthUserHandler(
     }
   }
 
-  private fun cacheSsoUser(
-    userId: Long,
-    thirdPartyAuthType: ThirdPartyAuthType,
-  ) {
-    if (thirdPartyAuthType == ThirdPartyAuthType.SSO) {
-      cacheWithExpirationManager.putCache(Caches.IS_SSO_USER_VALID, userId, true)
-    }
+  fun updateSsoSessionExpiry(user: UserAccount) {
+    user.ssoSessionExpiry = currentDateProvider.date.addMinutes(SSO_SESSION_EXPIRATION_MINUTES)
+    userAccountService.save(user)
+  }
+
+  fun updateSsoSessionExpiry(userAccountId: Long) {
+    val user = userAccountService.get(userAccountId)
+    user.ssoSessionExpiry = currentDateProvider.date.addMinutes(SSO_SESSION_EXPIRATION_MINUTES)
+    userAccountService.save(user)
   }
 }

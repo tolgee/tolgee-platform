@@ -21,6 +21,8 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.service.OAuthServiceEe
@@ -115,11 +117,22 @@ class AuthenticationFilter(
   }
 
   private fun checkIfSsoUserStillExists(userDto: UserAccountDto) {
-    if (!oAuthService.verifyUserIsStillEmployed(
+    if (userDto.thirdPartyAuth == null) {
+      return
+    }
+    val thirdPartyAuthType =
+      userDto.thirdPartyAuth?.let {
+        runCatching {
+          ThirdPartyAuthType.valueOf(it.uppercase())
+        }.getOrElse { throw BadRequestException(Message.SSO_CANT_VERIFY_USER) }
+      }
+
+    if (!oAuthService.verifyUserSsoAccountAvailable(
         userDto.ssoDomain,
         userDto.id,
         userDto.ssoRefreshToken,
-        userDto.thirdPartyAuth,
+        thirdPartyAuthType!!,
+        userDto.ssoSessionExpiry,
       )
     ) {
       throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)

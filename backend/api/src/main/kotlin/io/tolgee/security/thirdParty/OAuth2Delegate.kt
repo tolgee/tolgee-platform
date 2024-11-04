@@ -95,8 +95,6 @@ class OAuth2Delegate(
             givenName = userResponse.given_name,
             familyName = userResponse.family_name,
             email = email,
-            domain = null,
-            organizationId = null,
           )
         val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, ThirdPartyAuthType.OAUTH2)
 

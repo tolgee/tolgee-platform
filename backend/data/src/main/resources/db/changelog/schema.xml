@@ -3496,4 +3496,75 @@
     <changeSet author="huglx (generated)" id="1730212832589-2">
         <dropColumn columnName="sso_refresh_token_text" tableName="user_account"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-11">
+        <dropForeignKeyConstraint baseTableName="user_account" constraintName="FKff74k38aruylvp80sgdvmyw10"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-1">
+        <createTable tableName="tenant">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tenantPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authorization_uri" type="VARCHAR(255)"/>
+            <column name="client_id" type="VARCHAR(255)"/>
+            <column name="client_secret" type="VARCHAR(255)"/>
+            <column name="domain" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="is_enabled_for_this_organization" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="jwk_set_uri" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="sso_provider" type="VARCHAR(255)"/>
+            <column name="token_uri" type="VARCHAR(255)"/>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-2">
+        <addColumn tableName="user_account">
+            <column name="sso_tenant_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-3">
+        <addUniqueConstraint columnNames="domain" constraintName="UC_TENANTDOMAIN_COL" tableName="tenant"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-4">
+        <addUniqueConstraint columnNames="organization_id" constraintName="UC_TENANTORGANIZATION_ID_COL" tableName="tenant"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-5">
+        <addForeignKeyConstraint baseColumnNames="sso_tenant_id" baseTableName="user_account" constraintName="FK3w73xid4m8dxq7qtfpnxctpq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tenant" validate="true"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-6">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="tenant" constraintName="FKti8pr42oxjua5ym5d0mdpk2i0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-18">
+        <dropUniqueConstraint constraintName="uc_sso_configdomain_name_col" tableName="sso_config"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-19">
+        <dropTable tableName="sso_config"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730458966344-24">
+        <dropColumn columnName="sso_config_id" tableName="user_account"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730460178906-1">
+        <addColumn tableName="tenant">
+            <column defaultValueBoolean="true" name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730460178906-15">
+        <dropColumn columnName="is_enabled_for_this_organization" tableName="tenant"/>
+    </changeSet>
+    <changeSet author="huglx (generated)" id="1730477149327-1">
+        <addColumn tableName="user_account">
+            <column name="sso_session_expiry" type="timestamp(6)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

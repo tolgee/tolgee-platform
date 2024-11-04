@@ -1,13 +1,16 @@
 package io.tolgee.security.service
 
+import io.tolgee.model.enums.ThirdPartyAuthType
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 interface OAuthServiceEe {
-  fun verifyUserIsStillEmployed(
+  fun verifyUserSsoAccountAvailable(
     ssoDomain: String?,
     userId: Long,
     refreshToken: String?,
-    thirdPartyAuth: String?,
+    thirdPartyAuth: ThirdPartyAuthType,
+    ssoSessionExpiry: Date?,
   ): Boolean
 }

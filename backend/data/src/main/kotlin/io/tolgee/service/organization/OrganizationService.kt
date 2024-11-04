@@ -14,6 +14,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -372,4 +373,13 @@ class OrganizationService(
     id: Long,
     currentUserId: Long,
   ): OrganizationView? = organizationRepository.findView(id, currentUserId)
+
+  fun updateSsoProvider(
+    organizationId: Long,
+    tenant: SsoTenant,
+  ) {
+    val organization = get(organizationId)
+    organization.ssoTenant = tenant
+    save(organization)
+  }
 }

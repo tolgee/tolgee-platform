@@ -91,4 +91,7 @@
     <changeSet author="huglx (generated)" id="1730212830679-1">
         <dropColumn columnName="redirect_uri_base" tableName="tenant"/>
     </changeSet>
+    <changeSet author="huglx (generated)" id="1730458750437-1">
+        <dropTable tableName="tenant"/>
+    </changeSet>
 </databaseChangeLog>

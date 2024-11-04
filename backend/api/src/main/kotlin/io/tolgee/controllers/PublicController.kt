@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.email.TolgeeEmailSender
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.EmailParams
@@ -11,6 +12,7 @@ import io.tolgee.dtos.request.auth.ResetPassword
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.security.LoginRequest
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
@@ -49,6 +51,7 @@ class PublicController(
   private val signUpService: SignUpService,
   private val mfaService: MfaService,
   private val userCredentialsService: UserCredentialsService,
+  private val authProperties: AuthenticationProperties,
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -57,6 +60,10 @@ class PublicController(
     @RequestBody @Valid
     loginRequest: LoginRequest,
   ): JwtAuthenticationResponse {
+    if (!authProperties.nativeEnabled) {
+      throw AuthenticationException(Message.NATIVE_AUTHENTICATION_DISABLED)
+    }
+
     val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
     mfaService.checkMfa(userAccount, loginRequest.otp)
 

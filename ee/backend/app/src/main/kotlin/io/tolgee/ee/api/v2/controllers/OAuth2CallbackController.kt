@@ -1,13 +1,11 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.component.FrontendUrlProvider
-import io.tolgee.constants.Message
 import io.tolgee.ee.data.DomainRequest
 import io.tolgee.ee.data.SsoUrlResponse
-import io.tolgee.ee.exceptions.OAuthAuthorizationException
-import io.tolgee.ee.model.SsoTenant
 import io.tolgee.ee.service.OAuthService
 import io.tolgee.ee.service.TenantService
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -29,10 +27,7 @@ class OAuth2CallbackController(
     @RequestBody request: DomainRequest,
   ): SsoUrlResponse {
     val registrationId = request.domain
-    val tenant = tenantService.getByDomain(registrationId)
-    if (!tenant.isEnabledForThisOrganization) {
-      throw OAuthAuthorizationException(Message.SSO_DOMAIN_NOT_ENABLED, "Domain is not enabled for this organization")
-    }
+    val tenant = tenantService.getEnabledByDomain(registrationId)
     val redirectUrl = buildAuthUrl(tenant, state = request.state)
 
     return SsoUrlResponse(redirectUrl)

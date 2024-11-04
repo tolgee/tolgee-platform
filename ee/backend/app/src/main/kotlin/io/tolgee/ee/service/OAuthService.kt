@@ -8,14 +8,13 @@ import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
-import io.tolgee.component.cacheWithExpiration.CacheWithExpirationManager
-import io.tolgee.constants.Caches
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.OAuthAuthorizationException
-import io.tolgee.ee.model.SsoTenant
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -40,7 +39,7 @@ class OAuthService(
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
-  private val cacheWithExpirationManager: CacheWithExpirationManager,
+  private val currentDateProvider: CurrentDateProvider,
 ) : OAuthServiceEe,
   Logging {
   fun handleOAuthCallback(
@@ -59,7 +58,7 @@ class OAuthService(
       )
     }
 
-    val tenant = tenantService.getByDomain(registrationId)
+    val tenant = tenantService.getEnabledByDomain(registrationId)
 
     val tokenResponse =
       exchangeCodeForToken(tenant, code, redirectUrl)
@@ -156,27 +155,22 @@ class OAuthService(
         givenName = userResponse.given_name,
         familyName = userResponse.family_name,
         email = email,
-        domain = tenant.domain,
-        organizationId = tenant.organizationId,
         refreshToken = refreshToken,
+        tenant = tenant,
       )
     val user = oAuthUserHandler.findOrCreateUser(userData, invitationCode, ThirdPartyAuthType.SSO)
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
   }
 
-  override fun verifyUserIsStillEmployed(
+  override fun verifyUserSsoAccountAvailable(
     ssoDomain: String?,
     userId: Long,
     refreshToken: String?,
-    thirdPartyAuth: String?,
+    thirdPartyAuth: ThirdPartyAuthType,
+    ssoSessionExpiry: Date?,
   ): Boolean {
-    val thirdPartyAuthType =
-      thirdPartyAuth?.let {
-        runCatching { ThirdPartyAuthType.valueOf(it.uppercase()) }.getOrNull()
-      }
-
-    if (thirdPartyAuthType != ThirdPartyAuthType.SSO) {
+    if (thirdPartyAuth != ThirdPartyAuthType.SSO) {
       return true
     }
 
@@ -184,18 +178,11 @@ class OAuthService(
       throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
     }
 
-    val isValid =
-      cacheWithExpirationManager
-        .getCache(
-          Caches.IS_SSO_USER_VALID,
-        )?.getWrapper(userId)
-        ?.get() as? Boolean
-
-    if (isValid == true) {
+    if (ssoSessionExpiry != null && isSsoUserValid(ssoSessionExpiry)) {
       return true
     }
 
-    val tenant = tenantService.getByDomain(ssoDomain)
+    val tenant = tenantService.getEnabledByDomain(ssoDomain)
     val headers =
       HttpHeaders().apply {
         contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -218,7 +205,7 @@ class OAuthService(
           OAuth2TokenResponse::class.java,
         )
       if (response.body?.refresh_token != null) {
-        cacheWithExpirationManager.putCache(Caches.IS_SSO_USER_VALID, userId, true)
+        oAuthUserHandler.updateSsoSessionExpiry(userId)
         oAuthUserHandler.updateRefreshToken(userId, response.body?.refresh_token)
         return true
       }
@@ -228,4 +215,6 @@ class OAuthService(
       false
     }
   }
+
+  private fun isSsoUserValid(ssoSessionExpiry: Date): Boolean = ssoSessionExpiry.after(currentDateProvider.date)
 }
