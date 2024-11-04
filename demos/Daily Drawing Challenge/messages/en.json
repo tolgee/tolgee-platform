@@ -1,0 +1,17 @@
+{
+  "app-name": "Daily Drawing Challenge",
+  "brush-size": "Brush Size",
+  "clear": "Clear All",
+  "date": "Last updated",
+  "download": "Download",
+  "drawingMode": "Drawing Mode",
+  "eraser": "Eraser Mode",
+  "prompt1": "Draw a cat wearing a top hat",
+  "prompt2": "Sketch your dream home",
+  "prompt3": "Draw your favorite food",
+  "prompt4": "Create a magical forest scene",
+  "prompt5": "Design a futuristic vehicle",
+  "select-lang": "Select Language",
+  "taglline": "Get inspired with daily drawing prompts",
+  "undo": "Undo"
+}
