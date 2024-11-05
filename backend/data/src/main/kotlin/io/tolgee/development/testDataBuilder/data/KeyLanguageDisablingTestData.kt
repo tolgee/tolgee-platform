@@ -38,4 +38,11 @@ class KeyLanguageDisablingTestData {
       text = null
       state = TranslationState.DISABLED
     }
+
+  init {
+    project.addKey("notDisabledKey").addTranslation {
+      language = english.self
+      text = "text"
+    }
+  }
 }
