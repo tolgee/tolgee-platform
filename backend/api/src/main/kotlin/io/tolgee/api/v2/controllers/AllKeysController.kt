@@ -51,7 +51,9 @@ class AllKeysController(
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @Operation(
     summary = "Get disabled languages for all keys in project",
-    description = "Returns all project key with any disabled language.\n\nIf key has no disabled language, it is not returned.",
+    description =
+      "Returns all project key with any disabled language.\n\n" +
+        "If key has no disabled language, it is not returned.",
   )
   fun getDisabledLanguages(): CollectionModel<KeyDisabledLanguagesModel> {
     val result = keyService.getDisabledLanguages(projectHolder.project.id)
