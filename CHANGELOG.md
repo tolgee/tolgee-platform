@@ -1,3 +1,10 @@
+# [3.81.0](https://github.com/tolgee/tolgee-platform/compare/v3.80.6...v3.81.0) (2024-11-05)
+
+
+### Features
+
+* Add endpoint returning all project keys with disabled languages ([#2666](https://github.com/tolgee/tolgee-platform/issues/2666)) ([d48333f](https://github.com/tolgee/tolgee-platform/commit/d48333f46d203021021c6f51cd5d84a3286854e1))
+
 ## [3.80.6](https://github.com/tolgee/tolgee-platform/compare/v3.80.5...v3.80.6) (2024-10-30)
 
 
