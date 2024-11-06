@@ -11,6 +11,7 @@ import { StyledBillingSectionTitle } from '../../BillingSection';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
 import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
 import { PlansCloudList } from './PlansCloudList';
+import { useLocation } from 'react-router-dom';
 
 const StyledShoppingGrid = styled('div')`
   display: grid;
@@ -64,6 +65,18 @@ export const PlansCloud = () => {
   useEffect(() => {
     reportEvent('BILLING_CLOUD_SUBSCRIPTIONS_VIEW');
   }, []);
+
+  const { search } = useLocation();
+
+  const params = new URLSearchParams(search);
+
+  const isSuccess = params.get('success') === '';
+
+  useEffect(() => {
+    if (isSuccess) {
+      reportEvent('UI_CLOUD_SUBSCRIPTION_UPDATE_SUCCESS');
+    }
+  }, [isSuccess]);
 
   return (
     <>

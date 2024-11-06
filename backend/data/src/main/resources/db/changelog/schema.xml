@@ -3440,20 +3440,10 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1728668758700-1">
-        <addColumn tableName="user_account">
-            <column name="sso_domain" type="varchar(255)"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1729708438190-1">
-        <addColumn tableName="user_account">
-            <column name="sso_refresh_token" type="varchar(255)"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1729944678669-1">
-        <createTable tableName="sso_config">
+    <changeSet author="stepangranat (generated)" id="1725021063962-1">
+        <createTable tableName="task">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="sso_configPK"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="taskPK"/>
             </column>
             <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
@@ -3461,110 +3451,431 @@
             <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="domain_name" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1729944678669-2">
-        <addColumn tableName="user_account">
-            <column name="sso_config_id" type="bigint"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1729944678669-3">
-        <addUniqueConstraint columnNames="domain_name" constraintName="UC_SSO_CONFIGDOMAIN_NAME_COL" tableName="sso_config"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1729944678669-4">
-        <addForeignKeyConstraint baseColumnNames="sso_config_id" baseTableName="user_account" constraintName="FKff74k38aruylvp80sgdvmyw10" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="sso_config" validate="true"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1729944678669-5">
-        <dropColumn columnName="sso_domain" tableName="user_account"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730063210380-1">
-        <addColumn tableName="user_account">
-            <column name="sso_refresh_token_text" type="TEXT"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730063210380-2">
-        <dropColumn columnName="sso_refresh_token" tableName="user_account"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730212832589-1">
-        <addColumn tableName="user_account">
-            <column name="sso_refresh_token" type="TEXT"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730212832589-2">
-        <dropColumn columnName="sso_refresh_token_text" tableName="user_account"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-11">
-        <dropForeignKeyConstraint baseTableName="user_account" constraintName="FKff74k38aruylvp80sgdvmyw10"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-1">
-        <createTable tableName="tenant">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="tenantPK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="authorization_uri" type="VARCHAR(255)"/>
-            <column name="client_id" type="VARCHAR(255)"/>
-            <column name="client_secret" type="VARCHAR(255)"/>
-            <column name="domain" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueBoolean="true" name="is_enabled_for_this_organization" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="jwk_set_uri" type="VARCHAR(255)"/>
+            <column name="closed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="description" type="VARCHAR(2000)"/>
+            <column name="due_date" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
             <column name="name" type="VARCHAR(255)"/>
-            <column name="sso_provider" type="VARCHAR(255)"/>
-            <column name="token_uri" type="VARCHAR(255)"/>
-            <column name="organization_id" type="BIGINT"/>
+            <column name="number" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="author_id" type="BIGINT"/>
+            <column name="language_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-2">
-        <addColumn tableName="user_account">
-            <column name="sso_tenant_id" type="bigint"/>
-        </addColumn>
+    <changeSet author="stepangranat (generated)" id="1725021063962-2">
+        <createTable tableName="task_assignees">
+            <column name="tasks_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_assigneesPK"/>
+            </column>
+            <column name="assignees_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_assigneesPK"/>
+            </column>
+        </createTable>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-3">
-        <addUniqueConstraint columnNames="domain" constraintName="UC_TENANTDOMAIN_COL" tableName="tenant"/>
+    <changeSet author="stepangranat (generated)" id="1725021063962-3">
+        <createTable tableName="task_key">
+            <column name="done" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_keyPK"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="task_keyPK"/>
+            </column>
+            <column name="author_id" type="BIGINT"/>
+        </createTable>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-4">
-        <addUniqueConstraint columnNames="organization_id" constraintName="UC_TENANTORGANIZATION_ID_COL" tableName="tenant"/>
+    <changeSet author="stepangranat (generated)" id="1725021063962-4">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="task" constraintName="FK7ixsl6anocypa3fn8wghhb6d1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-5">
-        <addForeignKeyConstraint baseColumnNames="sso_tenant_id" baseTableName="user_account" constraintName="FK3w73xid4m8dxq7qtfpnxctpq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tenant" validate="true"/>
+    <changeSet author="stepangranat (generated)" id="1725021063962-5">
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="task" constraintName="FKc1s19fj1byr8uwyb176qm0s2j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-6">
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="tenant" constraintName="FKti8pr42oxjua5ym5d0mdpk2i0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    <changeSet author="stepangranat (generated)" id="1725021063962-6">
+        <addForeignKeyConstraint baseColumnNames="assignees_id" baseTableName="task_assignees" constraintName="FKcpb7bbiipjo0kkvccsi4uflmk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-18">
-        <dropUniqueConstraint constraintName="uc_sso_configdomain_name_col" tableName="sso_config"/>
+    <changeSet author="stepangranat (generated)" id="1725021063962-7">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="task_key" constraintName="FKeastey70m3vpk2vbh23kt01xl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-19">
-        <dropTable tableName="sso_config"/>
+    <changeSet author="stepangranat (generated)" id="1725021063962-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="task" constraintName="FKk8qrwowg31kx7hp93sru1pdqa" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730458966344-24">
-        <dropColumn columnName="sso_config_id" tableName="user_account"/>
+    <changeSet author="stepangranat (generated)" id="1725021063962-9">
+        <addForeignKeyConstraint baseColumnNames="task_id" baseTableName="task_key" constraintName="FKkvf74ngoesu5ld4unx462xyg8" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730460178906-1">
-        <addColumn tableName="tenant">
-            <column defaultValueBoolean="true" name="enabled" type="boolean">
+    <changeSet author="stepangranat (generated)" id="1725021063962-10">
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="task_key" constraintName="FKm50a9numg7m79ind8mraymtg9" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725021063962-11">
+        <addForeignKeyConstraint baseColumnNames="tasks_id" baseTableName="task_assignees" constraintName="FKn0exxrx5h7t0vc109xw9fc11s" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1725024344449-1">
+        <addUniqueConstraint columnNames="project_id, number" constraintName="project_number_unique" tableName="task"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-3">
+        <addColumn tableName="task_key">
+            <column name="created_at" type="timestamp(6)">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1730460178906-15">
-        <dropColumn columnName="is_enabled_for_this_organization" tableName="tenant"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730477149327-1">
-        <addColumn tableName="user_account">
-            <column name="sso_session_expiry" type="timestamp(6)"/>
+    <changeSet author="jenik (generated)" id="1728369764999-4">
+        <addColumn tableName="task_key">
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
         </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-5">
+        <addColumn tableName="task_key">
+            <column name="updated_at" type="timestamp(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-6">
+        <addUniqueConstraint columnNames="task_id, key_id" constraintName="task_key_unique" tableName="task_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-7">
+        <createIndex indexName="IX_task_keyPK" tableName="task_key" unique="true">
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-1">
+        <dropPrimaryKey tableName="task_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1728369764999-2">
+        <addPrimaryKey columnNames="id" constraintName="task_keyPK" tableName="task_key"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1728390455632-1">
+        <addColumn tableName="project">
+            <column defaultValueNumeric="0" name="last_task_number" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729020991123-1">
+        <sql>
+            create index if not exists import_translation_language_id_id on import_translation (language_id);
+        </sql>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-1">
+        <createIndex indexName="IDX2i3yx2idx8unp1318an4ko9uh" tableName="api_key">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-2">
+        <createIndex indexName="IDX36jc7xjy9os6gpk6a1itnc4oc" tableName="translation">
+            <column name="language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-3">
+        <createIndex indexName="IDX3bevu8kvpirhwtua7bqny8mc5" tableName="tolgee_batch_job">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-4">
+        <createIndex indexName="IDX3gv8wpf7vosi0kiky55etxxka" tableName="auto_translation_config">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-5">
+        <createIndex indexName="IDX6p3mx8al2w4f7ltqiwf1j88fm" tableName="permission">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-6">
+        <createIndex indexName="IDX8o82rss5686hnbidsbpe69jf6" tableName="key_comment">
+            <column name="key_meta_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-7">
+        <createIndex indexName="IDX8s40n0n4m3rcfo66vi8fl9b2f" tableName="tolgee_batch_job">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-8">
+        <createIndex indexName="IDX9uwg4sei1gso5jc8l0fi5gt31" tableName="key">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-9">
+        <createIndex indexName="IDXchpsdpcytt8o0nub8sw9ayx1k" tableName="permission">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-10">
+        <createIndex indexName="IDXe67q4k71yrg8d5d91wlauwu7r" tableName="import_key">
+            <column name="file_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-11">
+        <createIndex indexName="IDXhhp7il8c4o1galygoy3exfii8" tableName="key_code_reference">
+            <column name="key_meta_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-12">
+        <createIndex indexName="IDXkrh888rhj0c4mm455al08el84" tableName="translation">
+            <column name="key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-13">
+        <createIndex indexName="IDXr4bj1d6iqsmid4bevm9i3b555" tableName="key">
+            <column name="namespace_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-14">
+        <createIndex indexName="IDXs7dpucbxy0uf9xic0crc2a2uv" tableName="tolgee_batch_job_chunk_execution">
+            <column name="batch_job_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-15">
+        <createIndex indexName="IDXtedxl9xhocgey7ll6wh8lb945" tableName="project">
+            <column name="organization_owner_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-16">
+        <createIndex indexName="IDXterdfiw1uvbri2wn9kd0jl04v" tableName="api_key">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729173325348-17">
+        <createIndex indexName="index_project_id" tableName="language">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729175496815-1">
+        <createIndex indexName="IDX4cddet1537jrmqnxfog70s081" tableName="import_file">
+            <column name="import_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-1">
+        <createIndex indexName="IDX1b33nivk1i8w2jmfpxbkvn84n" tableName="key_code_reference">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-2">
+        <createIndex indexName="IDX26sa91bwrs710ro1kuj9iobty" tableName="content_delivery_config">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-3">
+        <createIndex indexName="IDX279m28yc8ed8r3u696wl7erk1" tableName="automation_trigger">
+            <column name="automation_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-4">
+        <createIndex indexName="IDX2yu2b8699cl222wyyis8q74k5" tableName="content_delivery_config">
+            <column name="content_storage_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-5">
+        <createIndex indexName="IDX3x3k0gnx327bciki93bpoav46" tableName="slack_config_preference">
+            <column name="slack_config_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-6">
+        <createIndex indexName="IDX4c8vnp5ygpwllyvtx36wq992o" tableName="translation_comment">
+            <column name="translation_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-7">
+        <createIndex indexName="IDX4sfphtvxnjvvu2573i1eyxyex" tableName="slack_config">
+            <column name="organization_slack_workspace_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-8">
+        <createIndex indexName="IDX57g654728ejds6qsskb6kp8pq" tableName="project">
+            <column name="user_owner_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-9">
+        <createIndex indexName="IDX5nhrtw75no52eo7cdejqkyegf" tableName="automation_action">
+            <column name="automation_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-10">
+        <createIndex indexName="IDX60wghi6jko6bdsiwb7k71ntx0" tableName="task_key">
+            <column name="task_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-11">
+        <createIndex indexName="IDX687dej2lskc2tkqwtaluq5m6d" tableName="slack_config">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-12">
+        <createIndex indexName="IDX73vhcxlg4vk27vgtqtbgfvo1j" tableName="task">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-13">
+        <createIndex indexName="IDX8529o8j1ep65j2x0ga8qdh42s" tableName="import">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-14">
+        <createIndex indexName="IDX88ccuk0tlsabl2yk9a5i4p1f8" tableName="key_screenshot_reference">
+            <column name="key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-15">
+        <createIndex indexName="IDX8o6uwjrr0oo669ix41lok0poi" tableName="automation_action">
+            <column name="content_delivery_config_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-16">
+        <createIndex indexName="IDX8y78inb7vt06l9uoydda84co5" tableName="mt_service_config">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-17">
+        <createIndex indexName="IDXay0ofiml9dyuqu5ac3mt04i79" tableName="automation_action">
+            <column name="slack_config_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-18">
+        <createIndex indexName="IDXbxdd4vhcjsw7pvfgqmuf6m83i" tableName="automation_action">
+            <column name="webhook_config_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-19">
+        <createIndex indexName="IDXc0gaino5wlyh346myssx893lo" tableName="pat">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-20">
+        <createIndex indexName="IDXccu355whvmqg3t29fu8gar4re" tableName="keys_distance">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-21">
+        <createIndex indexName="IDXcjvw0c842rp0iad9scl9a103t" tableName="import_language">
+            <column name="existing_language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-22">
+        <createIndex indexName="IDXdw4ovvbap7k54n7l27ffsvd3k" tableName="slack_message_info">
+            <column name="slack_message_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-23">
+        <createIndex indexName="IDXenpm1k2rged4q9k3l1wy9jm5r" tableName="import_translation">
+            <column name="conflict_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-24">
+        <createIndex indexName="IDXf0qqsycxd20iwpa3p5vo9h4x7" tableName="content_storage">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-25">
+        <createIndex indexName="IDXfk6awoh0cqg32ldr334cegjh7" tableName="translation_comment">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-26">
+        <createIndex indexName="IDXgr3wm9gb38n4t44aerexen6vv" tableName="task">
+            <column name="language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-27">
+        <createIndex indexName="IDXgroja4sik71oyq0bpg7uq6hij" tableName="quick_start">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-28">
+        <createIndex indexName="IDXhlhoflxgoals7c1wcwvenfchj" tableName="import_file_issue">
+            <column name="file_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-29">
+        <createIndex indexName="IDXihkdphgu2s5qco2u3h79aixyu" tableName="key_comment">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-30">
+        <createIndex indexName="IDXivm0wkwg1mdu92xflm3y43yd5" tableName="task_key">
+            <column name="key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-31">
+        <createIndex indexName="IDXjyn55tc219btu8bhcj7j7snqi" tableName="slack_config">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-32">
+        <createIndex indexName="IDXkk5uga4mu777w5arykpsl4043" tableName="automation">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-33">
+        <createIndex indexName="IDXl50xpx8la003xvqhlphq03e47" tableName="import_file_issue_param">
+            <column name="issue_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-34">
+        <createIndex indexName="IDXlv0dvsqhelv81xqdamu0v9vep" tableName="user_preferences">
+            <column name="preferred_organization_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-35">
+        <createIndex indexName="IDXlybdfmigs8a03iippxyop0mo8" tableName="organization_slack_workspace">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-36">
+        <createIndex indexName="IDXm7cd1bwne6n1hdw7ktukl448a" tableName="import_translation">
+            <column name="key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-37">
+        <createIndex indexName="IDXn6rstsel9t66t6k85c2oowx4u" tableName="key_screenshot_reference">
+            <column name="screenshot_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-38">
+        <createIndex indexName="IDXo7j55o0k41ysp9odgdlypq6ga" tableName="webhook_config">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-39">
+        <createIndex indexName="IDXpgn603i85gk5um7ptivu6j2hc" tableName="import_settings">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-40">
+        <createIndex indexName="IDXq7y2bv6wudng4xxe2hq2l1cic" tableName="saved_slack_message">
+            <column name="slack_config_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-41">
+        <createIndex indexName="IDXqq7tfbsfkef33jc0do2ku64y3" tableName="import">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-42">
+        <createIndex indexName="IDXrg9x3gn1uue6xrgnm0li031l9" tableName="import_language">
+            <column name="file_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-43">
+        <createIndex indexName="IDXslceqyfmpfijlhbkqjllmpnbm" tableName="uploaded_image">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-44">
+        <createIndex indexName="IDXtf5ts87iyc25na63th5qe1gxb" tableName="import_settings">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1729526722151-45">
+        <createIndex indexName="IDXvchuq7435w59x3f8esiwgce1" tableName="organization_slack_workspace">
+            <column name="organization_id"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

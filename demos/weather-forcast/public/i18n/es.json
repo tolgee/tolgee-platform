@@ -1,0 +1,13 @@
+{
+  "app-title": "Si la aplicación",
+  "current-weather": "Clima Actual",
+  "enter-city": "Ingrese el nombre de la ciudad",
+  "feels-like": "Se siente como",
+  "Forecast": "Pronóstico",
+  "Humidity": "Humedad",
+  "Loading": "Cargando",
+  "not-allow": "El usuario ha denegado la geolocalización",
+  "Pressure": "Presión",
+  "search-key": "Buscar",
+  "Wind": "Viento"
+}

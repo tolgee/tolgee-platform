@@ -1,5 +1,5 @@
 import { useField } from 'formik';
-import { default as React, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   FormControl,
@@ -7,6 +7,7 @@ import {
   MenuItem,
   Select,
   TextField as MuiTextField,
+  useTheme,
 } from '@mui/material';
 import { T } from '@tolgee/react';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -18,6 +19,7 @@ export const ExpirationDateField = ({
   options: ExpirationDateOptions;
 }) => {
   const [input, _, helpers] = useField('expiresAt');
+  const theme = useTheme();
 
   const getInitialSelectValue = () =>
     options.find((o) => o.time === input.value)?.value || 'custom';
@@ -72,7 +74,8 @@ export const ExpirationDateField = ({
                   helpers.setValue(new Date(newValue).getTime());
                 }
               }}
-              renderInput={(params) => <MuiTextField {...params} />}
+              slots={{ textField: MuiTextField }}
+              desktopModeMediaQuery={theme.breakpoints.up('md')}
             />
           </Box>
         )}

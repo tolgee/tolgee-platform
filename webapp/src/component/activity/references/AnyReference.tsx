@@ -7,6 +7,7 @@ import { LanguageReference } from './LanguageReference';
 import { ContentDeliveryReference } from './ContentDeliveryReference';
 import { ContentStorageReference } from './ContentStorageReference';
 import { WebhookConfigReference } from './WebhookConfigReference';
+import { TaskReference } from './TaskReference';
 
 const StyledReferences = styled(Box)`
   display: flex;
@@ -78,6 +79,8 @@ const getReference = (reference: Reference) => {
       return <ContentStorageReference data={reference} />;
     case 'webhook_config':
       return <WebhookConfigReference data={reference} />;
+    case 'task':
+      return <TaskReference data={reference} />;
     default:
       return null;
   }

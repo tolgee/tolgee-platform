@@ -1,6 +1,6 @@
 import { T, useTranslate } from '@tolgee/react';
 import { IconButton, styled, Tooltip } from '@mui/material';
-import { Clear, Link } from '@mui/icons-material';
+import { XClose, Link02 } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -107,7 +107,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
 
         <Tooltip title={t('invite_user_invitation_copy_button')}>
           <IconButton size="small" onClick={handleGetLink}>
-            <Link />
+            <Link02 />
           </IconButton>
         </Tooltip>
         <Tooltip title={t('invite_user_invitation_cancel_button')}>
@@ -116,7 +116,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             onClick={handleCancel}
             disabled={!canEditMembers}
           >
-            <Clear />
+            <XClose />
           </IconButton>
         </Tooltip>
       </StyledItemActions>

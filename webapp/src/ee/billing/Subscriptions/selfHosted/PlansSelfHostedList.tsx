@@ -1,4 +1,3 @@
-import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { PlanFeature } from 'tg.component/billing/PlanFeature';
 import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
@@ -8,10 +7,6 @@ import { excludePreviousPlanFeatures } from 'tg.component/billing/Plan/plansTool
 import { AllFromPlanFeature } from 'tg.component/billing/Plan/AllFromPlanFeature';
 
 import { SelfHostedPlanAction } from './SelfHostedPlanAction';
-
-const StyledPlanWrapper = styled('div')`
-  display: grid;
-`;
 
 type BillingPlansProps = {
   plans: PlanType[];
@@ -49,6 +44,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
       'PROJECT_LEVEL_CONTENT_STORAGES',
       'STANDARD_SUPPORT',
       'WEBHOOKS',
+      'TASKS',
     ],
     free: false,
     hasYearlyPrice: false,
@@ -81,36 +77,35 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
         const { filteredFeatures, previousPlanName, custom, plan } = info;
 
         return (
-          <StyledPlanWrapper key={plan.id}>
-            <Plan
-              plan={plan}
-              active={false}
-              ended={false}
-              custom={custom}
-              onPeriodChange={onPeriodChange}
-              period={period}
-              filteredFeatures={filteredFeatures}
-              featuresMinHeight="210px"
-              topFeature={
-                previousPlanName ? (
-                  <AllFromPlanFeature planName={previousPlanName} />
-                ) : (
-                  <PlanFeature
-                    bold
-                    link="https://tolgee.io/pricing/self-hosted#features-table"
-                    name={t('billing_subscriptions_all_essentials')}
-                  />
-                )
-              }
-              action={
-                <SelfHostedPlanAction
-                  plan={plan}
-                  period={period}
-                  custom={custom}
+          <Plan
+            key={plan.id}
+            plan={plan}
+            active={false}
+            ended={false}
+            custom={custom}
+            onPeriodChange={onPeriodChange}
+            period={period}
+            filteredFeatures={filteredFeatures}
+            featuresMinHeight="210px"
+            topFeature={
+              previousPlanName ? (
+                <AllFromPlanFeature planName={previousPlanName} />
+              ) : (
+                <PlanFeature
+                  bold
+                  link="https://tolgee.io/pricing/self-hosted#features-table"
+                  name={t('billing_subscriptions_all_essentials')}
                 />
-              }
-            />
-          </StyledPlanWrapper>
+              )
+            }
+            action={
+              <SelfHostedPlanAction
+                plan={plan}
+                period={period}
+                custom={custom}
+              />
+            }
+          />
         );
       })}
     </>

@@ -93,7 +93,7 @@ dependencies {
     implementation("org.springframework.data:spring-data-envers")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-starter-batch"
@@ -159,9 +159,7 @@ dependencies {
     implementation 'net.datafaker:datafaker:1.5.0'
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
-    implementation(libs.mailjet) {
-        exclude group: 'org.json', module: 'json'
-    }
+    implementation(libs.mailjet)
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
@@ -171,6 +169,7 @@ dependencies {
     implementation libs.jacksonKotlin
     implementation("org.apache.commons:commons-configuration2:2.10.1")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
+    implementation("com.opencsv:opencsv:5.9")
 
     /**
      * Google translation API

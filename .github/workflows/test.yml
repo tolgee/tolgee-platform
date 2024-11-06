@@ -122,7 +122,8 @@ jobs:
         with:
           timeout_minutes: 30
           max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }} 
+          # Print free memory for debugging purposes
+          command: ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
@@ -142,7 +143,7 @@ jobs:
 
       - name: Test Report
         uses: dorny/test-reporter@v1
-        if: always()
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         with:
           name: Backend Tests
           path: "**/build/test-results/**/TEST-*.xml"

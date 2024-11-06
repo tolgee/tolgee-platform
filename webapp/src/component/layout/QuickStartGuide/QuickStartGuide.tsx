@@ -1,15 +1,16 @@
 import { Box, IconButton, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useMemo } from 'react';
-import { RocketIcon } from 'tg.component/CustomIcons';
+import { ChevronUp } from '@untitled-ui/icons-react';
+
 import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
+import { RocketFilled } from 'tg.component/CustomIcons';
 import { BottomLinks } from './BottomLinks';
 import { items } from './quickStartConfig';
 import { QuickStartStep } from './QuickStartStep';
-import { KeyboardArrowUp } from '@mui/icons-material';
 import { QuickStartFinishStep } from './QuickStartFinishStep';
 
 const StyledContainer = styled(Box)`
@@ -67,11 +68,11 @@ export const QuickStartGuide = () => {
       <StyledArrow sx={{ opacity: topBarHeight ? 1 : 0 }} />
       <StyledHeader>
         <Box display="flex" gap="12px" alignItems="center">
-          <RocketIcon fontSize="small" />
+          <RocketFilled width={20} height={20} />
           <T keyName="guide_title" />
         </Box>
         <IconButton onClick={() => setQuickStartOpen(false)}>
-          <KeyboardArrowUp />
+          <ChevronUp />
         </IconButton>
       </StyledHeader>
       <Box />

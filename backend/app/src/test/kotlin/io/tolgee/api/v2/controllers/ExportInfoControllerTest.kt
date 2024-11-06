@@ -26,7 +26,7 @@ class ExportInfoControllerTest : AbstractControllerTest() {
             node("defaultFileStructureTemplate")
               .isString.isEqualTo("{namespace}/{languageTag}.{extension}")
           }
-          node("[5]") {
+          node("[4]") {
             node("extension").isEqualTo("")
             node("mediaType").isEqualTo("")
             node("defaultFileStructureTemplate")

@@ -9,7 +9,6 @@ enum class ExportFormat(
 ) {
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
-  JSON_I18NEXT("json", "application/json"),
   XLIFF("xliff", "application/x-xliff+xml"),
   PO("po", "text/x-gettext-translation"),
   APPLE_STRINGS_STRINGSDICT(
@@ -35,4 +34,6 @@ enum class ExportFormat(
   PROPERTIES("properties", "text/plain"),
   YAML_RUBY("yaml", "application/x-yaml"),
   YAML("yaml", "application/x-yaml"),
+  JSON_I18NEXT("json", "application/json"),
+  CSV("csv", "text/csv"),
 }

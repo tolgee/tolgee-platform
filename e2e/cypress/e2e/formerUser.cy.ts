@@ -26,7 +26,7 @@ describe('Former user', () => {
   it('shows the former user in activity', () => {
     cy.visit(`${HOST}/projects/${projectId}`);
     cy.gcy('project-dashboard-activity-list').should('be.visible');
-    cy.gcy('former-user-name').should('be.visible');
+    cy.contains('Former user').should('be.visible');
   });
 
   it('shows the former user in translation history', () => {
@@ -37,7 +37,7 @@ describe('Former user', () => {
     cy.gcy('translation-history-item')
       .findDcy('auto-avatar-img')
       .trigger('mouseover');
-    cy.gcy('former-user-name').should('be.visible');
+    cy.contains('Former user').should('be.visible');
   });
 
   it('shows the former user in translation comments', () => {
@@ -45,6 +45,6 @@ describe('Former user', () => {
     cy.gcy('translations-cell-comments-button').click();
     cy.waitForDom();
     cy.gcy('comment').findDcy('auto-avatar-img').trigger('mouseover');
-    cy.gcy('former-user-name').should('be.visible');
+    cy.contains('Former user').should('be.visible');
   });
 });

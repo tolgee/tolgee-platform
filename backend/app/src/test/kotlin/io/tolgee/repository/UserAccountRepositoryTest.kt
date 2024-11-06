@@ -2,6 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.DbPopulatorReal
+import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -47,7 +48,13 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
 
     permissionService.grantFullAccessToProject(franta, repo)
 
-    val returned = userAccountRepository.getAllInProject(repo.id, PageRequest.of(0, 20), "franta")
+    val returned =
+      userAccountRepository.getAllInProject(
+        repo.id,
+        PageRequest.of(0, 20),
+        "franta",
+        filters = UserAccountFilters(),
+      )
     assertThat(returned.content).hasSize(1)
   }
 }

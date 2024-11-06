@@ -19,12 +19,12 @@ import java.util.*
 @Lazy
 interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
-    """select t.text as text, l.tag as languageTag, k.name as key 
-        from Translation t 
+    """select t.text as text, l.tag as languageTag, k.name as key
+        from Translation t
         join t.key k
         left join k.namespace n
-        join t.language l 
-        where t.key.project.id = :projectId 
+        join t.language l
+        where t.key.project.id = :projectId
          and l.tag in :languages
          and ((n.name is null and :namespace is null) or n.name = :namespace)
         order by k.name
@@ -74,6 +74,18 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getAllByKeyIdIn(keyIds: Collection<Long>): Collection<Translation>
 
   @Query(
+    """
+    from Translation t
+    where t.language.id = :languageId
+        and t.key.id in :ids 
+  """,
+  )
+  fun findAllByLanguageIdAndKeyIdIn(
+    languageId: Long,
+    ids: Collection<Long>,
+  ): List<Translation>
+
+  @Query(
     """from Translation t 
     join fetch t.key k 
     left join fetch k.keyMeta 
@@ -98,18 +110,18 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """
       select 
-      new io.tolgee.model.views.TranslationMemoryItemView(baseTranslation.text, target.text, key.name, null, 1, key.id) 
+      new io.tolgee.model.views.TranslationMemoryItemView(baseTranslation.text, target.text, k.name, null, 1, k.id)
       from Translation baseTranslation
-      join baseTranslation.key key
-      join key.project p
-      join Translation target on 
-            target.key = key and 
+      join baseTranslation.key k
+      join k.project p
+      join Translation target on
+            target.key = k and
             target.language.id = :targetLanguageId and
             target.text <> '' and
             target.text is not null
       where baseTranslation.language = p.baseLanguage and
         baseTranslation.text = :baseTranslationText and
-        key <> :key
+        k <> :key
       """,
   )
   fun getTranslationMemoryValue(

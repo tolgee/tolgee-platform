@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400');
+
+
+@layer utilities {
+    .bg-faint-cross-lines {
+      @apply min-h-screen bg-[#0f1525];
+      background-image: 
+        linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.05) 50%, transparent 51%),
+        linear-gradient(135deg, transparent 49%, rgba(255, 255, 255, 0.05) 50%, transparent 51%);
+      background-size: 50px 50px;
+    }
+  }
+

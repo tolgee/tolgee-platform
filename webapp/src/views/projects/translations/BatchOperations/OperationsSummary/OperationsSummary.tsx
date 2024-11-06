@@ -1,4 +1,4 @@
-import { ExpandMore, PlayCircleOutline } from '@mui/icons-material';
+import { ChevronDown, PlayCircle } from '@untitled-ui/icons-react';
 import { Box, Popper, styled, Tooltip } from '@mui/material';
 
 import { useProjectContext } from 'tg.hooks/ProjectContext';
@@ -28,13 +28,13 @@ export const BatchOperationsSummary = () => {
     >
       <Box display="flex" gap={1} alignItems="center">
         <Box sx={{ mt: 0.75 }}>
-          <PlayCircleOutline fontSize="small" />
+          <PlayCircle width={18} height={18} />
         </Box>
         <Box>
           <BatchIndicator key={relevantTask.id} data={relevantTask} />
         </Box>
         <Box sx={{ mt: 0.75 }}>
-          <ExpandMore fontSize="small" />
+          <ChevronDown width={18} height={18} />
         </Box>
       </Box>
     </Tooltip>

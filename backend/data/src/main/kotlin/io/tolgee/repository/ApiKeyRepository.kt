@@ -34,6 +34,7 @@ interface ApiKeyRepository : JpaRepository<ApiKey, Long> {
     left join ak.userAccount u
     where u.id = :userAccountId 
     and (p.id = :filterProjectId or :filterProjectId is null)
+    and p.deletedAt is null
   """,
   )
   fun getAllByUserAccount(

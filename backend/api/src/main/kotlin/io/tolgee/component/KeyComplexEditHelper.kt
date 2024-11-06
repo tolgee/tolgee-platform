@@ -170,7 +170,11 @@ class KeyComplexEditHelper(
 
   private fun doStateUpdate() {
     if (areStatesModified) {
-      securityService.checkLanguageChangeStatePermissionsByLanguageId(modifiedStates!!.keys, projectHolder.project.id)
+      securityService.checkLanguageChangeStatePermissionsByLanguageId(
+        modifiedStates!!.keys,
+        projectHolder.project.id,
+        key.id,
+      )
       translationService.setStateBatch(
         states =
           modifiedStates!!.map {
@@ -187,10 +191,10 @@ class KeyComplexEditHelper(
 
   private fun doTranslationsUpdate() {
     if (modifiedTranslations != null && areTranslationsModified) {
-      projectHolder.projectEntity.checkTranslationsEditPermission()
       securityService.checkLanguageTranslatePermissionsByLanguageId(
         modifiedTranslations!!.keys,
         projectHolder.project.id,
+        keyId,
       )
 
       val modifiedTranslations = getModifiedTranslationsByTag()

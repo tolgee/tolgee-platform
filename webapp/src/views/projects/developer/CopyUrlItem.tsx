@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
-import { ContentCopy } from '@mui/icons-material';
+import { Copy06 } from '@untitled-ui/icons-react';
 
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
@@ -34,7 +34,7 @@ export const CopyUrlItem = ({ value, inputProps, maxWidth = 350 }: Props) => {
               messaging.success(<T keyName="clipboard_copy_success" />);
             }}
           >
-            <ContentCopy />
+            <Copy06 />
           </IconButton>
         </InputAdornment>
       }

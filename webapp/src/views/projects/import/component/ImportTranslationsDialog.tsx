@@ -7,7 +7,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
-import CloseIcon from '@mui/icons-material/Close';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import SearchField from 'tg.component/common/form/fields/SearchField';
@@ -87,7 +87,7 @@ export const ImportTranslationsDialog: FunctionComponent<{
               aria-label="close"
               size="large"
             >
-              <CloseIcon />
+              <XClose />
             </IconButton>
             <StyledTitle variant="h6">
               <T keyName="import_show_translations_title" />

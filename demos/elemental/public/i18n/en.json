@@ -1,0 +1,17 @@
+{
+  "days": {
+    "fri": "Fri",
+    "mon": "Mon",
+    "sat": "Sat",
+    "sun": "Sun",
+    "thurs": "Thurs",
+    "tue": "Tue",
+    "wed": "Wed"
+  },
+  "forecast": "Forecast for the next 3 days",
+  "humidity": "Humidity",
+  "label": "Change Language",
+  "location": "Tuesday",
+  "search_city": "Search City",
+  "wind_speed": "Wind Speed"
+}

@@ -3,6 +3,7 @@ package io.tolgee.service.queryBuilders.translationViewBuilder
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.TagService
 import io.tolgee.service.queryBuilders.CursorUtil
 import jakarta.persistence.EntityManager
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component
 class TranslationViewDataProvider(
   private val em: EntityManager,
   private val tagService: TagService,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   fun getData(
     projectId: Long,
@@ -98,6 +100,7 @@ class TranslationViewDataProvider(
         params = params,
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
         entityManager = em,
+        authenticationFacade = authenticationFacade,
       )
     val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
     deleteFailedKeysInJobTempTable()
@@ -118,5 +121,6 @@ class TranslationViewDataProvider(
     sort = pageable.sort,
     cursor = cursor?.let { CursorUtil.parseCursor(it) },
     entityManager = em,
+    authenticationFacade = authenticationFacade,
   )
 }

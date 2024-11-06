@@ -17,7 +17,7 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
   languages: LanguageModel[] | undefined;
-  className: string;
+  className?: string;
 };
 
 export const LanguageSelector: React.FC<Props> = ({ languages, className }) => {

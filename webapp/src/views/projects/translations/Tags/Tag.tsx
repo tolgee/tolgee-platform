@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 
 import { Wrapper } from './Wrapper';
 import clsx from 'clsx';
@@ -14,12 +14,12 @@ const StyledTag = styled('div')`
   white-space: nowrap;
 `;
 
-const StyledCloseIcon = styled(Close)`
-  margin-left: -6px;
+const StyledCloseIcon = styled(XClose)`
+  margin-left: -5px;
   padding: 1px;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 19px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 

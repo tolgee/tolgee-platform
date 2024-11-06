@@ -5,6 +5,11 @@ import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "slack_message_id"),
+  ],
+)
 class SlackMessageInfo(
   @ManyToOne(fetch = FetchType.LAZY)
   var slackMessage: SavedSlackMessage,

@@ -21,7 +21,7 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
     code.appendLine("""${i(indent)}${"\"\"\""}.trimIndent()""")
   }
   val escape = { str: String?, newLines: Boolean ->
-    str?.replace("\"", "\\\"").let {
+    str?.replace("\\", "\\\\")?.replace("\"", "\\\"").let {
       if (newLines) {
         return@let it?.replace("\n", "\\n")
       }

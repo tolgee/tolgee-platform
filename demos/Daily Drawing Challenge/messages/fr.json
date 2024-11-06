@@ -1,0 +1,17 @@
+{
+  "app-name": "Défi quotidien de dessin",
+  "brush-size": "Taille du pinceau",
+  "clear": "Tout effacer",
+  "date": "Dernière mise à jour",
+  "download": "Télécharger",
+  "drawingMode": "Mode dessin",
+  "eraser": "Mode gomme",
+  "prompt1": "Dessinez un chat portant un chapeau haut de forme",
+  "prompt2": "Esquissez la maison de vos rêves",
+  "prompt3": "Dessinez votre plat préféré",
+  "prompt4": "Créer une scène de forêt magique",
+  "prompt5": "Concevoir un véhicule futuriste",
+  "select-lang": "Sélectionner la langue",
+  "taglline": "Laissez-vous inspirer par les conseils quotidiens en matière de dessin",
+  "undo": "Annuler"
+}

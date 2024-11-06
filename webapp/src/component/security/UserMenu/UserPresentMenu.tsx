@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { IconButton, MenuItem, Popover, styled } from '@mui/material';
+import {
+  Badge,
+  Box,
+  IconButton,
+  MenuItem,
+  Popover,
+  styled,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
@@ -20,7 +27,10 @@ import { OrganizationSwitch } from './OrganizationSwitch';
 import { BillingItem } from './BillingItem';
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -57,6 +67,7 @@ export const UserPresentMenu: React.FC = () => {
   const userMenuItems = useUserMenuItems();
   const { usage } = useOrganizationUsage();
   const progressData = usage && getProgressData(usage);
+  const taskCount = useGlobalContext((c) => c.initialData.userTasks);
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -106,7 +117,9 @@ export const UserPresentMenu: React.FC = () => {
         onClick={handleOpen}
         size="large"
       >
-        <UserAvatar />
+        <Badge badgeContent={taskCount} color="primary" variant="dot">
+          <UserAvatar />
+        </Badge>
       </StyledIconButton>
       <StyledPopover
         id="user-menu"
@@ -130,6 +143,20 @@ export const UserPresentMenu: React.FC = () => {
           title={user.name}
           subtitle={user.username}
         />
+        <MenuItem
+          component={Link}
+          to={LINKS.MY_TASKS.build()}
+          selected={location.pathname === LINKS.MY_TASKS.build()}
+          data-cy="user-menu-my-tasks"
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            paddingRight: 3,
+          }}
+        >
+          <Box>{t('user_menu_my_tasks')}</Box>
+          <Badge badgeContent={taskCount} color="primary" />
+        </MenuItem>
         {userMenuItems.map((item, index) => (
           <MenuItem
             key={index}

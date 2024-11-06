@@ -1,0 +1,23 @@
+{
+  "bookmark": "Yer imi",
+  "books": "Yer İşaretleriniz",
+  "change_lang": "Dilinizi buradan değiştirin:",
+  "change_pass": "Şifrenizi buradan değiştirin:",
+  "error": "Dahili Sunucu Hatası,Oops! Sunucuda bir sorun oluştu.",
+  "findmov": "Bir Sonraki Filminizi Bulun",
+  "genre": "Aksiyon,Macera,Animasyon,Komedi,Suç,Belgesel,Dram,Aile,Fantastik,Tarih,Korku,Müzik,Gizem,Romantik,Bilim Kurgu,TV Filmi,Gerilim,Savaş,Western",
+  "get_sug": "Önerileri alın!",
+  "login": "Giriş yapmak",
+  "logout": "Çıkış Yap",
+  "mov_sug": "Film Önerileri",
+  "no_books": "Henüz hiçbir film yer imlerine eklenmedi!",
+  "no_mov": "Başlamak için bir tür seçin!",
+  "not_found": "Sayfa Bulunamadı,Aradığınız sayfa bulunmamaktadır.",
+  "pass": "Şifrenizi değiştirin",
+  "sel_genre": "Favori Türlerinizi Seçin:",
+  "set_lang": "Dil Ayarı",
+  "set_pass": "Şifre Ayarla",
+  "signup": "Kayıt Ol",
+  "signup_page": "Kullanıcı Adı,E-posta,Dil,Şifre,Şifre 8 ile 32 karakter arasında olmalıdır,Şifreyi Onayla,Şifreyi Tekrarla",
+  "unbookmark": "Yer işaretini kaldır"
+}

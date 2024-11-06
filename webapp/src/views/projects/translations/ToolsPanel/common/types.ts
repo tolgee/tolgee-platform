@@ -1,6 +1,7 @@
 import { components } from 'tg.service/apiSchema.generated';
 import { DeletableKeyWithTranslationsModelType } from '../../context/types';
 import { LanguageModel } from 'tg.component/PermissionsSettings/types';
+import type { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 export type ProjectModel = components['schemas']['ProjectModel'];
 export type TranslationViewModel =
@@ -13,6 +14,7 @@ export type PanelContentData = {
   baseLanguage: LanguageModel;
   activeVariant: string | undefined;
   editEnabled: boolean;
+  projectPermissions: ReturnType<typeof useProjectPermissions>;
 };
 
 export type PanelContentProps = PanelContentData & {
@@ -25,6 +27,8 @@ export type PanelConfig = {
   icon: React.ReactNode;
   name: React.ReactNode;
   component: React.FC<PanelContentProps>;
-  itemsCountComponent?: React.FC<PanelContentData>;
+  itemsCountFunction?: (props: PanelContentData) => number | React.ReactNode;
   displayPanel?: (value: PanelContentData) => boolean;
+  hideWhenCountZero?: boolean;
+  hideCount?: boolean;
 };

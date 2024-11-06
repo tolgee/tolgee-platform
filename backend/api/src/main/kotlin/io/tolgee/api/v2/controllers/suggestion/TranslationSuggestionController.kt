@@ -15,6 +15,7 @@ import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
@@ -72,12 +73,17 @@ class TranslationSuggestionController(
         "If an error occurs when for any service provider used," +
         " the error information is returned as a part of the result item, while the response has 200 status code.",
   )
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @UseDefaultPermissions
   @AllowApiAccess
   fun suggestMachineTranslationsStreaming(
     @RequestBody @Valid
     dto: SuggestRequestDto,
   ): ResponseEntity<StreamingResponseBody> {
+    securityService.checkScopeOrAssignedToTask(
+      Scope.TRANSLATIONS_EDIT,
+      dto.targetLanguageId,
+      dto.keyId ?: -1,
+    )
     return ResponseEntity.ok().disableAccelBuffering().body(
       machineTranslationSuggestionFacade.suggestStreaming(dto),
     )
@@ -90,16 +96,19 @@ class TranslationSuggestionController(
       "Suggests machine translations from translation memory. " +
         "The result is always sorted by similarity, so sorting is not supported.",
   )
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @UseDefaultPermissions
   @AllowApiAccess
   fun suggestTranslationMemory(
     @RequestBody @Valid
     dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationMemoryItemModel> {
+    securityService.checkScopeOrAssignedToTask(
+      Scope.TRANSLATIONS_EDIT,
+      dto.targetLanguageId,
+      dto.keyId ?: -1,
+    )
     val targetLanguage = languageService.get(dto.targetLanguageId, projectHolder.project.id)
-
-    securityService.checkLanguageTranslatePermission(projectHolder.project.id, listOf(targetLanguage.id))
 
     val data =
       dto.baseText?.let { baseText ->

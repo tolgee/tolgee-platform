@@ -1,5 +1,6 @@
 import { PrefilterActivity } from './PrefilterActivity';
 import { PrefilterFailedJob } from './PrefilterFailedJob';
+import { PrefilterTask } from './PrefilterTask';
 import { PrefilterType } from './usePrefilter';
 
 type Props = {
@@ -11,6 +12,8 @@ export const Prefilter = ({ prefilter }: Props) => {
     return <PrefilterActivity revisionId={prefilter.activity} />;
   } else if (prefilter?.failedJob) {
     return <PrefilterFailedJob jobId={prefilter.failedJob} />;
+  } else if (prefilter?.task) {
+    return <PrefilterTask taskNumber={prefilter.task} />;
   }
   return null;
 };

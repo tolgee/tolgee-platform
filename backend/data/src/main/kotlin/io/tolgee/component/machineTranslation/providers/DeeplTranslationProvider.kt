@@ -54,6 +54,7 @@ class DeeplTranslationProvider(
 
   override val supportedLanguages =
     arrayOf(
+      "ar",
       "bg",
       "cs",
       "da",

@@ -5,7 +5,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingCheckboxWithSkeleton';
-import { HelpOutline } from '@mui/icons-material';
+import { HelpCircle } from '@untitled-ui/icons-react';
 import { DOC_LINKS } from '../../../../docLinks';
 
 type ImportSettingRequest = components['schemas']['ImportSettingsRequest'];
@@ -111,7 +111,7 @@ export const ImportSettingsPanel: FC = (props) => {
           {...additionalCheckboxProps}
           customHelpIcon={
             <StyledLink href={DOC_LINKS.importingPlaceholders}>
-              <HelpOutline className="icon" />
+              <HelpCircle className="icon" />
             </StyledLink>
           }
         />
@@ -127,7 +127,9 @@ export const ImportSettingsPanel: FC = (props) => {
         checked={state?.overrideKeyDescriptions}
         customHelpIcon={
           <StyledLink href={DOC_LINKS.importOverridingDescriptions}>
-            <HelpOutline className="icon" />
+            <Box display="flex">
+              <HelpCircle className="icon" />
+            </Box>
           </StyledLink>
         }
         {...additionalCheckboxProps}
@@ -156,6 +158,7 @@ const StyledLink = styled('a')`
   color: ${({ theme }) => theme.palette.tokens.icon.primary};
 
   .icon {
-    font-size: 16px;
+    width: 18px;
+    height: 18px;
   }
 `;

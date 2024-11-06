@@ -39,9 +39,12 @@ export const useScopeTranslations = () => {
     'webhooks.manage': t('permissions_item_webhooks_manage'),
     'content-delivery.manage': t('permissions_item_content_delivery_manage'),
     'content-delivery.publish': t('permissions_item_content_delivery_publish'),
+    'tasks.view': t('permissions_item_tasks_view'),
+    'tasks.edit': t('permissions_item_tasks_edit'),
   };
 
   return {
-    getScopeTranslation: (scope: PermissionModelScope) => labels[scope],
+    getScopeTranslation: (scope: PermissionModelScope) =>
+      labels[scope] ?? scope,
   };
 };

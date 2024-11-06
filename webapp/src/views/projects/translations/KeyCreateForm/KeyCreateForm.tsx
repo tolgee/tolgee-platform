@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { T, TFnType, useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -118,7 +118,7 @@ export const KeyCreateForm: React.FC<Props> = ({
         pluralParameter: 'value',
       }}
       onSubmit={handleSubmit}
-      validationSchema={Validation.NEW_KEY_FORM(t as TFnType)}
+      validationSchema={Validation.NEW_KEY_FORM(t)}
     >
       {(formik) => {
         useEffect(() => {

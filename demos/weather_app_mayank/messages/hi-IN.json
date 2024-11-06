@@ -1,0 +1,13 @@
+{
+  "app-title": "मौसम ऐप",
+  "current-weather": "वर्तमान मौसम",
+  "enter-city": "शहर का नाम दर्ज करें",
+  "feels-like": "ऐसा लगता है",
+  "Forecast": "पूर्वानुमान",
+  "Humidity": "नमी",
+  "Loading": "लोड हो रहा है",
+  "not-allow": "उपयोगकर्ता ने जियोलोकेशन अस्वीकार कर दिया",
+  "Pressure": "दबाव",
+  "search-key": "खोजें",
+  "Wind": "हवा"
+}

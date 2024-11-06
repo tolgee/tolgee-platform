@@ -12,6 +12,12 @@
 
 Une alternative open-source à Crowdin, Phrase ou Lokalise
 
+<h2 align="center" style="border-bottom: none">
+
+[**English**](README.md)
+
+</h2>
+
 ![example workflow](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
 [![docker](https://img.shields.io/docker/v/tolgee/tolgee/latest?label=DockerHub)](https://hub.docker.com/repository/docker/tolgee/tolgee)
@@ -29,9 +35,9 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
 
-[![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
+[![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktoberfest2024.fr.md)
 
-Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktobefest2024.md](../Hacktobefest2024.md).
+Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktoberfest2024.fr.md](Hacktoberfest2024.fr.md).
 
 ### Types de Soumission
 - **Pull Requests** : Soumettez une pull request en traitant des problèmes étiquetés avec #hacktoberfest.
@@ -55,7 +61,7 @@ En fonction des points obtenus, vous recevrez des goodies :
 
 Veuillez donner une étoile au [répertoire Tolgee](https://github.com/tolgee/tolgee-platform) dans le cadre de votre contribution !
 
-Pour des informations complètes, consultez notre [Hacktobefest2024.md](../Hacktobefest2024.md).
+Pour des informations complètes, consultez notre [Hacktoberfest2024.fr.md](./Hacktoberfest2024.fr.md).
 
 **Rejoignez la famille. Participez à notre [canal Slack <img src="https://img.shields.io/badge/-Communauté Tolgee-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ)**
 

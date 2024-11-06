@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
@@ -12,7 +13,17 @@ import jakarta.validation.constraints.NotNull
 import java.util.*
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["tokenHash"], name = "pat_token_hash_unique")])
+@Table(
+  uniqueConstraints = [
+    UniqueConstraint(
+      columnNames = ["tokenHash"],
+      name = "pat_token_hash_unique",
+    ),
+  ],
+  indexes = [
+    Index(columnList = "user_account_id"),
+  ],
+)
 class Pat(
   @field:NotEmpty
   @field:NotNull

@@ -7,11 +7,19 @@ import io.tolgee.model.UserAccount
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @IdClass(ImportSettingsId::class)
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "user_account_id"),
+  ],
+)
 class ImportSettings(
   @Id
   @ManyToOne

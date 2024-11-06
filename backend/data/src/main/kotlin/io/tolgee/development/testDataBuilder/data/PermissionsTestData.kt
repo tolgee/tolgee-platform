@@ -6,20 +6,33 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.*
+import io.tolgee.model.key.Key
 import org.springframework.core.io.ClassPathResource
 
 class PermissionsTestData {
   var projectBuilder: ProjectBuilder
   var organizationBuilder: OrganizationBuilder
   var admin: UserAccountBuilder
+  var serverAdmin: UserAccountBuilder
+  lateinit var addedProject: Project
+  lateinit var englishLanguage: Language
+  lateinit var keys: List<Key>
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
       admin = addUserAccount { username = "admin@admin.com" }
+
+      serverAdmin =
+        addUserAccount {
+          username = "Server admin"
+          name = "Server admin"
+          role = UserAccount.Role.ADMIN
+        }
+
       organizationBuilder = admin.defaultOrganizationBuilder
 
       val member = addUserAccount { username = "member@member.com" }
@@ -39,6 +52,10 @@ class PermissionsTestData {
           val en = addEnglish()
           val de = addGerman()
           val cs = addCzech()
+
+          englishLanguage = en.self
+
+          addedProject = this.self
 
           addPermission {
             this.user = member.self
@@ -62,6 +79,8 @@ class PermissionsTestData {
                 }
               }
             }
+
+          keys = keyBuilders.map { it.self }
 
           keyBuilders[0].apply {
             val screenshotResource =
@@ -123,6 +142,47 @@ class PermissionsTestData {
       addPermission {
         this.user = user.self
         type = ProjectPermissionType.VIEW
+      }
+    }
+  }
+
+  fun addTasks(assignees: MutableSet<UserAccount>) {
+    projectBuilder.apply {
+      val translateTask =
+        addTask {
+          number = 1
+          name = "Assigned translate task"
+          type = TaskType.TRANSLATE
+          state = TaskState.NEW
+          project = addedProject
+          language = englishLanguage
+          this.assignees = assignees
+          author = admin.self
+        }.self
+
+      keys.first().let {
+        addTaskKey {
+          task = translateTask
+          key = it
+        }
+      }
+
+      val reviewTask =
+        addTask {
+          number = 2
+          name = "Unassigned review task"
+          type = TaskType.REVIEW
+          state = TaskState.NEW
+          project = addedProject
+          language = englishLanguage
+          author = admin.self
+        }.self
+
+      keys.take(2).forEach {
+        addTaskKey {
+          task = reviewTask
+          key = it
+        }
       }
     }
   }

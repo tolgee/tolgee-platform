@@ -1,0 +1,17 @@
+<h1>󰸕 <%= @translations["books"] %></h1>
+
+<div class="movies-cont">
+  <% if @movies.any? %>
+    <div class="movies">
+      <% @movies.each do |movie| %>
+        <div class="movie">
+          <strong class="mov-title"> &nbsp;<%= movie['title'] %></strong> (<%= movie['vote_average'].round(1) %>/10)
+          <% if @user %><%= button_to @translations["unbookmark"], unbook_path(movie['id']), method: :post, remote: true, class: 'bookmark-btn' %><% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p><%= @translations["no_books"] %></p>
+  <% end %>
+</div>
+

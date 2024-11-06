@@ -1,0 +1,17 @@
+{
+  "app-title": "Countdown Timer",
+  "days": "Days",
+  "dd": "dd",
+  "enter-event": "Enter Event Name",
+  "event-name": "Event Name",
+  "future-error": "Please select a future date and time!",
+  "hours": "Hours",
+  "minute-key": "minute",
+  "mm": "mm",
+  "remove": "Remove",
+  "seconds": "Seconds",
+  "set-timer": "Set Timer",
+  "success": "Timer added successfully!",
+  "target-date-time": "Target Date & Time",
+  "yyyy": "yyyy"
+}

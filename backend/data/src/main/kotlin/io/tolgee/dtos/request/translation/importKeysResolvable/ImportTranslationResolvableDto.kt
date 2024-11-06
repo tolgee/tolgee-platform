@@ -13,7 +13,8 @@ class ImportTranslationResolvableDto(
 
 - KEEP: Translation is not changed
 - OVERRIDE: Translation is overridden
-- NEW: New translation is created)
+- NEW: New translation is created
+- FORCE_OVERRIDE: Translation is updated, created or kept.
 """,
     example = "OVERRIDE",
   )

@@ -1,7 +1,17 @@
 import React, { FC } from 'react';
-import { styled, Chip, Box, Tooltip, Button } from '@mui/material';
+import {
+  styled,
+  Chip,
+  Box,
+  Tooltip,
+  Button,
+  Typography,
+  IconButton,
+  useTheme,
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Link, useHistory } from 'react-router-dom';
+import { Edit02 } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
@@ -17,7 +27,7 @@ import clsx from 'clsx';
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: auto auto auto 10fr auto;
-  margin: ${({ theme }) => theme.spacing(2, 0)};
+  margin: ${({ theme }) => theme.spacing(1, 0, 2, 0)};
 `;
 
 const StyledRow = styled('div')`
@@ -86,6 +96,7 @@ type Props = {
 };
 
 export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
+  const theme = useTheme();
   const languages = useProjectLanguages();
   const { satisfiesLanguageAccess, satisfiesPermission } =
     useProjectPermissions();
@@ -95,6 +106,7 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
   const baseLanguage = languages.find((l) => l.base === true)!.tag;
   const allLangs = languages.map((l) => l.tag);
   const canViewLanguages = satisfiesPermission('translations.view');
+  const canEditLanguages = satisfiesPermission('languages.edit');
 
   const redirectToLanguage = (lang?: string) => {
     const langs = !lang
@@ -111,6 +123,28 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
 
   return (
     <StyledContainer>
+      <Box display="flex" gridColumn="1 / -1" justifyContent="space-between">
+        <Box display="flex" gap={1} alignItems="center">
+          <Typography variant="h4">{t('dashboard_languages_title')}</Typography>
+          <Chip
+            data-cy="project-dashboard-language-count"
+            size="small"
+            label={languageStats.length}
+            sx={{ background: theme.palette.tokens.text._states.selected }}
+          />
+        </Box>
+        {canEditLanguages && (
+          <IconButton
+            data-cy="project-dashboard-languages-edit"
+            component={Link}
+            to={LINKS.PROJECT_LANGUAGES.build({
+              [PARAMS.PROJECT_ID]: project.id,
+            })}
+          >
+            <Edit02 width={20} height={20} />
+          </IconButton>
+        )}
+      </Box>
       {languageStats.map((item, i) => {
         const language = languages.find((l) => l.id === item.languageId)!;
         const canViewLanguage = satisfiesLanguageAccess(

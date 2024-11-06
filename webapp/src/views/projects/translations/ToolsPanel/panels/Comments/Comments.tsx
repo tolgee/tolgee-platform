@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
 import { Box, IconButton, styled, TextField } from '@mui/material';
-import { Send } from '@mui/icons-material';
+import { Send03 } from '@untitled-ui/icons-react';
 import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { StickyDateSeparator } from 'tg.views/projects/translations/ToolsPanel/common/StickyDateSeparator';
 import { useUser } from 'tg.globalContext/helpers';
@@ -49,17 +49,22 @@ export const Comments: React.FC<PanelContentProps> = ({
   const { satisfiesPermission } = useProjectPermissions();
   const user = useUser();
   const [limit, setLimit] = useState(true);
-
-  const canAddComment = satisfiesPermission('translation-comments.add');
-  const canEditComment = satisfiesPermission('translation-comments.edit');
-  const canSetCommentState = satisfiesPermission(
-    'translation-comments.set-state'
-  );
-
-  const keyId = keyData.keyId;
   const translation = keyData.translations[language.tag] as
     | TranslationViewModel
     | undefined;
+
+  const isAssignedToTask = keyData.tasks?.find(
+    (t) => t.languageTag === language.tag
+  )?.userAssigned;
+
+  const canAddComment =
+    satisfiesPermission('translation-comments.add') || isAssignedToTask;
+  const canEditComment =
+    satisfiesPermission('translation-comments.edit') || isAssignedToTask;
+  const canSetCommentState =
+    satisfiesPermission('translation-comments.set-state') || isAssignedToTask;
+
+  const keyId = keyData.keyId;
 
   const {
     commentsList,
@@ -164,9 +169,9 @@ export const Comments: React.FC<PanelContentProps> = ({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleAddComment}
                 disabled={isAddingComment}
-                sx={{ my: '-7px', alignSelf: 'end' }}
+                sx={{ my: '-6px', alignSelf: 'end' }}
               >
-                <Send fontSize="small" color="inherit" />
+                <Send03 width={20} height={20} color="inherit" />
               </IconButton>
             ),
           }}
@@ -176,9 +181,9 @@ export const Comments: React.FC<PanelContentProps> = ({
   );
 };
 
-export const CommentsItemsCount = ({ keyData, language }: PanelContentData) => {
+export const commentsCount = ({ keyData, language }: PanelContentData) => {
   const translation = keyData.translations[language.tag] as
     | TranslationViewModel
     | undefined;
-  return <>{translation?.commentCount ?? 0}</>;
+  return translation?.commentCount ?? 0;
 };

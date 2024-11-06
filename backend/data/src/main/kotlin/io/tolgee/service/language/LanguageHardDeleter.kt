@@ -1,8 +1,11 @@
 package io.tolgee.service.language
 
 import io.tolgee.model.Language
+import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.repository.TranslationRepository
+import io.tolgee.service.ITaskService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
@@ -21,25 +24,41 @@ class LanguageHardDeleter(
   fun delete() {
     val languageWithData = getWithFetchedTranslations(language)
     val allTranslations = getAllTranslations(languageWithData)
-    languageWithData.translations = allTranslations
-    languageRepository.delete(language)
+    val tasks = getAllTasks(languageWithData)
+    translationRepository.deleteAll(allTranslations)
+    taskService.deleteAll(tasks)
+    languageRepository.delete(languageWithData)
     entityManager.flush()
   }
 
   private fun getAllTranslations(languageWithData: Language) =
     languageWithData.translations.chunked(30000).flatMap {
-      entityManager.createQuery(
-        """from Translation t
+      val withComments =
+        entityManager.createQuery(
+          """from Translation t
             join fetch t.key k
             left join fetch k.keyMeta km
             left join fetch k.namespace
             left join fetch t.comments
             where t.id in :ids""",
-        Translation::class.java,
-      )
-        .setParameter("ids", it.map { it.id })
-        .resultList
+          Translation::class.java,
+        )
+          .setParameter("ids", it.map { it.id })
+          .resultList
+
+      withComments
     }.toMutableList()
+
+  fun getAllTasks(languageWithData: Language) =
+    entityManager.createQuery(
+      """from Task tk
+            join fetch tk.keys
+            where tk.language = :languageWithData""",
+      Task::class.java,
+    )
+      .setParameter("languageWithData", languageWithData)
+      .resultList
+      .toMutableList()
 
   private fun getWithFetchedTranslations(language: Language): Language {
     return entityManager.createQuery(
@@ -59,5 +78,13 @@ class LanguageHardDeleter(
 
   private val languageRepository by lazy {
     applicationContext.getBean(LanguageRepository::class.java)
+  }
+
+  private val translationRepository by lazy {
+    applicationContext.getBean(TranslationRepository::class.java)
+  }
+
+  private val taskService by lazy {
+    applicationContext.getBean(ITaskService::class.java)
   }
 }

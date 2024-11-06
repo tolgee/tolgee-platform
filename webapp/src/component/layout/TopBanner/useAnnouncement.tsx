@@ -75,6 +75,14 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_TASKS':
+        return (
+          <Announcement
+            content={<T keyName="announcement_feature_tasks" />}
+            link="https://tolgee.io/blog/new-feature-tasks"
+          />
+        );
+
       default:
         assertUnreachable(value);
     }

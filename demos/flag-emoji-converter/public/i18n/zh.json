@@ -1,0 +1,11 @@
+{
+  "app-description": "根据国家/地区的名称找到国家的国旗。",
+  "app-title": "查找国家/地区国旗",
+  "input-placeholder": "搜索国家/地区国旗",
+  "option-chinese": "中文",
+  "option-english": "英语",
+  "option-french": "法语",
+  "option-german": "德语",
+  "option-hindi": "印地语",
+  "option-spanish": "西班牙语"
+}

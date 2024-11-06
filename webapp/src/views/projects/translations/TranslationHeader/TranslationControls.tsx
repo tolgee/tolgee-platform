@@ -1,18 +1,18 @@
-import { Add, AppsRounded, ViewListRounded } from '@mui/icons-material';
+import { LayoutGrid02, LayoutLeft, Plus } from '@untitled-ui/icons-react';
 import { Button, ButtonGroup, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import TranslationsSearchField from './TranslationsSearchField';
+import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
+import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import { Filters } from '../Filters/Filters';
 import { StickyHeader } from './StickyHeader';
-import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -30,8 +30,8 @@ const StyledSpaced = styled('div')`
   flex-wrap: wrap;
 `;
 
-const StyledTranslationsSearchField = styled(TranslationsSearchField)`
-  min-width: 200px;
+const StyledTranslationsSearchField = styled(HeaderSearchField)`
+  width: 200px;
 `;
 
 const StyledToggleButton = styled(Button)`
@@ -52,6 +52,11 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { setSearch, selectLanguages, changeView } = useTranslationsActions();
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
+  const allLanguages = useTranslationsSelector((c) => c.languages);
+  const filters = useTranslationsSelector((c) => c.filters);
+  const { setFilters } = useTranslationsActions();
+  const selectedLanguagesMapped =
+    allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
 
   const handleAddTranslation = () => {
     onDialogOpen();
@@ -68,7 +73,11 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             variant="outlined"
             placeholder={t('standard_search_label')}
           />
-          <Filters />
+          <TranslationFilters
+            selectedLanguages={selectedLanguagesMapped}
+            value={filters}
+            onChange={setFilters}
+          />
         </StyledSpaced>
 
         <StyledSpaced>
@@ -84,21 +93,21 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
               onClick={() => changeView('LIST')}
               data-cy="translations-view-list-button"
             >
-              <ViewListRounded />
+              <LayoutLeft />
             </StyledToggleButton>
             <StyledToggleButton
               color={view === 'TABLE' ? 'primary' : 'default'}
               onClick={() => changeView('TABLE')}
               data-cy="translations-view-table-button"
             >
-              <AppsRounded />
+              <LayoutGrid02 />
             </StyledToggleButton>
           </ButtonGroup>
 
           {canCreateKeys && (
             <QuickStartHighlight itemKey="add_key">
               <Button
-                startIcon={<Add />}
+                startIcon={<Plus width={19} height={19} />}
                 color="primary"
                 variant="contained"
                 onClick={handleAddTranslation}

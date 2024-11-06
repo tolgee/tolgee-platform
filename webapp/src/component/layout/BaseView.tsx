@@ -16,9 +16,17 @@ const widthMap = {
 };
 
 const StyledContainer = styled(Box)`
-  margin: 0px auto;
+  display: grid;
   width: 100%;
   max-width: 100%;
+`;
+
+const StyledContainerInner = styled(Box)`
+  display: grid;
+  width: 100%;
+  margin: 0px auto;
+  margin-top: 0px;
+  margin-bottom: 0px;
 `;
 
 type BaseViewWidth = keyof typeof widthMap | number | undefined;
@@ -50,6 +58,7 @@ export interface BaseViewProps {
   initialSearch?: string;
   overflow?: string;
   wrapperProps?: React.ComponentProps<typeof Box>;
+  stretch?: boolean;
 }
 
 export const BaseView = (props: BaseViewProps) => {
@@ -74,11 +83,15 @@ export const BaseView = (props: BaseViewProps) => {
 
   return (
     <StyledContainer
-      style={{
-        maxWidth: props.allCentered ? maxWidth : undefined,
-      }}
+      justifySelf={props.allCentered ? 'center' : undefined}
+      width={props.allCentered ? `min(${maxWidth}px, 100%)` : undefined}
+      maxWidth={props.allCentered ? maxWidth : undefined}
     >
-      <Box minHeight="100%" data-cy={props['data-cy']}>
+      <Box
+        display="grid"
+        gridTemplateRows="auto auto auto 1fr"
+        data-cy={props['data-cy']}
+      >
         {displayNavigation && (
           <SecondaryBar
             height={49}
@@ -100,7 +113,7 @@ export const BaseView = (props: BaseViewProps) => {
         )}
         {displayHeader && (
           <SecondaryBar noBorder={Boolean(displayNavigation)}>
-            <StyledContainer
+            <StyledContainerInner
               data-cy="global-base-view-title"
               style={{ maxWidth }}
             >
@@ -138,17 +151,24 @@ export const BaseView = (props: BaseViewProps) => {
                   </Box>
                 </Box>
               )}
-            </StyledContainer>
+            </StyledContainerInner>
           </SecondaryBar>
         )}
-        <Box pl={3} pr={3} pt={2} pb={2} {...props.wrapperProps}>
-          <StyledContainer style={{ maxWidth }}>
+        <Box
+          pl={3}
+          pr={3}
+          pt={2}
+          pb={2}
+          {...props.wrapperProps}
+          display="grid"
+          gridRow={props.stretch ? 4 : undefined}
+        >
+          <StyledContainerInner style={{ maxWidth }}>
             {!props.loading || !hideChildrenOnLoading ? (
               <Box
                 data-cy="global-base-view-content"
                 display="grid"
                 position="relative"
-                maxWidth="100%"
                 sx={{ overflow: props.overflow }}
               >
                 {typeof props.children === 'function'
@@ -158,7 +178,7 @@ export const BaseView = (props: BaseViewProps) => {
             ) : (
               <></>
             )}
-          </StyledContainer>
+          </StyledContainerInner>
         </Box>
       </Box>
     </StyledContainer>

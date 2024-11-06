@@ -10,12 +10,15 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TaskType
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.ITaskService
 import io.tolgee.service.language.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 
 @Service
@@ -33,6 +36,10 @@ class SecurityService(
 
   @set:Autowired
   lateinit var userAccountService: UserAccountService
+
+  @set:Autowired
+  @Lazy
+  lateinit var taskService: ITaskService
 
   fun checkAnyProjectPermission(projectId: Long) {
     if (
@@ -75,6 +82,49 @@ class SecurityService(
 
     val apiKey = activeApiKey ?: return
     checkProjectPermission(projectId, requiredPermission, apiKey)
+  }
+
+  fun hasTaskEditScopeOrIsAssigned(
+    projectId: Long,
+    taskNumber: Long,
+  ) {
+    try {
+      checkProjectPermission(projectId, Scope.TASKS_EDIT)
+    } catch (err: PermissionException) {
+      val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
+      if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
+        throw err
+      }
+    }
+  }
+
+  fun hasTaskViewScopeOrIsAssigned(
+    projectId: Long,
+    taskNumber: Long,
+  ) {
+    try {
+      checkProjectPermission(projectId, Scope.TASKS_VIEW)
+    } catch (err: PermissionException) {
+      val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
+      if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
+        throw err
+      }
+    }
+  }
+
+  private fun translationInTask(
+    keyId: Long,
+    languageId: Long,
+    taskType: TaskType? = null,
+  ): Boolean {
+    val assignees =
+      taskService.findAssigneeByKey(
+        keyId,
+        languageId,
+        authenticationFacade.authenticatedUser.id,
+        taskType,
+      )
+    return assignees.isNotEmpty() && assignees[0].id == activeUser.id
   }
 
   fun checkProjectPermission(
@@ -163,24 +213,77 @@ class SecurityService(
     ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
   }
 
+  private fun translationsInTask(
+    projectId: Long,
+    taskType: TaskType,
+    languageIds: Collection<Long>,
+    keyId: Long? = null,
+  ): Boolean {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
+    checkLanguagePermission(
+      projectId,
+    ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
+
+    if (keyId != null && languageIds.isNotEmpty()) {
+      languageIds.forEach {
+        if (!translationInTask(keyId, it, taskType)) {
+          return false
+        }
+      }
+    } else {
+      return false
+    }
+    return true
+  }
+
   fun checkLanguageTranslatePermission(
     projectId: Long,
     languageIds: Collection<Long>,
+    keyId: Long? = null,
   ) {
-    checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-    checkLanguagePermission(
-      projectId,
-    ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+    try {
+      checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+      checkLanguagePermission(
+        projectId,
+      ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+    } catch (e: PermissionException) {
+      if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
+        throw e
+      }
+    }
   }
 
   fun checkLanguageStateChangePermission(
     projectId: Long,
     languageIds: Collection<Long>,
+    keyId: Long? = null,
   ) {
-    checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
-    checkLanguagePermission(
-      projectId,
-    ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
+    try {
+      checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
+      checkLanguagePermission(
+        projectId,
+      ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
+    } catch (e: PermissionException) {
+      if (!translationsInTask(projectId, TaskType.REVIEW, languageIds, keyId)) {
+        throw e
+      }
+    }
+  }
+
+  fun checkScopeOrAssignedToTask(
+    scope: Scope,
+    languageId: Long,
+    keyId: Long,
+    taskType: TaskType? = null,
+  ) {
+    try {
+      checkProjectPermission(projectHolder.project.id, scope)
+    } catch (e: PermissionException) {
+      checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
+      if (!translationInTask(keyId, languageId, taskType)) {
+        throw e
+      }
+    }
   }
 
   fun filterViewPermissionByTag(
@@ -233,27 +336,29 @@ class SecurityService(
 
   fun checkLanguageTranslatePermission(translation: Translation) {
     val language = translation.language
-    checkLanguageTranslatePermission(language.project.id, listOf(language.id))
+    checkLanguageTranslatePermission(language.project.id, listOf(language.id), translation.key.id)
   }
 
   fun checkStateChangePermission(translation: Translation) {
     val language = translation.language
-    checkLanguageStateChangePermission(language.project.id, listOf(language.id))
+    checkLanguageStateChangePermission(language.project.id, listOf(language.id), translation.key.id)
   }
 
   fun checkLanguageTranslatePermissionsByTag(
     tags: Set<String>,
     projectId: Long,
+    keyId: Long?,
   ) {
     val languages = languageService.findByTags(tags, projectId)
-    this.checkLanguageTranslatePermission(projectId, languages.map { it.id })
+    this.checkLanguageTranslatePermission(projectId, languages.map { it.id }, keyId)
   }
 
   fun checkLanguageTranslatePermissionsByLanguageId(
     languageIds: Collection<Long>,
     projectId: Long,
+    keyId: Long? = null,
   ) {
-    this.checkLanguageTranslatePermission(projectId, languageIds)
+    this.checkLanguageTranslatePermission(projectId, languageIds, keyId)
   }
 
   fun checkLanguageStateChangePermissionsByTag(
@@ -267,8 +372,9 @@ class SecurityService(
   fun checkLanguageChangeStatePermissionsByLanguageId(
     languageIds: Collection<Long>,
     projectId: Long,
+    keyId: Long? = null,
   ) {
-    this.checkLanguageStateChangePermission(projectId, languageIds)
+    this.checkLanguageStateChangePermission(projectId, languageIds, keyId)
   }
 
   fun checkApiKeyScopes(

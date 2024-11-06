@@ -99,4 +99,9 @@ To filter default namespace, set to empty string.
     description = "Select only keys which were not successfully translated by batch job with provided id",
   )
   var filterFailedKeysOfJob: Long? = null
+
+  @field:Parameter(
+    description = "Select only keys which are in specified task",
+  )
+  var filterTaskNumber: List<Long>? = null
 }

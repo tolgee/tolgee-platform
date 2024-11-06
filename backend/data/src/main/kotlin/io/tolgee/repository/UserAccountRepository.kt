@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.UserAccountView
+import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountInProjectView
@@ -13,6 +14,85 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
+
+private const val USER_FILTERS = """
+    (
+        :#{#filters.filterId} is null
+        or ua.id in :#{#filters.filterId}
+    )
+    and (
+        :#{#filters.filterNotId} is null
+        or ua.id not in :#{#filters.filterNotId}
+    )
+"""
+
+private const val PROJECT_PERMISSIONS_CTE = """
+    with projectPermissions as (
+        select
+            pe.id,
+            pe.user_id,
+            pe.scopes,
+            pe.project_id,
+            pe.type,
+            array_remove(array_agg(pe_view.view_languages_id), null)          as view_languages,
+            array_remove(array_agg(pe_edit.languages_id), null)               as edit_languages,
+            array_remove(array_agg(pe_state.state_change_languages_id), null) as state_languages
+        from permission pe
+                 left join permission_view_languages pe_view on pe.id = pe_view.permission_id
+                 left join permission_languages pe_edit on pe.id = pe_edit.permission_id
+                 left join permission_state_change_languages pe_state on pe.id = pe_state.permission_id
+        where pe.project_id = :projectId
+        group by pe.id, pe.user_id, pe.scopes, pe.project_id, pe.type
+    )"""
+private const val PROJECT_PERMISSIONS_MAIN = """
+    from user_account ua
+        left join projectPermissions pe on pe.user_id = ua.id
+        left join project p on p.id = :projectId
+        left join organization o on p.organization_owner_id = o.id
+        left join organization_role o_r on o_r.user_id = ua.id and o_r.organization_id = o.id
+        left join permission ope on ope.organization_id = o.id
+    where (
+        pe.project_id= :projectId
+        or o_r.user_id is not null
+    ) and (
+        :filterId is null
+        or ua.id in :filterId
+    ) and (
+        (:scopes is null and :projectRoles is null)
+        or (
+            (
+                cast(:scopes as character varying[]) && pe.scopes
+                or pe.type in :projectRoles
+            ) and (
+                :viewLanguageId is null or
+                cardinality(pe.view_languages) = 0 or
+                :viewLanguageId = any(pe.view_languages)
+            ) and (
+                :editLanguageId is null or
+                cardinality(pe.edit_languages) = 0 or
+                :editLanguageId = any(pe.edit_languages)
+            ) and (
+                :stateLanguageId is null or
+                cardinality(pe.state_languages) = 0 or
+                :stateLanguageId = any(pe.state_languages)
+            )
+        )
+        or (
+            pe.id is null 
+            and (
+              cast(:scopes as character varying[]) && ope.scopes
+              or ope.type in :projectRoles
+            )
+        )
+        or o_r.type = 1
+    ) and (
+        cast(:search as text) is null
+        or (
+            lower(ua.name) like lower(concat('%', cast(:search as text),'%'))
+            or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))
+        )
+    )
+"""
 
 @Repository
 @Lazy
@@ -146,6 +226,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         and ua.deletedAt is null
+        and $USER_FILTERS
     """,
   )
   fun getAllInProject(
@@ -153,6 +234,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     pageable: Pageable,
     search: String? = "",
     exceptUserId: Long? = null,
+    filters: UserAccountFilters,
   ): Page<UserAccountInProjectView>
 
   @Query(
@@ -240,4 +322,21 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   """,
   )
   fun findDemoByUsernames(usernames: List<String>): List<UserAccount>
+
+  @Query(
+    nativeQuery = true,
+    value = PROJECT_PERMISSIONS_CTE + "select ua.id" + PROJECT_PERMISSIONS_MAIN,
+    countQuery = PROJECT_PERMISSIONS_CTE + "select count(ua.id)" + PROJECT_PERMISSIONS_MAIN,
+  )
+  fun findUsersWithMinimalPermissions(
+    filterId: Collection<Long>,
+    scopes: String?,
+    projectRoles: Collection<String>,
+    projectId: Long,
+    viewLanguageId: Long?,
+    editLanguageId: Long?,
+    stateLanguageId: Long?,
+    search: String?,
+    pageable: Pageable,
+  ): Page<Long>
 }

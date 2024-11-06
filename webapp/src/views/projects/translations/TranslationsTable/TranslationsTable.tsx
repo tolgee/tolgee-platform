@@ -16,7 +16,7 @@ import { ReactList } from 'tg.component/reactList/ReactList';
 import clsx from 'clsx';
 import { useScrollStatus } from './useScrollStatus';
 import { useColumns } from '../useColumns';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 
 const ARROW_SIZE = 50;
 
@@ -183,7 +183,7 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
   } = useColumns({
     tableRef,
     initialRatios: columns.map(() => 1),
-    minSize: 300,
+    minSize: 350,
     deps: [toolsPanelOpen],
   });
 
@@ -249,7 +249,7 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
             }}
             onClick={() => handleScroll('right')}
           >
-            <ChevronRight fontSize="small" />
+            <ChevronRight width={20} height={20} />
           </StyledScrollArrow>
           <StyledScrollArrow
             className={clsx('left', { scrollLeft })}
@@ -258,7 +258,7 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
             }}
             onClick={() => handleScroll('left')}
           >
-            <ChevronLeft fontSize="small" />
+            <ChevronLeft width={20} height={20} />
           </StyledScrollArrow>
         </Portal>
       )}

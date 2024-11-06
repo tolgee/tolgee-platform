@@ -95,6 +95,7 @@ export function SideMenuItem({
           title={text}
           placement="right"
           classes={{ tooltip: 'tooltip' }}
+          disableInteractive
         >
           <Link
             data-cy={props['data-cy']}

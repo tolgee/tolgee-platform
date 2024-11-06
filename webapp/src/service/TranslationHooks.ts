@@ -42,3 +42,22 @@ export const useDeleteTag = () =>
     url: '/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}',
     method: 'delete',
   });
+
+export const usePutTask = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}',
+    method: 'put',
+  });
+
+export const useFinishTask = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}/finish',
+    method: 'put',
+    invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
+  });
+
+export const usePutTaskTranslation = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}/keys/{keyId}',
+    method: 'put',
+  });

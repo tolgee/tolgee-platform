@@ -7,7 +7,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { NavigateNext } from '@mui/icons-material';
+import { ChevronRight } from '@untitled-ui/icons-react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useTheme } from '@mui/material/styles';
@@ -51,7 +51,7 @@ export const Navigation: React.FC<Props> = ({ path }) => {
     <StyledWrapper>
       <Breadcrumbs
         aria-label="breadcrumb"
-        separator={<NavigateNext fontSize="small" />}
+        separator={<ChevronRight width={18} />}
         itemsBeforeCollapse={0}
         maxItems={smallScreen ? 1 : undefined}
       >

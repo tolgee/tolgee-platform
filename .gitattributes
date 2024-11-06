@@ -1,0 +1,10 @@
+*.mdx linguist-vendored
+*.java linguist-vendored
+ee/backend/** linguist-vendored
+/backend/misc/** linguist-vendored
+/backend/testing/** linguist-vendored
+/backend/development/** linguist-vendored
+/backend/security/** linguist-vendored
+/backend/data/**/test/** linguist-vendored
+/backend/api/**/test/** linguist-vendored
+/backend/app/**/test/** linguist-vendored

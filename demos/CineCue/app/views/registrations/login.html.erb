@@ -1,0 +1,24 @@
+<% flash.each do |key, message| %>
+  <div class="flash-message <%= key %>">
+    <span class="error_message"><%= message %></span><br>
+  </div>
+<% end %>
+
+<% signup_page = @translations["signup_page"].split(',') %>
+
+<div class="center">
+  <%= form_with url: login_path, method: :post, class: "form", data: { turbo: false } do |form| %>
+    <span class="form-title"><%= @translations["login"] %></span>
+    <table class="form-table">
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :username, signup_page[0] %>:</td>
+        <td class="form-field-input"><%= form.text_field :username, placeholder: signup_page[0], class: "form-input" %></td>
+      </tr>
+      <tr class="form-field">
+        <td class="form-field-title"><%= form.label :password, signup_page[3] %>:</td>
+        <td class="form-field-input"><%= form.password_field :password, placeholder: signup_page[3], class: "form-input" %></td>
+      </tr>
+    </table>
+    <%= form.submit @translations["login"], class: "form-submit-btn" %>
+  <% end %>
+</div>

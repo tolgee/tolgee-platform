@@ -1,6 +1,6 @@
 import { FunctionComponent, ReactElement } from 'react';
 import { IconButton, Tooltip } from '@mui/material';
-import { Clear } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
@@ -92,7 +92,7 @@ const RevokePermissionsButton = (props: {
         size="small"
         onClick={handleRevoke}
       >
-        <Clear />
+        <XClose />
       </IconButton>
     </Wrapper>
   );

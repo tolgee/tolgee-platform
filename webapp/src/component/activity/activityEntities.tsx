@@ -380,6 +380,60 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
       },
     },
   },
+  Task: {
+    label() {
+      return <T keyName="activity_entity_task" />;
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label() {
+          return <T keyName="activity_entity_task.name" />;
+        },
+      },
+      type: {
+        type: 'task_type',
+        label() {
+          return <T keyName="activity_entity_task.type" />;
+        },
+      },
+      state: {
+        type: 'task_state',
+        label() {
+          return <T keyName="activity_entity_task.state" />;
+        },
+      },
+      description: {
+        type: 'text',
+        label() {
+          return <T keyName="activity_entity_task.description" />;
+        },
+      },
+      dueDate: {
+        type: 'date',
+        label() {
+          return <T keyName="activity_entity_task.due_date" />;
+        },
+      },
+    },
+    references: (props) => {
+      const result: Reference[] = [];
+      const name = props.description?.name ?? props.modifications?.name?.new;
+      const taskType =
+        props.description?.type ?? props.modifications?.description?.new;
+      const number =
+        props.description?.number ?? props.modifications?.number?.new;
+      if (name && taskType && number) {
+        result.push({
+          type: 'task',
+          taskType: taskType as any,
+          name: name as unknown as string,
+          number: Number(number),
+        });
+      }
+      return result;
+    },
+  },
 };
 
 const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {

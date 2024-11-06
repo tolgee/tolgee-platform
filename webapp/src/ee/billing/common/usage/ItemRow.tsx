@@ -2,7 +2,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { Download } from '@mui/icons-material';
+import { Download02 } from '@untitled-ui/icons-react';
 
 export const ItemRow = (props: {
   item:
@@ -23,7 +23,7 @@ export const ItemRow = (props: {
         {props.onDownloadReport && (
           <Tooltip title={t('invoice_usage_download_button')}>
             <IconButton size="small" onClick={props.onDownloadReport}>
-              <Download />
+              <Download02 />
             </IconButton>
           </Tooltip>
         )}
