@@ -4,7 +4,6 @@ import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
-import { v4 as uuidv4 } from 'uuid';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -32,16 +31,14 @@ type LoginViewCredentialsProps = {
   onMfaEnabled: () => void;
 };
 
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
-
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
   const { login } = useGlobalActions();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
   const oAuthServices = useOAuthServices();
-
-  const { getSsoAuthLinkByDomain } = useSsoService();
+  // TODO: do I need to do something to monitor the state of the redirectLoadable?
+  const { handleRedirect, redirectLoadable } = useSsoService();
 
   return (
     <StandardForm
@@ -80,9 +77,9 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 to={LINKS.SSO_LOGIN.build()}
                 size="medium"
                 endIcon={
-                  remoteConfig.customLoginLogo ? (
+                  remoteConfig.authMethods?.sso.customLogoUrl ? (
                     <img
-                      src={remoteConfig.customLoginLogo}
+                      src={remoteConfig.authMethods?.sso.customLogoUrl}
                       alt="Custom Logo"
                       style={{ width: 24, height: 24 }}
                     />
@@ -94,8 +91,8 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 style={{ marginBottom: '0.5rem' }}
                 color="inherit"
               >
-                {remoteConfig.customLoginText ? (
-                  <span>{remoteConfig.customLoginText}</span>
+                {remoteConfig.authMethods?.sso.customLoginText ? (
+                  <span>{remoteConfig.authMethods?.sso.customLoginText}</span>
                 ) : (
                   <T keyName="login_sso" />
                 )}
@@ -103,13 +100,14 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
             )}
 
             {
+              (oAuthServices.length > 0 || remoteConfig.authMethods?.sso.globalEnabled || remoteConfig.authMethods?.sso.enabled) &&
               <Box
                 height="0px"
                 mt={5}
-              /> /*TODO: only show when there is SSO or oauth*/
+              />
             }
             {remoteConfig.nativeEnabled &&
-              !remoteConfig.globalSsoAuthentication && (
+              !remoteConfig.authMethods?.sso.globalEnabled && (
                 <Button
                   component={Link}
                   to={LINKS.SSO_LOGIN.build()}
@@ -123,22 +121,22 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 </Button>
               )}
             {remoteConfig.nativeEnabled &&
-              remoteConfig.globalSsoAuthentication && (
-                <Button
+              remoteConfig.authMethods?.sso.globalEnabled && (
+                <LoadingButton
+                  loading={redirectLoadable.isLoading}
                   size="medium"
                   endIcon={<LoginIcon />}
                   variant="outlined"
                   style={{ marginBottom: '0.5rem', marginTop: '1rem' }}
                   color="inherit"
                   onClick={async (data) => {
-                    const state = uuidv4();
-                    localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
-                    const response = await getSsoAuthLinkByDomain(null, state);
-                    window.location.href = response.redirectUrl;
+                    await handleRedirect(
+                      remoteConfig.authMethods?.sso.domain as string
+                    );
                   }}
                 >
                   <T keyName="login_sso" />
-                </Button>
+                </LoadingButton>
               )}
 
             {oAuthServices.map((provider) => (

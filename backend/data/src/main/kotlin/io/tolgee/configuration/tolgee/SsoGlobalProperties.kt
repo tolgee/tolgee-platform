@@ -7,11 +7,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @DocProperty(
   description =
     "Single sign-on (SSO) is an authentication process that allows a user to" +
-      " access multiple applications with one set of login credentials.",
+      " access multiple applications with one set of login credentials. To use SSO" +
+      " in Tolgee, can either configure global SSO settings in this section or" +
+      " just enable SSO and configure separately for each organization in the" +
+      " organization settings.",
   displayName = "Single Sign-On",
 )
 class SsoGlobalProperties {
+  @DocProperty(description = "Enables SSO authentication")
   var enabled: Boolean = false
+
+  val globalEnabled: Boolean
+    get() = enabled && !domain.isNullOrEmpty()
 
   @DocProperty(description = "Unique identifier for an application")
   var clientId: String? = null
@@ -33,15 +40,14 @@ class SsoGlobalProperties {
 
   @DocProperty(
     description =
-      "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`" +
+      "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`. " +
         "You may need that when you want to enable login via your custom SSO (the default logo is sso_login.svg," +
         " which is stored in the webapp/public directory).",
   )
   var customLogoUrl: String? = null
 
   @DocProperty(
-    description = "Custom text for the login button.",
-    defaultExplanation = "Defaults to 'SSO Login' if not set.",
+    description = "Custom text for the SSO login page. Can be set only when `nativeEnabled` is `false`.",
   )
-  var customButtonText: String? = null
+  var customLoginText: String? = null
 }

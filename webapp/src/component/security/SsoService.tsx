@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
@@ -6,6 +7,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { INVITATION_CODE_STORAGE_KEY } from 'tg.service/InvitationCodeService';
 
+const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 const LOCAL_STORAGE_DOMAIN_KEY = 'oauth2Domain';
 
 export const useSsoService = () => {
@@ -18,10 +20,6 @@ export const useSsoService = () => {
     key: INVITATION_CODE_STORAGE_KEY,
   });
 
-  // const authorizeOpenIdLoadable = useApiMutation({
-  //   url: '/v2/public/oauth2/callback/{registrationId}',
-  //   method: 'get',
-  // });
   const authorizeOAuthLoadable = useApiMutation({
     url: '/api/public/authorize_oauth/{serviceType}',
     method: 'get',
@@ -31,6 +29,24 @@ export const useSsoService = () => {
     url: '/v2/public/oauth2/callback/get-authentication-url',
     method: 'post',
   });
+
+  const getSsoAuthLinkByDomain = async (domain: string, state: string) => {
+    return await openIdAuthUrlLoadable.mutateAsync(
+      {
+        content: { 'application/json': { domain, state } },
+      },
+      {
+        onError: (error) => {
+          messageService.error(<TranslatedError code={error.code!} />);
+        },
+        onSuccess: (response) => {
+          if (response.redirectUrl) {
+            localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
+          }
+        },
+      }
+    );
+  };
 
   return {
     async loginWithOAuthCodeOpenId(registrationId: string, code: string) {
@@ -50,12 +66,7 @@ export const useSsoService = () => {
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
-            // TODO: this handling should no longer be necessary - code should be fine
-            let errorCode = error.code;
-            if (errorCode && errorCode.endsWith(': null')) {
-              errorCode = errorCode.replace(': null', '');
-            }
-            messageService.error(<TranslatedError code={errorCode!} />);
+            messageService.error(<TranslatedError code={error.code!} />);
           },
         }
       );
@@ -63,22 +74,13 @@ export const useSsoService = () => {
       await handleAfterLogin(response!);
     },
 
-    async getSsoAuthLinkByDomain(domain: string | null, state: string) {
-      return await openIdAuthUrlLoadable.mutateAsync(
-        {
-          content: { 'application/json': { domain, state } },
-        },
-        {
-          onError: (error) => {
-            messageService.error(<TranslatedError code={error.code!} />);
-          },
-          onSuccess: (response) => {
-            if (response.redirectUrl) {
-              localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
-            }
-          },
-        }
-      );
+    async handleRedirect(domain: string) {
+      const state = uuidv4();
+      localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+      const response = await getSsoAuthLinkByDomain(domain, state);
+      window.location.href = response.redirectUrl;
     },
+
+    redirectLoadable: openIdAuthUrlLoadable,
   };
 };

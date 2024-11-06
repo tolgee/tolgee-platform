@@ -196,11 +196,11 @@ export const setTranslations = (
   });
 
 export const setSsoProvider = () => {
-  const sql = `insert into ee.tenant (id, organization_id, domain, client_id, client_secret, authorization_uri,
-                                        jwk_set_uri, token_uri, redirect_uri_base, is_enabled_for_this_organization,
+  const sql = `insert into public.tenant (id, organization_id, domain, client_id, client_secret, authorization_uri,
+                                        jwk_set_uri, token_uri, enabled,
                                         name, sso_provider, created_at, updated_at)
                  values ('1', 1, 'domain.com', 'clientId', 'clientSecret', 'http://authorizationUri',
-                         'http://jwkSetUri', 'http://tokenUri', '${HOST}', true, 'name', 'sso', CURRENT_TIMESTAMP,
+                         'http://jwkSetUri', 'http://tokenUri', true, 'name', 'sso', CURRENT_TIMESTAMP,
                          CURRENT_TIMESTAMP)`;
   internalFetch(`sql/execute`, { method: 'POST', body: sql });
 };
@@ -208,7 +208,7 @@ export const setSsoProvider = () => {
 export const deleteSso = () => {
   const sql = `
         delete
-        from ee.tenant
+        from public.tenant
         where organization_id = 1
     `;
 

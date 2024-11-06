@@ -23,12 +23,11 @@ class TenantService(
     return tenantRepository.findByDomain(domain) ?: throw NotFoundException()
   }
 
-  fun getEnabledConfigByDomain(domain: String?): SsoTenantConfig {
+  fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
     return ssoGlobalProperties
-      .takeIf { it.enabled }
-      ?.takeIf { domain == null || domain == "" || domain == it.domain }
+      .takeIf { it.globalEnabled && domain == it.domain }
       ?.toConfig()
-      ?: domain?.let { tenantRepository.findEnabledByDomain(it)?.toConfig() }
+      ?: domain.let { tenantRepository.findEnabledByDomain(it)?.toConfig() }
       ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
   }
 

@@ -16,9 +16,6 @@ class PublicConfigurationDTO(
 ) {
   val authentication: Boolean = properties.authentication.enabled
   val authMethods: AuthMethodsDTO? = properties.authentication.asAuthMethodsDTO()
-
-  // TODO: check if the sso feature is really enabled (has a license) and show info if not
-  val globalSsoAuthentication: Boolean = properties.authentication.sso.enabled
   val passwordResettable: Boolean = properties.authentication.nativeEnabled
   val allowRegistrations: Boolean = properties.authentication.registrationsAllowed
   val screenshotsUrl = properties.fileStorageUrl + "/" + FileStoragePath.SCREENSHOTS
@@ -33,8 +30,6 @@ class PublicConfigurationDTO(
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val chatwootToken = properties.chatwootToken
   val nativeEnabled = properties.authentication.nativeEnabled
-  val customLoginLogo = properties.authentication.sso.customLogoUrl
-  val customLoginText = properties.authentication.sso.customButtonText
   val capterraTracker = properties.capterraTracker
   val ga4Tag = properties.ga4Tag
   val postHogApiKey: String? = properties.postHog.apiKey
@@ -64,6 +59,14 @@ class PublicConfigurationDTO(
           oauth2.authorizationUrl,
           oauth2.scopes,
         ),
+        SsoPublicConfigDTO(
+          sso.enabled,
+          sso.globalEnabled,
+          sso.clientId,
+          sso.domain,
+          sso.customLogoUrl,
+          sso.customLoginText,
+        ),
       )
     }
   }
@@ -72,6 +75,7 @@ class PublicConfigurationDTO(
     val github: OAuthPublicConfigDTO,
     val google: OAuthPublicConfigDTO,
     val oauth2: OAuthPublicExtendsConfigDTO,
+    val sso: SsoPublicConfigDTO,
   )
 
   data class OAuthPublicConfigDTO(
@@ -87,6 +91,15 @@ class PublicConfigurationDTO(
   ) {
     val enabled: Boolean = !clientId.isNullOrEmpty()
   }
+
+  data class SsoPublicConfigDTO(
+    val enabled: Boolean,
+    val globalEnabled: Boolean,
+    val clientId: String?,
+    val domain: String?,
+    val customLogoUrl: String?,
+    val customLoginText: String?,
+  )
 
   data class MtServicesDTO(
     val defaultPrimaryService: MtServiceType?,

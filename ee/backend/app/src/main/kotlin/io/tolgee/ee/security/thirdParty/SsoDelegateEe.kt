@@ -10,6 +10,7 @@ import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.configuration.tolgee.SsoGlobalProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
@@ -17,6 +18,7 @@ import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.SsoAuthorizationException
 import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
@@ -41,6 +43,7 @@ class SsoDelegateEe(
   private val jwtService: JwtService,
   private val restTemplate: RestTemplate,
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
+  private val ssoGlobalProperties: SsoGlobalProperties,
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
   private val currentDateProvider: CurrentDateProvider,
@@ -52,6 +55,11 @@ class SsoDelegateEe(
     redirectUri: String?,
     domain: String?,
   ): JwtAuthenticationResponse {
+    if (domain == null) {
+      // TODO: specific message "Missing parameter: domain"
+      throw BadRequestException("Missing parameter: domain")
+    }
+
     val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = tenant.organization?.id,
@@ -175,15 +183,18 @@ class SsoDelegateEe(
       return true
     }
 
-    if (ssoDomain == null || refreshToken == null) {
+    var domain = ssoDomain
+    if (domain == null) {
+      domain = ssoGlobalProperties.domain
+    }
+    if (domain == null || refreshToken == null) {
       throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
     }
-
     if (ssoSessionExpiry != null && isSsoUserValid(ssoSessionExpiry)) {
       return true
     }
 
-    val tenant = tenantService.getEnabledConfigByDomain(ssoDomain)
+    val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = tenant.organization?.id,
       Feature.SSO,

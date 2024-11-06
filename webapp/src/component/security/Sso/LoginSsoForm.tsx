@@ -9,7 +9,6 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { v4 as uuidv4 } from 'uuid';
 import { useSsoService } from 'tg.component/security/SsoService';
 
 const StyledInputFields = styled('div')`
@@ -23,10 +22,9 @@ type Credentials = { domain: string };
 type LoginViewCredentialsProps = {
   credentialsRef: RefObject<Credentials>;
 };
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 
 export function LoginSsoForm(props: LoginViewCredentialsProps) {
-  const { getSsoAuthLinkByDomain } = useSsoService();
+  const { handleRedirect } = useSsoService();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
   return (
@@ -56,10 +54,7 @@ export function LoginSsoForm(props: LoginViewCredentialsProps) {
         </Box>
       }
       onSubmit={async (data) => {
-        const state = uuidv4();
-        localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
-        const response = await getSsoAuthLinkByDomain(data.domain, state);
-        window.location.href = response.redirectUrl;
+        await handleRedirect(data.domain);
       }}
     >
       <StyledInputFields>

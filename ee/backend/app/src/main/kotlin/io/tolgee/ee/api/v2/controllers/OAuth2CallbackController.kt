@@ -9,8 +9,6 @@ import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.security.thirdParty.SsoTenantConfig
 import org.springframework.web.bind.annotation.*
 
-// TODO: Move all the logic from this class to PublicController
-
 @RestController
 @RequestMapping("v2/public/oauth2/callback/")
 class OAuth2CallbackController(

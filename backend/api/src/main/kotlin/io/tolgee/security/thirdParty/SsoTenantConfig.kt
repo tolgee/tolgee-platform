@@ -38,7 +38,7 @@ data class SsoTenantConfig(
     }
 
     fun SsoGlobalProperties.toConfig(): SsoTenantConfig? {
-      if (!enabled) {
+      if (!globalEnabled) {
         return null
       }
 
