@@ -229,8 +229,8 @@ class OAuthTest : AuthorizedControllerTest() {
     ssoGlobalProperties.domain = "registrationId"
     ssoGlobalProperties.clientId = "clientId"
     ssoGlobalProperties.clientSecret = "clientSecret"
-    ssoGlobalProperties.authorizationUrl = "authorizationUri"
-    ssoGlobalProperties.tokenUrl = "http://tokenUri"
+    ssoGlobalProperties.authorizationUri = "authorizationUri"
+    ssoGlobalProperties.tokenUri = "http://tokenUri"
     ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
     val response = oAuthMultiTenantsMocks.authorize("registrationId")
 
