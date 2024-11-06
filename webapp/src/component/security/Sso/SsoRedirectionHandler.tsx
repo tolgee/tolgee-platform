@@ -32,7 +32,7 @@ export const SsoRedirectionHandler: FunctionComponent<
       localStorage.removeItem(LOCAL_STORAGE_STATE_KEY);
     }
 
-    if (code && !allowPrivate && storedDomain) {
+    if (code && !allowPrivate && storedDomain !== null) {
       loginWithOAuthCodeOpenId(storedDomain, code);
     }
   }, [allowPrivate]);

@@ -5,7 +5,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.ee.data.toDto
-import io.tolgee.ee.service.TenantService
+import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.enums.OrganizationRoleType

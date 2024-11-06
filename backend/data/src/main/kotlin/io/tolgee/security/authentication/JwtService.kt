@@ -28,6 +28,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Qualifier
@@ -129,7 +130,7 @@ class JwtService(
     val account = validateJwt(jws.body)
 
     if (account.tokensValidNotBefore != null && jws.body.issuedAt.before(account.tokensValidNotBefore)) {
-      throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
     val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long

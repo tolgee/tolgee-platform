@@ -10,9 +10,6 @@ import Box from '@mui/material/Box';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 
-const StyledContainer = styled('div')`
-  background: ${({ theme }) => theme.palette.background.paper};
-`;
 export const OrganizationSsoView: FunctionComponent = () => {
   const organization = useOrganization();
   const { isEnabled } = useEnabledFeatures();

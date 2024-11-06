@@ -20,10 +20,10 @@ class SsoGlobalProperties {
   var clientSecret: String? = null
 
   @DocProperty(description = "URL to redirect users for authentication")
-  var authorizationUrl: String? = null
+  var authorizationUri: String? = null
 
   @DocProperty(description = "URL for exchanging authorization code for tokens")
-  var tokenUrl: String? = null
+  var tokenUri: String? = null
 
   @DocProperty(description = "Used to identify the organization on login page")
   var domain: String? = null

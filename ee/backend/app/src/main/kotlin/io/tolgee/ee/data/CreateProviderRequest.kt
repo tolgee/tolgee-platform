@@ -3,6 +3,7 @@ package io.tolgee.ee.data
 import jakarta.validation.constraints.NotEmpty
 import org.springframework.validation.annotation.Validated
 
+// TODO: check how validation between backend and frontend is handled
 @Validated
 data class CreateProviderRequest(
   val name: String?,

@@ -9,8 +9,8 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.ee.data.OAuth2TokenResponse
-import io.tolgee.ee.service.OAuthService
-import io.tolgee.ee.service.TenantService
+import io.tolgee.ee.security.thirdParty.SsoDelegateEe
+import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.ee.utils.OAuthMultiTenantsMocks
 import io.tolgee.ee.utils.OAuthMultiTenantsMocks.Companion.jwtClaimsSet
 import io.tolgee.exceptions.NotFoundException
@@ -59,7 +59,7 @@ class OAuthTest : AuthorizedControllerTest() {
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>? = null
 
   @Autowired
-  private lateinit var oAuthService: OAuthService
+  private lateinit var ssoDelegate: SsoDelegateEe
 
   @Autowired
   private lateinit var tenantService: TenantService
@@ -185,7 +185,7 @@ class OAuthTest : AuthorizedControllerTest() {
     val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(
-      oAuthService.verifyUserSsoAccountAvailable(
+      ssoDelegate.verifyUserSsoAccountAvailable(
         user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,
@@ -205,7 +205,7 @@ class OAuthTest : AuthorizedControllerTest() {
 
     oAuthMultiTenantsMocks.mockTokenExchange("http://tokenUri")
     assertThat(
-      oAuthService.verifyUserSsoAccountAvailable(
+      ssoDelegate.verifyUserSsoAccountAvailable(
         user.ssoTenant?.domain,
         user.id,
         user.ssoRefreshToken,

@@ -58,13 +58,12 @@ class GithubOAuthDelegate(
 
       // get github user emails
       val emails =
-        restTemplate
-          .exchange(
-            githubConfigurationProperties.userUrl + "/emails",
-            HttpMethod.GET,
-            entity,
-            Array<GithubEmailResponse>::class.java,
-          ).body
+        restTemplate.exchange(
+          githubConfigurationProperties.userUrl + "/emails",
+          HttpMethod.GET,
+          entity,
+          Array<GithubEmailResponse>::class.java,
+        ).body
           ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
       val verifiedEmails = Arrays.stream(emails).filter { it.verified }.collect(Collectors.toList())

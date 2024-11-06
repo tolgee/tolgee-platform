@@ -1,4 +1,4 @@
-package io.tolgee.ee.service
+package io.tolgee.ee.security.thirdParty
 
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.source.JWKSource
@@ -14,20 +14,21 @@ import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
-import io.tolgee.ee.exceptions.OAuthAuthorizationException
+import io.tolgee.ee.exceptions.SsoAuthorizationException
+import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.security.service.OAuthServiceEe
+import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.security.thirdParty.OAuthUserHandler
+import io.tolgee.security.thirdParty.SsoTenantConfig
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.http.*
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
@@ -35,8 +36,8 @@ import org.springframework.web.client.RestTemplate
 import java.net.URL
 import java.util.*
 
-@Service
-class OAuthService(
+@Component
+class SsoDelegateEe(
   private val jwtService: JwtService,
   private val restTemplate: RestTemplate,
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
@@ -44,45 +45,31 @@ class OAuthService(
   private val oAuthUserHandler: OAuthUserHandler,
   private val currentDateProvider: CurrentDateProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-) : OAuthServiceEe,
-  Logging {
-  fun handleOAuthCallback(
-    registrationId: String,
-    code: String,
-    redirectUrl: String,
-    error: String,
-    errorDescription: String,
+) : SsoDelegate, Logging {
+  override fun getTokenResponse(
+    code: String?,
     invitationCode: String?,
-  ): JwtAuthenticationResponse? {
-    if (error.isNotBlank()) {
-      logger.info("Third party auth failed: $errorDescription $error")
-      throw OAuthAuthorizationException(
-        Message.SSO_THIRD_PARTY_AUTH_FAILED,
-        "$errorDescription $error",
-      )
-    }
-
-    val tenant = tenantService.getEnabledByDomain(registrationId)
+    redirectUri: String?,
+    domain: String?,
+  ): JwtAuthenticationResponse {
+    val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = tenant.organization?.id,
       Feature.SSO,
     )
 
-    val tokenResponse =
-      exchangeCodeForToken(tenant, code, redirectUrl)
-        ?: throw OAuthAuthorizationException(
-          Message.SSO_TOKEN_EXCHANGE_FAILED,
-          null,
-        )
+    val token =
+      fetchToken(tenant, code, redirectUri)
+        ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo = verifyAndDecodeIdToken(tokenResponse.id_token, tenant.jwkSetUri)
-    return register(userInfo, tenant, invitationCode, tokenResponse.refresh_token)
+    val userInfo = decodeIdToken(token.id_token, tenant.jwkSetUri)
+    return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
-  private fun exchangeCodeForToken(
-    tenant: SsoTenant,
-    code: String,
-    redirectUrl: String,
+  private fun fetchToken(
+    tenant: SsoTenantConfig,
+    code: String?,
+    redirectUrl: String?,
   ): OAuth2TokenResponse? {
     val headers =
       HttpHeaders().apply {
@@ -113,7 +100,7 @@ class OAuthService(
     }
   }
 
-  private fun verifyAndDecodeIdToken(
+  private fun decodeIdToken(
     idToken: String,
     jwkSetUri: String,
   ): GenericUserResponse {
@@ -129,7 +116,7 @@ class OAuthService(
 
       val expirationTime: Date = jwtClaimsSet.expirationTime
       if (expirationTime.before(Date())) {
-        throw OAuthAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED, null)
+        throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
       }
 
       return GenericUserResponse().apply {
@@ -141,13 +128,13 @@ class OAuthService(
       }
     } catch (e: Exception) {
       logger.info(e.stackTraceToString())
-      throw OAuthAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED, null)
+      throw SsoAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED)
     }
   }
 
-  private fun register(
+  private fun getTokenResponseForUser(
     userResponse: GenericUserResponse,
-    tenant: SsoTenant,
+    tenant: SsoTenantConfig,
     invitationCode: String?,
     refreshToken: String,
   ): JwtAuthenticationResponse {
@@ -196,7 +183,7 @@ class OAuthService(
       return true
     }
 
-    val tenant = tenantService.getEnabledByDomain(ssoDomain)
+    val tenant = tenantService.getEnabledConfigByDomain(ssoDomain)
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = tenant.organization?.id,
       Feature.SSO,

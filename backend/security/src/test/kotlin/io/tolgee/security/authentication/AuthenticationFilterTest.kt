@@ -27,12 +27,16 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
-import io.tolgee.security.service.OAuthServiceEe
+import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.mock.web.MockFilterChain
@@ -77,7 +81,7 @@ class AuthenticationFilterTest {
 
   private val userAccount = Mockito.mock(UserAccount::class.java, Mockito.RETURNS_DEFAULTS)
 
-  private val oAuthServiceEe = Mockito.mock(OAuthServiceEe::class.java)
+  private val ssoDelegate = Mockito.mock(SsoDelegate::class.java)
 
   private val authenticationFilter =
     AuthenticationFilter(
@@ -88,7 +92,7 @@ class AuthenticationFilterTest {
       userAccountService,
       pakService,
       patService,
-      oAuthServiceEe,
+      ssoDelegate,
     )
 
   private val authenticationFacade =
@@ -105,21 +109,18 @@ class AuthenticationFilterTest {
 
     Mockito.`when`(authProperties.enabled).thenReturn(true)
 
-    Mockito
-      .`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
+    Mockito.`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
       .thenReturn(
         RateLimitPolicy("test policy", 5, Duration.ofSeconds(1), true),
       )
 
-    Mockito
-      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
+    Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))
       .then {
         val fn = it.getArgument<() -> Boolean>(1)
         fn()
       }
 
-    Mockito
-      .`when`(jwtService.validateToken(TEST_VALID_TOKEN))
+    Mockito.`when`(jwtService.validateToken(TEST_VALID_TOKEN))
       .thenReturn(
         TolgeeAuthentication(
           "uwu",
@@ -128,8 +129,7 @@ class AuthenticationFilterTest {
         ),
       )
 
-    Mockito
-      .`when`(jwtService.validateToken(TEST_INVALID_TOKEN))
+    Mockito.`when`(jwtService.validateToken(TEST_INVALID_TOKEN))
       .thenThrow(AuthenticationException(Message.INVALID_JWT_TOKEN))
 
     Mockito.`when`(pakService.parseApiKey(TEST_VALID_PAK)).thenReturn(TEST_VALID_PAK)
@@ -297,8 +297,7 @@ class AuthenticationFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito
-      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
+    Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))
       .thenThrow(RateLimitedException(1000L, true))
 
     req.addHeader("Authorization", "Bearer $TEST_VALID_TOKEN")

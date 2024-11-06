@@ -1,11 +1,11 @@
-import {DefaultParamType, T, TFnType, TranslationKey} from '@tolgee/react';
+import { DefaultParamType, T, TFnType, TranslationKey } from '@tolgee/react';
 import * as Yup from 'yup';
 
-import {components} from 'tg.service/apiSchema.generated';
-import {organizationService} from '../service/OrganizationService';
-import {signUpService} from '../service/SignUpService';
-import {checkParamNameIsValid} from '@tginternal/editor';
-import {validateObject} from 'tg.fixtures/validateObject';
+import { components } from 'tg.service/apiSchema.generated';
+import { organizationService } from '../service/OrganizationService';
+import { signUpService } from '../service/SignUpService';
+import { checkParamNameIsValid } from '@tginternal/editor';
+import { validateObject } from 'tg.fixtures/validateObject';
 
 type TFunType = TFnType<DefaultParamType, string, TranslationKey>;
 

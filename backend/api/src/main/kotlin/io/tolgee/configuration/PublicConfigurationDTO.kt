@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
@@ -14,9 +15,12 @@ class PublicConfigurationDTO(
   val version: String,
 ) {
   val authentication: Boolean = properties.authentication.enabled
-  var authMethods: AuthMethodsDTO? = null
-  val passwordResettable: Boolean
-  val allowRegistrations: Boolean
+  val authMethods: AuthMethodsDTO? = properties.authentication.asAuthMethodsDTO()
+
+  // TODO: check if the sso feature is really enabled (has a license) and show info if not
+  val globalSsoAuthentication: Boolean = properties.authentication.sso.enabled
+  val passwordResettable: Boolean = properties.authentication.nativeEnabled
+  val allowRegistrations: Boolean = properties.authentication.registrationsAllowed
   val screenshotsUrl = properties.fileStorageUrl + "/" + FileStoragePath.SCREENSHOTS
   val maxUploadFileSize = properties.maxUploadFileSize
   val clientSentryDsn = properties.sentry.clientDsn
@@ -45,6 +49,24 @@ class PublicConfigurationDTO(
       ),
       connected = properties.slack.token != null,
     )
+
+  companion object {
+    private fun AuthenticationProperties.asAuthMethodsDTO(): AuthMethodsDTO? {
+      if (!enabled) {
+        return null
+      }
+
+      return AuthMethodsDTO(
+        OAuthPublicConfigDTO(github.clientId),
+        OAuthPublicConfigDTO(google.clientId),
+        OAuthPublicExtendsConfigDTO(
+          oauth2.clientId,
+          oauth2.authorizationUrl,
+          oauth2.scopes,
+        ),
+      )
+    }
+  }
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
@@ -80,23 +102,4 @@ class PublicConfigurationDTO(
     val enabled: Boolean,
     val connected: Boolean,
   )
-
-  init {
-    if (authentication) {
-      authMethods =
-        AuthMethodsDTO(
-          OAuthPublicConfigDTO(
-            properties.authentication.github.clientId,
-          ),
-          OAuthPublicConfigDTO(properties.authentication.google.clientId),
-          OAuthPublicExtendsConfigDTO(
-            properties.authentication.oauth2.clientId,
-            properties.authentication.oauth2.authorizationUrl,
-            properties.authentication.oauth2.scopes,
-          ),
-        )
-    }
-    passwordResettable = properties.authentication.nativeEnabled
-    allowRegistrations = properties.authentication.registrationsAllowed
-  }
 }

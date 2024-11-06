@@ -21,6 +21,7 @@ data class UserAccountDto(
 ) : Serializable {
   companion object {
     fun fromEntity(entity: UserAccount) =
+      // FIXME: handle ssoDomain for global sso properly
       UserAccountDto(
         name = entity.name,
         username = entity.username,
@@ -38,5 +39,7 @@ data class UserAccountDto(
       )
   }
 
-  override fun toString(): String = username
+  override fun toString(): String {
+    return username
+  }
 }

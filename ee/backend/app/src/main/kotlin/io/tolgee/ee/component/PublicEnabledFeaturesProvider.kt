@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 class PublicEnabledFeaturesProvider(
   private val eeSubscriptionService: EeSubscriptionServiceImpl,
 ) : EnabledFeaturesProvider {
-  var forceEnabled: Set<Feature>? = null
+  var forceEnabled: Set<Feature>? = setOf(Feature.SSO)
 
   override fun get(organizationId: Long?): Array<Feature> =
     forceEnabled?.toTypedArray() ?: eeSubscriptionService.findSubscriptionEntity()?.enabledFeatures ?: emptyArray()

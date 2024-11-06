@@ -1,7 +1,6 @@
 package io.tolgee.security.thirdParty
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
@@ -21,7 +20,6 @@ class OAuthUserHandler(
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
-  private val authenticationProperties: AuthenticationProperties,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -32,8 +30,8 @@ class OAuthUserHandler(
     val tenant = userResponse.tenant
 
     val userAccountOptional =
-      if (thirdPartyAuthType == ThirdPartyAuthType.SSO && tenant?.domain != null) {
-        userAccountService.findByDomainSso(tenant.domain, userResponse.sub!!)
+      if (thirdPartyAuthType == ThirdPartyAuthType.SSO && tenant != null) {
+        userAccountService.findBySsoTenantId(tenant.entity?.id, userResponse.sub!!)
       } else {
         userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
       }
@@ -46,14 +44,6 @@ class OAuthUserHandler(
     return userAccountOptional.orElseGet {
       userAccountService.findActive(userResponse.email)?.let {
         throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
-      }
-
-      // do not create new user if user is not invited and GLOBAL sso is enabled
-      if (invitationCode == null &&
-        thirdPartyAuthType == ThirdPartyAuthType.SSO &&
-        authenticationProperties.sso.enabled
-      ) {
-        throw AuthenticationException(Message.SSO_USER_NOT_INVITED)
       }
 
       val newUserAccount = UserAccount()
@@ -69,8 +59,8 @@ class OAuthUserHandler(
         }
       newUserAccount.name = name
       newUserAccount.thirdPartyAuthId = userResponse.sub
-      if (tenant?.domain != null) {
-        newUserAccount.ssoTenant = tenant
+      if (tenant?.entity != null) {
+        newUserAccount.ssoTenant = tenant.entity
       }
       newUserAccount.thirdPartyAuthType = thirdPartyAuthType
       newUserAccount.ssoRefreshToken = userResponse.refreshToken
@@ -111,11 +101,7 @@ class OAuthUserHandler(
     refreshToken: String?,
   ) {
     val userAccount = userAccountService.get(userAccountId)
-
-    if (userAccount.ssoRefreshToken != refreshToken) {
-      userAccount.ssoRefreshToken = refreshToken
-      userAccountService.save(userAccount)
-    }
+    updateRefreshToken(userAccount, refreshToken)
   }
 
   fun updateSsoSessionExpiry(user: UserAccount) {

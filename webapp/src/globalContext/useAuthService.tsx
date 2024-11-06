@@ -186,7 +186,6 @@ export const useAuthService = (
       setInvitationCode(undefined);
       await handleAfterLogin(response!);
     },
-
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(
         {

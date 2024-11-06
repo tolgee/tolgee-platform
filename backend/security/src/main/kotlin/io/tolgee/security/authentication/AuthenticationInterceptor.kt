@@ -69,6 +69,8 @@ class AuthenticationInterceptor(
       requiresSuperAuth &&
       authenticationFacade.authenticatedUser.needsSuperJwt &&
       !authenticationFacade.isUserSuperAuthenticated
+      // TODO: && authentication.nativeEnabled ?? or how do we know if user can use password? (we can't just check if user has password since it can be set before native auth was disabled)
+      // NOTE: two-factor authentication can still be used
     ) {
       throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
     }

@@ -5,7 +5,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
@@ -53,13 +52,21 @@ class SignUpService(
     organizationName: String?,
     userSource: String? = null,
   ): UserAccount {
-    val invitation = findAndCheckInvitationOnRegistration(invitationCode)
+    if (invitationCode == null &&
+      entity.accountType != UserAccount.AccountType.MANAGED &&
+      !tolgeeProperties.authentication.registrationsAllowed
+    ) {
+      throw AuthenticationException(Message.REGISTRATIONS_NOT_ALLOWED)
+    }
+
+    val invitation = invitationCode?.let(invitationService::getInvitation)
     val user = userAccountService.createUser(entity, userSource)
     if (invitation != null) {
       invitationService.accept(invitation.code, user)
     }
 
     if (user.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
+      // No organization is created for SSO user
       return user
     }
 
@@ -75,16 +82,5 @@ class SignUpService(
   fun dtoToEntity(request: SignUpDto): UserAccount {
     val encodedPassword = passwordEncoder.encode(request.password!!)
     return UserAccount(name = request.name, username = request.email, password = encodedPassword)
-  }
-
-  @Transactional
-  fun findAndCheckInvitationOnRegistration(invitationCode: String?): Invitation? {
-    if (invitationCode == null) {
-      if (!tolgeeProperties.authentication.registrationsAllowed) {
-        throw AuthenticationException(Message.REGISTRATIONS_NOT_ALLOWED)
-      }
-      return null
-    }
-    return invitationService.getInvitation(invitationCode)
   }
 }

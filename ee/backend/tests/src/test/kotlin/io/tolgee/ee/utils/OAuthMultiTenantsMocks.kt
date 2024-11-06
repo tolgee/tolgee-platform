@@ -8,7 +8,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.ee.data.OAuth2TokenResponse
-import io.tolgee.ee.service.TenantService
+import io.tolgee.ee.service.sso.TenantService
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -93,7 +93,7 @@ class OAuthMultiTenantsMocks(
     jwtClaims: JWTClaimsSet = jwtClaimsSet,
   ): MvcResult {
     val receivedCode = "fake_access_token"
-    val tenant = tenantService?.getByDomain(registrationId)!!
+    val tenant = tenantService?.getEnabledConfigByDomain(registrationId)!!
     // mock token exchange
     whenever(
       restTemplate?.exchange(

@@ -1,6 +1,6 @@
 package io.tolgee.security.thirdParty.data
 
-import io.tolgee.model.SsoTenant
+import io.tolgee.security.thirdParty.SsoTenantConfig
 
 data class OAuthUserDetails(
   var sub: String? = null,
@@ -9,5 +9,5 @@ data class OAuthUserDetails(
   var familyName: String? = null,
   var email: String = "",
   val refreshToken: String? = null,
-  val tenant: SsoTenant? = null,
+  val tenant: SsoTenantConfig? = null,
 )

@@ -18,8 +18,12 @@ export const useSsoService = () => {
     key: INVITATION_CODE_STORAGE_KEY,
   });
 
-  const authorizeOpenIdLoadable = useApiMutation({
-    url: '/v2/public/oauth2/callback/{registrationId}',
+  // const authorizeOpenIdLoadable = useApiMutation({
+  //   url: '/v2/public/oauth2/callback/{registrationId}',
+  //   method: 'get',
+  // });
+  const authorizeOAuthLoadable = useApiMutation({
+    url: '/api/public/authorize_oauth/{serviceType}',
     method: 'get',
   });
 
@@ -31,13 +35,14 @@ export const useSsoService = () => {
   return {
     async loginWithOAuthCodeOpenId(registrationId: string, code: string) {
       const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({});
-      const response = await authorizeOpenIdLoadable.mutateAsync(
+      const response = await authorizeOAuthLoadable.mutateAsync(
         {
-          path: { registrationId: registrationId },
+          path: { serviceType: 'sso' },
           query: {
             code,
             redirect_uri: redirectUri,
             invitationCode: invitationCode,
+            domain: registrationId,
           },
         },
         {
@@ -45,6 +50,7 @@ export const useSsoService = () => {
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
+            // TODO: this handling should no longer be necessary - code should be fine
             let errorCode = error.code;
             if (errorCode && errorCode.endsWith(': null')) {
               errorCode = errorCode.replace(': null', '');
@@ -57,7 +63,7 @@ export const useSsoService = () => {
       await handleAfterLogin(response!);
     },
 
-    async getSsoAuthLinkByDomain(domain: string, state: string) {
+    async getSsoAuthLinkByDomain(domain: string | null, state: string) {
       return await openIdAuthUrlLoadable.mutateAsync(
         {
           content: { 'application/json': { domain, state } },
@@ -68,7 +74,7 @@ export const useSsoService = () => {
           },
           onSuccess: (response) => {
             if (response.redirectUrl) {
-              localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain);
+              localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
             }
           },
         }

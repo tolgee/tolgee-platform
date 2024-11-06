@@ -9,10 +9,12 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
-import io.tolgee.service.security.SignUpService
-import io.tolgee.service.security.UserAccountService
 import org.slf4j.LoggerFactory
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -22,10 +24,8 @@ import org.springframework.web.client.RestTemplate
 @Component
 class OAuth2Delegate(
   private val jwtService: JwtService,
-  private val userAccountService: UserAccountService,
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
-  private val signUpService: SignUpService,
   private val oAuthUserHandler: OAuthUserHandler,
 ) {
   private val oauth2ConfigurationProperties: OAuth2AuthenticationProperties = properties.authentication.oauth2

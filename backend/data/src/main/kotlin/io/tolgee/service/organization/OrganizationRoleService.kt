@@ -211,6 +211,7 @@ class OrganizationRoleService(
     organizationId: Long,
     organizationRoleType: OrganizationRoleType,
   ) {
+    // TODO: check if we can pass org as obj instead of id
     val organization = organizationRepository.findById(organizationId).orElseThrow { NotFoundException() }
 
     self.grantRoleToUser(user, organization, organizationRoleType = organizationRoleType)

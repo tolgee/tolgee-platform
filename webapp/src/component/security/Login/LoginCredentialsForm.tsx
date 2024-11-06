@@ -1,18 +1,23 @@
-import React, {RefObject} from 'react';
-import {Button, Link as MuiLink, styled, Typography} from '@mui/material';
+import React, { RefObject } from 'react';
+import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
 import Box from '@mui/material/Box';
-import {T, useTranslate} from '@tolgee/react';
-import {Link} from 'react-router-dom';
+import { T } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
+import { v4 as uuidv4 } from 'uuid';
 
-import {LINKS} from 'tg.constants/links';
-import {useConfig} from 'tg.globalContext/helpers';
+import { LINKS } from 'tg.constants/links';
+import { useConfig } from 'tg.globalContext/helpers';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import {StandardForm} from 'tg.component/common/form/StandardForm';
-import {TextField} from 'tg.component/common/form/fields/TextField';
-import {useOAuthServices} from 'tg.hooks/useOAuthServices';
-import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
-import {ApiError} from 'tg.service/http/ApiError';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { useOAuthServices } from 'tg.hooks/useOAuthServices';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { ApiError } from 'tg.service/http/ApiError';
+import { useSsoService } from 'tg.component/security/SsoService';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -27,12 +32,16 @@ type LoginViewCredentialsProps = {
   onMfaEnabled: () => void;
 };
 
+const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
+
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
   const { login } = useGlobalActions();
-  const t = useTranslate();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
+
   const oAuthServices = useOAuthServices();
+
+  const { getSsoAuthLinkByDomain } = useSsoService();
 
   return (
     <StandardForm
@@ -72,13 +81,13 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 size="medium"
                 endIcon={
                   remoteConfig.customLoginLogo ? (
-                      <img
-                          src={remoteConfig.customLoginLogo}
-                          alt="Custom Logo"
-                          style={{ width: 24, height: 24 }}
-                      />
+                    <img
+                      src={remoteConfig.customLoginLogo}
+                      alt="Custom Logo"
+                      style={{ width: 24, height: 24 }}
+                    />
                   ) : (
-                      <LoginIcon />
+                    <LoginIcon />
                   )
                 }
                 variant="outlined"
@@ -86,27 +95,51 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 color="inherit"
               >
                 {remoteConfig.customLoginText ? (
-                    <span>{remoteConfig.customLoginText}</span>
+                  <span>{remoteConfig.customLoginText}</span>
                 ) : (
-                    <T keyName="login_sso" />
+                  <T keyName="login_sso" />
                 )}
               </Button>
             )}
 
-            {<Box height="0px" mt={5} />}
-            {remoteConfig.nativeEnabled && (
-              <Button
-                component={Link}
-                to={LINKS.SSO_LOGIN.build()}
-                size="medium"
-                endIcon={<LoginIcon />}
-                variant="outlined"
-                style={{ marginBottom: '0.5rem', marginTop: '1rem' }}
-                color="inherit"
-              >
-                <T keyName="login_sso" />
-              </Button>
-            )}
+            {
+              <Box
+                height="0px"
+                mt={5}
+              /> /*TODO: only show when there is SSO or oauth*/
+            }
+            {remoteConfig.nativeEnabled &&
+              !remoteConfig.globalSsoAuthentication && (
+                <Button
+                  component={Link}
+                  to={LINKS.SSO_LOGIN.build()}
+                  size="medium"
+                  endIcon={<LoginIcon />}
+                  variant="outlined"
+                  style={{ marginBottom: '0.5rem', marginTop: '1rem' }}
+                  color="inherit"
+                >
+                  <T keyName="login_sso" />
+                </Button>
+              )}
+            {remoteConfig.nativeEnabled &&
+              remoteConfig.globalSsoAuthentication && (
+                <Button
+                  size="medium"
+                  endIcon={<LoginIcon />}
+                  variant="outlined"
+                  style={{ marginBottom: '0.5rem', marginTop: '1rem' }}
+                  color="inherit"
+                  onClick={async (data) => {
+                    const state = uuidv4();
+                    localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+                    const response = await getSsoAuthLinkByDomain(null, state);
+                    window.location.href = response.redirectUrl;
+                  }}
+                >
+                  <T keyName="login_sso" />
+                </Button>
+              )}
 
             {oAuthServices.map((provider) => (
               <React.Fragment key={provider.id}>
