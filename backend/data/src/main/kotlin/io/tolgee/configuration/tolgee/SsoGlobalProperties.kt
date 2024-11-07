@@ -3,14 +3,22 @@ package io.tolgee.configuration.tolgee
 import io.tolgee.configuration.annotations.DocProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 
+// TODO: Should we allow "Global SSO" users to manage/create their own organizations?
+// Basically the global SSO would become a separate login method similar to other oAuth providers.
 @ConfigurationProperties(prefix = "tolgee.authentication.sso")
 @DocProperty(
   description =
     "Single sign-on (SSO) is an authentication process that allows a user to" +
       " access multiple applications with one set of login credentials. To use SSO" +
       " in Tolgee, can either configure global SSO settings in this section or" +
-      " just enable SSO and configure separately for each organization in the" +
-      " organization settings.",
+      " just set the `enable` to `true` and configure it separately for each organization in the" +
+      " organization settings.\n\n" +
+      "There is a significant difference between global and per organization SSO:" +
+      " Global SSO can handle authentication for all server users no matter which organizations they belong to," +
+      " while per organization SSO can handle authentication only for users of the organization and" +
+      " such users cannot be members of any other organization. In both cases though, the SSO user has no" +
+      " rights to create or manage organizations. Global SSO users has to be invited to organizations they should" +
+      " have access to. Per organization SSO users are automatically added to the organization they belong to.",
   displayName = "Single Sign-On",
 )
 class SsoGlobalProperties {

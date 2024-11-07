@@ -38,6 +38,8 @@ export const OrganizationSsoView: FunctionComponent = () => {
     setToggleFormState(event.target.checked);
   };
 
+  // TODO: Show info when SSO is disabled in configuration
+
   return (
     <BaseOrganizationSettingsView
       windowTitle={t('organization_sso_title')}

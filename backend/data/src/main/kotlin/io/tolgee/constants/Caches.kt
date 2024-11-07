@@ -19,7 +19,6 @@ interface Caches {
     const val EE_SUBSCRIPTION = "eeSubscription"
     const val LANGUAGES = "languages"
     const val ORGANIZATION_ROLES = "organizationRoles"
-    const val IS_SSO_USER_VALID = "ssoUserValid"
 
     val caches =
       listOf(
@@ -38,7 +37,6 @@ interface Caches {
         EE_SUBSCRIPTION,
         LANGUAGES,
         ORGANIZATION_ROLES,
-        IS_SSO_USER_VALID,
       )
   }
 }

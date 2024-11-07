@@ -129,6 +129,7 @@ export function useErrorTranslation() {
         return t('verify_email_verification_code_not_valid');
       case 'user_is_subscribed_to_paid_plan':
         return t('user_is_subscribed_to_paid_plan');
+      // TODO: check and remove unused
       case 'sso_token_exchange_failed':
         return t('sso_token_exchange_failed');
       case 'sso_id_token_expired':

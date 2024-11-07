@@ -64,6 +64,7 @@ data class UserAccount(
   @Convert(converter = ThirdPartyAuthTypeConverter::class)
   var thirdPartyAuthType: ThirdPartyAuthType? = null
 
+  // TODO: replace with link from OrganizationRole
   @ManyToOne(fetch = FetchType.LAZY)
   var ssoTenant: SsoTenant? = null
 

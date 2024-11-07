@@ -110,7 +110,7 @@ class OAuthMultiTenantsMocks(
     return authMvc!!
       .perform(
         MockMvcRequestBuilders.get(
-          "/v2/public/oauth2/callback/$registrationId?code=$receivedCode&redirect_uri=redirect_uri",
+          "/api/public/authorize_oauth/sso?domain=$registrationId&code=$receivedCode&redirect_uri=redirect_uri",
         ),
       ).andReturn()
   }

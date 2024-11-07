@@ -16,6 +16,7 @@ class OAuth2CallbackController(
   private val frontendUrlProvider: FrontendUrlProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
+  // TODO: Move to PublicController?
   @PostMapping("/get-authentication-url")
   fun getAuthenticationUrl(
     @RequestBody request: DomainRequest,

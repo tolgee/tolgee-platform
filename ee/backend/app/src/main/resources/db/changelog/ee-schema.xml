@@ -60,38 +60,4 @@
     <changeSet author="jenik (generated)" id="1706777078864-1">
         <dropNotNullConstraint columnDataType="timestamp(6)" columnName="current_period_end" tableName="ee_subscription"/>
     </changeSet>
-    <changeSet author="huglx (generated)" id="1728214957423-1">
-        <createTable tableName="tenant">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="tenantPK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="authorization_uri" type="VARCHAR(255)"/>
-            <column name="client_id" type="VARCHAR(255)"/>
-            <column name="client_secret" type="VARCHAR(255)"/>
-            <column name="domain" type="VARCHAR(255)"/>
-            <column defaultValueBoolean="true" name="is_enabled_for_this_organization" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="jwk_set_uri" type="VARCHAR(255)"/>
-            <column name="name" type="VARCHAR(255)"/>
-            <column name="organization_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="redirect_uri_base" type="VARCHAR(255)"/>
-            <column name="sso_provider" type="VARCHAR(255)"/>
-            <column name="token_uri" type="VARCHAR(255)"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730212830679-1">
-        <dropColumn columnName="redirect_uri_base" tableName="tenant"/>
-    </changeSet>
-    <changeSet author="huglx (generated)" id="1730458750437-1">
-        <dropTable tableName="tenant"/>
-    </changeSet>
 </databaseChangeLog>

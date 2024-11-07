@@ -254,6 +254,7 @@ enum class Message {
   SSO_DOMAIN_NOT_FOUND_OR_DISABLED,
   NATIVE_AUTHENTICATION_DISABLED,
   SSO_USER_NOT_INVITED,
+  // TODO: remove unused
   ;
 
   val code: String
