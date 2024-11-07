@@ -24,7 +24,7 @@ type LoginViewCredentialsProps = {
 };
 
 export function LoginSsoForm(props: LoginViewCredentialsProps) {
-  const { handleRedirect } = useSsoService();
+  const { loginRedirect } = useSsoService();
   const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
 
   return (
@@ -54,7 +54,7 @@ export function LoginSsoForm(props: LoginViewCredentialsProps) {
         </Box>
       }
       onSubmit={async (data) => {
-        await handleRedirect(data.domain);
+        await loginRedirect(data.domain);
       }}
     >
       <StyledInputFields>

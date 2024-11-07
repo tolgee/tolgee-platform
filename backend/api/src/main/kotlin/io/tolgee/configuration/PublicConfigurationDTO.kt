@@ -16,6 +16,8 @@ class PublicConfigurationDTO(
 ) {
   val authentication: Boolean = properties.authentication.enabled
   val authMethods: AuthMethodsDTO? = properties.authentication.asAuthMethodsDTO()
+
+  @Deprecated("Use nativeEnabled instead", ReplaceWith("nativeEnabled"))
   val passwordResettable: Boolean = properties.authentication.nativeEnabled
   val allowRegistrations: Boolean = properties.authentication.registrationsAllowed
   val screenshotsUrl = properties.fileStorageUrl + "/" + FileStoragePath.SCREENSHOTS

@@ -41,13 +41,12 @@ class SsoGlobalProperties {
   @DocProperty(
     description =
       "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`. " +
-        "You may need that when you want to enable login via your custom SSO (the default logo is sso_login.svg," +
-        " which is stored in the webapp/public directory).",
+        "You may need that when you want to enable login via your custom SSO.",
   )
   var customLogoUrl: String? = null
 
   @DocProperty(
-    description = "Custom text for the SSO login page. Can be set only when `nativeEnabled` is `false`.",
+    description = "Custom text for the SSO login page.",
   )
   var customLoginText: String? = null
 }

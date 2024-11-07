@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
@@ -19,6 +20,8 @@ export const useSsoService = () => {
     initial: undefined,
     key: INVITATION_CODE_STORAGE_KEY,
   });
+
+  const history = useHistory();
 
   const authorizeOAuthLoadable = useApiMutation({
     url: '/api/public/authorize_oauth/{serviceType}',
@@ -49,7 +52,16 @@ export const useSsoService = () => {
   };
 
   return {
-    async loginWithOAuthCodeOpenId(registrationId: string, code: string) {
+    async login(state: string, code: string) {
+      const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
+      const storedDomain = localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY);
+      if (storedState !== state || storedDomain === null) {
+        history.replace(LINKS.LOGIN.build());
+        return;
+      }
+
+      localStorage.removeItem(LOCAL_STORAGE_STATE_KEY);
+
       const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({});
       const response = await authorizeOAuthLoadable.mutateAsync(
         {
@@ -58,7 +70,7 @@ export const useSsoService = () => {
             code,
             redirect_uri: redirectUri,
             invitationCode: invitationCode,
-            domain: registrationId,
+            domain: storedDomain,
           },
         },
         {
@@ -74,7 +86,7 @@ export const useSsoService = () => {
       await handleAfterLogin(response!);
     },
 
-    async handleRedirect(domain: string) {
+    async loginRedirect(domain: string) {
       const state = uuidv4();
       localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
       const response = await getSsoAuthLinkByDomain(domain, state);

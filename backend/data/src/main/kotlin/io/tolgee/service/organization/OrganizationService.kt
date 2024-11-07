@@ -11,7 +11,6 @@ import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.SsoTenant
@@ -82,10 +81,6 @@ class OrganizationService(
       throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
-    if (userAccount.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
-      throw PermissionException(Message.SSO_USER_CANNOT_CREATE_ORGANIZATION)
-    }
-
     val slug =
       createDto.slug
         ?: generateSlug(createDto.name)
@@ -152,7 +147,13 @@ class OrganizationService(
     exceptOrganizationId: Long = 0,
   ): Organization? {
     return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
-      if (tolgeeProperties.authentication.userCanCreateOrganizations || userAccount.role == UserAccount.Role.ADMIN) {
+      if (
+        (
+          tolgeeProperties.authentication.userCanCreateOrganizations &&
+            userAccount.thirdPartyAuthType !== ThirdPartyAuthType.SSO
+        ) ||
+        userAccount.role == UserAccount.Role.ADMIN
+      ) {
         return@let createPreferred(userAccount)
       }
       null

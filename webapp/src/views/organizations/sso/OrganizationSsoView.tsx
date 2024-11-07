@@ -5,7 +5,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
 import { CreateProviderSsoForm } from 'tg.views/organizations/sso/CreateProviderSsoForm';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { FormControlLabel, styled, Switch } from '@mui/material';
+import { FormControlLabel, Switch } from '@mui/material';
 import Box from '@mui/material/Box';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
