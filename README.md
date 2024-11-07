@@ -36,39 +36,6 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
 
-[![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktoberfest2024.md)
-
-We are sending swags for awesome demos merged PRs! For complete information, check
-our [Hacktoberfest2024.md](./Hacktoberfest2024.md)
-
-### Submission Types
-- **Pull Requests**: Submit a pull request addressing issues tagged with #hacktoberfest
-- You can **create a demo** with any of the following frameworks: React, Angular, Vue, Svelte, PHP, Flutter, Ruby, iOS, Android
-
-### Quality Criteria
-
-Your submissions will be evaluated based on the following criteria, with each project receiving a score between 10-50 points:
-- **Quality**: Is the code well-written, tested, and maintainable
-- **User Experience (UX)**: How intuitive and user-friendly is the implementation?
-- **Creativity**: Does the project offer a unique approach or innovative features?
-- **Usefulness**: How valuable is the contribution to the users?
-    
-According to the points, you'll get an amount of swag:
-    
-- 30 - 40 points - Tolgee Sticker set
-- 40 - 45 points - Tolgee Sticker set + Tolgee Socks
-- 45 - 50 points - Tolgee Sticker set + Tolgee Socks + Tolgee T-shirt
-    
-### Repository Star ⭐
-
-Please start the [Tolgee repository](https://github.com/tolgee/tolgee-platform) as part of your contribution!
-
-For complete information, check our [Hacktoberfest2024.md](./Hacktoberfest2024.md)
-
-Join Tolgee Community [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) to share your ideas, suggestions, or questions and connect with other users and contributors.
-
-![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
-
 ## Quick links
 - [Tolgee Website](https://tolgee.io)
 
