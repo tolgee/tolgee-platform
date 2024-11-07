@@ -99,13 +99,11 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
               </Button>
             )}
 
-            {
-              (oAuthServices.length > 0 || remoteConfig.authMethods?.sso.globalEnabled || remoteConfig.authMethods?.sso.enabled) &&
-              <Box
-                height="0px"
-                mt={5}
-              />
-            }
+            {(oAuthServices.length > 0 ||
+              remoteConfig.authMethods?.sso.globalEnabled ||
+              remoteConfig.authMethods?.sso.enabled) && (
+              <Box height="0px" mt={5} />
+            )}
             {remoteConfig.nativeEnabled &&
               !remoteConfig.authMethods?.sso.globalEnabled && (
                 <Button
