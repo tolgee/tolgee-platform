@@ -1,8 +1,10 @@
 import { FunctionComponent, useEffect } from 'react';
 
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
-import { useSsoService } from 'tg.component/security/SsoService';
 
 interface SsoRedirectionHandlerProps {}
 
@@ -10,8 +12,7 @@ export const SsoRedirectionHandler: FunctionComponent<
   SsoRedirectionHandlerProps
 > = () => {
   const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
-
-  const { login } = useSsoService();
+  const { loginWithOAuthCodeSso } = useGlobalActions();
 
   useEffect(() => {
     const searchParam = new URLSearchParams(window.location.search);
@@ -19,7 +20,7 @@ export const SsoRedirectionHandler: FunctionComponent<
     const state = searchParam.get('state');
 
     if (code && state && !allowPrivate) {
-      login(state, code);
+      loginWithOAuthCodeSso(state, code);
     }
   }, [allowPrivate]);
 

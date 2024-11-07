@@ -1,4 +1,4 @@
-import { API_URL, HOST, PASSWORD, USERNAME } from '../constants';
+import { API_URL, PASSWORD, USERNAME } from '../constants';
 import { ArgumentTypes, Scope } from '../types';
 import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');

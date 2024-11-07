@@ -16,8 +16,10 @@ export const SsoLoginView: FunctionComponent = () => {
   const { t } = useTranslate();
   const credentialsRef = useRef({ domain: '' });
 
-  const error = useGlobalContext((c) => c.auth.loginLoadable.error);
-  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
+  const error = useGlobalContext((c) => c.auth.authorizeOAuthLoadable.error);
+  const isLoading = useGlobalContext(
+    (c) => c.auth.authorizeOAuthLoadable.isLoading
+  );
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 

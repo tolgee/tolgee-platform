@@ -8,8 +8,10 @@ import { LINKS } from 'tg.constants/links';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useSsoService } from 'tg.component/security/SsoService';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -24,8 +26,10 @@ type LoginViewCredentialsProps = {
 };
 
 export function LoginSsoForm(props: LoginViewCredentialsProps) {
-  const { loginRedirect } = useSsoService();
-  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
+  const { loginRedirectSso } = useGlobalActions();
+  const isLoading = useGlobalContext(
+    (c) => c.auth.redirectSsoUrlLoadable.isLoading
+  );
 
   return (
     <StandardForm
@@ -54,7 +58,7 @@ export function LoginSsoForm(props: LoginViewCredentialsProps) {
         </Box>
       }
       onSubmit={async (data) => {
-        await loginRedirect(data.domain);
+        await loginRedirectSso(data.domain);
       }}
     >
       <StyledInputFields>

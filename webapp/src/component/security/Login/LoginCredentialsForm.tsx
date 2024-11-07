@@ -3,7 +3,7 @@ import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { LogIn01 as LoginIcon } from '@untitled-ui/icons-react';
+import { LogIn01 } from '@untitled-ui/icons-react';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -16,7 +16,6 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { ApiError } from 'tg.service/http/ApiError';
-import { useSsoService } from 'tg.component/security/SsoService';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -33,11 +32,13 @@ type LoginViewCredentialsProps = {
 
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
-  const { login } = useGlobalActions();
-  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
+  const { login, loginRedirectSso } = useGlobalActions();
+  const isLoading = useGlobalContext(
+    (c) =>
+      c.auth.loginLoadable.isLoading || c.auth.redirectSsoUrlLoadable.isLoading
+  );
 
   const oAuthServices = useOAuthServices();
-  const { loginRedirect, redirectLoadable } = useSsoService();
 
   const nativeEnabled = remoteConfig.nativeEnabled;
   const ssoEnabled = remoteConfig.authMethods?.sso.enabled ?? false;
@@ -55,7 +56,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
       style={{ width: 24, height: 24 }}
     />
   ) : (
-    <LoginIcon />
+    <LogIn01 />
   );
   const customLoginText = remoteConfig.authMethods?.sso.customLoginText;
   const loginText = customLoginText ? (
@@ -65,7 +66,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   );
 
   function globalSsoLogin() {
-    loginRedirect(remoteConfig.authMethods?.sso.domain as string);
+    loginRedirectSso(remoteConfig.authMethods?.sso.domain as string);
   }
 
   return (
@@ -131,7 +132,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 )}
                 {globalSsoEnabled && (
                   <LoadingButton
-                    loading={redirectLoadable.isLoading}
+                    loading={isLoading}
                     size="medium"
                     endIcon={logoIcon}
                     variant="outlined"
