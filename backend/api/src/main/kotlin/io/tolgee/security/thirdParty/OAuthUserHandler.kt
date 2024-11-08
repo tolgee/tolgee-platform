@@ -8,6 +8,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.service.AuthProviderChangeRequestService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -23,6 +24,8 @@ class OAuthUserHandler(
   private val ssoGlobalProperties: SsoGlobalProperties,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
+  private val authenticationProperties: AuthenticationProperties,
+  private val authProviderChangeRequestService: AuthProviderChangeRequestService,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -53,6 +56,9 @@ class OAuthUserHandler(
     }
 
     return userAccountOptional.orElseGet {
+      userAccountService.findActive(userResponse.email)?.let {
+        return@orElseGet manageUserNameConflict(it, userResponse, thirdPartyAuthType)
+      }
       createUser(userResponse, invitationCode, thirdPartyAuthType, accountType)
     }
   }
@@ -93,6 +99,42 @@ class OAuthUserHandler(
     }
 
     return newUserAccount
+  }
+
+  private fun manageUserNameConflict(
+    user: UserAccount,
+    userResponse: OAuthUserDetails,
+    thirdPartyAuthType: ThirdPartyAuthType
+  ): UserAccount {
+    val request = authProviderChangeRequestService.create(
+      user,
+      thirdPartyAuthType,
+      user.thirdPartyAuthType,
+      UserAccount.AccountType.THIRD_PARTY,
+      user.accountType,
+      userResponse.tenant?.domain,
+      userResponse.sub,
+      userResponse.refreshToken,
+      calculateExpirationDate()
+    )
+
+    throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS, listOf(request.id))
+  }
+
+  private fun changeAuthProvider(
+    user: UserAccount,
+    thirdPartyAuthType: ThirdPartyAuthType,
+    userDetails: OAuthUserDetails,
+  ): UserAccount {
+    user.thirdPartyAuthType = thirdPartyAuthType
+    user.accountType = UserAccount.AccountType.THIRD_PARTY
+    user.thirdPartyAuthId = userDetails.sub
+    user.ssoTenant = userDetails.tenant
+    if (thirdPartyAuthType == ThirdPartyAuthType.SSO) {
+      updateRefreshToken(user, userDetails.refreshToken)
+      updateSsoSessionExpiry(user)
+    }
+    return userAccountService.save(user)
   }
 
   fun updateRefreshToken(
