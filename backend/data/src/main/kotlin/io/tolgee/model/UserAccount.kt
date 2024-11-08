@@ -63,6 +63,12 @@ data class UserAccount(
   @Convert(converter = ThirdPartyAuthTypeConverter::class)
   var thirdPartyAuthType: ThirdPartyAuthType? = null
 
+  @OneToOne(mappedBy = "userAccount")
+  var authProviderChangeRequest: AuthProviderChangeRequest? = null
+
+  @ManyToOne
+  var ssoTenant: SsoTenant? = null
+
   @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
   var ssoRefreshToken: String? = null
 
