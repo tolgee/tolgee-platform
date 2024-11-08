@@ -8,9 +8,11 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.EmailParams
+import io.tolgee.dtos.request.AuthProviderChangeRequestDto
 import io.tolgee.dtos.request.auth.ResetPassword
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.response.AuthProviderChangeResponseDto
 import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
@@ -26,12 +28,14 @@ import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.security.thirdParty.GithubOAuthDelegate
 import io.tolgee.security.thirdParty.GoogleOAuthDelegate
 import io.tolgee.security.thirdParty.OAuth2Delegate
+import io.tolgee.service.AuthProviderChangeRequestService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.security.*
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.lang3.RandomStringUtils
+import org.springframework.context.annotation.Lazy
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -55,6 +59,8 @@ class PublicController(
   private val mfaService: MfaService,
   private val userCredentialsService: UserCredentialsService,
   private val authProperties: AuthenticationProperties,
+  @Lazy
+  private val authProviderChangeRequestService: AuthProviderChangeRequestService
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -72,6 +78,8 @@ class PublicController(
 
     // two factor passed, so we can generate super token
     val jwt = jwtService.emitToken(userAccount.id, true)
+
+    authProviderChangeRequestService.resolveChangeRequestIfExist(userAccount)
     return JwtAuthenticationResponse(jwt)
   }
 
@@ -250,6 +258,20 @@ class PublicController(
         throw NotFoundException(Message.SERVICE_NOT_FOUND)
       }
     }
+  }
+
+  @PostMapping("/auth-provider/request-change")
+  fun submitOrCancelAuthProviderChangeRequest(
+    @RequestBody authProviderChangeRequestDto: AuthProviderChangeRequestDto,
+  ) {
+    authProviderChangeRequestService.submitOrCancel(authProviderChangeRequestDto)
+  }
+
+  @GetMapping("/auth-provider/get-request")
+  fun getAuthProviderChangeRequest(
+    @RequestParam("requestId") id: Long,
+  ): AuthProviderChangeResponseDto {
+    return AuthProviderChangeResponseDto.fromEntity(authProviderChangeRequestService.getById(id))
   }
 
   private fun getFakeGithubUser(): UserAccount {
