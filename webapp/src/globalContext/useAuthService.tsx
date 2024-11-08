@@ -311,6 +311,11 @@ export const useAuthService = (
       setAdminToken(undefined);
     },
     setInvitationCode,
+
+    redirectToLink(link: Link) {
+      history.replace(link.build());
+    },
+
     redirectTo(url: string) {
       history.replace(LINKS.AFTER_LOGIN.build());
     },
