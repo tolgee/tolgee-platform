@@ -26,7 +26,7 @@ class ConfigurationController
     private val applicationContext: ApplicationContext,
     private val publicBillingConfProvider: PublicBillingConfProvider,
     private val versionProvider: VersionProvider,
-    private val CDFileStorageProvider: ContentDeliveryFileStorageProvider,
+    private val cdFileStorageProvider: ContentDeliveryFileStorageProvider,
   ) : IController {
     @GetMapping(value = ["configuration"])
     @Operation(summary = "Get server configuration")
@@ -41,7 +41,7 @@ class ConfigurationController
         machineTranslationServices = machineTranslationServices,
         billing = publicBillingConfProvider(),
         versionProvider.version,
-        contentDeliveryEnabled = CDFileStorageProvider.isServerContentDeliveryConfigured(),
+        contentDeliveryEnabled = cdFileStorageProvider.isServerContentDeliveryConfigured(),
       )
     }
 
