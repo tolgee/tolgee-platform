@@ -49,8 +49,12 @@ tolgee:
   recaptcha:
     site-key: 6Le0X08dAAAAALfQQk1NeWd-kXqvzLVk8HqoZpRw
     secret-key: dummy_secret_key
-  content-delivery:  
+  content-delivery:
     public-url-prefix: https://cdndev.tolg.ee/i18n
+    storage:
+      azure:
+        connection-string: "dummy-connection-string"
+        container-name: "dummy-container-name"
   machine-translation:
     free-credits-amount: 1000000000
     google:
