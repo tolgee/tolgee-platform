@@ -1,12 +1,12 @@
-import {LINKS} from 'tg.constants/links';
-import {GlobalError} from 'tg.error/GlobalError';
+import { LINKS } from 'tg.constants/links';
+import { GlobalError } from 'tg.error/GlobalError';
 
-import {tokenService} from '../TokenService';
-import {getUtmCookie} from 'tg.fixtures/utmCookie';
-import {handleApiError} from './handleApiError';
-import {ApiError} from './ApiError';
-import {errorAction} from './errorAction';
-import {globalContext} from 'tg.globalContext/globalActions';
+import { tokenService } from '../TokenService';
+import { getUtmCookie } from 'tg.fixtures/utmCookie';
+import { handleApiError } from './handleApiError';
+import { ApiError } from './ApiError';
+import { errorAction } from './errorAction';
+import { globalContext } from 'tg.globalContext/globalActions';
 
 const LOCAL_STORAGE_CHANGE_PROVIDER = 'change_provider';
 
@@ -66,9 +66,17 @@ export class ApiHttpService {
                 handleApiError(r, responseData, init, options)
               );
 
-              if(r.status === 401 && responseData.code === 'username_already_exists') {
-                localStorage.setItem(LOCAL_STORAGE_CHANGE_PROVIDER, resultError.data?.params?.[0]);
-                globalContext.actions?.redirectToLink(LINKS.CHANGE_AUTH_PROVIDER);
+              if (
+                r.status === 401 &&
+                responseData.code === 'username_already_exists'
+              ) {
+                localStorage.setItem(
+                  LOCAL_STORAGE_CHANGE_PROVIDER,
+                  resultError.data?.params?.[0]
+                );
+                globalContext.actions?.redirectToLink(
+                  LINKS.CHANGE_AUTH_PROVIDER
+                );
               }
 
               if (r.status === 400) {

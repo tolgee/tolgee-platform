@@ -80,8 +80,8 @@ export class LINKS {
   );
 
   static CHANGE_AUTH_PROVIDER = Link.ofParent(
-      LINKS.LOGIN,
-      'change-auth-provider'
+    LINKS.LOGIN,
+    'change-auth-provider'
   );
 
   static OPENID_RESPONSE = Link.ofParent(LINKS.LOGIN, 'open-id/auth-callback');
