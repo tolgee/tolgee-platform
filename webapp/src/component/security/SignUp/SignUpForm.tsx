@@ -23,11 +23,17 @@ import { PasswordLabel } from '../SetPasswordField';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
 import { Alert } from '../../common/Alert';
 import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
+import { LabelHint } from 'tg.component/common/LabelHint';
 
 const StyledInputFields = styled('div')`
   display: grid;
   align-items: start;
   padding-bottom: 12px;
+`;
+
+const StyledSeparator = styled('div')`
+  height: 32px;
+  justify-self: center;
 `;
 
 const PasswordFieldWithValidation = React.lazy(
@@ -122,6 +128,38 @@ export const SignUpForm = (props: Props) => {
       >
         <StyledInputFields>
           <Error loadable={props.loadable} />
+
+          <TextField
+            autoComplete="name"
+            name="name"
+            label={<T keyName="sign_up_form_full_name" />}
+          />
+          {orgRequired && (
+            <TextField
+              autoComplete="organization"
+              name="organizationName"
+              label={
+                <LabelHint title={t('sign_up_form_organization_hint')}>
+                  <T keyName="sign_up_form_organization_name" />
+                </LabelHint>
+              }
+            />
+          )}
+          {userSourceField && (
+            <TextField
+              autoComplete="off"
+              name="userSource"
+              label={
+                <>
+                  <T keyName="sign_up_form_user_source" /> (
+                  <T keyName="sign_up_form_optional_label" />)
+                </>
+              }
+            />
+          )}
+
+          <StyledSeparator />
+
           <TextField
             name="email"
             label={<T keyName="sign_up_form_email" />}
@@ -150,37 +188,18 @@ export const SignUpForm = (props: Props) => {
               ),
             }}
           />
-          <TextField
-            autoComplete="name"
-            name="name"
-            label={<T keyName="sign_up_form_full_name" />}
-          />
-          {orgRequired && (
-            <TextField
-              autoComplete="organization"
-              name="organizationName"
-              label={<T keyName="sign_up_form_organization_name" />}
-            />
-          )}
-          {userSourceField && (
-            <TextField
-              autoComplete="off"
-              name="userSource"
-              label={<T keyName="sign_up_form_user_source" />}
-            />
-          )}
+          <Box mt={1}>
+            <Typography variant="caption" fontSize={14}>
+              <T
+                keyName="sign-up-terms-and-conditions-message"
+                params={{
+                  Link: <Link href="https://tolgee.io/docs/terms_of_use" />,
+                }}
+              />
+            </Typography>
+          </Box>
         </StyledInputFields>
       </StandardForm>
-      <Box mt={1}>
-        <Typography variant="caption" fontSize={14}>
-          <T
-            keyName="sign-up-terms-and-conditions-message"
-            params={{
-              Link: <Link href="https://tolgee.io/docs/terms_of_use" />,
-            }}
-          />
-        </Typography>
-      </Box>
     </>
   );
 };
