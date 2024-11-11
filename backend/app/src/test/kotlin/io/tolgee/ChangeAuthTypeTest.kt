@@ -199,6 +199,34 @@ class ChangeAuthTypeTest : AbstractControllerTest() {
     assertThat(user.ssoRefreshToken).isNotNull()
   }
 
+  @Test
+  fun `change provider from native to Sso if request exists and confirmed by user`() {
+    val domain = "sso.com"
+    setSso(domain)
+
+    testDataService.saveTestData(changeAuthTypeTestData.createUserExisting)
+    doAuthentication(changeAuthTypeTestData.userExisting.username, "admin")
+    val ssoResponse = ssoUtil.authorize(domain, jwtClaims = SsoAuthUtil.jwtClaimsWithExistingUserSet).response
+    val errorResponse: ErrorResponse = objectMapper.readValue(ssoResponse.contentAsString)
+    val requestId = errorResponse.params[0]
+    authProviderChangeRequestService.confirmOrCancel(
+      AuthProviderChangeRequestDto(
+        changeRequestId = requestId,
+        isConfirmed = true,
+      ),
+    )
+    assertThat(authProviderChangeRequestService.getById(requestId).isConfirmed).isTrue
+
+    doAuthentication(changeAuthTypeTestData.userExisting.username, "admin")
+
+    val user = userAccountService.get(changeAuthTypeTestData.userExisting.username)
+    assertThat(user.thirdPartyAuthType).isEqualTo(ThirdPartyAuthType.SSO)
+    assertThat(user.accountType).isEqualTo(UserAccount.AccountType.THIRD_PARTY)
+    assertThat(user.ssoTenant?.domain).isEqualTo(domain)
+    assertThat(user.ssoSessionExpiry).isNotNull()
+    assertThat(user.ssoRefreshToken).isNotNull()
+  }
+
   private fun setSso(domain: String) {
     ssoGlobalProperties.enabled = true
     ssoGlobalProperties.domain = domain
