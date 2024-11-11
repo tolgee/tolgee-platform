@@ -1,4 +1,4 @@
-package io.tolgee.ee.utils
+package io.tolgee.util
 
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -8,7 +8,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.ee.data.OAuth2TokenResponse
-import io.tolgee.ee.service.sso.TenantService
+import io.tolgee.ee.service.TenantService
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-class OAuthMultiTenantsMocks(
+class SsoAuthUtil(
   private var authMvc: MockMvc? = null,
   private val restTemplate: RestTemplate? = null,
   private val tenantService: TenantService? = null,
@@ -56,7 +56,7 @@ class OAuthMultiTenantsMocks(
         return claimsSet
       }
 
-    val jwtClaimsSet2: JWTClaimsSet
+    val jwtClaimsWithExistingUserSet: JWTClaimsSet
       get() {
         val claimsSet =
           JWTClaimsSet
@@ -68,7 +68,7 @@ class OAuthMultiTenantsMocks(
             .claim("given_name", "Test2")
             .claim("given_name", "Test2")
             .claim("family_name", "User2")
-            .claim("email", "mai2@mail.com")
+            .claim("email", "fake_email@email.com")
             .build()
         return claimsSet
       }
@@ -93,7 +93,7 @@ class OAuthMultiTenantsMocks(
     jwtClaims: JWTClaimsSet = jwtClaimsSet,
   ): MvcResult {
     val receivedCode = "fake_access_token"
-    val tenant = tenantService?.getEnabledConfigByDomain(registrationId)!!
+    val tenant = tenantService?.getByDomain(registrationId)!!
     // mock token exchange
     whenever(
       restTemplate?.exchange(
@@ -110,7 +110,7 @@ class OAuthMultiTenantsMocks(
     return authMvc!!
       .perform(
         MockMvcRequestBuilders.get(
-          "/api/public/authorize_oauth/sso?domain=$registrationId&code=$receivedCode&redirect_uri=redirect_uri",
+          "/v2/public/oauth2/callback/$registrationId?code=$receivedCode&redirect_uri=redirect_uri",
         ),
       ).andReturn()
   }
@@ -119,7 +119,7 @@ class OAuthMultiTenantsMocks(
     authMvc!!
       .perform(
         MockMvcRequestBuilders
-          .post("/api/public/authorize_oauth/sso/authentication-url")
+          .post("/v2/public/oauth2/callback/get-authentication-url")
           .contentType(MediaType.APPLICATION_JSON)
           .content(
             """
