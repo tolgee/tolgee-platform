@@ -13,5 +13,5 @@ data class AuthProviderChangeRequestData(
   val ssoDomain: String? = null,
   val sub: String? = null,
   val refreshToken: String? = null,
-  val calculateExpirationDate: Date? = null
+  val calculateExpirationDate: Date? = null,
 )

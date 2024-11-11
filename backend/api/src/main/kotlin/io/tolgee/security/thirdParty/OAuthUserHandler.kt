@@ -105,7 +105,7 @@ class OAuthUserHandler(
   private fun manageUserNameConflict(
     user: UserAccount,
     userResponse: OAuthUserDetails,
-    thirdPartyAuthType: ThirdPartyAuthType
+    thirdPartyAuthType: ThirdPartyAuthType,
   ) {
     userConflictManager.manageUserNameConflict(
       user,
@@ -114,7 +114,7 @@ class OAuthUserHandler(
       userResponse.tenant?.domain,
       userResponse.sub,
       userResponse.refreshToken,
-      calculateExpirationDate()
+      calculateExpirationDate(),
     )
   }
 

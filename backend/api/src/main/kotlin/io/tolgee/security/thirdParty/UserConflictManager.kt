@@ -22,26 +22,26 @@ class UserConflictManager(
     ssoDomain: String? = null,
     sub: String? = null,
     refreshToken: String? = null,
-    calculateExpirationDate: Date? = null
+    calculateExpirationDate: Date? = null,
   ) {
-
-    val requestData = AuthProviderChangeRequestData(
-      userAccount = user,
-      newAuthProvider = newAuthProvider,
-      oldAuthProvider = user.thirdPartyAuthType,
-      newAccountType = newAccountType,
-      oldAccountType = user.accountType,
-      ssoDomain = ssoDomain,
-      sub = sub,
-      refreshToken = refreshToken,
-      calculateExpirationDate = calculateExpirationDate
-    )
+    val requestData =
+      AuthProviderChangeRequestData(
+        userAccount = user,
+        newAuthProvider = newAuthProvider,
+        oldAuthProvider = user.thirdPartyAuthType,
+        newAccountType = newAccountType,
+        oldAccountType = user.accountType,
+        ssoDomain = ssoDomain,
+        sub = sub,
+        refreshToken = refreshToken,
+        calculateExpirationDate = calculateExpirationDate,
+      )
     val request = authProviderChangeRequestService.create(requestData)
     throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS, listOf(request?.id))
   }
 
   fun resolveRequestIfExist(user: Optional<UserAccount>) {
-    if(user.isPresent) {
+    if (user.isPresent) {
       authProviderChangeRequestService.resolveChangeRequestIfExist(user.get())
     }
   }

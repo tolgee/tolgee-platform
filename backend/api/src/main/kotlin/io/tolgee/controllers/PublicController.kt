@@ -60,7 +60,7 @@ class PublicController(
   private val userCredentialsService: UserCredentialsService,
   private val authProperties: AuthenticationProperties,
   @Lazy
-  private val authProviderChangeRequestService: AuthProviderChangeRequestService
+  private val authProviderChangeRequestService: AuthProviderChangeRequestService,
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -270,9 +270,8 @@ class PublicController(
   @GetMapping("/auth-provider/get-request")
   fun getAuthProviderChangeRequest(
     @RequestParam("requestId") id: Long,
-  ): AuthProviderChangeResponseDto {
-    return AuthProviderChangeResponseDto.fromEntity(authProviderChangeRequestService.getById(id))
-  }
+  ): AuthProviderChangeResponseDto =
+    AuthProviderChangeResponseDto.fromEntity(authProviderChangeRequestService.getById(id))
 
   private fun getFakeGithubUser(): UserAccount {
     val username = "johndoe@doe.com"
