@@ -1,21 +1,27 @@
 package io.tolgee.service
 
+import io.tolgee.dtos.AuthProviderChangeRequestData
 import io.tolgee.dtos.request.AuthProviderChangeRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.AuthProviderChangeRequest
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.repository.AuthProviderChangeRequestRepository
 import io.tolgee.service.security.UserAccountService
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 
 @Service
 class AuthProviderChangeRequestService(
   private val authProviderChangeRequestRepository: AuthProviderChangeRequestRepository,
   private val userAccountService: UserAccountService,
-  private val tenantService: EeSsoTenantService
+  private val tenantService: EeSsoTenantService,
+  private val transactionTemplate: TransactionTemplate,
+  private val entityManager: EntityManager,
 ) {
   fun getById(id: Long): AuthProviderChangeRequest = findById(id).orElseGet { throw NotFoundException() }
 
@@ -27,42 +33,34 @@ class AuthProviderChangeRequestService(
   fun getByUserAccountId(userAccountId: Long): AuthProviderChangeRequest =
     findByUserAccount(userAccountId).orElseGet { throw NotFoundException() }
 
-  fun create(
-    userAccount: UserAccount,
-    newAuthProvider: ThirdPartyAuthType?,
-    oldAuthProvider: ThirdPartyAuthType?,
-    newAccountType: UserAccount.AccountType,
-    oldAccountType: UserAccount.AccountType?,
-    ssoDomain: String?,
-    sub: String?,
-    refreshToken: String?,
-    calculateExpirationDate: Date
-  ): AuthProviderChangeRequest {
-    findByUserAccount(userAccount.id).ifPresent {
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun create(data: AuthProviderChangeRequestData): AuthProviderChangeRequest? {
+    findByUserAccount(data.userAccount.id).ifPresent {
       throw BadRequestException("User already has a pending auth provider change request")
     }
-
     val authProviderChangeRequest =
       AuthProviderChangeRequest().apply {
-        this.userAccount = userAccount
-        this.newAuthProvider = newAuthProvider
-        this.oldAuthProvider = oldAuthProvider
-        this.newAccountType = newAccountType
-        this.oldAccountType = oldAccountType
-        this.newSsoDomain = ssoDomain
-        this.newSub = sub
-        this.ssoRefreshToken = refreshToken
-        this.ssoExpiration = calculateExpirationDate
+        this.userAccount = data.userAccount
+        this.newAuthProvider = data.newAuthProvider
+        this.oldAuthProvider = data.oldAuthProvider
+        this.newAccountType = data.newAccountType
+        this.oldAccountType = data.oldAccountType
+        this.newSsoDomain = data.ssoDomain
+        this.newSub = data.sub
+        this.ssoRefreshToken = data.refreshToken
+        this.ssoExpiration = data.calculateExpirationDate
       }
+
     val saved = authProviderChangeRequestRepository.save(authProviderChangeRequest)
-    userAccount.authProviderChangeRequest = saved
-    userAccountService.save(userAccount)
+    data.userAccount.authProviderChangeRequest = saved
+    userAccountService.save(data.userAccount)
+
     return saved
   }
 
-  fun submitOrCancel(authProviderChangeRequestDto: AuthProviderChangeRequestDto) {
+  fun confirmOrCancel(authProviderChangeRequestDto: AuthProviderChangeRequestDto) {
     val entity = getById(authProviderChangeRequestDto.changeRequestId)
-    if(!authProviderChangeRequestDto.isConfirmed) {
+    if (!authProviderChangeRequestDto.isConfirmed) {
       authProviderChangeRequestRepository.delete(entity)
       return
     }
@@ -70,22 +68,28 @@ class AuthProviderChangeRequestService(
     authProviderChangeRequestRepository.save(entity)
   }
 
-  fun resolveChangeRequestIfExist(userAccount: UserAccount) {
-    findByUserAccount(userAccount.id).ifPresent {
-      if (it.isConfirmed) {
-        userAccount.accountType = it.newAccountType
-        userAccount.thirdPartyAuthType = it.newAuthProvider
-        userAccount.ssoTenant = if (it.newSsoDomain != null) {
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun resolveChangeRequestIfExist(userAccount: UserAccount): Boolean {
+    var wasResolved = false
+
+    authProviderChangeRequestRepository.findByUserAccountAndIsConfirmed(userAccount, true).ifPresent {
+      userAccount.accountType = it.newAccountType
+      userAccount.thirdPartyAuthType = it.newAuthProvider
+      userAccount.ssoTenant =
+        if (it.newSsoDomain != null) {
           tenantService.getByDomain(it.newSsoDomain!!)
         } else {
           null
         }
-        userAccount.thirdPartyAuthId = it.newSub
-        userAccount.ssoRefreshToken = it.ssoRefreshToken
-        userAccount.ssoSessionExpiry = it.ssoExpiration
-        userAccountService.save(userAccount)
-        authProviderChangeRequestRepository.delete(it)
-      }
+      userAccount.thirdPartyAuthId = it.newSub
+      userAccount.ssoRefreshToken = it.ssoRefreshToken
+      userAccount.ssoSessionExpiry = it.ssoExpiration
+      userAccount.authProviderChangeRequest = null
+      userAccountService.save(userAccount)
+      authProviderChangeRequestRepository.delete(it)
+      wasResolved = true
     }
+
+    return wasResolved
   }
 }

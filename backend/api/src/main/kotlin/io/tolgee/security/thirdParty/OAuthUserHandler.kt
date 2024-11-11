@@ -26,6 +26,7 @@ class OAuthUserHandler(
   private val currentDateProvider: CurrentDateProvider,
   private val authenticationProperties: AuthenticationProperties,
   private val authProviderChangeRequestService: AuthProviderChangeRequestService,
+  private val userConflictManager: UserConflictManager,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -54,10 +55,10 @@ class OAuthUserHandler(
         resetSsoSessionExpiry(it)
       }
     }
-
+    userConflictManager.resolveRequestIfExist(userAccountOptional)
     return userAccountOptional.orElseGet {
       userAccountService.findActive(userResponse.email)?.let {
-        return@orElseGet manageUserNameConflict(it, userResponse, thirdPartyAuthType)
+        manageUserNameConflict(it, userResponse, thirdPartyAuthType)
       }
       createUser(userResponse, invitationCode, thirdPartyAuthType, accountType)
     }
@@ -105,20 +106,16 @@ class OAuthUserHandler(
     user: UserAccount,
     userResponse: OAuthUserDetails,
     thirdPartyAuthType: ThirdPartyAuthType
-  ): UserAccount {
-    val request = authProviderChangeRequestService.create(
+  ) {
+    userConflictManager.manageUserNameConflict(
       user,
       thirdPartyAuthType,
-      user.thirdPartyAuthType,
       UserAccount.AccountType.THIRD_PARTY,
-      user.accountType,
       userResponse.tenant?.domain,
       userResponse.sub,
       userResponse.refreshToken,
       calculateExpirationDate()
     )
-
-    throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS, listOf(request.id))
   }
 
   private fun changeAuthProvider(

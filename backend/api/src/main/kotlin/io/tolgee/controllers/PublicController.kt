@@ -264,7 +264,7 @@ class PublicController(
   fun submitOrCancelAuthProviderChangeRequest(
     @RequestBody authProviderChangeRequestDto: AuthProviderChangeRequestDto,
   ) {
-    authProviderChangeRequestService.submitOrCancel(authProviderChangeRequestDto)
+    authProviderChangeRequestService.confirmOrCancel(authProviderChangeRequestDto)
   }
 
   @GetMapping("/auth-provider/get-request")
