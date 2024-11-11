@@ -163,11 +163,12 @@ export const SignUpForm = (props: Props) => {
           <TextField
             name="email"
             label={<T keyName="sign_up_form_email" />}
-            autoComplete="email"
+            autoComplete="username email"
           />
           <PasswordFieldWithValidation
             label={<PasswordLabel />}
             inputProps={{ type: showPassword ? 'text' : 'password' }}
+            autoComplete="password"
             InputProps={{
               endAdornment: (
                 <Tooltip
