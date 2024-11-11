@@ -23,9 +23,6 @@ class SsoTenant : StandardAuditModel() {
   @OneToOne(fetch = FetchType.LAZY)
   lateinit var organization: Organization
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "ssoTenant")
-  var userAccounts: MutableSet<UserAccount> = mutableSetOf()
-
   @ColumnDefault("true")
   var enabled: Boolean = true
 }

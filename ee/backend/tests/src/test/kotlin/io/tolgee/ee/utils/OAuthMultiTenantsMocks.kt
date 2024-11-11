@@ -119,7 +119,7 @@ class OAuthMultiTenantsMocks(
     authMvc!!
       .perform(
         MockMvcRequestBuilders
-          .post("/v2/public/oauth2/callback/get-authentication-url")
+          .post("/api/public/authorize_oauth/sso/authentication-url")
           .contentType(MediaType.APPLICATION_JSON)
           .content(
             """

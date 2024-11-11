@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
@@ -10,14 +11,14 @@ import io.tolgee.security.thirdParty.SsoTenantConfig
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("v2/public/oauth2/callback/")
-class OAuth2CallbackController(
+@RequestMapping("/api/public")
+@Tag(name = "Authentication")
+class SsoAuthController(
   private val tenantService: TenantService,
   private val frontendUrlProvider: FrontendUrlProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
-  // TODO: Move to PublicController?
-  @PostMapping("/get-authentication-url")
+  @PostMapping("/authorize_oauth/sso/authentication-url")
   fun getAuthenticationUrl(
     @RequestBody request: DomainRequest,
   ): SsoUrlResponse {

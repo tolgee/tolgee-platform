@@ -13,6 +13,7 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.SsoAuthorizationException
@@ -27,6 +28,7 @@ import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.security.thirdParty.OAuthUserHandler
 import io.tolgee.security.thirdParty.SsoTenantConfig
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.http.*
@@ -44,6 +46,7 @@ class SsoDelegateEe(
   private val restTemplate: RestTemplate,
   private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
   private val ssoGlobalProperties: SsoGlobalProperties,
+  private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
   private val currentDateProvider: CurrentDateProvider,
@@ -55,9 +58,8 @@ class SsoDelegateEe(
     redirectUri: String?,
     domain: String?,
   ): JwtAuthenticationResponse {
-    if (domain == null) {
-      // TODO: specific message "Missing parameter: domain"
-      throw BadRequestException("Missing parameter: domain")
+    if (domain.isNullOrEmpty()) {
+      throw BadRequestException(Message.SSO_AUTH_MISSING_DOMAIN)
     }
 
     val tenant = tenantService.getEnabledConfigByDomain(domain)
@@ -115,6 +117,7 @@ class SsoDelegateEe(
     try {
       val signedJWT = SignedJWT.parse(idToken)
 
+      // TODO: Why is this deprecated?
       val jwkSource: JWKSource<SecurityContext> = RemoteJWKSet(URL(jwkSetUri))
 
       val keySelector = JWSAlgorithmFamilyJWSKeySelector(JWSAlgorithm.Family.RSA, jwkSource)
@@ -165,32 +168,35 @@ class SsoDelegateEe(
       oAuthUserHandler.findOrCreateUser(
         userData,
         invitationCode,
-        ThirdPartyAuthType.SSO,
+        if (tenant.global) ThirdPartyAuthType.SSO_GLOBAL else ThirdPartyAuthType.SSO,
         UserAccount.AccountType.MANAGED,
       )
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
   }
 
-  override fun verifyUserSsoAccountAvailable(
-    ssoDomain: String?,
-    userId: Long,
-    refreshToken: String?,
-    thirdPartyAuth: ThirdPartyAuthType,
-    ssoSessionExpiry: Date?,
-  ): Boolean {
-    if (thirdPartyAuth != ThirdPartyAuthType.SSO) {
-      return true
-    }
+  fun fetchLocalSsoDomainFor(userId: Long): String? {
+    // TODO: Cache this?
+    val organization = organizationRoleService.getManagedBy(userId) ?: return null
+    val tenant = tenantService.findTenant(organization.id)
+    return tenant?.domain
+  }
 
-    var domain = ssoDomain
-    if (domain == null) {
-      domain = ssoGlobalProperties.domain
-    }
-    if (domain == null || refreshToken == null) {
+  override fun verifyUserSsoAccountAvailable(user: UserAccountDto): Boolean {
+    var domain =
+      if (user.thirdPartyAuth == ThirdPartyAuthType.SSO) {
+        fetchLocalSsoDomainFor(user.id)
+      } else if (user.thirdPartyAuth == ThirdPartyAuthType.SSO_GLOBAL) {
+        ssoGlobalProperties.domain
+      } else {
+        // Not SSO user
+        return true
+      }
+
+    if (domain == null || user.ssoRefreshToken == null) {
       throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
     }
-    if (ssoSessionExpiry != null && isSsoUserValid(ssoSessionExpiry)) {
+    if (user.ssoSessionExpiry?.after(currentDateProvider.date) == true) {
       return true
     }
 
@@ -209,7 +215,7 @@ class SsoDelegateEe(
     body.add("client_id", tenant.clientId)
     body.add("client_secret", tenant.clientSecret)
     body.add("scope", "offline_access openid")
-    body.add("refresh_token", refreshToken)
+    body.add("refresh_token", user.ssoRefreshToken)
 
     val request = HttpEntity(body, headers)
     return try {
@@ -221,8 +227,8 @@ class SsoDelegateEe(
           OAuth2TokenResponse::class.java,
         )
       if (response.body?.refresh_token != null) {
-        oAuthUserHandler.updateSsoSessionExpiry(userId)
-        oAuthUserHandler.updateRefreshToken(userId, response.body?.refresh_token)
+        oAuthUserHandler.resetSsoSessionExpiry(user.id)
+        oAuthUserHandler.updateRefreshToken(user.id, response.body?.refresh_token)
         return true
       }
       false
@@ -231,6 +237,4 @@ class SsoDelegateEe(
       false
     }
   }
-
-  private fun isSsoUserValid(ssoSessionExpiry: Date): Boolean = ssoSessionExpiry.after(currentDateProvider.date)
 }

@@ -68,13 +68,15 @@ class PublicConfigurationDTO(
           oauth2.authorizationUrl,
           oauth2.scopes,
         ),
-        SsoPublicConfigDTO(
-          sso.enabled,
-          sso.globalEnabled,
-          sso.clientId,
-          sso.domain,
-          sso.customLogoUrl,
-          sso.customLoginText,
+        SsoGlobalPublicConfigDTO(
+          ssoGlobal.enabled,
+          ssoGlobal.clientId,
+          ssoGlobal.domain,
+          ssoGlobal.customLogoUrl,
+          ssoGlobal.customLoginText,
+        ),
+        SsoOrganizationsPublicConfigDTO(
+          ssoOrganizations.enabled,
         ),
       )
     }
@@ -84,7 +86,8 @@ class PublicConfigurationDTO(
     val github: OAuthPublicConfigDTO,
     val google: OAuthPublicConfigDTO,
     val oauth2: OAuthPublicExtendsConfigDTO,
-    val sso: SsoPublicConfigDTO,
+    val ssoGlobal: SsoGlobalPublicConfigDTO,
+    val ssoOrganizations: SsoOrganizationsPublicConfigDTO,
   )
 
   data class OAuthPublicConfigDTO(val clientId: String?) {
@@ -99,13 +102,16 @@ class PublicConfigurationDTO(
     val enabled: Boolean = !clientId.isNullOrEmpty()
   }
 
-  data class SsoPublicConfigDTO(
+  data class SsoGlobalPublicConfigDTO(
     val enabled: Boolean,
-    val globalEnabled: Boolean,
     val clientId: String?,
     val domain: String?,
     val customLogoUrl: String?,
     val customLoginText: String?,
+  )
+
+  data class SsoOrganizationsPublicConfigDTO(
+    val enabled: Boolean,
   )
 
   data class MtServicesDTO(

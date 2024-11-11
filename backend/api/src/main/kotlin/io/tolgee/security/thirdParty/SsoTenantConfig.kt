@@ -15,8 +15,8 @@ data class SsoTenantConfig(
   val domain: String,
   val jwkSetUri: String,
   val tokenUri: String,
+  val global: Boolean,
   val organization: Organization? = null,
-  val entity: SsoTenant? = null,
 ) {
   companion object {
     fun SsoTenant.toConfig(): SsoTenantConfig? {
@@ -32,13 +32,13 @@ data class SsoTenantConfig(
         domain = domain,
         jwkSetUri = jwkSetUri,
         tokenUri = tokenUri,
+        global = false,
         organization = organization,
-        entity = this,
       )
     }
 
     fun SsoGlobalProperties.toConfig(): SsoTenantConfig? {
-      if (!globalEnabled) {
+      if (!enabled) {
         return null
       }
 
@@ -50,10 +50,10 @@ data class SsoTenantConfig(
         domain = ::domain.validate(),
         jwkSetUri = ::jwkSetUri.validate(),
         tokenUri = ::tokenUri.validate(),
+        global = true,
       )
     }
 
-    // TODO: specific message "$name is missing in global SSO configuration",
     private fun <T : Any> KProperty0<T?>.validate(): T =
       this.get() ?: throw BadRequestException(
         Message.SSO_GLOBAL_CONFIG_MISSING_PROPERTIES,

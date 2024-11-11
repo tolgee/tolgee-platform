@@ -364,9 +364,6 @@ export interface paths {
      */
     post: operations["fetchBotEvent"];
   };
-  "/v2/public/oauth2/callback/get-authentication-url": {
-    post: operations["getAuthenticationUrl"];
-  };
   "/v2/public/licensing/subscription": {
     post: operations["getMySubscription"];
   };
@@ -578,6 +575,9 @@ export interface paths {
   };
   "/api/public/generatetoken": {
     post: operations["authenticateUser"];
+  };
+  "/api/public/authorize_oauth/sso/authentication-url": {
+    post: operations["getAuthenticationUrl"];
   };
   "/v2/user/single-owned-organizations": {
     /** Returns all organizations owned only by current user */
@@ -1132,11 +1132,6 @@ export interface components {
         | "slack_workspace_already_connected"
         | "slack_connection_error"
         | "email_verification_code_not_valid"
-        | "sso_third_party_auth_failed"
-        | "sso_token_exchange_failed"
-        | "sso_user_info_retrieval_failed"
-        | "sso_id_token_expired"
-        | "sso_domain_not_enabled"
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
@@ -1144,13 +1139,17 @@ export interface components {
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
+        | "sso_token_exchange_failed"
+        | "sso_user_info_retrieval_failed"
+        | "sso_id_token_expired"
         | "sso_user_cannot_create_organization"
         | "sso_cant_verify_user"
-        | "sso_user_cant_login_with_native"
         | "sso_global_config_missing_properties"
+        | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
         | "native_authentication_disabled"
-        | "sso_user_not_invited";
+        | "invitation_organization_mismatch"
+        | "user_is_managed_by_organization";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -1224,24 +1223,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
@@ -1280,6 +1261,24 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2144,12 +2143,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2478,11 +2477,11 @@ export interface components {
       userFullName?: string;
       username?: string;
       description: string;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      scopes: string[];
       /** Format: int64 */
       lastUsedAt?: number;
       projectName: string;
@@ -2551,13 +2550,6 @@ export interface components {
       text: string;
       trigger_id?: string;
       team_domain: string;
-    };
-    DomainRequest: {
-      domain: string;
-      state: string;
-    };
-    SsoUrlResponse: {
-      redirectUrl: string;
     };
     GetMySubscriptionDto: {
       licenseKey: string;
@@ -3086,11 +3078,6 @@ export interface components {
         | "slack_workspace_already_connected"
         | "slack_connection_error"
         | "email_verification_code_not_valid"
-        | "sso_third_party_auth_failed"
-        | "sso_token_exchange_failed"
-        | "sso_user_info_retrieval_failed"
-        | "sso_id_token_expired"
-        | "sso_domain_not_enabled"
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
@@ -3098,13 +3085,17 @@ export interface components {
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
+        | "sso_token_exchange_failed"
+        | "sso_user_info_retrieval_failed"
+        | "sso_id_token_expired"
         | "sso_user_cannot_create_organization"
         | "sso_cant_verify_user"
-        | "sso_user_cant_login_with_native"
         | "sso_global_config_missing_properties"
+        | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
         | "native_authentication_disabled"
-        | "sso_user_not_invited";
+        | "invitation_organization_mismatch"
+        | "user_is_managed_by_organization";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3589,6 +3580,13 @@ export interface components {
       password: string;
       otp?: string;
     };
+    DomainRequest: {
+      domain: string;
+      state: string;
+    };
+    SsoUrlResponse: {
+      redirectUrl: string;
+    };
     CollectionModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
@@ -3705,7 +3703,8 @@ export interface components {
       github: components["schemas"]["OAuthPublicConfigDTO"];
       google: components["schemas"]["OAuthPublicConfigDTO"];
       oauth2: components["schemas"]["OAuthPublicExtendsConfigDTO"];
-      sso: components["schemas"]["SsoPublicConfigDTO"];
+      ssoGlobal: components["schemas"]["SsoGlobalPublicConfigDTO"];
+      ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
     };
     InitialDataModel: {
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
@@ -3822,13 +3821,15 @@ export interface components {
       enabled: boolean;
       connected: boolean;
     };
-    SsoPublicConfigDTO: {
+    SsoGlobalPublicConfigDTO: {
       enabled: boolean;
-      globalEnabled: boolean;
       clientId?: string;
       domain?: string;
       customLogoUrl?: string;
       customLoginText?: string;
+    };
+    SsoOrganizationsPublicConfigDTO: {
+      enabled: boolean;
     };
     CollectionModelExportFormatModel: {
       _embedded?: {
@@ -4698,11 +4699,11 @@ export interface components {
       userFullName?: string;
       username?: string;
       description: string;
+      scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       expiresAt?: number;
-      scopes: string[];
       /** Format: int64 */
       lastUsedAt?: number;
       projectName: string;
@@ -10757,53 +10758,6 @@ export interface operations {
       };
     };
   };
-  getAuthenticationUrl: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SsoUrlResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DomainRequest"];
-      };
-    };
-  };
   getMySubscription: {
     responses: {
       /** OK */
@@ -14497,6 +14451,53 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["LoginRequest"];
+      };
+    };
+  };
+  getAuthenticationUrl: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SsoUrlResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DomainRequest"];
       };
     };
   };

@@ -7,6 +7,7 @@ import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OAuthTestData
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.security.thirdParty.SsoDelegateEe
@@ -175,22 +176,19 @@ class OAuthTest : AuthorizedControllerTest() {
     val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(user.ssoRefreshToken).isNotNull
-    assertThat(user.ssoTenant).isNotNull
+    val managedBy = organizationRoleService.getManagedBy(user.id)
+    assertThat(managedBy).isNotNull
     assertThat(user.thirdPartyAuthType?.code()).isEqualTo("sso")
   }
 
   @Test
-  fun `user is employee validation works`() {
+  fun `user account available validation works`() {
     loginAsSsoUser()
     val userName = jwtClaimsSet.getStringClaim("email")
     val user = userAccountService.get(userName)
     assertThat(
       ssoDelegate.verifyUserSsoAccountAvailable(
-        user.ssoTenant?.domain,
-        user.id,
-        user.ssoRefreshToken,
-        user.thirdPartyAuthType!!,
-        user.ssoSessionExpiry,
+        UserAccountDto.fromEntity(user),
       ),
     ).isTrue
   }
@@ -206,11 +204,7 @@ class OAuthTest : AuthorizedControllerTest() {
     oAuthMultiTenantsMocks.mockTokenExchange("http://tokenUri")
     assertThat(
       ssoDelegate.verifyUserSsoAccountAvailable(
-        user.ssoTenant?.domain,
-        user.id,
-        user.ssoRefreshToken,
-        user.thirdPartyAuthType!!,
-        user.ssoSessionExpiry,
+        UserAccountDto.fromEntity(user),
       ),
     ).isTrue
 

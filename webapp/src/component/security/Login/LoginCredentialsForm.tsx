@@ -41,13 +41,14 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const oAuthServices = useOAuthServices();
 
   const nativeEnabled = remoteConfig.nativeEnabled;
-  const ssoEnabled = remoteConfig.authMethods?.sso.enabled ?? false;
-  const globalSsoEnabled = remoteConfig.authMethods?.sso.globalEnabled ?? false;
+  const localSsoEnabled =
+    remoteConfig.authMethods?.ssoOrganizations.enabled ?? false;
+  const globalSsoEnabled = remoteConfig.authMethods?.ssoGlobal.enabled ?? false;
   const hasNonNativeAuthMethods =
-    oAuthServices.length > 0 || ssoEnabled || globalSsoEnabled;
+    oAuthServices.length > 0 || localSsoEnabled || globalSsoEnabled;
   const noLoginMethods = !nativeEnabled && !hasNonNativeAuthMethods;
 
-  const customLogoUrl = remoteConfig.authMethods?.sso.customLogoUrl;
+  const customLogoUrl = remoteConfig.authMethods?.ssoGlobal.customLogoUrl;
   // TODO: the custom logo is just displayed on button, is that expected?
   const logoIcon = customLogoUrl ? (
     <img
@@ -58,7 +59,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   ) : (
     <LogIn01 />
   );
-  const customLoginText = remoteConfig.authMethods?.sso.customLoginText;
+  const customLoginText = remoteConfig.authMethods?.ssoGlobal.customLoginText;
   const loginText = customLoginText ? (
     <span>{customLoginText}</span>
   ) : (
@@ -66,7 +67,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   );
 
   function globalSsoLogin() {
-    loginRedirectSso(remoteConfig.authMethods?.sso.domain as string);
+    loginRedirectSso(remoteConfig.authMethods?.ssoGlobal.domain as string);
   }
 
   return (
@@ -115,9 +116,9 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
               <Box height="0px" mt={5} />
             )}
 
-            {ssoEnabled && (
+            {(localSsoEnabled || globalSsoEnabled) && (
               <React.Fragment>
-                {!globalSsoEnabled && (
+                {localSsoEnabled && (
                   <Button
                     component={Link}
                     to={LINKS.SSO_LOGIN.build()}
@@ -130,7 +131,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                     {loginText}
                   </Button>
                 )}
-                {globalSsoEnabled && (
+                {!localSsoEnabled && (
                   <LoadingButton
                     loading={isLoading}
                     size="medium"

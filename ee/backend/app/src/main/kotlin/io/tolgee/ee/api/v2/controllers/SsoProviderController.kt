@@ -9,9 +9,9 @@ import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.service.organization.OrganizationService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
 
@@ -22,7 +22,7 @@ class SsoProviderController(
   private val tenantService: TenantService,
   private val ssoTenantAssembler: SsoTenantAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  private val organizationHolder: OrganizationHolder,
+  private val organizationService: OrganizationService,
 ) {
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @PutMapping("")
@@ -32,12 +32,12 @@ class SsoProviderController(
     @PathVariable organizationId: Long,
   ): SsoTenantModel {
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId =
-        organizationHolder.organization.id,
+      organizationId = organizationId,
       Feature.SSO,
     )
 
-    return ssoTenantAssembler.toModel(tenantService.saveOrUpdate(request, organizationId).toDto())
+    val organization = organizationService.get(organizationId)
+    return ssoTenantAssembler.toModel(tenantService.saveOrUpdate(request, organization).toDto())
   }
 
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
@@ -48,8 +48,7 @@ class SsoProviderController(
   ): SsoTenantModel? =
     try {
       enabledFeaturesProvider.checkFeatureEnabled(
-        organizationId =
-          organizationHolder.organization.id,
+        organizationId = organizationId,
         Feature.SSO,
       )
 

@@ -13,7 +13,6 @@ import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
-import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -400,15 +399,5 @@ class OrganizationService(
     currentUserId: Long,
   ): OrganizationView? {
     return organizationRepository.findView(id, currentUserId)
-  }
-
-  fun updateSsoProvider(
-    organizationId: Long,
-    tenant: SsoTenant,
-  ) {
-    // FIXME: shouldn't be needed - org doesn't own the tenant relation and ref should update automatically
-    val organization = get(organizationId)
-    organization.ssoTenant = tenant
-    save(organization)
   }
 }

@@ -166,8 +166,11 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query(
     """
     from UserAccount ua 
+      join OrganizationRole orl on orl.user = ua
+      join Organization o on orl.organization = o
       where ua.thirdPartyAuthId = :thirdPartyAuthId
-        and ua.ssoTenant.domain = :domain
+        and orl.managed = true
+        and o.ssoTenant.domain = :domain
         and ua.deletedAt is null
         and ua.disabledAt is null
   """,
@@ -180,8 +183,11 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query(
     """
     from UserAccount ua
+      join OrganizationRole orl on orl.user = ua
+      join Organization o on orl.organization = o
       where ua.thirdPartyAuthId = :thirdPartyAuthId
-        and ((:ssoTenantId is null and ua.ssoTenant is null) or ua.ssoTenant.id = :ssoTenantId)
+        and orl.managed = true
+        and ((:ssoTenantId is null and o.ssoTenant is null) or o.ssoTenant.id = :ssoTenantId)
         and ua.deletedAt is null
         and ua.disabledAt is null
   """,

@@ -59,7 +59,7 @@ export const useAuthService = (
   });
 
   const redirectSsoUrlLoadable = useApiMutation({
-    url: '/v2/public/oauth2/callback/get-authentication-url',
+    url: '/api/public/authorize_oauth/sso/authentication-url',
     method: 'post',
   });
 

@@ -192,29 +192,39 @@ class OrganizationRoleService(
     return UserOrganizationRoleDto.fromEntity(userId, entity)
   }
 
+  fun getManagedBy(userId: Long): Organization? {
+    return organizationRoleRepository.findOneByUserIdAndManagedIsTrue(userId)?.organization
+  }
+
+  @CacheEvict(Caches.ORGANIZATION_ROLES, key = "{#organization.id, #user.id}")
+  fun setManaged(
+    user: UserAccount,
+    organization: Organization,
+    managed: Boolean,
+  ) {
+    val role =
+      organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organization.id)
+        ?: throw NotFoundException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
+    role.managed = managed
+    organizationRoleRepository.save(role)
+  }
+
   @CacheEvict(Caches.ORGANIZATION_ROLES, key = "{#organization.id, #user.id}")
   fun grantRoleToUser(
     user: UserAccount,
     organization: Organization,
     organizationRoleType: OrganizationRoleType,
   ) {
+    val managedBy = getManagedBy(user.id)
+    if (managedBy != null && managedBy.id != organization.id) {
+      throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
+    }
     OrganizationRole(user = user, organization = organization, type = organizationRoleType)
       .let {
         organization.memberRoles.add(it)
         user.organizationRoles.add(it)
         organizationRoleRepository.save(it)
       }
-  }
-
-  fun grantRoleToUser(
-    user: UserAccount,
-    organizationId: Long,
-    organizationRoleType: OrganizationRoleType,
-  ) {
-    // TODO: check if we can pass org as obj instead of id
-    val organization = organizationRepository.findById(organizationId).orElseThrow { NotFoundException() }
-
-    self.grantRoleToUser(user, organization, organizationRoleType = organizationRoleType)
   }
 
   fun leave(organizationId: Long) {
@@ -225,6 +235,10 @@ class OrganizationRoleService(
     organizationId: Long,
     userId: Long,
   ) {
+    val managedBy = getManagedBy(userId)
+    if (managedBy != null && managedBy.id == organizationId) {
+      throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
+    }
     val role =
       organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
         organizationRoleRepository.delete(it)
