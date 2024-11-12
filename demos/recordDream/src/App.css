@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.App {
+  background-image: url('/background.jpg');
+  /* Update this path if necessary */
+  background-size: cover;
+  /* Cover the entire screen */
+  background-position: center;
+  /* Center the background image */
+  background-repeat: no-repeat;
+  /* Prevent the background image from repeating */
+}
