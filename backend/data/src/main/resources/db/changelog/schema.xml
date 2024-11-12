@@ -3907,7 +3907,7 @@
     <changeSet author="anty (generated)" id="1731342594097-2">
         <addColumn tableName="organization_role">
             <column name="managed" type="boolean">
-                <constraints nullable="false"/>
+                <constraints checkConstraint="managed is null or managed = true"/>
             </column>
         </addColumn>
     </changeSet>
