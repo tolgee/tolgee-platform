@@ -31,6 +31,18 @@ class GoogleAuthUtil(
       return fakeGoogleUser
     }
 
+  val userResponseWithExisingEmail: GoogleOAuthDelegate.GoogleUserResponse
+    get() {
+      val fakeGoogleUser = GoogleOAuthDelegate.GoogleUserResponse()
+      fakeGoogleUser.sub = "fakeId"
+      fakeGoogleUser.name = "fakeName"
+      fakeGoogleUser.given_name = "fakeGiveName"
+      fakeGoogleUser.family_name = "fakeGivenFamilyName"
+      fakeGoogleUser.email = "fake_email@email.com"
+      fakeGoogleUser.email_verified = true
+      return fakeGoogleUser
+    }
+
   private val defaultTokenResponse: Map<String, String?>
     get() {
       val accessToken = "fake_access_token"

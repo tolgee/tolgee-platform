@@ -10,6 +10,7 @@ import io.tolgee.model.SsoTenant
 import io.tolgee.repository.TenantRepository
 import io.tolgee.security.thirdParty.SsoTenantConfig
 import io.tolgee.security.thirdParty.SsoTenantConfig.Companion.toConfig
+import io.tolgee.service.EeSsoTenantService
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,10 +18,10 @@ class TenantService(
   private val tenantRepository: TenantRepository,
   private val ssoGlobalProperties: SsoGlobalProperties,
   private val ssoLocalProperties: SsoLocalProperties,
-) {
+) : EeSsoTenantService{
   fun getById(id: Long): SsoTenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
 
-  fun getByDomain(domain: String): SsoTenant {
+  override fun getByDomain(domain: String): SsoTenant {
     return tenantRepository.findByDomain(domain) ?: throw NotFoundException()
   }
 

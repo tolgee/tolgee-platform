@@ -576,6 +576,9 @@ export interface paths {
   "/api/public/generatetoken": {
     post: operations["authenticateUser"];
   };
+  "/api/public/auth-provider/request-change": {
+    post: operations["submitOrCancelAuthProviderChangeRequest"];
+  };
   "/api/public/authorize_oauth/sso/authentication-url": {
     post: operations["getAuthenticationUrl"];
   };
@@ -867,6 +870,9 @@ export interface paths {
   "/api/public/authorize_oauth/{serviceType}": {
     /** Authenticates user using third party oAuth service */
     get: operations["authenticateUser_1"];
+  };
+  "/api/public/auth-provider/get-request": {
+    get: operations["getAuthProviderChangeRequest"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     /** Exports data as ZIP of jsons */
@@ -3587,6 +3593,11 @@ export interface components {
     SsoUrlResponse: {
       redirectUrl: string;
     };
+    AuthProviderChangeRequestDto: {
+      isConfirmed: boolean;
+      /** Format: int64 */
+      changeRequestId: number;
+    };
     CollectionModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
@@ -4724,6 +4735,14 @@ export interface components {
       globalServerRole: "USER" | "ADMIN";
       deleted: boolean;
       disabled: boolean;
+    };
+    AuthProviderChangeResponseDto: {
+      newAuthType?: string;
+      oldAuthType?: string;
+      newAccountType?: string;
+      /** Format: int64 */
+      userId?: number;
+      oldAccountType?: string;
     };
     UserTotpDisableRequestDto: {
       password: string;
@@ -14501,6 +14520,49 @@ export interface operations {
       };
     };
   };
+  submitOrCancelAuthProviderChangeRequest: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AuthProviderChangeRequestDto"];
+      };
+    };
+  };
   /** Returns all organizations owned only by current user */
   getAllSingleOwnedOrganizations: {
     responses: {
@@ -18463,6 +18525,53 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAuthProviderChangeRequest: {
+    parameters: {
+      query: {
+        requestId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderChangeResponseDto"];
         };
       };
       /** Bad Request */

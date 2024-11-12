@@ -10,6 +10,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
+import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -25,6 +26,8 @@ class GoogleOAuthDelegate(
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
+  @Lazy
+  private val userConflictManager: UserConflictManager,
 ) {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
@@ -78,10 +81,11 @@ class GoogleOAuthDelegate(
         val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
         val userAccountOptional = userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse!!.sub!!)
+        userConflictManager.resolveRequestIfExist(userAccountOptional)
         val user =
           userAccountOptional.orElseGet {
             userAccountService.findActive(googleEmail)?.let {
-              throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+              manageUserNameConflict(it)
             }
 
             val newUserAccount = UserAccount()
@@ -109,6 +113,14 @@ class GoogleOAuthDelegate(
     } catch (e: HttpClientErrorException) {
       throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
     }
+  }
+
+  private fun manageUserNameConflict(user: UserAccount) {
+    userConflictManager.manageUserNameConflict(
+      user,
+      ThirdPartyAuthType.GOOGLE,
+      newAccountType = UserAccount.AccountType.THIRD_PARTY,
+    )
   }
 
   @Suppress("PropertyName")

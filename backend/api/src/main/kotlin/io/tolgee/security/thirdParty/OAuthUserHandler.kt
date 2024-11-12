@@ -13,7 +13,7 @@ import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.addMinutes
 import org.springframework.stereotype.Component
-import java.util.Date
+import java.util.*
 
 @Component
 class OAuthUserHandler(
@@ -23,6 +23,7 @@ class OAuthUserHandler(
   private val ssoGlobalProperties: SsoGlobalProperties,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
+  private val userConflictManager: UserConflictManager,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -51,8 +52,11 @@ class OAuthUserHandler(
         resetSsoSessionExpiry(it)
       }
     }
-
+    userConflictManager.resolveRequestIfExist(userAccountOptional)
     return userAccountOptional.orElseGet {
+      userAccountService.findActive(userResponse.email)?.let {
+        manageUserNameConflict(it, userResponse, thirdPartyAuthType)
+      }
       createUser(userResponse, invitationCode, thirdPartyAuthType, accountType)
     }
   }
@@ -93,6 +97,22 @@ class OAuthUserHandler(
     }
 
     return newUserAccount
+  }
+
+  private fun manageUserNameConflict(
+    user: UserAccount,
+    userResponse: OAuthUserDetails,
+    thirdPartyAuthType: ThirdPartyAuthType,
+  ) {
+    userConflictManager.manageUserNameConflict(
+      user,
+      thirdPartyAuthType,
+      UserAccount.AccountType.THIRD_PARTY,
+      userResponse.tenant?.domain,
+      userResponse.sub,
+      userResponse.refreshToken,
+      ssoCurrentExpiration(thirdPartyAuthType),
+    )
   }
 
   fun updateRefreshToken(

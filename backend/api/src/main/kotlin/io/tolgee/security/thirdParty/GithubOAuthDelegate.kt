@@ -10,6 +10,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
+import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -26,6 +27,8 @@ class GithubOAuthDelegate(
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
+  @Lazy
+  private val userConflictManager: UserConflictManager,
 ) {
   private val githubConfigurationProperties: GithubAuthenticationProperties = properties.authentication.github
 
@@ -76,10 +79,11 @@ class GithubOAuthDelegate(
           ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
       val userAccountOptional = userAccountService.findByThirdParty(ThirdPartyAuthType.GITHUB, userResponse!!.id!!)
+      userConflictManager.resolveRequestIfExist(userAccountOptional)
       val user =
         userAccountOptional.orElseGet {
           userAccountService.findActive(githubEmail)?.let {
-            throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+            manageUserNameConflict(it)
           }
 
           val newUserAccount = UserAccount()
@@ -105,6 +109,14 @@ class GithubOAuthDelegate(
     }
 
     throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
+  }
+
+  private fun manageUserNameConflict(user: UserAccount) {
+    userConflictManager.manageUserNameConflict(
+      user,
+      ThirdPartyAuthType.GITHUB,
+      newAccountType = UserAccount.AccountType.THIRD_PARTY,
+    )
   }
 
   class GithubEmailResponse {
