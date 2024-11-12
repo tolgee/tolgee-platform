@@ -9,7 +9,7 @@ import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
   @Schema(hidden = true)
-  val properties: TolgeeProperties,
+  properties: TolgeeProperties,
   val machineTranslationServices: MtServicesDTO,
   val billing: PublicBillingConfigurationDTO,
   val version: String,
@@ -103,10 +103,5 @@ class PublicConfigurationDTO(
     }
     passwordResettable = properties.authentication.nativeEnabled
     allowRegistrations = properties.authentication.registrationsAllowed
-  }
-
-  private fun isContentDeliveryEnabled(): Boolean {
-    return properties.contentDelivery.publicUrlPrefix != null &&
-      properties.contentDelivery.storage.s3.enabled
   }
 }
