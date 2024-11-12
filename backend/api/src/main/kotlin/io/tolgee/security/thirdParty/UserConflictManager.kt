@@ -37,7 +37,7 @@ class UserConflictManager(
         calculateExpirationDate = calculateExpirationDate,
       )
     val request = authProviderChangeRequestService.create(requestData)
-    throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS, listOf(request?.id))
+    throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS, params = listOf(request?.id))
   }
 
   fun resolveRequestIfExist(user: Optional<UserAccount>) {

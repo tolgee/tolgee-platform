@@ -8,20 +8,15 @@ import io.tolgee.model.AuthProviderChangeRequest
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.AuthProviderChangeRequestRepository
 import io.tolgee.service.security.UserAccountService
-import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 
 @Service
 class AuthProviderChangeRequestService(
   private val authProviderChangeRequestRepository: AuthProviderChangeRequestRepository,
   private val userAccountService: UserAccountService,
-  private val tenantService: EeSsoTenantService,
-  private val transactionTemplate: TransactionTemplate,
-  private val entityManager: EntityManager,
 ) {
   fun getById(id: Long): AuthProviderChangeRequest = findById(id).orElseGet { throw NotFoundException() }
 
@@ -75,12 +70,6 @@ class AuthProviderChangeRequestService(
     authProviderChangeRequestRepository.findByUserAccountAndIsConfirmed(userAccount, true).ifPresent {
       userAccount.accountType = it.newAccountType
       userAccount.thirdPartyAuthType = it.newAuthProvider
-      userAccount.ssoTenant =
-        if (it.newSsoDomain != null) {
-          tenantService.getByDomain(it.newSsoDomain!!)
-        } else {
-          null
-        }
       userAccount.thirdPartyAuthId = it.newSub
       userAccount.ssoRefreshToken = it.ssoRefreshToken
       userAccount.ssoSessionExpiry = it.ssoExpiration

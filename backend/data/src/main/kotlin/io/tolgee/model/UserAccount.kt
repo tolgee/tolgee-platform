@@ -8,24 +8,12 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.task.Task
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Convert
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.ManyToMany
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.OrderBy
+import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.*
+import kotlin.jvm.Transient
 
 @Entity
 @ActivityLoggedEntity
@@ -65,9 +53,6 @@ data class UserAccount(
 
   @OneToOne(mappedBy = "userAccount")
   var authProviderChangeRequest: AuthProviderChangeRequest? = null
-
-  @ManyToOne
-  var ssoTenant: SsoTenant? = null
 
   @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
   var ssoRefreshToken: String? = null

@@ -8,13 +8,12 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
-import io.tolgee.service.AuthProviderChangeRequestService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.addMinutes
 import org.springframework.stereotype.Component
-import java.util.Date
+import java.util.*
 
 @Component
 class OAuthUserHandler(
@@ -24,8 +23,6 @@ class OAuthUserHandler(
   private val ssoGlobalProperties: SsoGlobalProperties,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
-  private val authenticationProperties: AuthenticationProperties,
-  private val authProviderChangeRequestService: AuthProviderChangeRequestService,
   private val userConflictManager: UserConflictManager,
 ) {
   fun findOrCreateUser(
@@ -114,24 +111,8 @@ class OAuthUserHandler(
       userResponse.tenant?.domain,
       userResponse.sub,
       userResponse.refreshToken,
-      calculateExpirationDate(),
+      ssoCurrentExpiration(thirdPartyAuthType),
     )
-  }
-
-  private fun changeAuthProvider(
-    user: UserAccount,
-    thirdPartyAuthType: ThirdPartyAuthType,
-    userDetails: OAuthUserDetails,
-  ): UserAccount {
-    user.thirdPartyAuthType = thirdPartyAuthType
-    user.accountType = UserAccount.AccountType.THIRD_PARTY
-    user.thirdPartyAuthId = userDetails.sub
-    user.ssoTenant = userDetails.tenant
-    if (thirdPartyAuthType == ThirdPartyAuthType.SSO) {
-      updateRefreshToken(user, userDetails.refreshToken)
-      updateSsoSessionExpiry(user)
-    }
-    return userAccountService.save(user)
   }
 
   fun updateRefreshToken(

@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import java.io.Serializable
 
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
-open class AuthenticationException(message: Message) : ErrorException(message) {
-class AuthenticationException(
-  message: io.tolgee.constants.Message,
+open class AuthenticationException(
+  message: Message,
   params: List<Serializable?>? = null,
 ) : ErrorException(message, params) {
   override val httpStatus: HttpStatus

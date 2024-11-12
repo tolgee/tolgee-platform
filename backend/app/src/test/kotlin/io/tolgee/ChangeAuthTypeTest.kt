@@ -5,10 +5,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ChangeAuthTypeTestData
 import io.tolgee.dtos.request.AuthProviderChangeRequestDto
-import io.tolgee.ee.service.TenantService
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.service.AuthProviderChangeRequestService
@@ -56,10 +58,14 @@ class ChangeAuthTypeTest : AbstractControllerTest() {
   private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
   private val ssoUtil: SsoAuthUtil by lazy { SsoAuthUtil(authMvc, restTemplate, tenantService, jwtProcessor) }
 
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeAll
   fun init() {
     changeAuthTypeTestData = ChangeAuthTypeTestData()
     testDataService.saveTestData(changeAuthTypeTestData.root)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
   }
 
   @Test
@@ -192,9 +198,9 @@ class ChangeAuthTypeTest : AbstractControllerTest() {
     assertThat(successResponse.status).isEqualTo(200)
 
     user = userAccountService.get(googleAuthUtil.userResponseWithExisingEmail.email!!)
-    assertThat(user.thirdPartyAuthType).isEqualTo(ThirdPartyAuthType.SSO)
+    assertThat(user.thirdPartyAuthType).isEqualTo(ThirdPartyAuthType.SSO_GLOBAL)
     assertThat(user.accountType).isEqualTo(UserAccount.AccountType.THIRD_PARTY)
-    assertThat(user.ssoTenant?.domain).isEqualTo(domain)
+    //assertThat(user.ssoTenant?.domain).isEqualTo(domain)
     assertThat(user.ssoSessionExpiry).isNotNull()
     assertThat(user.ssoRefreshToken).isNotNull()
   }
@@ -220,9 +226,9 @@ class ChangeAuthTypeTest : AbstractControllerTest() {
     doAuthentication(changeAuthTypeTestData.userExisting.username, "admin")
 
     val user = userAccountService.get(changeAuthTypeTestData.userExisting.username)
-    assertThat(user.thirdPartyAuthType).isEqualTo(ThirdPartyAuthType.SSO)
+    assertThat(user.thirdPartyAuthType).isEqualTo(ThirdPartyAuthType.SSO_GLOBAL)
     assertThat(user.accountType).isEqualTo(UserAccount.AccountType.THIRD_PARTY)
-    assertThat(user.ssoTenant?.domain).isEqualTo(domain)
+    //assertThat(user.ssoTenant?.domain).isEqualTo(domain)
     assertThat(user.ssoSessionExpiry).isNotNull()
     assertThat(user.ssoRefreshToken).isNotNull()
   }
@@ -232,8 +238,8 @@ class ChangeAuthTypeTest : AbstractControllerTest() {
     ssoGlobalProperties.domain = domain
     ssoGlobalProperties.clientId = "clientId"
     ssoGlobalProperties.clientSecret = "clientSecret"
-    ssoGlobalProperties.authorizationUrl = "authorizationUri"
-    ssoGlobalProperties.tokenUrl = "http://tokenUri"
+    ssoGlobalProperties.authorizationUri = "authorizationUri"
+    ssoGlobalProperties.tokenUri = "http://tokenUri"
     ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
   }
 
