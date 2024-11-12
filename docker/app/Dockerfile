@@ -1,5 +1,11 @@
 FROM tolgee/base:jdk-21-postgres-13
 
+################
+# Dependencies #
+################
+
+RUN apk add curl
+
 #############
 ### Tolgee  #
 #############
@@ -28,4 +34,4 @@ CMD ["java", "-cp", "app:app/lib/*", "io.tolgee.Application"]
 
 # Health check to ensure the app is up and running
 HEALTHCHECK --interval=10s --timeout=3s --retries=20 \
-    CMD curl -f http://127.0.0.1:$HEALTHCHECK_PORT/actuator/health || exit 1
+    CMD curl -f "http://127.0.0.1:$HEALTHCHECK_PORT/actuator/health" || exit 1
