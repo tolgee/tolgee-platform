@@ -159,6 +159,8 @@ class AuthenticationFilterTest {
     Mockito.`when`(userAccount.needsSuperJwt).thenReturn(false)
     Mockito.`when`(userAccountDto.id).thenReturn(TEST_USER_ID)
 
+    Mockito.`when`(ssoDelegate.verifyUserSsoAccountAvailable(userAccountDto)).thenReturn(true)
+
     SecurityContextHolder.getContext().authentication = null
   }
 
