@@ -1,3 +1,10 @@
+## [3.81.2](https://github.com/tolgee/tolgee-platform/compare/v3.81.1...v3.81.2) (2024-11-12)
+
+
+### Bug Fixes
+
+* remove redundant isContentDeliveryEnabled function from PublicConfigurationDTO ([#2689](https://github.com/tolgee/tolgee-platform/issues/2689)) ([6ddba66](https://github.com/tolgee/tolgee-platform/commit/6ddba66d06bcf6ee58554abef07e15fa8e88334b))
+
 ## [3.81.1](https://github.com/tolgee/tolgee-platform/compare/v3.81.0...v3.81.1) (2024-11-11)
 
 
