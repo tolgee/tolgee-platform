@@ -14,6 +14,7 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.DisabledFunctionalityException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -21,6 +22,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authorization.BypassEmailVerification
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
+import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.security.thirdParty.GithubOAuthDelegate
 import io.tolgee.security.thirdParty.GoogleOAuthDelegate
 import io.tolgee.security.thirdParty.OAuth2Delegate
@@ -43,6 +45,7 @@ class PublicController(
   private val githubOAuthDelegate: GithubOAuthDelegate,
   private val googleOAuthDelegate: GoogleOAuthDelegate,
   private val oauth2Delegate: OAuth2Delegate,
+  private val ssoDelegate: SsoDelegate,
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val tolgeeEmailSender: TolgeeEmailSender,
@@ -79,6 +82,10 @@ class PublicController(
     @RequestBody @Valid
     request: ResetPasswordRequest,
   ) {
+    if (!authProperties.nativeEnabled) {
+      throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
+    }
+
     val userAccount = userAccountService.findActive(request.email!!) ?: return
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
       val params =
@@ -134,6 +141,9 @@ class PublicController(
     @PathVariable("code") code: String,
     @PathVariable("email") email: String,
   ) {
+    if (!authProperties.nativeEnabled) {
+      throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
+    }
     validateEmailCode(code, email)
   }
 
@@ -144,9 +154,12 @@ class PublicController(
     @RequestBody @Valid
     request: ResetPassword,
   ) {
+    if (!authProperties.nativeEnabled) {
+      throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
+    }
     val userAccount = validateEmailCode(request.code!!, request.email!!)
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
-      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+      throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
     if (userAccount.accountType === UserAccount.AccountType.THIRD_PARTY) {
       userAccountService.setAccountType(userAccount, UserAccount.AccountType.LOCAL)
@@ -168,6 +181,9 @@ class PublicController(
   ): JwtAuthenticationResponse? {
     if (!reCaptchaValidationService.validate(dto.recaptchaToken, "")) {
       throw BadRequestException(Message.INVALID_RECAPTCHA_TOKEN)
+    }
+    if (!authProperties.nativeEnabled) {
+      throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
     }
     return signUpService.signUp(dto)
   }
@@ -207,6 +223,7 @@ class PublicController(
     @RequestParam(value = "code", required = true) code: String?,
     @RequestParam(value = "redirect_uri", required = true) redirectUri: String?,
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?,
+    @RequestParam(value = "domain", required = false) domain: String?,
   ): JwtAuthenticationResponse {
     if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
       val user = getFakeGithubUser()
@@ -223,6 +240,10 @@ class PublicController(
 
       "oauth2" -> {
         oauth2Delegate.getTokenResponse(code, invitationCode, redirectUri)
+      }
+
+      "sso" -> {
+        ssoDelegate.getTokenResponse(code, invitationCode, redirectUri, domain)
       }
 
       else -> {

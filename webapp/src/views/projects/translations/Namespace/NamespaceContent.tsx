@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, MenuItem, styled } from '@mui/material';
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
 import { useNamespaceFilter } from './useNamespaceFilter';

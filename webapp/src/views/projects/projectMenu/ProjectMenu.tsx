@@ -1,22 +1,25 @@
-import { Devices, PersonOutline, Code } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
-import LanguageIcon from '@mui/icons-material/Language';
 import {
-  ExportIcon,
-  ImportIcon,
-  ProjectsIcon,
-  SettingsIcon,
-  TranslationIcon,
-} from 'tg.component/CustomIcons';
+  ClipboardCheck,
+  Code02,
+  FileDownload03,
+  Globe01,
+  HomeLine,
+  LayoutAlt04,
+  Settings01,
+  Translate01,
+  UploadCloud02,
+  User01,
+} from '@untitled-ui/icons-react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
 
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import { SideLogo } from './SideLogo';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { Integration } from 'tg.component/CustomIcons';
 
 export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
@@ -33,6 +36,7 @@ export const ProjectMenu = ({ id }) => {
   const canPublishCd = satisfiesPermission('content-delivery.publish');
   const canManageWebhooks = satisfiesPermission('webhooks.manage');
   const canViewDeveloper = canPublishCd || canManageWebhooks;
+  const canViewTasks = satisfiesPermission('tasks.view');
 
   const { t } = useTranslate();
 
@@ -43,13 +47,13 @@ export const ProjectMenu = ({ id }) => {
       <SideLogo hidden={!topBarHeight} />
       <SideMenuItem
         linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
-        icon={<ProjectsIcon />}
+        icon={<HomeLine />}
         text={t('project_menu_projects')}
         data-cy="project-menu-item-projects"
       />
       <SideMenuItem
         linkTo={LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: id })}
-        icon={<DashboardIcon />}
+        icon={<LayoutAlt04 />}
         text={t('project_menu_dashboard', 'Project Dashboard')}
         data-cy="project-menu-item-dashboard"
       />
@@ -58,79 +62,80 @@ export const ProjectMenu = ({ id }) => {
           linkTo={LINKS.PROJECT_TRANSLATIONS.build({
             [PARAMS.PROJECT_ID]: id,
           })}
-          icon={<TranslationIcon />}
+          icon={<Translate01 />}
           text={t('project_menu_translations')}
           data-cy="project-menu-item-translations"
           matchAsPrefix
           quickStart={{ itemKey: 'menu_translations' }}
         />
       )}
-      <>
-        {canEditProject && (
+      {canViewTasks && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_TASKS.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<ClipboardCheck />}
+          text={t('project_menu_tasks')}
+          data-cy="project-menu-item-tasks"
+          matchAsPrefix
+        />
+      )}
+
+      {canEditLanguages && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_LANGUAGES.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          matchAsPrefix
+          icon={<Globe01 />}
+          text={t('project_menu_languages')}
+          data-cy="project-menu-item-languages"
+          quickStart={{
+            itemKey: 'menu_languages',
+          }}
+        />
+      )}
+
+      {canViewUsers && (
+        <>
           <SideMenuItem
-            linkTo={LINKS.PROJECT_EDIT.build({
+            linkTo={LINKS.PROJECT_PERMISSIONS.build({
               [PARAMS.PROJECT_ID]: id,
             })}
-            matchAsPrefix
-            icon={<SettingsIcon />}
-            text={t('project_menu_project_settings')}
-            data-cy="project-menu-item-settings"
-            quickStart={{ itemKey: 'menu_settings' }}
-          />
-        )}
-        {canEditLanguages && (
-          <SideMenuItem
-            linkTo={LINKS.PROJECT_LANGUAGES.build({
-              [PARAMS.PROJECT_ID]: id,
-            })}
-            matchAsPrefix
-            icon={<LanguageIcon />}
-            text={t('project_menu_languages')}
-            data-cy="project-menu-item-languages"
+            icon={<User01 />}
+            text={t('project_menu_members')}
+            data-cy="project-menu-item-members"
             quickStart={{
-              itemKey: 'menu_languages',
+              itemKey: 'menu_members',
             }}
           />
-        )}
-        {canViewUsers && (
-          <>
-            <SideMenuItem
-              linkTo={LINKS.PROJECT_PERMISSIONS.build({
-                [PARAMS.PROJECT_ID]: id,
-              })}
-              icon={<PersonOutline />}
-              text={t('project_menu_members')}
-              data-cy="project-menu-item-members"
-              quickStart={{
-                itemKey: 'menu_members',
-              }}
-            />
-          </>
-        )}
-        {canImport && (
-          <SideMenuItem
-            linkTo={LINKS.PROJECT_IMPORT.build({
-              [PARAMS.PROJECT_ID]: id,
-            })}
-            icon={<ImportIcon />}
-            text={t('project_menu_import')}
-            data-cy="project-menu-item-import"
-            quickStart={{ itemKey: 'menu_import' }}
-          />
-        )}
-      </>
+        </>
+      )}
+
+      {canImport && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_IMPORT.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          icon={<UploadCloud02 />}
+          text={t('project_menu_import')}
+          data-cy="project-menu-item-import"
+          quickStart={{ itemKey: 'menu_import' }}
+        />
+      )}
 
       {canViewTranslations && (
         <SideMenuItem
           linkTo={LINKS.PROJECT_EXPORT.build({
             [PARAMS.PROJECT_ID]: id,
           })}
-          icon={<ExportIcon />}
+          icon={<FileDownload03 />}
           text={t('project_menu_export')}
           data-cy="project-menu-item-export"
           quickStart={{ itemKey: 'menu_export' }}
         />
       )}
+
       {canViewDeveloper && (
         <SideMenuItem
           linkTo={(canPublishCd
@@ -139,7 +144,7 @@ export const ProjectMenu = ({ id }) => {
           ).build({
             [PARAMS.PROJECT_ID]: id,
           })}
-          icon={<Code />}
+          icon={<Code02 />}
           text={t('project_menu_developer')}
           data-cy="project-menu-item-developer"
           quickStart={{ itemKey: 'menu_developer' }}
@@ -153,10 +158,22 @@ export const ProjectMenu = ({ id }) => {
           linkTo={LINKS.PROJECT_INTEGRATE.build({
             [PARAMS.PROJECT_ID]: id,
           })}
-          icon={<Devices />}
+          icon={<Integration />}
           text={t('project_menu_integrate')}
           data-cy="project-menu-item-integrate"
           quickStart={{ itemKey: 'menu_integrate' }}
+        />
+      )}
+      {canEditProject && (
+        <SideMenuItem
+          linkTo={LINKS.PROJECT_EDIT.build({
+            [PARAMS.PROJECT_ID]: id,
+          })}
+          matchAsPrefix
+          icon={<Settings01 />}
+          text={t('project_menu_project_settings')}
+          data-cy="project-menu-item-settings"
+          quickStart={{ itemKey: 'menu_settings' }}
         />
       )}
     </SideMenu>

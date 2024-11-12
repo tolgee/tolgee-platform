@@ -93,7 +93,7 @@ export const ActivityList: React.FC<Props> = ({ activityLoadable }) => {
   return (
     <StyledContainer>
       <StyledHeader>
-        <Typography variant="h5">
+        <Typography variant="h4">
           <T keyName="dashboard_activity_title" />
         </Typography>
         <FormControlLabel

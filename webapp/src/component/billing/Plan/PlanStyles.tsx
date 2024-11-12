@@ -1,7 +1,9 @@
 import { Box, styled } from '@mui/material';
 
 export const PlanContainer = styled('div')`
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   position: relative;
   border: 1px solid ${({ theme }) => theme.palette.background.paper};
   background: ${({ theme }) => theme.palette.background.paper};
@@ -21,13 +23,14 @@ export const PlanContainer = styled('div')`
 
 export const PlanContent = styled('div')`
   padding: 32px 24px;
-  display: grid;
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   height: 100%;
 `;
 
 export const PlanTitle = styled('div')`
-  justify-self: center;
+  align-self: center;
   font-size: 24px;
 `;
 
@@ -45,9 +48,10 @@ export const PlanSubtitle = styled('div')`
 `;
 
 export const PlanFeaturesBox = styled(Box)`
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   border-radius: 20px;
   padding: 24px 20px;
   background: ${({ theme }) => theme.palette.tokens.background['paper-3']};
-  align-self: start;
 `;

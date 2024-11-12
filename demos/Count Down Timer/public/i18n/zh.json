@@ -1,0 +1,17 @@
+{
+  "app-title": "倒计时器",
+  "days": "天",
+  "dd": "日",
+  "enter-event": "输入活动名称",
+  "event-name": "事件名称",
+  "future-error": "请选择未来的日期和时间！",
+  "hours": "小时",
+  "minute-key": "分钟",
+  "mm": "毫米",
+  "remove": "消除",
+  "seconds": "秒",
+  "set-timer": "设置定时器",
+  "success": "计时器添加成功！",
+  "target-date-time": "目标日期和时间",
+  "yyyy": "年份"
+}

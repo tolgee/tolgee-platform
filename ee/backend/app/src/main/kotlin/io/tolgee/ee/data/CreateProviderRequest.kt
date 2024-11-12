@@ -1,22 +1,22 @@
 package io.tolgee.ee.data
 
-import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 import org.springframework.validation.annotation.Validated
 
 @Validated
 data class CreateProviderRequest(
   val name: String?,
-  @field:NotEmpty
+  @field:NotNull
   val clientId: String,
-  @field:NotEmpty
+  @field:NotNull
   val clientSecret: String,
-  @field:NotEmpty
+  @field:NotNull
   val authorizationUri: String,
-  @field:NotEmpty
+  @field:NotNull
   val tokenUri: String,
-  @field:NotEmpty
+  @field:NotNull
   val jwkSetUri: String,
   val isEnabled: Boolean,
-  @field:NotEmpty
+  @field:NotNull
   val domainName: String,
 )

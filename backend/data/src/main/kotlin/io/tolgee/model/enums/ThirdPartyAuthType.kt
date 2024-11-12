@@ -5,6 +5,7 @@ enum class ThirdPartyAuthType {
   GITHUB,
   OAUTH2,
   SSO,
+  SSO_GLOBAL,
   ;
 
   fun code(): String = name.lowercase()

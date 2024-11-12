@@ -20,12 +20,11 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
-import io.tolgee.security.service.OAuthServiceEe
+import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -54,7 +53,7 @@ class AuthenticationFilter(
   @Lazy
   private val patService: PatService,
   @Lazy
-  private val oAuthService: OAuthServiceEe,
+  private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(
     request: HttpServletRequest,
@@ -75,7 +74,9 @@ class AuthenticationFilter(
     filterChain.doFilter(request, response)
   }
 
-  override fun shouldNotFilter(request: HttpServletRequest): Boolean = request.method == "OPTIONS"
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+    return request.method == "OPTIONS"
+  }
 
   private fun doAuthenticate(request: HttpServletRequest) {
     val authorization = request.getHeader("Authorization")
@@ -117,25 +118,8 @@ class AuthenticationFilter(
   }
 
   private fun checkIfSsoUserStillExists(userDto: UserAccountDto) {
-    if (userDto.thirdPartyAuth == null) {
-      return
-    }
-    val thirdPartyAuthType =
-      userDto.thirdPartyAuth?.let {
-        runCatching {
-          ThirdPartyAuthType.valueOf(it.uppercase())
-        }.getOrElse { throw BadRequestException(Message.SSO_CANT_VERIFY_USER) }
-      }
-
-    if (!oAuthService.verifyUserSsoAccountAvailable(
-        userDto.ssoDomain,
-        userDto.id,
-        userDto.ssoRefreshToken,
-        thirdPartyAuthType!!,
-        userDto.ssoSessionExpiry,
-      )
-    ) {
-      throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
+    if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
+      throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
     }
   }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { Box, Button, Link, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -89,7 +89,7 @@ export const CdList = () => {
             color="primary"
             onClick={() => setFormOpen(true)}
             disabled={!canAdd}
-            startIcon={<Add />}
+            startIcon={<Plus width={19} height={19} />}
             data-cy="content-delivery-add-button"
           >
             {t('content_delivery_add_button')}

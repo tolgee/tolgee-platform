@@ -3,7 +3,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { TABLE_FIRST_CELL } from '../tableStyles';
 import { LanguageItem } from '../LanguageItem';
 import { IconButton, styled } from '@mui/material';
-import { Add, Edit } from '@mui/icons-material';
+import { Plus, Edit02 } from '@untitled-ui/icons-react';
 import { AiLanguageDescriptionDialog } from './AiLanguageDescriptionDialog';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -46,7 +46,11 @@ export const AiLanguagesTableRow = ({ language, description }: Props) => {
           data-cy="ai-languages-description-edit"
           data-cy-language={language.tag}
         >
-          {description ? <Edit fontSize="small" /> : <Add fontSize="small" />}
+          {description ? (
+            <Edit02 width={19} height={19} />
+          ) : (
+            <Plus width={19} height={19} />
+          )}
         </IconButton>
       </StyledAction>
       {dialogOpen && (

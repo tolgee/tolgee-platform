@@ -1,4 +1,4 @@
-import { Help } from '@mui/icons-material';
+import { HelpCircle } from '@untitled-ui/icons-react';
 import { Tooltip, styled } from '@mui/material';
 
 const StyledLabelBody = styled('div')`
@@ -18,7 +18,7 @@ export const LabelHint = ({ children, title, size = 15 }: Props) => {
     <Tooltip title={title} disableInteractive>
       <StyledLabelBody>
         {children}
-        <Help style={{ fontSize: size }} />
+        <HelpCircle style={{ width: size, height: size }} />
       </StyledLabelBody>
     </Tooltip>
   );

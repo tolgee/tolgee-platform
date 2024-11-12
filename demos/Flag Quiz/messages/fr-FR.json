@@ -1,0 +1,15 @@
+{
+  "app-name": "Quiz des drapeaux",
+  "correct": "C'est exact !",
+  "correct-ans": "Réponse correcte :",
+  "game-over": "Jeu Terminé !",
+  "guess": "Quel pays représente ce drapeau ?",
+  "incorrect": "C'est faux !",
+  "question": "Question",
+  "quiz-name": "Quiz sur le drapeau",
+  "restart-quiz": "Redémarrez Quiz !",
+  "select-lang": "Sélectionnez la langue",
+  "you-lose": "Tu perds !",
+  "your-score": "Votre score :",
+  "you-win": "Tu as gagné !"
+}

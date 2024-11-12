@@ -10,6 +10,13 @@ import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "user_account_id"),
+    Index(columnList = "organization_slack_workspace_id"),
+  ],
+)
 class SlackConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,

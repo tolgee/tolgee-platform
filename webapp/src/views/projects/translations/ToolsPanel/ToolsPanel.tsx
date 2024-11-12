@@ -10,7 +10,7 @@ import { Panel } from './common/Panel';
 
 import { PANELS, PANELS_WHEN_INACTIVE } from './panelsList';
 import { useOpenPanels } from './useOpenPanels';
-import { Close } from '@mui/icons-material';
+import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
@@ -63,7 +63,7 @@ export const ToolsPanel = () => {
     : undefined;
 
   const displayPanels = keyData && language && baseLanguage;
-  const { satisfiesLanguageAccess } = useProjectPermissions();
+  const projectPermissions = useProjectPermissions();
 
   const dataProps = {
     project,
@@ -73,9 +73,21 @@ export const ToolsPanel = () => {
     activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
     setValue: setEditValueString,
     editEnabled: language
-      ? satisfiesLanguageAccess('translations.edit', language.id) &&
-        translation?.state !== 'DISABLED'
+      ? (projectPermissions.satisfiesLanguageAccess(
+          'translations.edit',
+          language.id
+        ) &&
+          translation?.state !== 'DISABLED') ||
+        Boolean(
+          keyData?.tasks?.find(
+            (t) =>
+              t.languageTag === language.tag &&
+              t.userAssigned &&
+              t.type === 'TRANSLATE'
+          )
+        )
       : false,
+    projectPermissions,
   };
 
   return (
@@ -108,7 +120,7 @@ export const ToolsPanel = () => {
             </Typography>
           </StyledTitle>
           <StyledButton onClick={() => setSidePanelOpen(false)}>
-            <Close />
+            <XClose />
           </StyledButton>
           {PANELS_WHEN_INACTIVE.map((config) => (
             <Panel

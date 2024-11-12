@@ -1,0 +1,13 @@
+{
+  "app-title": "Whether App",
+  "current-weather": "Current Weather",
+  "enter-city": "Enter city name",
+  "feels-like": "Feels like",
+  "Forecast": "Forecast",
+  "Humidity": "Humidity",
+  "Loading": "Loading",
+  "not-allow": "User denied Geolocation",
+  "Pressure": "Pressure",
+  "search-key": "Search",
+  "Wind": "Wind"
+}

@@ -17,14 +17,22 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
 @ActivityLoggedEntity
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "content_storage_id"),
+  ],
+)
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,

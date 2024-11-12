@@ -1,7 +1,7 @@
+import { DiffValue, FieldOptionsObj } from './types';
 import { getTextDiff } from './types/getTextDiff';
 import { getAutoChange } from './types/getAutoChange';
 import { getStateChange } from './types/getStateChange';
-import { DiffValue, FieldOptionsObj } from './types';
 import { getGeneralChange } from './types/getGeneralChange';
 import { getCommentStateChange } from './types/getCommentStateChange';
 import { getKeyTagsChange } from './types/getKeyTagsChange';
@@ -16,6 +16,9 @@ import { getBatchKeyTagListChange } from './types/getBatchKeyTagListChange';
 import { getBatchNamespaceChange } from './types/getBatchNamespaceChange';
 import { getBatchStateChange } from './types/getBatchStateChange';
 import { getDefaultNamespaceChange } from './types/getDefaultNamespaceChange';
+import { getDateChange } from './types/getDateChange';
+import { getTaskStateChange } from './types/getTaskStateChange';
+import { getTaskTypeChange } from './types/getTaskTypeChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -63,6 +66,12 @@ export const formatDiff = ({
       return getBatchStateChange(value);
     case 'default_namespace':
       return getDefaultNamespaceChange(value);
+    case 'date':
+      return getDateChange(value);
+    case 'task_state':
+      return getTaskStateChange(value);
+    case 'task_type':
+      return getTaskTypeChange(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }

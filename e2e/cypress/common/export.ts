@@ -52,6 +52,8 @@ export const exportToggleLanguage = (lang: string) => {
 export function assertExportLanguagesSelected(languages: string[]) {
   cy.gcy('export-language-selector').click();
 
+  cy.gcy('export-language-selector-item').should('be.visible');
+
   languages.forEach((language) => {
     cy.gcy('export-language-selector-item')
       .contains(language)
@@ -222,6 +224,16 @@ export const testExportFormats = (
       structureDelimiter: '.',
     },
   });
+
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
+      format: 'CSV',
+      expectedParams: {
+        format: 'CSV',
+      },
+    }
+  );
 };
 
 const testFormat = (

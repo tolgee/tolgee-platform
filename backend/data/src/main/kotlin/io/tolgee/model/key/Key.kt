@@ -12,17 +12,20 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreRemove
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
@@ -37,6 +40,12 @@ import org.springframework.context.ApplicationEventPublisher
 @ActivityReturnsExistence
 @ActivityEntityDescribingPaths(["namespace"])
 @EntityListeners(Key.Companion.KeyListeners::class)
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "namespace_id"),
+  ],
+)
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)
@@ -55,6 +64,9 @@ class Key(
 
   @OneToMany(mappedBy = "key")
   var translations: MutableList<Translation> = mutableListOf()
+
+  @OneToMany(mappedBy = "key", orphanRemoval = true)
+  var tasks: MutableList<TaskKey> = mutableListOf()
 
   @OneToOne(mappedBy = "key", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   override var keyMeta: KeyMeta? = null

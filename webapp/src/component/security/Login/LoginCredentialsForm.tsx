@@ -1,18 +1,21 @@
-import React, {RefObject} from 'react';
-import {Button, Link as MuiLink, styled, Typography} from '@mui/material';
+import React, { RefObject } from 'react';
+import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
 import Box from '@mui/material/Box';
-import {T, useTranslate} from '@tolgee/react';
-import {Link} from 'react-router-dom';
-import LoginIcon from '@mui/icons-material/Login';
+import { T } from '@tolgee/react';
+import { Link } from 'react-router-dom';
+import { LogIn01 } from '@untitled-ui/icons-react';
 
-import {LINKS} from 'tg.constants/links';
-import {useConfig} from 'tg.globalContext/helpers';
+import { LINKS } from 'tg.constants/links';
+import { useConfig } from 'tg.globalContext/helpers';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import {StandardForm} from 'tg.component/common/form/StandardForm';
-import {TextField} from 'tg.component/common/form/fields/TextField';
-import {useOAuthServices} from 'tg.hooks/useOAuthServices';
-import {useGlobalActions, useGlobalContext,} from 'tg.globalContext/GlobalContext';
-import {ApiError} from 'tg.service/http/ApiError';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { useOAuthServices } from 'tg.hooks/useOAuthServices';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
+import { ApiError } from 'tg.service/http/ApiError';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -29,10 +32,43 @@ type LoginViewCredentialsProps = {
 
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
-  const { login } = useGlobalActions();
-  const t = useTranslate();
-  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
+  const { login, loginRedirectSso } = useGlobalActions();
+  const isLoading = useGlobalContext(
+    (c) =>
+      c.auth.loginLoadable.isLoading || c.auth.redirectSsoUrlLoadable.isLoading
+  );
+
   const oAuthServices = useOAuthServices();
+
+  const nativeEnabled = remoteConfig.nativeEnabled;
+  const localSsoEnabled =
+    remoteConfig.authMethods?.ssoOrganizations.enabled ?? false;
+  const globalSsoEnabled = remoteConfig.authMethods?.ssoGlobal.enabled ?? false;
+  const hasNonNativeAuthMethods =
+    oAuthServices.length > 0 || localSsoEnabled || globalSsoEnabled;
+  const noLoginMethods = !nativeEnabled && !hasNonNativeAuthMethods;
+
+  const customLogoUrl = remoteConfig.authMethods?.ssoGlobal.customLogoUrl;
+  // TODO: the custom logo is just displayed on button, is that expected?
+  const logoIcon = customLogoUrl ? (
+    <img
+      src={customLogoUrl}
+      alt="Custom Logo"
+      style={{ width: 24, height: 24 }}
+    />
+  ) : (
+    <LogIn01 />
+  );
+  const customLoginText = remoteConfig.authMethods?.ssoGlobal.customLoginText;
+  const loginText = customLoginText ? (
+    <span>{customLoginText}</span>
+  ) : (
+    <T keyName="login_sso" />
+  );
+
+  function globalSsoLogin() {
+    loginRedirectSso(remoteConfig.authMethods?.ssoGlobal.domain as string);
+  }
 
   return (
     <StandardForm
@@ -40,72 +76,75 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
       submitButtons={
         <Box>
           <Box display="flex" flexDirection="column" alignItems="stretch">
-            {remoteConfig.nativeEnabled && (
-              <LoadingButton
-                loading={isLoading}
-                variant="contained"
-                color="primary"
-                type="submit"
-                data-cy="login-button"
-              >
-                <T keyName="login_login_button" />
-              </LoadingButton>
+            {noLoginMethods && (
+              <Typography variant="body1" color="error">
+                {/* Did you mess up your configuration? */}
+                <T keyName="login_no_login_methods" />
+              </Typography>
             )}
 
-            <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>
-              {remoteConfig.passwordResettable && (
-                <MuiLink
-                  to={LINKS.RESET_PASSWORD_REQUEST.build()}
-                  component={Link}
+            {nativeEnabled && (
+              <>
+                <LoadingButton
+                  loading={isLoading}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  data-cy="login-button"
                 >
-                  <Typography variant="body2">
-                    <T keyName="login_forgot_your_password" />
-                  </Typography>
-                </MuiLink>
-              )}
-            </Box>
-
-            {!remoteConfig.nativeEnabled && (
-              <Button
-                component={Link}
-                to={LINKS.SSO_LOGIN.build()}
-                size="medium"
-                endIcon={
-                  remoteConfig.customLoginLogo ? (
-                      <img
-                          src={remoteConfig.customLoginLogo}
-                          alt="Custom Logo"
-                          style={{ width: 24, height: 24 }}
-                      />
-                  ) : (
-                      <LoginIcon />
-                  )
-                }
-                variant="outlined"
-                style={{ marginBottom: '0.5rem' }}
-                color="inherit"
-              >
-                {remoteConfig.customLoginText ? (
-                    <span>{remoteConfig.customLoginText}</span>
-                ) : (
-                    <T keyName="login_sso" />
-                )}
-              </Button>
+                  <T keyName="login_login_button" />
+                </LoadingButton>
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  flexWrap="wrap"
+                  mt={1}
+                >
+                  <MuiLink
+                    to={LINKS.RESET_PASSWORD_REQUEST.build()}
+                    component={Link}
+                  >
+                    <Typography variant="body2">
+                      <T keyName="login_forgot_your_password" />
+                    </Typography>
+                  </MuiLink>
+                </Box>
+              </>
             )}
 
-            {<Box height="0px" mt={5} />}
-            {remoteConfig.nativeEnabled && (
-              <Button
-                component={Link}
-                to={LINKS.SSO_LOGIN.build()}
-                size="medium"
-                endIcon={<LoginIcon />}
-                variant="outlined"
-                style={{ marginBottom: '0.5rem', marginTop: '1rem' }}
-                color="inherit"
-              >
-                <T keyName="login_sso" />
-              </Button>
+            {nativeEnabled && hasNonNativeAuthMethods && (
+              <Box height="0px" mt={5} />
+            )}
+
+            {(localSsoEnabled || globalSsoEnabled) && (
+              <React.Fragment>
+                {localSsoEnabled && (
+                  <Button
+                    component={Link}
+                    to={LINKS.SSO_LOGIN.build()}
+                    size="medium"
+                    endIcon={logoIcon}
+                    variant="outlined"
+                    style={{ marginBottom: '0.5rem' }}
+                    color="inherit"
+                  >
+                    {loginText}
+                  </Button>
+                )}
+                {!localSsoEnabled && (
+                  <LoadingButton
+                    loading={isLoading}
+                    size="medium"
+                    endIcon={logoIcon}
+                    variant="outlined"
+                    style={{ marginBottom: '0.5rem' }}
+                    color="inherit"
+                    onClick={globalSsoLogin}
+                  >
+                    {loginText}
+                  </LoadingButton>
+                )}
+              </React.Fragment>
             )}
 
             {oAuthServices.map((provider) => (
@@ -138,7 +177,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         }
       }}
     >
-      {remoteConfig.nativeEnabled && (
+      {nativeEnabled && (
         <StyledInputFields>
           <TextField
             name="username"

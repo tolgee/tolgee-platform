@@ -1,6 +1,7 @@
 package io.tolgee.dtos.cacheable
 
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import java.io.Serializable
 import java.util.*
 
@@ -14,9 +15,8 @@ data class UserAccountDto(
   val deleted: Boolean,
   val tokensValidNotBefore: Date?,
   val emailVerified: Boolean,
-  val thirdPartyAuth: String?,
+  val thirdPartyAuth: ThirdPartyAuthType?,
   val ssoRefreshToken: String?,
-  val ssoDomain: String?,
   val ssoSessionExpiry: Date?,
 ) : Serializable {
   companion object {
@@ -31,12 +31,13 @@ data class UserAccountDto(
         deleted = entity.deletedAt != null,
         tokensValidNotBefore = entity.tokensValidNotBefore,
         emailVerified = entity.emailVerification == null,
-        thirdPartyAuth = entity.thirdPartyAuthType?.code(),
+        thirdPartyAuth = entity.thirdPartyAuthType,
         ssoRefreshToken = entity.ssoRefreshToken,
-        ssoDomain = entity.ssoTenant?.domain,
         ssoSessionExpiry = entity.ssoSessionExpiry,
       )
   }
 
-  override fun toString(): String = username
+  override fun toString(): String {
+    return username
+  }
 }

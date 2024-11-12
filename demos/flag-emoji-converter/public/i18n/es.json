@@ -1,0 +1,11 @@
+{
+  "app-description": "Localiza las banderas de los países en función de sus nombres.",
+  "app-title": "Buscar la bandera del país",
+  "input-placeholder": "Buscar bandera de país",
+  "option-chinese": "Chino",
+  "option-english": "Inglés",
+  "option-french": "Francés",
+  "option-german": "Alemán",
+  "option-hindi": "Hindi",
+  "option-spanish": "Español"
+}

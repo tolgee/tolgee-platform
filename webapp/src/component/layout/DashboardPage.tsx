@@ -13,10 +13,9 @@ import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
 import { useIsEmailVerified } from 'tg.globalContext/helpers';
 
 const StyledMain = styled(Box)`
-  display: flex;
-  position: relative;
-  flex-grow: 1;
-  justify-content: stretch;
+  display: grid;
+  width: 100%;
+  min-height: 100%;
   container: main-container / inline-size;
   position: relative;
 `;

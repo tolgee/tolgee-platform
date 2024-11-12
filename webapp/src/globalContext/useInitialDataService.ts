@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTolgee } from '@tolgee/react';
+import { TASK_ACTIVE_STATES } from 'tg.ee/task/components/utils';
 
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
@@ -33,6 +34,21 @@ export const useInitialDataService = () => {
       disable404Redirect: true,
     },
   });
+
+  const [userTasks, setUserTasks] = useState(0);
+  const userTasksLoadable = useApiQuery({
+    url: '/v2/user-tasks',
+    method: 'get',
+    query: { size: 1, filterState: TASK_ACTIVE_STATES },
+    options: {
+      enabled: Boolean(initialDataLoadable.data?.userInfo),
+      refetchInterval: 60_000,
+    },
+  });
+
+  useEffect(() => {
+    setUserTasks(userTasksLoadable.data?.page?.totalElements ?? 0);
+  }, [userTasksLoadable.data]);
 
   const [announcement, setAnnouncement] = useState<AnnouncementDto | undefined>(
     initialDataLoadable.data?.announcement
@@ -198,6 +214,7 @@ export const useInitialDataService = () => {
           : undefined,
         announcement,
         isFetching,
+        userTasks,
       }
     : undefined;
 
@@ -211,6 +228,7 @@ export const useInitialDataService = () => {
       completeGuideStep,
       finishGuide,
       setQuickStartOpen,
+      setUserTasks,
     },
   };
 };

@@ -26,7 +26,18 @@ import java.util.*
 import kotlin.jvm.Transient
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
+@Table(
+  uniqueConstraints = [
+    UniqueConstraint(
+      columnNames = ["address_part"],
+      name = "project_address_part_unique",
+    ),
+  ],
+  indexes = [
+    Index(columnList = "user_owner_id"),
+    Index(columnList = "organization_owner_id"),
+  ],
+)
 @EntityListeners(Project.Companion.ProjectListener::class)
 @ActivityLoggedEntity
 class Project(
@@ -69,7 +80,7 @@ class Project(
   @Deprecated(message = "Project can be owned only by organization")
   var userOwner: UserAccount? = null
 
-  @ManyToOne(optional = true)
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
   lateinit var organizationOwner: Organization
 
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
@@ -113,6 +124,9 @@ class Project(
 
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
+
+  @ColumnDefault("0")
+  var lastTaskNumber: Long = 0
 
   override var deletedAt: Date? = null
 

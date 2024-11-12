@@ -32,7 +32,10 @@ export const EstimatedCosts: FC<EstimatedCostsProps> = ({
       data-cy="billing-estimated-costs"
     >
       <Box>
-        <Tooltip title={t('active-plan-estimated-costs-description')}>
+        <Tooltip
+          title={t('active-plan-estimated-costs-description')}
+          disableInteractive
+        >
           <Box>{t('active-plan-estimated-costs-title')}</Box>
         </Tooltip>
         <Box textAlign="right" display="flex" alignItems="center">

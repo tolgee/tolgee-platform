@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
@@ -14,9 +15,11 @@ class PublicConfigurationDTO(
   val version: String,
 ) {
   val authentication: Boolean = properties.authentication.enabled
-  var authMethods: AuthMethodsDTO? = null
-  val passwordResettable: Boolean
-  val allowRegistrations: Boolean
+  val authMethods: AuthMethodsDTO? = properties.authentication.asAuthMethodsDTO()
+
+  @Deprecated("Use nativeEnabled instead", ReplaceWith("nativeEnabled"))
+  val passwordResettable: Boolean = properties.authentication.nativeEnabled
+  val allowRegistrations: Boolean = properties.authentication.registrationsAllowed
   val screenshotsUrl = properties.fileStorageUrl + "/" + FileStoragePath.SCREENSHOTS
   val maxUploadFileSize = properties.maxUploadFileSize
   val clientSentryDsn = properties.sentry.clientDsn
@@ -29,14 +32,19 @@ class PublicConfigurationDTO(
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val chatwootToken = properties.chatwootToken
   val nativeEnabled = properties.authentication.nativeEnabled
-  val customLoginLogo = properties.authentication.sso.customLogoUrl
-  val customLoginText = properties.authentication.sso.customButtonText
   val capterraTracker = properties.capterraTracker
   val ga4Tag = properties.ga4Tag
   val postHogApiKey: String? = properties.postHog.apiKey
   val postHogHost: String? = properties.postHog.host
   val contentDeliveryConfigured: Boolean = properties.contentDelivery.publicUrlPrefix != null
   val userSourceField: Boolean = properties.userSourceField
+  val plausible: PlausibleDto =
+    PlausibleDto(
+      properties.plausible.domain,
+      properties.plausible.url,
+      properties.plausible.scriptUrl,
+    )
+
   val slack: SlackDTO =
     SlackDTO(
       enabled = (
@@ -46,15 +54,43 @@ class PublicConfigurationDTO(
       connected = properties.slack.token != null,
     )
 
+  companion object {
+    private fun AuthenticationProperties.asAuthMethodsDTO(): AuthMethodsDTO? {
+      if (!enabled) {
+        return null
+      }
+
+      return AuthMethodsDTO(
+        OAuthPublicConfigDTO(github.clientId),
+        OAuthPublicConfigDTO(google.clientId),
+        OAuthPublicExtendsConfigDTO(
+          oauth2.clientId,
+          oauth2.authorizationUrl,
+          oauth2.scopes,
+        ),
+        SsoGlobalPublicConfigDTO(
+          ssoGlobal.enabled,
+          ssoGlobal.clientId,
+          ssoGlobal.domain,
+          ssoGlobal.customLogoUrl,
+          ssoGlobal.customLoginText,
+        ),
+        SsoOrganizationsPublicConfigDTO(
+          ssoOrganizations.enabled,
+        ),
+      )
+    }
+  }
+
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
     val google: OAuthPublicConfigDTO,
     val oauth2: OAuthPublicExtendsConfigDTO,
+    val ssoGlobal: SsoGlobalPublicConfigDTO,
+    val ssoOrganizations: SsoOrganizationsPublicConfigDTO,
   )
 
-  data class OAuthPublicConfigDTO(
-    val clientId: String?,
-  ) {
+  data class OAuthPublicConfigDTO(val clientId: String?) {
     val enabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 
@@ -65,6 +101,18 @@ class PublicConfigurationDTO(
   ) {
     val enabled: Boolean = !clientId.isNullOrEmpty()
   }
+
+  data class SsoGlobalPublicConfigDTO(
+    val enabled: Boolean,
+    val clientId: String?,
+    val domain: String?,
+    val customLogoUrl: String?,
+    val customLoginText: String?,
+  )
+
+  data class SsoOrganizationsPublicConfigDTO(
+    val enabled: Boolean,
+  )
 
   data class MtServicesDTO(
     val defaultPrimaryService: MtServiceType?,
@@ -80,23 +128,4 @@ class PublicConfigurationDTO(
     val enabled: Boolean,
     val connected: Boolean,
   )
-
-  init {
-    if (authentication) {
-      authMethods =
-        AuthMethodsDTO(
-          OAuthPublicConfigDTO(
-            properties.authentication.github.clientId,
-          ),
-          OAuthPublicConfigDTO(properties.authentication.google.clientId),
-          OAuthPublicExtendsConfigDTO(
-            properties.authentication.oauth2.clientId,
-            properties.authentication.oauth2.authorizationUrl,
-            properties.authentication.oauth2.scopes,
-          ),
-        )
-    }
-    passwordResettable = properties.authentication.nativeEnabled
-    allowRegistrations = properties.authentication.registrationsAllowed
-  }
 }

@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
-import { Box, Select, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { SearchSelectPopover } from './SearchSelectPopover';
 import { SearchSelectContent } from './SearchSelectContent';
+import { Select } from 'tg.component/common/Select';
 
 export type SelectItem<T> = {
   value: T;
@@ -85,7 +86,7 @@ export function SearchSelect<T extends React.Key>({
   const valueItem = items.find((i) => i.value === value);
 
   return (
-    <Box display="flex" data-cy="search-select">
+    <Box display="grid" data-cy="search-select">
       <Select
         ref={anchorEl}
         onOpen={handleOpen}
@@ -95,6 +96,7 @@ export function SearchSelect<T extends React.Key>({
         value={myRenderValue()}
         displayEmpty
         multiple
+        minHeight={false}
         renderValue={myRenderValue}
         {...SelectProps}
       />

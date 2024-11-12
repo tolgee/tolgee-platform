@@ -1,0 +1,17 @@
+{
+  "China": "龙是中国文化中力量的象征。",
+  "country_china": "中国",
+  "country_france": "法国",
+  "country_india": "印度",
+  "country_russia": "俄罗斯",
+  "country_USA": "美国",
+  "France": "埃菲尔铁塔是法国丰富文化的象征。",
+  "got it": "明白了！",
+  "How to Play": "如何玩",
+  "india": "莲花在印度象征着纯洁和美丽。",
+  "Instruction": "从左栏拖拽物品，并将它们与右栏中相应的物品匹配。匹配正确可得积分，匹配错误则扣分。尽量得分高！",
+  "russia": "套娃象征着俄罗斯的家庭和团结。",
+  "USA": "秃鹰代表了美国的力量和自由。",
+  "congrats": "恭喜！你得了{score}分！",
+  "loose": "你的得分是{score}。再试一次以提高成绩！"
+}

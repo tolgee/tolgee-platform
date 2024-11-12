@@ -8,6 +8,11 @@ const StyledIconButton = styled(IconButton)`
   width: 36px;
   height: 36px;
   margin: -8px;
+
+  & svg {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 type Props = React.ComponentProps<typeof IconButton> & {

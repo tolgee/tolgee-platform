@@ -1,0 +1,15 @@
+{
+  "app-name": "Flag Quiz",
+  "correct": "Correct !",
+  "correct-ans": "Correct Answer :",
+  "game-over": "Game Over !",
+  "guess": "What country does this flag represent?",
+  "incorrect": "Incorrect !",
+  "question": "Question",
+  "quiz-name": "Flag Quiz",
+  "restart-quiz": "Restart Quiz !",
+  "select-lang": "Select Language",
+  "you-lose": "You Lose !",
+  "your-score": "Your Score :",
+  "you-win": "You Wins !"
+}

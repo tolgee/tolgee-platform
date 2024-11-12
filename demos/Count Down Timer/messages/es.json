@@ -1,0 +1,17 @@
+{
+  "app-title": "Temporizador de cuenta regresiva",
+  "days": "Días",
+  "dd": "Oído",
+  "enter-event": "Ingresa el nombre del evento",
+  "event-name": "Nombre del Evento",
+  "future-error": "¡Por favor, seleccione una fecha y hora futuras!",
+  "hours": "Horas",
+  "minute-key": "minuto",
+  "mm": "milímetro",
+  "remove": "Eliminar",
+  "seconds": "Segundos",
+  "set-timer": "Establecer temporizador",
+  "success": "¡Temporizador añadido con éxito!",
+  "target-date-time": "Fecha y hora objetivo",
+  "yyyy": "aaaa"
+}

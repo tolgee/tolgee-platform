@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.KeyView
+import io.tolgee.dtos.queryResults.keyDisabledLanguages.KeyDisabledLanguagesQueryResultView
 import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeySearchResultView
@@ -53,6 +54,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
   fun getByProjectIdWithFetchedMetas(projectId: Long?): List<Key>
 
   fun deleteAllByIdIn(ids: Collection<Long>)
+
+  fun findAllByProjectIdAndIdIn(
+    projectId: Long,
+    ids: Collection<Long>,
+  ): List<Key>
 
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
 
@@ -199,7 +205,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     from Language l
     join l.translations t
-    where t.id in (select t.id from Key k join k.translations t where k.id = :keyId)
+    where t.key.id = :keyId
       and l.project.id = :projectId
       and t.state = io.tolgee.model.enums.TranslationState.DISABLED
    order by l.id
@@ -209,6 +215,21 @@ interface KeyRepository : JpaRepository<Key, Long> {
     projectId: Long,
     keyId: Long,
   ): List<Language>
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.keyDisabledLanguages.KeyDisabledLanguagesQueryResultView(
+        k.id, k.name, ns.name, l.id, l.tag
+    )
+    from Key k
+    left join k.namespace ns
+    join k.translations t on t.state = io.tolgee.model.enums.TranslationState.DISABLED
+    join t.language l
+    where k.project.id = :projectId
+    order by k.id, l.id
+  """,
+  )
+  fun getDisabledLanguages(projectId: Long): List<KeyDisabledLanguagesQueryResultView>
 
   fun findByProjectIdAndId(
     projectId: Long,

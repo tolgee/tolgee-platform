@@ -8,6 +8,8 @@ export type ActionType = components['schemas']['ProjectActivityModel']['type'];
 export type ProjectActivityModel =
   components['schemas']['ProjectActivityModel'];
 
+type TaskModel = components['schemas']['TaskModel'];
+
 export type DiffValue<T = string> = {
   old?: T;
   new?: T;
@@ -45,7 +47,8 @@ export type EntityEnum =
   | 'Params'
   | 'ContentDeliveryConfig'
   | 'WebhookConfig'
-  | 'ContentStorage';
+  | 'ContentStorage'
+  | 'Task';
 
 export type FieldTypeEnum =
   | 'text'
@@ -65,7 +68,10 @@ export type FieldTypeEnum =
   | 'batch_translation_state'
   | 'batch_boolean'
   | 'state_array'
-  | 'language_tags';
+  | 'language_tags'
+  | 'date'
+  | 'task_state'
+  | 'task_type';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;
@@ -115,13 +121,21 @@ export type WebhookConfigReferenceData = {
   url: string;
 };
 
+export type TaskReferenceData = {
+  type: 'task';
+  name: string;
+  taskType: TaskModel['type'];
+  number: number;
+};
+
 export type Reference =
   | KeyReferenceData
   | LanguageReferenceData
   | CommentReferenceData
   | ContentDeliveryConfigReferenceData
   | ContentStorageReferenceData
-  | WebhookConfigReferenceData;
+  | WebhookConfigReferenceData
+  | TaskReferenceData;
 
 export type ReferenceBuilder = (
   data: ModifiedEntityModel

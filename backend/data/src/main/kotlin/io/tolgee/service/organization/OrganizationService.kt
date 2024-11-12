@@ -11,10 +11,8 @@ import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
-import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -69,7 +67,9 @@ class OrganizationService(
   lateinit var projectService: ProjectService
 
   @Transactional
-  fun create(createDto: OrganizationDto): Organization = create(createDto, authenticationFacade.authenticatedUserEntity)
+  fun create(createDto: OrganizationDto): Organization {
+    return create(createDto, authenticationFacade.authenticatedUserEntity)
+  }
 
   @Transactional
   fun create(
@@ -78,10 +78,6 @@ class OrganizationService(
   ): Organization {
     if (createDto.slug != null && !validateSlugUniqueness(createDto.slug!!)) {
       throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
-    }
-
-    if (userAccount.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
-      throw PermissionException(Message.SSO_USER_CANNOT_CREATE_ORGANIZATION)
     }
 
     val slug =
@@ -134,14 +130,13 @@ class OrganizationService(
   fun findPreferred(
     userAccountId: Long,
     exceptOrganizationId: Long = 0,
-  ): Organization? =
-    organizationRepository
-      .findPreferred(
-        userId = userAccountId,
-        exceptOrganizationId,
-        PageRequest.of(0, 1),
-      ).content
-      .firstOrNull()
+  ): Organization? {
+    return organizationRepository.findPreferred(
+      userId = userAccountId,
+      exceptOrganizationId,
+      PageRequest.of(0, 1),
+    ).content.firstOrNull()
+  }
 
   /**
    * Returns existing or created organization which seems to be potentially preferred.
@@ -151,7 +146,13 @@ class OrganizationService(
     exceptOrganizationId: Long = 0,
   ): Organization? {
     return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
-      if (tolgeeProperties.authentication.userCanCreateOrganizations || userAccount.role == UserAccount.Role.ADMIN) {
+      if (
+        (
+          tolgeeProperties.authentication.userCanCreateOrganizations &&
+            userAccount.thirdPartyAuthType !== ThirdPartyAuthType.SSO
+        ) ||
+        userAccount.role == UserAccount.Role.ADMIN
+      ) {
         return@let createPreferred(userAccount)
       }
       null
@@ -162,42 +163,55 @@ class OrganizationService(
     pageable: Pageable,
     requestParamsDto: OrganizationRequestParamsDto,
     exceptOrganizationId: Long? = null,
-  ): Page<OrganizationView> =
-    findPermittedPaged(
+  ): Page<OrganizationView> {
+    return findPermittedPaged(
       pageable,
       requestParamsDto.filterCurrentUserOwner,
       requestParamsDto.search,
       exceptOrganizationId,
     )
+  }
 
   fun findPermittedPaged(
     pageable: Pageable,
     filterCurrentUserOwner: Boolean = false,
     search: String? = null,
     exceptOrganizationId: Long? = null,
-  ): Page<OrganizationView> =
-    organizationRepository.findAllPermitted(
+  ): Page<OrganizationView> {
+    return organizationRepository.findAllPermitted(
       userId = authenticationFacade.authenticatedUser.id,
       pageable = pageable,
       roleType = if (filterCurrentUserOwner) OrganizationRoleType.OWNER else null,
       search = search,
       exceptOrganizationId = exceptOrganizationId,
     )
+  }
 
-  fun get(id: Long): Organization =
-    organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+  fun get(id: Long): Organization {
+    return organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+  }
 
-  fun find(id: Long): Organization? = organizationRepository.find(id)
+  fun find(id: Long): Organization? {
+    return organizationRepository.find(id)
+  }
 
-  fun get(slug: String): Organization = find(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+  fun get(slug: String): Organization {
+    return find(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+  }
 
-  fun find(slug: String): Organization? = organizationRepository.findBySlug(slug)
+  fun find(slug: String): Organization? {
+    return organizationRepository.findBySlug(slug)
+  }
 
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
-  fun findDto(id: Long): CachedOrganizationDto? = find(id)?.let { CachedOrganizationDto.fromEntity(it) }
+  fun findDto(id: Long): CachedOrganizationDto? {
+    return find(id)?.let { CachedOrganizationDto.fromEntity(it) }
+  }
 
   @Cacheable(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #slug}")
-  fun findDto(slug: String): CachedOrganizationDto? = find(slug)?.let { CachedOrganizationDto.fromEntity(it) }
+  fun findDto(slug: String): CachedOrganizationDto? {
+    return find(slug)?.let { CachedOrganizationDto.fromEntity(it) }
+  }
 
   @CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #id}")
   fun edit(
@@ -301,9 +315,13 @@ class OrganizationService(
    * Checks slug uniqueness
    * @return Returns true if valid
    */
-  fun validateSlugUniqueness(slug: String): Boolean = !organizationRepository.organizationWithSlugExists(slug)
+  fun validateSlugUniqueness(slug: String): Boolean {
+    return !organizationRepository.organizationWithSlugExists(slug)
+  }
 
-  fun isThereAnotherOwner(id: Long): Boolean = organizationRoleService.isAnotherOwnerInOrganization(id)
+  fun isThereAnotherOwner(id: Long): Boolean {
+    return organizationRoleService.isAnotherOwnerInOrganization(id)
+  }
 
   fun generateSlug(
     name: String,
@@ -342,11 +360,17 @@ class OrganizationService(
     pageable: Pageable,
     search: String?,
     userId: Long,
-  ): Page<OrganizationView> = organizationRepository.findAllViews(pageable, search, userId)
+  ): Page<OrganizationView> {
+    return organizationRepository.findAllViews(pageable, search, userId)
+  }
 
-  fun findAllByName(name: String): List<Organization> = organizationRepository.findAllByName(name)
+  fun findAllByName(name: String): List<Organization> {
+    return organizationRepository.findAllByName(name)
+  }
 
-  fun getProjectOwner(projectId: Long): Organization = organizationRepository.getProjectOwner(projectId)
+  fun getProjectOwner(projectId: Long): Organization {
+    return organizationRepository.getProjectOwner(projectId)
+  }
 
   fun setBasePermission(
     organizationId: Long,
@@ -363,23 +387,17 @@ class OrganizationService(
   fun findPrivateView(
     id: Long,
     currentUserId: Long,
-  ): PrivateOrganizationView? =
-    findView(id, currentUserId)?.let {
+  ): PrivateOrganizationView? {
+    return findView(id, currentUserId)?.let {
       val quickStart = quickStartService.findView(currentUserId, id)
       PrivateOrganizationView(it, quickStart)
     }
+  }
 
   fun findView(
     id: Long,
     currentUserId: Long,
-  ): OrganizationView? = organizationRepository.findView(id, currentUserId)
-
-  fun updateSsoProvider(
-    organizationId: Long,
-    tenant: SsoTenant,
-  ) {
-    val organization = get(organizationId)
-    organization.ssoTenant = tenant
-    save(organization)
+  ): OrganizationView? {
+    return organizationRepository.findView(id, currentUserId)
   }
 }

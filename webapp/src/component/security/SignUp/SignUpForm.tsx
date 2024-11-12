@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { T, useTranslate } from '@tolgee/react';
+import { Eye, EyeOff } from '@untitled-ui/icons-react';
 
 import {
   LoadableType,
@@ -17,12 +18,11 @@ import {
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { PasswordLabel } from '../SetPasswordField';
 import { useConfig } from 'tg.globalContext/helpers';
+import { PasswordLabel } from '../SetPasswordField';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
 import { Alert } from '../../common/Alert';
 import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -142,12 +142,9 @@ export const SignUpForm = (props: Props) => {
                   <IconButton
                     size="small"
                     onClick={() => setShowPassword((v) => !v)}
+                    tabIndex={-1}
                   >
-                    {showPassword ? (
-                      <VisibilityOff fontSize="small" />
-                    ) : (
-                      <Visibility fontSize="small" />
-                    )}
+                    {showPassword ? <EyeOff /> : <Eye />}
                   </IconButton>
                 </Tooltip>
               ),

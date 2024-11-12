@@ -11,7 +11,7 @@ interface IUserAccount {
     get() = this.totpKey?.isNotEmpty() ?: false
 
   val needsSuperJwt: Boolean
-    get() = this.accountType != UserAccount.AccountType.THIRD_PARTY || isMfaEnabled
+    get() = this.accountType == UserAccount.AccountType.LOCAL || isMfaEnabled
 
   val totpKey: ByteArray?
 

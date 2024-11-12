@@ -1,0 +1,143 @@
+body {
+    background-color: #f0f0f0;
+}
+
+.container {
+    padding: 20px;
+    max-width: 1500px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    margin-top: 0px;
+};
+    
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.list-group-item {
+    cursor: pointer;
+}
+
+.list-group-item {
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.list-group-item:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+}
+
+.list-group-item.active {
+    background-color: #007bff;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+
+/* * Theme toggleing CSS part */
+
+.theme-toggle {
+    margin-top: 20px;
+    margin-right: 30px;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: flex-start;
+}
+
+.theme-button {
+    padding: 0px;
+    margin: 5px;
+    border-radius: 30px;
+    border: 0;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+#dark-mode-toggle {
+    background-color: #000;
+}
+
+#light-theme-toggle {
+    background-color: #fff;
+}
+
+#purple-theme-toggle {
+    background-color: #8e44ad;
+}
+
+#orange-theme-toggle {
+    background-color: #f0932b;
+}
+
+#brown-theme-toggle {
+    background-color: #a0522d;
+}
+
+#yellow-theme-toggle {
+    background-color: #f7f28b;
+}
+
+
+body.dark-theme {
+    background-color: #110f0f;
+    color: #fff;
+}
+
+body.light-theme {
+    background-color: #f0f0f0;
+    color: #000;
+}
+
+body.purple-theme {
+    background: linear-gradient(to right, #8e44ad, #c0392b);
+}
+
+body.orange-theme {
+    background: linear-gradient(to right, #f0932b, #f5d765);
+}
+
+body.brown-theme {
+    background: linear-gradient(to right, #a0522d, #c5946e);
+}
+
+body.yellow-theme {
+    background: linear-gradient(to right, #f7f28b, #f5d765);
+}
+
+.language-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.language-switcher select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.language-switcher select:hover {
+    border-color: #007bff;
+}
+
+.language-switcher select:focus {
+    outline: none;
+    border-color: #007bff;
+}

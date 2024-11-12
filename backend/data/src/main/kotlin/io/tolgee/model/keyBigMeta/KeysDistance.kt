@@ -15,6 +15,7 @@ import org.springframework.data.domain.Persistable
 @Entity
 @Table(
   indexes = [
+    Index(columnList = "project_id"),
     Index(columnList = "key1Id, key2Id", unique = true),
     Index(columnList = "key1Id"),
     Index(columnList = "key2Id"),

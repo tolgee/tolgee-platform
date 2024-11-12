@@ -1,6 +1,6 @@
 import { default as React } from 'react';
 import { Guide } from 'tg.views/projects/integrate/types';
-import { Code, Settings, Terminal } from '@mui/icons-material';
+import { Code01, Settings01, Terminal } from '@untitled-ui/icons-react';
 
 const getTechnologyImgComponent = (imgName: string) => {
   return function TechnologyImage(props) {
@@ -37,7 +37,7 @@ export const guides = [
   },
   {
     name: 'Web',
-    icon: Code,
+    icon: Code01,
     guide: React.lazy(() => import('./guides/Web.mdx')),
   },
   {
@@ -52,7 +52,7 @@ export const guides = [
   },
   {
     name: 'Rest',
-    icon: Settings,
+    icon: Settings01,
     guide: React.lazy(() => import('./guides/Rest.mdx')),
   },
   {

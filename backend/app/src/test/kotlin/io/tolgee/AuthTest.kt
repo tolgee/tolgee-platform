@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Message
 import io.tolgee.controllers.PublicController
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
@@ -81,18 +85,16 @@ class AuthTest : AbstractControllerTest() {
   fun userWithTokenHasAccess() {
     val response =
       doAuthentication(initialUsername, initialPassword)
-        .andReturn()
-        .response.contentAsString
+        .andReturn().response.contentAsString
     val token = mapper.readValue(response, HashMap::class.java)["accessToken"] as String?
     val mvcResult =
-      mvc
-        .perform(
-          MockMvcRequestBuilders
-            .get("/api/projects")
-            .accept(MediaType.ALL)
-            .header("Authorization", String.format("Bearer %s", token))
-            .contentType(MediaType.APPLICATION_JSON),
-        ).andReturn()
+      mvc.perform(
+        MockMvcRequestBuilders.get("/api/projects")
+          .accept(MediaType.ALL)
+          .header("Authorization", String.format("Bearer %s", token))
+          .contentType(MediaType.APPLICATION_JSON),
+      )
+        .andReturn()
     assertThat(mvcResult.response.status).isEqualTo(200)
   }
 
@@ -108,14 +110,12 @@ class AuthTest : AbstractControllerTest() {
     currentDateProvider.forcedDate = baseline
 
     val mvcResult =
-      mvc
-        .perform(
-          MockMvcRequestBuilders
-            .get("/api/projects")
-            .accept(MediaType.ALL)
-            .header("Authorization", String.format("Bearer %s", token))
-            .contentType(MediaType.APPLICATION_JSON),
-        ).andReturn()
+      mvc.perform(
+        MockMvcRequestBuilders.get("/api/projects")
+          .accept(MediaType.ALL)
+          .header("Authorization", String.format("Bearer %s", token))
+          .contentType(MediaType.APPLICATION_JSON),
+      ).andReturn()
 
     assertThat(mvcResult.response.status).isEqualTo(401)
     assertThat(mvcResult.response.contentAsString).contains(Message.EXPIRED_JWT_TOKEN.code)
@@ -281,16 +281,13 @@ class AuthTest : AbstractControllerTest() {
   }
 
   private fun assertExpired(token: String) {
-    mvc
-      .perform(
-        MockMvcRequestBuilders
-          .put("/v2/projects/${project.id}/users/${project.id}/revoke-access")
-          .accept(MediaType.ALL)
-          .header("Authorization", String.format("Bearer %s", token))
-          .contentType(MediaType.APPLICATION_JSON),
-      ).andIsForbidden
-      .andAssertThatJson {
-        node("code").isEqualTo(Message.EXPIRED_SUPER_JWT_TOKEN.code)
-      }
+    mvc.perform(
+      MockMvcRequestBuilders.put("/v2/projects/${project.id}/users/${project.id}/revoke-access")
+        .accept(MediaType.ALL)
+        .header("Authorization", String.format("Bearer %s", token))
+        .contentType(MediaType.APPLICATION_JSON),
+    ).andIsForbidden.andAssertThatJson {
+      node("code").isEqualTo(Message.EXPIRED_SUPER_JWT_TOKEN.code)
+    }
   }
 }

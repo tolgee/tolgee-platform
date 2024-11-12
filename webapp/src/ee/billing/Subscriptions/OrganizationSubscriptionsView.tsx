@@ -12,11 +12,13 @@ import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { Box, ButtonGroup } from '@mui/material';
 import { PlansSelfHosted } from './selfHosted/PlansSelfHosted';
 import { ButtonGroupRouterItem } from 'tg.component/common/ButtonGroupRouter';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 export const OrganizationSubscriptionsView: FunctionComponent = () => {
   const { search, pathname } = useLocation();
   const params = new URLSearchParams(search);
   const history = useHistory();
+  const { refetchInitialData } = useGlobalActions();
 
   const success = params.has('success');
   const mtCreditsSuccess = params.has('buy-mt-credits-success');
@@ -39,9 +41,16 @@ export const OrganizationSubscriptionsView: FunctionComponent = () => {
 
   useEffect(() => {
     if (success) {
-      refreshSubscription.mutate({
-        path: { organizationId: organization!.id },
-      });
+      refreshSubscription.mutate(
+        {
+          path: { organizationId: organization!.id },
+        },
+        {
+          onSuccess() {
+            refetchInitialData();
+          },
+        }
+      );
       messaging.success(<T keyName="billing_plan_update_success_message" />);
       history.replace(pathname);
     }

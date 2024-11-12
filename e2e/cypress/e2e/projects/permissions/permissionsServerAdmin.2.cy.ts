@@ -7,13 +7,14 @@ import {
 } from '../../../common/permissions/main';
 
 describe('Server admin 2', () => {
-  it('admin', () => {
+  it('Server admin', () => {
     visitProjectWithPermissions({ scopes: ['admin'] }).then((projectInfo) => {
       // login as admin
-      login('admin', 'admin');
+      login('Server admin', 'admin');
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': SKIP,
         'project-menu-item-translations': RUN,
+        'project-menu-item-tasks': SKIP,
         'project-menu-item-settings': SKIP,
         'project-menu-item-languages': SKIP,
         'project-menu-item-members': SKIP,

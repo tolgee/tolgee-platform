@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* html, body, #root {
+  height: 100vh;
+  overflow: auto;
+} */
+
+.primary-meditation-btn {
+  @apply bg-primaryBackground text-primaryText px-4 py-2 text-base md:text-xl font-semibold font-primary rounded shadow cursor-pointer;
+}
+.circle-btn {
+  @apply bg-primaryBackground p-4 text-xl font-semibold rounded-full shadow cursor-pointer;
+}
+.primary-btn {
+  @apply bg-secondaryBackground text-secondaryText px-4 py-2 text-base md:text-xl font-semibold font-heading rounded shadow cursor-pointer;
+}
+.secondary-btn {
+  @apply bg-themeColor text-secondaryText  px-4 py-2 text-base md:text-xl font-semibold font-heading rounded shadow cursor-pointer;
+}
+.btn:hover {
+  @apply scale-105 transition duration-150 ease-linear shadow-xl bg-opacity-80 backdrop-blur;
+}

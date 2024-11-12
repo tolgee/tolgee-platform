@@ -11,6 +11,7 @@ describe('Permissions admin 2', () => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': SKIP,
         'project-menu-item-translations': RUN,
+        'project-menu-item-tasks': SKIP,
         'project-menu-item-settings': SKIP,
         'project-menu-item-languages': SKIP,
         'project-menu-item-members': SKIP,

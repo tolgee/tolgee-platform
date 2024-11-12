@@ -1,18 +1,34 @@
 package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
+import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
 import io.tolgee.component.ThirdPartyAuthTypeConverter
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
-import jakarta.persistence.*
+import io.tolgee.model.task.Task
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Convert
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.OrderBy
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
+@ActivityLoggedEntity
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +42,7 @@ data class UserAccount(
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   override var accountType: AccountType? = AccountType.LOCAL,
-) : AuditModel(),
-  ModelWithAvatar,
-  IUserAccount {
+) : AuditModel(), ModelWithAvatar, IUserAccount, EntityWithId {
   @Column(name = "totp_key", columnDefinition = "bytea")
   override var totpKey: ByteArray? = null
 
@@ -49,19 +63,17 @@ data class UserAccount(
   @Convert(converter = ThirdPartyAuthTypeConverter::class)
   var thirdPartyAuthType: ThirdPartyAuthType? = null
 
-  @ManyToOne
-  var ssoTenant: SsoTenant? = null
-
   @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
   var ssoRefreshToken: String? = null
+
+  @Column(name = "sso_session_expiry")
+  var ssoSessionExpiry: Date? = null
 
   @Column(name = "third_party_auth_id")
   var thirdPartyAuthId: String? = null
 
   @Column(name = "reset_password_code")
   var resetPasswordCode: String? = null
-
-  var ssoSessionExpiry: Date? = null
 
   @OrderBy("id ASC")
   @OneToMany(mappedBy = "user", orphanRemoval = true)
@@ -104,6 +116,9 @@ data class UserAccount(
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackConfig: MutableList<SlackConfig> = mutableListOf()
 
+  @ManyToMany(mappedBy = "assignees")
+  var tasks: MutableSet<Task> = mutableSetOf()
+
   constructor(
     id: Long?,
     username: String?,
@@ -134,4 +149,8 @@ data class UserAccount(
     MANAGED,
     THIRD_PARTY,
   }
+
+  @Transient
+  @Column(insertable = false, updatable = false)
+  override var disableActivityLogging: Boolean = false
 }

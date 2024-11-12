@@ -127,13 +127,19 @@ class TranslationCommentController(
   @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Set state of translation comment")
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_SET_STATE)
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_SET_STATE])
+  @UseDefaultPermissions
   @AllowApiAccess
   fun setState(
     @PathVariable translationId: Long,
     @PathVariable commentId: Long,
     @PathVariable state: TranslationCommentState,
   ): TranslationCommentModel {
+    val translation = translationService.get(translationId)
+    securityService.checkScopeOrAssignedToTask(
+      Scope.TRANSLATIONS_COMMENTS_SET_STATE,
+      translation.language.id,
+      translation.key.id,
+    )
     val comment = translationCommentService.getWithAuthorFetched(projectHolder.project.id, translationId, commentId)
     translationCommentService.setState(comment, state)
     return translationCommentModelAssembler.toModel(comment)
@@ -174,12 +180,17 @@ class TranslationCommentController(
     description = "Creates a translation comment. Empty translation is stored, when not exists.",
   )
   @RequestActivity(ActivityType.TRANSLATION_COMMENT_ADD)
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_COMMENTS_ADD])
+  @UseDefaultPermissions
   @AllowApiAccess
   fun create(
     @RequestBody @Valid
     dto: TranslationCommentWithLangKeyDto,
   ): ResponseEntity<TranslationWithCommentModel> {
+    securityService.checkScopeOrAssignedToTask(
+      Scope.TRANSLATIONS_COMMENTS_ADD,
+      dto.languageId,
+      dto.keyId,
+    )
     val translation = translationService.getOrCreate(dto.keyId, dto.languageId)
     if (translation.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.KEY_NOT_FROM_PROJECT)

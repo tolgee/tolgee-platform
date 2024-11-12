@@ -17,6 +17,10 @@ import jakarta.validation.constraints.NotNull
       columnNames = ["user_id", "organization_id"],
       name = "organization_member_role_user_organization_unique",
     ),
+    UniqueConstraint(
+      columnNames = ["user_id", "managed"],
+      name = "organization_member_role_only_one_managed",
+    ),
   ],
 )
 class OrganizationRole(
@@ -37,6 +41,8 @@ class OrganizationRole(
 
   @ManyToOne
   var user: UserAccount? = null
+
+  var managed: Boolean = false
 
   @ManyToOne
   @NotNull

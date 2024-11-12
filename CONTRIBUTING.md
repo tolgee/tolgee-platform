@@ -13,8 +13,7 @@ contribute:
 
 ## Running and debugging the project
 
-- Everything you should know is described in
-  the [development wiki](https://github.com/tolgee/tolgee-platform/wiki/Development)
+- Everything you should know is described at the [development page](DEVELOPMENT.md)
 
 # Resources
 

@@ -17,6 +17,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
@@ -33,6 +34,10 @@ import org.hibernate.annotations.ColumnDefault
       columnNames = ["key_id", "language_id"],
       name = "translation_key_language",
     ),
+  ],
+  indexes = [
+    Index(columnList = "key_id"),
+    Index(columnList = "language_id"),
   ],
 )
 @ActivityLoggedEntity

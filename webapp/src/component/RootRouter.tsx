@@ -8,6 +8,8 @@ import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
 import { useConfig } from 'tg.globalContext/helpers';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
+import { RootView } from 'tg.views/RootView';
+import { MyTasksView } from 'tg.ee/task/views/myTasks/MyTasksView';
 
 import { PrivateRoute } from './common/PrivateRoute';
 import { OrganizationBillingRedirect } from './security/OrganizationBillingRedirect';
@@ -15,7 +17,6 @@ import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
-import { RootView } from 'tg.views/RootView';
 import { SsoLoginView } from 'tg.component/security/Sso/SsoLoginView';
 
 const LoginRouter = React.lazy(
@@ -123,6 +124,10 @@ export const RootRouter = () => (
     <PrivateRoute path={`${LINKS.ADMINISTRATION.template}`}>
       <AdministrationView />
     </PrivateRoute>
+    <PrivateRoute exact path={LINKS.MY_TASKS.template}>
+      <MyTasksView />
+    </PrivateRoute>
+
     <RequirePreferredOrganization>
       <Switch>
         <PrivateRoute exact path={LINKS.ROOT.template}>

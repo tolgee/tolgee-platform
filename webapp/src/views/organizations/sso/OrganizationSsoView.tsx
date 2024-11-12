@@ -5,32 +5,35 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
 import { CreateProviderSsoForm } from 'tg.views/organizations/sso/CreateProviderSsoForm';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { FormControlLabel, styled, Switch } from '@mui/material';
+import { Alert, AlertTitle, FormControlLabel, Switch } from '@mui/material';
 import Box from '@mui/material/Box';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-const StyledContainer = styled('div')`
-  background: ${({ theme }) => theme.palette.background.paper};
-`;
 export const OrganizationSsoView: FunctionComponent = () => {
   const organization = useOrganization();
-  const { isEnabled } = useEnabledFeatures();
-  const featureNotEnabled = !isEnabled('SSO');
-  const { t } = useTranslate();
   if (!organization) {
     return null;
   }
+  const { isEnabled } = useEnabledFeatures();
+  const featureEnabled = isEnabled('SSO');
+  const localSsoEnabled = useGlobalContext(
+    (c) =>
+      c.initialData.serverConfiguration.authMethods?.ssoOrganizations.enabled
+  );
+  const { t } = useTranslate();
 
-  const providersLoadable = featureNotEnabled
-    ? null
-    : useApiQuery({
-        url: `/v2/organizations/{organizationId}/sso`,
-        method: 'get',
-        path: {
-          organizationId: organization.id,
-        },
-      });
+  const providersLoadable =
+    featureEnabled && localSsoEnabled
+      ? useApiQuery({
+          url: `/v2/organizations/{organizationId}/sso`,
+          method: 'get',
+          path: {
+            organizationId: organization.id,
+          },
+        })
+      : null;
   const [toggleFormState, setToggleFormState] = useState(false);
 
   useEffect(() => {
@@ -40,6 +43,48 @@ export const OrganizationSsoView: FunctionComponent = () => {
   const handleSwitchChange = (event) => {
     setToggleFormState(event.target.checked);
   };
+
+  function renderBody() {
+    switch (true) {
+      case !featureEnabled:
+        return (
+          <Box>
+            <PaidFeatureBanner />
+          </Box>
+        );
+      case !localSsoEnabled:
+        return (
+          <Box>
+            <Alert severity="info">
+              <AlertTitle sx={{ pb: 0 }}>
+                {t('organization_sso_disabled_title')}
+              </AlertTitle>
+              <Box>{t('organization_sso_disabled')}</Box>
+            </Alert>
+          </Box>
+        );
+      default:
+        return (
+          <>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={toggleFormState}
+                  onChange={handleSwitchChange}
+                />
+              }
+              label={t('organization_sso_switch')}
+            />
+            <Box sx={{ marginTop: '16px' }}>
+              <CreateProviderSsoForm
+                data={providersLoadable?.data}
+                disabled={!toggleFormState}
+              />
+            </Box>
+          </>
+        );
+    }
+  }
 
   return (
     <BaseOrganizationSettingsView
@@ -57,26 +102,7 @@ export const OrganizationSsoView: FunctionComponent = () => {
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
-      {featureNotEnabled ? (
-        <Box>
-          <PaidFeatureBanner />
-        </Box>
-      ) : (
-        <>
-          <FormControlLabel
-            control={
-              <Switch checked={toggleFormState} onChange={handleSwitchChange} />
-            }
-            label={t('organization_sso_switch')}
-          />
-          <Box sx={{ marginTop: '16px' }}>
-            <CreateProviderSsoForm
-              data={providersLoadable?.data}
-              disabled={!toggleFormState}
-            />
-          </Box>
-        </>
-      )}
+      {renderBody()}
     </BaseOrganizationSettingsView>
   );
 };

@@ -1,6 +1,6 @@
 import { Box, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { StarsIcon } from 'tg.component/CustomIcons';
+import { Stars } from 'tg.component/CustomIcons';
 
 const StyledWrapper = styled(Box)`
   border-radius: 4px;
@@ -31,7 +31,7 @@ export const AiTips = ({ tips }: Props) => {
     <StyledWrapper>
       <Box display="flex" gap={1} py="8px">
         <StyledLabel>
-          <StarsIcon />
+          <Stars />
           <Box>{t('ai_tips_label')}</Box>
         </StyledLabel>
         <StyledItems>

@@ -2,6 +2,7 @@ package io.tolgee.service.key
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.KeyImportResolvableResult
+import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolution
@@ -91,6 +92,18 @@ class ResolvingKeyImporter(
             }
           }
 
+          if (resolvable.resolution == ImportTranslationResolution.FORCE_OVERRIDE) {
+            val updated =
+              forceAddOrUpdateTranslation(
+                key,
+                language,
+                resolvable.text,
+                existingTranslation,
+              )
+            translationsToModify.add(updated)
+            return@translations
+          }
+
           if (isEmpty || (!isNew && resolvable.resolution == ImportTranslationResolution.OVERRIDE)) {
             translationsToModify.add(TranslationToModify(existingTranslation!!, resolvable.text, false))
             return@translations
@@ -114,6 +127,24 @@ class ResolvingKeyImporter(
     translationService.setOutdatedBatch(outdatedKeys)
 
     return result
+  }
+
+  private fun forceAddOrUpdateTranslation(
+    key: Key,
+    language: LanguageDto,
+    translationText: String,
+    existingTranslation: Translation?,
+  ): TranslationToModify {
+    if (existingTranslation == null) {
+      val translation =
+        Translation(translationText).apply {
+          this.key = key
+          this.language = entityManager.getReference(Language::class.java, language.id)
+        }
+      return TranslationToModify(translation, translationText, true)
+    }
+
+    return TranslationToModify(existingTranslation, translationText, false)
   }
 
   private fun handlePluralizationAndSave(
@@ -180,10 +211,11 @@ class ResolvingKeyImporter(
     val locations = images.map { it.location }
 
     val allReferences =
-      screenshotService.getKeyScreenshotReferences(
-        importedKeys,
-        locations,
-      ).toMutableList()
+      screenshotService
+        .getKeyScreenshotReferences(
+          importedKeys,
+          locations,
+        ).toMutableList()
 
     val referencesToDelete = mutableListOf<KeyScreenshotReference>()
 
@@ -253,6 +285,10 @@ class ResolvingKeyImporter(
     key: Key,
     languageTag: String,
   ): Boolean {
+    if (resolvable.resolution == ImportTranslationResolution.FORCE_OVERRIDE) {
+      return false
+    }
+
     if (translationExists && resolvable.resolution == ImportTranslationResolution.NEW) {
       errors.add(
         listOf(Message.TRANSLATION_EXISTS.code, key.namespace?.name, key.name, languageTag),
@@ -308,12 +344,13 @@ class ResolvingKeyImporter(
     val namespaceJoin: Join<Key, Namespace> = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
 
     val predicates =
-      keys.map { (namespace, name) ->
-        cb.and(
-          cb.equal(root.get(Key_.name), name),
-          cb.equalNullable(namespaceJoin.get(Namespace_.name), namespace),
-        )
-      }.toTypedArray()
+      keys
+        .map { (namespace, name) ->
+          cb.and(
+            cb.equal(root.get(Key_.name), name),
+            cb.equalNullable(namespaceJoin.get(Namespace_.name), namespace),
+          )
+        }.toTypedArray()
 
     val projectIdPath = root.get(Key_.project).get(Project_.id)
 
@@ -323,10 +360,12 @@ class ResolvingKeyImporter(
   }
 
   private val existingKeys by lazy {
-    this.getAllByNamespaceAndName(
-      projectId = projectEntity.id,
-      keys = keysToImport.map { it.namespace to it.name },
-    ).associateBy { (it.namespace?.name to it.name) }.toMutableMap()
+    this
+      .getAllByNamespaceAndName(
+        projectId = projectEntity.id,
+        keys = keysToImport.map { it.namespace to it.name },
+      ).associateBy { (it.namespace?.name to it.name) }
+      .toMutableMap()
   }
 
   private val languages by lazy {
@@ -335,16 +374,19 @@ class ResolvingKeyImporter(
   }
 
   private val keyLanguagesMap by lazy {
-    keysToImport.mapNotNull {
-      val key = existingKeys[it.namespace to it.name] ?: return@mapNotNull null
-      val keyLanguages = it.translations.keys.mapNotNull { tag -> languages[tag] }
-      key to keyLanguages
-    }.toMap()
+    keysToImport
+      .mapNotNull {
+        val key = existingKeys[it.namespace to it.name] ?: return@mapNotNull null
+        val keyLanguages = it.translations.keys.mapNotNull { tag -> languages[tag] }
+        key to keyLanguages
+      }.toMap()
   }
 
   private val existingTranslations by lazy {
-    translationService.get(keyLanguagesMap)
-      .groupBy { it.key.namespace?.name to it.key.name }.map { (key, translations) ->
+    translationService
+      .get(keyLanguagesMap)
+      .groupBy { it.key.namespace?.name to it.key.name }
+      .map { (key, translations) ->
         key to translations.associateBy { it.language.tag }
       }.toMap()
   }

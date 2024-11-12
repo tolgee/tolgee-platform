@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Add } from '@mui/icons-material';
+import { Plus } from '@untitled-ui/icons-react';
 import { Box, Button, Typography } from '@mui/material';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -63,7 +63,7 @@ export const WebhookList = () => {
           color="primary"
           onClick={() => setFormOpen(true)}
           disabled={!canAdd || !isEnabled}
-          startIcon={<Add />}
+          startIcon={<Plus width={19} height={19} />}
           data-cy="webhooks-add-item-button"
         >
           {t('webhooks_add_button')}

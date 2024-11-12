@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Box, styled, Tooltip } from '@mui/material';
-import { MoreVert } from '@mui/icons-material';
+import { DotsVertical } from '@untitled-ui/icons-react';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
@@ -154,7 +154,7 @@ export const HistoryItem: React.FC<Props> = ({
           className="hoverVisible"
           onClick={() => setDetailOpen(true)}
         >
-          <MoreVert fontSize="small" color="inherit" />
+          <DotsVertical width={20} height={20} color="inherit" />
         </StyledSmallActionButton>
       </Box>
       {detailOpen && (

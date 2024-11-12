@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 import { securityService } from 'tg.service/SecurityService';
 import {
@@ -24,6 +25,9 @@ type JwtAuthenticationResponse =
   components['schemas']['JwtAuthenticationResponse'];
 type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
+
+const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
+const LOCAL_STORAGE_DOMAIN_KEY = 'oauth2Domain';
 
 export function getRedirectUrl(userId?: number) {
   const link = securityService.getAfterLoginLink();
@@ -52,6 +56,11 @@ export const useAuthService = (
   const authorizeOAuthLoadable = useApiMutation({
     url: '/api/public/authorize_oauth/{serviceType}',
     method: 'get',
+  });
+
+  const redirectSsoUrlLoadable = useApiMutation({
+    url: '/api/public/authorize_oauth/sso/authentication-url',
+    method: 'post',
   });
 
   const acceptInvitationLoadable = useApiMutation({
@@ -102,6 +111,24 @@ export const useAuthService = (
 
   const history = useHistory();
 
+  async function getSsoAuthLinkByDomain(domain: string, state: string) {
+    return await redirectSsoUrlLoadable.mutateAsync(
+      {
+        content: { 'application/json': { domain, state } },
+      },
+      {
+        onError: (error) => {
+          messageService.error(<TranslatedError code={error.code!} />);
+        },
+        onSuccess: (response) => {
+          if (response.redirectUrl) {
+            localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
+          }
+        },
+      }
+    );
+  }
+
   async function setJwtToken(token: string | undefined) {
     _setJwtToken(token);
     if (token) {
@@ -150,6 +177,7 @@ export const useAuthService = (
     loginLoadable,
     signupLoadable,
     authorizeOAuthLoadable,
+    redirectSsoUrlLoadable,
     allowRegistration,
   };
 
@@ -186,7 +214,46 @@ export const useAuthService = (
       setInvitationCode(undefined);
       await handleAfterLogin(response!);
     },
+    async loginWithOAuthCodeSso(state: string, code: string) {
+      const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
+      const storedDomain = localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY);
+      if (storedState !== state || storedDomain === null) {
+        history.replace(LINKS.LOGIN.build());
+        return;
+      }
 
+      localStorage.removeItem(LOCAL_STORAGE_STATE_KEY);
+
+      const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({});
+      const response = await authorizeOAuthLoadable.mutateAsync(
+        {
+          path: { serviceType: 'sso' },
+          query: {
+            code,
+            redirect_uri: redirectUri,
+            invitationCode: invitationCode,
+            domain: storedDomain,
+          },
+        },
+        {
+          onError: (error) => {
+            if (error.code === 'invitation_code_does_not_exist_or_expired') {
+              setInvitationCode(undefined);
+            }
+            messageService.error(<TranslatedError code={error.code!} />);
+          },
+        }
+      );
+      setInvitationCode(undefined);
+      localStorage.removeItem(LOCAL_STORAGE_DOMAIN_KEY);
+      await handleAfterLogin(response!);
+    },
+    async loginRedirectSso(domain: string) {
+      const state = uuidv4();
+      localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+      const response = await getSsoAuthLinkByDomain(domain, state);
+      window.location.href = response.redirectUrl;
+    },
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(
         {

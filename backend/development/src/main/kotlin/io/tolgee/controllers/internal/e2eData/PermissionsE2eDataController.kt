@@ -29,12 +29,16 @@ class PermissionsE2eDataController() : AbstractE2eDataController() {
     @RequestParam translateLanguageTags: List<String>?,
     @RequestParam stateChangeLanguageTags: List<String>?,
   ): StandardTestDataResult {
-    this.permissionsTestData.addUserWithPermissions(
-      scopes = Scope.parse(scopes).toList(),
-      type = type,
-      viewLanguageTags = viewLanguageTags,
-      translateLanguageTags = translateLanguageTags,
-      stateChangeLanguageTags = stateChangeLanguageTags,
+    val user =
+      this.permissionsTestData.addUserWithPermissions(
+        scopes = Scope.parse(scopes).toList(),
+        type = type,
+        viewLanguageTags = viewLanguageTags,
+        translateLanguageTags = translateLanguageTags,
+        stateChangeLanguageTags = stateChangeLanguageTags,
+      )
+    this.permissionsTestData.addTasks(
+      mutableSetOf(user, permissionsTestData.serverAdmin.self),
     )
     return generate()
   }

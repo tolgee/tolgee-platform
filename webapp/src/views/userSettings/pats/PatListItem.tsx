@@ -7,7 +7,7 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { PatExpiryInfo } from './PatExpiryInfo';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { Link } from 'react-router-dom';
-import { Edit } from '@mui/icons-material';
+import { Edit02 } from '@untitled-ui/icons-react';
 import { NewTokenInfo } from './NewTokenInfo';
 
 const StyledRoot = styled(Box)`
@@ -89,7 +89,7 @@ export function PatListItem(props: {
         })}
       >
         {props.pat.description}
-        <Edit className="edit-icon" sx={{ width: '15px' }} />{' '}
+        <Edit02 className="edit-icon" style={{ width: '15px' }} />
       </StyledDescription>
       <Box data-cy="pat-list-item-last-used">
         {props.pat.lastUsedAt ? (

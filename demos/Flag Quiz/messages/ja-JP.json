@@ -1,0 +1,15 @@
+{
+  "app-name": "旗クイズ",
+  "correct": "正しい!",
+  "correct-ans": "正解:",
+  "game-over": "ゲームオーバー！",
+  "guess": "この国旗はどの国を表していますか？",
+  "incorrect": "間違い!",
+  "question": "質問",
+  "quiz-name": "旗クイズ",
+  "restart-quiz": "クイズを再開！",
+  "select-lang": "言語選択",
+  "you-lose": "負けました！",
+  "your-score": "あなたのスコア:",
+  "you-win": "あなたの勝ち！"
+}

@@ -1,0 +1,6 @@
+"key";"en";"cs"
+"key";"value";"hodnota"
+"keyDeep.inner";"value";"hodnota"
+"keyInterpolate";"replace this {value}";"nahradit toto {value}"
+"keyInterpolateWithFormatting";"replace this {value, number}";"nahradit toto {value, number}"
+"keyPluralSimple";" {value, plural, one {the singular} other {the plural {value}}}";" {value, plural, one {jednotné číslo} other {množné číslo {value}}}"

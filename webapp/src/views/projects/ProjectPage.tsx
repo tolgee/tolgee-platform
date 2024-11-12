@@ -7,11 +7,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { ProjectMenu } from './projectMenu/ProjectMenu';
 
 const StyledContent = styled('div')`
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  position: relative;
+  display: grid;
   max-width: 100%;
 `;
 

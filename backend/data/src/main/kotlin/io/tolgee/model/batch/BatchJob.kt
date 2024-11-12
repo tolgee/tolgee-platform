@@ -13,6 +13,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EnumType.STRING
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
@@ -20,7 +21,14 @@ import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
-@Table(name = "tolgee_batch_job")
+@Table(
+  name = "tolgee_batch_job",
+  indexes = [
+    Index(columnList = "project_id"),
+    Index(columnList = "author_id"),
+    Index(columnList = "debouncing_key"),
+  ],
+)
 class BatchJob : StandardAuditModel(), IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project

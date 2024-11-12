@@ -57,6 +57,13 @@ export const useTranslationsShortcuts = () => {
     return allLanguages?.find((l) => l.tag === langTag)?.id;
   };
 
+  const getCurrentKey = () => {
+    const focused = getCurrentlyFocused(elementsRef.current);
+    if (focused?.language && focused.keyId) {
+      return fixedTranslations?.find((t) => t.keyId === focused.keyId);
+    }
+  };
+
   const getCurrentTranslation = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
     if (focused?.language && focused.keyId) {
@@ -93,15 +100,21 @@ export const useTranslationsShortcuts = () => {
   const getEnterHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
     if (focused) {
-      const canTranslate = satisfiesLanguageAccess(
-        'translations.edit',
-        getLanguageId(focused.language)
+      const translation = getCurrentTranslation();
+      const keyData = getCurrentKey();
+      const firstTask = keyData?.tasks?.find(
+        (t) => t.languageTag === focused.language
       );
+      const canTranslate =
+        satisfiesLanguageAccess(
+          'translations.edit',
+          getLanguageId(focused.language)
+        ) ||
+        (firstTask?.userAssigned && firstTask.type === 'TRANSLATE');
       if (
         (isTranslation(focused) && canTranslate) ||
         (!isTranslation(focused) && canEditKey)
       ) {
-        const translation = getCurrentTranslation();
         if (translation?.state === 'DISABLED') {
           return;
         }
@@ -126,16 +139,21 @@ export const useTranslationsShortcuts = () => {
 
   const getChangeStateHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
-    const canTranslate = satisfiesLanguageAccess(
-      'translations.state-edit',
-      getLanguageId(focused?.language)
+    const translation = fixedTranslations?.find(
+      (t) => t.keyId === focused?.keyId
+    )?.translations[focused?.language || ''];
+    const keyData = getCurrentKey();
+    const firstTask = keyData?.tasks?.find(
+      (t) => t.languageTag === focused?.language
     );
+    const canTranslate =
+      satisfiesLanguageAccess(
+        'translations.state-edit',
+        getLanguageId(focused?.language)
+      ) ||
+      (firstTask?.userAssigned && firstTask.type === 'REVIEW');
 
     if (focused?.language && canTranslate) {
-      const translation = fixedTranslations?.find(
-        (t) => t.keyId === focused.keyId
-      )?.translations[focused.language];
-
       const newState =
         translation?.state && TRANSLATION_STATES[translation.state]?.next;
 

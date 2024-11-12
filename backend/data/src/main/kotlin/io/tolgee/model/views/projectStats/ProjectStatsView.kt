@@ -5,4 +5,5 @@ data class ProjectStatsView(
   val keyCount: Long,
   val memberCount: Long,
   val tagCount: Long,
+  val taskCount: Long,
 )

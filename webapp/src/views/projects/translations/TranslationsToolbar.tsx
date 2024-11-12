@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { IconButton, Portal, styled, Tooltip } from '@mui/material';
-import { KeyboardArrowUp } from '@mui/icons-material';
+import { ChevronUp } from '@untitled-ui/icons-react';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
@@ -154,14 +154,14 @@ export const TranslationsToolbar: React.FC = () => {
             <StyledStretcher>{counterContent}</StyledStretcher>
           </StyledIndex>
           <StyledDivider />
-          <Tooltip title={t('translations_toolbar_to_top')}>
+          <Tooltip title={t('translations_toolbar_to_top')} disableInteractive>
             <StyledIconButton
               data-cy="translations-toolbar-to-top"
               onClick={handleScrollUp}
               size="small"
               aria-label={t('translations_toolbar_to_top')}
             >
-              <KeyboardArrowUp />
+              <ChevronUp width={20} height={20} />
             </StyledIconButton>
           </Tooltip>
         </StyledCounterContainer>
