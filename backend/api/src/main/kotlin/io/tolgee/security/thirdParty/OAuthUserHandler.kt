@@ -100,6 +100,7 @@ class OAuthUserHandler(
     refreshToken: String?,
   ) {
     if (userAccount.ssoRefreshToken != refreshToken) {
+      // TODO: allow only refresh token with unlimited expiration
       userAccount.ssoRefreshToken = refreshToken
       userAccountService.save(userAccount)
     }

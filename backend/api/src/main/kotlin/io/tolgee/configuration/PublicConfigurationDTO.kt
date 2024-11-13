@@ -9,10 +9,12 @@ import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
-  @Schema(hidden = true) properties: TolgeeProperties,
+  @Schema(hidden = true)
+  properties: TolgeeProperties,
   val machineTranslationServices: MtServicesDTO,
   val billing: PublicBillingConfigurationDTO,
   val version: String,
+  contentDeliveryEnabled: Boolean,
 ) {
   val authentication: Boolean = properties.authentication.enabled
   val authMethods: AuthMethodsDTO? = properties.authentication.asAuthMethodsDTO()
@@ -36,7 +38,8 @@ class PublicConfigurationDTO(
   val ga4Tag = properties.ga4Tag
   val postHogApiKey: String? = properties.postHog.apiKey
   val postHogHost: String? = properties.postHog.host
-  val contentDeliveryConfigured: Boolean = properties.contentDelivery.publicUrlPrefix != null
+  val contentDeliveryConfigured: Boolean = contentDeliveryEnabled
+
   val userSourceField: Boolean = properties.userSourceField
   val plausible: PlausibleDto =
     PlausibleDto(

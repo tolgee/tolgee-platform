@@ -1,3 +1,10 @@
+## [3.81.1](https://github.com/tolgee/tolgee-platform/compare/v3.81.0...v3.81.1) (2024-11-11)
+
+
+### Bug Fixes
+
+* Content delivery configured check & docs ([#2481](https://github.com/tolgee/tolgee-platform/issues/2481)) ([5a94758](https://github.com/tolgee/tolgee-platform/commit/5a947586b74783c497bc80438d6fffa686fb1b2a))
+
 # [3.81.0](https://github.com/tolgee/tolgee-platform/compare/v3.80.6...v3.81.0) (2024-11-05)
 
 

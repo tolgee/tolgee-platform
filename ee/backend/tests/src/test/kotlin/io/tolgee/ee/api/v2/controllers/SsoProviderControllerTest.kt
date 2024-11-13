@@ -1,7 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.OAuthTestData
+import io.tolgee.development.testDataBuilder.data.SsoTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class SsoProviderControllerTest : AuthorizedControllerTest() {
-  private lateinit var testData: OAuthTestData
+  private lateinit var testData: SsoTestData
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
-    testData = OAuthTestData()
+    testData = SsoTestData()
     testDataService.saveTestData(testData.root)
     this.userAccount = testData.user
     loginAsUser(testData.user.username)

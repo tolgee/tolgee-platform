@@ -194,8 +194,9 @@ class SsoDelegateEe(
       }
 
     if (domain == null || user.ssoRefreshToken == null) {
-      throw AuthenticationException(Message.SSO_CANT_VERIFY_USER)
+      return false
     }
+
     if (user.ssoSessionExpiry?.after(currentDateProvider.date) == true) {
       return true
     }
@@ -218,7 +219,7 @@ class SsoDelegateEe(
     body.add("refresh_token", user.ssoRefreshToken)
 
     val request = HttpEntity(body, headers)
-    return try {
+    try {
       val response: ResponseEntity<OAuth2TokenResponse> =
         restTemplate.exchange(
           tenant.tokenUri,
@@ -231,10 +232,9 @@ class SsoDelegateEe(
         oAuthUserHandler.updateRefreshToken(user.id, response.body?.refresh_token)
         return true
       }
-      false
     } catch (e: RestClientException) {
       logger.info("Failed to refresh token: ${e.message}")
-      false
     }
+    return false
   }
 }

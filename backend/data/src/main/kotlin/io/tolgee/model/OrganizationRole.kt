@@ -42,7 +42,9 @@ class OrganizationRole(
   @ManyToOne
   var user: UserAccount? = null
 
-  var managed: Boolean = false
+  // Valid values are true or null
+  // Constraint was manually added to migration schema
+  var managed: Boolean? = null
 
   @ManyToOne
   @NotNull
