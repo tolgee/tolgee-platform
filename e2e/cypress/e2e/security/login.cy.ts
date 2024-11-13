@@ -5,12 +5,14 @@ import { getAnyContainingText } from '../../common/xPath';
 import {
   createUser,
   deleteAllEmails,
-  deleteSso,
   disableEmailVerification,
   getParsedResetPasswordEmail,
   login,
   logout,
-  setSsoProvider,
+  enableLocalSsoProvider,
+  disableLocalSsoProvider,
+  enableGlobalSsoProvider,
+  disableGlobalSsoProvider,
   userDisableMfa,
   userEnableMfa,
 } from '../../common/apiCalls/common';
@@ -33,22 +35,6 @@ context('Login', () => {
 
   it('can change language', () => {
     cy.gcy('global-language-menu').should('be.visible');
-  });
-
-  context('SSO Login', () => {
-    it('login with sso', { retries: { runMode: 5 } }, () => {
-      disableEmailVerification();
-      setSsoProvider();
-      cy.visit(HOST);
-      cy.contains('Log in with SSO').click();
-      cy.xpath("//*[@name='domain']").type('domain.com');
-      loginWithFakeSso();
-    });
-
-    afterEach(() => {
-      deleteSso();
-      logout();
-    });
   });
 
   it('login', () => {
@@ -87,6 +73,36 @@ context('Login', () => {
   it('login with oauth2', { retries: { runMode: 5 } }, () => {
     disableEmailVerification();
     loginWithFakeOAuth2();
+  });
+
+  context('SSO Login Local', () => {
+    it('login with global sso', { retries: { runMode: 5 } }, () => {
+      disableEmailVerification();
+      enableLocalSsoProvider();
+
+      cy.contains('Log in with SSO').click();
+      cy.xpath("//*[@name='domain']").type('domain.com');
+
+      loginWithFakeSso();
+    });
+
+    afterEach(() => {
+      disableLocalSsoProvider();
+      logout();
+    });
+  });
+
+  context('SSO Login Global', () => {
+    it('login with global sso', { retries: { runMode: 5 } }, () => {
+      disableEmailVerification();
+      enableGlobalSsoProvider();
+      loginWithFakeSso();
+    });
+
+    afterEach(() => {
+      disableGlobalSsoProvider();
+      logout();
+    });
   });
 
   it('logout', () => {

@@ -23,6 +23,16 @@ tolgee:
       authorization-url: "https://dummy-url.com/authorize"
       token-url: "https://dummy-url.com/oauth/token"
       user-url: "https://dummy-url.com/userinfo"
+    sso-organizations:
+      enabled: false
+    sso-global:
+      enabled: false
+      authorization-uri: "http://authorizationUri"
+      client-id: "clientId"
+      client-secret: "clientSecret"
+      domain: "domain.com"
+      jwk-set-uri: "http://jwkSetUri"
+      token-uri: "http://tokenUri"
     create-demo-for-initial-user: false
   rate-limits: # tests go brrrr but then get 429'd and no longer go brrrr
     global-limits: false

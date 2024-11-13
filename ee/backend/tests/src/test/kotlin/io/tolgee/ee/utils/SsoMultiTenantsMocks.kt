@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-class OAuthMultiTenantsMocks(
+class SsoMultiTenantsMocks(
   private var authMvc: MockMvc? = null,
   private val restTemplate: RestTemplate? = null,
   private val tenantService: TenantService? = null,

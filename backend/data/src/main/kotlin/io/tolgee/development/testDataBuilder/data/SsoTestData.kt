@@ -5,7 +5,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
-class OAuthTestData : BaseTestData() {
+class SsoTestData : BaseTestData() {
   val organization = this.projectBuilder.self.organizationOwner
 
   var userNotOwner: UserAccount
