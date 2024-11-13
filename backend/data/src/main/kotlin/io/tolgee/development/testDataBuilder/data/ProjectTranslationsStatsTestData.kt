@@ -3,7 +3,6 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
-import io.tolgee.model.UserAccount
 
 class ProjectTranslationsStatsTestData {
   var organizationBuilder: OrganizationBuilder
