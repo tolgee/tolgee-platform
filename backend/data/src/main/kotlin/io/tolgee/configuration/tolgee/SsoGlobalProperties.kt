@@ -1,7 +1,11 @@
 package io.tolgee.configuration.tolgee
 
+import io.tolgee.api.ISsoTenant
 import io.tolgee.configuration.annotations.DocProperty
+import io.tolgee.model.Organization
+import jakarta.annotation.PostConstruct
 import org.springframework.boot.context.properties.ConfigurationProperties
+import kotlin.reflect.KProperty0
 
 @ConfigurationProperties(prefix = "tolgee.authentication.sso-global")
 @DocProperty(
@@ -18,27 +22,27 @@ import org.springframework.boot.context.properties.ConfigurationProperties
       " have access to. Per organization SSO users are automatically added to the organization they belong to.",
   displayName = "Single Sign-On",
 )
-class SsoGlobalProperties {
+class SsoGlobalProperties : ISsoTenant {
   @DocProperty(description = "Enables SSO authentication on global level - as a login method for the whole server")
   var enabled: Boolean = false
 
   @DocProperty(description = "Unique identifier for an application")
-  var clientId: String? = null
+  override var clientId: String = ""
 
   @DocProperty(description = "Key used to authenticate the application")
-  var clientSecret: String? = null
+  override var clientSecret: String = ""
 
   @DocProperty(description = "URL to redirect users for authentication")
-  var authorizationUri: String? = null
+  override var authorizationUri: String = ""
 
   @DocProperty(description = "URL for exchanging authorization code for tokens")
-  var tokenUri: String? = null
+  override var tokenUri: String = ""
 
   @DocProperty(description = "Used to identify the organization on login page")
-  var domain: String? = null
+  override var domain: String = ""
 
-  @DocProperty(description = "URL to retrieve the JSON Web Key Set (JWKS)")
-  var jwkSetUri: String? = null
+  @DocProperty(description = "URL to retrieve the JSON Web Token Set (JWTS)")
+  override var jwtSetUri: String = ""
 
   @DocProperty(
     description =
@@ -59,4 +63,27 @@ class SsoGlobalProperties {
     description = "Custom text for the SSO login page.",
   )
   var customLoginText: String? = null
+
+  @DocProperty(hidden = true)
+  override val name: String
+    get() = "Global SSO"
+
+  @DocProperty(hidden = true)
+  override val global: Boolean
+    get() = true
+
+  @DocProperty(hidden = true)
+  override val organization: Organization? = null
+
+  @PostConstruct
+  fun validate() {
+    if (enabled) {
+      listOf(::clientId, ::clientSecret, ::authorizationUri, ::domain, this::jwtSetUri, ::tokenUri).forEach {
+        it.validateIsNotBlank()
+      }
+    }
+  }
+
+  private fun <T : String?> KProperty0<T?>.validateIsNotBlank() =
+    require(!this.get().isNullOrBlank()) { "Property ${this.name} must be set when SSO is enabled" }
 }

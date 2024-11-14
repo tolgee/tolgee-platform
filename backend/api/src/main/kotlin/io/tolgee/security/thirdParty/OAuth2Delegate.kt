@@ -8,6 +8,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
+import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -27,14 +28,18 @@ class OAuth2Delegate(
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
   private val oAuthUserHandler: OAuthUserHandler,
-) {
+) : ThirdPartyAuthDelegate {
   private val oauth2ConfigurationProperties: OAuth2AuthenticationProperties = properties.authentication.oauth2
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  fun getTokenResponse(
+  override val name: String
+    get() = "oauth2"
+
+  override fun getTokenResponse(
     receivedCode: String?,
     invitationCode: String?,
     redirectUri: String?,
+    domain: String?,
   ): JwtAuthenticationResponse {
     try {
       val body: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>()

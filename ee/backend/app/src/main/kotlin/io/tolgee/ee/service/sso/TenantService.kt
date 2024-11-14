@@ -9,7 +9,6 @@ import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
 import io.tolgee.repository.TenantRepository
 import io.tolgee.security.thirdParty.SsoTenantConfig
-import io.tolgee.security.thirdParty.SsoTenantConfig.Companion.toConfig
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,19 +17,13 @@ class TenantService(
   private val ssoGlobalProperties: SsoGlobalProperties,
   private val ssoLocalProperties: SsoLocalProperties,
 ) {
-  fun getById(id: Long): SsoTenant = tenantRepository.findById(id).orElseThrow { NotFoundException() }
-
-  fun getByDomain(domain: String): SsoTenant {
-    return tenantRepository.findByDomain(domain) ?: throw NotFoundException()
-  }
-
   fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
     return ssoGlobalProperties
       .takeIf { it.enabled && domain == it.domain }
-      ?.toConfig()
+      ?.let { ssoTenantProperties -> SsoTenantConfig(ssoTenantProperties) }
       ?: domain
         .takeIf { ssoLocalProperties.enabled }
-        ?.let { tenantRepository.findEnabledByDomain(it)?.toConfig() }
+        ?.let { tenantRepository.findEnabledByDomain(it)?.let { ssoTenantEntity -> SsoTenantConfig(ssoTenantEntity) } }
       ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
   }
 
@@ -62,7 +55,7 @@ class TenantService(
     tenant.clientSecret = dto.clientSecret
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
-    tenant.jwkSetUri = dto.jwkSetUri
+    tenant.jwtSetUri = dto.jwkSetUri
     tenant.enabled = dto.isEnabled
     return save(tenant)
   }

@@ -226,19 +226,14 @@ class UserAccountService(
   fun findByThirdParty(
     type: ThirdPartyAuthType,
     id: String,
-  ): Optional<UserAccount> {
+  ): UserAccount? {
     return userAccountRepository.findThirdByThirdParty(id, type)
   }
 
   fun findBySsoDomain(
     type: String,
     idSub: String,
-  ): Optional<UserAccount> = userAccountRepository.findBySsoDomain(idSub, type)
-
-  fun findBySsoTenantId(
-    tenantId: Long?,
-    idSub: String,
-  ): Optional<UserAccount> = userAccountRepository.findBySsoTenantId(idSub, tenantId)
+  ): UserAccount? = userAccountRepository.findBySsoDomain(idSub, type)
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")

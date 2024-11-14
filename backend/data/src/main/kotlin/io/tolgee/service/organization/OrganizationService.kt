@@ -146,13 +146,11 @@ class OrganizationService(
     exceptOrganizationId: Long = 0,
   ): Organization? {
     return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
-      if (
-        (
-          tolgeeProperties.authentication.userCanCreateOrganizations &&
-            userAccount.thirdPartyAuthType !== ThirdPartyAuthType.SSO
-        ) ||
-        userAccount.role == UserAccount.Role.ADMIN
-      ) {
+      val canCreateOrganizations =
+        tolgeeProperties.authentication.userCanCreateOrganizations &&
+          userAccount.thirdPartyAuthType !== ThirdPartyAuthType.SSO
+
+      if (canCreateOrganizations || userAccount.role == UserAccount.Role.ADMIN) {
         return@let createPreferred(userAccount)
       }
       null

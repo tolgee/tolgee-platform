@@ -13,7 +13,7 @@ import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.addMinutes
 import org.springframework.stereotype.Component
-import java.util.Date
+import java.util.*
 
 @Component
 class OAuthUserHandler(
@@ -30,31 +30,33 @@ class OAuthUserHandler(
     thirdPartyAuthType: ThirdPartyAuthType,
     accountType: UserAccount.AccountType,
   ): UserAccount {
-    val userAccountOptional =
-      if (thirdPartyAuthType == ThirdPartyAuthType.SSO) {
-        if (userResponse.tenant == null) {
-          // This should never happen
-          throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
-        }
-        userAccountService.findBySsoDomain(userResponse.tenant.domain, userResponse.sub!!)
-      } else {
-        // SSO_GLOBAL or OAUTH2
-        userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
-      }
+    val userAccount =
+      getUserAccount(thirdPartyAuthType, userResponse)
 
-    userAccountOptional.ifPresent {
-      if (
-        thirdPartyAuthType == ThirdPartyAuthType.SSO ||
-        thirdPartyAuthType == ThirdPartyAuthType.SSO_GLOBAL
-      ) {
-        updateRefreshToken(it, userResponse.refreshToken)
-        resetSsoSessionExpiry(it)
+    if (userAccount != null) {
+      if (thirdPartyAuthType in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)) {
+        updateRefreshToken(userAccount, userResponse.refreshToken)
+        resetSsoSessionExpiry(userAccount)
       }
+      return userAccount
     }
 
-    return userAccountOptional.orElseGet {
-      createUser(userResponse, invitationCode, thirdPartyAuthType, accountType)
+    return createUser(userResponse, invitationCode, thirdPartyAuthType, accountType)
+  }
+
+  private fun getUserAccount(
+    thirdPartyAuthType: ThirdPartyAuthType,
+    userResponse: OAuthUserDetails,
+  ): UserAccount? {
+    if (thirdPartyAuthType == ThirdPartyAuthType.SSO) {
+      if (userResponse.tenant == null) {
+        // This should never happen
+        throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
+      }
+      return userAccountService.findBySsoDomain(userResponse.tenant.domain, userResponse.sub!!)
     }
+    // SSO_GLOBAL or OAUTH2
+    return userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
   }
 
   private fun createUser(

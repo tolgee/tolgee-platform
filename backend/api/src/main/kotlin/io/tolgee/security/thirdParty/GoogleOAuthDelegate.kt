@@ -8,6 +8,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
+import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.http.HttpEntity
@@ -25,13 +26,17 @@ class GoogleOAuthDelegate(
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
-) {
+) : ThirdPartyAuthDelegate {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
-  fun getTokenResponse(
+  override val name: String
+    get() = "google"
+
+  override fun getTokenResponse(
     receivedCode: String?,
     invitationCode: String?,
     redirectUri: String?,
+    domain: String?,
   ): JwtAuthenticationResponse {
     try {
       val body = HashMap<String, String?>()
@@ -58,7 +63,7 @@ class GoogleOAuthDelegate(
         if (exchange.statusCode != HttpStatus.OK || exchange.body == null) {
           throw AuthenticationException(Message.THIRD_PARTY_UNAUTHORIZED)
         }
-        val userResponse = exchange.body
+        val userResponse = exchange.body ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
 
         // check google email verified
         if (userResponse.email_verified == false) {
@@ -66,7 +71,9 @@ class GoogleOAuthDelegate(
         }
 
         // Split the comma-separated list of domains into a List
-        val allowedDomains = googleConfigurationProperties.workspaceDomain?.split(",")?.map { it.trim() } ?: listOf()
+        val allowedDomains =
+          googleConfigurationProperties.workspaceDomain?.split(",")?.map { it.trim() }
+            ?: listOf()
 
         // ensure that only Google Workspace users from allowed domains can log in
         if (allowedDomains.isNotEmpty()) {
@@ -77,9 +84,8 @@ class GoogleOAuthDelegate(
 
         val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-        val userAccountOptional = userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse!!.sub!!)
-        val user =
-          userAccountOptional.orElseGet {
+        val userAccount =
+          userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!) ?: let {
             userAccountService.findActive(googleEmail)?.let {
               throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
             }
@@ -95,7 +101,7 @@ class GoogleOAuthDelegate(
 
             newUserAccount
           }
-        val jwt = jwtService.emitToken(user.id)
+        val jwt = jwtService.emitToken(userAccount.id)
         return JwtAuthenticationResponse(jwt)
       }
       if (response == null) {

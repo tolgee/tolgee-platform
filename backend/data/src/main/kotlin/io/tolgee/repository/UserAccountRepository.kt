@@ -161,7 +161,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findThirdByThirdParty(
     thirdPartyAuthId: String,
     thirdPartyAuthType: ThirdPartyAuthType,
-  ): Optional<UserAccount>
+  ): UserAccount?
 
   @Query(
     """
@@ -178,7 +178,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findBySsoDomain(
     thirdPartyAuthId: String,
     domain: String,
-  ): Optional<UserAccount>
+  ): UserAccount?
 
   @Query(
     """

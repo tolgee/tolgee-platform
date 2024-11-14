@@ -25,7 +25,9 @@ import jakarta.transaction.Transactional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.ArgumentMatchers.*
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.times
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.verify
@@ -90,7 +92,7 @@ class SsoTest : AuthorizedControllerTest() {
           clientId = "clientId"
           clientSecret = "clientSecret"
           authorizationUri = "authorizationUri"
-          jwkSetUri = "http://jwkSetUri"
+          jwtSetUri = "http://jwkSetUri"
           tokenUri = "http://tokenUri"
           organization = testData.organization
         }.let { tenantService.save(it) }
@@ -226,7 +228,7 @@ class SsoTest : AuthorizedControllerTest() {
     ssoGlobalProperties.clientSecret = "clientSecret"
     ssoGlobalProperties.authorizationUri = "authorizationUri"
     ssoGlobalProperties.tokenUri = "http://tokenUri"
-    ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
+    ssoGlobalProperties.jwtSetUri = "http://jwkSetUri"
     val response = ssoMultiTenantsMocks.authorize("registrationId")
 
     val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)

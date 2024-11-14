@@ -23,18 +23,29 @@ import io.tolgee.security.authorization.BypassEmailVerification
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.security.service.thirdParty.SsoDelegate
+import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.security.thirdParty.GithubOAuthDelegate
 import io.tolgee.security.thirdParty.GoogleOAuthDelegate
 import io.tolgee.security.thirdParty.OAuth2Delegate
 import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.security.*
+import io.tolgee.service.security.MfaService
+import io.tolgee.service.security.ReCaptchaValidationService
+import io.tolgee.service.security.SignUpService
+import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserCredentialsService
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
@@ -55,6 +66,7 @@ class PublicController(
   private val mfaService: MfaService,
   private val userCredentialsService: UserCredentialsService,
   private val authProperties: AuthenticationProperties,
+  private val thirdPartyAuthDelegates: List<ThirdPartyAuthDelegate>,
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -229,27 +241,10 @@ class PublicController(
       val user = getFakeGithubUser()
       return JwtAuthenticationResponse(jwtService.emitToken(user.id))
     }
-    return when (serviceType) {
-      "github" -> {
-        githubOAuthDelegate.getTokenResponse(code, invitationCode)
-      }
 
-      "google" -> {
-        googleOAuthDelegate.getTokenResponse(code, invitationCode, redirectUri)
-      }
-
-      "oauth2" -> {
-        oauth2Delegate.getTokenResponse(code, invitationCode, redirectUri)
-      }
-
-      "sso" -> {
-        ssoDelegate.getTokenResponse(code, invitationCode, redirectUri, domain)
-      }
-
-      else -> {
-        throw NotFoundException(Message.SERVICE_NOT_FOUND)
-      }
-    }
+    return thirdPartyAuthDelegates.find { it.name == serviceType }
+      ?.getTokenResponse(code, invitationCode, redirectUri, domain)
+      ?: throw NotFoundException(Message.SERVICE_NOT_FOUND)
   }
 
   private fun getFakeGithubUser(): UserAccount {

@@ -31,7 +31,11 @@ import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -72,7 +76,7 @@ class SsoDelegateEe(
       fetchToken(tenant, code, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo = decodeIdToken(token.id_token, tenant.jwkSetUri)
+    val userInfo = decodeIdToken(token.id_token, tenant.jwtSetUri)
     return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
@@ -183,22 +187,31 @@ class SsoDelegateEe(
   }
 
   override fun verifyUserSsoAccountAvailable(user: UserAccountDto): Boolean {
-    var domain =
-      if (user.thirdPartyAuth == ThirdPartyAuthType.SSO) {
-        fetchLocalSsoDomainFor(user.id)
-      } else if (user.thirdPartyAuth == ThirdPartyAuthType.SSO_GLOBAL) {
-        ssoGlobalProperties.domain
-      } else {
-        // Not SSO user
-        return true
-      }
-
-    if (domain == null || user.ssoRefreshToken == null) {
-      return false
+    val isNotSsoUser = user.thirdPartyAuth !in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)
+    if (isNotSsoUser) {
+      return true
     }
 
     if (user.ssoSessionExpiry?.after(currentDateProvider.date) == true) {
       return true
+    }
+
+    val domain =
+      when (user.thirdPartyAuth) {
+        ThirdPartyAuthType.SSO -> {
+          fetchLocalSsoDomainFor(user.id)
+        }
+        ThirdPartyAuthType.SSO_GLOBAL -> {
+          ssoGlobalProperties.domain
+        }
+        else -> {
+          // Not SSO user
+          return true
+        }
+      }
+
+    if (domain == null || user.ssoRefreshToken == null) {
+      return false
     }
 
     val tenant = tenantService.getEnabledConfigByDomain(domain)
