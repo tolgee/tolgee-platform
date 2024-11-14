@@ -2,7 +2,6 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.api.ISsoTenant
 import io.tolgee.configuration.annotations.DocProperty
-import io.tolgee.model.Organization
 import jakarta.annotation.PostConstruct
 import org.springframework.boot.context.properties.ConfigurationProperties
 import kotlin.reflect.KProperty0
@@ -42,7 +41,7 @@ class SsoGlobalProperties : ISsoTenant {
   override var domain: String = ""
 
   @DocProperty(description = "URL to retrieve the JSON Web Token Set (JWTS)")
-  override var jwtSetUri: String = ""
+  override var jwkSetUri: String = ""
 
   @DocProperty(
     description =
@@ -65,20 +64,13 @@ class SsoGlobalProperties : ISsoTenant {
   var customLoginText: String? = null
 
   @DocProperty(hidden = true)
-  override val name: String
-    get() = "Global SSO"
-
-  @DocProperty(hidden = true)
   override val global: Boolean
     get() = true
-
-  @DocProperty(hidden = true)
-  override val organization: Organization? = null
 
   @PostConstruct
   fun validate() {
     if (enabled) {
-      listOf(::clientId, ::clientSecret, ::authorizationUri, ::domain, this::jwtSetUri, ::tokenUri).forEach {
+      listOf(::clientId, ::clientSecret, ::authorizationUri, ::domain, this::jwkSetUri, ::tokenUri).forEach {
         it.validateIsNotBlank()
       }
     }

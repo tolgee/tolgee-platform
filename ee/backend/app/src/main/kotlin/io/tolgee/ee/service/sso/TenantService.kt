@@ -20,10 +20,14 @@ class TenantService(
   fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
     return ssoGlobalProperties
       .takeIf { it.enabled && domain == it.domain }
-      ?.let { ssoTenantProperties -> SsoTenantConfig(ssoTenantProperties) }
+      ?.let { ssoTenantProperties -> SsoTenantConfig(ssoTenantProperties, null) }
       ?: domain
         .takeIf { ssoLocalProperties.enabled }
-        ?.let { tenantRepository.findEnabledByDomain(it)?.let { ssoTenantEntity -> SsoTenantConfig(ssoTenantEntity) } }
+        ?.let {
+          tenantRepository.findEnabledByDomain(it)?.let { ssoTenantEntity ->
+            SsoTenantConfig(ssoTenantEntity, ssoTenantEntity.organization)
+          }
+        }
       ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
   }
 
@@ -35,28 +39,27 @@ class TenantService(
 
   fun getTenant(organizationId: Long): SsoTenant = findTenant(organizationId) ?: throw NotFoundException()
 
-  fun saveOrUpdate(
+  fun createOrUpdate(
     request: CreateProviderRequest,
     organization: Organization,
   ): SsoTenant {
     val tenant = findTenant(organization.id) ?: SsoTenant()
-    return setAndSaveTenantsFields(tenant, request, organization)
+    setTenantsFields(tenant, request, organization)
+    return save(tenant)
   }
 
-  private fun setAndSaveTenantsFields(
+  private fun setTenantsFields(
     tenant: SsoTenant,
     dto: CreateProviderRequest,
     organization: Organization,
-  ): SsoTenant {
-    tenant.name = dto.name ?: ""
+  ) {
     tenant.organization = organization
-    tenant.domain = dto.domainName
+    tenant.domain = dto.domain
     tenant.clientId = dto.clientId
     tenant.clientSecret = dto.clientSecret
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
-    tenant.jwtSetUri = dto.jwkSetUri
-    tenant.enabled = dto.isEnabled
-    return save(tenant)
+    tenant.jwkSetUri = dto.jwkSetUri
+    tenant.enabled = dto.enabled
   }
 }

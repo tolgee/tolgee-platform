@@ -37,7 +37,7 @@ export const OrganizationSsoView: FunctionComponent = () => {
   const [toggleFormState, setToggleFormState] = useState(false);
 
   useEffect(() => {
-    setToggleFormState(providersLoadable?.data?.isEnabled || false);
+    setToggleFormState(providersLoadable?.data?.enabled || false);
   }, [providersLoadable?.data]);
 
   const handleSwitchChange = (event) => {

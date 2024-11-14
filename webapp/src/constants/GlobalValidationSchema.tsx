@@ -425,7 +425,7 @@ export class Validation {
   static readonly SSO_PROVIDER = (t: TranslateFunction) =>
     Yup.object().shape({
       clientId: Yup.string().required().max(255),
-      domainName: Yup.string().required().max(255),
+      domain: Yup.string().required().max(255),
       clientSecret: Yup.string().required().max(255),
       authorizationUri: Yup.string()
         .required()

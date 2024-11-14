@@ -21,7 +21,7 @@ type FormValues = {
   clientSecret: string;
   tokenUri: string;
   jwkSetUri: string;
-  domainName: string;
+  domain: string;
 };
 
 export function CreateProviderSsoForm({ data, disabled }) {
@@ -33,7 +33,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
     clientSecret: data?.clientSecret ?? '',
     tokenUri: data?.tokenUri ?? '',
     jwkSetUri: data?.jwkSetUri ?? '',
-    domainName: data?.domainName ?? '',
+    domain: data?.domain ?? '',
   };
 
   if (!organization) {
@@ -54,7 +54,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
         providersCreate.mutate(
           {
             path: { organizationId: organization.id },
-            content: { 'application/json': { ...data, isEnabled: !disabled } },
+            content: { 'application/json': { ...data, enabled: !disabled } },
           },
           {
             onSuccess(data) {
@@ -70,7 +70,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
         <TextField
           disabled={disabled}
           variant="standard"
-          name="domainName"
+          name="domain"
           label={<T keyName="organization_sso_domain_name" />}
           minHeight={false}
           helperText={<T keyName="sso_domain_name_helper_text" />}

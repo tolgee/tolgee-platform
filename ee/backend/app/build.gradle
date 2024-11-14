@@ -66,6 +66,9 @@ dependencies {
     /**
      * MISC
      */
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
     implementation libs.hibernateTypes
     implementation libs.jacksonKotlin
     implementation libs.commonsCodec

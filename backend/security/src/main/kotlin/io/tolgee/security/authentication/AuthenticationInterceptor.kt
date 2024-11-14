@@ -72,9 +72,6 @@ class AuthenticationInterceptor(
       authenticationProperties.enabled &&
       authenticationFacade.authenticatedUser.needsSuperJwt &&
       !authenticationFacade.isUserSuperAuthenticated
-      // TODO: && authentication.nativeEnabled || authenticationFacade.authenticatedUser.isMfaEnabled
-      //  similar check is already in the needsSuperJwt bit it doesn't account for the nativeEnabled config option
-      //  should we just add the isMfaEnabled to the user dto?
     ) {
       throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
     }

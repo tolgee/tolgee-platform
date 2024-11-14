@@ -83,7 +83,7 @@ class AuthenticationFilter(
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val auth = jwtService.validateToken(authorization.substring(7))
-        checkIfSsoUserStillExists(auth.principal)
+        checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth
         return
@@ -117,7 +117,7 @@ class AuthenticationFilter(
     }
   }
 
-  private fun checkIfSsoUserStillExists(userDto: UserAccountDto) {
+  private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {
     if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
       throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
     }
@@ -141,7 +141,7 @@ class AuthenticationFilter(
       userAccountService.findDto(pak.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
 
-    checkIfSsoUserStillExists(userAccount)
+    checkIfSsoUserStillValid(userAccount)
 
     apiKeyService.updateLastUsedAsync(pak.id)
     SecurityContextHolder.getContext().authentication =
@@ -166,7 +166,7 @@ class AuthenticationFilter(
       userAccountService.findDto(pat.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
 
-    checkIfSsoUserStillExists(userAccount)
+    checkIfSsoUserStillValid(userAccount)
 
     patService.updateLastUsedAsync(pat.id)
     SecurityContextHolder.getContext().authentication =

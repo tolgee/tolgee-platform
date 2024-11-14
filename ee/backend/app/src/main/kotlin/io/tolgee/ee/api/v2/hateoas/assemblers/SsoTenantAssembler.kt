@@ -18,8 +18,8 @@ class SsoTenantAssembler :
       clientId = entity.clientId,
       clientSecret = entity.clientSecret,
       tokenUri = entity.tokenUri,
-      isEnabled = entity.isEnabled,
+      enabled = entity.enabled,
       jwkSetUri = entity.jwkSetUri,
-      domainName = entity.domainName,
+      domain = entity.domain,
     )
 }

@@ -87,12 +87,11 @@ class SsoTest : AuthorizedControllerTest() {
     tenantService.findTenant(testData.organization.id)
       ?: SsoTenant()
         .apply {
-          name = "tenant1"
-          domain = "registrationId"
+          this.domain = "registrationId"
           clientId = "clientId"
           clientSecret = "clientSecret"
           authorizationUri = "authorizationUri"
-          jwtSetUri = "http://jwkSetUri"
+          jwkSetUri = "http://jwkSetUri"
           tokenUri = "http://tokenUri"
           organization = testData.organization
         }.let { tenantService.save(it) }
@@ -228,7 +227,7 @@ class SsoTest : AuthorizedControllerTest() {
     ssoGlobalProperties.clientSecret = "clientSecret"
     ssoGlobalProperties.authorizationUri = "authorizationUri"
     ssoGlobalProperties.tokenUri = "http://tokenUri"
-    ssoGlobalProperties.jwtSetUri = "http://jwkSetUri"
+    ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
     val response = ssoMultiTenantsMocks.authorize("registrationId")
 
     val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)

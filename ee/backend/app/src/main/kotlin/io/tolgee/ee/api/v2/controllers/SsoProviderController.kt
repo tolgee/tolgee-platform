@@ -37,7 +37,7 @@ class SsoProviderController(
     )
 
     val organization = organizationService.get(organizationId)
-    return ssoTenantAssembler.toModel(tenantService.saveOrUpdate(request, organization).toDto())
+    return ssoTenantAssembler.toModel(tenantService.createOrUpdate(request, organization).toDto())
   }
 
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)

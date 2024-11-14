@@ -1,13 +1,7 @@
 package io.tolgee.ee.security.thirdParty
 
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.jwk.source.JWKSource
-import com.nimbusds.jose.jwk.source.RemoteJWKSet
-import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector
-import com.nimbusds.jose.proc.SecurityContext
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.SignedJWT
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
+import io.jsonwebtoken.JwtParser
+import io.jsonwebtoken.Jwts
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
@@ -29,6 +23,7 @@ import io.tolgee.security.thirdParty.OAuthUserHandler
 import io.tolgee.security.thirdParty.SsoTenantConfig
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.http.HttpEntity
@@ -41,21 +36,25 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
-import java.net.URL
 import java.util.*
 
 @Component
 class SsoDelegateEe(
   private val jwtService: JwtService,
   private val restTemplate: RestTemplate,
-  private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>,
   private val ssoGlobalProperties: SsoGlobalProperties,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
+  private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : SsoDelegate, Logging {
+  private val jwtParser: JwtParser =
+    Jwts.parserBuilder()
+      .setClock { currentDateProvider.date }
+      .build()
+
   override fun getTokenResponse(
     code: String?,
     invitationCode: String?,
@@ -76,7 +75,7 @@ class SsoDelegateEe(
       fetchToken(tenant, code, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo = decodeIdToken(token.id_token, tenant.jwtSetUri)
+    val userInfo = decodeIdToken(token.id_token, tenant.jwkSetUri)
     return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
@@ -119,31 +118,43 @@ class SsoDelegateEe(
     jwkSetUri: String,
   ): GenericUserResponse {
     try {
-      val signedJWT = SignedJWT.parse(idToken)
+      // val signedJWT = SignedJWT.parse(idToken)
+      // val jwtProcessor: ConfigurableJWTProcessor<SecurityContext> = DefaultJWTProcessor()
 
-      // TODO: Why is this deprecated?
-      val jwkSource: JWKSource<SecurityContext> = RemoteJWKSet(URL(jwkSetUri))
+      // TODO: Do we need to verify the signature here?
+      //  The token is directly from the SSO provider, so there is no real reason to not trust it.
+      //  Removing this check would mean we can also remove the jwkSetUri from the tenant configuration.
+      // val jwkSource: JWKSource<SecurityContext> = RemoteJWKSet(URL(jwkSetUri))
 
-      val keySelector = JWSAlgorithmFamilyJWSKeySelector(JWSAlgorithm.Family.RSA, jwkSource)
-      jwtProcessor.jwsKeySelector = keySelector
+      // val keySelector = JWSAlgorithmFamilyJWSKeySelector(JWSAlgorithm.Family.RSA, jwkSource)
+      // jwtProcessor.jwsKeySelector = keySelector
+      // val jwtClaimsSet: JWTClaimsSet = jwtProcessor.process(signedJWT, null)
 
-      val jwtClaimsSet: JWTClaimsSet = jwtProcessor.process(signedJWT, null)
+      val claims = jwtParser.parseClaimsJws(idToken).body
 
-      val expirationTime: Date = jwtClaimsSet.expirationTime
+      // val expirationTime: Date = jwtClaimsSet.expirationTime
+      val expirationTime: Date = claims.expiration
       if (expirationTime.before(Date())) {
         throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
       }
 
+      // return GenericUserResponse().apply {
+      //   sub = jwtClaimsSet.subject
+      //   name = jwtClaimsSet.getStringClaim("name")
+      //   given_name = jwtClaimsSet.getStringClaim("given_name")
+      //   family_name = jwtClaimsSet.getStringClaim("family_name")
+      //   email = jwtClaimsSet.getStringClaim("email")
+      // }
       return GenericUserResponse().apply {
-        sub = jwtClaimsSet.subject
-        name = jwtClaimsSet.getStringClaim("name")
-        given_name = jwtClaimsSet.getStringClaim("given_name")
-        family_name = jwtClaimsSet.getStringClaim("family_name")
-        email = jwtClaimsSet.getStringClaim("email")
+        sub = claims.subject
+        name = claims.get("name", String::class.java)
+        given_name = claims.get("given_name", String::class.java)
+        family_name = claims.get("family_name", String::class.java)
+        email = claims.get("email", String::class.java)
       }
     } catch (e: Exception) {
-      logger.info(e.stackTraceToString())
-      throw SsoAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED)
+      logger.warn(e.stackTraceToString())
+      throw SsoAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED, cause = e)
     }
   }
 
@@ -180,45 +191,58 @@ class SsoDelegateEe(
   }
 
   fun fetchLocalSsoDomainFor(userId: Long): String? {
-    // TODO: Cache this?
     val organization = organizationRoleService.getManagedBy(userId) ?: return null
     val tenant = tenantService.findTenant(organization.id)
     return tenant?.domain
   }
 
   override fun verifyUserSsoAccountAvailable(user: UserAccountDto): Boolean {
-    val isNotSsoUser = user.thirdPartyAuth !in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)
-    if (isNotSsoUser) {
-      return true
-    }
-
-    if (user.ssoSessionExpiry?.after(currentDateProvider.date) == true) {
+    val isSsoUser = user.thirdPartyAuth in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)
+    val isSessionExpired = user.ssoSessionExpiry?.after(currentDateProvider.date) != true
+    if (!isSsoUser || isSessionExpired) {
       return true
     }
 
     val domain =
       when (user.thirdPartyAuth) {
-        ThirdPartyAuthType.SSO -> {
-          fetchLocalSsoDomainFor(user.id)
-        }
-        ThirdPartyAuthType.SSO_GLOBAL -> {
-          ssoGlobalProperties.domain
-        }
-        else -> {
-          // Not SSO user
-          return true
-        }
+        ThirdPartyAuthType.SSO -> fetchLocalSsoDomainFor(user.id)
+        ThirdPartyAuthType.SSO_GLOBAL -> ssoGlobalProperties.domain
+        else -> null
       }
+    val refreshToken = user.ssoRefreshToken
 
-    if (domain == null || user.ssoRefreshToken == null) {
+    if (domain == null || refreshToken == null) {
       return false
     }
 
+    return updateRefreshToken(user, domain, refreshToken)
+  }
+
+  private fun updateRefreshToken(
+    user: UserAccountDto,
+    domain: String,
+    refreshToken: String,
+  ): Boolean {
     val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = tenant.organization?.id,
       Feature.SSO,
     )
+
+    val response = fetchRefreshToken(tenant, refreshToken)
+    if (response?.refresh_token == null) {
+      return false
+    }
+
+    val userAccount = userAccountService.get(user.id)
+    userAccountService.updateSsoSession(userAccount, response.refresh_token)
+    return true
+  }
+
+  private fun fetchRefreshToken(
+    tenant: SsoTenantConfig,
+    refreshToken: String,
+  ): OAuth2TokenResponse? {
     val headers =
       HttpHeaders().apply {
         contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -229,7 +253,7 @@ class SsoDelegateEe(
     body.add("client_id", tenant.clientId)
     body.add("client_secret", tenant.clientSecret)
     body.add("scope", "offline_access openid")
-    body.add("refresh_token", user.ssoRefreshToken)
+    body.add("refresh_token", refreshToken)
 
     val request = HttpEntity(body, headers)
     try {
@@ -240,14 +264,10 @@ class SsoDelegateEe(
           request,
           OAuth2TokenResponse::class.java,
         )
-      if (response.body?.refresh_token != null) {
-        oAuthUserHandler.resetSsoSessionExpiry(user.id)
-        oAuthUserHandler.updateRefreshToken(user.id, response.body?.refresh_token)
-        return true
-      }
+      return response.body
     } catch (e: RestClientException) {
       logger.info("Failed to refresh token: ${e.message}")
     }
-    return false
+    return null
   }
 }

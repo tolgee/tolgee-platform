@@ -10,8 +10,6 @@ import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.thirdParty.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
@@ -271,18 +269,6 @@ class AuthTest : AbstractControllerTest() {
     setForcedDate(baseline)
 
     assertExpired(token)
-  }
-
-  @Test
-  fun `doesn't auth sso user`() {
-    // FIXME: This is s wired test. Just setting the auth type doesn't create valid
-    //  sso user - there is no way for such user to authenticate
-    // TODO: create also for global sso
-    val user = userAccountService.get(initialUsername)
-    user.thirdPartyAuthType = ThirdPartyAuthType.SSO
-    user.accountType = UserAccount.AccountType.MANAGED
-    userAccountService.save(user)
-    doAuthentication(initialUsername, initialPassword).andIsUnauthorized
   }
 
   private fun assertExpired(token: String) {

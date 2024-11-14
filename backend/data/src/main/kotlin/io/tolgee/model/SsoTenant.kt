@@ -13,7 +13,6 @@ import org.hibernate.annotations.ColumnDefault
 @Entity
 @Table(name = "tenant")
 class SsoTenant : ISsoTenant, StandardAuditModel() {
-  override var name: String = ""
   override var clientId: String = ""
   override var clientSecret: String = ""
   override var authorizationUri: String = ""
@@ -21,12 +20,12 @@ class SsoTenant : ISsoTenant, StandardAuditModel() {
   @Column(unique = true, nullable = false)
   @NotBlank
   override var domain: String = ""
-  override var jwtSetUri: String = ""
+  override var jwkSetUri: String = ""
   override var tokenUri: String = ""
 
   @NotNull
   @OneToOne(fetch = FetchType.LAZY)
-  override lateinit var organization: Organization
+  lateinit var organization: Organization
 
   override val global: Boolean
     get() = false

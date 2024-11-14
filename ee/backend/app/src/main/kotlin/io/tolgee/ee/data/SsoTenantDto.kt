@@ -1,16 +1,20 @@
 package io.tolgee.ee.data
 
+import io.tolgee.api.ISsoTenant
 import io.tolgee.model.SsoTenant
 
 data class SsoTenantDto(
-  val authorizationUri: String,
-  val clientId: String,
-  val clientSecret: String,
-  val tokenUri: String,
-  val isEnabled: Boolean,
-  val jwkSetUri: String,
-  val domainName: String,
-)
+  val enabled: Boolean,
+  override val authorizationUri: String,
+  override val clientId: String,
+  override val clientSecret: String,
+  override val tokenUri: String,
+  override val jwkSetUri: String,
+  override val domain: String,
+) : ISsoTenant {
+  override val global: Boolean
+    get() = false
+}
 
 fun SsoTenant.toDto(): SsoTenantDto =
   SsoTenantDto(
@@ -18,7 +22,7 @@ fun SsoTenant.toDto(): SsoTenantDto =
     clientId = this.clientId,
     clientSecret = this.clientSecret,
     tokenUri = this.tokenUri,
-    isEnabled = this.enabled,
-    jwkSetUri = this.jwtSetUri,
-    domainName = this.domain,
+    enabled = this.enabled,
+    jwkSetUri = this.jwkSetUri,
+    domain = this.domain,
   )

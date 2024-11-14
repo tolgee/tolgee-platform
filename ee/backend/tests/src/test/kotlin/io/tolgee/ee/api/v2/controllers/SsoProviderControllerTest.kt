@@ -36,13 +36,13 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/${testData.organization.id}/sso")
       .andIsOk
       .andAssertThatJson {
-        node("domainName").isEqualTo("google")
+        node("domain").isEqualTo("google")
         node("clientId").isEqualTo("clientId")
         node("clientSecret").isEqualTo("clientSecret")
         node("authorizationUri").isEqualTo("authorization")
         node("tokenUri").isEqualTo("tokenUri")
         node("jwkSetUri").isEqualTo("jwkSetUri")
-        node("isEnabled").isEqualTo(true)
+        node("enabled").isEqualTo(true)
       }
   }
 
@@ -59,13 +59,13 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
 
   fun requestTenant() =
     mapOf(
-      "domainName" to "google",
+      "domain" to "google",
       "clientId" to "clientId",
       "clientSecret" to "clientSecret",
       "authorizationUri" to "authorization",
       "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
       "jwkSetUri" to "jwkSetUri",
-      "isEnabled" to true,
+      "enabled" to true,
     )
 }

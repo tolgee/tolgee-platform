@@ -2,6 +2,8 @@ package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.demoProject.DemoProjectData
+import io.tolgee.configuration.tolgee.SsoGlobalProperties
+import io.tolgee.configuration.tolgee.SsoLocalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -29,6 +31,7 @@ import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
+import io.tolgee.util.addMinutes
 import jakarta.persistence.EntityManager
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.time.DateUtils
@@ -54,6 +57,8 @@ class UserAccountService(
   private val userAccountRepository: UserAccountRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
+  private val ssoLocalProperties: SsoLocalProperties,
+  private val ssoGlobalProperties: SsoGlobalProperties,
   private val avatarService: AvatarService,
   private val passwordEncoder: PasswordEncoder,
   @Lazy
@@ -324,6 +329,28 @@ class UserAccountService(
   ): UserAccount {
     userAccount.mfaRecoveryCodes = codes
     return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
+  fun updateSsoSession(
+    userAccount: UserAccount,
+    refreshToken: String?,
+  ): UserAccount {
+    // TODO: allow only refresh token with unlimited expiration
+    userAccount.ssoRefreshToken = refreshToken
+    userAccount.ssoSessionExpiry = getCurrentSsoExpiration(userAccount.thirdPartyAuthType)
+    return userAccountRepository.save(userAccount)
+  }
+
+  fun getCurrentSsoExpiration(type: ThirdPartyAuthType?): Date? {
+    return currentDateProvider.date.addMinutes(
+      when (type) {
+        ThirdPartyAuthType.SSO -> ssoLocalProperties.sessionExpirationMinutes
+        ThirdPartyAuthType.SSO_GLOBAL -> ssoGlobalProperties.sessionExpirationMinutes
+        else -> return null
+      },
+    )
   }
 
   @Transactional

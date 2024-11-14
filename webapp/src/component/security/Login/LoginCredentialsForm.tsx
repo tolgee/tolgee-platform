@@ -49,16 +49,6 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const noLoginMethods = !nativeEnabled && !hasNonNativeAuthMethods;
 
   const customLogoUrl = remoteConfig.authMethods?.ssoGlobal.customLogoUrl;
-  // TODO: the custom logo is just displayed on button, is that expected?
-  const logoIcon = customLogoUrl ? (
-    <img
-      src={customLogoUrl}
-      alt="Custom Logo"
-      style={{ width: 24, height: 24 }}
-    />
-  ) : (
-    <LogIn01 />
-  );
   const customLoginText = remoteConfig.authMethods?.ssoGlobal.customLoginText;
   const loginText = customLoginText ? (
     <span>{customLoginText}</span>
@@ -112,6 +102,21 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
               </>
             )}
 
+            {!nativeEnabled && globalSsoEnabled && customLogoUrl && (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                mb={2}
+              >
+                <img
+                  src={customLogoUrl}
+                  alt="Custom Logo"
+                  style={{ width: 24, height: 24 }}
+                />
+              </Box>
+            )}
+
             {nativeEnabled && hasNonNativeAuthMethods && (
               <Box height="0px" mt={5} />
             )}
@@ -123,7 +128,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                     component={Link}
                     to={LINKS.SSO_LOGIN.build()}
                     size="medium"
-                    endIcon={logoIcon}
+                    endIcon={<LogIn01 />}
                     variant="outlined"
                     style={{ marginBottom: '0.5rem' }}
                     color="inherit"
@@ -135,7 +140,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                   <LoadingButton
                     loading={isLoading}
                     size="medium"
-                    endIcon={logoIcon}
+                    endIcon={<LogIn01 />}
                     variant="outlined"
                     style={{ marginBottom: '0.5rem' }}
                     color="inherit"

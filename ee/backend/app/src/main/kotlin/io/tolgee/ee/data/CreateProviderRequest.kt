@@ -1,13 +1,13 @@
 package io.tolgee.ee.data
 
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.ISsoTenant
-import io.tolgee.model.Organization
 import jakarta.validation.constraints.NotNull
 import org.springframework.validation.annotation.Validated
 
 @Validated
 data class CreateProviderRequest(
-  override val name: String,
+  val enabled: Boolean,
   @field:NotNull
   override val clientId: String,
   @field:NotNull
@@ -17,17 +17,11 @@ data class CreateProviderRequest(
   @field:NotNull
   override val tokenUri: String,
   @field:NotNull
-  val jwkSetUri: String,
-  val isEnabled: Boolean,
+  override val jwkSetUri: String,
   @field:NotNull
-  val domainName: String,
+  override val domain: String,
 ) : ISsoTenant {
-  override val domain: String
-    get() = TODO("Not yet implemented")
-  override val jwtSetUri: String
-    get() = TODO("Not yet implemented")
+  @get:Schema(hidden = true)
   override val global: Boolean
-    get() = TODO("Not yet implemented")
-  override val organization: Organization?
-    get() = TODO("Not yet implemented")
+    get() = false
 }
