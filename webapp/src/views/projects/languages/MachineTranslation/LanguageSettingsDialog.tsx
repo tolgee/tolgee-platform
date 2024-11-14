@@ -62,6 +62,11 @@ const StyledHint = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
+const StyledFormalityHint = styled(Typography)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 15px;
+`;
+
 const StyledSettings = styled('div')`
   align-items: flex-start;
   display: flex;
@@ -269,7 +274,7 @@ export const LanguageSettingsDialog = ({
                         )}
                       </div>
                       <div className={TABLE_CENTERED}>
-                        {formalitySupported && (
+                        {formalitySupported ? (
                           <Select
                             data-cy="mt-language-dialog-formality-select"
                             data-cy-service={service}
@@ -295,6 +300,10 @@ export const LanguageSettingsDialog = ({
                               </MenuItem>
                             ))}
                           </Select>
+                        ) : (
+                          <StyledFormalityHint>
+                            {t('project_mt_dialog_formality_not_supported')}
+                          </StyledFormalityHint>
                         )}
                       </div>
                     </React.Fragment>
