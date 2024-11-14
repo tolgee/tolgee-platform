@@ -5,7 +5,6 @@ import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
-import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.model.mtServiceConfig.Formality
 import org.slf4j.LoggerFactory
@@ -121,7 +120,7 @@ class MtServiceManager(
         formality != Formality.DEFAULT
 
     if (!provider.isLanguageFormalitySupported(params.targetLanguageTag) && requiresFormality) {
-      throw FormalityNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
+      params.serviceInfo.formality = null
     }
   }
 

@@ -11,13 +11,14 @@ import {
 } from '../tableStyles';
 import { ServiceAvatar } from './ServiceAvatar';
 import { LanguageSettingsDialog } from './LanguageSettingsDialog';
-import { RowData, ServiceType } from './types';
+import { LanguageInfoModel, RowData, ServiceType } from './types';
 
 type Props = {
   rowData: RowData;
+  info: LanguageInfoModel[];
 };
 
-export const LanguageRow: React.FC<Props> = ({ rowData }) => {
+export const LanguageRow: React.FC<Props> = ({ rowData, info }) => {
   const { t } = useTranslate();
 
   const { inheritedFromDefault, settings } = rowData;
@@ -90,6 +91,7 @@ export const LanguageRow: React.FC<Props> = ({ rowData }) => {
         <LanguageSettingsDialog
           onClose={() => setSettingsOpen(false)}
           rowData={rowData}
+          info={info}
         />
       )}
     </>

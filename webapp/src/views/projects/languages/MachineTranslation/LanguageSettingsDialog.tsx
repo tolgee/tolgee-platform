@@ -29,10 +29,16 @@ import {
   TABLE_FIRST_CELL,
   TABLE_TOP_ROW,
 } from '../tableStyles';
-import { FormalityType, RowData, ServiceType } from './types';
+import {
+  FormalityType,
+  LanguageInfoModel,
+  RowData,
+  ServiceType,
+} from './types';
 import { ServiceLabel } from './ServiceLabel';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';
 import { SuggestionsLabel } from './SuggestionsLabel';
+import { supportsFormality } from './supportsFormality';
 
 const StyledSubtitle = styled('div')`
   font-size: 14px;
@@ -68,9 +74,11 @@ const FORMALITY_VALUES = ['DEFAULT', 'FORMAL', 'INFORMAL'] as const;
 type Props = {
   onClose: () => void;
   rowData: RowData;
+  info: LanguageInfoModel[];
 };
 
 export const LanguageSettingsDialog = ({
+  info,
   onClose,
   rowData: { inheritedFromDefault, onChange, settings },
 }: Props) => {
@@ -103,7 +111,7 @@ export const LanguageSettingsDialog = ({
   const [reseting, setReseting] = useState(false);
   async function handleResetToDefault() {
     setReseting(true);
-    return onChange(settings.language?.id, null)
+    return onChange(info, settings.language?.id, null)
       .then(() => {
         onClose();
       })
@@ -136,7 +144,7 @@ export const LanguageSettingsDialog = ({
           formality: primaryFormality,
         };
 
-        await onChange(settings.id || undefined, {
+        await onChange(info, settings.id || undefined, {
           machineTranslation: {
             targetLanguageId: settings.language?.id,
             primaryServiceInfo: primaryServiceInfo,
@@ -223,7 +231,11 @@ export const LanguageSettingsDialog = ({
                     (s) => s.serviceType === service
                   );
                   const languageSupported = Boolean(serviceInfo) || isDefault;
-                  const formalitySupported = serviceInfo?.formalitySupported;
+                  const formalitySupported = supportsFormality(
+                    info,
+                    service,
+                    settings.language?.id
+                  );
                   return (
                     <React.Fragment key={service}>
                       <Box className={TABLE_FIRST_CELL} key={service}>

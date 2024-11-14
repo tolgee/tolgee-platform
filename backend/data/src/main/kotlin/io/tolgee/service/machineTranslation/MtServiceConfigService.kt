@@ -252,12 +252,7 @@ class MtServiceConfigService(
         MtServiceType.AWS -> entity.awsFormality = it.formality ?: Formality.DEFAULT
         MtServiceType.DEEPL -> entity.deeplFormality = it.formality ?: Formality.DEFAULT
         MtServiceType.TOLGEE -> entity.tolgeeFormality = it.formality ?: Formality.DEFAULT
-        else -> {
-          if (it.formality == null) {
-            return@forEach
-          }
-          throw BadRequestException(Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE, listOf(it.serviceType))
-        }
+        else -> {}
       }
     }
   }

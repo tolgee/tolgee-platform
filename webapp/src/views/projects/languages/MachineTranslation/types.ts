@@ -21,12 +21,6 @@ export type AutoTranslationSettings = {
   usingTranslationMemory: boolean;
 };
 
-export type LanguageData = {
-  languageId: number | undefined;
-  primaryServiceInfo: LanguageConfigItemModel['primaryServiceInfo'];
-  enabledServicesInfo: LanguageCombinedSetting[];
-};
-
 export type LanguageCombinedSetting = {
   id: number | null;
   info: LanguageInfoModel | undefined;
@@ -42,6 +36,7 @@ export type RowData = {
 };
 
 export type OnMtChange = (
+  settings: LanguageInfoModel[],
   languageId: number | undefined,
   value: OnRowChangeData | null
 ) => Promise<void>;

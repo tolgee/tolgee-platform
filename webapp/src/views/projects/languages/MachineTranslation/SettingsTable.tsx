@@ -1,17 +1,22 @@
 import clsx from 'clsx';
 
-import { LanguageRow } from './LanguageRow';
 import { TABLE_CENTERED, TABLE_DIVIDER, TABLE_TOP_ROW } from '../tableStyles';
-import { LanguageCombinedSetting, OnMtChange } from './types';
+import { LanguageRow } from './LanguageRow';
+import {
+  LanguageCombinedSetting,
+  LanguageInfoModel,
+  OnMtChange,
+} from './types';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';
 import { SuggestionsLabel } from './SuggestionsLabel';
 
 type Props = {
+  info: LanguageInfoModel[];
   settings: LanguageCombinedSetting[];
   onUpdate: OnMtChange;
 };
 
-export const SettingsTable = ({ settings, onUpdate }: Props) => {
+export const SettingsTable = ({ info, settings, onUpdate }: Props) => {
   const defaultSetting = settings.find((l) => l.id === null)!;
 
   return (
@@ -31,6 +36,7 @@ export const SettingsTable = ({ settings, onUpdate }: Props) => {
           inheritedFromDefault: false,
           onChange: onUpdate,
         }}
+        info={info}
       />
 
       <div className={TABLE_DIVIDER} />
@@ -54,6 +60,7 @@ export const SettingsTable = ({ settings, onUpdate }: Props) => {
                 inheritedFromDefault: inherited,
                 onChange: onUpdate,
               }}
+              info={info}
             />
           );
         })}
