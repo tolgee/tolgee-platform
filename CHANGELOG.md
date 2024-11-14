@@ -1,3 +1,10 @@
+## [3.81.3](https://github.com/tolgee/tolgee-platform/compare/v3.81.2...v3.81.3) (2024-11-14)
+
+
+### Bug Fixes
+
+* projects-with-stats response for single language ([#2695](https://github.com/tolgee/tolgee-platform/issues/2695)) ([961c197](https://github.com/tolgee/tolgee-platform/commit/961c19757ad9ea11108f2424989687baacbefcc6))
+
 ## [3.81.2](https://github.com/tolgee/tolgee-platform/compare/v3.81.1...v3.81.2) (2024-11-12)
 
 
