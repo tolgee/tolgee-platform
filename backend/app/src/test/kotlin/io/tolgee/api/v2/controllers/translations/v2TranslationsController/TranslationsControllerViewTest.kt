@@ -245,6 +245,23 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
       }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `returns keys filtered by provided tags`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations/en,de?filterTag=Another cool tag&filterTag=Unknown Tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("en")
+          .isObject
+          .containsOnlyKeys("Another key with tag")
+        node("de")
+          .isObject
+          .containsOnlyKeys("Another key with tag")
+      }
+  }
+
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `works with API key`() {

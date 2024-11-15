@@ -23,10 +23,14 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
         from Translation t
         join t.key k
         left join k.namespace n
+        left join k.keyMeta km
+        left join km.tags kmt
         join t.language l
         where t.key.project.id = :projectId
          and l.tag in :languages
          and ((n.name is null and :namespace is null) or n.name = :namespace)
+         and (:filterTags is null or kmt.name in :filterTags)
+        group by t.id, l.tag, k.name
         order by k.name
    """,
   )
@@ -34,6 +38,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languages: Set<String>,
     namespace: String?,
     projectId: Long,
+    filterTags: List<String>?,
   ): List<SimpleTranslationView>
 
   @Query(

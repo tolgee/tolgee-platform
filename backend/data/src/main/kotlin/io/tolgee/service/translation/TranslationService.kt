@@ -69,9 +69,10 @@ class TranslationService(
     namespace: String?,
     projectId: Long,
     structureDelimiter: Char?,
+    filterTag: List<String>? = null,
   ): Map<String, Any> {
     val safeNamespace = if (namespace == "") null else namespace
-    val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId)
+    val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId, filterTag)
     val langTranslations: HashMap<String, Any> = LinkedHashMap()
     for (translation in allByLanguages) {
       val map =
