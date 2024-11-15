@@ -147,6 +147,33 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `formality can be set for default`() {
+    performAuthPut(
+      "/v2/projects/${project.id}/machine-translation-service-settings",
+      SetMachineTranslationSettingsDto(
+        listOf(
+          MachineTranslationLanguagePropsDto(
+            targetLanguageId = null,
+            primaryService = MtServiceType.GOOGLE,
+            enabledServicesInfo = setOf(
+              MtServiceInfo(MtServiceType.GOOGLE, null),
+              MtServiceInfo(MtServiceType.AWS, Formality.FORMAL),
+            ),
+          ),
+        ),
+      ),
+    )
+
+    executeInNewTransaction {
+      val germanSetting =
+        mtServiceConfigService.getProjectSettings(testData.projectBuilder.self)
+          .find { it.targetLanguage?.id == null }
+      germanSetting!!.awsFormality.assert.isEqualTo(Formality.FORMAL)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it sets primary service via info`() {
     performAuthPut(
       "/v2/projects/${project.id}/machine-translation-service-settings",
@@ -263,7 +290,21 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     ).andPrettyPrint.andAssertThatJson {
       node("_embedded.languageInfos") {
         isArray
-        node("[1]") {
+        node("[0]") {
+          node("languageTag").isEqualTo(null)
+          node("supportedServices") {
+            isArray
+            node("[0]") {
+              node("serviceType").isEqualTo("GOOGLE")
+              node("formalitySupported").isEqualTo(false)
+            }
+            node("[1]") {
+              node("serviceType").isEqualTo("AWS")
+              node("formalitySupported").isEqualTo(true)
+            }
+          }
+        }
+        node("[2]") {
           node("languageTag").isEqualTo("de")
           node("supportedServices") {
             isArray
