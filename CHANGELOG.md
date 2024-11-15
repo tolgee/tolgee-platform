@@ -1,3 +1,11 @@
+## [3.81.4](https://github.com/tolgee/tolgee-platform/compare/v3.81.3...v3.81.4) (2024-11-15)
+
+
+### Bug Fixes
+
+* dashboard translations ([#2697](https://github.com/tolgee/tolgee-platform/issues/2697)) ([88e8465](https://github.com/tolgee/tolgee-platform/commit/88e846582a557bdf01ab1c3424f39468810b16b6))
+* Healthcheck of docker image ([#2694](https://github.com/tolgee/tolgee-platform/issues/2694)) ([c21575f](https://github.com/tolgee/tolgee-platform/commit/c21575fc6634b3c192cadb6adf55993d87f85292)), closes [#2676](https://github.com/tolgee/tolgee-platform/issues/2676) [#2675](https://github.com/tolgee/tolgee-platform/issues/2675)
+
 ## [3.81.3](https://github.com/tolgee/tolgee-platform/compare/v3.81.2...v3.81.3) (2024-11-14)
 
 
