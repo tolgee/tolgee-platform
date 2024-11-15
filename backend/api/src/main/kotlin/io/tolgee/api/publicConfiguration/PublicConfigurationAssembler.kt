@@ -3,6 +3,7 @@ package io.tolgee.api.publicConfiguration
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.AuthMethodsDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicConfigDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicExtendsConfigDTO
+import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.PlausibleDto
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -18,6 +19,7 @@ class PublicConfigurationAssembler(
   private val applicationContext: ApplicationContext,
   private val publicBillingConfProvider: PublicBillingConfProvider,
   private val versionProvider: VersionProvider,
+  private val contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider,
 ) {
   fun toDto(): PublicConfigurationDTO {
     return PublicConfigurationDTO(
@@ -44,7 +46,7 @@ class PublicConfigurationAssembler(
       ga4Tag = properties.ga4Tag,
       postHogApiKey = properties.postHog.apiKey,
       postHogHost = properties.postHog.host,
-      contentDeliveryConfigured = properties.contentDelivery.publicUrlPrefix != null,
+      contentDeliveryConfigured = contentDeliveryFileStorageProvider.isServerContentDeliveryConfigured(),
       userSourceField = properties.userSourceField,
       plausible =
         PlausibleDto(
