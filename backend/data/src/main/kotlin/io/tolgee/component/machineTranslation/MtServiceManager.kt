@@ -145,9 +145,12 @@ class MtServiceManager(
   }
 
   private fun getFaked(params: TranslationParams): TranslateResult {
-    val formalityIndicator = if ((params.serviceInfo.formality ?: Formality.DEFAULT) !== Formality.DEFAULT) {
-      "${params.serviceInfo.formality} "
-    } else ""
+    val formalityIndicator =
+      if ((params.serviceInfo.formality ?: Formality.DEFAULT) !== Formality.DEFAULT) {
+        "${params.serviceInfo.formality} "
+      } else {
+        ""
+      }
     var fakedText =
       "${params.text} translated ${formalityIndicator}with ${params.serviceInfo.serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}"

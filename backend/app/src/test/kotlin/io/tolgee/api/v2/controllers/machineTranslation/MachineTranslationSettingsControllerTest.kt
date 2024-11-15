@@ -155,10 +155,11 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
           MachineTranslationLanguagePropsDto(
             targetLanguageId = null,
             primaryService = MtServiceType.GOOGLE,
-            enabledServicesInfo = setOf(
-              MtServiceInfo(MtServiceType.GOOGLE, null),
-              MtServiceInfo(MtServiceType.AWS, Formality.FORMAL),
-            ),
+            enabledServicesInfo =
+              setOf(
+                MtServiceInfo(MtServiceType.GOOGLE, null),
+                MtServiceInfo(MtServiceType.AWS, Formality.FORMAL),
+              ),
           ),
         ),
       ),
