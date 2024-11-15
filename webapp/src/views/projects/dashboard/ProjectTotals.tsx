@@ -101,6 +101,9 @@ const StyledTileDescription = styled('div')`
   @container (max-width: 800px) {
     font-size: 14px;
   }
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const StyledTileEdit = styled(Box)`
@@ -210,8 +213,8 @@ export const ProjectTotals: React.FC<{
               {Number(stats.taskCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_task_count', {
-                count: stats.taskCount,
+              {t('project_dashboard_task_count_plural', {
+                value: stats.taskCount,
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
@@ -228,8 +231,8 @@ export const ProjectTotals: React.FC<{
               {Number(stats.keyCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_key_count', 'Keys', {
-                count: stats.keyCount,
+              {t('project_dashboard_key_count_plural', 'Keys', {
+                value: stats.keyCount,
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
@@ -238,8 +241,8 @@ export const ProjectTotals: React.FC<{
               {Number(stats.baseWordsCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_base_words_count', 'Base words', {
-                count: stats.baseWordsCount,
+              {t('project_dashboard_base_words_count_plural', {
+                value: stats.baseWordsCount,
               })}
             </StyledTileDescription>
           </StyledTileDataItem>
@@ -256,7 +259,7 @@ export const ProjectTotals: React.FC<{
               <PercentFormat number={stats.translatedPercentage} />
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_translated_percent', 'Translated')}
+              {t('project_dashboard_translated_percent')}
             </StyledTileDescription>
           </StyledTileDataItem>
           <StyledTileDataItem data-cy="project-dashboard-reviewed-percentage">
@@ -280,7 +283,11 @@ export const ProjectTotals: React.FC<{
               {Number(stringsCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              <StringsHint>{t('project_dashboard_strings_count')}</StringsHint>
+              <StringsHint>
+                {t('project_dashboard_strings_count_plural', {
+                  value: Number(stringsCount),
+                })}
+              </StringsHint>
             </StyledTileDescription>
           </StyledTileDataItem>
         </StyledTile>
@@ -296,7 +303,9 @@ export const ProjectTotals: React.FC<{
               {Number(stats.membersCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_member_count', 'Members')}
+              {t('project_dashboard_member_count_plural', {
+                value: Number(stats.membersCount),
+              })}
             </StyledTileDescription>
           </StyledTileDataItem>
           {membersEditable && (
@@ -320,7 +329,9 @@ export const ProjectTotals: React.FC<{
               {Number(stats.tagCount).toLocaleString(locale)}
             </StyledTileValue>
             <StyledTileDescription>
-              {t('project_dashboard_tag_count', 'Tags')}
+              {t('project_dashboard_tag_count_plural', {
+                value: Number(stats.tagCount),
+              })}
             </StyledTileDescription>
           </StyledTileDataItem>
         </StyledTile>
