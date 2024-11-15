@@ -1,3 +1,10 @@
+# [3.82.0](https://github.com/tolgee/tolgee-platform/compare/v3.81.4...v3.82.0) (2024-11-15)
+
+
+### Features
+
+* Provide filtering by key tags when getting all translations ([#2660](https://github.com/tolgee/tolgee-platform/issues/2660)) ([ff1344c](https://github.com/tolgee/tolgee-platform/commit/ff1344cb00d702d570c9c43932f95d681cca681c)), closes [#2453](https://github.com/tolgee/tolgee-platform/issues/2453)
+
 ## [3.81.4](https://github.com/tolgee/tolgee-platform/compare/v3.81.3...v3.81.4) (2024-11-15)
 
 
