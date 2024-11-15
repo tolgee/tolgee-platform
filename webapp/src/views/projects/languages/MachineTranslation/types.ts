@@ -36,8 +36,7 @@ export type RowData = {
 };
 
 export type OnMtChange = (
-  settings: LanguageInfoModel[],
-  languageId: number | undefined,
+  langInfo: LanguageInfoModel,
   value: OnRowChangeData | null
 ) => Promise<void>;
 

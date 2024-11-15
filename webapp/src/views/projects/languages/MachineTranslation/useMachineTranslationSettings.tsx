@@ -65,23 +65,22 @@ export const useMachineTranslationSettings = () => {
   }
 
   function validateService(
-    info: LanguageInfoModel[],
-    service: MtServiceInfo | undefined,
-    languageId: number | null
+    langInfo: LanguageInfoModel,
+    service: MtServiceInfo | undefined
   ): MtServiceInfo | undefined {
-    if (service === undefined || !isSupported(service, languageId)) {
+    if (service === undefined || !isSupported(service, langInfo.languageId)) {
       return undefined;
     }
     return {
       serviceType: service.serviceType,
-      formality: supportsFormality(info, service.serviceType, languageId)
+      formality: supportsFormality(langInfo, service.serviceType)
         ? service.formality
         : undefined,
     };
   }
 
-  const applyUpdate: OnMtChange = async (info, languageId, data) => {
-    const languageIdOrNull = languageId ?? null;
+  const applyUpdate: OnMtChange = async (langInfo, data) => {
+    const languageIdOrNull = langInfo.languageId;
     const existingMtSettings =
       mtSettings.data?._embedded?.languageConfigs
         ?.filter((l) => l.targetLanguageId !== languageIdOrNull)
@@ -101,18 +100,11 @@ export const useMachineTranslationSettings = () => {
 
     const mtSettingsValidated = updatedMtSettings.map(
       ({ targetLanguageId, primaryServiceInfo, enabledServicesInfo }) => {
-        const targetLanguageIdOrNull = targetLanguageId ?? null;
         return {
           targetLanguageId,
-          primaryServiceInfo: validateService(
-            info,
-            primaryServiceInfo,
-            targetLanguageIdOrNull
-          ),
+          primaryServiceInfo: validateService(langInfo, primaryServiceInfo),
           enabledServicesInfo: enabledServicesInfo
-            ?.map((service) =>
-              validateService(info, service, targetLanguageIdOrNull)
-            )
+            ?.map((service) => validateService(langInfo, service))
             .filter((service) => Boolean(service)) as MtServiceInfo[],
         };
       }

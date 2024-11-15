@@ -29,12 +29,7 @@ import {
   TABLE_FIRST_CELL,
   TABLE_TOP_ROW,
 } from '../tableStyles';
-import {
-  FormalityType,
-  LanguageInfoModel,
-  RowData,
-  ServiceType,
-} from './types';
+import { FormalityType, RowData, ServiceType } from './types';
 import { ServiceLabel } from './ServiceLabel';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';
 import { SuggestionsLabel } from './SuggestionsLabel';
@@ -79,11 +74,9 @@ const FORMALITY_VALUES = ['DEFAULT', 'FORMAL', 'INFORMAL'] as const;
 type Props = {
   onClose: () => void;
   rowData: RowData;
-  info: LanguageInfoModel[];
 };
 
 export const LanguageSettingsDialog = ({
-  info,
   onClose,
   rowData: { inheritedFromDefault, onChange, settings },
 }: Props) => {
@@ -116,7 +109,7 @@ export const LanguageSettingsDialog = ({
   const [reseting, setReseting] = useState(false);
   async function handleResetToDefault() {
     setReseting(true);
-    return onChange(info, settings.language?.id, null)
+    return onChange(settings.info!, null)
       .then(() => {
         onClose();
       })
@@ -149,7 +142,7 @@ export const LanguageSettingsDialog = ({
           formality: primaryFormality,
         };
 
-        await onChange(info, settings.id || undefined, {
+        await onChange(settings.info!, {
           machineTranslation: {
             targetLanguageId: settings.language?.id,
             primaryServiceInfo: primaryServiceInfo,
@@ -237,9 +230,8 @@ export const LanguageSettingsDialog = ({
                   );
                   const languageSupported = Boolean(serviceInfo) || isDefault;
                   const formalitySupported = supportsFormality(
-                    info,
-                    service,
-                    settings.language?.id
+                    settings.info!,
+                    service
                   );
                   return (
                     <React.Fragment key={service}>

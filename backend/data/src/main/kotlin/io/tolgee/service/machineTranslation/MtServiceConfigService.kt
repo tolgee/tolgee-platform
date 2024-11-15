@@ -325,13 +325,26 @@ class MtServiceConfigService(
   }
 
   fun getLanguageInfo(project: ProjectDto): List<MtLanguageInfo> {
-    return languageService.findAll(project.id).map { language ->
+    val result: MutableList<MtLanguageInfo> = mutableListOf()
+    result.add(
+      MtLanguageInfo(
+        language = null,
+        supportedServices =
+          services.filter {
+            it.value.second.isEnabled
+          }.map {
+            MtSupportedService(it.key, it.value.second.formalitySupportingLanguages !== null)
+          },
+      ),
+    )
+    languageService.findAll(project.id).forEach { language ->
       val supportedServices =
         services.filter { it.value.second.isLanguageSupported(language.tag) && it.value.second.isEnabled }.map {
           MtSupportedService(it.key, it.value.second.isLanguageFormalitySupported(language.tag))
         }
-      MtLanguageInfo(language = language, supportedServices)
+      result.add(MtLanguageInfo(language = language, supportedServices))
     }
+    return result
   }
 
   val services by lazy {

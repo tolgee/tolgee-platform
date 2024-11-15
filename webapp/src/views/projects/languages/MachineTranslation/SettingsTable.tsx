@@ -36,7 +36,6 @@ export const SettingsTable = ({ info, settings, onUpdate }: Props) => {
           inheritedFromDefault: false,
           onChange: onUpdate,
         }}
-        info={info}
       />
 
       <div className={TABLE_DIVIDER} />
@@ -60,7 +59,6 @@ export const SettingsTable = ({ info, settings, onUpdate }: Props) => {
                 inheritedFromDefault: inherited,
                 onChange: onUpdate,
               }}
-              info={info}
             />
           );
         })}
