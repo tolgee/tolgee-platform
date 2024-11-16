@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ * Copyright (C) 2024 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,21 @@ const GLOBALS = {
   instanceUrl: 'https://app.tolgee.io',
 };
 
+function formatDev(string?: string, demoParams?: Record<string, any>) {
+  const formatted = new IntlMessageFormat(string, 'en-US').format({
+    ...GLOBALS,
+    ...demoParams,
+  });
+
+  if (Array.isArray(formatted)) {
+    return formatted.map((e: string | boolean | object, i) =>
+      typeof e === 'object' ? { ...e, key: i } : e
+    ) as any;
+  }
+
+  return formatted;
+}
+
 export default function t(
   key: string,
   defaultString?: string,
@@ -31,10 +46,7 @@ export default function t(
   const text =
     process.env.NODE_ENV === 'production'
       ? defaultString
-      : new IntlMessageFormat(defaultString, 'en-US').format({
-          ...GLOBALS,
-          ...demoParams,
-        });
+      : formatDev(defaultString, demoParams);
 
   return React.createElement('span', { 'th:utext': `#{${key}}` }, text);
 }

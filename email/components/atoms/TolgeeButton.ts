@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ * Copyright (C) 2024 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 
 import * as React from 'react';
-import { Link, LinkProps } from '@react-email/components';
+import { Button, ButtonProps } from '@react-email/components';
 
-const LINK_CLASSES = 'text-brand underline';
+const BUTTON_CLASSES =
+  'bg-brand text-white font-bold px-[16px] py-[8px] rounded cursor-pointer';
 
-export default function TolgeeLink(props: LinkProps) {
+export default function TolgeeButton(props: ButtonProps) {
   const className = props.className
-    ? `${LINK_CLASSES} ${props.className}`
-    : LINK_CLASSES;
+    ? `${BUTTON_CLASSES} ${props.className}`
+    : BUTTON_CLASSES;
 
-  return React.createElement(Link, { ...props, className: className });
+  return React.createElement(Button, { ...props, className: className });
 }
