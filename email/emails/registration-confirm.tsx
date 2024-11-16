@@ -17,14 +17,14 @@
 import * as React from 'react';
 import { Section, Text } from '@react-email/components';
 import t from '../components/translate';
-import Layout from '../components/Layout';
+import ClassicLayout from '../components/layouts/ClassicLayout';
+import TolgeeLink from '../components/atoms/TolgeeLink';
+import TolgeeButton from '../components/atoms/TolgeeButton';
 import LocalizedText from '../components/LocalizedText';
-import TolgeeLink from '../components/parts/TolgeeLink';
-import TolgeeButton from '../components/parts/TolgeeButton';
 
 export default function RegistrationConfirmEmail() {
   return (
-    <Layout
+    <ClassicLayout
       subject={t('registration-confirm-subject', 'Confirm your account')}
       sendReason={t(
         'send-reason-created-account',
@@ -56,7 +56,9 @@ export default function RegistrationConfirmEmail() {
       <Text>
         <LocalizedText
           keyName="registration-confirm-link"
-          defaultValue="or copy and paste this URL into your browser: <link>{confirmUrl}</link>"
+          defaultValue={
+            'Or, copy and paste this URL into your browser:\n<link>{confirmUrl}</link>'
+          }
           demoParams={{
             link: (c: string) => (
               <TolgeeLink href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
@@ -76,9 +78,9 @@ export default function RegistrationConfirmEmail() {
       <Text>
         <LocalizedText
           keyName="email-signature"
-          defaultValue={'Regards,\nTolgee'}
+          defaultValue={'Happy translating,\nTolgee'}
         />
       </Text>
-    </Layout>
+    </ClassicLayout>
   );
 }

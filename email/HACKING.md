@@ -11,7 +11,9 @@ of the output HTML files, and you'll see for yourself why it's such a big deal t
 
 React Email exposes a handful of primitives documented on their [website](https://react.email/docs/introduction).
 If you need real world examples, they provide a bunch of great examples based on real-world emails written using
-React Email [here](https://demo.react.email/preview/stack-overflow-tips).
+React Email [here](https://demo.react.email/preview/newsletters/stack-overflow-tips).
+
+They also provide a handful of components [here](https://react.email/components)
 
 ### Preview and build
 While working on emails, you can use `npm run dev` to spin up a dev server and have a live preview of the emails in
@@ -37,17 +39,19 @@ fine to send and what isn't; basically the [Can I Use](https://caniuse.com/) of 
 This also applies to the layout; always prefer React Email's `Container`, `Row` and `Column` elements for layout.
 They'll get turned into ugly HTML tables to do the layout - just like in the good ol' HTML days...
 
-## Base layout
-The base layout is available in `components/Layout.tsx`. All components should use it, as it'll include the base
-Tailwind configuration and all the main elements.
+## Layouts
+The core shell of emails is provided by `components/layouts/LayoutCore.tsx`. It is not expected to be used as-is, but
+instead to serve as a shared base for more complete layouts such as `ClassicLayout.tsx`. All emails should use a layout,
+or at least must use the core layout as it contains important building blocks for emails to work properly.
 
-The layout takes 2 properties:
+The classic layout (`ClassicLayout.tsx`) takes 3 properties:
 - `subject` (required): displayed in the header of the email and be used to construct the actual email subject
 - `sendReason` (required): important for anti-spam laws and must reflect the reason why a given email is sent
   - Is it because they have an account? Is it because they enabled notifications? ...
 - `extra` (optional): displayed at the very bottom, useful to insert an unsubscribe link if necessary
 
-These three properties are generally expected to receive output from the `t()` function documented below.
+These three properties are generally expected to receive output from the `t()` function documented below. The core
+layout only requires the subject.
 
 ## Utility components
 This is note is left here for the lack of a better section: whenever you need a dynamic properties (e.g. href that
@@ -58,7 +62,8 @@ takes the value of a variable), you can prefix your attribute with `data-th-` an
 <a data-th-href="${link}">Click here!</a>
 ```
 
-A few base components with default styles are available in `components/parts`, such as buttons.
+A few low-level base components with default styles are available in `components/atoms`, such as buttons.
+Shared parts are found in `components/parts`.
 
 ### `<LocalizedText />` and `t()`
 Most if not all text in emails are expected to be wrapped in `<LocalizedText />` (or `t()` when more appropriate).
@@ -175,5 +180,13 @@ The following global variables are available:
 - `instanceQualifier`: Either "Tolgee" for Tolgee Cloud, or the domain name used for the instance
 - `instanceUrl`: Base URL of the instance
 
-They still need to be passed as demo values except for localized strings where a default value is provided.
+They still need to be passed as demo values, except for localized strings as a default value is provided then.
 The default value can be overridden.
+
+## Tips & tricks
+How the social icons were generated:
+- Get SVG from https://simpleicons.org/
+- Write to `[file].svg`
+- Add `width="16" height="16" fill="#a0a0a0"` to the `<svg>` tag
+- Convert SVG to PNG
+- Drink a deserved coffee
