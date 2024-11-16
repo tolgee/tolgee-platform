@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ * Copyright (C) 2024 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 import * as React from 'react';
-import { join, extname } from 'path';
-import { readFileSync, readdirSync } from 'fs';
+import { extname, join } from 'path';
+import { readdirSync, readFileSync } from 'fs';
 import { Img, ImgProps } from '@react-email/components';
 
 let root = __dirname;
@@ -28,20 +28,20 @@ const RESOURCES_FOLDER = join(root, 'resources');
 
 type Props = Omit<ImgProps, 'src'> & {
   resourceName: string;
+  src?: string;
 };
 
 export default function ImgResource(props: Props) {
   const file = join(RESOURCES_FOLDER, props.resourceName);
 
-  const newProps = { ...props } as ImgProps & Props;
+  const newProps = { ...props } as Props;
   delete newProps.resourceName;
   delete newProps.src;
 
   if (process.env.NODE_ENV === 'production') {
     // Resources will be copied during final assembly.
-    newProps[
-      'data-th-src'
-    ] = `\${instanceUrl} + '/static/emails/${props.resourceName}'`;
+    newProps['data-th-src'] =
+      `\${instanceUrl} + '/static/emails/${props.resourceName}'`;
   } else {
     const blob = readFileSync(file);
     const ext = extname(file).slice(1);
