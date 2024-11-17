@@ -34,8 +34,8 @@ import LayoutCore from './LayoutCore';
 
 type Props = {
   children: React.ReactNode;
-  subject: React.ReactElement;
-  sendReason: React.ReactElement;
+  subject: React.ReactElement | string;
+  sendReason: React.ReactElement | string;
 };
 
 type SocialLinkProps = {

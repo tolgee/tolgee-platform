@@ -109,8 +109,8 @@ export default async function extractor(
           code
         );
 
-        if (res.key) keys.push(res.key)
-        if (res.warning) warnings.push(res.warning)
+        if (res.key) keys.push(res.key);
+        if (res.warning) warnings.push(res.warning);
       }
 
       if (
@@ -158,8 +158,8 @@ export default async function extractor(
           code
         );
 
-        if (res.key) keys.push(res.key)
-        if (res.warning) warnings.push(res.warning)
+        if (res.key) keys.push(res.key);
+        if (res.warning) warnings.push(res.warning);
       }
     },
   });
