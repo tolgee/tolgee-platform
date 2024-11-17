@@ -73,6 +73,7 @@ allOpen {
     annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
+apply from: "$rootDir/gradle/email.gradle"
 apply from: "$rootDir/gradle/liquibase.gradle"
 
 configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
@@ -109,6 +110,7 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -257,6 +259,10 @@ jar {
 
 tasks.named('compileJava') {
     inputs.files(tasks.named('processResources'))
+}
+
+tasks.named('compileKotlin') {
+    dependsOn 'buildEmails'
 }
 
 ktlint {

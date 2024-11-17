@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ * Copyright (C) 2024 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ export default function RegistrationConfirmEmail() {
         { instanceQualifier: 'Tolgee' }
       )}
     >
-      <Text>
+      <Text style={{ margin: '0 0 16px' }}>
         <LocalizedText
           keyName="email-greetings"
           defaultValue="Hello {username},"
@@ -41,7 +41,7 @@ export default function RegistrationConfirmEmail() {
       </Text>
       <Text>
         <LocalizedText
-          keyName="email-greetings"
+          keyName="registration-welcome-text"
           defaultValue="Welcome and thank you for creating an account! To start using Tolgee, you need to confirm your email."
         />
       </Text>
@@ -71,7 +71,7 @@ export default function RegistrationConfirmEmail() {
       </Text>
       <Text>
         <LocalizedText
-          keyName="registration-confirm-enjoy-your-stay"
+          keyName="registration-welcome-enjoy-your-stay"
           defaultValue="We hope you'll enjoy your experience!"
         />
       </Text>

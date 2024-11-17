@@ -22,18 +22,17 @@ import { Head, Html, Tailwind } from '@react-email/components';
 
 type Props = {
   children: React.ReactNode;
-  subject: React.ReactElement;
+  subject: React.ReactElement | string;
 };
 
 export default function LayoutCore({ children, subject }: Props) {
   const subjectPlainText = convert(renderToString(subject));
+  const thText = typeof subject === 'object' ? subject.props['th:text'] : null;
 
   return (
     <Html>
       <Head>
-        <title {...{ 'th:text': subject.props['th:text'] }}>
-          {subjectPlainText}
-        </title>
+        <title {...{ 'th:text': thText }}>{subjectPlainText}</title>
         {process.env.NODE_ENV !== 'production' && (
           // This is a hack to get line returns to behave as line returns.
           // The Kotlin renderer will handle these cases, but this is for the browser preview.

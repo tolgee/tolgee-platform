@@ -8,7 +8,10 @@
     "build": "email build",
     "export": "cross-env NODE_ENV=production email export",
     "prettier": "prettier --write ./emails ./components ./.config",
-    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components ./.config"
+    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components ./.config",
+    "tg:pull": "tolgee pull",
+    "tg:push": "tolgee push",
+    "tg:sync": "tolgee sync"
   },
   "devDependencies": {
     "@react-email/components": "0.0.28",
@@ -24,7 +27,6 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
     "estree-walker": "^3.0.3",
-    "html-to-text": "^9.0.5",
     "intl-messageformat": "^10.7.6",
     "prettier": "^3.3.3",
     "react": "18.3.1",
