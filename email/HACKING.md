@@ -28,6 +28,10 @@ templates in the `out` folder that the backend will be able to consume and rende
 The resources used by emails stored in `resources` must be served by the backend at `/static/emails`. Filenames must
 be preserved.
 
+> [!NOTE]
+> The backend build includes the necessary Gradle tasks to build the emails by itself. You should not need to worry
+> about building them yourself or copy files around.
+
 ### TailwindCSS
 For styles, React Email has a great [TailwindCSS](https://tailwindcss.com/) integration that gets turned into
 email-friendly inline styles.
@@ -127,7 +131,7 @@ HTML node with the properties it received set to the HTML element. That's a lot 
 Fragments, but real nodes such as a `<div />` or a `<Container />` etc. 
 
 It receives the following properties:
-- `condition` (required): the [Thymeleaf conditional expression](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#conditional-expressions)
+- `condition` (required): the [Thymeleaf conditional expression](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#simple-conditionals-if-and-unless)
 - `demoValue` (optional): the demo value. Defaults to `true`
 
 ### `<For />`
@@ -140,7 +144,8 @@ This component receives the following properties:
 
 #### Note on available variables
 Within the for inner template, the iter variable is available as a classic Thymeleaf variable. However, within ICU
-strings, if the iter variable is an object, all the fields are available as plain variables prefixed by `$it_`.
+strings, if the iter variable is an object, all the fields are available as plain variables prefixed by the name of
+the iteration variable and 2 underscores. If you have `product.id`, then you can access it as `product__id`.
 Information about the iteration can be kept by using [Thymeleaf iterator status mechanism](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#keeping-iteration-status).
 
 All of these variables still have to be set as `demoProps` for the template to render properly in preview mode.
@@ -155,18 +160,18 @@ Example:
     <td>
       <LocalizedText
         keyName="product-id"
-        defaultValue="Product #{$it_id}"
+        defaultValue="Product #{product__id}"
         demoParams={{
-          $it_id: 1337
+          product__id: 1337
         }}
       />
     </td>
     <td>
       <LocalizedText
         keyName="product-price"
-        defaultValue="Price: {$it_id, number}"
+        defaultValue="Price: {product__price, number}"
         demoParams={{
-          $it_id: 4.00
+          product__id: 4.00
         }}
       />
     </td>

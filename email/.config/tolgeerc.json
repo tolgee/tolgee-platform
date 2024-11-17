@@ -1,12 +1,12 @@
 {
   "$schema": "https://docs.tolgee.io/cli-schema.json",
   "projectId": 1,
-  "format": "PROPERTIES_JAVA",
+  "format": "PROPERTIES_ICU",
   "patterns": ["./emails/**/*.ts?(x)", "./components/**/*.ts?(x)"],
   "extractor": "./.config/extractor.ts",
   "pull": {
-    "path": "./src/i18n",
-    "tags": ["email"]
+    "path": "./i18n",
+    "fileStructureTemplate": "messages_{snakeLanguageTag}.{extension}"
   },
   "push": {
     "tagNewKeys": ["email"]

@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2024 Tolgee s.r.o. and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply from: "$rootDir/gradle/utils.gradle"
+
+def emailPath = "${rootDir}/email"
+
+tasks.register('copyEmailResources', Copy) {
+    def fromDir = "${emailPath}/resources"
+    def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/emails/."
+    from fromDir
+    into toDir
+    inputs.dir(fromDir)
+    outputs.dir(toDir)
+    mustRunAfter unpack
+}
+
+tasks.register('installEmailDeps', Exec) {
+    onlyIf { System.getenv("SKIP_EMAIL_BUILD") != "true" }
+
+    workingDir = emailPath
+    commandLine npmCommandName, "ci"
+
+    inputs.file("${emailPath}/package.json")
+    inputs.file("${emailPath}/package-lock.json")
+    outputs.dir("${emailPath}/node_modules")
+}
+
+tasks.register('buildEmails', Exec) {
+    dependsOn "installEmailDeps", "updateEmailTranslations"
+    onlyIf { System.getenv("SKIP_EMAIL_BUILD") != "true" }
+
+    workingDir = emailPath
+    commandLine npmCommandName, "run", "export"
+
+    inputs.dir("${emailPath}/")
+    outputs.dir("${emailPath}/out/")
+}
+
+tasks.register('updateEmailTranslations', Exec) {
+    onlyIf {
+        System.getenv("SKIP_EMAIL_BUILD") != "true" &&
+                System.getenv("TOLGEE_API_URL") != null &&
+                System.getenv("TOLGEE_API_URL") != ""
+    }
+
+    workingDir = emailPath
+    commandLine npmCommandName, "run", "tg:pull"
+}

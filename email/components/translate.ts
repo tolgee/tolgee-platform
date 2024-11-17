@@ -15,7 +15,7 @@
  */
 
 import * as React from 'react';
-import IntlMessageFormat from 'intl-messageformat';
+import { IntlMessageFormat } from 'intl-messageformat';
 
 const GLOBALS = {
   isCloud: true,
