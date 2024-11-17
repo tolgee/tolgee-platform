@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import t from './translate';
+import _t from './translate.js';
 
 type Props = {
   keyName: string;
@@ -23,5 +23,5 @@ type Props = {
 };
 
 export default function LocalizedText(props: Props) {
-  return t(props.keyName, props.defaultValue, props.demoParams);
+  return _t(props.keyName, props.defaultValue, props.demoParams);
 }
