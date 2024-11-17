@@ -2,15 +2,18 @@
   "name": "@tolgee/email",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "email dev",
     "build": "email build",
     "export": "cross-env NODE_ENV=production email export",
-    "prettier": "prettier --write ./emails ./components",
-    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components"
+    "prettier": "prettier --write ./emails ./components ./.config",
+    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components ./.config"
   },
   "devDependencies": {
     "@react-email/components": "0.0.28",
+    "@swc/core": "^1.9.2",
+    "@tolgee/cli": "^2.3.2",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -20,6 +23,7 @@
     "eslint": "^8.57.1",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
+    "estree-walker": "^3.0.3",
     "html-to-text": "^9.0.5",
     "intl-messageformat": "^10.7.6",
     "prettier": "^3.3.3",
