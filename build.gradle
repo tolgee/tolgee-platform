@@ -117,9 +117,8 @@ project(':server-app').afterEvaluate {
                 project(':ee-app').tasks.findByName("diffChangelog"),
         ]
 
-        def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangelog")
-
-        if (billingDiffChangelog != null) {
+        if (gradle.ext.billingAppDirectory.exists()) {
+            def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangelog")
             finalizedBy.add(billingDiffChangelog)
         }
 

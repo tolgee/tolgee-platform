@@ -140,7 +140,7 @@ dependencies {
     /**
      * Conditional billing module
      */
-    if (rootProject.project(":billing-app").projectDir.exists()) {
+    if (gradle.ext.billingAppDirectory.exists()) {
         implementation(project(':billing-app'))
     }
 

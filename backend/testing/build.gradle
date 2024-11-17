@@ -43,7 +43,6 @@ apply plugin: "kotlin-kapt"
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 kotlin {
