@@ -44,16 +44,6 @@ class MtServiceManager(
     val provider = params.serviceInfo.serviceType.getProvider()
     validate(provider, params)
 
-    val formality = params.serviceInfo.formality
-    val requiresFormality =
-      formality != null &&
-        formality != Formality.DEFAULT
-
-    if (!provider.isLanguageFormalitySupported(params.targetLanguageTag) && requiresFormality) {
-      // disable formality, if it's not supported for the language
-      params.serviceInfo.formality = null
-    }
-
     if (internalProperties.fakeMtProviders) {
       logger.debug("Fake MT provider is enabled")
       return getFaked(params)
