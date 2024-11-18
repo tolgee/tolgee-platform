@@ -1,3 +1,10 @@
+## [3.82.1](https://github.com/tolgee/tolgee-platform/compare/v3.82.0...v3.82.1) (2024-11-18)
+
+
+### Bug Fixes
+
+* double chars unicode characters breaking placeholders ([#2700](https://github.com/tolgee/tolgee-platform/issues/2700)) ([b866644](https://github.com/tolgee/tolgee-platform/commit/b86664488c4c97235c62aaf85887154dc9d012aa))
+
 # [3.82.0](https://github.com/tolgee/tolgee-platform/compare/v3.81.4...v3.82.0) (2024-11-15)
 
 
