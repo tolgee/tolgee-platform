@@ -870,7 +870,7 @@
   "order_translation_create_task_title": "Vytvořit úkol",
   "order_translation_description": "Vybraná agentura obdrží statistiky o vašem překladatelském úkolu (počet slov, klíčů a znaků), aby mohla odhadnout náklady. Také obdrží váš e-mail ({email}), aby vás mohla kontaktovat.",
   "order_translation_feature_description": "Profesionální překlad je dostupný pouze v placených plánech",
-  "order_translation_invite_to_project_detail": "Agenturu můžete pozvat později v sekci \"{menuItem}\"",
+  "order_translation_invite_to_project_detail": "Agenturu můžete pozvat také později v sekci \"{menuItem}\"",
   "order_translation_invite_to_project_label": "Pozvat agenturu do projektu s oprávněními \"{viewPermissionLabel}\"",
   "order_translation_next_button": "Další",
   "order_translation_sharing_details_label": "Souhlasím se sdílením podrobností s překladatelskou agenturou",

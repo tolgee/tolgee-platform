@@ -1,3 +1,10 @@
+## [3.82.2](https://github.com/tolgee/tolgee-platform/compare/v3.82.1...v3.82.2) (2024-11-18)
+
+
+### Bug Fixes
+
+* update signup form ([#2678](https://github.com/tolgee/tolgee-platform/issues/2678)) ([74c142c](https://github.com/tolgee/tolgee-platform/commit/74c142c6c457e3fbc4f4aab8bbe6cfd5c6dbf956))
+
 ## [3.82.1](https://github.com/tolgee/tolgee-platform/compare/v3.82.0...v3.82.1) (2024-11-18)
 
 
