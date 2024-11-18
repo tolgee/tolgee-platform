@@ -54,7 +54,6 @@ class MtServiceManager(
       params.serviceInfo.formality = null
     }
 
-
     if (internalProperties.fakeMtProviders) {
       logger.debug("Fake MT provider is enabled")
       return getFaked(params)
