@@ -101,10 +101,12 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
           name="username"
           label={<T keyName="login_email_label" />}
           minHeight={false}
+          autoComplete="username email"
         />
         <TextField
           name="password"
           type="password"
+          autoComplete="password"
           label={<T keyName="login_password_label" />}
           minHeight={false}
         />

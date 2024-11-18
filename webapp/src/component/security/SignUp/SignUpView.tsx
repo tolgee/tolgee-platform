@@ -29,7 +29,7 @@ export type SignUpType = {
 
 const StyledRightPart = styled('div')`
   display: grid;
-  align-content: end;
+  padding-bottom: 90px;
 `;
 
 export const SignUpView: FunctionComponent = () => {
