@@ -2,21 +2,16 @@ import clsx from 'clsx';
 
 import { TABLE_CENTERED, TABLE_DIVIDER, TABLE_TOP_ROW } from '../tableStyles';
 import { LanguageRow } from './LanguageRow';
-import {
-  LanguageCombinedSetting,
-  LanguageInfoModel,
-  OnMtChange,
-} from './types';
+import { LanguageCombinedSetting, OnMtChange } from './types';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';
 import { SuggestionsLabel } from './SuggestionsLabel';
 
 type Props = {
-  info: LanguageInfoModel[];
   settings: LanguageCombinedSetting[];
   onUpdate: OnMtChange;
 };
 
-export const SettingsTable = ({ info, settings, onUpdate }: Props) => {
+export const SettingsTable = ({ settings, onUpdate }: Props) => {
   const defaultSetting = settings.find((l) => l.id === null)!;
 
   return (

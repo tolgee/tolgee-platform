@@ -20,8 +20,7 @@ const StyledLoadingWrapper = styled('div')`
 
 export const MachineTranslation = () => {
   const { t } = useTranslate();
-  const { settings, applyUpdate, isFetching, info } =
-    useMachineTranslationSettings();
+  const { settings, applyUpdate, isFetching } = useMachineTranslationSettings();
   const gridTemplateColumns = `1fr auto 1fr auto`;
 
   if (!settings) {
@@ -43,11 +42,7 @@ export const MachineTranslation = () => {
       >
         <StyledContainer>
           <StyledLanguageTable style={{ gridTemplateColumns }}>
-            <SettingsTable
-              info={info}
-              settings={settings || []}
-              onUpdate={applyUpdate}
-            />
+            <SettingsTable settings={settings || []} onUpdate={applyUpdate} />
             <StyledLoadingWrapper>
               <SmoothProgress loading={isFetching} />
             </StyledLoadingWrapper>

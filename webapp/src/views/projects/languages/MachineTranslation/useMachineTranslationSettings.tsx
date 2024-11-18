@@ -195,7 +195,6 @@ export const useMachineTranslationSettings = () => {
   ]);
 
   return {
-    info: languageInfos.data?._embedded?.languageInfos ?? [],
     settings,
     applyUpdate,
     isFetching,
