@@ -1,8 +1,6 @@
 package io.tolgee.api.publicConfiguration
 
 import io.tolgee.configuration.PlausibleDto
-import io.tolgee.configuration.PublicConfigurationDTO.SsoGlobalPublicConfigDTO
-import io.tolgee.configuration.PublicConfigurationDTO.SsoOrganizationsPublicConfigDTO
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 
