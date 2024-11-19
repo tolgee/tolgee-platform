@@ -190,7 +190,7 @@ class SsoDelegateEe(
     return JwtAuthenticationResponse(jwt)
   }
 
-  fun fetchLocalSsoDomainFor(userId: Long): String? {
+  fun fetchOrganizationsSsoDomainFor(userId: Long): String? {
     val organization = organizationRoleService.getManagedBy(userId) ?: return null
     val tenant = tenantService.findTenant(organization.id)
     return tenant?.domain
@@ -205,7 +205,7 @@ class SsoDelegateEe(
 
     val domain =
       when (user.thirdPartyAuth) {
-        ThirdPartyAuthType.SSO -> fetchLocalSsoDomainFor(user.id)
+        ThirdPartyAuthType.SSO -> fetchOrganizationsSsoDomainFor(user.id)
         ThirdPartyAuthType.SSO_GLOBAL -> ssoGlobalProperties.domain
         else -> null
       }

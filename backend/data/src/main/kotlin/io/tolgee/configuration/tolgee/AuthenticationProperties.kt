@@ -148,7 +148,7 @@ class AuthenticationProperties(
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
   var ssoGlobal: SsoGlobalProperties = SsoGlobalProperties(),
-  var ssoOrganizations: SsoLocalProperties = SsoLocalProperties(),
+  var ssoOrganizations: SsoOrganizationsProperties = SsoOrganizationsProperties(),
 ) {
   fun checkAllowedRegistrations() {
     if (!this.registrationsAllowed) {

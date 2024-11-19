@@ -195,7 +195,7 @@ export const setTranslations = (
     method: 'POST',
   });
 
-export const enableLocalSsoProvider = () => {
+export const enableOrganizationsSsoProvider = () => {
   const sql = `insert into public.tenant (id, organization_id, domain, client_id, client_secret, authorization_uri,
                                         jwk_set_uri, token_uri, enabled,
                                         name, sso_provider, created_at, updated_at)
@@ -206,7 +206,7 @@ export const enableLocalSsoProvider = () => {
   return internalFetch(`sql/execute`, { method: 'POST', body: sql });
 };
 
-export const disableLocalSsoProvider = () => {
+export const disableOrganizationsSsoProvider = () => {
   const sql = `
         delete
         from public.tenant

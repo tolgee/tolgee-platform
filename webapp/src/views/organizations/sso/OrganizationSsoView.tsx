@@ -18,14 +18,14 @@ export const OrganizationSsoView: FunctionComponent = () => {
   }
   const { isEnabled } = useEnabledFeatures();
   const featureEnabled = isEnabled('SSO');
-  const localSsoEnabled = useGlobalContext(
+  const organizationsSsoEnabled = useGlobalContext(
     (c) =>
       c.initialData.serverConfiguration.authMethods?.ssoOrganizations.enabled
   );
   const { t } = useTranslate();
 
   const providersLoadable =
-    featureEnabled && localSsoEnabled
+    featureEnabled && organizationsSsoEnabled
       ? useApiQuery({
           url: `/v2/organizations/{organizationId}/sso`,
           method: 'get',
@@ -52,7 +52,7 @@ export const OrganizationSsoView: FunctionComponent = () => {
             <PaidFeatureBanner />
           </Box>
         );
-      case !localSsoEnabled:
+      case !organizationsSsoEnabled:
         return (
           <Box>
             <Alert severity="info">

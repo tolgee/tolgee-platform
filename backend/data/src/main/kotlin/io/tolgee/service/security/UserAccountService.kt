@@ -3,7 +3,7 @@ package io.tolgee.service.security
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.SsoGlobalProperties
-import io.tolgee.configuration.tolgee.SsoLocalProperties
+import io.tolgee.configuration.tolgee.SsoOrganizationsProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -57,7 +57,7 @@ class UserAccountService(
   private val userAccountRepository: UserAccountRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
-  private val ssoLocalProperties: SsoLocalProperties,
+  private val ssoOrganizationsProperties: SsoOrganizationsProperties,
   private val ssoGlobalProperties: SsoGlobalProperties,
   private val avatarService: AvatarService,
   private val passwordEncoder: PasswordEncoder,
@@ -346,7 +346,7 @@ class UserAccountService(
   fun getCurrentSsoExpiration(type: ThirdPartyAuthType?): Date? {
     return currentDateProvider.date.addMinutes(
       when (type) {
-        ThirdPartyAuthType.SSO -> ssoLocalProperties.sessionExpirationMinutes
+        ThirdPartyAuthType.SSO -> ssoOrganizationsProperties.sessionExpirationMinutes
         ThirdPartyAuthType.SSO_GLOBAL -> ssoGlobalProperties.sessionExpirationMinutes
         else -> return null
       },

@@ -41,11 +41,11 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const oAuthServices = useOAuthServices();
 
   const nativeEnabled = remoteConfig.nativeEnabled;
-  const localSsoEnabled =
+  const organizationsSsoEnabled =
     remoteConfig.authMethods?.ssoOrganizations.enabled ?? false;
   const globalSsoEnabled = remoteConfig.authMethods?.ssoGlobal.enabled ?? false;
   const hasNonNativeAuthMethods =
-    oAuthServices.length > 0 || localSsoEnabled || globalSsoEnabled;
+    oAuthServices.length > 0 || organizationsSsoEnabled || globalSsoEnabled;
   const noLoginMethods = !nativeEnabled && !hasNonNativeAuthMethods;
 
   const customLogoUrl = remoteConfig.authMethods?.ssoGlobal.customLogoUrl;
@@ -121,9 +121,9 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
               <Box height="0px" mt={5} />
             )}
 
-            {(localSsoEnabled || globalSsoEnabled) && (
+            {(organizationsSsoEnabled || globalSsoEnabled) && (
               <React.Fragment>
-                {localSsoEnabled && (
+                {organizationsSsoEnabled && (
                   <Button
                     component={Link}
                     to={LINKS.SSO_LOGIN.build()}
@@ -136,7 +136,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                     {loginText}
                   </Button>
                 )}
-                {!localSsoEnabled && (
+                {!organizationsSsoEnabled && (
                   <LoadingButton
                     loading={isLoading}
                     size="medium"

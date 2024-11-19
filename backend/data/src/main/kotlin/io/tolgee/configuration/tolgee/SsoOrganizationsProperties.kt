@@ -19,7 +19,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
       " have access to. Per organization SSO users are automatically added to the organization they belong to.",
   displayName = "Single Sign-On per Organization",
 )
-class SsoLocalProperties {
+class SsoOrganizationsProperties {
   @DocProperty(description = "Enables SSO authentication")
   var enabled: Boolean = false
 

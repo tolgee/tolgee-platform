@@ -9,8 +9,8 @@ import {
   getParsedResetPasswordEmail,
   login,
   logout,
-  enableLocalSsoProvider,
-  disableLocalSsoProvider,
+  enableOrganizationsSsoProvider,
+  disableOrganizationsSsoProvider,
   enableGlobalSsoProvider,
   disableGlobalSsoProvider,
   userDisableMfa,
@@ -75,10 +75,10 @@ context('Login', () => {
     loginWithFakeOAuth2();
   });
 
-  context('SSO Login Local', () => {
+  context('SSO Organizations Login', () => {
     it('login with global sso', { retries: { runMode: 5 } }, () => {
       disableEmailVerification();
-      enableLocalSsoProvider();
+      enableOrganizationsSsoProvider();
 
       cy.contains('Log in with SSO').click();
       cy.xpath("//*[@name='domain']").type('domain.com');
@@ -87,12 +87,12 @@ context('Login', () => {
     });
 
     afterEach(() => {
-      disableLocalSsoProvider();
+      disableOrganizationsSsoProvider();
       logout();
     });
   });
 
-  context('SSO Login Global', () => {
+  context('SSO Global Login', () => {
     it('login with global sso', { retries: { runMode: 5 } }, () => {
       disableEmailVerification();
       enableGlobalSsoProvider();
