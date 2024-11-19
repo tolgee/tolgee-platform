@@ -61,6 +61,14 @@ class ProjectStatsService(
     val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
     val nonBaseLanguages = languageStats.filterNot { it.languageId == baseLanguage.id }
 
+    if (nonBaseLanguages.isEmpty()) {
+      return ProjectStateTotals(
+        baseWordsCount = baseWordsCount,
+        translatedPercent = baseStats.translatedPercentage,
+        reviewedPercent = baseStats.reviewedPercentage,
+      )
+    }
+
     val allNonBaseTotalBaseWords = baseWordsCount * nonBaseLanguages.size
     val allNonBaseTotalTranslatedWords = nonBaseLanguages.sumOf { it.translatedWords }
     val allNonBaseTotalReviewedWords = nonBaseLanguages.sumOf { it.reviewedWords }

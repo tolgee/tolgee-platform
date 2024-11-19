@@ -237,16 +237,40 @@ class TranslationsTestData {
         name = "Key with tag"
       }.build {
         addTag("Cool tag")
+        addTranslation {
+          language = germanLanguage
+          text = "Key with tag DE"
+        }
+        addTranslation {
+          language = englishLanguage
+          text = "Key with tag EN"
+        }
       }
       addKey {
         name = "Another key with tag"
       }.build {
         addTag("Another cool tag")
+        addTranslation {
+          language = germanLanguage
+          text = "Another key with tag DE"
+        }
+        addTranslation {
+          language = englishLanguage
+          text = "Another key with tag EN"
+        }
       }
       addKey {
         name = "Key with tag 2"
       }.build {
         addTag("Cool tag")
+        addTranslation {
+          language = germanLanguage
+          text = "Key with tag 2 DE"
+        }
+        addTranslation {
+          language = englishLanguage
+          text = "Key with tag 2 EN"
+        }
       }
     }
   }

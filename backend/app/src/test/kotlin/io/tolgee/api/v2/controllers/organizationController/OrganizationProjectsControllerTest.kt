@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
+import io.tolgee.development.testDataBuilder.data.ProjectTranslationsStatsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -124,6 +125,25 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats").andPrettyPrint
       .andAssertThatJson {
         node("_embedded.projects").isArray.hasSize(1)
+      }
+  }
+
+  @Test
+  fun `project with single language should show correct translation percentages`() {
+    val testData = ProjectTranslationsStatsTestData()
+    val user = testData.admin.self
+
+    testDataService.saveTestData(testData.root)
+    userAccount = user
+    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats").andPrettyPrint
+      .andAssertThatJson {
+        node("_embedded.projects") {
+          node("").isArray.hasSize(1)
+          node("[0].stats.translationStatePercentages") {
+            node("TRANSLATED").isNumber.isEqualTo("100.0")
+            node("UNTRANSLATED").isNumber.isEqualTo("0.0")
+          }
+        }
       }
   }
 }

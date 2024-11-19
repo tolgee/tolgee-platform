@@ -83,11 +83,18 @@ project(':server-app').projectDir = new File('backend/app')
 include ':data'
 project(':data').projectDir = new File('backend/data')
 
-include ':billing-app'
-project(':billing-app').projectDir = new File('../billing/app')
+gradle.ext.billingAppDirectory = new File('../billing/app')
+gradle.ext.billingTestDirectory = new File('../billing/tests')
 
-include ':billing-test'
-project(':billing-test').projectDir = new File('../billing/tests')
+if (gradle.ext.billingAppDirectory.exists()) {
+    include ':billing-app'
+    project(':billing-app').projectDir = gradle.ext.billingAppDirectory
+}
+
+if (gradle.ext.billingTestDirectory.exists()) {
+    include ':billing-test'
+    project(':billing-test').projectDir = gradle.ext.billingTestDirectory
+}
 
 include ':testing'
 project(':testing').projectDir = new File('backend/testing')

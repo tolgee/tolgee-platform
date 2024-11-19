@@ -1,3 +1,46 @@
+## [3.82.2](https://github.com/tolgee/tolgee-platform/compare/v3.82.1...v3.82.2) (2024-11-18)
+
+
+### Bug Fixes
+
+* update signup form ([#2678](https://github.com/tolgee/tolgee-platform/issues/2678)) ([74c142c](https://github.com/tolgee/tolgee-platform/commit/74c142c6c457e3fbc4f4aab8bbe6cfd5c6dbf956))
+
+## [3.82.1](https://github.com/tolgee/tolgee-platform/compare/v3.82.0...v3.82.1) (2024-11-18)
+
+
+### Bug Fixes
+
+* double chars unicode characters breaking placeholders ([#2700](https://github.com/tolgee/tolgee-platform/issues/2700)) ([b866644](https://github.com/tolgee/tolgee-platform/commit/b86664488c4c97235c62aaf85887154dc9d012aa))
+
+# [3.82.0](https://github.com/tolgee/tolgee-platform/compare/v3.81.4...v3.82.0) (2024-11-15)
+
+
+### Features
+
+* Provide filtering by key tags when getting all translations ([#2660](https://github.com/tolgee/tolgee-platform/issues/2660)) ([ff1344c](https://github.com/tolgee/tolgee-platform/commit/ff1344cb00d702d570c9c43932f95d681cca681c)), closes [#2453](https://github.com/tolgee/tolgee-platform/issues/2453)
+
+## [3.81.4](https://github.com/tolgee/tolgee-platform/compare/v3.81.3...v3.81.4) (2024-11-15)
+
+
+### Bug Fixes
+
+* dashboard translations ([#2697](https://github.com/tolgee/tolgee-platform/issues/2697)) ([88e8465](https://github.com/tolgee/tolgee-platform/commit/88e846582a557bdf01ab1c3424f39468810b16b6))
+* Healthcheck of docker image ([#2694](https://github.com/tolgee/tolgee-platform/issues/2694)) ([c21575f](https://github.com/tolgee/tolgee-platform/commit/c21575fc6634b3c192cadb6adf55993d87f85292)), closes [#2676](https://github.com/tolgee/tolgee-platform/issues/2676) [#2675](https://github.com/tolgee/tolgee-platform/issues/2675)
+
+## [3.81.3](https://github.com/tolgee/tolgee-platform/compare/v3.81.2...v3.81.3) (2024-11-14)
+
+
+### Bug Fixes
+
+* projects-with-stats response for single language ([#2695](https://github.com/tolgee/tolgee-platform/issues/2695)) ([961c197](https://github.com/tolgee/tolgee-platform/commit/961c19757ad9ea11108f2424989687baacbefcc6))
+
+## [3.81.2](https://github.com/tolgee/tolgee-platform/compare/v3.81.1...v3.81.2) (2024-11-12)
+
+
+### Bug Fixes
+
+* remove redundant isContentDeliveryEnabled function from PublicConfigurationDTO ([#2689](https://github.com/tolgee/tolgee-platform/issues/2689)) ([6ddba66](https://github.com/tolgee/tolgee-platform/commit/6ddba66d06bcf6ee58554abef07e15fa8e88334b))
+
 ## [3.81.1](https://github.com/tolgee/tolgee-platform/compare/v3.81.0...v3.81.1) (2024-11-11)
 
 
