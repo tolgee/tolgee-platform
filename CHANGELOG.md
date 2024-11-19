@@ -1,3 +1,10 @@
+## [3.82.3](https://github.com/tolgee/tolgee-platform/compare/v3.82.2...v3.82.3) (2024-11-19)
+
+
+### Bug Fixes
+
+* Absolute address for pricing link ([#2702](https://github.com/tolgee/tolgee-platform/issues/2702)) ([bfa972b](https://github.com/tolgee/tolgee-platform/commit/bfa972bbb435adb3d985a14c51e5dbb7dfcfe9e4)), closes [tolgee/documentation#757](https://github.com/tolgee/documentation/issues/757)
+
 ## [3.82.2](https://github.com/tolgee/tolgee-platform/compare/v3.82.1...v3.82.2) (2024-11-18)
 
 
