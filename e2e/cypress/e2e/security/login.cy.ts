@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import * as totp from 'totp-generator';
 import { HOST, PASSWORD, USERNAME } from '../../common/constants';
+import { ssoOrganizationsLoginTestData } from '../../common/apiCalls/testData/testData';
 import { getAnyContainingText } from '../../common/xPath';
 import {
   createUser,
@@ -77,6 +78,9 @@ context('Login', () => {
 
   context('SSO Organizations Login', () => {
     it('login with global sso', { retries: { runMode: 5 } }, () => {
+      ssoOrganizationsLoginTestData.clean();
+      ssoOrganizationsLoginTestData.generate();
+
       disableEmailVerification();
       enableOrganizationsSsoProvider();
 
@@ -89,6 +93,7 @@ context('Login', () => {
     afterEach(() => {
       disableOrganizationsSsoProvider();
       logout();
+      ssoOrganizationsLoginTestData.clean();
     });
   });
 

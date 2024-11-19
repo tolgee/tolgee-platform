@@ -196,25 +196,11 @@ export const setTranslations = (
   });
 
 export const enableOrganizationsSsoProvider = () => {
-  const sql = `insert into public.tenant (id, organization_id, domain, client_id, client_secret, authorization_uri,
-                                        jwk_set_uri, token_uri, enabled,
-                                        name, sso_provider, created_at, updated_at)
-                 values (1, 1, 'domain.com', 'clientId', 'clientSecret', 'http://authorizationUri',
-                         'http://jwkSetUri', 'http://tokenUri', true, 'name', 'sso', CURRENT_TIMESTAMP,
-                         CURRENT_TIMESTAMP)`;
-  setProperty('authentication.sso-organizations.enabled', true);
-  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+  return setProperty('authentication.sso-organizations.enabled', true);
 };
 
 export const disableOrganizationsSsoProvider = () => {
-  const sql = `
-        delete
-        from public.tenant
-        where id = 1
-    `;
-
-  setProperty('authentication.sso-organizations.enabled', false);
-  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+  return setProperty('authentication.sso-organizations.enabled', false);
 };
 
 export const enableGlobalSsoProvider = () =>
