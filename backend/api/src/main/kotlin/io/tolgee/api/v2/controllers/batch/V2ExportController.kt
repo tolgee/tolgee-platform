@@ -50,7 +50,7 @@ class V2ExportController(
   @Operation(summary = "Export data")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
-  fun export(
+  fun exportData(
     @ParameterObject params: ExportParams,
   ): ResponseEntity<StreamingResponseBody> {
     params.languages =
@@ -74,7 +74,7 @@ class V2ExportController(
   fun exportPost(
     @RequestBody params: ExportParams,
   ): ResponseEntity<StreamingResponseBody> {
-    return export(params)
+    return exportData(params)
   }
 
   private fun getZipHeaders(projectName: String): HttpHeaders {
