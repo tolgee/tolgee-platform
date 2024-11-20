@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.startsWith
 import org.mockito.Mockito.times
@@ -161,7 +160,7 @@ class SsoTest : AuthorizedControllerTest() {
   fun `sso auth doesn't create demo project and user organization`() {
     loginAsSsoUser(
       tokenResponse = SsoMultiTenantsMocks.defaultTokenResponse2,
-      jwtClaims = SsoMultiTenantsMocks.jwtClaimsSet2
+      jwtClaims = SsoMultiTenantsMocks.jwtClaimsSet2,
     )
     val userName = SsoMultiTenantsMocks.jwtClaimsSet2.get("email") as String
     val user = userAccountService.get(userName)
@@ -185,7 +184,7 @@ class SsoTest : AuthorizedControllerTest() {
 
   @Test
   fun `sso auth saves refresh token`() {
-  loginAsSsoUser()
+    loginAsSsoUser()
     val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
     val user = userAccountService.get(userName)
     assertThat(user.ssoRefreshToken).isNotNull
@@ -256,7 +255,7 @@ class SsoTest : AuthorizedControllerTest() {
 
   fun loginAsSsoUser(
     tokenResponse: ResponseEntity<OAuth2TokenResponse>? = SsoMultiTenantsMocks.defaultTokenResponse,
-    jwtClaims: Claims = SsoMultiTenantsMocks.jwtClaimsSet
+    jwtClaims: Claims = SsoMultiTenantsMocks.jwtClaimsSet,
   ): MvcResult {
     addTenant()
     return ssoMultiTenantsMocks.authorize("registrationId", tokenResponse = tokenResponse, jwtClaims = jwtClaims)

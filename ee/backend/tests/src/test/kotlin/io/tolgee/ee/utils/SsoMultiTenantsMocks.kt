@@ -44,29 +44,29 @@ class SsoMultiTenantsMocks(
     val jwtClaimsSet: Claims
       get() {
         return Jwts.claims().apply {
-            subject = "testSubject"
-            issuer = "https://test-oauth-provider.com"
-            expiration = Date(System.currentTimeMillis() + 3600 * 1000)
-            put("name", "Test User")
-            put("given_name", "Test")
-            put("given_name", "Test")
-            put("family_name", "User")
-            put("email", "mail@mail.com")
-          }
+          subject = "testSubject"
+          issuer = "https://test-oauth-provider.com"
+          expiration = Date(System.currentTimeMillis() + 3600 * 1000)
+          put("name", "Test User")
+          put("given_name", "Test")
+          put("given_name", "Test")
+          put("family_name", "User")
+          put("email", "mail@mail.com")
+        }
       }
 
     val jwtClaimsSet2: Claims
       get() {
         return Jwts.claims().apply {
-            subject = "testSubject"
-            issuer = "https://test-oauth-provider.com"
-            expiration = Date(System.currentTimeMillis() + 3600 * 1000)
-            put("name", "Test User2")
-            put("given_name", "Test2")
-            put("given_name", "Test2")
-            put("family_name", "User2")
-            put("email", "mai2@mail.com")
-          }
+          subject = "testSubject"
+          issuer = "https://test-oauth-provider.com"
+          expiration = Date(System.currentTimeMillis() + 3600 * 1000)
+          put("name", "Test User2")
+          put("given_name", "Test2")
+          put("given_name", "Test2")
+          put("family_name", "User2")
+          put("email", "mai2@mail.com")
+        }
       }
 
     private fun generateTestJwt(claims: Claims): String {
