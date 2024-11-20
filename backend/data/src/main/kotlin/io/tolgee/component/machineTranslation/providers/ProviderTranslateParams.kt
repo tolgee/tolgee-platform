@@ -25,20 +25,21 @@ data class ProviderTranslateParams(
    */
   val pluralFormExamples: Map<String, String>? = null,
 ) {
-  val cacheKey: String
-    get() =
-      jacksonObjectMapper()
-        .writeValueAsString(
-          listOf(
-            text,
-            textRaw,
-            keyName,
-            sourceLanguageTag,
-            targetLanguageTag,
-            metadata,
-            formality,
-            pluralForms,
-            pluralFormExamples,
-          ),
-        )
+  fun cacheKey(provider: String): String {
+    return jacksonObjectMapper()
+      .writeValueAsString(
+        listOf(
+          text,
+          textRaw,
+          keyName,
+          sourceLanguageTag,
+          targetLanguageTag,
+          metadata,
+          formality,
+          pluralForms,
+          pluralFormExamples,
+          provider
+        ),
+      )
+  }
 }

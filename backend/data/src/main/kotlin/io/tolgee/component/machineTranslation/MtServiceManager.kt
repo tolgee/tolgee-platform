@@ -165,8 +165,8 @@ class MtServiceManager(
   }
 
   private fun ProviderTranslateParams.findInCacheByParams(serviceType: MtServiceType): TranslateResult? {
-    return getCache(serviceType)?.let { cache ->
-      val result = cache.get(this.cacheKey)?.get() as? TranslateResult
+    return getCache()?.let { cache ->
+      val result = cache.get(this.cacheKey(serviceType.name))?.get() as? TranslateResult
       result?.actualPrice = 0
       return result
     }
@@ -176,13 +176,11 @@ class MtServiceManager(
     result: TranslateResult,
     serviceType: MtServiceType,
   ) {
-    getCache(serviceType)?.put(this.cacheKey, result)
+    getCache()?.put(this.cacheKey(serviceType.name), result)
   }
 
-  private fun getCache(serviceType: MtServiceType) =
-    cacheManager.getCache(
-      "${Caches.MACHINE_TRANSLATIONS}-${serviceType.name}",
-    )
+  private fun getCache() =
+    cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
 
   fun MtServiceType.getProvider(): MtValueProvider {
     return applicationContext.getBean(this.providerClass)
