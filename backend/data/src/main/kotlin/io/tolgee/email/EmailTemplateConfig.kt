@@ -52,7 +52,7 @@ class EmailTemplateConfig {
   @Bean("emailTemplateEngine")
   fun templateEngine(
     @Qualifier("emailTemplateResolver") templateResolver: ITemplateResolver,
-    @Qualifier("emailMessageSource") messageSource: MessageSource
+    @Qualifier("emailMessageSource") messageSource: MessageSource,
   ): TemplateEngine {
     val templateEngine = SpringTemplateEngine()
     templateEngine.templateResolvers = setOf(templateResolver)
