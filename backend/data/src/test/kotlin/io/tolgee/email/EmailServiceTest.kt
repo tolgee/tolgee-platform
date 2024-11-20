@@ -100,22 +100,26 @@ class EmailServiceTest {
   }
 
   companion object {
-    private val TEST_PROPERTIES = mapOf(
-      "testVar" to "test!!",
-      "testList" to listOf(
-        mapOf("name" to "Name #1"),
-        mapOf("name" to "Name #2"),
-        mapOf("name" to "Name #3"),
+    private val TEST_PROPERTIES =
+      mapOf(
+        "testVar" to "test!!",
+        "testList" to
+          listOf(
+            mapOf("name" to "Name #1"),
+            mapOf("name" to "Name #2"),
+            mapOf("name" to "Name #3"),
+          ),
       )
-    )
 
-    private val TEST_PROPERTIES_MEOW = mapOf(
-      "testVar" to "meow",
-      "testList" to listOf(
-        mapOf("name" to "Name #1"),
-        mapOf("name" to "Name #2"),
-        mapOf("name" to "Name #3"),
+    private val TEST_PROPERTIES_MEOW =
+      mapOf(
+        "testVar" to "meow",
+        "testList" to
+          listOf(
+            mapOf("name" to "Name #1"),
+            mapOf("name" to "Name #2"),
+            mapOf("name" to "Name #3"),
+          ),
       )
-    )
   }
 }
