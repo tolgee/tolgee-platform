@@ -1,17 +1,13 @@
 package io.tolgee.ee.utils
 
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.crypto.MACSigner
-import com.nimbusds.jose.proc.SecurityContext
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.SignedJWT
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.Keys
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.service.sso.TenantService
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -27,85 +23,78 @@ class SsoMultiTenantsMocks(
   private var authMvc: MockMvc? = null,
   private val restTemplate: RestTemplate? = null,
   private val tenantService: TenantService? = null,
-  private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext>?,
 ) {
   companion object {
     val defaultToken =
-      OAuth2TokenResponse(id_token = generateTestJwt(), scope = "scope", refresh_token = "refresh_token")
+      OAuth2TokenResponse(id_token = generateTestJwt(jwtClaimsSet), scope = "scope", refresh_token = "refresh_token")
+    val defaultToken2 =
+      OAuth2TokenResponse(id_token = generateTestJwt(jwtClaimsSet2), scope = "scope", refresh_token = "refresh_token")
 
     val defaultTokenResponse =
       ResponseEntity(
         defaultToken,
         HttpStatus.OK,
       )
+    val defaultTokenResponse2 =
+      ResponseEntity(
+        defaultToken2,
+        HttpStatus.OK,
+      )
 
-    val jwtClaimsSet: JWTClaimsSet
+    val jwtClaimsSet: Claims
       get() {
-        val claimsSet =
-          JWTClaimsSet
-            .Builder()
-            .subject("testSubject")
-            .issuer("https://test-oauth-provider.com")
-            .expirationTime(Date(System.currentTimeMillis() + 3600 * 1000)) // Время действия 1 час
-            .claim("name", "Test User")
-            .claim("given_name", "Test")
-            .claim("given_name", "Test")
-            .claim("family_name", "User")
-            .claim("email", "mail@mail.com")
-            .build()
-        return claimsSet
+        return Jwts.claims().apply {
+            subject = "testSubject"
+            issuer = "https://test-oauth-provider.com"
+            expiration = Date(System.currentTimeMillis() + 3600 * 1000)
+            put("name", "Test User")
+            put("given_name", "Test")
+            put("given_name", "Test")
+            put("family_name", "User")
+            put("email", "mail@mail.com")
+          }
       }
 
-    val jwtClaimsSet2: JWTClaimsSet
+    val jwtClaimsSet2: Claims
       get() {
-        val claimsSet =
-          JWTClaimsSet
-            .Builder()
-            .subject("testSubject")
-            .issuer("https://test-oauth-provider.com")
-            .expirationTime(Date(System.currentTimeMillis() + 3600 * 1000)) // Время действия 1 час
-            .claim("name", "Test User2")
-            .claim("given_name", "Test2")
-            .claim("given_name", "Test2")
-            .claim("family_name", "User2")
-            .claim("email", "mai2@mail.com")
-            .build()
-        return claimsSet
+        return Jwts.claims().apply {
+            subject = "testSubject"
+            issuer = "https://test-oauth-provider.com"
+            expiration = Date(System.currentTimeMillis() + 3600 * 1000)
+            put("name", "Test User2")
+            put("given_name", "Test2")
+            put("given_name", "Test2")
+            put("family_name", "User2")
+            put("email", "mai2@mail.com")
+          }
       }
 
-    private fun generateTestJwt(): String {
-      val header = JWSHeader(JWSAlgorithm.HS256)
-
-      val signedJwt = SignedJWT(header, jwtClaimsSet)
-
+    private fun generateTestJwt(claims: Claims): String {
       val testSecret = "test-256-bit-secretAAAAAAAAAAAAAAA"
-      val signer = MACSigner(testSecret.toByteArray())
-
-      signedJwt.sign(signer)
-
-      return signedJwt.serialize()
+      val key = Keys.hmacShaKeyFor(testSecret.toByteArray())
+      return Jwts.builder()
+        .setClaims(claims)
+        .signWith(key, SignatureAlgorithm.HS256)
+        .compact()
     }
   }
 
   fun authorize(
     registrationId: String,
     tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse,
-    jwtClaims: JWTClaimsSet = jwtClaimsSet,
+    jwtClaims: Claims = jwtClaimsSet,
+    tokenUri: String = tenantService?.getEnabledConfigByDomain(registrationId)?.tokenUri!!,
   ): MvcResult {
     val receivedCode = "fake_access_token"
-    val tenant = tenantService?.getEnabledConfigByDomain(registrationId)!!
     // mock token exchange
     whenever(
       restTemplate?.exchange(
-        eq(tenant.tokenUri),
+        eq(tokenUri),
         eq(HttpMethod.POST),
         any(),
         eq(OAuth2TokenResponse::class.java),
       ),
     ).thenReturn(tokenResponse)
-
-    // mock parsing of jwt
-    mockJwt(jwtClaims)
 
     return authMvc!!
       .perform(
@@ -130,15 +119,6 @@ class SsoMultiTenantsMocks(
             """.trimIndent(),
           ),
       ).andReturn()
-
-  private fun mockJwt(jwtClaims: JWTClaimsSet) {
-    whenever(
-      jwtProcessor?.process(
-        any<SignedJWT>(),
-        isNull(),
-      ),
-    ).thenReturn(jwtClaims)
-  }
 
   fun mockTokenExchange(
     tokenUri: String,

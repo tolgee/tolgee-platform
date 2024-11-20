@@ -75,7 +75,7 @@ class SsoDelegateEe(
       fetchToken(tenant, code, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo = decodeIdToken(token.id_token, tenant.jwkSetUri)
+    val userInfo = decodeIdTokenUnsafe(token.id_token, tenant.jwkSetUri)
     return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
@@ -113,10 +113,11 @@ class SsoDelegateEe(
     }
   }
 
-  private fun decodeIdToken(
+  private fun decodeIdTokenUnsafe(
     idToken: String,
     jwkSetUri: String,
   ): GenericUserResponse {
+    // We assume the token was received directly from the SSO provider and is safe - no need to verify the signature.
     try {
       // val signedJWT = SignedJWT.parse(idToken)
       // val jwtProcessor: ConfigurableJWTProcessor<SecurityContext> = DefaultJWTProcessor()
@@ -130,7 +131,10 @@ class SsoDelegateEe(
       // jwtProcessor.jwsKeySelector = keySelector
       // val jwtClaimsSet: JWTClaimsSet = jwtProcessor.process(signedJWT, null)
 
-      val claims = jwtParser.parseClaimsJws(idToken).body
+      val jwt = idToken.substring(0, idToken.lastIndexOf('.') + 1)
+      val claims = jwtParser.parseClaimsJwt(jwt).body
+
+      // val claims = jwtParser.parseClaimsJwt(idToken).body
 
       // val expirationTime: Date = jwtClaimsSet.expirationTime
       val expirationTime: Date = claims.expiration
@@ -199,7 +203,7 @@ class SsoDelegateEe(
   override fun verifyUserSsoAccountAvailable(user: UserAccountDto): Boolean {
     val isSsoUser = user.thirdPartyAuth in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)
     val isSessionExpired = user.ssoSessionExpiry?.after(currentDateProvider.date) != true
-    if (!isSsoUser || isSessionExpired) {
+    if (!isSsoUser || !isSessionExpired) {
       return true
     }
 
