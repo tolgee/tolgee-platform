@@ -179,8 +179,7 @@ class MtServiceManager(
     getCache()?.put(this.cacheKey(serviceType.name), result)
   }
 
-  private fun getCache() =
-    cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
+  private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
 
   fun MtServiceType.getProvider(): MtValueProvider {
     return applicationContext.getBean(this.providerClass)

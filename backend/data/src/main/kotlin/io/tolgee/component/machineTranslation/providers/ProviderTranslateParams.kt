@@ -38,7 +38,7 @@ data class ProviderTranslateParams(
           formality,
           pluralForms,
           pluralFormExamples,
-          provider
+          provider,
         ),
       )
   }
