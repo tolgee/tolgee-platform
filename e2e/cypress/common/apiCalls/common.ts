@@ -195,19 +195,17 @@ export const setTranslations = (
     method: 'POST',
   });
 
-export const enableOrganizationsSsoProvider = () => {
-  return setProperty('authentication.sso-organizations.enabled', true);
-};
+export const enableOrganizationsSsoProvider = () =>
+  setProperty('authentication.ssoOrganizations.enabled', true);
 
-export const disableOrganizationsSsoProvider = () => {
-  return setProperty('authentication.sso-organizations.enabled', false);
-};
+export const disableOrganizationsSsoProvider = () =>
+  setProperty('authentication.ssoOrganizations.enabled', false);
 
 export const enableGlobalSsoProvider = () =>
-  setProperty('authentication.sso-global.enabled', true);
+  setProperty('authentication.ssoGlobal.enabled', true);
 
 export const disableGlobalSsoProvider = () =>
-  setProperty('authentication.sso-global.enabled', false);
+  setProperty('authentication.ssoGlobal.enabled', false);
 
 export const deleteProject = (id: number) => {
   return v2apiFetch(`projects/${id}`, { method: 'DELETE' });
