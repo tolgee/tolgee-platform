@@ -102,7 +102,7 @@ dependencies {
     testImplementation(libs.azureBlob) {
         exclude group: 'io.netty', module: 'netty-codec-http'
     }
-    testImplementation('io.netty:netty-codec-http:4.1.108.Final')
+    testImplementation('io.netty:netty-codec-http:4.1.115.Final')
 
 
     /**
