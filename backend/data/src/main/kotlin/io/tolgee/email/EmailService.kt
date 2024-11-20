@@ -34,8 +34,12 @@ class EmailService(
   @Qualifier("emailTemplateEngine") private val templateEngine: TemplateEngine,
 ) {
   private val smtpFrom
-    get() = smtpProperties.from
-      ?: throw IllegalStateException("SMTP sender is not configured. See https://docs.tolgee.io/platform/self_hosting/configuration#smtp")
+    get() =
+      smtpProperties.from
+        ?: throw IllegalStateException(
+          "SMTP sender is not configured. " +
+            "See https://docs.tolgee.io/platform/self_hosting/configuration#smtp",
+        )
 
   @Async
   fun sendEmailTemplate(
@@ -43,7 +47,7 @@ class EmailService(
     template: String,
     locale: Locale,
     properties: Map<String, Any> = mapOf(),
-    attachments: List<EmailAttachment> = listOf()
+    attachments: List<EmailAttachment> = listOf(),
   ) {
     val context = Context(locale, properties)
     val html = templateEngine.process(template, context)
@@ -57,10 +61,10 @@ class EmailService(
     recipient: String,
     subject: String,
     contents: String,
-    attachments: List<EmailAttachment> = listOf()
+    attachments: List<EmailAttachment> = listOf(),
   ) {
     val message = mailSender.createMimeMessage()
-    val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,"UTF8")
+    val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF8")
 
     helper.setFrom(smtpFrom)
     helper.setTo(recipient)
