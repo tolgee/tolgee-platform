@@ -1,7 +1,8 @@
 import { useApiQuery, useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { MtServiceInfo, OnMtChange } from './types';
+import { LanguageInfoModel, MtServiceInfo, OnMtChange } from './types';
 import { useMemo } from 'react';
+import { supportsFormality } from './supportsFormality';
 
 export const useMachineTranslationSettings = () => {
   const project = useProject();
@@ -63,35 +64,23 @@ export const useMachineTranslationSettings = () => {
     );
   }
 
-  function supportsFormality(
-    service: MtServiceInfo | undefined,
-    languageId: number | null
-  ) {
-    const settings = languageInfos.data!._embedded?.languageInfos?.find(
-      (l) => l.languageId === languageId
-    );
-    return settings?.supportedServices.find(
-      (i) => i.serviceType === service?.serviceType
-    )?.formalitySupported;
-  }
-
   function validateService(
-    service: MtServiceInfo | undefined,
-    languageId: number | null
+    langInfo: LanguageInfoModel,
+    service: MtServiceInfo | undefined
   ): MtServiceInfo | undefined {
-    if (service === undefined || !isSupported(service, languageId)) {
+    if (service === undefined || !isSupported(service, langInfo.languageId)) {
       return undefined;
     }
     return {
       serviceType: service.serviceType,
-      formality: supportsFormality(service, languageId)
+      formality: supportsFormality(langInfo, service.serviceType)
         ? service.formality
         : undefined,
     };
   }
 
-  const applyUpdate: OnMtChange = async (languageId, data) => {
-    const languageIdOrNull = languageId ?? null;
+  const applyUpdate: OnMtChange = async (langInfo, data) => {
+    const languageIdOrNull = langInfo.languageId;
     const existingMtSettings =
       mtSettings.data?._embedded?.languageConfigs
         ?.filter((l) => l.targetLanguageId !== languageIdOrNull)
@@ -111,15 +100,11 @@ export const useMachineTranslationSettings = () => {
 
     const mtSettingsValidated = updatedMtSettings.map(
       ({ targetLanguageId, primaryServiceInfo, enabledServicesInfo }) => {
-        const targetLanguageIdOrNull = targetLanguageId ?? null;
         return {
           targetLanguageId,
-          primaryServiceInfo: validateService(
-            primaryServiceInfo,
-            targetLanguageIdOrNull
-          ),
+          primaryServiceInfo: validateService(langInfo, primaryServiceInfo),
           enabledServicesInfo: enabledServicesInfo
-            ?.map((service) => validateService(service, targetLanguageIdOrNull))
+            ?.map((service) => validateService(langInfo, service))
             .filter((service) => Boolean(service)) as MtServiceInfo[],
         };
       }

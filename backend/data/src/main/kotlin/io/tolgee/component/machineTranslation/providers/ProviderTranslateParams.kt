@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation.providers
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.model.mtServiceConfig.Formality
 
@@ -23,4 +24,22 @@ data class ProviderTranslateParams(
    * Only for translators supporting plurals
    */
   val pluralFormExamples: Map<String, String>? = null,
-)
+) {
+  fun cacheKey(provider: String): String {
+    return jacksonObjectMapper()
+      .writeValueAsString(
+        listOf(
+          text,
+          textRaw,
+          keyName,
+          sourceLanguageTag,
+          targetLanguageTag,
+          metadata,
+          formality,
+          pluralForms,
+          pluralFormExamples,
+          provider,
+        ),
+      )
+  }
+}

@@ -8,7 +8,7 @@ import java.io.Serializable
 @Suppress("unused")
 @Relation(collectionRelation = "languageInfos", itemRelation = "languageInfo")
 class LanguageInfoModel(
-  val languageId: Long,
-  val languageTag: String,
+  val languageId: Long?,
+  val languageTag: String?,
   val supportedServices: List<MtSupportedService>,
 ) : RepresentationModel<LanguageInfoModel>(), Serializable

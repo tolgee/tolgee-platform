@@ -1,6 +1,5 @@
 package io.tolgee.component.machineTranslation
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.service.machineTranslation.MtServiceInfo
 
@@ -15,11 +14,4 @@ data class TranslationParams(
   val isBatch: Boolean,
   var pluralForms: Map<String, String>? = null,
   val pluralFormExamples: Map<String, String>? = null,
-) {
-  val cacheKey: String
-    get() =
-      jacksonObjectMapper()
-        .writeValueAsString(
-          listOf(text, textRaw, pluralForms, sourceLanguageTag, targetLanguageTag, serviceInfo, metadata),
-        )
-}
+)
