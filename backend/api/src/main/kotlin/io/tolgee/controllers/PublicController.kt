@@ -103,11 +103,11 @@ class PublicController(
       val params =
         EmailParams(
           to = request.email!!,
-          subject = "Password Reset Request - SSO Managed Account",
+          subject = "Password reset - SSO managed account",
           text =
             """
             Hello! 👋<br/><br/>
-            We received a request to reset the password for your account. However, your account is managed by your organization and uses a single sign-on (SSO) service for login.<br/><br/>
+            We received a request to reset the password for your account. However, your account is managed by your organization and uses a single sign-on (SSO) service to log in.<br/><br/>
             To access your account, please use the "SSO Login" button on the Tolgee login page. No password reset is needed.<br/><br/>
             If you did not make this request, you may safely ignore this email.<br/><br/>
             
