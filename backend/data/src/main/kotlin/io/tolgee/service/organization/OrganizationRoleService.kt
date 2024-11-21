@@ -205,7 +205,7 @@ class OrganizationRoleService(
     val role =
       organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organization.id)
         ?: throw NotFoundException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
-    role.managed = if (managed) true else null
+    role.managed = managed
     organizationRoleRepository.save(role)
   }
 

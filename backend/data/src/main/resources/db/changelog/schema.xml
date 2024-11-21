@@ -3907,7 +3907,7 @@
     <changeSet author="anty (generated)" id="1731342594097-2">
         <addColumn tableName="organization_role">
             <column name="managed" type="boolean">
-                <constraints checkConstraint="managed is null or managed = true"/>
+                <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
@@ -3933,7 +3933,9 @@
         <addUniqueConstraint columnNames="organization_id" constraintName="UC_TENANTORGANIZATION_ID_COL" tableName="tenant"/>
     </changeSet>
     <changeSet author="anty (generated)" id="1731342594097-7">
-        <addUniqueConstraint columnNames="user_id, managed" constraintName="organization_member_role_only_one_managed" tableName="organization_role"/>
+        <sql>
+            create unique index organization_member_role_only_one_managed on public.organization_role (user_id) where managed = true;
+        </sql>
     </changeSet>
     <changeSet author="anty (generated)" id="1731342594097-8">
         <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="tenant" constraintName="FKti8pr42oxjua5ym5d0mdpk2i0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>

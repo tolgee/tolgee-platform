@@ -17,10 +17,6 @@ import jakarta.validation.constraints.NotNull
       columnNames = ["user_id", "organization_id"],
       name = "organization_member_role_user_organization_unique",
     ),
-    UniqueConstraint(
-      columnNames = ["user_id", "managed"],
-      name = "organization_member_role_only_one_managed",
-    ),
   ],
 )
 class OrganizationRole(
@@ -42,9 +38,9 @@ class OrganizationRole(
   @ManyToOne
   var user: UserAccount? = null
 
-  // Valid values are true or null
-  // Constraint was manually added to migration schema
-  var managed: Boolean? = null
+  // Unique constraint manually created in the schema:
+  // - Only one role where managed is true per user
+  var managed: Boolean = false
 
   @ManyToOne
   @NotNull
