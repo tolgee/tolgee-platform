@@ -60,8 +60,9 @@ class TolgeeTranslationProvider(
     return metadata
   }
 
-  override val supportedLanguages = null
-  override val formalitySupportingLanguages = null
+  // empty array meaning all is supported
+  override val supportedLanguages = arrayOf<String>()
+  override val formalitySupportingLanguages = arrayOf<String>()
 
   override fun isLanguageSupported(tag: String): Boolean = true
 

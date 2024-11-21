@@ -5,7 +5,6 @@ import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
-import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.model.mtServiceConfig.Formality
 import org.slf4j.LoggerFactory
@@ -29,13 +28,16 @@ class MtServiceManager(
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  private fun findInCache(params: TranslationParams): TranslateResult? {
-    return params.findInCacheByParams()?.let {
+  private fun findInCache(
+    params: ProviderTranslateParams,
+    serviceType: MtServiceType,
+  ): TranslateResult? {
+    return params.findInCacheByParams(serviceType)?.let {
       TranslateResult(
         translatedText = it.translatedText,
         contextDescription = it.contextDescription,
         actualPrice = 0,
-        usedService = params.serviceInfo.serviceType,
+        usedService = serviceType,
         params.textRaw.isEmpty(),
       )
     }
@@ -45,9 +47,25 @@ class MtServiceManager(
     val provider = params.serviceInfo.serviceType.getProvider()
     validate(provider, params)
 
+    val supportsFormality = provider.isLanguageFormalitySupported(params.targetLanguageTag)
+
+    val translateParams =
+      ProviderTranslateParams(
+        params.text,
+        params.textRaw,
+        params.keyName,
+        params.sourceLanguageTag,
+        params.targetLanguageTag,
+        params.metadata,
+        if (supportsFormality) params.serviceInfo.formality else null,
+        params.isBatch,
+        pluralFormExamples = params.pluralFormExamples,
+        pluralForms = params.pluralForms,
+      )
+
     if (internalProperties.fakeMtProviders) {
       logger.debug("Fake MT provider is enabled")
-      return getFaked(params)
+      return getFaked(translateParams, params.serviceInfo.serviceType)
     }
 
     if (params.textRaw.isBlank()) {
@@ -60,27 +78,14 @@ class MtServiceManager(
       )
     }
 
-    val foundInCache = findInCache(params)
+    val foundInCache = findInCache(translateParams, params.serviceInfo.serviceType)
     if (foundInCache != null) {
       return foundInCache
     }
 
     return try {
       val translated =
-        provider.translate(
-          ProviderTranslateParams(
-            params.text,
-            params.textRaw,
-            params.keyName,
-            params.sourceLanguageTag,
-            params.targetLanguageTag,
-            params.metadata,
-            params.serviceInfo.formality,
-            params.isBatch,
-            pluralFormExamples = params.pluralFormExamples,
-            pluralForms = params.pluralForms,
-          ),
-        )
+        provider.translate(translateParams)
 
       val translateResult =
         TranslateResult(
@@ -91,7 +96,7 @@ class MtServiceManager(
           params.textRaw.isBlank(),
         )
 
-      params.cacheResult(translateResult)
+      translateParams.cacheResult(translateResult, params.serviceInfo.serviceType)
 
       return translateResult
     } catch (e: Exception) {
@@ -113,15 +118,6 @@ class MtServiceManager(
   ) {
     if (!provider.isLanguageSupported(params.targetLanguageTag)) {
       throw LanguageNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
-    }
-
-    val formality = params.serviceInfo.formality
-    val requiresFormality =
-      formality != null &&
-        formality != Formality.DEFAULT
-
-    if (!provider.isLanguageFormalitySupported(params.targetLanguageTag) && requiresFormality) {
-      throw FormalityNotSupportedException(params.targetLanguageTag, params.serviceInfo.serviceType)
     }
   }
 
@@ -145,32 +141,42 @@ class MtServiceManager(
     }
   }
 
-  private fun getFaked(params: TranslationParams): TranslateResult {
-    var fakedText =
-      "${params.text} translated with ${params.serviceInfo.serviceType.name} " +
+  private fun getFaked(
+    params: ProviderTranslateParams,
+    serviceType: MtServiceType,
+  ): TranslateResult {
+    val formalityIndicator =
+      if ((params.formality ?: Formality.DEFAULT) !== Formality.DEFAULT) {
+        "${params.formality} "
+      } else {
+        ""
+      }
+    val fakedText =
+      "${params.text} translated ${formalityIndicator}with ${serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}"
-    if ((params.serviceInfo.formality ?: Formality.DEFAULT) !== Formality.DEFAULT) {
-      fakedText += " ${params.serviceInfo.formality}"
-    }
+
     return TranslateResult(
       translatedText = fakedText,
       contextDescription = null,
       actualPrice = params.text.length * 100,
-      usedService = params.serviceInfo.serviceType,
+      usedService = serviceType,
       baseBlank = params.textRaw.isEmpty(),
     )
   }
 
-  private fun TranslationParams.findInCacheByParams(): TranslateResult? {
+  private fun ProviderTranslateParams.findInCacheByParams(serviceType: MtServiceType): TranslateResult? {
     return getCache()?.let { cache ->
-      val result = cache.get(this.cacheKey)?.get() as? TranslateResult
+      val result = cache.get(this.cacheKey(serviceType.name))?.get() as? TranslateResult
       result?.actualPrice = 0
       return result
     }
   }
 
-  private fun TranslationParams.cacheResult(result: TranslateResult) {
-    getCache()?.put(this.cacheKey, result)
+  private fun ProviderTranslateParams.cacheResult(
+    result: TranslateResult,
+    serviceType: MtServiceType,
+  ) {
+    getCache()?.put(this.cacheKey(serviceType.name), result)
   }
 
   private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)

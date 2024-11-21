@@ -68,8 +68,8 @@ class MachineTranslationSettingsController(
     return CollectionModel.of(
       data.map {
         LanguageInfoModel(
-          it.language.id,
-          it.language.tag,
+          it.language?.id,
+          it.language?.tag,
           supportedServices = it.supportedServices,
         )
       }.sortedBy { it.languageId },

@@ -33,6 +33,7 @@ import { FormalityType, RowData, ServiceType } from './types';
 import { ServiceLabel } from './ServiceLabel';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';
 import { SuggestionsLabel } from './SuggestionsLabel';
+import { supportsFormality } from './supportsFormality';
 
 const StyledSubtitle = styled('div')`
   font-size: 14px;
@@ -54,6 +55,11 @@ const StyledContainer = styled('div')`
 
 const StyledHint = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledFormalityHint = styled(Typography)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 15px;
 `;
 
 const StyledSettings = styled('div')`
@@ -103,7 +109,7 @@ export const LanguageSettingsDialog = ({
   const [reseting, setReseting] = useState(false);
   async function handleResetToDefault() {
     setReseting(true);
-    return onChange(settings.language?.id, null)
+    return onChange(settings.info!, null)
       .then(() => {
         onClose();
       })
@@ -136,7 +142,7 @@ export const LanguageSettingsDialog = ({
           formality: primaryFormality,
         };
 
-        await onChange(settings.id || undefined, {
+        await onChange(settings.info!, {
           machineTranslation: {
             targetLanguageId: settings.language?.id,
             primaryServiceInfo: primaryServiceInfo,
@@ -223,7 +229,10 @@ export const LanguageSettingsDialog = ({
                     (s) => s.serviceType === service
                   );
                   const languageSupported = Boolean(serviceInfo) || isDefault;
-                  const formalitySupported = serviceInfo?.formalitySupported;
+                  const formalitySupported = supportsFormality(
+                    settings.info!,
+                    service
+                  );
                   return (
                     <React.Fragment key={service}>
                       <Box className={TABLE_FIRST_CELL} key={service}>
@@ -257,7 +266,7 @@ export const LanguageSettingsDialog = ({
                         )}
                       </div>
                       <div className={TABLE_CENTERED}>
-                        {formalitySupported && (
+                        {formalitySupported ? (
                           <Select
                             data-cy="mt-language-dialog-formality-select"
                             data-cy-service={service}
@@ -283,6 +292,10 @@ export const LanguageSettingsDialog = ({
                               </MenuItem>
                             ))}
                           </Select>
+                        ) : (
+                          <StyledFormalityHint>
+                            {t('project_mt_dialog_formality_not_supported')}
+                          </StyledFormalityHint>
                         )}
                       </div>
                     </React.Fragment>

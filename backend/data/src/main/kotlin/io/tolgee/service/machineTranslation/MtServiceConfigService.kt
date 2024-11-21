@@ -252,12 +252,7 @@ class MtServiceConfigService(
         MtServiceType.AWS -> entity.awsFormality = it.formality ?: Formality.DEFAULT
         MtServiceType.DEEPL -> entity.deeplFormality = it.formality ?: Formality.DEFAULT
         MtServiceType.TOLGEE -> entity.tolgeeFormality = it.formality ?: Formality.DEFAULT
-        else -> {
-          if (it.formality == null) {
-            return@forEach
-          }
-          throw BadRequestException(Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE, listOf(it.serviceType))
-        }
+        else -> {}
       }
     }
   }
@@ -330,13 +325,26 @@ class MtServiceConfigService(
   }
 
   fun getLanguageInfo(project: ProjectDto): List<MtLanguageInfo> {
-    return languageService.findAll(project.id).map { language ->
+    val result: MutableList<MtLanguageInfo> = mutableListOf()
+    result.add(
+      MtLanguageInfo(
+        language = null,
+        supportedServices =
+          services.filter {
+            it.value.second.isEnabled
+          }.map {
+            MtSupportedService(it.key, it.value.second.formalitySupportingLanguages !== null)
+          },
+      ),
+    )
+    languageService.findAll(project.id).forEach { language ->
       val supportedServices =
         services.filter { it.value.second.isLanguageSupported(language.tag) && it.value.second.isEnabled }.map {
           MtSupportedService(it.key, it.value.second.isLanguageFormalitySupported(language.tag))
         }
-      MtLanguageInfo(language = language, supportedServices)
+      result.add(MtLanguageInfo(language = language, supportedServices))
     }
+    return result
   }
 
   val services by lazy {

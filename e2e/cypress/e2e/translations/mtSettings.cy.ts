@@ -28,6 +28,10 @@ describe('Machine translation settings', () => {
     cy.gcy('machine-translations-settings-language-options').first().click();
     getEnableCheckbox('GOOGLE').click();
     getPrimaryRadio('AWS').click();
+    getFormalitySelect('AWS').click();
+    cy.gcy('mt-language-dialog-formality-select-item')
+      .contains('Formal')
+      .click();
     cy.gcy('mt-language-dialog-auto-for-import').click();
     cy.gcy('mt-language-dialog-auto-machine-translation').click();
     cy.gcy('mt-language-dialog-auto-translation-memory').click();
@@ -44,6 +48,7 @@ describe('Machine translation settings', () => {
     cy.gcy('translation-tools-machine-translation-item')
       .contains('Cool translated text 1 translated with AWS from en to cs')
       .should('be.visible');
+
     cy.gcy('translation-tools-machine-translation-item').should(
       'have.length',
       1
@@ -53,6 +58,9 @@ describe('Machine translation settings', () => {
     cy.contains('test translation translated with AWS from en to cs').should(
       'be.visible'
     );
+    cy.contains(
+      'test translation translated FORMAL with AWS from en to es'
+    ).should('be.visible');
   });
 
   it('will update language specific settings', { retries: 5 }, () => {
@@ -86,7 +94,7 @@ describe('Machine translation settings', () => {
     );
     cy.gcy('translation-tools-machine-translation-item')
       .contains(
-        'Cool translated text 1 translated with AWS from en to es FORMAL'
+        'Cool translated text 1 translated FORMAL with AWS from en to es'
       )
       .should('be.visible');
     cy.gcy('global-editor').type('{esc}');
@@ -100,7 +108,7 @@ describe('Machine translation settings', () => {
 
     createTranslation({ key: 'aaa_key', translation: 'test translation' });
     cy.contains(
-      'test translation translated with AWS from en to es FORMAL'
+      'test translation translated FORMAL with AWS from en to es'
     ).should('be.visible');
     cy.contains('from en to cs').should('not.exist');
   });

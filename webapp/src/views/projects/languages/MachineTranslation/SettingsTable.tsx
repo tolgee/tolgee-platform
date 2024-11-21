@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 
-import { LanguageRow } from './LanguageRow';
 import { TABLE_CENTERED, TABLE_DIVIDER, TABLE_TOP_ROW } from '../tableStyles';
+import { LanguageRow } from './LanguageRow';
 import { LanguageCombinedSetting, OnMtChange } from './types';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';
 import { SuggestionsLabel } from './SuggestionsLabel';
