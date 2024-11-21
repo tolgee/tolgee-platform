@@ -4,7 +4,7 @@ import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.configuration.tolgee.SsoGlobalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -42,7 +42,7 @@ import java.util.*
 class SsoDelegateEe(
   private val jwtService: JwtService,
   private val restTemplate: RestTemplate,
-  private val ssoGlobalProperties: SsoGlobalProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
   private val oAuthUserHandler: OAuthUserHandler,
@@ -210,7 +210,7 @@ class SsoDelegateEe(
     val domain =
       when (user.thirdPartyAuth) {
         ThirdPartyAuthType.SSO -> fetchOrganizationsSsoDomainFor(user.id)
-        ThirdPartyAuthType.SSO_GLOBAL -> ssoGlobalProperties.domain
+        ThirdPartyAuthType.SSO_GLOBAL -> tolgeeProperties.authentication.ssoGlobal.domain
         else -> null
       }
     val refreshToken = user.ssoRefreshToken

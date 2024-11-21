@@ -84,15 +84,17 @@ context('Login', () => {
       disableEmailVerification();
       enableOrganizationsSsoProvider();
 
-      cy.contains('Log in with SSO').click();
+      cy.visit(HOST);
+
+      cy.contains('SSO login').click();
       cy.xpath("//*[@name='domain']").type('domain.com');
 
       loginWithFakeSso();
     });
 
     afterEach(() => {
-      disableOrganizationsSsoProvider();
       logout();
+      disableOrganizationsSsoProvider();
       ssoOrganizationsLoginTestData.clean();
     });
   });
@@ -101,12 +103,13 @@ context('Login', () => {
     it('login with global sso', { retries: { runMode: 5 } }, () => {
       disableEmailVerification();
       enableGlobalSsoProvider();
+      cy.visit(HOST);
       loginWithFakeSso();
     });
 
     afterEach(() => {
-      disableGlobalSsoProvider();
       logout();
+      disableGlobalSsoProvider();
     });
   });
 

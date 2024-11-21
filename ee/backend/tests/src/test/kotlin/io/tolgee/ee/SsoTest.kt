@@ -2,8 +2,6 @@ package io.tolgee.ee
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.jsonwebtoken.Claims
-import io.tolgee.configuration.tolgee.SsoGlobalProperties
-import io.tolgee.configuration.tolgee.SsoOrganizationsProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SsoTestData
@@ -66,12 +64,6 @@ class SsoTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
-  @Autowired
-  lateinit var ssoGlobalProperties: SsoGlobalProperties
-
-  @Autowired
-  lateinit var ssoOrganizationsProperties: SsoOrganizationsProperties
-
   private val ssoMultiTenantsMocks: SsoMultiTenantsMocks by lazy {
     SsoMultiTenantsMocks(authMvc, restTemplate, tenantService)
   }
@@ -81,13 +73,13 @@ class SsoTest : AuthorizedControllerTest() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
 
     currentDateProvider.forcedDate = currentDateProvider.date
-    ssoGlobalProperties.enabled = false
+    tolgeeProperties.authentication.ssoGlobal.enabled = false
     testData = SsoTestData()
     testDataService.saveTestData(testData.root)
   }
 
   private fun addTenant(): SsoTenant {
-    ssoOrganizationsProperties.enabled = true
+    tolgeeProperties.authentication.ssoOrganizations.enabled = true
     return tenantService.findTenant(testData.organization.id)
       ?: SsoTenant()
         .apply {
@@ -232,13 +224,15 @@ class SsoTest : AuthorizedControllerTest() {
 
   @Test
   fun `sso auth works via global config`() {
-    ssoGlobalProperties.enabled = true
-    ssoGlobalProperties.domain = "registrationId"
-    ssoGlobalProperties.clientId = "clientId"
-    ssoGlobalProperties.clientSecret = "clientSecret"
-    ssoGlobalProperties.authorizationUri = "authorizationUri"
-    ssoGlobalProperties.tokenUri = "http://tokenUri"
-    ssoGlobalProperties.jwkSetUri = "http://jwkSetUri"
+    tolgeeProperties.authentication.ssoGlobal.apply {
+      enabled = true
+      domain = "registrationId"
+      clientId = "clientId"
+      clientSecret = "clientSecret"
+      authorizationUri = "authorizationUri"
+      tokenUri = "http://tokenUri"
+      jwkSetUri = "http://jwkSetUri"
+    }
     val response = ssoMultiTenantsMocks.authorize("registrationId")
 
     val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)

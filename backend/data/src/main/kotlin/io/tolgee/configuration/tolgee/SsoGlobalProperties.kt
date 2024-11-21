@@ -22,6 +22,7 @@ import kotlin.reflect.KProperty0
   displayName = "Single Sign-On",
 )
 class SsoGlobalProperties : ISsoTenant {
+  @E2eRuntimeMutable
   @DocProperty(description = "Enables SSO authentication on global level - as a login method for the whole server")
   var enabled: Boolean = false
 

@@ -26,8 +26,8 @@ type JwtAuthenticationResponse =
 type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
 
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
-const LOCAL_STORAGE_DOMAIN_KEY = 'oauth2Domain';
+const LOCAL_STORAGE_SSO_STATE_KEY = 'ssoOauth2State';
+const LOCAL_STORAGE_SSO_DOMAIN_KEY = 'ssoDomain';
 
 export function getRedirectUrl(userId?: number) {
   const link = securityService.getAfterLoginLink();
@@ -120,11 +120,6 @@ export const useAuthService = (
         onError: (error) => {
           messageService.error(<TranslatedError code={error.code!} />);
         },
-        onSuccess: (response) => {
-          if (response.redirectUrl) {
-            localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
-          }
-        },
       }
     );
   }
@@ -215,14 +210,14 @@ export const useAuthService = (
       await handleAfterLogin(response!);
     },
     async loginWithOAuthCodeSso(state: string, code: string) {
-      const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
-      const storedDomain = localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY);
+      const storedState = localStorage.getItem(LOCAL_STORAGE_SSO_STATE_KEY);
+      const storedDomain = localStorage.getItem(LOCAL_STORAGE_SSO_DOMAIN_KEY);
       if (storedState !== state || storedDomain === null) {
         history.replace(LINKS.LOGIN.build());
         return;
       }
 
-      localStorage.removeItem(LOCAL_STORAGE_STATE_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_SSO_STATE_KEY);
 
       const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({});
       const response = await authorizeOAuthLoadable.mutateAsync(
@@ -245,12 +240,13 @@ export const useAuthService = (
         }
       );
       setInvitationCode(undefined);
-      localStorage.removeItem(LOCAL_STORAGE_DOMAIN_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_SSO_DOMAIN_KEY);
       await handleAfterLogin(response!);
     },
     async loginRedirectSso(domain: string) {
+      localStorage.setItem(LOCAL_STORAGE_SSO_DOMAIN_KEY, domain || '');
       const state = uuidv4();
-      localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+      localStorage.setItem(LOCAL_STORAGE_SSO_STATE_KEY, state);
       const response = await getSsoAuthLinkByDomain(domain, state);
       window.location.href = response.redirectUrl;
     },

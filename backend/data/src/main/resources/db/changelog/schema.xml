@@ -3922,7 +3922,12 @@
         </addColumn>
     </changeSet>
     <changeSet author="anty (generated)" id="1731342594097-5">
-        <addUniqueConstraint columnNames="domain" constraintName="UC_TENANTDOMAIN_COL" tableName="tenant"/>
+        <sql>
+            create unique index on public.tenant (domain) where enabled = true;
+        </sql>
+        <sql>
+            alter table tenant add constraint tenant_domain_not_blank check (enabled = false or (domain is not null and domain != ''));
+        </sql>
     </changeSet>
     <changeSet author="anty (generated)" id="1731342594097-6">
         <addUniqueConstraint columnNames="organization_id" constraintName="UC_TENANTORGANIZATION_ID_COL" tableName="tenant"/>

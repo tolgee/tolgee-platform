@@ -1,7 +1,6 @@
 package io.tolgee.ee.service.sso
 
-import io.tolgee.configuration.tolgee.SsoGlobalProperties
-import io.tolgee.configuration.tolgee.SsoOrganizationsProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.exceptions.NotFoundException
@@ -14,15 +13,14 @@ import org.springframework.stereotype.Service
 @Service
 class TenantService(
   private val tenantRepository: TenantRepository,
-  private val ssoGlobalProperties: SsoGlobalProperties,
-  private val ssoOrganizationsProperties: SsoOrganizationsProperties,
+  private val properties: TolgeeProperties,
 ) {
   fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
-    return ssoGlobalProperties
+    return properties.authentication.ssoGlobal
       .takeIf { it.enabled && domain == it.domain }
       ?.let { ssoTenantProperties -> SsoTenantConfig(ssoTenantProperties, null) }
       ?: domain
-        .takeIf { ssoOrganizationsProperties.enabled }
+        .takeIf { properties.authentication.ssoOrganizations.enabled }
         ?.let {
           tenantRepository.findEnabledByDomain(it)?.let { ssoTenantEntity ->
             SsoTenantConfig(ssoTenantEntity, ssoTenantEntity.organization)

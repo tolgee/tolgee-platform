@@ -20,6 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
   displayName = "Single Sign-On per Organization",
 )
 class SsoOrganizationsProperties {
+  @E2eRuntimeMutable
   @DocProperty(description = "Enables SSO authentication")
   var enabled: Boolean = false
 
