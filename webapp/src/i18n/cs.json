@@ -1412,6 +1412,7 @@
   "translations_cell_tab_comments": "{value, plural, other {Komentáře (#)} =0 {Komentáře}}",
   "translations_cell_tab_edit": "Editovat",
   "translations_cell_tab_history": "Historie",
+  "translations_checkbox_select_multiple_hint": "Podržte „shift“ a klikněte pro výběr více položek",
   "translations_clear_selection": "Zrušit výběr",
   "translations_comments_delete_button": "Smazat",
   "translations_comments_delete_confirmation": "Opravdu chcete smazat tento komentář?",

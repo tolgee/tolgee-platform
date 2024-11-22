@@ -1,3 +1,10 @@
+# [3.83.0](https://github.com/tolgee/tolgee-platform/compare/v3.82.6...v3.83.0) (2024-11-22)
+
+
+### Features
+
+* select multiple keys with holding shift key ([#2712](https://github.com/tolgee/tolgee-platform/issues/2712)) ([0079d36](https://github.com/tolgee/tolgee-platform/commit/0079d36164b903a36c7abc331648cbc02c14f753)), closes [#2713](https://github.com/tolgee/tolgee-platform/issues/2713)
+
 ## [3.82.6](https://github.com/tolgee/tolgee-platform/compare/v3.82.5...v3.82.6) (2024-11-22)
 
 

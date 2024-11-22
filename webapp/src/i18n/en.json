@@ -1423,6 +1423,7 @@
   "translations_cell_tab_comments": "{value, plural, other {Comments (#)} =0 {Comments}}",
   "translations_cell_tab_edit": "Edit",
   "translations_cell_tab_history": "History",
+  "translations_checkbox_select_multiple_hint": "Hold \"shift\" and click to select multiple",
   "translations_clear_selection": "Clear selection",
   "translations_comments_delete_button": "Delete",
   "translations_comments_delete_confirmation": "Do you really want to delete this comment?",

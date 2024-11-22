@@ -1412,6 +1412,7 @@
   "translations_cell_tab_comments": "{value, plural, one {Kommentar} other {Kommentarer (#)} =0 {Kommentarer}}",
   "translations_cell_tab_edit": "Rediger",
   "translations_cell_tab_history": "Historik",
+  "translations_checkbox_select_multiple_hint": "Hold \"shift\" og klik for at vælge flere",
   "translations_clear_selection": "Ryd markering",
   "translations_comments_delete_button": "Slet",
   "translations_comments_delete_confirmation": "Er du sikker på, at du vil slette denne kommentar?",
