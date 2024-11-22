@@ -22,9 +22,6 @@ export const useSelectionService = ({ translations }: Props) => {
 
   const groupToggle = (keyId: number) => {
     const lastSelected = selection[selection.length - 1];
-    if (!lastSelected) {
-      toggle(keyId);
-    }
     const lastIndex =
       translations.fixedTranslations?.findIndex(
         (t) => t.keyId === lastSelected
@@ -33,6 +30,7 @@ export const useSelectionService = ({ translations }: Props) => {
       translations.fixedTranslations?.findIndex((t) => t.keyId === keyId) ?? -1;
 
     if (lastIndex < 0 || currentIndex < 0) {
+      toggle(keyId);
       return;
     }
 

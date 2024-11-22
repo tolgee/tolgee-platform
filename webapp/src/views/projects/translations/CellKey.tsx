@@ -8,6 +8,7 @@ import { Zap } from '@untitled-ui/icons-react';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
+import { wrapIf } from 'tg.fixtures/wrapIf';
 
 import { Tags } from './Tags/Tags';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
@@ -126,7 +127,6 @@ export const CellKey: React.FC<Props> = ({
   editEnabled,
   active,
   simple,
-  onSaveSuccess,
   className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
@@ -138,6 +138,9 @@ export const CellKey: React.FC<Props> = ({
 
   const isSelected = useTranslationsSelector((c) =>
     c.selection.includes(data.keyId)
+  );
+  const somethingSelected = useTranslationsSelector((c) =>
+    Boolean(c.selection.length)
   );
 
   // prevent blinking, when closing popup
@@ -181,15 +184,23 @@ export const CellKey: React.FC<Props> = ({
         ref={cellRef}
       >
         <>
-          {!simple && (
-            <StyledCheckbox
-              size="small"
-              checked={isSelected}
-              onChange={handleToggleSelect as any}
-              onClick={stopBubble()}
-              data-cy="translations-row-checkbox"
-            />
-          )}
+          {!simple &&
+            wrapIf(
+              somethingSelected && !isSelected,
+              <StyledCheckbox
+                size="small"
+                checked={isSelected}
+                onChange={handleToggleSelect as any}
+                onClick={stopBubble()}
+                data-cy="translations-row-checkbox"
+              />,
+              // @ts-ignore
+              <Tooltip
+                title={t('translations_checkbox_select_multiple_hint')}
+                enterDelay={1000}
+                enterNextDelay={1000}
+              />
+            )}
           <StyledKey>
             <LimitedHeightText width={width} maxLines={3} wrap="break-all">
               {data.keyName}
