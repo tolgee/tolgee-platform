@@ -39,7 +39,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
         node("domain").isEqualTo("google")
         node("clientId").isEqualTo("dummy_client_id")
         node("clientSecret").isEqualTo("clientSecret")
-        node("authorizationUri").isEqualTo("dummy-url.com")
+        node("authorizationUri").isEqualTo("https://dummy-url.com")
         node("tokenUri").isEqualTo("tokenUri")
         node("jwkSetUri").isEqualTo("jwkSetUri")
         node("enabled").isEqualTo(true)

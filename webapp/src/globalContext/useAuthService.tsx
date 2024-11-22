@@ -26,8 +26,8 @@ type JwtAuthenticationResponse =
 type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
 
-const LOCAL_STORAGE_SSO_STATE_KEY = 'ssoOauth2State';
-const LOCAL_STORAGE_SSO_DOMAIN_KEY = 'ssoDomain';
+const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
+const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
 
 export function getRedirectUrl(userId?: number) {
   const link = securityService.getAfterLoginLink();
@@ -56,11 +56,23 @@ export const useAuthService = (
   const authorizeOAuthLoadable = useApiMutation({
     url: '/api/public/authorize_oauth/{serviceType}',
     method: 'get',
+    fetchOptions: {
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+      disable404Redirect: true,
+      disableAutoErrorHandle: true,
+    },
   });
 
   const redirectSsoUrlLoadable = useApiMutation({
     url: '/api/public/authorize_oauth/sso/authentication-url',
     method: 'post',
+    fetchOptions: {
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+      disable404Redirect: true,
+      disableAutoErrorHandle: true,
+    },
   });
 
   const acceptInvitationLoadable = useApiMutation({
@@ -112,16 +124,9 @@ export const useAuthService = (
   const history = useHistory();
 
   async function getSsoAuthLinkByDomain(domain: string, state: string) {
-    return await redirectSsoUrlLoadable.mutateAsync(
-      {
-        content: { 'application/json': { domain, state } },
-      },
-      {
-        onError: (error) => {
-          messageService.error(<TranslatedError code={error.code!} />);
-        },
-      }
-    );
+    return await redirectSsoUrlLoadable.mutateAsync({
+      content: { 'application/json': { domain, state } },
+    });
   }
 
   async function setJwtToken(token: string | undefined) {
@@ -211,9 +216,12 @@ export const useAuthService = (
       await handleAfterLogin(response!);
     },
     async loginRedirectSso(domain: string) {
-      localStorage.setItem(LOCAL_STORAGE_SSO_DOMAIN_KEY, domain || '');
+      localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
+      // FIXME: oauth2 uses the same state key with one difference being:
+      //  it is generated during initialization (instead of during the redirect)
+      //  this way they don't interfere with each other, but the whole solution feels wrong
       const state = uuidv4();
-      localStorage.setItem(LOCAL_STORAGE_SSO_STATE_KEY, state);
+      localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
       const response = await getSsoAuthLinkByDomain(domain, state);
       window.location.href = response.redirectUrl;
     },

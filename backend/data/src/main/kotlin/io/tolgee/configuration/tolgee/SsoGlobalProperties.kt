@@ -54,8 +54,7 @@ class SsoGlobalProperties : ISsoTenant {
 
   @DocProperty(
     description =
-      "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`. " +
-        "You may need that when you want to enable login via your custom SSO.",
+      "Custom logo URL to be displayed on the login screen. Can be set only when `nativeEnabled` is `false`.",
   )
   var customLogoUrl: String? = null
 

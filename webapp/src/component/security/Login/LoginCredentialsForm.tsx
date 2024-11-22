@@ -112,7 +112,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                 <img
                   src={customLogoUrl}
                   alt="Custom Logo"
-                  style={{ width: 24, height: 24 }}
+                  style={{ width: 96, height: 96 }}
                 />
               </Box>
             )}

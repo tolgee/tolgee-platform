@@ -16,9 +16,14 @@ export const SsoLoginView: FunctionComponent = () => {
   const { t } = useTranslate();
   const credentialsRef = useRef({ domain: '' });
 
-  const error = useGlobalContext((c) => c.auth.authorizeOAuthLoadable.error);
+  const error = useGlobalContext(
+    (c) =>
+      c.auth.authorizeOAuthLoadable.error || c.auth.redirectSsoUrlLoadable.error
+  );
   const isLoading = useGlobalContext(
-    (c) => c.auth.authorizeOAuthLoadable.isLoading
+    (c) =>
+      c.auth.authorizeOAuthLoadable.isLoading ||
+      c.auth.redirectSsoUrlLoadable.isLoading
   );
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
