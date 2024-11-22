@@ -22,6 +22,10 @@ import {
   ResponseContent,
 } from './ApiSchemaHttpService';
 
+export type CustomOptions = {
+  noGlobalLoading?: boolean;
+};
+
 export type QueryProps<
   Url extends keyof Paths,
   Method extends keyof Paths[Url],
@@ -30,7 +34,8 @@ export type QueryProps<
   url: Url;
   method: Method;
   fetchOptions?: RequestOptions;
-  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError>;
+  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError> &
+    CustomOptions;
 } & RequestParamsType<Url, Method, Paths>;
 
 export type InfiniteQueryProps<
@@ -44,7 +49,8 @@ export type InfiniteQueryProps<
   options?: UseInfiniteQueryOptions<
     ResponseContent<Url, Method, Paths>,
     ApiError
-  >;
+  > &
+    CustomOptions;
 } & RequestParamsType<Url, Method, Paths>;
 
 type Split<S extends string> = S extends `${infer Prefix}/${infer Rest}`
@@ -66,7 +72,8 @@ export type MutationProps<
     ResponseContent<Url, Method, Paths>,
     ApiError,
     RequestParamsType<Url, Method, Paths>
-  >;
+  > &
+    CustomOptions;
   invalidatePrefix?: Prefix | Prefix[];
 };
 

@@ -7,6 +7,7 @@ import { useIsFetching, useIsMutating } from 'react-query';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { usePosthog } from 'tg.hooks/usePosthog';
 import { usePlausible } from 'tg.hooks/plausible';
+import { CustomOptions } from 'tg.service/http/useQueryApi';
 
 export const MandatoryDataProvider = (props: any) => {
   const userData = useUser();
@@ -14,8 +15,16 @@ export const MandatoryDataProvider = (props: any) => {
 
   const isFetching = useGlobalContext((c) => c.initialData.isFetching);
 
-  const isGloballyFetching = useIsFetching();
-  const isGloballyMutating = useIsMutating();
+  const isGloballyFetching = useIsFetching({
+    predicate(query) {
+      return !(query.options as unknown as CustomOptions).noGlobalLoading;
+    },
+  });
+  const isGloballyMutating = useIsMutating({
+    predicate(query) {
+      return !(query.options as unknown as CustomOptions).noGlobalLoading;
+    },
+  });
 
   useGlobalLoading(
     Boolean(isGloballyFetching || isGloballyMutating || isFetching)
