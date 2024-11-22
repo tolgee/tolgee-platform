@@ -62,57 +62,6 @@ context('Login', () => {
     cy.contains('Invalid credentials').should('be.visible');
   });
 
-  it('login with github', () => {
-    disableEmailVerification();
-    checkAnonymousIdSet();
-
-    loginWithFakeGithub();
-
-    checkAnonymousIdUnset();
-    checkAnonymousUserIdentified();
-  });
-  it('login with oauth2', { retries: { runMode: 5 } }, () => {
-    disableEmailVerification();
-    loginWithFakeOAuth2();
-  });
-
-  context('SSO Organizations Login', () => {
-    it('login with global sso', { retries: { runMode: 5 } }, () => {
-      ssoOrganizationsLoginTestData.clean();
-      ssoOrganizationsLoginTestData.generate();
-
-      disableEmailVerification();
-      enableOrganizationsSsoProvider();
-
-      cy.visit(HOST);
-
-      cy.contains('SSO login').click();
-      cy.xpath("//*[@name='domain']").type('domain.com');
-
-      loginWithFakeSso();
-    });
-
-    afterEach(() => {
-      logout();
-      disableOrganizationsSsoProvider();
-      ssoOrganizationsLoginTestData.clean();
-    });
-  });
-
-  context('SSO Global Login', () => {
-    it('login with global sso', { retries: { runMode: 5 } }, () => {
-      disableEmailVerification();
-      enableGlobalSsoProvider();
-      cy.visit(HOST);
-      loginWithFakeSso();
-    });
-
-    afterEach(() => {
-      logout();
-      disableGlobalSsoProvider();
-    });
-  });
-
   it('logout', () => {
     login();
     cy.reload();
@@ -191,6 +140,69 @@ context('Login', () => {
       waitForGlobalLoading();
       cy.gcy('login-button').should('not.exist');
       cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
+    });
+  });
+});
+
+context('Login third party', () => {
+  beforeEach(() => {
+    disableEmailVerification();
+    cy.visit(HOST);
+  });
+
+  it('login with github', () => {
+    checkAnonymousIdSet();
+
+    loginWithFakeGithub();
+
+    checkAnonymousIdUnset();
+    checkAnonymousUserIdentified();
+  });
+  it('login with oauth2', { retries: { runMode: 5 } }, () => {
+    loginWithFakeOAuth2();
+  });
+});
+
+context('Login SSO', () => {
+  beforeEach(() => {
+    disableEmailVerification();
+  });
+
+  context('SSO Organizations Login', () => {
+    beforeEach(() => {
+      ssoOrganizationsLoginTestData.clean();
+      ssoOrganizationsLoginTestData.generate();
+      enableOrganizationsSsoProvider();
+
+      cy.visit(HOST);
+    });
+
+    it('login with global sso', { retries: { runMode: 5 } }, () => {
+      cy.contains('SSO login').click();
+      cy.xpath("//*[@name='domain']").type('domain.com');
+      loginWithFakeSso();
+    });
+
+    afterEach(() => {
+      logout();
+      disableOrganizationsSsoProvider();
+      ssoOrganizationsLoginTestData.clean();
+    });
+  });
+
+  context('SSO Global Login', () => {
+    beforeEach(() => {
+      enableGlobalSsoProvider();
+      cy.visit(HOST);
+    });
+
+    it('login with global sso', { retries: { runMode: 5 } }, () => {
+      loginWithFakeSso();
+    });
+
+    afterEach(() => {
+      logout();
+      disableGlobalSsoProvider();
     });
   });
 });
