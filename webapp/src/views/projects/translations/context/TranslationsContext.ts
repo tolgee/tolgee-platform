@@ -186,8 +186,11 @@ export const [
         return positionService.updatePosition(edit);
       }
     },
-    toggleSelect(index: number) {
-      return selectionService.toggle(index);
+    toggleSelect(keyId: number) {
+      return selectionService.toggle(keyId);
+    },
+    groupToggleSelect(keyId: number) {
+      return selectionService.groupToggle(keyId);
     },
     async selectAll() {
       const allItems = await translationService.getAllIds();
