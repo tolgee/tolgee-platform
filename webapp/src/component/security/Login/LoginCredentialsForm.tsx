@@ -1,5 +1,11 @@
 import React, { RefObject } from 'react';
-import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
+import {
+  Button,
+  Link as MuiLink,
+  Typography,
+  styled,
+  Alert,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
@@ -16,6 +22,7 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { ApiError } from 'tg.service/http/ApiError';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -67,10 +74,10 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         <Box>
           <Box display="flex" flexDirection="column" alignItems="stretch">
             {noLoginMethods && (
-              <Typography variant="body1" color="error">
+              <Alert severity="error">
                 {/* Did you mess up your configuration? */}
                 <T keyName="login_no_login_methods" />
-              </Typography>
+              </Alert>
             )}
 
             {nativeEnabled && (
