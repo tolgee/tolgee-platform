@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useTranslate } from '@tolgee/react';
 import { Checkbox, styled, Tooltip, Box } from '@mui/material';
