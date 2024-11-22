@@ -1,3 +1,10 @@
+## [3.82.5](https://github.com/tolgee/tolgee-platform/compare/v3.82.4...v3.82.5) (2024-11-22)
+
+
+### Bug Fixes
+
+* exlcude batch jobs from global loading ([#2711](https://github.com/tolgee/tolgee-platform/issues/2711)) ([016e505](https://github.com/tolgee/tolgee-platform/commit/016e505835425c5f900f6b3a4a75dd04534d86f3))
+
 ## [3.82.4](https://github.com/tolgee/tolgee-platform/compare/v3.82.3...v3.82.4) (2024-11-21)
 
 
