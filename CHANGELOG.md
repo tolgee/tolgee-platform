@@ -1,3 +1,10 @@
+## [3.82.6](https://github.com/tolgee/tolgee-platform/compare/v3.82.5...v3.82.6) (2024-11-22)
+
+
+### Bug Fixes
+
+* CLI integration command ([#2714](https://github.com/tolgee/tolgee-platform/issues/2714)) ([0019637](https://github.com/tolgee/tolgee-platform/commit/00196372c0bc075fd8e4a49904f418d35be283fd))
+
 ## [3.82.5](https://github.com/tolgee/tolgee-platform/compare/v3.82.4...v3.82.5) (2024-11-22)
 
 
