@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useTranslate } from '@tolgee/react';
 import { Checkbox, styled, Tooltip, Box } from '@mui/material';
@@ -131,7 +131,7 @@ export const CellKey: React.FC<Props> = ({
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
-  const { toggleSelect, addTag } = useTranslationsActions();
+  const { toggleSelect, groupToggleSelect, addTag } = useTranslationsActions();
   const { t } = useTranslate();
 
   const screenshotEl = useRef<HTMLButtonElement | null>(null);
@@ -143,8 +143,13 @@ export const CellKey: React.FC<Props> = ({
   // prevent blinking, when closing popup
   const [screenshotsOpenDebounced] = useDebounce(screenshotsOpen, 100);
 
-  const handleToggleSelect = () => {
-    toggleSelect(data.keyId);
+  const handleToggleSelect = (e: React.PointerEvent) => {
+    const shiftPressed = e.nativeEvent.shiftKey;
+    if (shiftPressed) {
+      groupToggleSelect(data.keyId);
+    } else {
+      toggleSelect(data.keyId);
+    }
   };
 
   const handleAddTag = (name: string) => {
@@ -180,7 +185,7 @@ export const CellKey: React.FC<Props> = ({
             <StyledCheckbox
               size="small"
               checked={isSelected}
-              onChange={handleToggleSelect}
+              onChange={handleToggleSelect as any}
               onClick={stopBubble()}
               data-cy="translations-row-checkbox"
             />
