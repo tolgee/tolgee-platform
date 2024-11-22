@@ -184,7 +184,7 @@ export const useAuthService = (
       response.accessToken;
       await handleAfterLogin(response!);
     },
-    async loginWithOAuthCode(type: string, code: string) {
+    async loginWithOAuthCode(type: string, code: string, domain?: string) {
       const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
         [PARAMS.SERVICE_TYPE]: type,
       });
@@ -195,6 +195,7 @@ export const useAuthService = (
             code,
             redirect_uri: redirectUri,
             invitationCode: invitationCode,
+            domain,
           },
         },
         {
@@ -207,40 +208,6 @@ export const useAuthService = (
         }
       );
       setInvitationCode(undefined);
-      await handleAfterLogin(response!);
-    },
-    async loginWithOAuthCodeSso(state: string, code: string) {
-      const storedState = localStorage.getItem(LOCAL_STORAGE_SSO_STATE_KEY);
-      const storedDomain = localStorage.getItem(LOCAL_STORAGE_SSO_DOMAIN_KEY);
-      if (storedState !== state || storedDomain === null) {
-        history.replace(LINKS.LOGIN.build());
-        return;
-      }
-
-      localStorage.removeItem(LOCAL_STORAGE_SSO_STATE_KEY);
-
-      const redirectUri = LINKS.OPENID_RESPONSE.buildWithOrigin({});
-      const response = await authorizeOAuthLoadable.mutateAsync(
-        {
-          path: { serviceType: 'sso' },
-          query: {
-            code,
-            redirect_uri: redirectUri,
-            invitationCode: invitationCode,
-            domain: storedDomain,
-          },
-        },
-        {
-          onError: (error) => {
-            if (error.code === 'invitation_code_does_not_exist_or_expired') {
-              setInvitationCode(undefined);
-            }
-            messageService.error(<TranslatedError code={error.code!} />);
-          },
-        }
-      );
-      setInvitationCode(undefined);
-      localStorage.removeItem(LOCAL_STORAGE_SSO_DOMAIN_KEY);
       await handleAfterLogin(response!);
     },
     async loginRedirectSso(domain: string) {

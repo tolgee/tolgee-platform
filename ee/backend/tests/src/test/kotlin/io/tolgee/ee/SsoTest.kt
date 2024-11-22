@@ -84,9 +84,9 @@ class SsoTest : AuthorizedControllerTest() {
       ?: SsoTenant()
         .apply {
           domain = "registrationId"
-          clientId = "clientId"
+          clientId = "dummy_client_id"
           clientSecret = "clientSecret"
-          authorizationUri = "authorizationUri"
+          authorizationUri = "https://dummy-url.com"
           jwkSetUri = "http://jwkSetUri"
           tokenUri = "http://tokenUri"
           organization = testData.organization
@@ -227,9 +227,9 @@ class SsoTest : AuthorizedControllerTest() {
     tolgeeProperties.authentication.ssoGlobal.apply {
       enabled = true
       domain = "registrationId"
-      clientId = "clientId"
+      clientId = "dummy_client_id"
       clientSecret = "clientSecret"
-      authorizationUri = "authorizationUri"
+      authorizationUri = "https://dummy-url.com"
       tokenUri = "http://tokenUri"
       jwkSetUri = "http://jwkSetUri"
     }

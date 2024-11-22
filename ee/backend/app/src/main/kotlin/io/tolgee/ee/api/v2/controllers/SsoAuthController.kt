@@ -22,6 +22,8 @@ class SsoAuthController(
   fun getAuthenticationUrl(
     @RequestBody request: DomainRequest,
   ): SsoUrlResponse {
+    // FIXME: Maybe instead of this pretty specific endpoint, we could have an endpoint that returns tenant info and
+    //  frontend can take care of building the URL like it already does for other login providers
     val registrationId = request.domain
     val tenant = tenantService.getEnabledConfigByDomain(registrationId)
     enabledFeaturesProvider.checkFeatureEnabled(
@@ -39,7 +41,7 @@ class SsoAuthController(
   ): String =
     "${tenant.authorizationUri}?" +
       "client_id=${tenant.clientId}&" +
-      "redirect_uri=${frontendUrlProvider.url + "/login/open-id/auth-callback"}&" +
+      "redirect_uri=${frontendUrlProvider.url + "/login/auth_callback/sso"}&" +
       "response_type=code&" +
       "scope=openid profile email offline_access&" +
       "state=$state"

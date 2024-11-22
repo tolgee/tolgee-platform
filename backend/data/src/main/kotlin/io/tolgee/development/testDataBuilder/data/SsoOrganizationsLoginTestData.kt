@@ -33,8 +33,8 @@ class SsoOrganizationsLoginTestData : BaseTestData("ssoOrgLoginTestUser", "Empty
 
       setTenant {
         enabled = true
-        authorizationUri = "http://authorizationUri"
-        clientId = "clientId"
+        authorizationUri = "https://dummy-url.com"
+        clientId = "dummy_client_id"
         clientSecret = "clientSecret"
         domain = "domain.com"
         jwkSetUri = "http://jwkSetUri"

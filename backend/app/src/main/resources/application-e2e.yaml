@@ -27,8 +27,8 @@ tolgee:
       enabled: false
     sso-global:
       enabled: false
-      authorization-uri: "http://authorizationUri"
-      client-id: "clientId"
+      authorization-uri: "https://dummy-url.com"
+      client-id: "dummy_client_id"
       client-secret: "clientSecret"
       domain: "domain.com"
       jwk-set-uri: "http://jwkSetUri"
