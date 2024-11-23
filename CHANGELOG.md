@@ -1,3 +1,10 @@
+## [3.83.1](https://github.com/tolgee/tolgee-platform/compare/v3.83.0...v3.83.1) (2024-11-23)
+
+
+### Bug Fixes
+
+* Update netty to 4.1.115.Final ([#2705](https://github.com/tolgee/tolgee-platform/issues/2705)) ([76bae8d](https://github.com/tolgee/tolgee-platform/commit/76bae8ddf2cec71e155ccce0bd1cc4fbd2673290))
+
 # [3.83.0](https://github.com/tolgee/tolgee-platform/compare/v3.82.6...v3.83.0) (2024-11-22)
 
 
