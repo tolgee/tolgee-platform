@@ -50,7 +50,7 @@ tasks.register('buildEmails', Exec) {
     inputs.dir("${emailPath}/components")
     inputs.file("${emailPath}/package.json")
     inputs.file("${emailPath}/package-lock.json")
-    outputs.dir("${emailPath}/out/")
+    outputs.dir("${emailPath}/dist")
 }
 
 tasks.register('updateEmailTranslations', Exec) {

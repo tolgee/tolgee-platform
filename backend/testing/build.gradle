@@ -41,6 +41,7 @@ apply plugin: "kotlin-allopen"
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 java {
