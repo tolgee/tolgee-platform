@@ -31,6 +31,7 @@ allOpen {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 test {

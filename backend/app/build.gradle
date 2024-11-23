@@ -48,6 +48,7 @@ apply plugin: "org.gradle.test-retry"
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencyManagement {

@@ -73,14 +73,20 @@ Shared parts are found in `components/parts`.
 Most if not all text in emails are expected to be wrapped in `<LocalizedText />` (or `t()` when more appropriate).
 They are equivalent as `<LocalizedText />` is simply a JSX wrapper for calling `t()`.
 
+The strings are written using a format similar to the familiar Tolgee ICU, via [ICU4J](https://github.com/unicode-org/icu/tree/main/icu4j)
+(see [MessageFormat](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html)).
+
+ICU arguments are pulled from the template variables. To access a dotted key, such as `item.name` use a double
+underscore: `item__name`.
+
 The `<LocalizedText />` takes the following properties:
 - `keyName` (required): String key name
 - `defaultValue` (optional): Default string to use
   - Will be used by the CLI to push default values when pushing new keys, and when previewing
-- `demoProps` (required*): Demo properties to use when rendering the string
+- `demoProps` (required¹): Demo properties to use when rendering the string
   - When previewing, the ICU string will be rendered using these values, so it is representative of a "real" email
   - If demo props are not specified, the preview will fail to render
-  - \*It can be unset if there are no props in the string
+  - ¹It can be unset if there are no props in the string
 
 The `t()` function takes the same properties, instead it takes them as arguments in the order they're described here.
 
@@ -141,43 +147,6 @@ inner HTML for each element of the array.
 This component receives the following properties:
 - `each` (required): The [Thymeleaf iterator expression](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#using-theach)
 - `demoIterations` (required): An array of elements used for the preview
-
-#### Note on available variables
-Within the for inner template, the iter variable is available as a classic Thymeleaf variable. However, within ICU
-strings, if the iter variable is an object, all the fields are available as plain variables prefixed by the name of
-the iteration variable and 2 underscores. If you have `product.id`, then you can access it as `product__id`.
-Information about the iteration can be kept by using [Thymeleaf iterator status mechanism](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#keeping-iteration-status).
-
-All of these variables still have to be set as `demoProps` for the template to render properly in preview mode.
-
-Example:
-```jsx
-<For each="product, iterStat : ${products}" demoIterations={2}>
-  <tr>
-    <td>
-      <Var variable="iterStat.index" demoValue="1" />
-    </td>
-    <td>
-      <LocalizedText
-        keyName="product-id"
-        defaultValue="Product #{product__id}"
-        demoParams={{
-          product__id: 1337
-        }}
-      />
-    </td>
-    <td>
-      <LocalizedText
-        keyName="product-price"
-        defaultValue="Price: {product__price, number}"
-        demoParams={{
-          product__id: 4.00
-        }}
-      />
-    </td>
-  </tr>
-</For>
-```
 
 ## Global variables
 The following global variables are available:
