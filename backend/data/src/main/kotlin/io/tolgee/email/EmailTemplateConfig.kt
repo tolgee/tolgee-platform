@@ -16,11 +16,12 @@
 
 package io.tolgee.email
 
+import com.transferwise.icu.ICUMessageSource
+import com.transferwise.icu.ICUReloadableResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.support.ResourceBundleMessageSource
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.spring6.SpringTemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
@@ -39,13 +40,11 @@ class EmailTemplateConfig {
   }
 
   @Bean("emailMessageSource")
-  fun messageSource(): MessageSource {
-    val messageSource = ResourceBundleMessageSource()
-    messageSource.setBasename("email-i18n.messages")
+  fun messageSource(): ICUMessageSource {
+    val messageSource = ICUReloadableResourceBundleMessageSource()
+    messageSource.setBasenames("email-i18n/messages", "email-i18n-test/messages")
     messageSource.setDefaultEncoding("UTF-8")
     messageSource.setDefaultLocale(Locale.ENGLISH)
-    println(messageSource.getMessage("powered-by", null, Locale.ENGLISH))
-    println(messageSource.getMessage("powered-by", null, Locale.FRENCH))
     return messageSource
   }
 
@@ -55,6 +54,7 @@ class EmailTemplateConfig {
     @Qualifier("emailMessageSource") messageSource: MessageSource,
   ): TemplateEngine {
     val templateEngine = SpringTemplateEngine()
+    templateEngine.enableSpringELCompiler = true
     templateEngine.templateResolvers = setOf(templateResolver)
     templateEngine.setTemplateEngineMessageSource(messageSource)
     return templateEngine

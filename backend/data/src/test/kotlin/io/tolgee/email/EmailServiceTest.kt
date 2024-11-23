@@ -76,9 +76,15 @@ class EmailServiceTest {
       .let { it.getBodyPart(0).content as MimeMultipart }
       .let { it.getBodyPart(0).content as String }
       .assert
-      .contains("Value of `testVar` : <span>test!!</span>")
+      .contains("Testing ICU strings -- test!!")
+      .contains("Value of `testVar`: <span>test!!</span>")
       .contains("<span>Was `testVar` equal to &quot;meow&quot; : </span><span>no</span>")
-      .contains("Powered by")
+      // Makes sure tag handling works as expected
+      .contains(
+        "Powered by <a href=\"https://tolgee.io\" style=\"color:inherit;text-decoration-line:underline\" " +
+          "target=\"_blank\">Tolgee</a>",
+      )
+      // Might be a bit brittle but does the trick for now.
       .doesNotContain(" th:")
       .doesNotContain(" data-th")
   }
@@ -95,8 +101,29 @@ class EmailServiceTest {
       .let { it.getBodyPart(0).content as MimeMultipart }
       .let { it.getBodyPart(0).content as String }
       .assert
-      .contains("Value of `testVar` : <span>meow</span>")
+      .contains("Testing ICU strings -- meow")
+      .contains("Value of `testVar`: <span>meow</span>")
       .contains("<span>Was `testVar` equal to &quot;meow&quot; : </span><span>yes</span>")
+  }
+
+  @Test
+  fun `it correctly processes foreach blocks`() {
+    // FWIW this is very close to just testing Thymeleaf itself, but it serves as a sanity check for the template itself
+    emailService.sendEmailTemplate("test@tolgee.internal", "zz-test-email", Locale.ENGLISH, TEST_PROPERTIES_MEOW)
+    verify(mailSender).send(emailCaptor.capture())
+
+    val email = emailCaptor.value
+    email.content
+      .let { it as MimeMultipart }
+      .let { it.getBodyPart(0).content as MimeMultipart }
+      .let { it.getBodyPart(0).content as String }
+      .assert
+      .contains("Plain test: <span>Name #1</span>")
+      .contains("<span>ICU test: Name #1</span>")
+      .contains("Plain test: <span>Name #2</span>")
+      .contains("<span>ICU test: Name #2</span>")
+      .contains("Plain test: <span>Name #3</span>")
+      .contains("<span>ICU test: Name #3</span>")
   }
 
   companion object {
