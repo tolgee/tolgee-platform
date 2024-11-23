@@ -52,6 +52,7 @@ apply plugin: 'org.hibernate.orm'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 idea {
@@ -99,6 +100,9 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+
+    implementation 'com.github.transferwise:spring-icu:0.3.0'
 
     /**
      * DB
