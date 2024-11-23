@@ -23,6 +23,7 @@ apply plugin: 'io.spring.dependency-management'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 java {

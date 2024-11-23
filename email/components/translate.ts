@@ -15,6 +15,7 @@
  */
 
 import * as React from 'react';
+import { TYPE } from '@formatjs/icu-messageformat-parser';
 import { IntlMessageFormat } from 'intl-messageformat';
 
 const GLOBALS = {
@@ -43,10 +44,32 @@ export default function t(
   defaultString?: string,
   demoParams?: Record<string, any>
 ) {
+  const intl = new IntlMessageFormat(defaultString, 'en-US');
+  const ast = intl.getAst();
+
+  const stringArguments: string[] = [];
+
+  for (const node of ast) {
+    if (node.type === TYPE.literal || node.type === TYPE.pound) {
+      continue;
+    }
+
+    if (node.type === TYPE.tag) {
+      // TODO: find a way to process the tag
+      continue;
+    }
+
+    stringArguments.push(`${node.value}: ${node.value.replace(/__/g, '.')}`);
+  }
+
   const text =
     process.env.NODE_ENV === 'production'
       ? defaultString
       : formatDev(defaultString, demoParams);
 
-  return React.createElement('span', { 'th:utext': `#{${key}}` }, text);
+  const messageExpression = stringArguments.length
+    ? `#{${key}(\${ { ${stringArguments.join(', ')} } })}`
+    : `#{${key}}`;
+
+  return React.createElement('span', { 'th:utext': messageExpression }, text);
 }

@@ -98,7 +98,7 @@ export default function ClassicLayout({
                           <Text className="text-xs m-0">
                             <LocalizedText
                               keyName="footer-cloud-sent-by"
-                              defaultValue="🐭 Sent by Tolgee - Check out <link>blog</link> and our socials! 🧀"
+                              defaultValue="🐭 Sent by Tolgee - Check out our <link>blog</link> and our socials! 🧀"
                               demoParams={{
                                 link: (c) => (
                                   <Link

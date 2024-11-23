@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-import type { ExtractedKey, ExtractionResult, Warning } from "@tolgee/cli/extractor";
-import type { CallExpression, Expression, JSXAttribute, JSXAttrValue, JSXOpeningElement, Node, Span } from "@swc/types";
-import { walk } from "estree-walker";
-import { parse } from "@swc/core";
+import type {
+  ExtractedKey,
+  ExtractionResult,
+  Warning,
+} from '@tolgee/cli/extractor';
+import type {
+  CallExpression,
+  Expression,
+  JSXAttribute,
+  JSXAttrValue,
+  JSXOpeningElement,
+  Node,
+  Span,
+} from '@swc/types';
+import { walk } from 'estree-walker';
+import { parse } from '@swc/core';
 
 type AnyExpr = Expression | JSXAttrValue;
 

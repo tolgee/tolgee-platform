@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "email dev",
     "build": "email build",
-    "export": "cross-env NODE_ENV=production email export",
+    "export": "cross-env NODE_ENV=production email export --outDir dist/email-templates",
     "prettier": "prettier --write ./emails ./components ./.config",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components ./.config",
     "tg:pull": "tolgee pull",
@@ -14,6 +14,7 @@
     "tg:sync": "tolgee sync"
   },
   "devDependencies": {
+    "@formatjs/icu-messageformat-parser": "^2.9.4",
     "@react-email/components": "0.0.28",
     "@swc/core": "^1.9.2",
     "@tolgee/cli": "^2.3.2",

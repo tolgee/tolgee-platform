@@ -1,8 +1,24 @@
+/*
+ * Copyright (C) 2024 Tolgee s.r.o. and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as React from 'react';
-import { Hr, Text } from '@react-email/components';
+import { Hr, Link, Text } from '@react-email/components';
 import ClassicLayout from '../components/layouts/ClassicLayout';
 import TolgeeLink from '../components/atoms/TolgeeLink';
-import LocalizedText from '../components/LocalizedText';
+import _LocalizedText from '../components/LocalizedText';
 import Var from '../components/Var';
 import If from '../components/If';
 import For from '../components/For';
@@ -20,9 +36,9 @@ export default function RegistrationConfirmEmail() {
       </Text>
       <Hr />
       <Text>
-        <LocalizedText
-          keyName="__email-test-string"
-          defaultValue="Testing ICU strings -- {testVar} <link>link text</link>"
+        <_LocalizedText
+          keyName="email-test-string"
+          defaultValue="Testing ICU strings -- {testVar}"
           demoParams={{
             link: (c: string) => (
               <TolgeeLink href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
@@ -34,7 +50,7 @@ export default function RegistrationConfirmEmail() {
         />
       </Text>
       <Text>
-        Value of `testVar` : <Var demoValue="demo" variable="testVar" />
+        Value of `testVar`: <Var demoValue="demo" variable="testVar" />
       </Text>
       <Text>
         <span>Was `testVar` equal to "meow" : </span>
@@ -49,11 +65,11 @@ export default function RegistrationConfirmEmail() {
             <Var variable="iterStat.index" demoValue="1" />
             <ul>
               <li>
-                <Var variable="item.name" demoValue="demo..." />
+                Plain test: <Var variable="item.name" demoValue="demo..." />
               </li>
               <li>
-                <LocalizedText
-                  keyName="__email-test-it"
+                <_LocalizedText
+                  keyName="email-test-it"
                   defaultValue="ICU test: {item__name}"
                   demoParams={{ item__name: 'demo...' }}
                 />
@@ -62,6 +78,18 @@ export default function RegistrationConfirmEmail() {
           </li>
         </For>
       </ul>
+
+      <_LocalizedText
+        keyName="powered-by"
+        defaultValue="Powered by <link>Tolgee</link> 🐁"
+        demoParams={{
+          link: (c) => (
+            <Link href="https://tolgee.io" className="text-inherit underline">
+              {c}
+            </Link>
+          ),
+        }}
+      />
     </ClassicLayout>
   );
 }
