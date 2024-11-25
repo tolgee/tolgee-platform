@@ -26,9 +26,17 @@ class SsoMultiTenantsMocks(
 ) {
   companion object {
     val defaultToken =
-      OAuth2TokenResponse(id_token = generateTestJwt(jwtClaimsSet), scope = "scope", refresh_token = "refresh_token")
+      OAuth2TokenResponse(
+        id_token = generateTestJwt(jwtClaimsSet),
+        scope = "scope",
+        refresh_token = "refresh_token",
+      )
     val defaultToken2 =
-      OAuth2TokenResponse(id_token = generateTestJwt(jwtClaimsSet2), scope = "scope", refresh_token = "refresh_token")
+      OAuth2TokenResponse(
+        id_token = generateTestJwt(jwtClaimsSet2),
+        scope = "scope",
+        refresh_token = "refresh_token",
+      )
 
     val defaultTokenResponse =
       ResponseEntity(
@@ -80,10 +88,9 @@ class SsoMultiTenantsMocks(
   }
 
   fun authorize(
-    registrationId: String,
+    domain: String,
     tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse,
-    jwtClaims: Claims = jwtClaimsSet,
-    tokenUri: String = tenantService?.getEnabledConfigByDomain(registrationId)?.tokenUri!!,
+    tokenUri: String = tenantService?.getEnabledConfigByDomain(domain)?.tokenUri!!,
   ): MvcResult {
     val receivedCode = "fake_access_token"
     // mock token exchange
@@ -99,12 +106,12 @@ class SsoMultiTenantsMocks(
     return authMvc!!
       .perform(
         MockMvcRequestBuilders.get(
-          "/api/public/authorize_oauth/sso?domain=$registrationId&code=$receivedCode&redirect_uri=redirect_uri",
+          "/api/public/authorize_oauth/sso?domain=$domain&code=$receivedCode&redirect_uri=redirect_uri",
         ),
       ).andReturn()
   }
 
-  fun getAuthLink(registrationId: String): MvcResult =
+  fun getAuthLink(domain: String): MvcResult =
     authMvc!!
       .perform(
         MockMvcRequestBuilders
@@ -113,24 +120,10 @@ class SsoMultiTenantsMocks(
           .content(
             """
             {
-                "domain": "$registrationId",
+                "domain": "$domain",
                 "state": "state"
             }
             """.trimIndent(),
           ),
       ).andReturn()
-
-  fun mockTokenExchange(
-    tokenUri: String,
-    tokenResponse: ResponseEntity<OAuth2TokenResponse>? = defaultTokenResponse,
-  ) {
-    whenever(
-      restTemplate?.exchange(
-        eq(tokenUri),
-        eq(HttpMethod.POST),
-        any(),
-        eq(OAuth2TokenResponse::class.java),
-      ),
-    ).thenReturn(tokenResponse)
-  }
 }

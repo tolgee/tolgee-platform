@@ -19,10 +19,9 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    testData = SsoTestData()
+    testData = SsoTestData(false)
     testDataService.saveTestData(testData.root)
     this.userAccount = testData.user
-    loginAsUser(testData.user.username)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
   }
 
@@ -48,11 +47,10 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `fails if user is not owner of organization`() {
-    testDataService.saveTestData(testData.createUserNotOwner)
     this.userAccount = testData.userNotOwner
     loginAsUser(testData.userNotOwner.username)
     performAuthPut(
-      "/v2/organizations/${testData.userNotOwnerOrganization.id}/sso",
+      "/v2/organizations/${testData.organization.id}/sso",
       requestTenant(),
     ).andIsForbidden
   }

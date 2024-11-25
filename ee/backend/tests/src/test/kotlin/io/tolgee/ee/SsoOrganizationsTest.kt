@@ -1,7 +1,6 @@
 package io.tolgee.ee
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.jsonwebtoken.Claims
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SsoTestData
@@ -13,20 +12,20 @@ import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.ee.utils.SsoMultiTenantsMocks
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.model.SsoTenant
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import jakarta.transaction.Transactional
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.startsWith
-import org.mockito.Mockito.times
 import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.only
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -44,8 +43,7 @@ import java.util.*
     "tolgee.cache.enabled=true",
   ],
 )
-class SsoTest : AuthorizedControllerTest() {
-  // TODO: separate version of these tests for global sso?
+class SsoOrganizationsTest : AuthorizedControllerTest() {
   private lateinit var testData: SsoTestData
 
   @MockBean
@@ -71,26 +69,18 @@ class SsoTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
-
     currentDateProvider.forcedDate = currentDateProvider.date
-    tolgeeProperties.authentication.ssoGlobal.enabled = false
-    testData = SsoTestData()
+    tolgeeProperties.authentication.ssoOrganizations.enabled = true
+    testData = SsoTestData(true)
     testDataService.saveTestData(testData.root)
   }
 
-  private fun addTenant(): SsoTenant {
-    tolgeeProperties.authentication.ssoOrganizations.enabled = true
-    return tenantService.findTenant(testData.organization.id)
-      ?: SsoTenant()
-        .apply {
-          domain = "registrationId"
-          clientId = "dummy_client_id"
-          clientSecret = "clientSecret"
-          authorizationUri = "https://dummy-url.com"
-          jwkSetUri = "http://jwkSetUri"
-          tokenUri = "http://tokenUri"
-          organization = testData.organization
-        }.let { tenantService.save(it) }
+  @AfterEach
+  fun tearDown() {
+    testDataService.cleanTestData(testData.root)
+    tolgeeProperties.authentication.ssoOrganizations.enabled = false
+    currentDateProvider.forcedDate = null
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
@@ -106,9 +96,8 @@ class SsoTest : AuthorizedControllerTest() {
 
   @Test
   fun `does not return auth link when tenant is disabled`() {
-    val tenant = addTenant()
-    tenant.enabled = false
-    tenantService.save(tenant)
+    testData.tenant.enabled = false
+    tenantService.save(testData.tenant)
     val response = ssoMultiTenantsMocks.getAuthLink("registrationId").response
     assertThat(response.status).isEqualTo(404)
     assertThat(response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
@@ -116,10 +105,9 @@ class SsoTest : AuthorizedControllerTest() {
 
   @Test
   fun `does not auth user when tenant is disabled`() {
-    val tenant = addTenant()
-    tenant.enabled = false
-    tenantService.save(tenant)
-    val response = ssoMultiTenantsMocks.authorize("registrationId", tokenUri = tenant.tokenUri)
+    testData.tenant.enabled = false
+    tenantService.save(testData.tenant)
+    val response = ssoMultiTenantsMocks.authorize("registrationId", tokenUri = testData.tenant.tokenUri)
     assertThat(response.response.status).isEqualTo(404)
     assertThat(response.response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
   }
@@ -135,7 +123,6 @@ class SsoTest : AuthorizedControllerTest() {
 
   @Test
   fun `doesn't authorize user when token exchange fails`() {
-    addTenant()
     val response =
       ssoMultiTenantsMocks.authorize(
         "registrationId",
@@ -152,7 +139,6 @@ class SsoTest : AuthorizedControllerTest() {
   fun `sso auth doesn't create demo project and user organization`() {
     loginAsSsoUser(
       tokenResponse = SsoMultiTenantsMocks.defaultTokenResponse2,
-      jwtClaims = SsoMultiTenantsMocks.jwtClaimsSet2,
     )
     val userName = SsoMultiTenantsMocks.jwtClaimsSet2.get("email") as String
     val user = userAccountService.get(userName)
@@ -207,37 +193,18 @@ class SsoTest : AuthorizedControllerTest() {
     val userDto = userAccountService.getDto(user.id)
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + 600_000)
 
-    // ssoMultiTenantsMocks.mockTokenExchange("http://tokenUri")
     assertThat(
       ssoDelegate.verifyUserSsoAccountAvailable(
         userDto,
       ),
     ).isTrue
 
-    verify(restTemplate, times(1))?.exchange(
+    verify(restTemplate, only())?.exchange(
       startsWith("http://tokenUri"),
       eq(HttpMethod.POST),
       any(HttpEntity::class.java),
       eq(OAuth2TokenResponse::class.java),
     )
-  }
-
-  @Test
-  fun `sso auth works via global config`() {
-    tolgeeProperties.authentication.ssoGlobal.apply {
-      enabled = true
-      domain = "registrationId"
-      clientId = "dummy_client_id"
-      clientSecret = "clientSecret"
-      authorizationUri = "https://dummy-url.com"
-      tokenUri = "http://tokenUri"
-      jwkSetUri = "http://jwkSetUri"
-    }
-    val response = ssoMultiTenantsMocks.authorize("registrationId")
-
-    val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)
-    result["accessToken"].assert.isNotNull
-    result["tokenType"].assert.isEqualTo("Bearer")
   }
 
   fun organizationDto() =
@@ -249,9 +216,7 @@ class SsoTest : AuthorizedControllerTest() {
 
   fun loginAsSsoUser(
     tokenResponse: ResponseEntity<OAuth2TokenResponse>? = SsoMultiTenantsMocks.defaultTokenResponse,
-    jwtClaims: Claims = SsoMultiTenantsMocks.jwtClaimsSet,
   ): MvcResult {
-    addTenant()
-    return ssoMultiTenantsMocks.authorize("registrationId", tokenResponse = tokenResponse, jwtClaims = jwtClaims)
+    return ssoMultiTenantsMocks.authorize("registrationId", tokenResponse = tokenResponse)
   }
 }
