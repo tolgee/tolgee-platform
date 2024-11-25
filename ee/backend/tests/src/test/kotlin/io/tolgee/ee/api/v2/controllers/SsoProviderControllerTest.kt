@@ -19,7 +19,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    testData = SsoTestData(false)
+    testData = SsoTestData()
     testDataService.saveTestData(testData.root)
     this.userAccount = testData.user
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
@@ -40,7 +40,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
         node("clientSecret").isEqualTo("clientSecret")
         node("authorizationUri").isEqualTo("https://dummy-url.com")
         node("tokenUri").isEqualTo("tokenUri")
-        node("jwkSetUri").isEqualTo("jwkSetUri")
+        // node("jwkSetUri").isEqualTo("jwkSetUri")
         node("enabled").isEqualTo(true)
       }
   }
@@ -63,7 +63,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "authorizationUri" to "https://dummy-url.com",
       "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
-      "jwkSetUri" to "jwkSetUri",
+      // "jwkSetUri" to "jwkSetUri",
       "enabled" to true,
     )
 }

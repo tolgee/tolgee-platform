@@ -37,7 +37,7 @@ class SsoOrganizationsLoginTestData : BaseTestData("ssoOrgLoginTestUser", "Empty
         clientId = "dummy_client_id"
         clientSecret = "clientSecret"
         domain = "domain.com"
-        jwkSetUri = "http://jwkSetUri"
+        // jwkSetUri = "http://jwkSetUri"
         tokenUri = "http://tokenUri"
       }
     }

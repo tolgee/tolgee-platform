@@ -71,7 +71,8 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
     currentDateProvider.forcedDate = currentDateProvider.date
     tolgeeProperties.authentication.ssoOrganizations.enabled = true
-    testData = SsoTestData(true)
+    testData = SsoTestData()
+    testData.addTenant()
     testDataService.saveTestData(testData.root)
   }
 

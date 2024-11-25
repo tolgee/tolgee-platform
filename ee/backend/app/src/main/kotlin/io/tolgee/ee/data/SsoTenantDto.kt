@@ -9,7 +9,7 @@ data class SsoTenantDto(
   override val clientId: String,
   override val clientSecret: String,
   override val tokenUri: String,
-  override val jwkSetUri: String,
+  // override val jwkSetUri: String,
   override val domain: String,
 ) : ISsoTenant {
   override val global: Boolean
@@ -23,6 +23,6 @@ fun SsoTenant.toDto(): SsoTenantDto =
     clientSecret = this.clientSecret,
     tokenUri = this.tokenUri,
     enabled = this.enabled,
-    jwkSetUri = this.jwkSetUri,
+    // jwkSetUri = this.jwkSetUri,
     domain = this.domain,
   )

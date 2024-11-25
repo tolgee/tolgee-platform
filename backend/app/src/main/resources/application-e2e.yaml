@@ -31,7 +31,7 @@ tolgee:
       client-id: "dummy_client_id"
       client-secret: "clientSecret"
       domain: "domain.com"
-      jwk-set-uri: "http://jwkSetUri"
+      #jwk-set-uri: "http://jwkSetUri"
       token-uri: "http://tokenUri"
     create-demo-for-initial-user: false
   rate-limits: # tests go brrrr but then get 429'd and no longer go brrrr

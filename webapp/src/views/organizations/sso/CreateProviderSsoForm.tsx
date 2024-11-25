@@ -20,7 +20,7 @@ type FormValues = {
   clientId: string;
   clientSecret: string;
   tokenUri: string;
-  jwkSetUri: string;
+  // jwkSetUri: string;
   domain: string;
 };
 
@@ -32,7 +32,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
     clientId: data?.clientId ?? '',
     clientSecret: data?.clientSecret ?? '',
     tokenUri: data?.tokenUri ?? '',
-    jwkSetUri: data?.jwkSetUri ?? '',
+    // jwkSetUri: data?.jwkSetUri ?? '',
     domain: data?.domain ?? '',
   };
 
@@ -116,16 +116,16 @@ export function CreateProviderSsoForm({ data, disabled }) {
           helperText={<T keyName="sso_token_uri_helper_text" />}
         />
       </StyledInputFields>
-      <StyledInputFields>
-        <TextField
-          disabled={disabled}
-          variant="standard"
-          name="jwkSetUri"
-          label={<T keyName="organization_sso_jwk_set_uri" />}
-          minHeight={false}
-          helperText={<T keyName="sso_jwk_set_uri_helper_text" />}
-        />
-      </StyledInputFields>
+      {/*<StyledInputFields>*/}
+      {/*  <TextField*/}
+      {/*    disabled={disabled}*/}
+      {/*    variant="standard"*/}
+      {/*    name="jwkSetUri"*/}
+      {/*    label={<T keyName="organization_sso_jwk_set_uri" />}*/}
+      {/*    minHeight={false}*/}
+      {/*    helperText={<T keyName="sso_jwk_set_uri_helper_text" />}*/}
+      {/*  />*/}
+      {/*</StyledInputFields>*/}
     </StandardForm>
   );
 }

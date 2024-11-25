@@ -11,7 +11,6 @@ import io.tolgee.ee.security.thirdParty.SsoDelegateEe
 import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.ee.utils.SsoMultiTenantsMocks
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -75,9 +74,9 @@ class SsoGlobalTest : AuthorizedControllerTest() {
       clientSecret = "clientSecret"
       authorizationUri = "https://dummy-url.com"
       tokenUri = "http://tokenUri"
-      jwkSetUri = "http://jwkSetUri"
+      // jwkSetUri = "http://jwkSetUri"
     }
-    testData = SsoTestData(false)
+    testData = SsoTestData()
     testDataService.saveTestData(testData.root)
   }
 
@@ -91,7 +90,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
       clientSecret = ""
       authorizationUri = ""
       tokenUri = ""
-      jwkSetUri = ""
+      // jwkSetUri = ""
     }
     currentDateProvider.forcedDate = null
     enabledFeaturesProvider.forceEnabled = null
@@ -119,18 +118,13 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   @Test
   fun `does not auth user when tenant is disabled`() {
     tolgeeProperties.authentication.ssoGlobal.enabled = false
-    val response = ssoMultiTenantsMocks.authorize("registrationId", tokenUri = testData.tenant.tokenUri)
+    val response =
+      ssoMultiTenantsMocks.authorize(
+        "registrationId",
+        tokenUri = tolgeeProperties.authentication.ssoGlobal.tokenUri,
+      )
     assertThat(response.response.status).isEqualTo(404)
     assertThat(response.response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
-  }
-
-  @Test
-  fun `new user belongs to organization associated with the sso issuer`() {
-    loginAsSsoUser()
-    val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
-    val user = userAccountService.get(userName)
-    assertThat(organizationRoleService.isUserOfRole(user.id, testData.organization.id, OrganizationRoleType.MEMBER))
-      .isEqualTo(true)
   }
 
   @Test
@@ -152,9 +146,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
     val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
     val user = userAccountService.get(userName)
     assertThat(user.ssoRefreshToken).isNotNull
-    val managedBy = organizationRoleService.getManagedBy(user.id)
-    assertThat(managedBy).isNotNull
-    assertThat(user.thirdPartyAuthType?.code()).isEqualTo("sso")
+    assertThat(user.thirdPartyAuthType?.code()).isEqualTo("sso_global")
   }
 
   @Test

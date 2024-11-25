@@ -41,8 +41,8 @@ class SsoGlobalProperties : ISsoTenant {
   @DocProperty(description = "Used to identify the organization on login page")
   override var domain: String = ""
 
-  @DocProperty(description = "URL to retrieve the JSON Web Token Set (JWTS)")
-  override var jwkSetUri: String = ""
+  // @DocProperty(description = "URL to retrieve the JSON Web Token Set (JWTS)")
+  // override var jwkSetUri: String = ""
 
   @DocProperty(
     description =
@@ -70,7 +70,14 @@ class SsoGlobalProperties : ISsoTenant {
   @PostConstruct
   fun validate() {
     if (enabled) {
-      listOf(::clientId, ::clientSecret, ::authorizationUri, ::domain, this::jwkSetUri, ::tokenUri).forEach {
+      listOf(
+        ::clientId,
+        ::clientSecret,
+        ::authorizationUri,
+        ::domain,
+        // ::jwkSetUri,
+        ::tokenUri,
+      ).forEach {
         it.validateIsNotBlank()
       }
     }

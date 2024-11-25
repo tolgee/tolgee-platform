@@ -139,8 +139,6 @@ export function useErrorTranslation() {
         return t('sso_user_cannot_create_organization');
       case 'sso_cant_verify_user':
         return t('sso_cant_verify_user');
-      case 'sso_global_config_missing_properties':
-        return t('sso_global_config_missing_properties');
       case 'sso_auth_missing_domain':
         return t('sso_auth_missing_domain');
       case 'sso_domain_not_found_or_disabled':

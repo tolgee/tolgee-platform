@@ -21,9 +21,9 @@ data class CreateProviderRequest(
   @field:NotNull
   @field:Size(max = 255)
   override val tokenUri: String,
-  @field:NotNull
-  @field:Size(max = 255)
-  override val jwkSetUri: String,
+  // @field:NotNull
+  // @field:Size(max = 255)
+  // override val jwkSetUri: String,
   @field:NotNull
   @field:Size(max = 255)
   override val domain: String,

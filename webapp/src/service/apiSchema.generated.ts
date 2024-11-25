@@ -1144,7 +1144,6 @@ export interface components {
         | "sso_id_token_expired"
         | "sso_user_cannot_create_organization"
         | "sso_cant_verify_user"
-        | "sso_global_config_missing_properties"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
         | "native_authentication_disabled"
@@ -2326,7 +2325,6 @@ export interface components {
       clientSecret: string;
       authorizationUri: string;
       tokenUri: string;
-      jwkSetUri: string;
       domain: string;
     };
     SsoTenantModel: {
@@ -2335,7 +2333,6 @@ export interface components {
       clientId: string;
       clientSecret: string;
       tokenUri: string;
-      jwkSetUri: string;
       domain: string;
       global: boolean;
     };
@@ -3090,7 +3087,6 @@ export interface components {
         | "sso_id_token_expired"
         | "sso_user_cannot_create_organization"
         | "sso_cant_verify_user"
-        | "sso_global_config_missing_properties"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
         | "native_authentication_disabled"

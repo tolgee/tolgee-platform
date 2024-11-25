@@ -53,6 +53,7 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
       'STANDARD_SUPPORT',
       'WEBHOOKS',
       'TASKS',
+      'SSO',
     ],
     free: false,
     hasYearlyPrice: false,

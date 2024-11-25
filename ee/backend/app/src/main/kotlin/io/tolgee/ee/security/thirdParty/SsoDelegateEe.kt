@@ -75,7 +75,11 @@ class SsoDelegateEe(
       fetchToken(tenant, code, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo = decodeIdTokenUnsafe(token.id_token, tenant.jwkSetUri)
+    val userInfo =
+      decodeIdTokenUnsafe(
+        token.id_token,
+        // tenant.jwkSetUri,
+      )
     return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
@@ -115,7 +119,7 @@ class SsoDelegateEe(
 
   private fun decodeIdTokenUnsafe(
     idToken: String,
-    jwkSetUri: String,
+    // jwkSetUri: String,
   ): GenericUserResponse {
     // We assume the token was received directly from the SSO provider and is safe - no need to verify the signature.
     try {

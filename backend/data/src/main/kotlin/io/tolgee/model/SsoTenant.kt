@@ -20,7 +20,8 @@ class SsoTenant : ISsoTenant, StandardAuditModel() {
    * When the tenant is enabled the domain must not be empty and must be unique across all enabled tenants.
    */
   override var domain: String = ""
-  override var jwkSetUri: String = ""
+
+//  override var jwkSetUri: String = ""
   override var tokenUri: String = ""
 
   @NotNull
