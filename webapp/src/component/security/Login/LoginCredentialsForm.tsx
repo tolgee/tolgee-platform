@@ -22,7 +22,6 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { ApiError } from 'tg.service/http/ApiError';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 const StyledInputFields = styled('div')`
   display: grid;
