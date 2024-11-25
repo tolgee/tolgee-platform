@@ -125,6 +125,9 @@ class Project(
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
 
+  @ColumnDefault("false")
+  var useNamespaces: Boolean = false
+
   @ColumnDefault("0")
   var lastTaskNumber: Long = 0
 

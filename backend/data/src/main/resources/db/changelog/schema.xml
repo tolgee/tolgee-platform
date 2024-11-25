@@ -4031,4 +4031,11 @@
                 alter column score set default 10000;
         </sql>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1732537248089-1">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="use_namespaces" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

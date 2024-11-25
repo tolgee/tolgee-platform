@@ -1184,6 +1184,7 @@ export interface components {
       slug?: string;
       /** Format: int64 */
       baseLanguageId?: number;
+      useNamespaces: boolean;
       /** Format: int64 */
       defaultNamespaceId?: number;
       description?: string;
@@ -1368,6 +1369,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      useNamespaces: boolean;
       defaultNamespace?: components["schemas"]["NamespaceModel"];
       organizationRole?: "MEMBER" | "OWNER";
       directPermission?: components["schemas"]["PermissionModel"];
