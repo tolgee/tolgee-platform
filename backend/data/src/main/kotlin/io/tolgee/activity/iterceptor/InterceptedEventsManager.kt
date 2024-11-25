@@ -21,7 +21,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
-import org.apache.commons.lang3.exception.ExceptionUtils.*
+import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction
 import org.hibernate.action.spi.BeforeTransactionCompletionProcess
 import org.hibernate.collection.spi.AbstractPersistentCollection
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
@@ -250,8 +251,8 @@ class InterceptedEventsManager(
     }
   }
 
-  private val annotatedMembersCache: MutableMap<Class<*>, Map<String, ActivityLoggedProp>> = mutableMapOf()
-  private val ignoredMembersCache: MutableMap<Class<*>, Set<String>> = mutableMapOf()
+  private val annotatedMembersCache: ConcurrentHashMap<Class<*>, Map<String, ActivityLoggedProp>> = ConcurrentHashMap()
+  private val ignoredMembersCache: ConcurrentHashMap<Class<*>, Set<String>> = ConcurrentHashMap()
 
   private fun shouldHandleActivity(entity: Any?) =
     entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>() &&
