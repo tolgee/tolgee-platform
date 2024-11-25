@@ -37,6 +37,7 @@ export const ProjectSettingsAdvanced = () => {
           name: project.name,
           description: project.description,
           baseLanguageId: project.baseLanguage!.id,
+          useNamespaces: project.useNamespaces,
         },
       },
     });

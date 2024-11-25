@@ -22,12 +22,14 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
         baseLanguageId = base.project.languages.toList()[1].id,
         slug = "new-slug",
         icuPlaceholders = true,
+        useNamespaces = true,
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
       node("slug").isEqualTo(content.slug)
       node("baseLanguage.id").isEqualTo(content.baseLanguageId)
       node("icuPlaceholders").isEqualTo(content.icuPlaceholders)
+      node("useNamespaces").isEqualTo(content.useNamespaces)
     }
   }
 
@@ -54,6 +56,20 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
       node("baseLanguage.id").isEqualTo(base.project.languages.toList()[0].id)
+    }
+  }
+
+  @Test
+  fun `fail validation on disabling namespaces when a namespace exists`() {
+    val base = dbPopulator.createBase()
+    dbPopulator.createNamespace(base.project)
+    val content =
+      EditProjectRequest(
+        name = "test",
+        useNamespaces = false,
+      )
+    performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsBadRequest.andAssertThatJson {
+      node("CUSTOM_VALIDATION.namespaces_cannot_be_disabled_when_namespace_exists").isNotNull
     }
   }
 }

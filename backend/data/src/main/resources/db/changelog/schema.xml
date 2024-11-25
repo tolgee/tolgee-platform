@@ -3938,4 +3938,11 @@
     <changeSet author="anty (generated)" id="1731342594097-8">
         <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="tenant" constraintName="FKti8pr42oxjua5ym5d0mdpk2i0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1732537248089-1">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="use_namespaces" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

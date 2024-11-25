@@ -11,6 +11,7 @@ interface ProjectView {
   val description: String?
   val slug: String?
   val avatarHash: String?
+  val useNamespaces: Boolean
   val defaultNamespace: Namespace?
   val organizationOwner: Organization
   val organizationRole: OrganizationRoleType?
