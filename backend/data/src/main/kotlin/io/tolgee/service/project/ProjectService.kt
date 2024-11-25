@@ -180,6 +180,7 @@ class ProjectService(
     project.name = dto.name
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders
+    project.useNamespaces = dto.useNamespaces
 
     if (project.defaultNamespace != null) {
       namespaceService.deleteUnusedNamespaces(listOf(project.defaultNamespace!!))
