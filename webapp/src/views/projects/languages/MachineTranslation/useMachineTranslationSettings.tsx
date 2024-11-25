@@ -68,7 +68,10 @@ export const useMachineTranslationSettings = () => {
     langInfo: LanguageInfoModel,
     service: MtServiceInfo | undefined
   ): MtServiceInfo | undefined {
-    if (service === undefined || !isSupported(service, langInfo.languageId)) {
+    if (
+      service === undefined ||
+      !isSupported(service, langInfo.languageId ?? null)
+    ) {
       return undefined;
     }
     return {

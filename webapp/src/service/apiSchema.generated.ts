@@ -490,7 +490,7 @@ export interface paths {
     delete: operations["cancelImport"];
   };
   "/v2/projects/{projectId}/export": {
-    get: operations["export"];
+    get: operations["exportData"];
     /** Exports data (post). Useful when exceeding allowed URL size. */
     post: operations["exportPost"];
   };
@@ -1222,24 +1222,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1278,6 +1260,24 @@ export interface components {
        * @example 200001,200004
        */
       viewLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2142,12 +2142,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2307,13 +2307,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
-      /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
       description: string;
     };
     SetOrganizationRoleDto: {
@@ -2472,15 +2472,15 @@ export interface components {
       /** Format: int64 */
       id: number;
       projectName: string;
-      scopes: string[];
-      /** Format: int64 */
-      projectId: number;
-      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
       expiresAt?: number;
+      scopes: string[];
       description: string;
+      username?: string;
       userFullName?: string;
     };
     SuperTokenRequest: {
@@ -3766,9 +3766,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      avatar?: components["schemas"]["Avatar"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
@@ -3786,9 +3786,9 @@ export interface components {
       machineTranslationServices: components["schemas"]["MtServicesDTO"];
       billing: components["schemas"]["PublicBillingConfigurationDTO"];
       version: string;
-      contentDeliveryEnabled?: boolean;
       authentication: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
+      nativeEnabled: boolean;
       passwordResettable: boolean;
       allowRegistrations: boolean;
       screenshotsUrl: string;
@@ -3804,7 +3804,6 @@ export interface components {
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
       chatwootToken?: string;
-      nativeEnabled: boolean;
       capterraTracker?: string;
       ga4Tag?: string;
       postHogApiKey?: string;
@@ -3941,8 +3940,8 @@ export interface components {
     };
     LanguageInfoModel: {
       /** Format: int64 */
-      languageId: number;
-      languageTag: string;
+      languageId?: number;
+      languageTag?: string;
       supportedServices: components["schemas"]["MtSupportedService"][];
     };
     MtSupportedService: {
@@ -4567,13 +4566,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
-      /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
       description: string;
     };
     PagedModelOrganizationModel: {
@@ -4694,15 +4693,15 @@ export interface components {
       /** Format: int64 */
       id: number;
       projectName: string;
-      scopes: string[];
-      /** Format: int64 */
-      projectId: number;
-      username?: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
       expiresAt?: number;
+      scopes: string[];
       description: string;
+      username?: string;
       userFullName?: string;
     };
     PagedModelUserAccountModel: {
@@ -12940,7 +12939,7 @@ export interface operations {
       };
     };
   };
-  export: {
+  exportData: {
     parameters: {
       query: {
         /**
@@ -16649,6 +16648,12 @@ export interface operations {
          * When null, resulting file will be a flat key-value object.
          */
         structureDelimiter?: string;
+        /**
+         * Enables filtering of returned keys by their tags.
+         * Only keys with at least one provided tag will be returned.
+         * Optional, filtering is not applied if not specified.
+         */
+        filterTag?: string[];
       };
     };
     responses: {

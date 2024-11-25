@@ -30,6 +30,9 @@ export interface paths {
     put: operations["updatePlan_1"];
     delete: operations["deletePlan_1"];
   };
+  "/v2/administration/billing/add-usage-items-to-invoice-and-finalize-it/{invoiceId}": {
+    put: operations["addUsageItemsToInvoiceAndFinalizeIt"];
+  };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     post: operations["subscribe"];
   };
@@ -85,6 +88,10 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/billing/expected-usage": {
     get: operations["getExpectedUsage_1"];
+  };
+  "/v2/organizations/{organizationId}/billing/expected-usage/{type}.csv": {
+    /** Returns CSV file with usage detail for each time period and it's usage. */
+    get: operations["getExpectedUsageDetail"];
   };
   "/v2/organizations/{organizationId}/billing/customer-portal": {
     get: operations["goToCustomerPortal"];
@@ -347,7 +354,17 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open";
+        | "task_not_open"
+        | "sso_token_exchange_failed"
+        | "sso_user_info_retrieval_failed"
+        | "sso_id_token_expired"
+        | "sso_user_cannot_create_organization"
+        | "sso_cant_verify_user"
+        | "sso_auth_missing_domain"
+        | "sso_domain_not_found_or_disabled"
+        | "native_authentication_disabled"
+        | "invitation_organization_mismatch"
+        | "user_is_managed_by_organization";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -401,6 +418,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -450,6 +468,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -527,6 +546,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesRequest"];
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
@@ -563,6 +583,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -591,6 +612,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesRequest"];
@@ -628,6 +650,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -1355,6 +1378,49 @@ export interface operations {
     parameters: {
       path: {
         planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  addUsageItemsToInvoiceAndFinalizeIt: {
+    parameters: {
+      path: {
+        invoiceId: string;
       };
     };
     responses: {
@@ -2349,6 +2415,55 @@ export interface operations {
       };
     };
   };
+  /** Returns CSV file with usage detail for each time period and it's usage. */
+  getExpectedUsageDetail: {
+    parameters: {
+      path: {
+        organizationId: number;
+        type: "SEATS" | "TRANSLATIONS";
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "text/csv": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   goToCustomerPortal: {
     parameters: {
       path: {
@@ -2563,6 +2678,7 @@ export interface operations {
             | "AI_PROMPT_CUSTOMIZATION"
             | "SLACK_INTEGRATION"
             | "TASKS"
+            | "SSO"
           )[];
         };
       };
