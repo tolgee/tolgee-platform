@@ -364,7 +364,8 @@ export interface components {
         | "sso_domain_not_found_or_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
-        | "user_is_managed_by_organization";
+        | "user_is_managed_by_organization"
+        | "cannot_set_sso_provider_missing_fields";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {

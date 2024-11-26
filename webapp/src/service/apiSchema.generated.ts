@@ -1148,7 +1148,8 @@ export interface components {
         | "sso_domain_not_found_or_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
-        | "user_is_managed_by_organization";
+        | "user_is_managed_by_organization"
+        | "cannot_set_sso_provider_missing_fields";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -1222,6 +1223,11 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1256,19 +1262,6 @@ export interface components {
         | "tasks.edit"
       )[];
       /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1278,6 +1271,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1867,8 +1868,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2307,14 +2308,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2471,17 +2472,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
+      userFullName?: string;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
       scopes: string[];
       description: string;
-      username?: string;
-      userFullName?: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -3091,7 +3092,8 @@ export interface components {
         | "sso_domain_not_found_or_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
-        | "user_is_managed_by_organization";
+        | "user_is_managed_by_organization"
+        | "cannot_set_sso_provider_missing_fields";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3766,18 +3768,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3952,20 +3954,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
       translation?: string;
       namespace?: string;
       description?: string;
-      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
+      baseTranslation?: string;
       translation?: string;
       namespace?: string;
       description?: string;
-      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4566,14 +4568,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
       expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
-      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4692,17 +4694,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
+      userFullName?: string;
+      username?: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
       scopes: string[];
       description: string;
-      username?: string;
-      userFullName?: string;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
