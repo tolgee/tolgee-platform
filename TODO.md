@@ -2,8 +2,9 @@
 
 ## BE
 * BE tests for saving
-* Add liquibase changeset for customers already using namespaces, disable them only when there are none
-  * Default is off, set it to on for customers who already use it
+* By default, namespaces are turned off
+* Handle current situation - if a namespace exists in the project, turn namespaces on
+  * Add liquibase changeset
 * BE tests
 
 ## FE
@@ -15,7 +16,7 @@
 
 ## FE
 * Hide select boxes by the settings
-* Hide
+* Hide namespace tag 
 
 ## BE
 * Return all, ignore namespace if namespaces are turned off
