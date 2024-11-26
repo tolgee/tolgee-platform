@@ -2,12 +2,15 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.ee.data.toDto
 import io.tolgee.ee.service.sso.TenantService
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.ee.SsoTenantModel
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
@@ -31,6 +34,8 @@ class SsoProviderController(
     @RequestBody @Valid request: CreateProviderRequest,
     @PathVariable organizationId: Long,
   ): SsoTenantModel {
+    validateProvider(request)
+
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationId = organizationId,
       Feature.SSO,
@@ -45,15 +50,38 @@ class SsoProviderController(
   @RequiresSuperAuthentication
   fun findProvider(
     @PathVariable organizationId: Long,
-  ): SsoTenantModel? =
+  ): SsoTenantModel? {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationId = organizationId,
+      Feature.SSO,
+    )
+    val tenant: SsoTenant
     try {
-      enabledFeaturesProvider.checkFeatureEnabled(
-        organizationId = organizationId,
-        Feature.SSO,
-      )
-
-      ssoTenantAssembler.toModel(tenantService.getTenant(organizationId).toDto())
-    } catch (e: NotFoundException) {
-      null
+      tenant = tenantService.getTenant(organizationId)
+    } catch (_: NotFoundException) {
+      return null
     }
+    return ssoTenantAssembler.toModel(tenant.toDto())
+  }
+
+  private fun validateProvider(req: CreateProviderRequest) {
+    if (!req.enabled) {
+      return
+    }
+
+    // FIXME: Should we validate URIs and domains if they are real?
+
+    listOf(
+      CreateProviderRequest::clientId,
+      CreateProviderRequest::clientSecret,
+      CreateProviderRequest::authorizationUri,
+      CreateProviderRequest::domain,
+      // CreateProviderRequest::jwkSetUri,
+      CreateProviderRequest::tokenUri,
+    ).forEach {
+      if (it.get(req).isBlank()) {
+        throw BadRequestException(Message.CANNOT_SET_SSO_PROVIDER_MISSING_FIELDS, listOf(it.name))
+      }
+    }
+  }
 }
