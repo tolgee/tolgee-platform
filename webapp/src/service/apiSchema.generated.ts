@@ -1132,7 +1132,8 @@ export interface components {
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "namespaces_cannot_be_disabled_when_namespace_exists";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -3050,7 +3051,8 @@ export interface components {
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "namespaces_cannot_be_disabled_when_namespace_exists";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
