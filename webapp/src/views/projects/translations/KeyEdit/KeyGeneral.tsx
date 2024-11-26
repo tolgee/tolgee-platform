@@ -12,6 +12,7 @@ import { Tag } from '../Tags/Tag';
 import { RequiredField } from 'tg.component/common/form/RequiredField';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledSection = styled('div')``;
 
@@ -39,6 +40,7 @@ const StyledTags = styled('div')`
 
 export const KeyGeneral = () => {
   const { t } = useTranslate();
+  const project = useProject();
   const { values, setFieldValue, submitForm, errors } =
     useFormikContext<KeyFormType>();
   const theme = useTheme();
@@ -67,7 +69,7 @@ export const KeyGeneral = () => {
           </EditorWrapper>
           <FieldError error={errors.name} />
         </StyledSection>
-        <StyledSection>
+        <StyledSection hidden={!project.useNamespaces}>
           <FieldLabel>
             <LabelHint title={t('translations_key_edit_label_namespace_hint')}>
               {t('translations_key_edit_label_namespace')}
