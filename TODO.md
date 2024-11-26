@@ -8,21 +8,16 @@
 * BE tests
 
 ## FE
-* Nice to have: Inline checkbox styling
-* Nice to have: Hide default namespace select-box in settings if use namespaces is off
+* Hide default namespace select-box in settings if use namespaces is off
 * FE tests maybe?
 
 # Using
 
 ## FE
 * Hide select boxes by the settings
-* Hide namespace tag 
-
-## BE
-* Return all, ignore namespace if namespaces are turned off
+* Hide namespace tag in listings
 
 # Cypress tests
 
-* Cypress tests
 * All usages of namespaces based on the feature turned-on
   * make it possible to make it changeable on-the-fly
