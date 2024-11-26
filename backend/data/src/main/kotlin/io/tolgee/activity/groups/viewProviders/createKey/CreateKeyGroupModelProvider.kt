@@ -4,6 +4,8 @@ import io.tolgee.activity.groups.ActivityGroupType
 import io.tolgee.activity.groups.GroupModelProvider
 import io.tolgee.activity.groups.data.DescribingMapping
 import io.tolgee.activity.groups.data.RelatedMapping
+import io.tolgee.activity.groups.data.getFieldFromView
+import io.tolgee.activity.groups.data.getFieldFromViewNullable
 import io.tolgee.activity.groups.dataProviders.GroupDataProvider
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
@@ -77,7 +79,7 @@ class CreateKeyGroupModelProvider(
         relatedEntities[entity]
           ?.get(translationMapping)?.singleOrNull()
 
-      val baseTranslationValue =
+      val baseTranslationText =
         baseTranslation?.modifications
           ?.get("text")
           ?.new as? String
@@ -103,7 +105,7 @@ class CreateKeyGroupModelProvider(
             ?.data
             ?.get(Namespace::name.name)
             as? String,
-        baseTranslationValue = baseTranslationValue,
+        baseTranslationText = baseTranslationText,
         baseLanguageId = baseLanguageId,
       )
     }

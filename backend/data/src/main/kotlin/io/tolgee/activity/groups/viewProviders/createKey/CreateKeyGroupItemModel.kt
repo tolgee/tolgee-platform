@@ -15,7 +15,7 @@ class CreateKeyGroupItemModel(
   @Schema(description = Key.PLURAL_ARG_NAME_FIELD)
   val pluralArgName: String?,
   @Schema(description = "The base translation value entered when key was created")
-  val baseTranslationValue: String?,
+  val baseTranslationText: String?,
   val tags: List<String>,
   override val description: String?,
   override val custom: Map<String, Any?>?,

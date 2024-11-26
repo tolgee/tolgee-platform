@@ -1,23 +1,12 @@
 package io.tolgee.activity.groups.viewProviders.setTranslations
 
-import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.api.IKeyModel
-import io.tolgee.sharedDocs.Key
+import io.tolgee.activity.data.PropertyModification
+import io.tolgee.activity.groups.baseModels.ActivityGroupKeyModel
 import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "items", itemRelation = "item")
 class SetTranslationsGroupItemModel(
-  override val id: Long,
-  override val name: String,
-  override val namespace: String?,
-  @Schema(description = Key.IS_PLURAL_FIELD)
-  val isPlural: Boolean,
-  @Schema(description = Key.PLURAL_ARG_NAME_FIELD)
-  val pluralArgName: String?,
-  @Schema(description = "The base translation value entered when key was created")
-  val baseTranslationValue: String?,
-  val tags: List<String>,
-  override val description: String?,
-  override val custom: Map<String, Any?>?,
-  val baseLanguageId: Long?,
-) : IKeyModel
+  val id: Long,
+  val text: PropertyModification<String>,
+  val key: ActivityGroupKeyModel,
+)
