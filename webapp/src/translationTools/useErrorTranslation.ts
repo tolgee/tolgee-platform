@@ -129,6 +129,8 @@ export function useErrorTranslation() {
         return t('verify_email_verification_code_not_valid');
       case 'user_is_subscribed_to_paid_plan':
         return t('user_is_subscribed_to_paid_plan');
+      case 'namespaces_cannot_be_disabled_when_namespace_exists':
+        return t('namespaces_cannot_be_disabled_when_namespace_exists');
       default:
         return code;
     }
