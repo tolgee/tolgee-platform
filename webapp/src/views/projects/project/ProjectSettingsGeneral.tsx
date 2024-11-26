@@ -10,8 +10,9 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useLeaveProject } from '../useLeaveProject';
 import { TextField } from 'tg.component/common/form/fields/TextField';
+import { Checkbox } from 'tg.component/common/form/fields/Checkbox';
 import { FieldLabel } from 'tg.component/FormField';
-import { Box, styled } from '@mui/material';
+import { Box, FormControlLabel, styled, Typography } from '@mui/material';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
@@ -20,6 +21,7 @@ type FormValues = {
   name: string;
   description: string | undefined;
   baseLanguageId: number | undefined;
+  useNamespaces: boolean | false;
   defaultNamespaceId: number | '';
 };
 
@@ -69,6 +71,7 @@ export const ProjectSettingsGeneral = () => {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
     description: project.description ?? '',
+    useNamespaces: project.useNamespaces ?? false,
     defaultNamespaceId: defaultNamespace?.id ?? '',
   } satisfies FormValues;
 
@@ -82,6 +85,7 @@ export const ProjectSettingsGeneral = () => {
     const data = {
       ...values,
       description: values.description || undefined,
+      useNamespaces: values.useNamespaces || false,
       defaultNamespaceId:
         values.defaultNamespaceId === 0 ? undefined : values.defaultNamespaceId,
     };
@@ -158,6 +162,35 @@ export const ProjectSettingsGeneral = () => {
             <ProjectLanguagesProvider>
               <LanguageSelect />
             </ProjectLanguagesProvider>
+            <Box display="grid">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="useNamespaces"
+                    disabled={updateLoadable.isLoading}
+                  />
+                }
+                label={<T keyName="project_settings_use_namespaces" />}
+                data-cy="project-settings-use-namespaces-checkbox"
+              />
+              <Typography variant="caption">
+                {
+                  <T
+                    keyName="project_settings_use_namespaces_hint"
+                    params={{
+                      a: (
+                        <a
+                          href="https://docs.tolgee.io/js-sdk/namespaces"
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: '#D81B5F' }}
+                        />
+                      ),
+                    }}
+                  />
+                }
+              </Typography>
+            </Box>
             <NamespaceSelect />
           </Box>
         </StandardForm>
