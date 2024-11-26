@@ -12,7 +12,7 @@ import { useLeaveProject } from '../useLeaveProject';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Checkbox } from 'tg.component/common/form/fields/Checkbox';
 import { FieldLabel } from 'tg.component/FormField';
-import { Box, styled } from '@mui/material';
+import { Box, FormControlLabel, styled, Typography } from '@mui/material';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
@@ -161,15 +161,20 @@ export const ProjectSettingsGeneral = () => {
           <ProjectLanguagesProvider>
             <LanguageSelect />
           </ProjectLanguagesProvider>
-          <Box>
-            <FieldLabel>
-              <T keyName="project_settings_use_namespaces" />
-            </FieldLabel>
-            <Checkbox
-              name="useNamespaces"
-              data-cy="use-namespaces-checkbox"
-              size="small"
+          <Box display="grid">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="useNamespaces"
+                  disabled={updateLoadable.isLoading}
+                />
+              }
+              label={<T keyName="project_settings_use_namespaces" />}
+              data-cy="project-settings-use-namespaces-checkbox"
             />
+            <Typography variant="caption">
+              {<T keyName="project_settings_use_namespaces_hint" />}
+            </Typography>
           </Box>
           <NamespaceSelect />
         </Box>
