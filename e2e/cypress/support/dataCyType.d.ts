@@ -596,6 +596,7 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
+        "use-namespaces-checkbox" |
         "user-delete-organization-message-item" |
         "user-menu-language-switch" |
         "user-menu-logout" |
