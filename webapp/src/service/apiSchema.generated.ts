@@ -462,7 +462,7 @@ export interface paths {
     delete: operations["cancelImport"];
   };
   "/v2/projects/{projectId}/export": {
-    get: operations["export"];
+    get: operations["exportData"];
     /** Exports data (post). Useful when exceeding allowed URL size. */
     post: operations["exportPost"];
   };
@@ -630,11 +630,23 @@ export interface paths {
     get: operations["getMachineTranslationLanguageInfo"];
   };
   "/v2/projects/{projectId}/keys/search": {
-    /** This endpoint helps you to find desired key by keyName, base translation or translation in specified language. */
+    /**
+     * This endpoint helps you to find desired key by keyName, base translation or translation in specified language.
+     *
+     * Sort is ignored for this request.
+     */
     get: operations["searchForKey"];
   };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
+  };
+  "/v2/projects/{projectId}/all-keys-with-disabled-languages": {
+    /**
+     * Returns all project key with any disabled language.
+     *
+     * If key has no disabled language, it is not returned.
+     */
+    get: operations["getDisabledLanguages_2"];
   };
   "/v2/projects/{projectId}/activity/revisions/{revisionId}/modified-entities": {
     get: operations["getModifiedEntitiesByRevision"];
@@ -1166,18 +1178,6 @@ export interface components {
         | "ORGANIZATION_OWNER"
         | "NONE"
         | "SERVER_ADMIN";
-      /** @description The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
       /**
        * @deprecated
        * @description Deprecated (use translateLanguageIds).
@@ -1186,11 +1186,6 @@ export interface components {
        * @example 200001,200004
        */
       permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1225,6 +1220,23 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /** @description The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1814,8 +1826,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1865,10 +1877,8 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
@@ -1877,7 +1887,9 @@ export interface components {
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       /**
        * @description Delimiter to structure file content.
        *
@@ -1965,10 +1977,8 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
@@ -1977,7 +1987,9 @@ export interface components {
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2089,12 +2101,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2252,9 +2264,6 @@ export interface components {
     RevealedPatModel: {
       token: string;
       /** Format: int64 */
-      id: number;
-      description: string;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
@@ -2262,6 +2271,9 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      id: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2398,19 +2410,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      /** Format: int64 */
-      id: number;
       userFullName?: string;
       projectName: string;
-      description: string;
       username?: string;
-      scopes: string[];
       /** Format: int64 */
       projectId: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      id: number;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2545,11 +2557,12 @@ export interface components {
        *
        * - KEEP: Translation is not changed
        * - OVERRIDE: Translation is overridden
-       * - NEW: New translation is created)
+       * - NEW: New translation is created
+       * - FORCE_OVERRIDE: Translation is updated, created or kept.
        *
        * @example OVERRIDE
        */
-      resolution: "KEEP" | "OVERRIDE" | "NEW";
+      resolution: "KEEP" | "OVERRIDE" | "NEW" | "FORCE_OVERRIDE";
     };
     KeyImportResolvableResultModel: {
       /** @description List of keys */
@@ -3106,10 +3119,8 @@ export interface components {
       languages?: string[];
       /** @description Format to export to */
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
@@ -3118,7 +3129,9 @@ export interface components {
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       /**
        * @description Delimiter to structure file content.
        *
@@ -3578,22 +3591,22 @@ export interface components {
         | "TASKS"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
-      /** @example Beautiful organization */
-      name: string;
-      /** Format: int64 */
-      id: number;
+      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example Beautiful organization */
+      name: string;
+      /** Format: int64 */
+      id: number;
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3639,10 +3652,8 @@ export interface components {
     };
     ExportFormatModel: {
       format:
-        | "CSV"
         | "JSON"
         | "JSON_TOLGEE"
-        | "JSON_I18NEXT"
         | "XLIFF"
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
@@ -3651,7 +3662,9 @@ export interface components {
         | "FLUTTER_ARB"
         | "PROPERTIES"
         | "YAML_RUBY"
-        | "YAML";
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV";
       extension: string;
       mediaType: string;
       defaultFileStructureTemplate: string;
@@ -3745,8 +3758,8 @@ export interface components {
     };
     LanguageInfoModel: {
       /** Format: int64 */
-      languageId: number;
-      languageTag: string;
+      languageId?: number;
+      languageTag?: string;
       supportedServices: components["schemas"]["MtSupportedService"][];
     };
     MtSupportedService: {
@@ -3754,23 +3767,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
+      baseTranslation?: string;
+      translation?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
       description?: string;
-      translation?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
+      baseTranslation?: string;
+      translation?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
-      namespace?: string;
       description?: string;
-      translation?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -3800,6 +3813,36 @@ export interface components {
       _embedded?: {
         keys?: components["schemas"]["KeyModel"][];
       };
+    };
+    CollectionModelKeyDisabledLanguagesModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyDisabledLanguagesModel"][];
+      };
+    };
+    /** @description Disabled languages */
+    KeyDisabledLanguageModel: {
+      /** Format: int64 */
+      id: number;
+      tag: string;
+    };
+    KeyDisabledLanguagesModel: {
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+      /** @description Disabled languages */
+      disabledLanguages: components["schemas"]["KeyDisabledLanguageModel"][];
     };
     EntityDescriptionWithRelations: {
       entityClass: string;
@@ -4339,9 +4382,6 @@ export interface components {
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
-      id: number;
-      description: string;
-      /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
@@ -4349,6 +4389,9 @@ export interface components {
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      id: number;
+      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4465,19 +4508,19 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
-      /** Format: int64 */
-      id: number;
       userFullName?: string;
       projectName: string;
-      description: string;
       username?: string;
-      scopes: string[];
       /** Format: int64 */
       projectId: number;
+      scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
+      /** Format: int64 */
+      id: number;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -12255,7 +12298,7 @@ export interface operations {
       };
     };
   };
-  export: {
+  exportData: {
     parameters: {
       query: {
         /**
@@ -12266,10 +12309,8 @@ export interface operations {
         languages?: string[];
         /** Format to export to */
         format?:
-          | "CSV"
           | "JSON"
           | "JSON_TOLGEE"
-          | "JSON_I18NEXT"
           | "XLIFF"
           | "PO"
           | "APPLE_STRINGS_STRINGSDICT"
@@ -12278,7 +12319,9 @@ export interface operations {
           | "FLUTTER_ARB"
           | "PROPERTIES"
           | "YAML_RUBY"
-          | "YAML";
+          | "YAML"
+          | "JSON_I18NEXT"
+          | "CSV";
         /**
          * Delimiter to structure file content.
          *
@@ -14840,7 +14883,11 @@ export interface operations {
       };
     };
   };
-  /** This endpoint helps you to find desired key by keyName, base translation or translation in specified language. */
+  /**
+   * This endpoint helps you to find desired key by keyName, base translation or translation in specified language.
+   *
+   * Sort is ignored for this request.
+   */
   searchForKey: {
     parameters: {
       query: {
@@ -14911,6 +14958,58 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /**
+   * Returns all project key with any disabled language.
+   *
+   * If key has no disabled language, it is not returned.
+   */
+  getDisabledLanguages_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelKeyDisabledLanguagesModel"];
         };
       };
       /** Bad Request */
@@ -15861,6 +15960,12 @@ export interface operations {
          * When null, resulting file will be a flat key-value object.
          */
         structureDelimiter?: string;
+        /**
+         * Enables filtering of returned keys by their tags.
+         * Only keys with at least one provided tag will be returned.
+         * Optional, filtering is not applied if not specified.
+         */
+        filterTag?: string[];
       };
     };
     responses: {
