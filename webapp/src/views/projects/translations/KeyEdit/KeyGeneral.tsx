@@ -67,10 +67,11 @@ export const KeyGeneral = () => {
           </EditorWrapper>
           <FieldError error={errors.name} />
         </StyledSection>
+        {/*<ConditionalFormItem>*/}
         <StyledSection>
           <FieldLabel>
             <LabelHint title={t('translations_key_edit_label_namespace_hint')}>
-              {t('translations_key_edit_label_namespace')}
+              {t('translations_key_edit_label_namespace')} TODO tady
             </LabelHint>
           </FieldLabel>
           <NamespaceSelector
@@ -84,6 +85,7 @@ export const KeyGeneral = () => {
           />
           <FieldError error={errors.namespace} />
         </StyledSection>
+        {/*</ConditionalFormItem>*/}
       </StyledKeyNsContainer>
 
       <StyledSection>
