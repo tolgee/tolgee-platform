@@ -104,7 +104,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
     result["accessToken"].assert.isNotNull
     result["tokenType"].assert.isEqualTo("Bearer")
     val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
-    assertThat(userAccountService.get(userName)).isNotNull
+    assertThat(userAccountService.findActive(userName)).isNotNull
   }
 
   @Test
