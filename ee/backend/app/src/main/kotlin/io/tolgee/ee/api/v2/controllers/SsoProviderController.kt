@@ -70,16 +70,17 @@ class SsoProviderController(
     }
 
     // FIXME: Should we validate URIs and domains if they are real?
+    //  (are there some existing spring validators for this?)
 
     listOf(
-      CreateProviderRequest::clientId,
-      CreateProviderRequest::clientSecret,
-      CreateProviderRequest::authorizationUri,
-      CreateProviderRequest::domain,
-      // CreateProviderRequest::jwkSetUri,
-      CreateProviderRequest::tokenUri,
+      req::clientId,
+      req::clientSecret,
+      req::authorizationUri,
+      req::domain,
+      // req::jwkSetUri,
+      req::tokenUri,
     ).forEach {
-      if (it.get(req).isBlank()) {
+      if (it.get().isBlank()) {
         throw BadRequestException(Message.CANNOT_SET_SSO_PROVIDER_MISSING_FIELDS, listOf(it.name))
       }
     }

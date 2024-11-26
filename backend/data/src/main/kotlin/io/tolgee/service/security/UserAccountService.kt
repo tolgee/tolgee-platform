@@ -93,6 +93,7 @@ class UserAccountService(
     return userAccountRepository.findInitialUser()
   }
 
+  @Transactional
   fun get(id: Long): UserAccount {
     return this.findActive(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
@@ -231,10 +232,10 @@ class UserAccountService(
     return userAccountRepository.findThirdByThirdParty(id, type)
   }
 
-  fun findBySsoDomain(
+  fun findEnabledBySsoDomain(
     type: String,
     idSub: String,
-  ): UserAccount? = userAccountRepository.findBySsoDomain(idSub, type)
+  ): UserAccount? = userAccountRepository.findEnabledBySsoDomain(idSub, type)
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
@@ -333,7 +334,6 @@ class UserAccountService(
     userAccount: UserAccount,
     refreshToken: String?,
   ): UserAccount {
-    // TODO: allow only refresh token with unlimited expiration
     userAccount.ssoRefreshToken = refreshToken
     userAccount.ssoSessionExpiry = getCurrentSsoExpiration(userAccount.thirdPartyAuthType)
     return userAccountRepository.save(userAccount)

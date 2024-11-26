@@ -46,7 +46,6 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
 
-    testImplementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(project(":testing"))
     testImplementation(project(":security"))

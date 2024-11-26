@@ -141,8 +141,8 @@ class SsoDelegateEe(
       // val claims = jwtParser.parseClaimsJwt(idToken).body
 
       // val expirationTime: Date = jwtClaimsSet.expirationTime
-      val expirationTime: Date = claims.expiration
-      if (expirationTime.before(Date())) {
+      val expirationTime: Date? = claims.expiration
+      if (expirationTime?.before(currentDateProvider.date) == true) {
         throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
       }
 
@@ -257,11 +257,13 @@ class SsoDelegateEe(
       }
 
     val body: MultiValueMap<String, String> = LinkedMultiValueMap()
-    body.add("grant_type", "refresh_token")
-    body.add("client_id", tenant.clientId)
-    body.add("client_secret", tenant.clientSecret)
-    body.add("scope", "offline_access openid")
-    body.add("refresh_token", refreshToken)
+    body.apply {
+      add("grant_type", "refresh_token")
+      add("client_id", tenant.clientId)
+      add("client_secret", tenant.clientSecret)
+      add("scope", "offline_access openid")
+      add("refresh_token", refreshToken)
+    }
 
     val request = HttpEntity(body, headers)
     try {

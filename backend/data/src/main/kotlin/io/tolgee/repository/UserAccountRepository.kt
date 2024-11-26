@@ -171,31 +171,16 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       where ua.thirdPartyAuthId = :thirdPartyAuthId
         and orl.managed = true
         and o.ssoTenant.domain = :domain
+        and o.ssoTenant.enabled = true
+        and o.deletedAt is null
         and ua.deletedAt is null
         and ua.disabledAt is null
   """,
   )
-  fun findBySsoDomain(
+  fun findEnabledBySsoDomain(
     thirdPartyAuthId: String,
     domain: String,
   ): UserAccount?
-
-  @Query(
-    """
-    from UserAccount ua
-      join OrganizationRole orl on orl.user = ua
-      join Organization o on orl.organization = o
-      where ua.thirdPartyAuthId = :thirdPartyAuthId
-        and orl.managed = true
-        and ((:ssoTenantId is null and o.ssoTenant is null) or o.ssoTenant.id = :ssoTenantId)
-        and ua.deletedAt is null
-        and ua.disabledAt is null
-  """,
-  )
-  fun findBySsoTenantId(
-    thirdPartyAuthId: String,
-    ssoTenantId: Long?,
-  ): Optional<UserAccount>
 
   @Query(
     """ select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole,

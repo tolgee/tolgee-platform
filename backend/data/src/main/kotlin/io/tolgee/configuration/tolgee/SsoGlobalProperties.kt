@@ -19,7 +19,7 @@ import kotlin.reflect.KProperty0
       " such users cannot be members of any other organization. SSO users associated with per organization SSO have" +
       " no rights to create or manage organizations. Global SSO users should be invited to organizations they need to" +
       " have access to. Per organization SSO users are automatically added to the organization they belong to.",
-  displayName = "Single Sign-On",
+  displayName = "Server wide Single Sign-On",
 )
 class SsoGlobalProperties : ISsoTenant {
   @E2eRuntimeMutable

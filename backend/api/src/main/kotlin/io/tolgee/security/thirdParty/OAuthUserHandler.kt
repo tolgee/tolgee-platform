@@ -44,9 +44,12 @@ class OAuthUserHandler(
         // This should never happen
         throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
       }
-      return userAccountService.findBySsoDomain(userResponse.tenant.domain, userResponse.sub!!)
+      return userAccountService.findEnabledBySsoDomain(userResponse.tenant.domain, userResponse.sub!!)
     }
-    // SSO_GLOBAL or OAUTH2
+    if (thirdPartyAuthType !in arrayOf(ThirdPartyAuthType.SSO_GLOBAL, ThirdPartyAuthType.OAUTH2)) {
+      // This should never happen
+      throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
+    }
     return userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
   }
 
@@ -56,7 +59,7 @@ class OAuthUserHandler(
     thirdPartyAuthType: ThirdPartyAuthType,
     accountType: UserAccount.AccountType,
   ): UserAccount {
-    userAccountService.findActive(userResponse.email)?.let {
+    if (userAccountService.findActive(userResponse.email) != null) {
       throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
     }
 
