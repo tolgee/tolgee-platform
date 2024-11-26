@@ -14,6 +14,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
@@ -40,6 +41,7 @@ class DbPopulatorReal(
   private val initialPasswordManager: InitialPasswordManager,
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
+  private val namespaceService: NamespaceService,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val apiKeyService: ApiKeyService,
@@ -319,6 +321,10 @@ class DbPopulatorReal(
     translationDe.text = deutsch
     entityManager.persist(translationDe)
     entityManager.flush()
+  }
+
+  fun createNamespace(project: Project, name: String = UUID.randomUUID().toString()) {
+    namespaceService.create(name, project.id)
   }
 
   companion object {

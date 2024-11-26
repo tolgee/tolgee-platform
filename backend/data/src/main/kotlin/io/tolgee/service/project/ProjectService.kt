@@ -10,6 +10,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.request.project.ProjectFilters
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
@@ -177,6 +178,11 @@ class ProjectService(
     val project =
       projectRepository.findById(id)
         .orElseThrow { NotFoundException() }!!
+
+    if (!dto.useNamespaces && project.namespaces.isNotEmpty()) {
+      throw ValidationException(Message.NAMESPACES_CANNOT_BE_DISABLED_WHEN_NAMESPACE_EXISTS)
+    }
+
     project.name = dto.name
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders

@@ -58,4 +58,18 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
       node("baseLanguage.id").isEqualTo(base.project.languages.toList()[0].id)
     }
   }
+
+  @Test
+  fun `fail validation on disabling namespaces when a namespace exists`() {
+    val base = dbPopulator.createBase("What a project")
+    dbPopulator.createNamespace(base.project)
+    val content =
+      EditProjectRequest(
+        name = "test",
+        useNamespaces = false,
+      )
+    performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsBadRequest.andAssertThatJson {
+      node("CUSTOM_VALIDATION.namespaces_cannot_be_disabled_when_namespace_exists").isNotNull
+    }
+  }
 }
