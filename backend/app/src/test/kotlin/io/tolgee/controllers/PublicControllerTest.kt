@@ -6,7 +6,6 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AbstractControllerTest
@@ -99,7 +98,7 @@ class PublicControllerTest :
 
   @Test
   fun `doesn't create organization when invitation provided`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     val invitation =
       invitationService.create(

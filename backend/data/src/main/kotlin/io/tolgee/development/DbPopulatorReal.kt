@@ -54,7 +54,7 @@ class DbPopulatorReal(
   fun autoPopulate() {
     // do not populate if db is not empty
     if (userAccountRepository.count() == 0L) {
-      this.populate("Application")
+      this.populate()
     }
   }
 
@@ -170,32 +170,26 @@ class DbPopulatorReal(
   }
 
   @Transactional
-  fun createBase(
-    projectName: String,
-    username: String,
-  ): Base {
-    return createBase(projectName, username, null)
+  fun createBase(username: String): Base {
+    return createBase(UUID.randomUUID().toString(), username, null)
   }
 
   @Transactional
-  fun createBase(projectName: String): Base {
-    return createBase(projectName, tolgeeProperties.authentication.initialUsername)
+  fun createBase(): Base {
+    return createBase(tolgeeProperties.authentication.initialUsername)
   }
 
-  fun populate(projectName: String): Base {
+  fun populate(): Base {
     return executeInNewTransaction(platformTransactionManager) {
-      populate(projectName, tolgeeProperties.authentication.initialUsername)
+      populate(userName = tolgeeProperties.authentication.initialUsername)
     }.also {
       languageStatsService.refreshLanguageStats(it.project.id)
     }
   }
 
   @Transactional
-  fun populate(
-    projectName: String,
-    userName: String,
-  ): Base {
-    val base = createBase(projectName, userName)
+  fun populate(userName: String): Base {
+    val base = createBase(userName)
     val project = projectService.get(base.project.id)
     createApiKey(project)
     createTranslation(project, "Hello world!", "Hallo Welt!", en, de)

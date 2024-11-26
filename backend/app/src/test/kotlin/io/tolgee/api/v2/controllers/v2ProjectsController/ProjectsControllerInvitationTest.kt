@@ -14,7 +14,6 @@ import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.node
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
@@ -55,7 +54,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   fun `returns project invitations`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     createTranslateInvitation(project)

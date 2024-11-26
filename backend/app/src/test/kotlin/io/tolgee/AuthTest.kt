@@ -7,7 +7,6 @@ import io.tolgee.controllers.PublicController
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
 import io.tolgee.security.authentication.JwtService
@@ -55,7 +54,7 @@ class AuthTest : AbstractControllerTest() {
 
   @BeforeEach
   fun setup() {
-    project = dbPopulator.createBase(generateUniqueString()).project
+    project = dbPopulator.createBase().project
     authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
   }
 

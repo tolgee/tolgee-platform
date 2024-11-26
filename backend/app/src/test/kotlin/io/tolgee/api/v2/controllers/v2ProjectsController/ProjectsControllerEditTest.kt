@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 class ProjectsControllerEditTest : AuthorizedControllerTest() {
   @Test
   fun `edits project`() {
-    val base = dbPopulator.createBase("What a project")
+    val base = dbPopulator.createBase()
     val content =
       EditProjectRequest(
         name = "new name",
@@ -33,7 +33,7 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
 
   @Test
   fun `validates project on edit`() {
-    val base = dbPopulator.createBase("What a project")
+    val base = dbPopulator.createBase()
     val content =
       EditProjectRequest(
         name = "",
@@ -46,7 +46,7 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
 
   @Test
   fun `automatically chooses base language`() {
-    val base = dbPopulator.createBase("What a project")
+    val base = dbPopulator.createBase()
     val content =
       EditProjectRequest(
         name = "test",

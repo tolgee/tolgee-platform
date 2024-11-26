@@ -34,7 +34,7 @@ class SlugControllerTest : AuthorizedControllerTest() {
       Project(
         name = "aaa",
         slug = "hello-1",
-      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization },
+      ).also { it.organizationOwner = dbPopulator.createBase().organization },
     )
     performAuthGet("/v2/slug/validate-project/hello-1").andIsOk.andAssertThatJson {
       isEqualTo(false)
@@ -82,7 +82,7 @@ class SlugControllerTest : AuthorizedControllerTest() {
       Project(
         name = "aaa",
         slug = "hello-world",
-      ).also { it.organizationOwner = dbPopulator.createBase("proj").organization },
+      ).also { it.organizationOwner = dbPopulator.createBase().organization },
     )
     performAuthPost("/v2/slug/generate-project", GenerateSlugDto("Hello world"))
       .andIsOk.andAssertThatJson {

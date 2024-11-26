@@ -46,7 +46,7 @@ class SqlControllerTest : AbstractControllerTest(), Logging {
   @Test
   fun getList() {
     logger.info("Internal controller enabled: ${tolgeeProperties.internal.controllerEnabled}")
-    dbPopulator.createBase("Test")
+    dbPopulator.createBase()
     val parseResponseTo: List<Any> =
       mvc.perform(
         post("/internal/sql/list")
@@ -60,7 +60,7 @@ class SqlControllerTest : AbstractControllerTest(), Logging {
   @Test
   fun delete() {
     logger.info("Internal controller enabled: ${tolgeeProperties.internal.controllerEnabled}")
-    val project = dbPopulator.createBase("Test").project
+    val project = dbPopulator.createBase().project
     mvc.perform(
       post("/internal/sql/execute")
         .content("delete from permission"),
