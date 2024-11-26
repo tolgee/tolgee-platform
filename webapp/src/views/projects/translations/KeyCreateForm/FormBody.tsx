@@ -122,27 +122,29 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             }}
           </FastField>
 
-          <FastField name="namespace">
-            {({ field, form }: FieldProps<any>) => {
-              return (
-                <div>
-                  <FieldLabel>
-                    <LabelHint title={t('translation_single_namespace_hint')}>
-                      <T keyName="translation_single_label_namespace" />
-                    </LabelHint>
-                  </FieldLabel>
-                  <StyledEdtorWrapper data-cy="translation-create-namespace-input">
-                    <NamespaceSelector
-                      value={field.value}
-                      onChange={(value) =>
-                        form.setFieldValue(field.name, value)
-                      }
-                    />
-                  </StyledEdtorWrapper>
-                </div>
-              );
-            }}
-          </FastField>
+          {project.useNamespaces && (
+            <FastField name="namespace">
+              {({ field, form }: FieldProps<any>) => {
+                return (
+                  <div>
+                    <FieldLabel>
+                      <LabelHint title={t('translation_single_namespace_hint')}>
+                        <T keyName="translation_single_label_namespace" />
+                      </LabelHint>
+                    </FieldLabel>
+                    <StyledEdtorWrapper data-cy="translation-create-namespace-input">
+                      <NamespaceSelector
+                        value={field.value}
+                        onChange={(value) =>
+                          form.setFieldValue(field.name, value)
+                        }
+                      />
+                    </StyledEdtorWrapper>
+                  </div>
+                );
+              }}
+            </FastField>
+          )}
         </StyledKeyNsContainer>
 
         <FastField name={`description`}>
