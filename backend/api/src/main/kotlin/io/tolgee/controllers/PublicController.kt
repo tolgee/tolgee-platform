@@ -68,11 +68,17 @@ class PublicController(
   @Operation(summary = "Request password reset")
   @PostMapping("/reset_password_request")
   @OpenApiHideFromPublicDocs
+  @RateLimited(limit = 2, refillDurationInMs = 300000)
   fun resetPasswordRequest(
     @RequestBody @Valid
     request: ResetPasswordRequest,
   ) {
     val userAccount = userAccountService.findActive(request.email!!) ?: return
+
+    if (!emailVerificationService.isVerified(userAccount)) {
+      throw BadRequestException(Message.EMAIL_NOT_VERIFIED)
+    }
+
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
 
