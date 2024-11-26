@@ -153,6 +153,8 @@ export function useErrorTranslation() {
         return t('cannot_set_sso_provider_missing_fields');
       case 'namespace_cannot_be_used_when_feature_is_disabled':
         return t('namespace_cannot_be_used_when_feature_is_disabled');
+      case 'namespaces_cannot_be_disabled_when_namespace_exists':
+        return t('namespaces_cannot_be_disabled_when_namespace_exists');
       default:
         return code;
     }

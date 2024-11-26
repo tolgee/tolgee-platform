@@ -1129,7 +1129,8 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "task_not_open"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "namespaces_cannot_be_disabled_when_namespace_exists";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -2992,7 +2993,8 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "task_not_open"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "namespaces_cannot_be_disabled_when_namespace_exists";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
