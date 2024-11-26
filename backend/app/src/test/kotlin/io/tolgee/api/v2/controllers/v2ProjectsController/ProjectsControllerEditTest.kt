@@ -22,12 +22,14 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
         baseLanguageId = base.project.languages.toList()[1].id,
         slug = "new-slug",
         icuPlaceholders = true,
+        useNamespaces = true,
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
       node("slug").isEqualTo(content.slug)
       node("baseLanguage.id").isEqualTo(content.baseLanguageId)
       node("icuPlaceholders").isEqualTo(content.icuPlaceholders)
+      node("useNamespaces").isEqualTo(content.useNamespaces)
     }
   }
 
