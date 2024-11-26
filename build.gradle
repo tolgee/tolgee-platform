@@ -126,7 +126,10 @@ project(':server-app').afterEvaluate {
 
 
         doFirst {
-            project(':server-app').bootRun.systemProperty('spring.profiles.active', 'dbschema')
+            project(':server-app').bootRun
+                    .systemProperty('spring.profiles.active', 'dbschema')
+                    // Use an unlikely-to-be-used port
+                    .systemProperty('server.port', '61987')
         }
     }
 }

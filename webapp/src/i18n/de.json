@@ -1237,6 +1237,7 @@
   "translations_cell_tab_comments": "{value, plural, other {Kommentare (#)} =0 {Kommentare}}",
   "translations_cell_tab_edit": "Bearbeiten",
   "translations_cell_tab_history": "Verlauf",
+  "translations_checkbox_select_multiple_hint": "Halten Sie die \"Umschalttaste\" gedrückt und klicken Sie, um mehrere auszuwählen",
   "translations_clear_selection": "Auswahl löschen",
   "translations_comments_delete_button": "Löschen",
   "translations_comments_delete_confirmation": "Willst du diesen Kommentar wirklich löschen?",

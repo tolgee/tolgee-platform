@@ -1,3 +1,31 @@
+## [3.83.1](https://github.com/tolgee/tolgee-platform/compare/v3.83.0...v3.83.1) (2024-11-23)
+
+
+### Bug Fixes
+
+* Update netty to 4.1.115.Final ([#2705](https://github.com/tolgee/tolgee-platform/issues/2705)) ([76bae8d](https://github.com/tolgee/tolgee-platform/commit/76bae8ddf2cec71e155ccce0bd1cc4fbd2673290))
+
+# [3.83.0](https://github.com/tolgee/tolgee-platform/compare/v3.82.6...v3.83.0) (2024-11-22)
+
+
+### Features
+
+* select multiple keys with holding shift key ([#2712](https://github.com/tolgee/tolgee-platform/issues/2712)) ([0079d36](https://github.com/tolgee/tolgee-platform/commit/0079d36164b903a36c7abc331648cbc02c14f753)), closes [#2713](https://github.com/tolgee/tolgee-platform/issues/2713)
+
+## [3.82.6](https://github.com/tolgee/tolgee-platform/compare/v3.82.5...v3.82.6) (2024-11-22)
+
+
+### Bug Fixes
+
+* CLI integration command ([#2714](https://github.com/tolgee/tolgee-platform/issues/2714)) ([0019637](https://github.com/tolgee/tolgee-platform/commit/00196372c0bc075fd8e4a49904f418d35be283fd))
+
+## [3.82.5](https://github.com/tolgee/tolgee-platform/compare/v3.82.4...v3.82.5) (2024-11-22)
+
+
+### Bug Fixes
+
+* exlcude batch jobs from global loading ([#2711](https://github.com/tolgee/tolgee-platform/issues/2711)) ([016e505](https://github.com/tolgee/tolgee-platform/commit/016e505835425c5f900f6b3a4a75dd04534d86f3))
+
 ## [3.82.4](https://github.com/tolgee/tolgee-platform/compare/v3.82.3...v3.82.4) (2024-11-21)
 
 

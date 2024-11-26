@@ -1412,6 +1412,7 @@
   "translations_cell_tab_comments": "{value, plural, one {Un comentariu} other {# comentarii} =0 {Comentarii}}",
   "translations_cell_tab_edit": "Editare",
   "translations_cell_tab_history": "Istoric",
+  "translations_checkbox_select_multiple_hint": "Țineți apăsată tasta „shift” și faceți clic pentru a selecta mai multe",
   "translations_clear_selection": "Deselectați tot",
   "translations_comments_delete_button": "Ștergeți",
   "translations_comments_delete_confirmation": "Sigur doriți să ștergeți acest comentariu?",

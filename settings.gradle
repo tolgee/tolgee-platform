@@ -77,6 +77,8 @@ dependencyResolutionManagement {
     }
 }
 
+rootProject.name = "tolgee-platform"
+
 include ':server-app'
 project(':server-app').projectDir = new File('backend/app')
 

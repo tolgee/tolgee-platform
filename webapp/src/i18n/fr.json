@@ -1198,6 +1198,7 @@
   "translations_cell_tab_comments": "{value, plural, other {Commentaires (#)} =0 {Commentaires}}",
   "translations_cell_tab_edit": "Modifier",
   "translations_cell_tab_history": "Historique",
+  "translations_checkbox_select_multiple_hint": "Maintenez \"shift\" et cliquez pour sélectionner plusieurs",
   "translations_clear_selection": "Supprimer la sélection",
   "translations_comments_delete_button": "Supprimer",
   "translations_comments_delete_confirmation": "Voulez-vous vraiment supprimer ce commentaire? ",
