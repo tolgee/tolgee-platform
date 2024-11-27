@@ -34,6 +34,7 @@ export const DefaultNamespaceSelect: FC<{
   label?: ReactNode;
   name: string;
   valueKey?: keyof NamespaceModel;
+  hidden: boolean;
 }> = (props) => {
   const { t } = useTranslate();
   const namespaces = props.namespaces.map(({ id, name }) => ({
@@ -42,7 +43,7 @@ export const DefaultNamespaceSelect: FC<{
   }));
 
   return (
-    <Box>
+    <Box hidden={props.hidden}>
       <FieldLabel>{props.label}</FieldLabel>
       <Select
         data-cy="default-namespace-select"
