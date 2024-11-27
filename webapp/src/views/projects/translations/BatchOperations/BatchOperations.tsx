@@ -70,21 +70,21 @@ export const BatchOperations = ({ open, onClose }: Props) => {
   const { selectionClear, refetchTranslations } = useTranslationsActions();
   const { refetchBatchJobs } = useProjectActions();
 
-  const [operation, setOperation] = useState<string>();
+  const [operationId, setOperationId] = useState<string>();
   const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
 
   const { findOperation } = useBatchOperations();
 
   function onCloseOnly() {
     selectionClear();
-    setOperation(undefined);
+    setOperationId(undefined);
     onClose();
   }
 
   function onFinished() {
     refetchTranslations();
     selectionClear();
-    setOperation(undefined);
+    setOperationId(undefined);
     onClose();
   }
 
@@ -98,6 +98,9 @@ export const BatchOperations = ({ open, onClose }: Props) => {
     onFinished,
   };
 
+  const operation = findOperation(operationId);
+  const OperationComponent = operation?.component;
+
   return (
     <>
       {open && (
@@ -110,13 +113,13 @@ export const BatchOperations = ({ open, onClose }: Props) => {
               <StyledItem>{`${selection.length} / ${totalCount}`}</StyledItem>
               <StyledItem data-cy="batch-operations-select">
                 <BatchSelect
-                  value={operation}
-                  onChange={setOperation}
+                  value={operationId}
+                  onChange={setOperationId}
                   {...sharedProps}
                 />
               </StyledItem>
             </StyledBase>
-            {findOperation(operation)}
+            {OperationComponent && <OperationComponent {...sharedProps} />}
           </StyledContent>
         </StyledContainer>
       )}
