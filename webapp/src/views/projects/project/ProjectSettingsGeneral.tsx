@@ -16,6 +16,7 @@ import { Box, FormControlLabel, styled, Typography } from '@mui/material';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
+import { useField } from 'formik';
 
 type FormValues = {
   name: string;
@@ -52,12 +53,15 @@ const LanguageSelect = () => {
 };
 
 const NamespaceSelect = () => {
+  const [useNamespacesField] = useField('useNamespaces');
   const { allNamespacesWithNone } = useProjectNamespaces();
+
   return (
     <DefaultNamespaceSelect
       label={<T keyName="project_settings_base_namespace" />}
       name="defaultNamespaceId"
       namespaces={allNamespacesWithNone}
+      hidden={!useNamespacesField.value}
     />
   );
 };
