@@ -57,7 +57,7 @@ export const useBatchOperations = () => {
   const canViewTranslations = satisfiesPermission('translations.view');
   const canEditTranslations = satisfiesPermission('translations.edit');
 
-  const operations: BatchOperation[] = [
+  const publicOperations: BatchOperation[] = [
     {
       id: 'machine_translate',
       label: t('batch_operations_machine_translate'),
@@ -129,7 +129,7 @@ export const useBatchOperations = () => {
 
   const addEeBatchOperations = useAddEeBatchOperations();
 
-  addEeBatchOperations(operations);
+  const operations = addEeBatchOperations(publicOperations);
 
   function findOperation(id?: string) {
     return operations.find((o) => o.id === id);
