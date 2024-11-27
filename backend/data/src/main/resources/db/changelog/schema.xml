@@ -4037,5 +4037,6 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+        <sqlFile path="classpath:db/changelog/enableUseNamespacesForProjectsWithNamespaces.sql" splitStatements="false"/>
     </changeSet>
 </databaseChangeLog>
