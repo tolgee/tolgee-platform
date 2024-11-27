@@ -5,11 +5,11 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
 import { getEe } from '../../../plugin/getEe';
 
-const {
-  organization: { apps: eeApps },
-} = getEe();
-
 export const OrganizationAppsView: FunctionComponent = () => {
+  const {
+    organization: { apps: eeApps },
+  } = getEe();
+
   const organization = useOrganization();
   const { t } = useTranslate();
 

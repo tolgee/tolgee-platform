@@ -59,15 +59,15 @@ type Props = {
   className?: string;
 };
 
-const {
-  tasks: { TranslationTaskIndicator: EeTranslationTaskIndicator },
-} = getEe();
-
 export const TranslationFlags: React.FC<Props> = ({
   keyData,
   lang,
   className,
 }) => {
+  const {
+    tasks: { TranslationTaskIndicator: EeTranslationTaskIndicator },
+  } = getEe();
+
   const project = useProject();
   const { t } = useTranslate();
   const translation = keyData.translations[lang];

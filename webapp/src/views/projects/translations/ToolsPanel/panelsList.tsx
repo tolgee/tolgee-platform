@@ -22,7 +22,7 @@ export const PANELS_WHEN_INACTIVE = [
   },
 ];
 
-const basePanels = [
+const BASE_PANELS = [
   {
     id: 'machine_translation',
     icon: <Mt />,
@@ -52,14 +52,10 @@ const basePanels = [
   },
 ] satisfies PanelConfig[];
 
-const { translationPanelAdder } = getEe();
-
-translationPanelAdder();
-
 export function addPanelAfter(panels: PanelConfig[], afterId: string) {
   return () => {
     const newPanels: PanelConfig[] = [];
-    basePanels.forEach((operation) => {
+    BASE_PANELS.forEach((operation) => {
       newPanels.push(operation);
       if (operation.id === afterId) {
         newPanels.push(...panels);
@@ -69,4 +65,8 @@ export function addPanelAfter(panels: PanelConfig[], afterId: string) {
   };
 }
 
-export const PANELS = basePanels;
+export function getPanels() {
+  const { translationPanelAdder } = getEe();
+
+  return translationPanelAdder();
+}

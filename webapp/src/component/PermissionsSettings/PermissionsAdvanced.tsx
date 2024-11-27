@@ -10,14 +10,14 @@ type Props = {
   allLangs?: LanguageModel[];
 };
 
-const { PermissionsAdvanced: PermissionsAdvancedEe } = getEe();
-
 export const PermissionsAdvanced: React.FC<Props> = ({
   dependencies,
   state,
   onChange,
   allLangs,
 }) => {
+  const { PermissionsAdvanced: PermissionsAdvancedEe } = getEe();
+
   const { isEnabled } = useEnabledFeatures();
 
   if (!isEnabled('GRANULAR_PERMISSIONS')) {

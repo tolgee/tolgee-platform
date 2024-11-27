@@ -11,14 +11,14 @@ import { getEe } from '../../plugin/getEe';
 
 type Props = BaseViewProps;
 
-const {
-  organization: { Usage: EeUsage },
-} = getEe();
-
 export const BaseProjectView: React.FC<Props> = ({
   navigation,
   ...otherProps
 }) => {
+  const {
+    organization: { Usage: EeUsage },
+  } = getEe();
+
   const project = useProject() as ReturnType<typeof useProject> | undefined;
 
   const history = useHistory();

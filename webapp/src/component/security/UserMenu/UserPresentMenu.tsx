@@ -45,12 +45,12 @@ const StyledDivider = styled('div')`
       : theme.palette.emphasis[400]};
 `;
 
-const {
-  billing: { billingMenuItems },
-  tasks: { useUserTaskCount },
-} = getEe();
-
 export const UserPresentMenu: React.FC = () => {
+  const {
+    billing: { billingMenuItems },
+    tasks: { useUserTaskCount },
+  } = getEe();
+
   const { logout } = useGlobalActions();
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();

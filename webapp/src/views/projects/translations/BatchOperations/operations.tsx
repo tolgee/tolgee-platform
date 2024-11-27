@@ -42,9 +42,9 @@ export function addOperationAfter(
 
 export type BatchOperationAdder = ReturnType<typeof addOperationAfter>;
 
-const { useAddBatchOperations: useAddEeBatchOperations } = getEe();
-
 export const useBatchOperations = () => {
+  const { useAddBatchOperations: useAddEeBatchOperations } = getEe();
+
   const { satisfiesPermission } = useProjectPermissions();
 
   const { t } = useTranslate();

@@ -16,10 +16,6 @@ import { OrganizationSwitch } from 'tg.component/organizationSwitch/Organization
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { getEe } from '../../plugin/getEe';
 
-const {
-  organization: { Usage: EeUsage },
-} = getEe();
-
 const StyledWrapper = styled('div')`
   display: flex;
   flex-direction: column;
@@ -31,6 +27,10 @@ const StyledWrapper = styled('div')`
 `;
 
 export const ProjectListView = () => {
+  const {
+    organization: { Usage: EeUsage },
+  } = getEe();
+
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const { preferredOrganization } = usePreferredOrganization();

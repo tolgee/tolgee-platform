@@ -28,11 +28,11 @@ const IntegrateView = React.lazy(() =>
   }))
 );
 
-const {
-  routes: { Project: EeRoutes },
-} = getEe();
-
 export const ProjectRouter = () => {
+  const {
+    routes: { Project: EeRoutes },
+  } = getEe();
+
   const match = useRouteMatch();
 
   const projectId = match.params[PARAMS.PROJECT_ID];

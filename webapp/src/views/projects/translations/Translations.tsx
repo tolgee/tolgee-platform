@@ -33,11 +33,11 @@ const StyledContainer = styled('div')`
   grid-template-columns: 1fr auto;
 `;
 
-const {
-  tasks: { TranslationsTaskDetail: EeTranslationsTaskDetail },
-} = getEe();
-
 export const Translations = () => {
+  const {
+    tasks: { TranslationsTaskDetail: EeTranslationsTaskDetail },
+  } = getEe();
+
   const { setQuickStartOpen, quickStartForceFloating } = useGlobalActions();
   const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);

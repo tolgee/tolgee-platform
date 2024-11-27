@@ -7,11 +7,11 @@ type Props = {
   prefilter?: PrefilterType;
 };
 
-const {
-  tasks: { PrefilterTask: EePrefilterTask },
-} = getEe();
-
 export const Prefilter = ({ prefilter }: Props) => {
+  const {
+    tasks: { PrefilterTask: EePrefilterTask },
+  } = getEe();
+
   if (prefilter?.activity) {
     return <PrefilterActivity revisionId={prefilter.activity} />;
   } else if (prefilter?.failedJob) {

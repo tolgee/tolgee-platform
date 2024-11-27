@@ -22,7 +22,7 @@ import { OrganizationSubscriptionsView } from 'tg.ee/billing/Subscriptions/Organ
 import { OrganizationInvoicesView } from 'tg.ee/billing/Invoices/OrganizationInvoicesView';
 import { OrganizationBillingView } from 'tg.ee/billing/OrganizationBillingView';
 import { OrganizationBillingTestClockHelperView } from 'tg.ee/billing/OrganizationBillingTestClockHelperView';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { ProjectTasksView } from 'tg.ee/task/views/projectTasks/ProjectTasksView';
 import { addOperationAfter } from 'tg.views/projects/translations/BatchOperations/operations';
 import { OperationTaskCreate } from 'tg.ee/batchOperations/OperationTaskCreate';
@@ -52,13 +52,15 @@ export const eePlugin: PluginType = {
       Usage,
     },
     routes: {
-      Root: () => (
-        <>
-          <PrivateRoute exact path={LINKS.MY_TASKS.template}>
-            <MyTasksView />
-          </PrivateRoute>
-        </>
-      ),
+      Root: () => {
+        return (
+          <Switch>
+            <PrivateRoute exact path={LINKS.MY_TASKS.template}>
+              <MyTasksView />
+            </PrivateRoute>
+          </Switch>
+        );
+      },
       Administration: () => (
         <>
           <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>

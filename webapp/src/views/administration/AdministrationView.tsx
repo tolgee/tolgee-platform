@@ -8,11 +8,11 @@ import { AdministrationUsers } from './AdministrationUsers';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { getEe } from '../../plugin/getEe';
 
-const {
-  routes: { Administration: eeRoutes },
-} = getEe();
-
 export const AdministrationView = () => {
+  const {
+    routes: { Administration: eeRoutes },
+  } = getEe();
+
   const [search, setSearch] = useUrlSearchState('search');
 
   return (

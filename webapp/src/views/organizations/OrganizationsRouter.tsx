@@ -15,10 +15,6 @@ import { useOrganization } from './useOrganization';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
 import { getEe } from '../../plugin/getEe';
 
-const {
-  routes: { Organization: EeOrganization },
-} = getEe();
-
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
   const isAdmin = useIsAdmin();
@@ -62,6 +58,10 @@ const SpecificOrganizationRouter = () => {
 };
 
 export const OrganizationsRouter = () => {
+  const {
+    routes: { Organization: EeOrganization },
+  } = getEe();
+
   return (
     <Switch>
       <PrivateRoute exact path={LINKS.ORGANIZATIONS_ADD.template}>

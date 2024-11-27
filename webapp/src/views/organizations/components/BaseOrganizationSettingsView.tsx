@@ -23,10 +23,6 @@ type Props = BaseViewProps & {
   link: Link;
 };
 
-const {
-  organization: { Usage: EeUsage },
-} = getEe();
-
 export const BaseOrganizationSettingsView: React.FC<Props> = ({
   children,
   loading,
@@ -34,6 +30,10 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   link,
   ...otherProps
 }) => {
+  const {
+    organization: { Usage: EeUsage },
+  } = getEe();
+
   const config = useConfig();
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
