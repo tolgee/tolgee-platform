@@ -1,6 +1,6 @@
 import { Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { StyledBillingHint } from './Decorations';
+import { StyledBillingHint } from 'tg.ee/billing/component/Decorations';
 
 export const MtHint: React.FC = ({ children }) => {
   const { t } = useTranslate();

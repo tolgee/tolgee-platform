@@ -4,8 +4,8 @@ import { Box, styled } from '@mui/material';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { PlanType } from 'tg.component/billing/Plan/types';
-import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
+import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
+import { PlanType } from 'tg.ee/billing/component/Plan/types';
 
 export const StyledContainer = styled(Box)`
   justify-self: center;

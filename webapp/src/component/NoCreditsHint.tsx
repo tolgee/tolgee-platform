@@ -3,8 +3,8 @@ import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { Link as MuiLink, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { MtHint } from './billing/MtHint';
 import { useErrorTranslation } from 'tg.translationTools/useErrorTranslation';
+import { MtHint } from './billing/MtHint';
 
 type Props = {
   code: string;

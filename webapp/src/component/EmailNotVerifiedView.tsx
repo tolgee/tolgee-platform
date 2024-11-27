@@ -4,7 +4,6 @@ import { messageService } from 'tg.service/MessageService';
 import { T, useTranslate } from '@tolgee/react';
 import { useEmailAwaitingVerification } from 'tg.globalContext/helpers';
 import { LINKS } from 'tg.constants/links';
-import { Usage } from 'tg.component/billing/Usage';
 import { StyledWrapper } from 'tg.component/searchSelect/SearchStyled';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseView } from 'tg.component/layout/BaseView';
@@ -122,11 +121,10 @@ export const EmailNotVerifiedView = () => {
     <StyledWrapper>
       <DashboardPage>
         <BaseView
-          windowTitle={t('projects_title')}
+          windowTitle={t('verify_email_title')}
           maxWidth={1000}
           allCentered
           hideChildrenOnLoading={false}
-          navigationRight={<Usage />}
         >
           <StyledContainer>
             <StyledHeader variant="h4">

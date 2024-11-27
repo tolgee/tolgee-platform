@@ -16,7 +16,7 @@ import { TaskMenu } from './TaskMenu';
 import { TaskTypeChip } from './TaskTypeChip';
 import { TaskState } from './TaskState';
 import { TaskAssignees } from './TaskAssignees';
-import { getTaskRedirect } from './utils';
+import { getTaskUrl } from './utils';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -87,7 +87,7 @@ export const BoardItem = ({
     <StyledContainer
       component={Link}
       // @ts-ignore
-      to={getTaskRedirect(project, task.number)}
+      to={getTaskUrl(project, task.number)}
     >
       <StyledRow>
         <TaskLabel task={task} hideType />

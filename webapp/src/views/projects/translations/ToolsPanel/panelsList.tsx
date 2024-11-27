@@ -5,14 +5,13 @@ import { TranslationMemory } from './panels/TranslationMemory/TranslationMemory'
 import { Comments, commentsCount } from './panels/Comments/Comments';
 import { History } from './panels/History/History';
 import {
-  Keyboard02,
   ClockRewind,
-  ClipboardCheck,
+  Keyboard02,
   MessageTextSquare02,
 } from '@untitled-ui/icons-react';
 import { PanelConfig } from './common/types';
 import { KeyboardShortcuts } from './panels/KeyboardShortcuts/KeyboardShortcuts';
-import { Tasks, tasksCount } from './panels/Tasks/Tasks';
+import { getEe } from '../../../../plugin/getEe';
 
 export const PANELS_WHEN_INACTIVE = [
   {
@@ -23,7 +22,7 @@ export const PANELS_WHEN_INACTIVE = [
   },
 ];
 
-export const PANELS = [
+const basePanels = [
   {
     id: 'machine_translation',
     icon: <Mt />,
@@ -51,15 +50,23 @@ export const PANELS = [
     name: <T keyName="translation_tools_history" />,
     component: History,
   },
-  {
-    id: 'tasks',
-    icon: <ClipboardCheck />,
-    name: <T keyName="translation_tools_tasks" />,
-    component: Tasks,
-    itemsCountFunction: tasksCount,
-    displayPanel: ({ projectPermissions }) =>
-      projectPermissions.satisfiesPermission('tasks.view'),
-    hideWhenCountZero: true,
-    hideCount: true,
-  },
 ] satisfies PanelConfig[];
+
+const { translationPanelAdder } = getEe();
+
+translationPanelAdder();
+
+export function addPanelAfter(panels: PanelConfig[], afterId: string) {
+  return () => {
+    const newPanels: PanelConfig[] = [];
+    basePanels.forEach((operation) => {
+      newPanels.push(operation);
+      if (operation.id === afterId) {
+        newPanels.push(...panels);
+      }
+    });
+    return newPanels;
+  };
+}
+
+export const PANELS = basePanels;

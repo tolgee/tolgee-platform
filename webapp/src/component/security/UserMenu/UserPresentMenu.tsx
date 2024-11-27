@@ -10,27 +10,18 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import {
-  useConfig,
-  useOrganizationUsage,
-  usePreferredOrganization,
-  useUser,
-} from 'tg.globalContext/helpers';
+import { usePreferredOrganization, useUser } from 'tg.globalContext/helpers';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
-import { getProgressData } from 'tg.component/billing/utils';
 
 import { MenuHeader } from './MenuHeader';
 import { OrganizationSwitch } from './OrganizationSwitch';
-import { BillingItem } from './BillingItem';
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { getEe } from '../../../plugin/getEe';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -54,20 +45,22 @@ const StyledDivider = styled('div')`
       : theme.palette.emphasis[400]};
 `;
 
+const {
+  billing: { billingMenuItems },
+  tasks: { useUserTaskCount },
+} = getEe();
+
 export const UserPresentMenu: React.FC = () => {
   const { logout } = useGlobalActions();
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
   const { t } = useTranslate();
-  const config = useConfig();
   const location = useLocation();
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser()!;
   const userMenuItems = useUserMenuItems();
-  const { usage } = useOrganizationUsage();
-  const progressData = usage && getProgressData(usage);
-  const taskCount = useGlobalContext((c) => c.initialData.userTasks);
+  const taskCount = useUserTaskCount();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -88,11 +81,6 @@ export const UserPresentMenu: React.FC = () => {
     setAnchorEl(null);
     history.push(LINKS.ORGANIZATIONS_ADD.build());
   };
-
-  const showBilling =
-    config.billing.enabled &&
-    (preferredOrganization?.currentUserRole === 'OWNER' ||
-      user.globalServerRole === 'ADMIN');
 
   const getOrganizationMenuItems = () =>
     [
@@ -192,13 +180,7 @@ export const UserPresentMenu: React.FC = () => {
               </MenuItem>
             ))}
 
-            {showBilling && (
-              <BillingItem
-                progressData={progressData}
-                onClose={handleClose}
-                organizationSlug={preferredOrganization.slug}
-              />
-            )}
+            {billingMenuItems}
 
             <OrganizationSwitch
               onSelect={handleSelectOrganization}

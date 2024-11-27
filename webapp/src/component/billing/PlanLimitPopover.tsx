@@ -1,23 +1,23 @@
-import { styled } from '@mui/material';
 import {
   Button,
   DialogActions,
   DialogContent,
-  DialogTitle,
   DialogContentText,
+  DialogTitle,
   Popover,
+  styled,
 } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import {
-  usePreferredOrganization,
   useOrganizationUsage,
+  usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import { USAGE_ELEMENT_ID } from './Usage';
-import { UsageDetailed } from './UsageDetailed';
-import { getProgressData } from './utils';
+import { USAGE_ELEMENT_ID } from 'tg.ee/billing/component/Usage';
+import { UsageDetailed } from 'tg.ee/billing/component/UsageDetailed';
+import { getProgressData } from 'tg.ee/billing/component/utils';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;

@@ -1,5 +1,6 @@
 import { TranslateParams } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
+import { TaskReferenceData } from '../../plugin/PluginType';
 
 type ModifiedEntityModel = components['schemas']['ModifiedEntityModel'];
 export type TranslationHistoryModel =
@@ -7,8 +8,6 @@ export type TranslationHistoryModel =
 export type ActionType = components['schemas']['ProjectActivityModel']['type'];
 export type ProjectActivityModel =
   components['schemas']['ProjectActivityModel'];
-
-type TaskModel = components['schemas']['TaskModel'];
 
 export type DiffValue<T = string> = {
   old?: T;
@@ -119,13 +118,6 @@ export type ContentStorageReferenceData = {
 export type WebhookConfigReferenceData = {
   type: 'webhook_config';
   url: string;
-};
-
-export type TaskReferenceData = {
-  type: 'task';
-  name: string;
-  taskType: TaskModel['type'];
-  number: number;
 };
 
 export type Reference =

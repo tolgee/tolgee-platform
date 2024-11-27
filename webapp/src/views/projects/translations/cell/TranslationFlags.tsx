@@ -1,26 +1,18 @@
-import clsx from 'clsx';
-import { useState } from 'react';
-import { Box, Dialog, styled, useTheme } from '@mui/material';
-import { XClose, Flag02, ClipboardCheck } from '@untitled-ui/icons-react';
+import { Box, styled } from '@mui/material';
+import { Flag02, XClose } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { AutoTranslationIcon } from 'tg.component/AutoTranslationIcon';
-import {
-  StyledImgWrapper,
-  TranslationFlagIcon,
-} from 'tg.component/TranslationFlagIcon';
-import { stopAndPrevent } from 'tg.fixtures/eventHandler';
-import { TaskTooltip } from 'tg.ee/task/components/TaskTooltip';
-import { TaskDetail } from 'tg.ee/task/components/TaskDetail';
+import { TranslationFlagIcon } from 'tg.component/TranslationFlagIcon';
 
 import { useTranslationsActions } from '../context/TranslationsContext';
+import { getEe } from '../../../../plugin/getEe';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
-type TaskModel = components['schemas']['TaskModel'];
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -38,7 +30,7 @@ const ActiveFlagCircle = styled(Flag02)`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const StyledContainer = styled(Box)`
+export const StyledTranslationFlagsContainer = styled(Box)`
   display: inline-flex;
   flex-grow: 0;
   align-items: center;
@@ -67,19 +59,21 @@ type Props = {
   className?: string;
 };
 
+const {
+  tasks: { TranslationTaskIndicator: EeTranslationTaskIndicator },
+} = getEe();
+
 export const TranslationFlags: React.FC<Props> = ({
   keyData,
   lang,
   className,
 }) => {
-  const theme = useTheme();
   const project = useProject();
   const { t } = useTranslate();
   const translation = keyData.translations[lang];
   const task = keyData.tasks?.find((t) => t.languageTag === lang);
 
   const { updateTranslation } = useTranslationsActions();
-  const [taskDetailData, setTaskDetailData] = useState<TaskModel>();
 
   const clearAutoTranslatedState = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state',
@@ -131,24 +125,9 @@ export const TranslationFlags: React.FC<Props> = ({
 
   return (
     <StyledWrapper className={className}>
-      {task && (
-        <TaskTooltip
-          taskNumber={task.number}
-          project={project}
-          newTaskActions={true}
-        >
-          <StyledContainer
-            className={clsx({ clickDisabled: true })}
-            data-cy="translations-task-indicator"
-          >
-            <StyledImgWrapper>
-              <ClipboardCheck color={theme.palette.text.primary} />
-            </StyledImgWrapper>
-          </StyledContainer>
-        </TaskTooltip>
-      )}
+      <EeTranslationTaskIndicator task={task} />
       {translation?.auto && (
-        <StyledContainer data-cy="translations-auto-translated-indicator">
+        <StyledTranslationFlagsContainer data-cy="translations-auto-translated-indicator">
           <AutoTranslationIcon provider={translation.mtProvider} />
           <StyledClearButton
             role="button"
@@ -156,10 +135,10 @@ export const TranslationFlags: React.FC<Props> = ({
             data-cy="translations-auto-translated-clear-button"
             className="clearButton"
           />
-        </StyledContainer>
+        </StyledTranslationFlagsContainer>
       )}
       {translation?.outdated && (
-        <StyledContainer data-cy="translations-outdated-indicator">
+        <StyledTranslationFlagsContainer data-cy="translations-outdated-indicator">
           <TranslationFlagIcon
             tooltip={t('translations_cell_outdated')}
             icon={<ActiveFlagCircle />}
@@ -170,22 +149,7 @@ export const TranslationFlags: React.FC<Props> = ({
             data-cy="translations-outdated-clear-button"
             className="clearButton"
           />
-        </StyledContainer>
-      )}
-      {taskDetailData && (
-        <Dialog
-          open={true}
-          onClose={() => setTaskDetailData(undefined)}
-          maxWidth="xl"
-          onClick={stopAndPrevent()}
-        >
-          <TaskDetail
-            taskNumber={taskDetailData.number}
-            onClose={() => setTaskDetailData(undefined)}
-            projectId={project.id}
-            task={taskDetailData}
-          />
-        </Dialog>
+        </StyledTranslationFlagsContainer>
       )}
     </StyledWrapper>
   );

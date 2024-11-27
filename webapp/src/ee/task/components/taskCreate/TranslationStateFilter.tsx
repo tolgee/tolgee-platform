@@ -1,19 +1,20 @@
 import { XClose } from '@untitled-ui/icons-react';
 import {
+  Box,
   Checkbox,
+  IconButton,
   ListItemText,
   MenuItem,
+  Select,
   styled,
   SxProps,
-  Select,
-  Box,
-  IconButton,
 } from '@mui/material';
 import { StateType, TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { stopBubble } from 'tg.fixtures/eventHandler';
-import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
-
-export type TranslationStateType = StateType | 'OUTDATED';
+import {
+  TranslationStateType,
+  useStateTranslation,
+} from 'tg.translationTools/useStateTranslation';
 
 const StyledDot = styled('div')`
   width: 8px;

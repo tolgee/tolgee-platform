@@ -12,8 +12,8 @@
       "tg.views/*": ["views/*"],
       "tg.error/*": ["error/*"],
       "tg.svgs/*": ["svgs/*"],
-      "tg.translationTools/*": ["translationTools/*"],
       "tg.ee/*": ["ee/*"],
+      "tg.translationTools/*": ["translationTools/*"],
       "tg.websocket-client/*": ["websocket-client/*"]
     }
   }

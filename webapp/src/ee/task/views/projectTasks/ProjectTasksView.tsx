@@ -20,7 +20,7 @@ import { TaskDetail } from 'tg.ee/task/components/TaskDetail';
 import { TasksList } from './TasksList';
 import { ProjectTasksBoard } from './ProjectTasksBoard';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
-import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -113,7 +113,9 @@ export const ProjectTasksView = () => {
     >
       {!taskFeature ? (
         <Box>
-          <PaidFeatureBanner customMessage={t('tasks_feature_description')} />
+          <DisabledFeatureBanner
+            customMessage={t('tasks_feature_description')}
+          />
         </Box>
       ) : (
         <>

@@ -4,7 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckBoxGroupMultiSelect';
+import { CheckBoxGroupMultiSelect } from 'tg.ee/PermissionsAdvanced/CheckBoxGroupMultiSelect';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';

@@ -1,8 +1,8 @@
 import { Box, styled } from '@mui/material';
 import clsx from 'clsx';
-import { BillingProgress } from 'tg.component/billing/BillingProgress';
-import { BILLING_CRITICAL_FRACTION } from 'tg.component/billing/constants';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
+import { BillingProgress } from '../component/BillingProgress';
+import { BILLING_CRITICAL_FRACTION } from '../component/constants';
 
 export const StyledMetrics = styled('div')`
   display: grid;

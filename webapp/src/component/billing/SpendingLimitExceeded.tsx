@@ -11,8 +11,8 @@ import {
 import { T } from '@tolgee/react';
 
 import { useOrganizationUsage } from 'tg.globalContext/helpers';
-import { USAGE_ELEMENT_ID } from './Usage';
-import { getProgressData } from './utils';
+import { USAGE_ELEMENT_ID } from 'tg.ee/billing/component/Usage';
+import { getProgressData } from 'tg.ee/billing/component/utils';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;

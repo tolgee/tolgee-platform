@@ -3,18 +3,15 @@ import { Box, styled, useTheme } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 import { SelfHostedEeSubscriptionActions } from './SelfHostedEeSubscriptionActions';
-import {
-  PlanContainer,
-  PlanContent,
-} from 'tg.component/billing/Plan/PlanStyles';
-import { SelfHostedEeEstimatedCosts } from 'tg.component/billing/ActiveSubscription/SelfHostedEeEstimatedCosts';
-import { ActivePlanTitle } from 'tg.component/billing/ActiveSubscription/ActivePlanTitle';
-import { PricePrimary } from 'tg.component/billing/Price/PricePrimary';
-import { PayAsYouGoPrices } from 'tg.component/billing/Price/PayAsYouGoPrices';
-import { IncludedUsage } from 'tg.component/billing/Plan/IncludedUsage';
-import { isPlanLegacy } from 'tg.component/billing/Plan/plansTools';
-import { ActiveSubscriptionBanner } from 'tg.component/billing/ActiveSubscription/ActiveSubscriptionBanner';
-import { CollapsedFeatures } from 'tg.component/billing/ActiveSubscription/CollapsedFeatures';
+import { PlanContainer, PlanContent } from '../../component/Plan/PlanStyles';
+import { isPlanLegacy } from '../../component/Plan/plansTools';
+import { ActiveSubscriptionBanner } from 'tg.ee/billing/component/ActiveSubscription/ActiveSubscriptionBanner';
+import { ActivePlanTitle } from 'tg.ee/billing/component/ActiveSubscription/ActivePlanTitle';
+import { SelfHostedEeEstimatedCosts } from 'tg.ee/billing/component/ActiveSubscription/SelfHostedEeEstimatedCosts';
+import { CollapsedFeatures } from 'tg.ee/billing/component/ActiveSubscription/CollapsedFeatures';
+import { IncludedUsage } from 'tg.ee/billing/component/Plan/IncludedUsage';
+import { PayAsYouGoPrices } from 'tg.ee/billing/component/Price/PayAsYouGoPrices';
+import { PricePrimary } from '../../component/Price/PricePrimary';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];

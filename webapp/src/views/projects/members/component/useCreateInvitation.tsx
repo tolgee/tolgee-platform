@@ -5,9 +5,9 @@ import {
   LanguagePermissions,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
-import { getScopeLanguagePermission } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { getScopeLanguagePermission } from 'tg.component/PermissionsSettings/hierarchyTools';
 
 type Props = {
   projectId: number;

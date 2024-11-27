@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import { useHistory } from 'react-router-dom';
-import { Usage } from 'tg.component/billing/Usage';
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
@@ -8,8 +7,13 @@ import { OrganizationSwitch } from 'tg.component/organizationSwitch/Organization
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { BatchOperationsSummary } from './translations/BatchOperations/OperationsSummary/OperationsSummary';
+import { getEe } from '../../plugin/getEe';
 
 type Props = BaseViewProps;
+
+const {
+  organization: { Usage: EeUsage },
+} = getEe();
 
 export const BaseProjectView: React.FC<Props> = ({
   navigation,
@@ -44,7 +48,7 @@ export const BaseProjectView: React.FC<Props> = ({
       navigationRight={
         <Box display="grid">
           <BatchOperationsSummary />
-          <Usage />
+          <EeUsage />
         </Box>
       }
     />

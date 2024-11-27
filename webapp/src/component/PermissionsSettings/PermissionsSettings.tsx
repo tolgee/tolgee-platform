@@ -2,7 +2,7 @@ import { Box, Button, ButtonGroup, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useEffect, useState } from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
-import { PermissionsAdvanced } from 'tg.ee/PermissionsAdvanced/PermissionsAdvanced';
+import { PermissionsAdvanced } from './PermissionsAdvanced';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { PermissionsBasic } from './PermissionsBasic';

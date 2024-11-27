@@ -15,13 +15,17 @@ import {
   useIsAdmin,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import { Usage } from 'tg.component/billing/Usage';
+import { getEe } from '../../../plugin/getEe';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
 type Props = BaseViewProps & {
   link: Link;
 };
+
+const {
+  organization: { Usage: EeUsage },
+} = getEe();
 
 export const BaseOrganizationSettingsView: React.FC<Props> = ({
   children,
@@ -116,7 +120,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       {...otherProps}
       loading={organizationLoadable.isLoading || loading}
       navigation={[...navigationPrefix, ...(navigation || [])]}
-      navigationRight={<Usage />}
+      navigationRight={<EeUsage />}
       menuItems={menuItems}
       hideChildrenOnLoading={false}
     >

@@ -5,7 +5,6 @@ import { Box, Button, Typography } from '@mui/material';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
@@ -15,6 +14,7 @@ import { CdNotConfiguredAlert } from '../CdNotConfiguredAlert';
 import { StorageEditDialog } from './StorageEditDialog';
 import { StorageItem } from './StorageItem';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 export const StorageList = () => {
   const project = useProject();
@@ -94,7 +94,7 @@ export const StorageList = () => {
       />
       {!isEnabled && (
         <Box mt={6}>
-          <PaidFeatureBanner
+          <DisabledFeatureBanner
             customTitle={
               itemsCount === 0 ? undefined : t('storage_over_limit_title')
             }

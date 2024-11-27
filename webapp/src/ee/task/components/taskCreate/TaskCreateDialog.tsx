@@ -28,10 +28,9 @@ import { User } from 'tg.component/UserAccount';
 
 import { TaskDatePicker } from '../TaskDatePicker';
 import { TaskPreview } from './TaskPreview';
-import {
-  TranslationStateFilter,
-  TranslationStateType,
-} from './TranslationStateFilter';
+import { TranslationStateFilter } from './TranslationStateFilter';
+import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
+import { StateType } from 'tg.constants/translationStates';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -174,7 +173,9 @@ export const TaskCreateDialog = ({
             {
               path: { projectId },
               query: {
-                filterState: stateFilters.filter((i) => i !== 'OUTDATED'),
+                filterState: stateFilters.filter(
+                  (i) => i !== 'OUTDATED'
+                ) as StateType[],
                 filterOutdated: stateFilters.includes('OUTDATED'),
               },
               content: {

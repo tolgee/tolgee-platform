@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Tooltip, styled } from '@mui/material';
+import { Checkbox, FormControlLabel, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import {
   HierarchyItem,
@@ -9,16 +9,16 @@ import {
 } from 'tg.component/PermissionsSettings/types';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
 import {
+  ALL_LANGUAGES_SCOPES,
   checkChildren,
+  getBlockingScopes,
   getChildScopes,
   getLanguagesUnion,
   getScopeLanguagePermission,
-  updateByDependencies,
-  getBlockingScopes,
-  updateByDependenciesSoftly,
   isAllLanguages,
-  ALL_LANGUAGES_SCOPES,
-} from './hierarchyTools';
+  updateByDependencies,
+  updateByDependenciesSoftly,
+} from 'tg.component/PermissionsSettings/hierarchyTools';
 import { useScopeTranslations } from './useScopeTranslations';
 
 const StyledContainer = styled('div')`
