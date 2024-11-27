@@ -32,40 +32,45 @@ export const useAvailableFilters = (
     path: { projectId: project.id },
   });
 
+  const optionsToSend = [
+    {
+      label: t('translations_filters_heading_tags'),
+      value: null,
+      submenu:
+        tags.data?._embedded?.tags?.map((val) => {
+          return {
+            label: val.name,
+            value: encodeFilter({
+              filter: 'filterTag',
+              value: val.name,
+            }),
+          };
+        }) || [],
+    },
+  ];
+
+  if (project.useNamespaces) {
+    optionsToSend.push({
+      label: t('translations_filters_heading_namespaces'),
+      value: null,
+      submenu:
+        namespaces.data?._embedded?.namespaces?.map((val) => {
+          return {
+            label: val.name || t('namespace_default'),
+            value: encodeFilter({
+              filter: 'filterNamespace',
+              value: val.name || '',
+            }),
+          };
+        }) || [],
+    });
+  }
+
   const availableFilters: GroupType[] = [
     {
       name: null,
       type: 'multi',
-      options: [
-        {
-          label: t('translations_filters_heading_tags'),
-          value: null,
-          submenu:
-            tags.data?._embedded?.tags?.map((val) => {
-              return {
-                label: val.name,
-                value: encodeFilter({
-                  filter: 'filterTag',
-                  value: val.name,
-                }),
-              };
-            }) || [],
-        },
-        {
-          label: t('translations_filters_heading_namespaces'),
-          value: null,
-          submenu:
-            namespaces.data?._embedded?.namespaces?.map((val) => {
-              return {
-                label: val.name || t('namespace_default'),
-                value: encodeFilter({
-                  filter: 'filterNamespace',
-                  value: val.name || '',
-                }),
-              };
-            }) || [],
-        },
-      ],
+      options: optionsToSend,
     },
   ];
 
