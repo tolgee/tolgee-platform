@@ -3945,4 +3945,7 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="stanov" id="1732537248089-2">
+        <sqlFile path="classpath:db/changelog/enableUseNamespacesForProjectsWithNamespaces.sql" splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
