@@ -42,11 +42,11 @@ export const ProjectRouter = () => {
   );
 
   return (
-    <Switch>
-      <ProjectContext id={Number(projectId)}>
-        <ProjectPage>
-          {matchedTranslations?.isExact && <HideObserver />}
-          <React.Suspense fallback={<FullPageLoading />}>
+    <ProjectContext id={Number(projectId)}>
+      <ProjectPage>
+        {matchedTranslations?.isExact && <HideObserver />}
+        <React.Suspense fallback={<FullPageLoading />}>
+          <Switch>
             <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
               <SingleKeyView />
             </Route>
@@ -95,17 +95,16 @@ export const ProjectRouter = () => {
               <TaskRedirect />
             </Route>
 
-            <EeRoutes />
-
             {/*
               Preview section...
             */}
             <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
               <WebsocketPreview />
             </Route>
-          </React.Suspense>
-        </ProjectPage>
-      </ProjectContext>
-    </Switch>
+          </Switch>
+          <EeRoutes />
+        </React.Suspense>
+      </ProjectPage>
+    </ProjectContext>
   );
 };

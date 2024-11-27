@@ -10,7 +10,7 @@ import { getEe } from '../../plugin/getEe';
 
 export const AdministrationView = () => {
   const {
-    routes: { Administration: eeRoutes },
+    routes: { Administration: EeRoutes },
   } = getEe();
 
   const [search, setSearch] = useUrlSearchState('search');
@@ -30,8 +30,8 @@ export const AdministrationView = () => {
             setSearch={setSearch}
           />
         </PrivateRoute>
-        {eeRoutes}
       </Switch>
+      <EeRoutes />
     </>
   );
 };

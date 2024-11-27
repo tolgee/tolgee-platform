@@ -62,7 +62,7 @@ export const eePlugin: PluginType = {
         );
       },
       Administration: () => (
-        <>
+        <Switch>
           <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
             <AdministrationEeLicenseView />
           </PrivateRoute>
@@ -102,14 +102,14 @@ export const eePlugin: PluginType = {
           >
             <AdministrationEePlanEditView />
           </PrivateRoute>
-        </>
+        </Switch>
       ),
       Organization: () => {
         const config = useConfig();
         return (
           <>
             {config.billing.enabled && (
-              <>
+              <Switch>
                 <PrivateRoute path={LINKS.ORGANIZATION_SUBSCRIPTIONS.template}>
                   <OrganizationSubscriptionsView />
                 </PrivateRoute>
@@ -126,15 +126,17 @@ export const eePlugin: PluginType = {
                     <OrganizationBillingTestClockHelperView />
                   </PrivateRoute>
                 )}
-              </>
+              </Switch>
             )}
           </>
         );
       },
       Project: () => (
-        <Route path={LINKS.PROJECT_TASKS.template}>
-          <ProjectTasksView />
-        </Route>
+        <Switch>
+          <Route path={LINKS.PROJECT_TASKS.template}>
+            <ProjectTasksView />
+          </Route>
+        </Switch>
       ),
     },
     tasks: {

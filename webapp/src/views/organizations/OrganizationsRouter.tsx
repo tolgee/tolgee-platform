@@ -63,16 +63,17 @@ export const OrganizationsRouter = () => {
   } = getEe();
 
   return (
-    <Switch>
-      <PrivateRoute exact path={LINKS.ORGANIZATIONS_ADD.template}>
-        <OrganizationCreateView />
-      </PrivateRoute>
+    <>
+      <Switch>
+        <PrivateRoute exact path={LINKS.ORGANIZATIONS_ADD.template}>
+          <OrganizationCreateView />
+        </PrivateRoute>
 
+        <PrivateRoute path={LINKS.ORGANIZATION.template}>
+          <SpecificOrganizationRouter />
+        </PrivateRoute>
+      </Switch>
       <EeOrganization />
-
-      <PrivateRoute path={LINKS.ORGANIZATION.template}>
-        <SpecificOrganizationRouter />
-      </PrivateRoute>
-    </Switch>
+    </>
   );
 };
