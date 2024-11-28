@@ -12,8 +12,8 @@ import {
   usePermissionsStructure,
 } from 'tg.ee/PermissionsAdvanced/usePermissionsStructure';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { PermissionAdvancedState } from 'tg.component/PermissionsSettings/types';
-import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import { PermissionAdvancedState } from './types';
+import { SpinnerProgress } from '../SpinnerProgress';
 
 interface CheckBoxGroupMultiSelectProps {
   name: string;

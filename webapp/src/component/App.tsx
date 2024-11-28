@@ -10,7 +10,6 @@ import { Ga4Tag } from './Ga4Tag';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { globalContext } from 'tg.globalContext/globalActions';
 import { getEe } from '../plugin/getEe';
-import { GlobalLimitPopover } from 'tg.ee/billing/limitPopover/GlobalLimitPopover';
 
 const GlobalConfirmation = () => {
   const state = useGlobalContext((c) => c.confirmationDialog);
