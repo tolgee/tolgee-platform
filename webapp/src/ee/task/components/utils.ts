@@ -46,5 +46,3 @@ export const useTaskReport = () => {
   }
   return { downloadReport, isLoading: reportMutation.isLoading };
 };
-
-export const TASK_ACTIVE_STATES = ['NEW', 'IN_PROGRESS'] as TaskState[];

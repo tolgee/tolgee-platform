@@ -11,11 +11,11 @@ import { PrefilterContainer } from 'tg.views/projects/translations/prefilters/Co
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useUser } from 'tg.globalContext/helpers';
 import { usePrefilter } from 'tg.views/projects/translations/prefilters/usePrefilter';
-import { TaskState } from './TaskState';
+import { TaskState } from 'tg.component/task/TaskState';
 import { TaskTooltip } from './TaskTooltip';
-import { TASK_ACTIVE_STATES } from './utils';
 import { TaskLabel } from './TaskLabel';
 import { PrefilterTaskProps } from '../../../plugin/PluginType';
+import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 
 const StyledWarning = styled('div')`
   display: flex;

@@ -37,6 +37,7 @@ import { addPanelAfter } from 'tg.views/projects/translations/ToolsPanel/panelsL
 import { ClipboardCheck } from '@untitled-ui/icons-react';
 import { tasksCount, TasksPanel } from 'tg.ee/task/components/TasksPanel';
 import { TranslationsTaskDetail } from 'tg.ee/task/components/TranslationsTaskDetail';
+import { GlobalLimitPopover } from 'tg.ee/billing/limitPopover/GlobalLimitPopover';
 
 export const eePlugin: PluginType = {
   ee: {
@@ -46,6 +47,7 @@ export const eePlugin: PluginType = {
     PermissionsAdvanced: PermissionsAdvancedEe,
     billing: {
       billingMenuItems: [BillingMenuItem],
+      GlobalLimitPopover,
     },
     organization: {
       apps: SlackApp,

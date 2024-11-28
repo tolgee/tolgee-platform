@@ -2,7 +2,7 @@ import { styled } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { DiffValue } from '../types';
-import { TaskTypeChip } from 'tg.ee/task/components/TaskTypeChip';
+import { TaskTypeChip } from '../../task/TaskTypeChip';
 
 type Type = components['schemas']['TaskModel']['type'];
 

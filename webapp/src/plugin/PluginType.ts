@@ -13,6 +13,7 @@ export interface PluginType {
     PermissionsAdvanced: FC<PermissionsAdvancedEeProps>;
     billing: {
       billingMenuItems: FC<BillingMenuItemsProps>[];
+      GlobalLimitPopover: FC;
     };
     activity: {
       TaskReference: FC<TaskReferenceProps>;

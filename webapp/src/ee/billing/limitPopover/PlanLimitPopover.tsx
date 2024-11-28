@@ -4,15 +4,20 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Link,
   Popover,
   styled,
 } from '@mui/material';
 import { T } from '@tolgee/react';
+import { useHistory } from 'react-router-dom';
 
-import { useOrganizationUsage } from 'tg.globalContext/helpers';
-import { USAGE_ELEMENT_ID } from 'tg.ee/billing/component/Usage';
-import { getProgressData } from 'tg.ee/billing/component/utils';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import {
+  useOrganizationUsage,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
+import { USAGE_ELEMENT_ID } from '../component/Usage';
+import { UsageDetailed } from '../component/UsageDetailed';
+import { getProgressData } from '../component/utils';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -25,11 +30,20 @@ type Props = {
   open: boolean;
 };
 
-export const SpendingLimitExceededPopover: React.FC<Props> = ({
-  open,
-  onClose,
-}) => {
+export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
+  const { preferredOrganization } = usePreferredOrganization();
   const { usage } = useOrganizationUsage();
+  const isOwner = preferredOrganization?.currentUserRole === 'OWNER';
+  const history = useHistory();
+
+  const handleConfirm = () => {
+    onClose();
+    history.push(
+      LINKS.ORGANIZATION_BILLING.build({
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization!.slug,
+      })
+    );
+  };
 
   const anchorEl = document.getElementById(USAGE_ELEMENT_ID);
   const progressData = usage && getProgressData(usage);
@@ -41,7 +55,7 @@ export const SpendingLimitExceededPopover: React.FC<Props> = ({
       anchorEl={open ? anchorEl : undefined}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
-      data-cy="spending-limit-exceeded-popover"
+      data-cy="billing-limit-exceeded-popover"
       {...(anchorEl
         ? {
             anchorOrigin: { horizontal: 'right', vertical: 'bottom' },
@@ -53,12 +67,13 @@ export const SpendingLimitExceededPopover: React.FC<Props> = ({
           })}
     >
       <DialogTitle id="alert-dialog-title">
-        {<T keyName="spending_limit_dialog_title" />}
+        {<T keyName="plan_limit_dialog_title" />}
       </DialogTitle>
       <StyledDialogContent>
         <DialogContentText id="alert-dialog-description">
-          <SpendingLimitExceededDescription />
+          <T keyName="plan_limit_dialog_description" />
         </DialogContentText>
+        <UsageDetailed {...progressData} />
       </StyledDialogContent>
 
       <DialogActions>
@@ -68,24 +83,18 @@ export const SpendingLimitExceededPopover: React.FC<Props> = ({
           type="button"
           color="secondary"
         >
-          <T keyName="spending_limit_dialog_close" />
+          <T keyName="plan_limit_dialog_close" />
         </Button>
+        {isOwner && (
+          <Button
+            data-cy="global-confirmation-confirm"
+            color="primary"
+            onClick={handleConfirm}
+          >
+            <T keyName="plan_limit_dialog_go_to_billing" />
+          </Button>
+        )}
       </DialogActions>
     </Popover>
   ) : null;
 };
-
-export const SpendingLimitExceededDescription = () => (
-  <T
-    keyName="spending_limit_dialog_description"
-    params={{
-      email: (
-        <Link
-          href="mailto:billing@tolgee.io"
-          target="_blank"
-          rel="noreferrer noopener"
-        />
-      ),
-    }}
-  />
-);

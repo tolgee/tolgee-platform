@@ -1,6 +1,6 @@
 import { useTranslate } from '@tolgee/react';
 import { Tooltip } from '@mui/material';
-import { StyledBillingHint } from 'tg.ee/billing/component/Decorations';
+import { StyledBillingHint } from '../billing/Decorations';
 
 export const StringsHint: React.FC = ({ children }) => {
   const { t } = useTranslate();

@@ -13,8 +13,8 @@ import { BatchProgress } from 'tg.views/projects/translations/BatchOperations/Op
 
 import { TaskLabel } from './TaskLabel';
 import { TaskMenu } from './TaskMenu';
-import { TaskTypeChip } from './TaskTypeChip';
-import { TaskState } from './TaskState';
+import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
+import { TaskState } from 'tg.component/task/TaskState';
 import { TaskAssignees } from './TaskAssignees';
 import { getTaskUrl } from './utils';
 

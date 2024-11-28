@@ -83,7 +83,7 @@
     "tag-keys:deprecated": "tolgee tag --filter-not-extracted --filter-tag production --tag deprecated",
     "tag-keys:production": "tolgee tag --filter-extracted --tag production --untag deprecated 'draft: *' --untag-other production",
     "tag-keys": "npm run tag-keys:deprecated && npm run tag-keys:production",
-    "prepare": "npm run --prefix .. init-husky && node ./scripts/updateBranchInfo.mjs"
+    "prepare": "npm run --prefix .. init-husky && node ./scripts/updateBranchInfo.mjs && node ./scripts/prepareEe.cjs"
   },
   "eslintConfig": {
     "extends": [

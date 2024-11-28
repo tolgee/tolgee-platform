@@ -8,9 +8,9 @@ import {
   PanelContentProps,
 } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
-import { TASK_ACTIVE_STATES } from './utils';
 import { TaskTooltip } from './TaskTooltip';
 import { TaskLabel } from './TaskLabel';
+import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 
 const StyledContainer = styled('div')`
   display: flex;

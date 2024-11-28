@@ -4,7 +4,7 @@ import { useTaskStateTranslation } from 'tg.translationTools/useTaskStateTransla
 import { Scope } from 'tg.fixtures/permissions';
 
 import { BoardItem } from './BoardItem';
-import { useStateColor } from './TaskState';
+import { useStateColor } from 'tg.component/task/TaskState';
 
 type TaskModel = components['schemas']['TaskModel'];
 type TaskWithProjectModel = components['schemas']['TaskWithProjectModel'];

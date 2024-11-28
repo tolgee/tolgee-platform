@@ -2,7 +2,7 @@ import { Check } from '@untitled-ui/icons-react';
 import { Box, SxProps, Typography } from '@mui/material';
 import React from 'react';
 import { wrapIf } from 'tg.fixtures/wrapIf';
-import { StyledBillingLink } from './Decorations';
+import { StyledBillingLink } from 'tg.component/billing/Decorations';
 
 type Props = {
   name: React.ReactNode;

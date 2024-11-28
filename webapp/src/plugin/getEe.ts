@@ -1,4 +1,4 @@
-import { eePlugin } from '../eePlugin.ee';
+import { eePlugin } from '../eePlugin.local';
 
 export function getEe() {
   const ee = eePlugin.ee;

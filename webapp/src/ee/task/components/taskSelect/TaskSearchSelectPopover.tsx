@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Autocomplete,
+  Box,
+  Button,
+  InputBase,
   MenuItem,
   Popover,
-  Autocomplete,
-  InputBase,
-  Box,
   styled,
-  Button,
   SxProps,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
@@ -17,7 +17,9 @@ import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { TaskSearchSelectItem } from './TaskSearchSelectItem';
 import { Task } from './types';
-import { TASK_ACTIVE_STATES } from '../utils';
+
+import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
+import { StyledInput } from 'tg.component/searchSelect/SearchStyled';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 

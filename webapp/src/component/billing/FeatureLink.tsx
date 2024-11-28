@@ -1,4 +1,4 @@
-import { StyledBillingLink } from 'tg.ee/billing/component/Decorations';
+import { StyledBillingLink } from './Decorations';
 
 type Props = {
   href: string;

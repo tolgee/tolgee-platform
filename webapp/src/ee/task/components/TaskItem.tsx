@@ -12,7 +12,7 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { Scope } from 'tg.fixtures/permissions';
 import { TaskMenu } from './TaskMenu';
 import { TaskLabel } from './TaskLabel';
-import { TaskState } from './TaskState';
+import { TaskState } from 'tg.component/task/TaskState';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { TaskAssignees } from './TaskAssignees';
 import { getTaskUrl } from './utils';
