@@ -19,7 +19,7 @@ import {
   updateByDependencies,
   updateByDependenciesSoftly,
 } from './hierarchyTools';
-import { useScopeTranslations } from 'tg.ee/PermissionsAdvanced/useScopeTranslations';
+import { useScopeTranslations } from './useScopeTranslations';
 
 const StyledContainer = styled('div')`
   display: grid;

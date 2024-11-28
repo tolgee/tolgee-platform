@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
+import { PermissionModelScope } from './types';
 
 export const useScopeTranslations = () => {
   const { t } = useTranslate();
