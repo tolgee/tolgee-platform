@@ -6,11 +6,11 @@ import {
   FormLabel,
 } from '@mui/material';
 import { useField } from 'formik';
-import { Hierarchy } from 'tg.ee/PermissionsAdvanced/Hierarchy';
+import { Hierarchy } from './Hierarchy';
 import {
   limitStructureToOptions,
   usePermissionsStructure,
-} from 'tg.ee/PermissionsAdvanced/usePermissionsStructure';
+} from './usePermissionsStructure';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { PermissionAdvancedState } from './types';
 import { SpinnerProgress } from '../SpinnerProgress';

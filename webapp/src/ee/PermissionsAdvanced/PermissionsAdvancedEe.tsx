@@ -1,5 +1,5 @@
-import { Hierarchy } from './Hierarchy';
-import { usePermissionsStructure } from './usePermissionsStructure';
+import { Hierarchy } from 'tg.component/PermissionsSettings/Hierarchy';
+import { usePermissionsStructure } from 'tg.component/PermissionsSettings/usePermissionsStructure';
 import { PermissionsAdvancedEeProps } from '../../plugin/PluginType';
 import { FC } from 'react';
 

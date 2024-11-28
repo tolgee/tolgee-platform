@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { HierarchyType } from 'tg.component/PermissionsSettings/types';
+import { HierarchyType } from './types';
 import { Scope } from 'tg.fixtures/permissions';
 
 export function limitStructureToOptions(

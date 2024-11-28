@@ -24,7 +24,6 @@ import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent
 import { Alert } from '../../common/Alert';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { SpendingLimitExceededDescription } from './SpendingLimitExceededDesciption';
-import PasswordFieldWithValidation from '../PasswordFieldWithValidation';
 
 const StyledInputFields = styled('div')`
   display: grid;

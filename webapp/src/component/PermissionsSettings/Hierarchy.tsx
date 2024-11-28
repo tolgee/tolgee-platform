@@ -6,8 +6,8 @@ import {
   LanguageModel,
   PermissionAdvancedState,
   PermissionModelScope,
-} from 'tg.component/PermissionsSettings/types';
-import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
+} from './types';
+import { LanguagePermissionsMenu } from '../security/LanguagePermissionsMenu';
 import {
   ALL_LANGUAGES_SCOPES,
   checkChildren,
@@ -18,8 +18,8 @@ import {
   isAllLanguages,
   updateByDependencies,
   updateByDependenciesSoftly,
-} from 'tg.component/PermissionsSettings/hierarchyTools';
-import { useScopeTranslations } from './useScopeTranslations';
+} from './hierarchyTools';
+import { useScopeTranslations } from 'tg.ee/PermissionsAdvanced/useScopeTranslations';
 
 const StyledContainer = styled('div')`
   display: grid;
