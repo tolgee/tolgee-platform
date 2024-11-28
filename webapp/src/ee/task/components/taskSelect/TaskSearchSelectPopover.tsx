@@ -19,7 +19,6 @@ import { TaskSearchSelectItem } from './TaskSearchSelectItem';
 import { Task } from './types';
 
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
-import { StyledInput } from 'tg.component/searchSelect/SearchStyled';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
