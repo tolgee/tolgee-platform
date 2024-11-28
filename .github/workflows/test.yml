@@ -347,6 +347,13 @@ jobs:
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
+      - name: Check it builds without ee directory
+        run: |
+          rm -rf ./webapp/src/ee
+          npm install
+          npm run tsc
+          npm run build
+
   e2e-code-checks:
     name: E2E Static Check 🪲
     runs-on: ubuntu-latest
