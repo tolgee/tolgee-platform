@@ -14,6 +14,7 @@ import { OperationExportTranslations } from './OperationExportTranslations';
 import { FC } from 'react';
 import { OperationProps } from './types';
 import { getEe } from '../../../../plugin/getEe';
+import { createAdder } from 'tg.fixtures/pluginAdder';
 
 export type BatchOperation = {
   id: string;
@@ -24,23 +25,11 @@ export type BatchOperation = {
   component: FC<OperationProps>;
 };
 
-export function addOperationAfter(
-  operations: BatchOperation[],
-  afterId: string
-) {
-  return (existingOperations: BatchOperation[]) => {
-    const newOperations: BatchOperation[] = [];
-    existingOperations.forEach((operation) => {
-      newOperations.push(operation);
-      if (operation.id === afterId) {
-        newOperations.push(...operations);
-      }
-    });
-    return newOperations;
-  };
-}
+export const addOperations = createAdder<BatchOperation>({
+  referencingProperty: 'id',
+});
 
-export type BatchOperationAdder = ReturnType<typeof addOperationAfter>;
+export type BatchOperationAdder = ReturnType<typeof addOperations>;
 
 export const useBatchOperations = () => {
   const { useAddBatchOperations: useAddEeBatchOperations } = getEe();

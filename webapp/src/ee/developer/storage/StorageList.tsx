@@ -10,7 +10,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
-import { CdNotConfiguredAlert } from '../CdNotConfiguredAlert';
+import { CdNotConfiguredAlert } from 'tg.views/projects/developer/CdNotConfiguredAlert';
 import { StorageEditDialog } from './StorageEditDialog';
 import { StorageItem } from './StorageItem';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';

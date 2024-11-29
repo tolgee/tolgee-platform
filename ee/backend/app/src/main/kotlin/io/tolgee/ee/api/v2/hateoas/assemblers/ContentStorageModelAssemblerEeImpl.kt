@@ -5,10 +5,12 @@ import io.tolgee.hateoas.ee.contentStorage.ContentStorageModel
 import io.tolgee.hateoas.ee.contentStorage.ContentStorageModelAssembler
 import io.tolgee.hateoas.ee.contentStorage.S3ContentStorageConfigModel
 import io.tolgee.model.contentDelivery.ContentStorage
+import org.springframework.context.annotation.Primary
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 
 @Component
+@Primary
 class ContentStorageModelAssemblerEeImpl :
   RepresentationModelAssembler<ContentStorage, ContentStorageModel>,
   ContentStorageModelAssembler {

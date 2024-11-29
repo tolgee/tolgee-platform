@@ -14,7 +14,7 @@ import { usePrefilter } from 'tg.views/projects/translations/prefilters/usePrefi
 import { TaskState } from 'tg.component/task/TaskState';
 import { TaskTooltip } from './TaskTooltip';
 import { TaskLabel } from './TaskLabel';
-import { PrefilterTaskProps } from '../../../plugin/PluginType';
+import { PrefilterTaskProps } from '../../../plugin/EePluginType';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 
 const StyledWarning = styled('div')`

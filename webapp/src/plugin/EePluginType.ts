@@ -6,9 +6,10 @@ import {
 import { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { BatchOperationAdder } from 'tg.views/projects/translations/BatchOperations/operations';
-import { addPanelAfter } from 'tg.views/projects/translations/ToolsPanel/panelsList';
+import { addPanel } from 'tg.views/projects/translations/ToolsPanel/panelsList';
+import { DeveloperViewItemsAdder } from 'tg.views/projects/developer/developerViewItems';
 
-export interface PluginType {
+export interface EePluginType {
   ee?: {
     PermissionsAdvanced: FC<PermissionsAdvancedEeProps>;
     billing: {
@@ -35,7 +36,8 @@ export interface PluginType {
       Project: FC;
     };
     useAddBatchOperations: () => BatchOperationAdder;
-    translationPanelAdder: ReturnType<typeof addPanelAfter>;
+    translationPanelAdder: ReturnType<typeof addPanel>;
+    useAddDeveloperViewItems: () => DeveloperViewItemsAdder;
   };
 }
 

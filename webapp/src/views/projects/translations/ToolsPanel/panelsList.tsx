@@ -12,6 +12,7 @@ import {
 import { PanelConfig } from './common/types';
 import { KeyboardShortcuts } from './panels/KeyboardShortcuts/KeyboardShortcuts';
 import { getEe } from '../../../../plugin/getEe';
+import { createAdder } from 'tg.fixtures/pluginAdder';
 
 export const PANELS_WHEN_INACTIVE = [
   {
@@ -52,21 +53,10 @@ const BASE_PANELS = [
   },
 ] satisfies PanelConfig[];
 
-export function addPanelAfter(panels: PanelConfig[], afterId: string) {
-  return () => {
-    const newPanels: PanelConfig[] = [];
-    BASE_PANELS.forEach((operation) => {
-      newPanels.push(operation);
-      if (operation.id === afterId) {
-        newPanels.push(...panels);
-      }
-    });
-    return newPanels;
-  };
-}
+export const addPanel = createAdder<PanelConfig>({ referencingProperty: 'id' });
 
 export function getPanels() {
   const { translationPanelAdder } = getEe();
 
-  return translationPanelAdder();
+  return translationPanelAdder(BASE_PANELS);
 }

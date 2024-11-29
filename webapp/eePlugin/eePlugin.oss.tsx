@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { PluginType } from '../src/plugin/PluginType';
+import { EePluginType } from '../src/plugin/EePluginType';
 
 const NotIncludedInOss: FC = () => {
   return <div>Not included in OSS</div>;
@@ -9,7 +9,7 @@ const Empty: FC = () => {
   return null;
 };
 
-export const eePlugin: PluginType = {
+export const eePlugin: EePluginType = {
   ee: {
     activity: {
       TaskReference: NotIncludedInOss,
@@ -35,7 +35,7 @@ export const eePlugin: PluginType = {
       PrefilterTask: NotIncludedInOss,
       TranslationsTaskDetail: NotIncludedInOss,
     },
-
+    useAddDeveloperViewItems: () => () => [],
     useAddBatchOperations: () => () => [],
     translationPanelAdder: () => [],
   },

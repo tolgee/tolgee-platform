@@ -1,4 +1,4 @@
-import { PluginType } from '../src/plugin/PluginType';
+import { EePluginType } from './plugin/EePluginType';
 import { PermissionsAdvancedEe } from '../src/ee/PermissionsAdvanced/PermissionsAdvancedEe';
 import { BillingMenuItem } from '../src/ee/billing/component/UserMenu/BillingMenuItem';
 import { PrivateRoute } from '../src/component/common/PrivateRoute';
@@ -24,7 +24,7 @@ import { OrganizationBillingView } from '../src/ee/billing/OrganizationBillingVi
 import { OrganizationBillingTestClockHelperView } from '../src/ee/billing/OrganizationBillingTestClockHelperView';
 import { Route, Switch } from 'react-router-dom';
 import { ProjectTasksView } from '../src/ee/task/views/projectTasks/ProjectTasksView';
-import { addOperationAfter } from '../src/views/projects/translations/BatchOperations/operations';
+import { addOperations } from '../src/views/projects/translations/BatchOperations/operations';
 import { OperationTaskCreate } from '../src/ee/batchOperations/OperationTaskCreate';
 import { OperationTaskAddKeys } from '../src/ee/batchOperations/OperationTaskAddKeys';
 import { OperationTaskRemoveKeys } from '../src/ee/batchOperations/OperationTaskRemoveKeys';
@@ -33,13 +33,16 @@ import { useProjectPermissions } from '../src/hooks/useProjectPermissions';
 import { T, useTranslate } from '@tolgee/react';
 import { TranslationTaskIndicator } from '../src/ee/task/components/TranslationTaskIndicator';
 import { PrefilterTask } from '../src/ee/task/components/PrefilterTask';
-import { addPanelAfter } from '../src/views/projects/translations/ToolsPanel/panelsList';
+import { addPanel } from '../src/views/projects/translations/ToolsPanel/panelsList';
 import { ClipboardCheck } from '@untitled-ui/icons-react';
 import { tasksCount, TasksPanel } from '../src/ee/task/components/TasksPanel';
 import { TranslationsTaskDetail } from '../src/ee/task/components/TranslationsTaskDetail';
 import { GlobalLimitPopover } from '../src/ee/billing/limitPopover/GlobalLimitPopover';
+import { addDeveloperViewItems } from '../src/views/projects/developer/developerViewItems';
+import { StorageList } from '../src/ee/developer/storage/StorageList';
+import { WebhookList } from '../src/ee/developer/webhook/WebhookList';
 
-export const eePlugin: PluginType = {
+export const eePlugin: EePluginType = {
   ee: {
     activity: {
       TaskReference: TaskReference,
@@ -164,7 +167,7 @@ export const eePlugin: PluginType = {
       const taskFeature = features.includes('TASKS');
       const { t } = useTranslate();
 
-      return addOperationAfter(
+      return addOperations(
         [
           {
             id: 'task_create',
@@ -189,10 +192,10 @@ export const eePlugin: PluginType = {
             component: OperationTaskRemoveKeys,
           },
         ],
-        'export_translations'
+        { position: 'after', value: 'export_translations' }
       );
     },
-    translationPanelAdder: addPanelAfter(
+    translationPanelAdder: addPanel(
       [
         {
           id: 'tasks',
@@ -206,7 +209,37 @@ export const eePlugin: PluginType = {
           hideCount: true,
         },
       ],
-      'history'
+      { position: 'after', value: 'history' }
     ),
+    useAddDeveloperViewItems: () => {
+      const { t } = useTranslate();
+      return addDeveloperViewItems(
+        [
+          {
+            value: 'storage',
+            tab: {
+              label: t('developer_menu_storage'),
+              dataCy: 'developer-menu-storage',
+              condition: ({ satisfiesPermission }) =>
+                satisfiesPermission('content-delivery.manage'),
+            },
+            link: LINKS.PROJECT_STORAGE,
+            component: StorageList,
+          },
+          {
+            value: 'webhooks',
+            tab: {
+              label: t('developer_menu_webhooks'),
+              dataCy: 'developer-menu-webhooks',
+              condition: ({ satisfiesPermission }) =>
+                satisfiesPermission('webhooks.manage'),
+            },
+            link: LINKS.PROJECT_WEBHOOKS,
+            component: WebhookList,
+          },
+        ],
+        { position: 'after', value: 'content-delivery' }
+      );
+    },
   },
 };

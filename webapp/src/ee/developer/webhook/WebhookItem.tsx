@@ -19,7 +19,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
-import { CopyUrlItem } from '../CopyUrlItem';
+import { CopyUrlItem } from 'tg.views/projects/developer/CopyUrlItem';
 import { WebhookEditDialog } from './WebhookEditDialog';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
