@@ -1,7 +1,7 @@
 package io.tolgee.service.contentDelivery
 
-import io.tolgee.component.ContentStorageProvider
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
+import io.tolgee.component.contentStorageProvider.ContentStorageProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message

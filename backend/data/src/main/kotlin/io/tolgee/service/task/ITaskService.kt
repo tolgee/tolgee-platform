@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.task
 
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType

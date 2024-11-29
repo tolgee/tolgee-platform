@@ -27,17 +27,18 @@ import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.model.views.TranslationToTaskView
 import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.ITaskService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.task.ITaskService
 import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.annotation.Primary
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -48,6 +49,7 @@ import java.util.*
 import kotlin.math.max
 
 @Component
+@Primary
 class TaskService(
   private val taskRepository: TaskRepository,
   private val entityManager: EntityManager,
@@ -56,9 +58,6 @@ class TaskService(
   private val securityService: SecurityService,
   private val taskKeyRepository: TaskKeyRepository,
   private val authenticationFacade: AuthenticationFacade,
-  @Lazy
-  @Autowired
-  private val taskService: TaskService,
   private val assigneeNotificationService: AssigneeNotificationService,
   @Autowired
   private val platformTransactionManager: PlatformTransactionManager,
@@ -112,8 +111,8 @@ class TaskService(
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
   ): TaskWithScopeView {
-    val task = taskService.createSingleTask(projectId, dto, filters)
-    val prefetched = taskService.getPrefetchedTasks(listOf(task)).first()
+    val task = createSingleTask(projectId, dto, filters)
+    val prefetched = getPrefetchedTasks(listOf(task)).first()
     return getTaskWithScope(prefetched)
   }
 
@@ -134,11 +133,12 @@ class TaskService(
     filters: TranslationScopeFilters,
   ): Task {
     var lastErr = DataIntegrityViolationException("Error")
+
     repeat(10) {
       // necessary for proper transaction creation
       try {
         return executeInNewRepeatableTransaction(platformTransactionManager) {
-          val task = taskService.createTaskInTransaction(projectId, dto, filters)
+          val task = createTaskInTransaction(projectId, dto, filters)
           entityManager.flush()
           task.assignees.forEach {
             assigneeNotificationService.notifyNewAssignee(it, task)
@@ -507,6 +507,7 @@ class TaskService(
     }
   }
 
+  @Transactional
   fun getExcelFile(
     project: Project,
     taskNumber: Long,

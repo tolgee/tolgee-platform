@@ -1,4 +1,4 @@
-package io.tolgee.component
+package io.tolgee.component.contentStorageProvider
 
 import io.tolgee.model.contentDelivery.ContentStorage
 

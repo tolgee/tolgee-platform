@@ -162,8 +162,9 @@ dependencies {
     /**
      * EE MODULE
      */
-    implementation(project(':ee-app'))
-
+    if (gradle.ext.eeAppDirectoryExists) {
+        implementation(project(':ee-app'))
+    }
 
     /**
      * Dev module
