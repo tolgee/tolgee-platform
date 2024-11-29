@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { IconButton, MenuItem, Popover, styled } from '@mui/material';
-import { Link } from 'react-router-dom';
 
-import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
+import { UserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 
 import { ThemeItem } from './ThemeItem';
@@ -32,7 +31,6 @@ const StyledDivider = styled('div')`
 
 export const UserUnverifiedEmailMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const userMenuItems = useUserMenuItems();
   const { logout } = useGlobalActions();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -72,18 +70,7 @@ export const UserUnverifiedEmailMenu = () => {
         }}
         classes={{ paper: 'paper' }}
       >
-        {userMenuItems.map((item, index) => (
-          <MenuItem
-            key={index}
-            component={Link}
-            to={item.link}
-            selected={item.isSelected}
-            onClick={handleClose}
-            data-cy="user-menu-user-settings"
-          >
-            {item.label}
-          </MenuItem>
-        ))}
+        <UserMenuItems onClose={handleClose} />
 
         <StyledDivider />
         <LanguageItem />

@@ -35,8 +35,8 @@ export const eePlugin: EePluginType = {
       PrefilterTask: NotIncludedInOss,
       TranslationsTaskDetail: NotIncludedInOss,
     },
-    useAddDeveloperViewItems: () => () => [],
-    useAddBatchOperations: () => () => [],
-    translationPanelAdder: () => [],
+    useAddDeveloperViewItems: () => (existingItems) => existingItems,
+    useAddBatchOperations: () => (existingItems) => existingItems,
+    translationPanelAdder: (existingItems) => existingItems,
   },
 };

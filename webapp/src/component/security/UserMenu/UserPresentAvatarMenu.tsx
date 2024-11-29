@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Badge,
-  Box,
-  IconButton,
-  MenuItem,
-  Popover,
-  styled,
-} from '@mui/material';
+import { Badge, IconButton, MenuItem, Popover, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import { usePreferredOrganization, useUser } from 'tg.globalContext/helpers';
-import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
+import { UserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
@@ -45,11 +38,13 @@ const StyledDivider = styled('div')`
       : theme.palette.emphasis[400]};
 `;
 
-export const UserPresentMenu: React.FC = () => {
+export const UserPresentAvatarMenu: React.FC = () => {
   const {
     billing: { billingMenuItems },
     tasks: { useUserTaskCount },
   } = getEe();
+
+  const taskCount = useUserTaskCount();
 
   const { logout } = useGlobalActions();
   const { preferredOrganization, updatePreferredOrganization } =
@@ -59,8 +54,6 @@ export const UserPresentMenu: React.FC = () => {
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser()!;
-  const userMenuItems = useUserMenuItems();
-  const taskCount = useUserTaskCount();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -131,33 +124,7 @@ export const UserPresentMenu: React.FC = () => {
           title={user.name}
           subtitle={user.username}
         />
-        <MenuItem
-          component={Link}
-          to={LINKS.MY_TASKS.build()}
-          selected={location.pathname === LINKS.MY_TASKS.build()}
-          data-cy="user-menu-my-tasks"
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            paddingRight: 3,
-          }}
-        >
-          <Box>{t('user_menu_my_tasks')}</Box>
-          <Badge badgeContent={taskCount} color="primary" />
-        </MenuItem>
-        {userMenuItems.map((item, index) => (
-          <MenuItem
-            key={index}
-            component={Link}
-            to={item.link}
-            selected={item.isSelected}
-            onClick={handleClose}
-            data-cy="user-menu-user-settings"
-          >
-            {item.label}
-          </MenuItem>
-        ))}
-
+        <UserMenuItems onClose={handleClose} />
         {preferredOrganization && (
           <>
             <StyledDivider />

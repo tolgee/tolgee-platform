@@ -8,6 +8,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { BatchOperationAdder } from 'tg.views/projects/translations/BatchOperations/operations';
 import { addPanel } from 'tg.views/projects/translations/ToolsPanel/panelsList';
 import { DeveloperViewItemsAdder } from 'tg.views/projects/developer/developerViewItems';
+import { UserMenuItemsAdder } from 'tg.hooks/useUserMenuItems';
 
 export interface EePluginType {
   ee?: {
@@ -38,6 +39,7 @@ export interface EePluginType {
     useAddBatchOperations: () => BatchOperationAdder;
     translationPanelAdder: ReturnType<typeof addPanel>;
     useAddDeveloperViewItems: () => DeveloperViewItemsAdder;
+    useAddUserMenuItems: () => UserMenuItemsAdder;
   };
 }
 

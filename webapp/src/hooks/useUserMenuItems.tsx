@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { LINKS } from '../constants/links';
 import {
@@ -7,16 +7,12 @@ import {
   useIsEmailVerified,
   useUser,
 } from 'tg.globalContext/helpers';
+import { MenuItem } from '@mui/material';
+import React, { FC } from 'react';
+import { createAdder } from 'tg.fixtures/pluginAdder';
+import { getEe } from '../plugin/getEe';
 
-export class UserMenuItem {
-  constructor(
-    public link: string,
-    public label: string,
-    public isSelected: boolean
-  ) {}
-}
-
-export const useUserMenuItems = (): UserMenuItem[] => {
+export const UserMenuItems: FC<{ onClose: () => void }> = ({ onClose }) => {
   const location = useLocation();
   const { t } = useTranslate();
 
@@ -24,33 +20,78 @@ export const useUserMenuItems = (): UserMenuItem[] => {
   const user = useUser();
   const isEmailVerified = useIsEmailVerified();
 
-  const userSettings =
-    !config.authentication || !user
-      ? []
-      : [
-          {
-            link: LINKS.USER_PROFILE.build(),
-            label: t('user_menu_user_settings'),
-          },
-        ];
+  const { useAddUserMenuItems } = getEe();
 
-  if (!isEmailVerified) {
-    return [...userSettings].map((i) => {
-      return new UserMenuItem(i.link, i.label, location.pathname === i.link);
-    });
-  }
+  const addEeItems = useAddUserMenuItems();
 
-  return [
-    ...userSettings,
+  const baseItems = [
     {
-      link: LINKS.USER_API_KEYS.build(),
-      label: t('user_menu_api_keys'),
+      id: 'user-settings',
+      enabled: config.authentication && !!user,
+      Component: (props: { onClose: () => void }) => (
+        <MenuItem
+          component={Link}
+          to={LINKS.USER_PROFILE.build()}
+          selected={location.pathname === LINKS.USER_PROFILE.build()}
+          onClick={props.onClose}
+          data-cy="user-menu-user-settings"
+        >
+          {t('user_menu_user_settings')}
+        </MenuItem>
+      ),
     },
     {
-      link: LINKS.USER_PATS.build(),
-      label: t('user_menu_pats'),
+      id: 'api-keys',
+      enabled: isEmailVerified,
+      Component: (props: { onClose: () => void }) => (
+        <MenuItem
+          component={Link}
+          to={LINKS.USER_API_KEYS.build()}
+          selected={location.pathname === LINKS.USER_API_KEYS.build()}
+          onClick={props.onClose}
+          data-cy="user-menu-api-keys"
+        >
+          {t('user_menu_api_keys')}
+        </MenuItem>
+      ),
     },
-  ].map((i) => {
-    return new UserMenuItem(i.link, i.label, location.pathname === i.link);
-  });
+    {
+      id: 'pats',
+      enabled: isEmailVerified,
+      Component: (props: { onClose: () => void }) => (
+        <MenuItem
+          component={Link}
+          to={LINKS.USER_PATS.build()}
+          selected={location.pathname === LINKS.USER_PATS.build()}
+          onClick={props.onClose}
+          data-cy="user-menu-pats"
+        >
+          {t('user_menu_pats')}
+        </MenuItem>
+      ),
+    },
+  ] satisfies UserMenuItem[];
+
+  const items = addEeItems(baseItems);
+
+  return (
+    <>
+      {items.map(({ Component, enabled }, index) => {
+        if (!enabled) return null;
+        return <Component key={index} onClose={onClose} />;
+      })}
+    </>
+  );
 };
+
+type UserMenuItem = {
+  id: string;
+  enabled: boolean;
+  Component: React.FC<{ onClose: () => void }>;
+};
+
+export const addUserMenuItems = createAdder<UserMenuItem>({
+  referencingProperty: 'id',
+});
+
+export type UserMenuItemsAdder = ReturnType<typeof addUserMenuItems>;

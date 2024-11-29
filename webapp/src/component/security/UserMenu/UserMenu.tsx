@@ -5,8 +5,8 @@ import {
   useIsEmailVerified,
   useUser,
 } from 'tg.globalContext/helpers';
-import { UserMissingMenu } from './UserMissingMenu';
-import { UserPresentMenu } from './UserPresentMenu';
+import { UserMissingAvatarMenu } from './UserMissingAvatarMenu';
+import { UserPresentAvatarMenu } from './UserPresentAvatarMenu';
 import { UserUnverifiedEmailMenu } from './UserUnverifiedEmailMenu';
 
 export const UserMenu: React.FC = () => {
@@ -19,8 +19,8 @@ export const UserMenu: React.FC = () => {
   }
 
   if (!config.authentication || !user) {
-    return <UserMissingMenu />;
+    return <UserMissingAvatarMenu />;
   } else {
-    return <UserPresentMenu />;
+    return <UserPresentAvatarMenu />;
   }
 };

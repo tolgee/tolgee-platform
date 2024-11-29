@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { IconButton, MenuItem, Popover, styled } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { IconButton, Popover, styled } from '@mui/material';
 
-import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
+import { UserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 
 import { ThemeItem } from './ThemeItem';
@@ -28,9 +27,8 @@ const StyledDivider = styled('div')`
       : theme.palette.emphasis[400]};
 `;
 
-export const UserMissingMenu: React.FC = () => {
+export const UserMissingAvatarMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const userMenuItems = useUserMenuItems();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -69,18 +67,7 @@ export const UserMissingMenu: React.FC = () => {
         }}
         classes={{ paper: 'paper' }}
       >
-        {userMenuItems.map((item, index) => (
-          <MenuItem
-            key={index}
-            component={Link}
-            to={item.link}
-            selected={item.isSelected}
-            onClick={handleClose}
-            data-cy="user-menu-user-settings"
-          >
-            {item.label}
-          </MenuItem>
-        ))}
+        <UserMenuItems onClose={handleClose} />
 
         <StyledDivider />
         <LanguageItem />

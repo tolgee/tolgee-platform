@@ -22,7 +22,7 @@ import { OrganizationSubscriptionsView } from '../src/ee/billing/Subscriptions/O
 import { OrganizationInvoicesView } from '../src/ee/billing/Invoices/OrganizationInvoicesView';
 import { OrganizationBillingView } from '../src/ee/billing/OrganizationBillingView';
 import { OrganizationBillingTestClockHelperView } from '../src/ee/billing/OrganizationBillingTestClockHelperView';
-import { Route, Switch } from 'react-router-dom';
+import { Link, Route, Switch } from 'react-router-dom';
 import { ProjectTasksView } from '../src/ee/task/views/projectTasks/ProjectTasksView';
 import { addOperations } from '../src/views/projects/translations/BatchOperations/operations';
 import { OperationTaskCreate } from '../src/ee/batchOperations/OperationTaskCreate';
@@ -41,6 +41,8 @@ import { GlobalLimitPopover } from '../src/ee/billing/limitPopover/GlobalLimitPo
 import { addDeveloperViewItems } from '../src/views/projects/developer/developerViewItems';
 import { StorageList } from '../src/ee/developer/storage/StorageList';
 import { WebhookList } from '../src/ee/developer/webhook/WebhookList';
+import { addUserMenuItems } from '../src/hooks/useUserMenuItems';
+import { Badge, Box, MenuItem } from '@mui/material';
 
 export const eePlugin: EePluginType = {
   ee: {
@@ -145,13 +147,7 @@ export const eePlugin: EePluginType = {
       ),
     },
     tasks: {
-      useUserTaskCount: () => {
-        const userInfo = useGlobalContext(
-          (context) => context.initialData.userInfo
-        );
-        const loadable = useUserTasks({ enabled: !!userInfo });
-        return loadable.data?.page?.totalElements ?? 0;
-      },
+      useUserTaskCount,
       TranslationTaskIndicator,
       PrefilterTask,
       TranslationsTaskDetail,
@@ -241,5 +237,45 @@ export const eePlugin: EePluginType = {
         { position: 'after', value: 'content-delivery' }
       );
     },
+    useAddUserMenuItems: () => {
+      const taskCount = useUserTaskCount();
+
+      return addUserMenuItems(
+        [
+          {
+            Component: ({ onClose }) => {
+              const { t } = useTranslate();
+
+              return (
+                <MenuItem
+                  component={Link}
+                  to={LINKS.MY_TASKS.build()}
+                  selected={location.pathname === LINKS.MY_TASKS.build()}
+                  onClick={onClose}
+                  data-cy="user-menu-my-tasks"
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    paddingRight: 3,
+                  }}
+                >
+                  <Box>{t('user_menu_my_tasks')}</Box>
+                  <Badge badgeContent={taskCount} color="primary" />
+                </MenuItem>
+              );
+            },
+            enabled: true,
+            id: 'mu-tasks',
+          },
+        ],
+        { position: 'start' }
+      );
+    },
   },
 };
+
+function useUserTaskCount() {
+  const userInfo = useGlobalContext((context) => context.initialData.userInfo);
+  const loadable = useUserTasks({ enabled: !!userInfo });
+  return loadable.data?.page?.totalElements ?? 0;
+}
