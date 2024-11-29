@@ -13,11 +13,13 @@ import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslation
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+@Primary
 class TolgeeTranslationProviderImpl(
   @Lazy
   private val cloudTolgeeTranslateApiService: CloudTolgeeTranslateApiService,

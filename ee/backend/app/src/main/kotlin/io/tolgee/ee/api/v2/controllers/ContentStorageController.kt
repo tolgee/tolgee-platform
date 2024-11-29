@@ -7,7 +7,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.contentDelivery.ContentStorageRequest
-import io.tolgee.ee.api.v2.hateoas.assemblers.ContentStorageModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.ContentStorageModelAssemblerEeImpl
 import io.tolgee.ee.data.StorageTestResult
 import io.tolgee.ee.service.ContentStorageService
 import io.tolgee.hateoas.ee.contentStorage.ContentStorageModel
@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController
 class ContentStorageController(
   private val contentStorageService: ContentStorageService,
   private val projectHolder: ProjectHolder,
-  private val contentStorageModelAssembler: ContentStorageModelAssembler,
+  private val contentStorageModelAssemblerEeImpl: ContentStorageModelAssemblerEeImpl,
   private val pageModelAssembler: PagedResourcesAssembler<ContentStorage>,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
@@ -63,7 +63,7 @@ class ContentStorageController(
       Feature.PROJECT_LEVEL_CONTENT_STORAGES,
     )
     val contentStorage = contentStorageService.create(projectHolder.project.id, dto)
-    return contentStorageModelAssembler.toModel(contentStorage)
+    return contentStorageModelAssemblerEeImpl.toModel(contentStorage)
   }
 
   @PutMapping("/{contentStorageId}")
@@ -81,7 +81,7 @@ class ContentStorageController(
       Feature.PROJECT_LEVEL_CONTENT_STORAGES,
     )
     val contentStorage = contentStorageService.update(projectHolder.project.id, contentStorageId, dto)
-    return contentStorageModelAssembler.toModel(contentStorage)
+    return contentStorageModelAssemblerEeImpl.toModel(contentStorage)
   }
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
@@ -92,7 +92,7 @@ class ContentStorageController(
     @ParameterObject pageable: Pageable,
   ): PagedModel<ContentStorageModel> {
     val page = contentStorageService.getAllInProject(projectHolder.project.id, pageable)
-    return pageModelAssembler.toModel(page, contentStorageModelAssembler)
+    return pageModelAssembler.toModel(page, contentStorageModelAssemblerEeImpl)
   }
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
@@ -113,7 +113,7 @@ class ContentStorageController(
   fun get(
     @PathVariable contentStorageId: Long,
   ): ContentStorageModel {
-    return contentStorageModelAssembler
+    return contentStorageModelAssemblerEeImpl
       .toModel(contentStorageService.get(projectHolder.project.id, contentStorageId))
   }
 

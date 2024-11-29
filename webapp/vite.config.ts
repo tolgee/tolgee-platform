@@ -9,7 +9,6 @@ import { resolve } from 'path';
 
 import { extractDataCy } from './dataCy.plugin';
 import rehypeHighlight from 'rehype-highlight';
-import { fileURLToPath } from 'node:url';
 
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -42,15 +41,8 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       rollupOptions: {
-        external: [
-          resolvePath('src/eePlugin.ee.tsx'),
-          resolvePath('src/eePlugin.oss.tsx'),
-        ],
+        external: ['src/eePlugin.ee.tsx', 'src/eePlugin.oss.tsx'],
       },
     },
   };
 });
-
-function resolvePath(path: string) {
-  return fileURLToPath(new URL(path, import.meta.url));
-}

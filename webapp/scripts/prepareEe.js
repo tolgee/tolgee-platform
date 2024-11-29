@@ -10,8 +10,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const srcDir = path.join(__dirname, '../src/ee');
-const eePluginEe = path.join(__dirname, '../src/eePlugin.ee.tsx');
-const eePluginOss = path.join(__dirname, '../src/eePlugin.oss.tsx');
+const eePluginEe = path.join(__dirname, '../eePlugin/eePlugin.ee.tsx');
+const eePluginOss = path.join(__dirname, '../eePlugin/eePlugin.oss.tsx');
 const eePluginLocal = path.join(__dirname, '../src/eePlugin.local.tsx');
 
 if (existsSync(eePluginLocal)) {

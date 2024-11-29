@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.invitation
 
 import io.tolgee.component.email.InvitationEmailSender
 import io.tolgee.component.reporting.BusinessEventPublisher

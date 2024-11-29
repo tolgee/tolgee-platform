@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { PluginType } from './plugin/PluginType';
+import { PluginType } from '../src/plugin/PluginType';
 
 const NotIncludedInOss: FC = () => {
   return <div>Not included in OSS</div>;

@@ -30,7 +30,7 @@
     "vite-env.d.ts"
   ],
   "exclude": [
-    "src/eePlugin.ee.tsx",
-    "src/eePlugin.oss.tsx"
+    "eePlugin/eePlugin.ee.tsx",
+    "eePlugin/eePlugin.oss.tsx"
   ]
 }

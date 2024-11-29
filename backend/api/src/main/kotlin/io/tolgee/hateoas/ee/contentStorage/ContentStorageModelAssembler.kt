@@ -2,6 +2,6 @@ package io.tolgee.hateoas.ee.contentStorage
 
 import io.tolgee.model.contentDelivery.ContentStorage
 
-interface IContentStorageModelAssembler {
+interface ContentStorageModelAssembler {
   fun toModel(entity: ContentStorage): ContentStorageModel
 }
