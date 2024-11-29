@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { IconButton, Popover, styled } from '@mui/material';
 
-import { UserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
+import { UserMenuItems } from './UserMenuItems';
 
 const StyledIconButton = styled(IconButton)`
   width: 40px;

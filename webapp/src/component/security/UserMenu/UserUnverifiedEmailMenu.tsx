@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { IconButton, MenuItem, Popover, styled } from '@mui/material';
 
-import { UserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
 import { T } from '@tolgee/react';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { UserMenuItems } from './UserMenuItems';
 
 const StyledIconButton = styled(IconButton)`
   width: 40px;

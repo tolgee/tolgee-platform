@@ -4,7 +4,6 @@ import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import { usePreferredOrganization, useUser } from 'tg.globalContext/helpers';
-import { UserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
@@ -15,6 +14,7 @@ import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { getEe } from '../../../plugin/getEe';
+import { UserMenuItems } from './UserMenuItems';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 

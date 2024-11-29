@@ -1,7 +1,7 @@
 import { useTranslate } from '@tolgee/react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { LINKS } from '../constants/links';
+import { LINKS } from 'tg.constants/links';
 import {
   useConfig,
   useIsEmailVerified,
@@ -10,7 +10,7 @@ import {
 import { MenuItem } from '@mui/material';
 import React, { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
-import { getEe } from '../plugin/getEe';
+import { getEe } from '../../../plugin/getEe';
 
 export const UserMenuItems: FC<{ onClose: () => void }> = ({ onClose }) => {
   const location = useLocation();

@@ -41,8 +41,9 @@ import { GlobalLimitPopover } from '../src/ee/billing/limitPopover/GlobalLimitPo
 import { addDeveloperViewItems } from '../src/views/projects/developer/developerViewItems';
 import { StorageList } from '../src/ee/developer/storage/StorageList';
 import { WebhookList } from '../src/ee/developer/webhook/WebhookList';
-import { addUserMenuItems } from '../src/hooks/useUserMenuItems';
 import { Badge, Box, MenuItem } from '@mui/material';
+import { addUserMenuItems } from '../src/component/security/UserMenu/UserMenuItems';
+import { addProjectMenuItems } from '../src/views/projects/projectMenu/ProjectMenu';
 
 export const eePlugin: EePluginType = {
   ee: {
@@ -269,6 +270,28 @@ export const eePlugin: EePluginType = {
           },
         ],
         { position: 'start' }
+      );
+    },
+    useAddProjectMenuItems: () => {
+      const { t } = useTranslate();
+
+      return addProjectMenuItems(
+        [
+          {
+            id: 'tasks',
+            condition: ({ satisfiesPermission }) =>
+              satisfiesPermission('tasks.view'),
+            link: LINKS.PROJECT_TASKS,
+            icon: ClipboardCheck,
+            text: t('project_menu_tasks'),
+            dataCy: 'project-menu-item-tasks',
+            matchAsPrefix: true,
+          },
+        ],
+        {
+          position: 'after',
+          value: 'translations',
+        }
       );
     },
   },
