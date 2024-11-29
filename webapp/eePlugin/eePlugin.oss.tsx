@@ -38,5 +38,7 @@ export const eePlugin: EePluginType = {
     useAddDeveloperViewItems: () => (existingItems) => existingItems,
     useAddBatchOperations: () => (existingItems) => existingItems,
     translationPanelAdder: (existingItems) => existingItems,
+    useAddProjectMenuItems: () => (existingItems) => existingItems,
+    useAddUserMenuItems: () => (existingItems) => existingItems,
   },
 };
