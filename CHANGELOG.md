@@ -1,3 +1,10 @@
+## [3.83.3](https://github.com/tolgee/tolgee-platform/compare/v3.83.2...v3.83.3) (2024-11-29)
+
+
+### Bug Fixes
+
+* use file name instead of whole path for language guess ([#2734](https://github.com/tolgee/tolgee-platform/issues/2734)) ([961812b](https://github.com/tolgee/tolgee-platform/commit/961812bad0ac2bfa3cb31dc38ffcf94d06e31231))
+
 ## [3.83.2](https://github.com/tolgee/tolgee-platform/compare/v3.83.1...v3.83.2) (2024-11-28)
 
 
