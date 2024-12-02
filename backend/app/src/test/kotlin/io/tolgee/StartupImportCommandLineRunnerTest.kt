@@ -43,7 +43,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
           baseLanguageTag = "de"
         },
       )
-      base = dbPopulator.createBase("labaala", "admin")
+      base = dbPopulator.createBase("admin")
       startupImportCommandLineRunner.run()
     }
   }

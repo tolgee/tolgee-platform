@@ -8,7 +8,6 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.isPermissionScopes
 import io.tolgee.fixtures.node
 import io.tolgee.model.Permission
@@ -26,8 +25,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {
     executeInNewTransaction {
-      dbPopulator.createBase("one", "kim")
-      dbPopulator.createBase("two", "kim")
+      dbPopulator.createBase("kim")
+      dbPopulator.createBase("kim")
 
       loginAsUser("kim")
 
@@ -126,7 +125,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   fun `get single returns permissions`() {
-    val base = dbPopulator.createBase("one")
+    val base = dbPopulator.createBase()
     userAccount = dbPopulator.createUserIfNotExists("another-user")
     permissionService.create(
       Permission(
@@ -145,7 +144,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   fun getNotPermitted() {
-    val base = dbPopulator.createBase("one")
+    val base = dbPopulator.createBase()
 
     val account = dbPopulator.createUserIfNotExists("peter")
     loginAsUser(account.name)
@@ -248,7 +247,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   fun revokeUsersAccessOwn() {
-    val base = dbPopulator.createBase("base", "jirina")
+    val base = dbPopulator.createBase("jirina")
 
     loginAsUser("jirina")
 
@@ -271,7 +270,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   fun deleteProject() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     performAuthDelete("/v2/projects/${base.project.id}", null).andIsOk
     val project = projectService.find(base.project.id)
     Assertions.assertThat(project).isNull()

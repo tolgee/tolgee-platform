@@ -43,7 +43,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun testFindAllPermitted() {
     executeInNewTransaction {
       val users = dbPopulator.createUsersAndOrganizations()
-      dbPopulator.createBase("Test", users[3].username)
+      dbPopulator.createBase(users[3].username)
       val projects = projectService.findAllPermitted(users[3])
       assertThat(projects).hasSize(10)
     }
@@ -63,7 +63,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun testFindAllSingleProject() {
     executeInNewTransaction {
       dbPopulator.createUsersAndOrganizations() // create some data
-      val base = dbPopulator.createBase("Hello world", generateUniqueString())
+      val base = dbPopulator.createBase(generateUniqueString())
       val projects = projectService.findAllPermitted(base.userAccount)
       assertThat(projects).hasSize(1)
       assertThat(projects[0].scopes).containsExactlyInAnyOrder(*ProjectPermissionType.MANAGE.availableScopes)
@@ -74,7 +74,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun testFindMultiple() {
     executeInNewTransaction {
       val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("helga") // create some data
-      val base = dbPopulator.createBase("Hello world")
+      val base = dbPopulator.createBase()
       val organization = usersWithOrganizations[0].organizationRoles[0].organization
       organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
 
@@ -94,7 +94,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun testFindMultiplePermissions() {
     executeInNewTransaction(platformTransactionManager) {
       val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") // create some data
-      val base = dbPopulator.createBase("Hello world")
+      val base = dbPopulator.createBase()
       val organization = usersWithOrganizations[0].organizationRoles[0].organization
       organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
 
