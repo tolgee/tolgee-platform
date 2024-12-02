@@ -171,4 +171,43 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
 
     namespaceService.getAllInProject(testData.projectBuilder.self.id).assert.isEmpty()
   }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `key with namespace cannot be created when useNamespaces feature is disabled`() {
+    disableNamespaces()
+    performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to "new_ns"))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `key with namespace cannot be edited when useNamespaces feature is disabled`() {
+    disableNamespaces()
+    performProjectAuthPut("keys/${testData.keyWithoutNs.id}", EditKeyDto(name = "super_k", "ns-2"))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `key with namespace cannot be complex-edited when useNamespaces feature is disabled`() {
+    disableNamespaces()
+    performProjectAuthPut(
+      "keys/${testData.keyWithoutNs.id}/complex-update",
+      mapOf("name" to "new-name", "namespace" to "ns-2"),
+    )
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+  }
+
+  private fun disableNamespaces() {
+    val projectFetched = projectService.get(project.id)
+    projectFetched.useNamespaces = false
+    projectService.save(projectFetched)
+  }
 }
