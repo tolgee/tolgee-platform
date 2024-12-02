@@ -78,6 +78,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `correctly maps language in single language file`() {
     saveAndPrepare()
+    enableNamespaces()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -95,6 +96,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `correctly maps language in multi language file`() {
     saveAndPrepare()
+    enableNamespaces()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -110,6 +112,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `throws when language not mapped`() {
     saveAndPrepare()
+    enableNamespaces()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -122,6 +125,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `maps languages automatically when possible`() {
     saveAndPrepare()
+    enableNamespaces()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -142,6 +146,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `maps namespace`() {
     saveAndPrepare()
+    enableNamespaces()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -156,6 +161,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `maps null namespace from non-null mapping`() {
     saveAndPrepare()
+    enableNamespaces()
     val fileName = "guessed-ns/en.json"
     performImport(
       projectId = testData.project.id,
@@ -181,6 +187,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `respects provided format`() {
     saveAndPrepare()
+    enableNamespaces()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -206,6 +213,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `imports apple strings file`() {
     saveAndPrepare()
+    enableNamespaces()
     val fileName = "en/Localizable.strings"
     performImport(
       projectId = testData.project.id,
@@ -218,6 +226,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `imports xliff file`() {
     saveAndPrepare()
+    enableNamespaces()
     importXliffFile()
   }
 
@@ -230,6 +239,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     }
 
     saveAndPrepare()
+    enableNamespaces()
     importXliffFile()
 
     assertAutoTranslationTriggered()
@@ -251,6 +261,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   fun `removes other keys`() {
     testData.addConflictTranslation()
     saveAndPrepare()
+    enableNamespaces()
     val params = getFileMappings(jsonFileName)
     params["removeOtherKeys"] = true
 
@@ -365,5 +376,11 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }
+  }
+
+  private fun enableNamespaces() {
+    val fetchedProject = projectService.find(testData.project.id)!!
+    fetchedProject.useNamespaces = true
+    projectService.save(fetchedProject)
   }
 }

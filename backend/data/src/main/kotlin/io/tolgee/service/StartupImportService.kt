@@ -61,6 +61,7 @@ class StartupImportService(
       createImplicitApiKey(userAccount, project)
       assignProjectHolder(project)
       importData(fileDtos, project, userAccount)
+      disableNamespacesIfNoneWereImported(project.id)
       return
     }
     logger.info("Not Importing initial project $projectName - project already exists")
@@ -148,6 +149,7 @@ class StartupImportService(
       )
 
     setBaseLanguage(project)
+    project.useNamespaces = true
 
     projectService.save(project)
     return project
@@ -191,5 +193,16 @@ class StartupImportService(
       userAccountService
         .findActive(properties.authentication.initialUsername)
     return userAccount
+  }
+
+  private fun disableNamespacesIfNoneWereImported(projectId: Long) {
+    val project = projectService.find(projectId)!!
+
+    if (project.namespaces.isNotEmpty()) {
+      return
+    }
+
+    project.useNamespaces = false
+    projectService.save(project)
   }
 }

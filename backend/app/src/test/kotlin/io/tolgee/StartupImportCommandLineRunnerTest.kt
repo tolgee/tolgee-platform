@@ -60,6 +60,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
         assertThat(translationService.getAllByLanguageId(it.id)).hasSize(10)
       }
       assertThat(project.apiKeys.first().keyHash).isEqualTo("Zy98PdrKTEla1Ix7I1WbZPRoIDttk+Byk77tEjgRIzs=")
+      assertThat(project.useNamespaces).isFalse()
     }
   }
 
@@ -70,6 +71,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
       assertThat(projects).isNotEmpty
       val project = projects.first()
       project.namespaces.assert.hasSize(7)
+      assertThat(project.useNamespaces).isTrue()
     }
   }
 
@@ -80,6 +82,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
       assertThat(projects).isNotEmpty
       val project = projects.first()
       project.baseLanguage!!.tag.assert.isEqualTo("de")
+      assertThat(project.useNamespaces).isFalse()
     }
   }
 }

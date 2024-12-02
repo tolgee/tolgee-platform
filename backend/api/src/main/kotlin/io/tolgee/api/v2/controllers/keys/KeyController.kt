@@ -6,6 +6,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.KeyComplexEditHelper
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.request.GetKeysRequestDto
@@ -16,6 +17,7 @@ import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableDto
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyImportResolvableResultModel
 import io.tolgee.hateoas.key.KeyModel
@@ -114,6 +116,7 @@ class KeyController(
     checkTranslatePermission(dto)
     checkCanStoreBigMeta(dto)
     checkStateChangePermission(dto)
+    checkNamespaceFeature(dto.namespace)
 
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
@@ -162,6 +165,7 @@ class KeyController(
   ): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
+    checkNamespaceFeature(dto.namespace)
     keyService.edit(id, dto)
     val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom)
     return keyModelAssembler.toModel(view)
@@ -194,6 +198,7 @@ class KeyController(
     @RequestBody @Valid
     dto: ComplexEditKeyDto,
   ): KeyWithDataModel {
+    checkNamespaceFeature(dto.namespace)
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
@@ -380,6 +385,12 @@ class KeyController(
   private fun checkScreenshotUploadPermissions(dto: CreateKeyDto) {
     if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
+    }
+  }
+
+  private fun checkNamespaceFeature(namespace: String?) {
+    if (!projectHolder.projectEntity.useNamespaces && namespace != null) {
+      throw ValidationException(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED)
     }
   }
 }
