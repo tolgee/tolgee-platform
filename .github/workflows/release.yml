@@ -26,11 +26,6 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: Set git globals
-        run: |
-          git config --local user.email "machine@tolgee.io"
-          git config --local user.name "Tolgee Machine"
-
       - name: Install node modules
         run: npm ci
 
@@ -38,6 +33,10 @@ jobs:
         run: npm run release-dry
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: Tolgee Machine
+          GIT_COMMITTER_NAME: Tolgee Machine
+          GIT_AUTHOR_EMAIL: machine@tolgee.io
+          GIT_COMMITTER_EMAIL: machine@tolgee.io
 
       - name: Set version property
         id: version
@@ -85,6 +84,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOLGEE_MACHINE_PAT }}
           VERSION: ${{ steps.version.outputs.VERSION }}
+          GIT_AUTHOR_NAME: Tolgee Machine
+          GIT_COMMITTER_NAME: Tolgee Machine
+          GIT_AUTHOR_EMAIL: machine@tolgee.io
+          GIT_COMMITTER_EMAIL: machine@tolgee.io
 
       - name: Tag production and deprecated keys in platform
         if: ${{ steps.version.outputs.VERSION != '' }}
