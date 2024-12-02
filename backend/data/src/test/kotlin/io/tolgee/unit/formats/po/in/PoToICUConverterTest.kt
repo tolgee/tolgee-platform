@@ -39,6 +39,50 @@ class PoToICUConverterTest {
     )
   }
 
+  @Test
+  fun testPhpPluralsWithHashtags() {
+    val result =
+      getPhpConvertor().convert(
+        rawData =
+          mapOf(
+            0 to "Petr má jeden znak #.",
+            1 to "Petr má %d znaky #.",
+            2 to "Petr má %d znaků #.",
+          ),
+        languageTag = "cs",
+        convertPlaceholders = true,
+      ).message
+    assertThat(result).isEqualTo(
+      "{0, plural,\n" +
+        "one {Petr má jeden znak '#'.}\n" +
+        "few {Petr má # znaky '#'.}\n" +
+        "other {Petr má # znaků '#'.}\n" +
+        "}",
+    )
+  }
+
+  @Test
+  fun testPhpPluralsWithHashtagsAndDisabledPlaceholders() {
+    val result =
+      getPhpConvertor().convert(
+        rawData =
+          mapOf(
+            0 to "Petr má jeden znak #.",
+            1 to "Petr má %d znaky #.",
+            2 to "Petr má %d znaků #.",
+          ),
+        languageTag = "cs",
+        convertPlaceholders = false,
+      ).message
+    assertThat(result).isEqualTo(
+      "{value, plural,\n" +
+        "one {Petr má jeden znak '#'.}\n" +
+        "few {Petr má %d znaky '#'.}\n" +
+        "other {Petr má %d znaků '#'.}\n" +
+        "}",
+    )
+  }
+
   private fun getPhpConvertor() = PoToIcuMessageConvertor { PhpToIcuPlaceholderConvertor() }
 
   @Test
@@ -46,6 +90,20 @@ class PoToICUConverterTest {
     val result =
       getPhpConvertor().convert("hello this is string %s, this is digit %d", "en").message
     assertThat(result).isEqualTo("hello this is string {0}, this is digit {1, number}")
+  }
+
+  @Test
+  fun testPhpMessageWithHashtag() {
+    val result =
+      getPhpConvertor().convert("hello this is hashtag # and it should not be escaped", "en").message
+    assertThat(result).isEqualTo("hello this is hashtag # and it should not be escaped")
+  }
+
+  @Test
+  fun testPhpMessageWithHashtagAndDisabledPlaceholders() {
+    val result =
+      getPhpConvertor().convert("hello this is hashtag # and it should not be escaped", "en", convertPlaceholders = false).message
+    assertThat(result).isEqualTo("hello this is hashtag # and it should not be escaped")
   }
 
   @Test
