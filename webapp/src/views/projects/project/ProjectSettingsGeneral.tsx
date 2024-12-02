@@ -79,6 +79,9 @@ export const ProjectSettingsGeneral = () => {
     url: '/v2/projects/{projectId}',
     method: 'put',
     invalidatePrefix: '/v2/projects',
+    fetchOptions: {
+      disableErrorNotification: true,
+    },
   });
 
   const updateProjectSettings = (values: FormValues) => {
