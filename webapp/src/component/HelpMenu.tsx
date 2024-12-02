@@ -14,12 +14,15 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Divider,
+  Typography,
 } from '@mui/material';
 import {
   BookOpen01,
   MessageSquare01,
   Mail01,
   HelpCircle,
+  Keyboard02,
 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -29,6 +32,7 @@ import {
   useUser,
 } from 'tg.globalContext/helpers';
 import { GitHub, Slack } from './CustomIcons';
+import { TranslationsShortcuts } from './shortcuts/TranslationsShortcuts';
 
 const BASE_URL = 'https://app.chatwoot.com';
 let scriptPromise: Promise<void> | null = null;
@@ -91,9 +95,15 @@ export const HelpMenu = () => {
   };
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   function handleOpenDialog() {
     setDialogOpen(true);
+    handleClose();
+  }
+
+  function handleOpenShortcuts() {
+    setShortcutsOpen(true);
     handleClose();
   }
 
@@ -219,6 +229,14 @@ export const HelpMenu = () => {
           </ListItemIcon>
           <ListItemText primary={t('help_menu_email')} />
         </MenuItem>
+        <Divider />
+
+        <MenuItem onClick={handleOpenShortcuts}>
+          <ListItemIcon>
+            <Keyboard02 />
+          </ListItemIcon>
+          <ListItemText primary={t('help_menu_shortcuts')} />
+        </MenuItem>
       </Menu>
 
       <Dialog open={dialogOpen}>
@@ -231,6 +249,23 @@ export const HelpMenu = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>
+            {t('global_close_button')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)}>
+        <DialogTitle>{t('help_menu_shortcuts_dialog_title')}</DialogTitle>
+        <DialogContent sx={{ width: '85vw', maxWidth: '400px' }}>
+          <Typography
+            sx={{ fontWeight: 'bold', paddingBottom: 1, fontSize: 14 }}
+          >
+            <T keyName="help_menu_shortcuts_dialog_translations_view" />
+          </Typography>
+          <TranslationsShortcuts />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShortcutsOpen(false)}>
             {t('global_close_button')}
           </Button>
         </DialogActions>

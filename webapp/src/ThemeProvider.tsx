@@ -268,6 +268,14 @@ const getTheme = (mode: PaletteMode) => {
           },
         },
       },
+      MuiMenu: {
+        styleOverrides: {
+          list: {
+            paddingTop: 8,
+            paddingBottom: 8,
+          },
+        },
+      },
       MuiLink: {
         styleOverrides: {
           root: {
