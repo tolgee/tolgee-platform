@@ -102,7 +102,11 @@ class PoToICUConverterTest {
   @Test
   fun testPhpMessageWithHashtagAndDisabledPlaceholders() {
     val result =
-      getPhpConvertor().convert("hello this is hashtag # and it should not be escaped", "en", convertPlaceholders = false).message
+      getPhpConvertor().convert(
+        "hello this is hashtag # and it should not be escaped",
+        "en",
+        convertPlaceholders = false,
+      ).message
     assertThat(result).isEqualTo("hello this is hashtag # and it should not be escaped")
   }
 
