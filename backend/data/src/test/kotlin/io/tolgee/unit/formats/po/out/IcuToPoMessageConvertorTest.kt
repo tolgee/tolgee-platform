@@ -22,7 +22,7 @@ class IcuToPoMessageConvertorTest {
       IcuToPhpPlaceholderConvertor(),
       forceIsPlural = false,
     ).convert().singleResult.assert.isEqualTo(
-      "Normal hashtag # and escaped hashtag '#' and double escaped hashtag ''#''"
+      "Normal hashtag # and escaped hashtag '#' and double escaped hashtag ''#''",
     )
   }
 
@@ -34,7 +34,7 @@ class IcuToPoMessageConvertorTest {
       forceIsPlural = false,
       projectIcuPlaceholdersSupport = false,
     ).convert().singleResult.assert.isEqualTo(
-      "Normal hashtag # and escaped hashtag '#' and double escaped hashtag '''#'''"
+      "Normal hashtag # and escaped hashtag '#' and double escaped hashtag '''#'''",
     )
   }
 
@@ -71,7 +71,12 @@ class IcuToPoMessageConvertorTest {
   fun `converts complex escape sequences with plurals`() {
     val forms =
       IcuToPoMessageConvertor(
-        message = "{0, plural, one {# znak '#' pro psa} few {# znaky '#' pro psi} other {# znaků '''''#''''' a '#' pro psi}}",
+        message =
+          "{0, plural," +
+            " one {# znak '#' pro psa}" +
+            " few {# znaky '#' pro psi}" +
+            " other {# znaků '''''#''''' a '#' pro psi}" +
+            "}",
         languageTag = "cs",
         placeholderConvertor = IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,
@@ -86,7 +91,12 @@ class IcuToPoMessageConvertorTest {
   fun `converts complex escape sequences with plurals and icu disabled`() {
     val forms =
       IcuToPoMessageConvertor(
-        message = "{0, plural, one {'#' znak '#' pro psa} few {'#' znaky '#' pro psi} other {'#' znaků '''''#''''' a '#' pro psi}}",
+        message =
+          "{0, plural," +
+            " one {'#' znak '#' pro psa}" +
+            " few {'#' znaky '#' pro psi}" +
+            " other {'#' znaků '''''#''''' a '#' pro psi}" +
+            "}",
         languageTag = "cs",
         placeholderConvertor = IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,

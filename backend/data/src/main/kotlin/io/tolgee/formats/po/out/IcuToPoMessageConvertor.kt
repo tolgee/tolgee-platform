@@ -5,7 +5,6 @@ import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
 import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessageConvertorFactory
-import io.tolgee.formats.escaping.IcuUnescaper
 import io.tolgee.formats.getPluralDataOrNull
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
