@@ -70,7 +70,7 @@ export const useMachineTranslationSettings = () => {
   ): MtServiceInfo | undefined {
     if (
       service === undefined ||
-      !isSupported(service, langInfo.languageId ?? null)
+      !isSupported(service, langInfo.languageId ?? undefined)
     ) {
       return undefined;
     }
