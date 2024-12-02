@@ -69,7 +69,7 @@ class IcuToPoMessageConvertor(
     val plurals =
       languagePluralData.examples.map {
         val form = forms[it.plural] ?: OTHER_KEYWORD
-        it.plural to ((formsResult[form] ?: formsResult[OTHER_KEYWORD])?.forceUnescapePluralForm() ?: "")
+        it.plural to (formsResult[form] ?: formsResult[OTHER_KEYWORD] ?: "")
       }.sortedBy { it.first }.map { it.second }.toList()
 
     return plurals
@@ -91,13 +91,6 @@ class IcuToPoMessageConvertor(
           }?.key ?: return@mapNotNull null
       index to keyword
     }.toMap()
-  }
-
-  private fun String.forceUnescapePluralForm(): String {
-    if (!projectIcuPlaceholdersSupport) {
-      return IcuUnescaper(this, isPlural = true).unescaped
-    }
-    return this
   }
 
   private fun getPluralIndexesForKeyword(keyword: String) =
