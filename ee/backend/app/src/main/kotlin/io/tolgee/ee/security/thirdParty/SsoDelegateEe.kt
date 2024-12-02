@@ -113,9 +113,7 @@ class SsoDelegateEe(
     }
   }
 
-  private fun decodeIdTokenUnsafe(
-    idToken: String,
-  ): GenericUserResponse {
+  private fun decodeIdTokenUnsafe(idToken: String): GenericUserResponse {
     // We assume the token was received directly from the SSO provider and is safe - no need to verify the signature.
     try {
       val jwt = idToken.substring(0, idToken.lastIndexOf('.') + 1)

@@ -22,11 +22,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authorization.BypassEmailVerification
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
-import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
-import io.tolgee.security.thirdParty.GithubOAuthDelegate
-import io.tolgee.security.thirdParty.GoogleOAuthDelegate
-import io.tolgee.security.thirdParty.OAuth2Delegate
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.ReCaptchaValidationService
