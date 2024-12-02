@@ -10,6 +10,7 @@ import { addPanel } from 'tg.views/projects/translations/ToolsPanel/panelsList';
 import { DeveloperViewItemsAdder } from 'tg.views/projects/developer/developerViewItems';
 import { UserMenuItemsAdder } from 'tg.component/security/UserMenu/UserMenuItems';
 import { ProjectMenuItemsAdder } from 'tg.views/projects/projectMenu/ProjectMenu';
+import { AdministrationMenuItemsAdder } from 'tg.views/administration/components/BaseAdministrationView';
 
 export interface EePluginType {
   ee?: {
@@ -42,6 +43,7 @@ export interface EePluginType {
     useAddDeveloperViewItems: () => DeveloperViewItemsAdder;
     useAddUserMenuItems: () => UserMenuItemsAdder;
     useAddProjectMenuItems: () => ProjectMenuItemsAdder;
+    useAddAdministrationMenuItems: () => AdministrationMenuItemsAdder;
   };
 }
 

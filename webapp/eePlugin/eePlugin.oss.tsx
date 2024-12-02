@@ -40,5 +40,6 @@ export const eePlugin: EePluginType = {
     translationPanelAdder: (existingItems) => existingItems,
     useAddProjectMenuItems: () => (existingItems) => existingItems,
     useAddUserMenuItems: () => (existingItems) => existingItems,
+    useAddAdministrationMenuItems: () => (existingItems) => existingItems,
   },
 };

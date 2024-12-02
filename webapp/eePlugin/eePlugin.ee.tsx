@@ -44,6 +44,7 @@ import { WebhookList } from '../src/ee/developer/webhook/WebhookList';
 import { Badge, Box, MenuItem } from '@mui/material';
 import { addUserMenuItems } from '../src/component/security/UserMenu/UserMenuItems';
 import { addProjectMenuItems } from '../src/views/projects/projectMenu/ProjectMenu';
+import { addAdministrationMenuItems } from '../src/views/administration/components/BaseAdministrationView';
 
 export const eePlugin: EePluginType = {
   ee: {
@@ -292,6 +293,34 @@ export const eePlugin: EePluginType = {
           position: 'after',
           value: 'translations',
         }
+      );
+    },
+    useAddAdministrationMenuItems: () => {
+      const { t } = useTranslate();
+      const config = useConfig();
+
+      return addAdministrationMenuItems(
+        [
+          {
+            id: 'license',
+            link: LINKS.ADMINISTRATION_EE_LICENSE,
+            label: t('administration_ee_license'),
+            condition: () => true,
+          },
+          {
+            id: 'cloud_plans',
+            link: LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
+            label: t('administration_cloud_plans'),
+            condition: () => config.billing.enabled,
+          },
+          {
+            id: 'self_hosted_plans',
+            link: LINKS.ADMINISTRATION_BILLING_EE_PLANS,
+            label: t('administration_ee_plans'),
+            condition: () => config.billing.enabled,
+          },
+        ],
+        { position: 'after', value: 'users' }
       );
     },
   },
