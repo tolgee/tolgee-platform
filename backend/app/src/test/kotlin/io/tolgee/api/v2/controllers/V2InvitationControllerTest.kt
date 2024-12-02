@@ -31,7 +31,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `does not return when has no project permission`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     userAccount = dbPopulator.createUserIfNotExists("pavol")
     performAuthGet("/v2/projects/${project.id}/invitations").andIsNotFound
@@ -39,7 +39,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `deletes translate invitation with languages`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     val invitation = createTranslateInvitation(project)
@@ -51,7 +51,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `deletes edit invitation`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
 
     val invitation =
@@ -68,7 +68,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `accepts invitation`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     val code =
       invitationService.create(
@@ -87,7 +87,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `accepts translate invitation with languages`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val project = base.project
     val code =
       invitationService.create(

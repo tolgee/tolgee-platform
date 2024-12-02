@@ -1,3 +1,19 @@
+## [3.83.3](https://github.com/tolgee/tolgee-platform/compare/v3.83.2...v3.83.3) (2024-11-29)
+
+
+### Bug Fixes
+
+* use file name instead of whole path for language guess ([#2734](https://github.com/tolgee/tolgee-platform/issues/2734)) ([961812b](https://github.com/tolgee/tolgee-platform/commit/961812bad0ac2bfa3cb31dc38ffcf94d06e31231))
+
+## [3.83.2](https://github.com/tolgee/tolgee-platform/compare/v3.83.1...v3.83.2) (2024-11-28)
+
+
+### Bug Fixes
+
+* Prevent ConcurrentModificationException in InterceptedEventsManager ([#2720](https://github.com/tolgee/tolgee-platform/issues/2720)) ([b1f9022](https://github.com/tolgee/tolgee-platform/commit/b1f90229bd97fe61f512e088e2b52bfc938ea96e))
+* Prevent indexing of the app ([8b21d30](https://github.com/tolgee/tolgee-platform/commit/8b21d303322aba59ce6d2f45068119aa45af50b7))
+* Rate limit reset password requests ([#2724](https://github.com/tolgee/tolgee-platform/issues/2724)) ([64cabae](https://github.com/tolgee/tolgee-platform/commit/64cabae54ba085fec44c410965cab7c76d62749d))
+
 ## [3.83.1](https://github.com/tolgee/tolgee-platform/compare/v3.83.0...v3.83.1) (2024-11-23)
 
 

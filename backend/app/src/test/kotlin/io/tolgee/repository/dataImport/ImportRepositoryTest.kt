@@ -16,7 +16,7 @@ class ImportRepositoryTest : AbstractSpringTest() {
 
   @Test
   fun `creates, saves and gets Import entity`() {
-    val base = dbPopulator.createBase("hello", "import-user")
+    val base = dbPopulator.createBase("import-user")
     Import(project = base.project).let {
       it.author = base.userAccount
       importRepository.save(it).let {

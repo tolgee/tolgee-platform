@@ -48,7 +48,7 @@ export const useMachineTranslationSettings = () => {
 
   function isSupported(
     service: MtServiceInfo | undefined,
-    languageId: number | null
+    languageId: number | undefined
   ) {
     const settings = languageInfos.data!._embedded?.languageInfos?.find(
       (l) => l.languageId === languageId

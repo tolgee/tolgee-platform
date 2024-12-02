@@ -35,7 +35,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    val base = dbPopulator.createBase("SomeProject", "user")
+    val base = dbPopulator.createBase("user")
     userAccount = base.userAccount
     createForLanguagesDto =
       CreateProjectRequest(
@@ -62,7 +62,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
 
   @Test
   fun createProject() {
-    dbPopulator.createBase("test")
+    dbPopulator.createBase()
     testCreateValidationSizeShort()
     testCreateValidationSizeLong()
     testCreateCorrectRequest()

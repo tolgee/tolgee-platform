@@ -4,7 +4,6 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Language
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
@@ -24,7 +23,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun exportZipJson() {
-    val base = dbPopulator.populate(generateUniqueString())
+    val base = dbPopulator.populate()
     commitTransaction()
     projectSupplier = { base.project }
     userAccount = base.userAccount
@@ -45,7 +44,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @Transactional
   @ProjectApiKeyAuthTestMethod
   fun exportZipJsonWithApiKey() {
-    val base = dbPopulator.populate(generateUniqueString())
+    val base = dbPopulator.populate()
     commitTransaction()
     projectSupplier = { base.project }
     val mvcResult =

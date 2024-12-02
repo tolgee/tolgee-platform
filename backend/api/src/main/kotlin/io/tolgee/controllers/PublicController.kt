@@ -53,10 +53,6 @@ import java.util.*
 @Tag(name = "Authentication")
 class PublicController(
   private val jwtService: JwtService,
-  private val githubOAuthDelegate: GithubOAuthDelegate,
-  private val googleOAuthDelegate: GoogleOAuthDelegate,
-  private val oauth2Delegate: OAuth2Delegate,
-  private val ssoDelegate: SsoDelegate,
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val tolgeeEmailSender: TolgeeEmailSender,
@@ -90,6 +86,7 @@ class PublicController(
   @Operation(summary = "Request password reset")
   @PostMapping("/reset_password_request")
   @OpenApiHideFromPublicDocs
+  @RateLimited(limit = 2, refillDurationInMs = 300000)
   fun resetPasswordRequest(
     @RequestBody @Valid
     request: ResetPasswordRequest,
@@ -99,6 +96,11 @@ class PublicController(
     }
 
     val userAccount = userAccountService.findActive(request.email!!) ?: return
+
+    if (!emailVerificationService.isVerified(userAccount)) {
+      throw BadRequestException(Message.EMAIL_NOT_VERIFIED)
+    }
+
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
       val params =
         EmailParams(

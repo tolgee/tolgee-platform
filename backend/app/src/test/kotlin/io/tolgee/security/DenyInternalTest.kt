@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 class DenyInternalTest : AbstractControllerTest() {
   @Test
   fun getListFail() {
-    dbPopulator.createBase("Test")
+    dbPopulator.createBase()
     val response =
       mvc.perform(
         MockMvcRequestBuilders.post("/internal/sql/list")
@@ -23,7 +23,7 @@ class DenyInternalTest : AbstractControllerTest() {
 
   @Test
   fun setPropertyFail() {
-    dbPopulator.createBase("Test")
+    dbPopulator.createBase()
     val response =
       mvc.perform(
         MockMvcRequestBuilders.post("/internal/properties")

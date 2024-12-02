@@ -6,7 +6,6 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
@@ -36,7 +35,7 @@ class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
 
   @Test
   fun `access with legacy key works`() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.values()), base.project)
     mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations?ak=" + apiKey.key)).andIsOk
   }
@@ -49,7 +48,7 @@ class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
 
   @Test
   fun accessWithApiKey_failure_api_path() {
-    val base = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase()
     val apiKey = apiKeyService.create(base.userAccount, setOf(*Scope.entries.toTypedArray()), base.project)
     mvc.perform(MockMvcRequestBuilders.get("/v2/projects?ak=${apiKey.key}")).andIsForbidden
   }

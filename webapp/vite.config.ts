@@ -35,6 +35,7 @@ export default defineConfig(({ mode }) => {
     server: {
       // this ensures that the browser opens upon server start
       open: true,
+      host: process.env.VITE_HOST || undefined,
       // this sets a default port to 3000
       port: Number(process.env.VITE_PORT) || 3000,
     },
