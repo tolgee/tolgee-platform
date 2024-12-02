@@ -40,7 +40,7 @@ class PoToICUConverterTest {
   }
 
   @Test
-  fun testPhpPluralsWithHashtags() {
+  fun `php plurals with hashtags works`() {
     val result =
       getPhpConvertor().convert(
         rawData =
@@ -62,7 +62,7 @@ class PoToICUConverterTest {
   }
 
   @Test
-  fun testPhpPluralsWithHashtagsAndDisabledPlaceholders() {
+  fun `php plurals with hashtags and disabled placeholders works`() {
     val result =
       getPhpConvertor().convert(
         rawData =
@@ -93,14 +93,14 @@ class PoToICUConverterTest {
   }
 
   @Test
-  fun testPhpMessageWithHashtag() {
+  fun `php message with hashtag works`() {
     val result =
       getPhpConvertor().convert("hello this is hashtag # and it should not be escaped", "en").message
     assertThat(result).isEqualTo("hello this is hashtag # and it should not be escaped")
   }
 
   @Test
-  fun testPhpMessageWithHashtagAndDisabledPlaceholders() {
+  fun `php message with hashtag and disabled placeholders works`() {
     val result =
       getPhpConvertor().convert(
         "hello this is hashtag # and it should not be escaped",
