@@ -17,7 +17,7 @@ export const ResourceErrorComponent: FunctionComponent<{
         parseErrorResponse(props.error)
           .slice(0, props.limit)
           .map((e, index) => (
-            <Box ml={-2} mr={-2} key={index}>
+            <Box key={index}>
               <Alert severity="error">
                 <TranslatedError code={e} />
               </Alert>
