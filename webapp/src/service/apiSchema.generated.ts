@@ -1131,7 +1131,8 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open";
+        | "task_not_open"
+        | "namespace_cannot_be_used_when_feature_is_disabled";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -3048,7 +3049,8 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open";
+        | "task_not_open"
+        | "namespace_cannot_be_used_when_feature_is_disabled";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {

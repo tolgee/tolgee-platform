@@ -8,6 +8,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 
 class NamespacesTestData : BaseTestData() {
+  var keyWithoutNs: Key
   var keyInNs1: Key
   var singleKeyInNs2: Key
   lateinit var defaultUnusedProject: Project
@@ -24,7 +25,7 @@ class NamespacesTestData : BaseTestData() {
     }
 
     projectBuilder.apply {
-      addKeyWithTranslation("key", null)
+      keyWithoutNs = addKeyWithTranslation("key", null)
       keyInNs1 = addKeyWithTranslation("key", "ns-1")
       singleKeyInNs2 = addKeyWithTranslation("key", "ns-2")
       addKeyWithTranslation("key2", null)

@@ -31,6 +31,7 @@ open class BaseTestData(
         addProject {
           name = projectName
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+          useNamespaces = true
         }.build buildProject@{
 
           addPermission {
