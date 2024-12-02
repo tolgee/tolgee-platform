@@ -4,7 +4,7 @@ import { TranslationsShortcuts } from 'tg.component/shortcuts/TranslationsShortc
 const StyledContainer = styled(Box)`
   height: 100%;
   margin: 0px 8px;
-  display: flex;
+  display: grid;
 `;
 
 export const KeyboardShortcuts = () => {

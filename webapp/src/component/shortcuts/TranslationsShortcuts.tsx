@@ -7,8 +7,7 @@ import { Shortcut } from './Shortcut';
 const StyledContainer = styled(Box)`
   height: 100%;
   padding: 16px 12px 8px 12px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
   position: relative;
   background: ${({ theme }) => theme.palette.cell.hover};
   border-radius: 16px;
@@ -32,6 +31,19 @@ export const TranslationsShortcuts = () => {
     {
       name: <T keyName="translations_cell_edit" />,
       formula: formatShortcut('Enter'),
+    },
+  ];
+
+  const batchShortcuts = [
+    {
+      name: <T keyName="translations_shortcut_shift_checkbox" />,
+      formula: (
+        <Box display="flex" alignItems="center">
+          {formatShortcut('Shift')}
+          <Box px="2px">+</Box>
+          <T keyName="translations_shortcut_click" />
+        </Box>
+      ),
     },
   ];
 
@@ -72,6 +84,15 @@ export const TranslationsShortcuts = () => {
       </Typography>
       <StyledItems>
         {editorShortcuts.map((item, i) => {
+          return <Shortcut key={i} {...item} />;
+        })}
+      </StyledItems>
+
+      <Typography variant="subtitle2">
+        <T keyName="translations_shortcuts_batch_title" />
+      </Typography>
+      <StyledItems>
+        {batchShortcuts.map((item, i) => {
           return <Shortcut key={i} {...item} />;
         })}
       </StyledItems>
