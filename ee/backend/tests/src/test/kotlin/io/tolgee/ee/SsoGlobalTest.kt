@@ -74,7 +74,6 @@ class SsoGlobalTest : AuthorizedControllerTest() {
       clientSecret = "clientSecret"
       authorizationUri = "https://dummy-url.com"
       tokenUri = "http://tokenUri"
-      // jwkSetUri = "http://jwkSetUri"
     }
     testData = SsoTestData()
     testDataService.saveTestData(testData.root)
@@ -90,7 +89,6 @@ class SsoGlobalTest : AuthorizedControllerTest() {
       clientSecret = ""
       authorizationUri = ""
       tokenUri = ""
-      // jwkSetUri = ""
     }
     currentDateProvider.forcedDate = null
     enabledFeaturesProvider.forceEnabled = null

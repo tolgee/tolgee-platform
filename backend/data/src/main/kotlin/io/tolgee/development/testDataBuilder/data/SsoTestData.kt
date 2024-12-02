@@ -30,7 +30,6 @@ class SsoTestData() : BaseTestData() {
         clientId = "dummy_client_id"
         clientSecret = "clientSecret"
         authorizationUri = "https://dummy-url.com"
-        // jwkSetUri = "http://jwkSetUri"
         tokenUri = "http://tokenUri"
       }.self
   }

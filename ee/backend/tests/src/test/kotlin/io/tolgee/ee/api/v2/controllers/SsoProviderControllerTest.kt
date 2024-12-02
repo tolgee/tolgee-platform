@@ -41,7 +41,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
         node("clientSecret").isEqualTo("clientSecret")
         node("authorizationUri").isEqualTo("https://dummy-url.com")
         node("tokenUri").isEqualTo("tokenUri")
-        // node("jwkSetUri").isEqualTo("jwkSetUri")
         node("enabled").isEqualTo(true)
       }
   }
@@ -61,7 +60,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
         node("clientSecret").isEqualTo("")
         node("authorizationUri").isEqualTo("")
         node("tokenUri").isEqualTo("")
-        // node("jwkSetUri").isEqualTo("")
         node("enabled").isEqualTo(false)
       }
   }
@@ -116,7 +114,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "authorizationUri" to "https://dummy-url.com",
       "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
-      // "jwkSetUri" to "jwkSetUri",
       "enabled" to true,
     )
 
@@ -128,7 +125,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "authorizationUri" to "",
       "redirectUri" to "",
       "tokenUri" to "",
-      // "jwkSetUri" to "",
       "enabled" to false,
     )
 
@@ -140,7 +136,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "authorizationUri" to "https://dummy-url.com",
       "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
-      // "jwkSetUri" to "jwkSetUri",
       "enabled" to true,
     )
 
@@ -152,7 +147,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "authorizationUri" to "",
       "redirectUri" to "",
       "tokenUri" to "",
-      // "jwkSetUri" to "",
       "enabled" to true,
     )
 
@@ -169,7 +163,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "authorizationUri" to "https://dummy-url.com",
       "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
-      // "jwkSetUri" to "jwkSetUri",
       "enabled" to true,
     )
 }

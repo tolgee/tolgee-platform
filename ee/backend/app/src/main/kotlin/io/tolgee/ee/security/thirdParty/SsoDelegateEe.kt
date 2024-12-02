@@ -75,11 +75,7 @@ class SsoDelegateEe(
       fetchToken(tenant, code, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
 
-    val userInfo =
-      decodeIdTokenUnsafe(
-        token.id_token,
-        // tenant.jwkSetUri,
-      )
+    val userInfo = decodeIdTokenUnsafe(token.id_token)
     return getTokenResponseForUser(userInfo, tenant, invitationCode, token.refresh_token)
   }
 
@@ -119,40 +115,17 @@ class SsoDelegateEe(
 
   private fun decodeIdTokenUnsafe(
     idToken: String,
-    // jwkSetUri: String,
   ): GenericUserResponse {
     // We assume the token was received directly from the SSO provider and is safe - no need to verify the signature.
     try {
-      // val signedJWT = SignedJWT.parse(idToken)
-      // val jwtProcessor: ConfigurableJWTProcessor<SecurityContext> = DefaultJWTProcessor()
-
-      // TODO: Do we need to verify the signature here?
-      //  The token is directly from the SSO provider, so there is no real reason to not trust it.
-      //  Removing this check would mean we can also remove the jwkSetUri from the tenant configuration.
-      // val jwkSource: JWKSource<SecurityContext> = RemoteJWKSet(URL(jwkSetUri))
-
-      // val keySelector = JWSAlgorithmFamilyJWSKeySelector(JWSAlgorithm.Family.RSA, jwkSource)
-      // jwtProcessor.jwsKeySelector = keySelector
-      // val jwtClaimsSet: JWTClaimsSet = jwtProcessor.process(signedJWT, null)
-
       val jwt = idToken.substring(0, idToken.lastIndexOf('.') + 1)
       val claims = jwtParser.parseClaimsJwt(jwt).body
 
-      // val claims = jwtParser.parseClaimsJwt(idToken).body
-
-      // val expirationTime: Date = jwtClaimsSet.expirationTime
       val expirationTime: Date? = claims.expiration
       if (expirationTime?.before(currentDateProvider.date) == true) {
         throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
       }
 
-      // return GenericUserResponse().apply {
-      //   sub = jwtClaimsSet.subject
-      //   name = jwtClaimsSet.getStringClaim("name")
-      //   given_name = jwtClaimsSet.getStringClaim("given_name")
-      //   family_name = jwtClaimsSet.getStringClaim("family_name")
-      //   email = jwtClaimsSet.getStringClaim("email")
-      // }
       return GenericUserResponse().apply {
         sub = claims.subject
         name = claims.get("name", String::class.java)

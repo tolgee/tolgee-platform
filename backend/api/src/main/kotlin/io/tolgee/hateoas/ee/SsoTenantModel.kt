@@ -13,7 +13,6 @@ class SsoTenantModel(
   override val clientId: String,
   override val clientSecret: String,
   override val tokenUri: String,
-  // override val jwkSetUri: String,
   override val domain: String,
 ) : ISsoTenant,
   RepresentationModel<SsoTenantModel>(),

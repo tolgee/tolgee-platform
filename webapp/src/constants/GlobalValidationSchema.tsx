@@ -443,14 +443,6 @@ export class Validation {
           t('sso_invalid_url_format'),
           Validation.validateUrlWithPort
         ),
-      // jwkSetUri: Yup.string()
-      //   .required()
-      //   .max(255)
-      //   .test(
-      //     'is-valid-url-with-port',
-      //     t('sso_invalid_url_format'),
-      //     Validation.validateUrlWithPort
-      //   ),
     });
 }
 

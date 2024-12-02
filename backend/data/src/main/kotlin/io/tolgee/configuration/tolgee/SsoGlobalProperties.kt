@@ -41,9 +41,6 @@ class SsoGlobalProperties : ISsoTenant {
   @DocProperty(description = "Used to identify the organization on login page")
   override var domain: String = ""
 
-  // @DocProperty(description = "URL to retrieve the JSON Web Token Set (JWTS)")
-  // override var jwkSetUri: String = ""
-
   @DocProperty(
     description =
       "Minutes after which the server will recheck the user's with the SSO provider to" +
@@ -75,7 +72,6 @@ class SsoGlobalProperties : ISsoTenant {
         ::clientSecret,
         ::authorizationUri,
         ::domain,
-        // ::jwkSetUri,
         ::tokenUri,
       ).forEach {
         it.validateIsNotBlank()

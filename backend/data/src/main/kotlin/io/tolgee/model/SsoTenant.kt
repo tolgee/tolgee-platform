@@ -11,17 +11,15 @@ import org.hibernate.annotations.ColumnDefault
 @Entity
 @Table(name = "tenant")
 class SsoTenant : ISsoTenant, StandardAuditModel() {
-  override var clientId: String = ""
-  override var clientSecret: String = ""
-  override var authorizationUri: String = ""
 
   /**
    * The domain column uses unique constraint.
    * When the tenant is enabled the domain must not be empty and must be unique across all enabled tenants.
    */
   override var domain: String = ""
-
-//  override var jwkSetUri: String = ""
+  override var clientId: String = ""
+  override var clientSecret: String = ""
+  override var authorizationUri: String = ""
   override var tokenUri: String = ""
 
   @NotNull

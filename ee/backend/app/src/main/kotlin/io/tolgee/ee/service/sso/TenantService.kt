@@ -57,7 +57,6 @@ class TenantService(
     tenant.clientSecret = dto.clientSecret
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
-    // tenant.jwkSetUri = dto.jwkSetUri
     tenant.enabled = dto.enabled
   }
 }

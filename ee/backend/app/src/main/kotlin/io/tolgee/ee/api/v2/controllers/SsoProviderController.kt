@@ -77,7 +77,6 @@ class SsoProviderController(
       req::clientSecret,
       req::authorizationUri,
       req::domain,
-      // req::jwkSetUri,
       req::tokenUri,
     ).forEach {
       if (it.get().isBlank()) {
