@@ -19,9 +19,9 @@ class KeysDistanceUtil(
   }
 
   private fun increaseRelevant() {
-    relatedKeysInOrder.forEachIndexed forEach1@{ index1, item1 ->
+    distinctKeys.forEachIndexed forEach1@{ index1, item1 ->
       val key1Id = keyIdMap[item1.namespace to item1.keyName] ?: return@forEach1
-      relatedKeysInOrder.forEachIndexed forEach2@{ index2, item2 ->
+      distinctKeys.forEachIndexed forEach2@{ index2, item2 ->
         if (index2 <= index1 || abs(index1 - index2) > (BigMetaService.MAX_ORDER_DISTANCE + 1)) {
           return@forEach2
         }
@@ -48,6 +48,10 @@ class KeysDistanceUtil(
 
   private val keys by lazy {
     bigMetaService.getKeyIdsForItems(relatedKeysInOrder, project.id)
+  }
+
+  private val distinctKeys by lazy {
+    relatedKeysInOrder.distinct()
   }
 
   private val relevant = mutableMapOf<Pair<Long, Long>, KeysDistanceDto>()

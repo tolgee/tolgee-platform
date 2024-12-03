@@ -110,7 +110,7 @@ class KeyComplexEditHelper(
   private fun storeBigMeta() {
     if (isBigMetaProvided) {
       securityService.checkBigMetaUploadPermission(projectHolder.project.id)
-      bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity)
+      bigMetaService.store(dto.relatedKeysInOrder!!, projectHolder.projectEntity, forKeyId = key.id)
     }
   }
 
