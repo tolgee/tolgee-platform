@@ -598,13 +598,11 @@ declare namespace DataCy {
         "translations-view-table" |
         "translations-view-table-button" |
         "user-delete-organization-message-item" |
-        "user-menu-api-keys" |
         "user-menu-language-switch" |
         "user-menu-logout" |
         "user-menu-my-tasks" |
         "user-menu-organization-settings" |
         "user-menu-organization-switch" |
-        "user-menu-pats" |
         "user-menu-server-administration" |
         "user-menu-theme-switch" |
         "user-menu-user-settings" |
