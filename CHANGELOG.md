@@ -1,3 +1,11 @@
+## [3.83.4](https://github.com/tolgee/tolgee-platform/compare/v3.83.3...v3.83.4) (2024-12-03)
+
+
+### Bug Fixes
+
+* avoid escaping hash characters outside of plurals ([#2731](https://github.com/tolgee/tolgee-platform/issues/2731)) ([07a3a10](https://github.com/tolgee/tolgee-platform/commit/07a3a10569eb5482d45d0220f74f646b51014950))
+* help menu shortcuts ([#2740](https://github.com/tolgee/tolgee-platform/issues/2740)) ([a9d7ac3](https://github.com/tolgee/tolgee-platform/commit/a9d7ac35026967e5c56aa43eefe05ee95d916d3f))
+
 ## [3.83.3](https://github.com/tolgee/tolgee-platform/compare/v3.83.2...v3.83.3) (2024-11-29)
 
 
