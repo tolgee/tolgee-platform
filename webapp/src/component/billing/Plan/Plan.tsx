@@ -16,7 +16,8 @@ import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
 import { isPlanLegacy } from './plansTools';
-import { Box, useTheme } from '@mui/material';
+import { Box, Chip, Tooltip, useTheme } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 
 type Features = PlanType['enabledFeatures'];
 
@@ -31,6 +32,7 @@ type Props = {
   featuresMinHeight?: string;
   action: React.ReactNode;
   custom?: boolean;
+  nonCommercial: boolean;
 };
 
 export const Plan: FC<Props> = ({
@@ -44,25 +46,40 @@ export const Plan: FC<Props> = ({
   featuresMinHeight,
   action,
   custom,
+  nonCommercial,
 }) => {
   const theme = useTheme();
   const highlightColor = custom
     ? theme.palette.tokens.info.main
     : theme.palette.tokens.primary.main;
+  const { t } = useTranslate();
 
   return (
     <PlanContainer className={clsx({ active })} data-cy="billing-plan">
       <PlanActiveBanner active={active} ended={ended} custom={custom} />
       <PlanContent>
-        <PlanTitle sx={{ paddingBottom: '20px', color: highlightColor }}>
+        <PlanTitle sx={{ pb: '10px', color: highlightColor }}>
           {plan.name}
         </PlanTitle>
+
+        {nonCommercial && (
+          <Box display="flex" justifyContent="center">
+            <Tooltip title={t('billing_plan_non_commercial_hint')}>
+              <Chip
+                label={t('billing_plan_non_commercial_label')}
+                size="small"
+                color="success"
+              />
+            </Tooltip>
+          </Box>
+        )}
 
         <Box
           display="flex"
           flexDirection="column"
           alignItems="stretch"
           flexGrow={1}
+          sx={{ pt: '10px' }}
         >
           <PlanFeaturesBox sx={{ gap: '18px' }}>
             <IncludedFeatures

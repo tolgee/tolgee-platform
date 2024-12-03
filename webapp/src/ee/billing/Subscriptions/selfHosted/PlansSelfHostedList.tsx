@@ -49,6 +49,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
     free: false,
     hasYearlyPrice: false,
     public: true,
+    nonCommercial: false,
   });
 
   const parentForPublic: PlanType[] = [];
@@ -87,6 +88,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
             period={period}
             filteredFeatures={filteredFeatures}
             featuresMinHeight="210px"
+            nonCommercial={plan.nonCommercial}
             topFeature={
               previousPlanName ? (
                 <AllFromPlanFeature planName={previousPlanName} />

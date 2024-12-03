@@ -85,6 +85,7 @@ export const AdministrationCloudPlanCreateView = () => {
               public: true,
               forOrganizationIds: [],
               free: false,
+              nonCommercial: false,
               autoAssignOrganizationIds: [],
             }}
           />

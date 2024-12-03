@@ -15,4 +15,5 @@ open class SelfHostedEePlanModel(
   val includedUsage: PlanIncludedUsageModel = PlanIncludedUsageModel(),
   val hasYearlyPrice: Boolean = false,
   val free: Boolean,
+  val nonCommercial: Boolean,
 ) : RepresentationModel<SelfHostedEePlanModel>()

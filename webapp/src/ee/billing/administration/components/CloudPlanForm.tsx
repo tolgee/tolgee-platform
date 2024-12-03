@@ -33,6 +33,7 @@ export type CloudPlanFormData = {
   public: boolean;
   free: boolean;
   autoAssignOrganizationIds: CloudPlanModel['autoAssignOrganizationIds'];
+  nonCommercial: boolean;
 };
 
 type Props = {
@@ -307,6 +308,19 @@ export function CloudPlanForm({
               }
               data-cy="administration-cloud-plan-field-free"
               label={t('administration_cloud_plan_field_free')}
+            />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={values.nonCommercial}
+                  onChange={() =>
+                    setFieldValue('nonCommercial', !values.nonCommercial)
+                  }
+                />
+              }
+              data-cy="administration-cloud-plan-field-non-commercial"
+              label="Non-commercial"
             />
 
             {!values.public && (
