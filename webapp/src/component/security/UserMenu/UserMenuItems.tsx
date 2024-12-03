@@ -49,7 +49,7 @@ export const UserMenuItems: FC<{ onClose: () => void }> = ({ onClose }) => {
           to={LINKS.USER_API_KEYS.build()}
           selected={location.pathname === LINKS.USER_API_KEYS.build()}
           onClick={props.onClose}
-          data-cy="user-menu-api-keys"
+          data-cy="user-menu-user-settings"
         >
           {t('user_menu_api_keys')}
         </MenuItem>
@@ -64,7 +64,7 @@ export const UserMenuItems: FC<{ onClose: () => void }> = ({ onClose }) => {
           to={LINKS.USER_PATS.build()}
           selected={location.pathname === LINKS.USER_PATS.build()}
           onClick={props.onClose}
-          data-cy="user-menu-pats"
+          data-cy="user-menu-user-settings"
         >
           {t('user_menu_pats')}
         </MenuItem>

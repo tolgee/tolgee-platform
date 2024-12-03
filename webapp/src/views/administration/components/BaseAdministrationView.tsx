@@ -5,7 +5,6 @@ import { Link, LINKS } from 'tg.constants/links';
 
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
-import { useConfig } from 'tg.globalContext/helpers';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { getEe } from '../../../plugin/getEe';
 
@@ -18,7 +17,6 @@ export const BaseAdministrationView: React.FC<Props> = ({
   ...otherProps
 }) => {
   const { t } = useTranslate();
-  const config = useConfig();
 
   const { useAddAdministrationMenuItems } = getEe();
   const addItems = useAddAdministrationMenuItems();
