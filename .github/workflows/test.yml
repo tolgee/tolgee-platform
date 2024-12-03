@@ -75,6 +75,7 @@ jobs:
             "server-app:runContextRecreatingTests",
             "server-app:runStandardTests",
             "server-app:runWebsocketTests",
+            "server-app:runWithoutEeTests",
             "ee-test:test",
             "data:test",
             "security:test",
@@ -116,6 +117,11 @@ jobs:
           tar -xzf ~/backend-development.tgz ./backend/development/build
           tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
           tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
+
+      - name: Remove ee
+        if: matrix.command == 'server-app:runWithoutEeTests'
+        run: |
+          rm -rf ./ee
 
       - name: Run backend tests
         uses: nick-fields/retry@v2
@@ -349,10 +355,11 @@ jobs:
 
       - name: Check it builds without ee directory
         run: |
-          rm -rf ./webapp/src/ee
+          rm -rf ./src/ee
           npm install
           npm run tsc
           npm run build
+        working-directory: ./webapp
 
   e2e-code-checks:
     name: E2E Static Check 🪲

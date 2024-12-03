@@ -13,6 +13,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.testing.WithoutEeTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithoutEeTest
 class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {

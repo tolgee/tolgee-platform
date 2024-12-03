@@ -233,6 +233,15 @@ tasks.register('runWebsocketTests', Test) {
     setTestRetry(it)
 }
 
+tasks.register('runWithoutEeTests', Test) {
+    outputs.upToDateWhen { false }
+    useJUnitPlatform {
+        includeTags "withoutEe"
+    }
+    maxHeapSize = "4096m"
+    setTestRetry(it)
+}
+
 springBoot {
     buildInfo {
         properties {
