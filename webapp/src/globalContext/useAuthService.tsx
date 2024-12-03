@@ -129,6 +129,10 @@ export const useAuthService = (
     });
   }
 
+  function getLastSsoDomain() {
+    return localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY);
+  }
+
   async function setJwtToken(token: string | undefined) {
     _setJwtToken(token);
     if (token) {
@@ -225,6 +229,7 @@ export const useAuthService = (
       const response = await getSsoAuthLinkByDomain(domain, state);
       window.location.href = response.redirectUrl;
     },
+    getLastSsoDomain,
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(
         {

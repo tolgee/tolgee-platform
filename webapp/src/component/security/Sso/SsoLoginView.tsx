@@ -1,4 +1,4 @@
-import { FunctionComponent, useRef } from 'react';
+import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Alert, useMediaQuery } from '@mui/material';
 
@@ -8,13 +8,37 @@ import {
   CompactView,
   SPLIT_CONTENT_BREAK_POINT,
 } from 'tg.component/layout/CompactView';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalContext,
+  useGlobalActions,
+} from 'tg.globalContext/GlobalContext';
 import { LoginMoreInfo } from 'tg.component/security/Login/LoginMoreInfo';
 import { LoginSsoForm } from 'tg.component/security/Sso/LoginSsoForm';
+import { useLocation } from 'react-router-dom';
+import { GlobalLoading } from 'tg.component/GlobalLoading';
 
 export const SsoLoginView: FunctionComponent = () => {
   const { t } = useTranslate();
-  const credentialsRef = useRef({ domain: '' });
+  const { loginRedirectSso, getLastSsoDomain } = useGlobalActions();
+  const { search } = useLocation();
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
+
+  const qAutoSubmit = searchParams.get('submit') === 'true';
+  const qDomain = searchParams.get('domain');
+  const storedDomain = getLastSsoDomain();
+  const defaultDomain = qDomain || storedDomain || '';
+
+  const [isSubmitLoading, setIsSubmitLoading] = useState(qAutoSubmit);
+
+  useEffect(() => {
+    if (qAutoSubmit) {
+      loginRedirectSso(defaultDomain).catch(() => {
+        setIsSubmitLoading(false);
+      });
+    }
+  }, [qAutoSubmit]);
+
+  const credentialsRef = useRef({ domain: defaultDomain });
 
   const error = useGlobalContext(
     (c) =>
@@ -28,7 +52,9 @@ export const SsoLoginView: FunctionComponent = () => {
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
-  return (
+  return isSubmitLoading ? (
+    <GlobalLoading />
+  ) : (
     <DashboardPage>
       <CompactView
         maxWidth={isSmall ? 550 : 964}
