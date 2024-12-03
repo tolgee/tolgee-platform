@@ -93,7 +93,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   @Test
   fun testFindMultiplePermissions() {
     executeInNewTransaction(platformTransactionManager) {
-      val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") // create some data
+      val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("zoey") // create some data
       val base = dbPopulator.createBase()
       val organization = usersWithOrganizations[0].organizationRoles[0].organization
       organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
@@ -122,10 +122,10 @@ class ProjectServiceTest : AbstractSpringTest() {
 
       val projects = projectService.findAllPermitted(base.userAccount)
       assertThat(projects).hasSize(7)
-      assertThat(projects[6].scopes).equalsPermissionType(ProjectPermissionType.MANAGE)
-      assertThat(projects[2].scopes).equalsPermissionType(ProjectPermissionType.TRANSLATE)
-      assertThat(projects[1].scopes).equalsPermissionType(ProjectPermissionType.VIEW)
-      assertThat(projects[5].scopes).equalsPermissionType(ProjectPermissionType.MANAGE)
+      assertThat(projects[0].scopes).equalsPermissionType(ProjectPermissionType.MANAGE)
+      assertThat(projects[3].scopes).equalsPermissionType(ProjectPermissionType.TRANSLATE)
+      assertThat(projects[2].scopes).equalsPermissionType(ProjectPermissionType.VIEW)
+      assertThat(projects[4].scopes).equalsPermissionType(ProjectPermissionType.MANAGE)
     }
   }
 
