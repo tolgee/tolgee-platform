@@ -31,7 +31,13 @@ class Metrics(
 
   val bigMetaStoringTimer: Timer by lazy {
     Timer.builder("tolgee.big_meta.storing.timer")
-      .description("Time spent storing big meta data")
+      .description("Time spent storing big meta data (sync)")
+      .register(meterRegistry)
+  }
+
+  val bigMetaStoringAsyncTimer: Timer by lazy {
+    Timer.builder("tolgee.big_meta.storing-async.timer")
+      .description("Time spent storing big meta data (async)")
       .register(meterRegistry)
   }
 

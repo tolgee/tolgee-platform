@@ -126,4 +126,8 @@ class KeysTestData {
       }
     }
   }
+
+  fun addThirdKey(): Key {
+    return projectBuilder.addKey("third_key").self
+  }
 }
