@@ -174,6 +174,11 @@ class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `failing test to test automerge`() {
+    throw IllegalStateException()
+  }
+
+  @Test
   fun `deletes project with batch jobs`() {
     val testData = BatchJobsTestData()
     val keys = testData.addTranslationOperationData(10)
