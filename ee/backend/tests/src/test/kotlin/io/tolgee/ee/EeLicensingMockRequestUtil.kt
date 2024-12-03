@@ -35,6 +35,7 @@ class EeLicensingMockRequestUtil {
           subscriptionMonthly = 200.toBigDecimal(),
         ),
       free = false,
+      nonCommercial = false,
     )
 
   final val mockedSubscriptionResponse =
