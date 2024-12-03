@@ -126,12 +126,13 @@ class ProjectServiceTest : AbstractSpringTest() {
 
       assertThat(fetchedProjects).hasSize(7)
 
-      val expectedPermissions = listOf(
-        base.project to ProjectPermissionType.MANAGE,
-        customPermissionProject to ProjectPermissionType.TRANSLATE,
-        organizationUserIsMember.projects[0] to ProjectPermissionType.VIEW,
-        organizationUserIsOwner.projects[0] to ProjectPermissionType.MANAGE,
-      )
+      val expectedPermissions =
+        listOf(
+          base.project to ProjectPermissionType.MANAGE,
+          customPermissionProject to ProjectPermissionType.TRANSLATE,
+          organizationUserIsMember.projects[0] to ProjectPermissionType.VIEW,
+          organizationUserIsOwner.projects[0] to ProjectPermissionType.MANAGE,
+        )
 
       expectedPermissions.forEach { (project, expectedPermission) ->
         assertThat(fetchedProjects.find { it.name.equals(project.name) }!!.scopes)
