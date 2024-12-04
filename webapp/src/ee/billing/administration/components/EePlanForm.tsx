@@ -97,12 +97,13 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                     }}
                     value={field.value}
                     onChange={(val) => form.setFieldValue(field.name, val)}
-                    items={
-                      products?.map(({ id, name }) => ({
+                    items={[
+                      { value: undefined, name: 'None' },
+                      ...(products?.map(({ id, name }) => ({
                         value: id,
                         name: `${id} ${name}`,
-                      })) || []
-                    }
+                      })) || []),
+                    ]}
                   />
                 )}
               </Field>
