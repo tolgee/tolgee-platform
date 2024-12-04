@@ -154,7 +154,7 @@ export function CloudPlanForm({
                       size: 'small',
                       fullWidth: true,
                       variant: 'outlined',
-                      error: meta.error,
+                      error: (meta.touched && meta.error) || '',
                     }}
                     value={field.value}
                     onChange={(val) => form.setFieldValue(field.name, val)}
