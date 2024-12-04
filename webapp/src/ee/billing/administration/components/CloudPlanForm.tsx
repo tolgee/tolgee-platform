@@ -139,7 +139,7 @@ export function CloudPlanForm({
                 ))}
               </Select>
               <Field name="stripeProductId">
-                {({ field, form }: FieldProps) => (
+                {({ field, form, meta }: FieldProps) => (
                   <SearchSelect
                     compareFunction={(prompt, label) =>
                       label.toLowerCase().includes(prompt.toLowerCase())
@@ -154,6 +154,7 @@ export function CloudPlanForm({
                       size: 'small',
                       fullWidth: true,
                       variant: 'outlined',
+                      error: meta.error,
                     }}
                     value={field.value}
                     onChange={(val) => form.setFieldValue(field.name, val)}
