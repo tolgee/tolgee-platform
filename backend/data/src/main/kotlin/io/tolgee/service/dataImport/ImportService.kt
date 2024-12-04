@@ -356,6 +356,15 @@ class ImportService(
     }
   }
 
+  fun isSomeFileNamespaced(
+    projectId: Long,
+    userId: Long,
+  ): Boolean {
+    return this.getNotExpired(projectId, userId).let {
+      this.importLanguageRepository.isSomeFileNamespaced(it.id)
+    }
+  }
+
   fun findLanguage(languageId: Long): ImportLanguage? {
     return importLanguageRepository.findById(languageId).orElse(null)
   }

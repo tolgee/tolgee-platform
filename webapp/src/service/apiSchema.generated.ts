@@ -3264,6 +3264,7 @@ export interface components {
     };
     ImportAddFilesResultModel: {
       errors: components["schemas"]["ErrorResponseBody"][];
+      warnings: components["schemas"]["ImportLanguageWarning"][];
       result?: components["schemas"]["PagedModelImportLanguageModel"];
     };
     ImportLanguageModel: {
@@ -3287,6 +3288,9 @@ export interface components {
       conflictCount: number;
       /** Format: int32 */
       resolvedCount: number;
+    };
+    ImportLanguageWarning: {
+      messageCode: string;
     };
     PageMetadata: {
       /** Format: int64 */
