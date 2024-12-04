@@ -1,9 +1,7 @@
 import {
   Box,
   Checkbox,
-  FormControl,
   FormControlLabel,
-  InputLabel,
   Switch,
   Typography,
 } from '@mui/material';
@@ -81,41 +79,32 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
               fullWidth
               data-cy="administration-ee-plan-field-name"
             />
-            <Box display="grid" gap={2} sx={{ mt: 2 }}>
+            <Box display="grid" gap={2}>
               <Field name="stripeProductId">
-                {({ meta, field, form }: FieldProps) => (
-                  <FormControl
-                    variant="standard"
-                    error={!!meta.error && meta.touched}
-                    sx={{
-                      display: 'grid',
+                {({ field, form, meta }: FieldProps) => (
+                  <SearchSelect
+                    compareFunction={(prompt, label) =>
+                      label.toLowerCase().includes(prompt.toLowerCase())
+                    }
+                    SelectProps={{
+                      // @ts-ignore
+                      'data-cy': 'administration-ee-plan-field-stripe-product',
+                      label: t('administration_ee_plan_field_stripe_product'),
+                      size: 'small',
+                      fullWidth: true,
+                      variant: 'outlined',
+                      error: (meta.touched && meta.error) || '',
                     }}
-                    data-cy="administration-ee-plan-field-stripe-product"
-                  >
-                    <InputLabel sx={{ position: 'static' }}>
-                      {t('administration_ee_plan_field_stripe_product')}
-                    </InputLabel>
-                    <Box>
-                      <SearchSelect
-                        compareFunction={(prompt, label) =>
-                          label.toLowerCase().includes(prompt.toLowerCase())
-                        }
-                        SelectProps={{
-                          size: 'small',
-                          fullWidth: true,
-                          variant: 'outlined',
-                        }}
-                        value={field.value}
-                        onChange={(val) => form.setFieldValue(field.name, val)}
-                        items={
-                          products?.map(({ id, name }) => ({
-                            value: id,
-                            name: `${id} ${name}`,
-                          })) || []
-                        }
-                      />
-                    </Box>
-                  </FormControl>
+                    value={field.value}
+                    onChange={(val) => form.setFieldValue(field.name, val)}
+                    items={[
+                      { value: undefined, name: 'None' },
+                      ...(products?.map(({ id, name }) => ({
+                        value: id,
+                        name: `${id} ${name}`,
+                      })) || []),
+                    ]}
+                  />
                 )}
               </Field>
             </Box>
