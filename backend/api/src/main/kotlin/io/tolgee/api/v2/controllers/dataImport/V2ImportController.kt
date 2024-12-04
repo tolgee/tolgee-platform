@@ -12,10 +12,7 @@ import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.hateoas.dataImport.ImportAddFilesResultModel
-import io.tolgee.hateoas.dataImport.ImportLanguageModel
-import io.tolgee.hateoas.dataImport.ImportLanguageModelAssembler
-import io.tolgee.hateoas.dataImport.ImportNamespaceModel
+import io.tolgee.hateoas.dataImport.*
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -99,7 +96,13 @@ class V2ImportController(
       } catch (e: NotFoundException) {
         null
       }
-    return ImportAddFilesResultModel(errors, result)
+
+    val namespacesDetected = importService.isSomeFileNamespaced(
+      projectHolder.project.id,
+      authenticationFacade.authenticatedUser.id
+    )
+    val warnings = if (!projectHolder.project.useNamespaces && namespacesDetected) listOf(ImportLanguageWarning("namespaces_detected")) else listOf()
+    return ImportAddFilesResultModel(errors, warnings, result)
   }
 
   @PutMapping("/apply")
