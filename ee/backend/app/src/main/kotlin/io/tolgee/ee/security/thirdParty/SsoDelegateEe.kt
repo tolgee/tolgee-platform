@@ -8,10 +8,10 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.ee.data.GenericUserResponse
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.SsoAuthorizationException
-import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
@@ -20,8 +20,8 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.security.thirdParty.OAuthUserHandler
-import io.tolgee.security.thirdParty.SsoTenantConfig
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging

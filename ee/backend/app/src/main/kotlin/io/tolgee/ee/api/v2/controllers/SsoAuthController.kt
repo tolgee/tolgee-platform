@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.ee.data.DomainRequest
 import io.tolgee.ee.data.SsoUrlResponse
-import io.tolgee.ee.service.sso.TenantService
-import io.tolgee.security.thirdParty.SsoTenantConfig
+import io.tolgee.service.TenantService
 import org.springframework.web.bind.annotation.*
 
 @RestController

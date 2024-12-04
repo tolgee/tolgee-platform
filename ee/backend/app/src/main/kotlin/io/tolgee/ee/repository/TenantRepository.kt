@@ -1,4 +1,4 @@
-package io.tolgee.repository
+package io.tolgee.ee.repository
 
 import io.tolgee.model.SsoTenant
 import org.springframework.data.jpa.repository.JpaRepository

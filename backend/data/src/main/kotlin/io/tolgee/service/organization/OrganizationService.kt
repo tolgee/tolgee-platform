@@ -18,11 +18,11 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.repository.OrganizationRepository
-import io.tolgee.repository.TenantRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.QuickStartService
+import io.tolgee.service.TenantService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
@@ -48,7 +48,7 @@ import io.tolgee.dtos.cacheable.OrganizationDto as CachedOrganizationDto
 @Transactional
 class OrganizationService(
   private val organizationRepository: OrganizationRepository,
-  private val tenantRepository: TenantRepository,
+  private val tenantService: TenantService?,
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
@@ -247,8 +247,7 @@ class OrganizationService(
     val tenant = organization.ssoTenant
     if (tenant != null && tenant.enabled) {
       tenant.enabled = false
-      // FIXME: should probably be tenantService, but the service is in ee module :/
-      tenantRepository.save(tenant)
+      tenantService?.save(tenant)
     }
     organization.deletedAt = currentDateProvider.date
     save(organization)

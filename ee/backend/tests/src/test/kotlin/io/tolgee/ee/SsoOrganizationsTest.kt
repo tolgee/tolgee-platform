@@ -8,11 +8,11 @@ import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.security.thirdParty.SsoDelegateEe
-import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.ee.utils.SsoMultiTenantsMocks
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.service.TenantService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat

@@ -1,6 +1,6 @@
 package io.tolgee.security.thirdParty.data
 
-import io.tolgee.security.thirdParty.SsoTenantConfig
+import io.tolgee.dtos.sso.SsoTenantConfig
 
 data class OAuthUserDetails(
   var sub: String? = null,

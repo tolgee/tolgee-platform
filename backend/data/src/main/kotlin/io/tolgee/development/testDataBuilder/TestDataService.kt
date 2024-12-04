@@ -12,7 +12,7 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
-import io.tolgee.repository.TenantRepository
+import io.tolgee.service.TenantService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
@@ -63,7 +63,7 @@ class TestDataService(
   private val screenshotService: ScreenshotService,
   private val translationCommentService: TranslationCommentService,
   private val tagService: TagService,
-  private val tenantRepository: TenantRepository,
+  private val tenantService: TenantService,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
   private val apiKeyService: ApiKeyService,
@@ -198,7 +198,7 @@ class TestDataService(
   }
 
   private fun saveOrganizationTenants(builder: TestDataBuilder) {
-    tenantRepository.saveAll(builder.data.organizations.mapNotNull { it.data.tenant?.self })
+    tenantService.saveAll(builder.data.organizations.mapNotNull { it.data.tenant?.self })
   }
 
   private fun finalize() {

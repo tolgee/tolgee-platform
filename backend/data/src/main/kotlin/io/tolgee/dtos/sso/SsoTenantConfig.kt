@@ -1,4 +1,4 @@
-package io.tolgee.security.thirdParty
+package io.tolgee.dtos.sso
 
 import io.tolgee.api.ISsoTenant
 import io.tolgee.model.Organization

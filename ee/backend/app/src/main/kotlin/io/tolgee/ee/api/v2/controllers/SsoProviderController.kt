@@ -3,10 +3,10 @@ package io.tolgee.ee.api.v2.controllers
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.dtos.sso.SsoTenantDto
+import io.tolgee.dtos.sso.toDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
 import io.tolgee.ee.data.CreateProviderRequest
-import io.tolgee.ee.data.toDto
-import io.tolgee.ee.service.sso.TenantService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.ee.SsoTenantModel
@@ -14,6 +14,7 @@ import io.tolgee.model.SsoTenant
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
@@ -42,7 +43,7 @@ class SsoProviderController(
     )
 
     val organization = organizationService.get(organizationId)
-    return ssoTenantAssembler.toModel(tenantService.createOrUpdate(request, organization).toDto())
+    return ssoTenantAssembler.toModel(tenantService.createOrUpdate(request.toDto(), organization).toDto())
   }
 
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
@@ -83,5 +84,16 @@ class SsoProviderController(
         throw BadRequestException(Message.CANNOT_SET_SSO_PROVIDER_MISSING_FIELDS, listOf(it.name))
       }
     }
+  }
+
+  private fun CreateProviderRequest.toDto(): SsoTenantDto {
+    return SsoTenantDto(
+      authorizationUri = this.authorizationUri,
+      clientId = this.clientId,
+      clientSecret = this.clientSecret,
+      tokenUri = this.tokenUri,
+      enabled = this.enabled,
+      domain = this.domain,
+    )
   }
 }

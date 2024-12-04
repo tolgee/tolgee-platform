@@ -1,4 +1,4 @@
-package io.tolgee.ee.data
+package io.tolgee.dtos.sso
 
 import io.tolgee.api.ISsoTenant
 import io.tolgee.model.SsoTenant

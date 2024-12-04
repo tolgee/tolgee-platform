@@ -1,7 +1,7 @@
 package io.tolgee.ee.api.v2.hateoas.assemblers
 
+import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.ee.api.v2.controllers.SsoProviderController
-import io.tolgee.ee.data.SsoTenantDto
 import io.tolgee.hateoas.ee.SsoTenantModel
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component

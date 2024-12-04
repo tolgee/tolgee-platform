@@ -5,7 +5,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.tolgee.ee.data.OAuth2TokenResponse
-import io.tolgee.ee.service.sso.TenantService
+import io.tolgee.service.TenantService
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
