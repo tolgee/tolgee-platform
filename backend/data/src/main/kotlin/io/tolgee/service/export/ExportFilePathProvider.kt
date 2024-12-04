@@ -15,13 +15,13 @@ class ExportFilePathProvider(
    */
   fun getFilePath(
     namespace: String?,
-    languageTag: String,
+    languageTag: String? = null,
     replaceExtension: Boolean = true,
   ): String {
     val template = validateAndGetTemplate()
     return template
       .replacePlaceholder(ExportFilePathPlaceholder.NAMESPACE, namespace ?: "")
-      .replaceLanguageTag(languageTag)
+      .replaceLanguageTag(languageTag ?: "all")
       .replaceExtensionIfEnabled(replaceExtension)
       .finalizePath()
   }
