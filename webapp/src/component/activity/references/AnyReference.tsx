@@ -9,7 +9,7 @@ import { ContentStorageReference } from './ContentStorageReference';
 import { WebhookConfigReference } from './WebhookConfigReference';
 import { TaskReference } from './TaskReference';
 
-const StyledReferences = styled(Box)`
+export const StyledReferences = styled(Box)`
   display: flex;
   gap: 3px;
   white-space: nowrap;
