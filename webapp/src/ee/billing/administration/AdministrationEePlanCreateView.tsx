@@ -83,6 +83,7 @@ export const AdministrationEePlanCreateView = () => {
               enabledFeatures: [],
               public: true,
               free: false,
+              nonCommercial: false,
             }}
           />
         </Box>

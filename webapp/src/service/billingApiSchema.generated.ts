@@ -30,6 +30,9 @@ export interface paths {
     put: operations["updatePlan_1"];
     delete: operations["deletePlan_1"];
   };
+  "/v2/administration/billing/add-usage-items-to-invoice-and-finalize-it/{invoiceId}": {
+    put: operations["addUsageItemsToInvoiceAndFinalizeIt"];
+  };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     post: operations["subscribe"];
   };
@@ -85,6 +88,10 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/billing/expected-usage": {
     get: operations["getExpectedUsage_1"];
+  };
+  "/v2/organizations/{organizationId}/billing/expected-usage/{type}.csv": {
+    /** Returns CSV file with usage detail for each time period and it's usage. */
+    get: operations["getExpectedUsageDetail"];
   };
   "/v2/organizations/{organizationId}/billing/customer-portal": {
     get: operations["goToCustomerPortal"];
@@ -406,6 +413,7 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       free: boolean;
+      nonCommercial: boolean;
     };
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
@@ -456,6 +464,7 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       public: boolean;
+      nonCommercial: boolean;
     };
     CloudSubscriptionModel: {
       /** Format: int64 */
@@ -540,6 +549,7 @@ export interface components {
       usableUntil?: string;
       forOrganizationIds: number[];
       free: boolean;
+      nonCommercial: boolean;
     };
     SelfHostedEePlanAdministrationModel: {
       /** Format: int64 */
@@ -568,12 +578,14 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       free: boolean;
+      nonCommercial: boolean;
       stripeProductId: string;
       forOrganizationIds: number[];
     };
     CloudPlanRequest: {
       name: string;
       free: boolean;
+      nonCommercial: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -636,6 +648,7 @@ export interface components {
       public: boolean;
       stripeProductId: string;
       forOrganizationIds: number[];
+      nonCommercial: boolean;
     };
     CloudSubscribeRequest: {
       /**
@@ -1355,6 +1368,49 @@ export interface operations {
     parameters: {
       path: {
         planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  addUsageItemsToInvoiceAndFinalizeIt: {
+    parameters: {
+      path: {
+        invoiceId: string;
       };
     };
     responses: {
@@ -2313,6 +2369,55 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["UsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns CSV file with usage detail for each time period and it's usage. */
+  getExpectedUsageDetail: {
+    parameters: {
+      path: {
+        organizationId: number;
+        type: "SEATS" | "TRANSLATIONS";
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "text/csv": string;
         };
       };
       /** Bad Request */

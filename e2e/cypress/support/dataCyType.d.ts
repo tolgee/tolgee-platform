@@ -14,6 +14,7 @@ declare namespace DataCy {
         "administration-cloud-plan-field-included-mt-credits" |
         "administration-cloud-plan-field-included-translations" |
         "administration-cloud-plan-field-name" |
+        "administration-cloud-plan-field-non-commercial" |
         "administration-cloud-plan-field-price-monthly" |
         "administration-cloud-plan-field-price-per-thousand-mt-credits" |
         "administration-cloud-plan-field-price-per-thousand-translations" |

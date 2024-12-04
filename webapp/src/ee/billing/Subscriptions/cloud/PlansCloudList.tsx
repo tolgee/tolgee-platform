@@ -57,6 +57,7 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
     free: false,
     hasYearlyPrice: false,
     public: true,
+    nonCommercial: false,
   });
 
   const parentForPublic: PlanType[] = [];
@@ -124,6 +125,7 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
               filteredFeatures={filteredFeatures}
               featuresMinHeight="155px"
               custom={custom}
+              nonCommercial={plan.nonCommercial}
               topFeature={
                 parentPlan && <AllFromPlanFeature planName={parentPlan} />
               }

@@ -29,6 +29,7 @@ type FormData = {
   public: boolean;
   forOrganizationIds: number[];
   free: boolean;
+  nonCommercial: boolean;
 };
 
 type Props = {
@@ -64,6 +65,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
         public: initialData.public,
         forOrganizationIds: initialData.forOrganizationIds,
         free: initialData.free,
+        nonCommercial: initialData.nonCommercial,
       }}
       enableReinitialize
       onSubmit={onSubmit}
@@ -229,6 +231,19 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
               }
               data-cy="administration-ee-plan-field-free"
               label={t('administration_ee_plan_field_free')}
+            />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={values.nonCommercial}
+                  onChange={() =>
+                    setFieldValue('nonCommercial', !values.nonCommercial)
+                  }
+                />
+              }
+              data-cy="administration-cloud-plan-field-non-commercial"
+              label="Non-commercial"
             />
 
             {!values.public && (
