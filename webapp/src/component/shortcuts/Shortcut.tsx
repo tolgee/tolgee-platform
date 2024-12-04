@@ -21,7 +21,7 @@ export const Shortcut = ({ name, formula }: Props) => {
       >
         {name}
       </StyledItemContent>
-      <StyledItemContent sx={{ whiteSpace: 'nowrap' }}>
+      <StyledItemContent variant="body2" sx={{ whiteSpace: 'nowrap' }}>
         {formula}
       </StyledItemContent>
     </StyledItem>

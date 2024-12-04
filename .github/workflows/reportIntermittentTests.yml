@@ -121,6 +121,7 @@ jobs:
 
       - name: Get report name
         id: reportName
+        if: always()
         run: |
           reportName=${{ matrix.command }}
           echo "reportName=${reportName//\:/_}" >> $GITHUB_OUTPUT
@@ -128,9 +129,17 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: backend_test_reports_${{ steps.version.outputs.reportName }}
+          name: backend_test_reports_${{ steps.reportName.outputs.reportName }}
           path: |
             ./**/build/reports/**/*
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test report for ${{ matrix.command }}
+          path: "**/build/test-results/**/TEST-*.xml"
+          reporter: java-junit
 
   e2e:
     needs: [ frontend-build, backend-build, e2e-install-deps ]

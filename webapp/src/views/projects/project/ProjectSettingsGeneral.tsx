@@ -110,56 +110,58 @@ export const ProjectSettingsGeneral = () => {
       <Box gridArea="avatar">
         <ProjectProfileAvatar />
       </Box>
-      <StandardForm
-        validationSchema={Validation.PROJECT_SETTINGS}
-        initialValues={initialValues}
-        onSubmit={handleEdit}
-        saveActionLoadable={updateLoadable}
-        hideCancel
-        customActions={
-          <LoadingButton
-            data-cy="project-delete-button"
-            color="secondary"
-            variant="outlined"
-            onClick={() => leave(project.name, project.id)}
-            loading={isLeaving}
-          >
-            <T keyName="project_leave_button" />
-          </LoadingButton>
-        }
-      >
-        <Box gridArea="fields" display="grid" gap={2} mb={4}>
-          <Box>
-            <FieldLabel>
-              <T keyName="project_settings_name_label" />
-            </FieldLabel>
-            <TextField
-              size="small"
-              name="name"
-              required={true}
-              data-cy="project-settings-name"
-              sx={{ mt: 0 }}
-            />
+      <Box gridArea="fields">
+        <StandardForm
+          validationSchema={Validation.PROJECT_SETTINGS}
+          initialValues={initialValues}
+          onSubmit={handleEdit}
+          saveActionLoadable={updateLoadable}
+          hideCancel
+          customActions={
+            <LoadingButton
+              data-cy="project-delete-button"
+              color="secondary"
+              variant="outlined"
+              onClick={() => leave(project.name, project.id)}
+              loading={isLeaving}
+            >
+              <T keyName="project_leave_button" />
+            </LoadingButton>
+          }
+        >
+          <Box display="grid" gap={2} mb={4}>
+            <Box>
+              <FieldLabel>
+                <T keyName="project_settings_name_label" />
+              </FieldLabel>
+              <TextField
+                size="small"
+                name="name"
+                required={true}
+                data-cy="project-settings-name"
+                sx={{ mt: 0 }}
+              />
+            </Box>
+            <Box>
+              <FieldLabel>
+                <T keyName="project_settings_description_label" />
+              </FieldLabel>
+              <TextField
+                size="small"
+                minRows={2}
+                multiline
+                name="description"
+                data-cy="project-settings-description"
+                sx={{ mt: 0 }}
+              />
+            </Box>
+            <ProjectLanguagesProvider>
+              <LanguageSelect />
+            </ProjectLanguagesProvider>
+            <NamespaceSelect />
           </Box>
-          <Box>
-            <FieldLabel>
-              <T keyName="project_settings_description_label" />
-            </FieldLabel>
-            <TextField
-              size="small"
-              minRows={2}
-              multiline
-              name="description"
-              data-cy="project-settings-description"
-              sx={{ mt: 0 }}
-            />
-          </Box>
-          <ProjectLanguagesProvider>
-            <LanguageSelect />
-          </ProjectLanguagesProvider>
-          <NamespaceSelect />
-        </Box>
-      </StandardForm>
+        </StandardForm>
+      </Box>
     </StyledContainer>
   );
 };

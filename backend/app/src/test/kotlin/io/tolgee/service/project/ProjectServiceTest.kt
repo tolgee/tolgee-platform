@@ -19,7 +19,9 @@ import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.waitFor
+import io.tolgee.model.Organization
 import io.tolgee.model.Permission
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.service.bigMeta.BigMetaService
@@ -93,18 +95,18 @@ class ProjectServiceTest : AbstractSpringTest() {
   @Test
   fun testFindMultiplePermissions() {
     executeInNewTransaction(platformTransactionManager) {
-      val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") // create some data
+      val users = dbPopulator.createUsersAndOrganizations("agnes")
       val base = dbPopulator.createBase()
-      val organization = usersWithOrganizations[0].organizationRoles[0].organization
-      organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
 
-      val user3 = userAccountService.get(usersWithOrganizations[3].id) // entityManager.merge(usersWithOrganizations[3])
+      val organizationUserIsMember = users[1].firstOrganization()
+      organizationRoleService.grantRoleToUser(base.userAccount, organizationUserIsMember, OrganizationRoleType.MEMBER)
 
-      val organization2 = user3.organizationRoles[0].organization
-      organizationRoleService.grantRoleToUser(base.userAccount, organization2!!, OrganizationRoleType.OWNER)
+      val organizationUserIsOwner = users[2].firstOrganization()
+      organizationRoleService.grantRoleToUser(base.userAccount, organizationUserIsOwner, OrganizationRoleType.OWNER)
 
-      val customPermissionProject = usersWithOrganizations[0].organizationRoles[0].organization!!.projects[2]
-      val customPermissionProject2 = user3.organizationRoles[0].organization!!.projects[2]
+      val customPermissionProject = organizationUserIsMember.projects[2]
+      val customPermissionProject2 = organizationUserIsOwner.projects[2]
+
       permissionService.create(
         Permission(
           user = base.userAccount,
@@ -120,14 +122,26 @@ class ProjectServiceTest : AbstractSpringTest() {
         ),
       )
 
-      val projects = projectService.findAllPermitted(base.userAccount)
-      assertThat(projects).hasSize(7)
-      assertThat(projects[6].scopes).equalsPermissionType(ProjectPermissionType.MANAGE)
-      assertThat(projects[2].scopes).equalsPermissionType(ProjectPermissionType.TRANSLATE)
-      assertThat(projects[1].scopes).equalsPermissionType(ProjectPermissionType.VIEW)
-      assertThat(projects[5].scopes).equalsPermissionType(ProjectPermissionType.MANAGE)
+      val fetchedProjects = projectService.findAllPermitted(base.userAccount)
+
+      assertThat(fetchedProjects).hasSize(7)
+
+      val expectedPermissions =
+        listOf(
+          base.project to ProjectPermissionType.MANAGE,
+          customPermissionProject to ProjectPermissionType.TRANSLATE,
+          organizationUserIsMember.projects[0] to ProjectPermissionType.VIEW,
+          organizationUserIsOwner.projects[0] to ProjectPermissionType.MANAGE,
+        )
+
+      expectedPermissions.forEach { (project, expectedPermission) ->
+        assertThat(fetchedProjects.find { it.name.equals(project.name) }!!.scopes)
+          .equalsPermissionType(expectedPermission)
+      }
     }
   }
+
+  private fun UserAccount.firstOrganization(): Organization = organizationRoles[0].organization!!
 
   @Test
   fun testDeleteProjectWithTags() {
