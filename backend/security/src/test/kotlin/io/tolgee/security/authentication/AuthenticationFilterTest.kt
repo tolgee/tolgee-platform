@@ -27,6 +27,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
+import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -80,6 +81,8 @@ class AuthenticationFilterTest {
 
   private val userAccount = Mockito.mock(UserAccount::class.java, Mockito.RETURNS_DEFAULTS)
 
+  private val ssoDelegate = Mockito.mock(SsoDelegate::class.java)
+
   private val authenticationFilter =
     AuthenticationFilter(
       authProperties,
@@ -89,6 +92,7 @@ class AuthenticationFilterTest {
       userAccountService,
       pakService,
       patService,
+      ssoDelegate,
     )
 
   private val authenticationFacade =
@@ -154,6 +158,8 @@ class AuthenticationFilterTest {
     Mockito.`when`(userAccount.username).thenReturn("")
     Mockito.`when`(userAccount.needsSuperJwt).thenReturn(false)
     Mockito.`when`(userAccountDto.id).thenReturn(TEST_USER_ID)
+
+    Mockito.`when`(ssoDelegate.verifyUserSsoAccountAvailable(userAccountDto)).thenReturn(true)
 
     SecurityContextHolder.getContext().authentication = null
   }

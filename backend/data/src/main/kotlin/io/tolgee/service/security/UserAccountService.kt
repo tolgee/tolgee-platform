@@ -20,6 +20,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -28,6 +29,7 @@ import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
+import io.tolgee.util.addMinutes
 import jakarta.persistence.EntityManager
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.time.DateUtils
@@ -91,6 +93,7 @@ class UserAccountService(
     return userAccountRepository.findInitialUser()
   }
 
+  @Transactional
   fun get(id: Long): UserAccount {
     return this.findActive(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
@@ -223,11 +226,16 @@ class UserAccountService(
   }
 
   fun findByThirdParty(
-    type: String,
+    type: ThirdPartyAuthType,
     id: String,
-  ): Optional<UserAccount> {
+  ): UserAccount? {
     return userAccountRepository.findThirdByThirdParty(id, type)
   }
+
+  fun findEnabledBySsoDomain(
+    type: String,
+    idSub: String,
+  ): UserAccount? = userAccountRepository.findEnabledBySsoDomain(idSub, type)
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
@@ -318,6 +326,27 @@ class UserAccountService(
   ): UserAccount {
     userAccount.mfaRecoveryCodes = codes
     return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
+  fun updateSsoSession(
+    userAccount: UserAccount,
+    refreshToken: String?,
+  ): UserAccount {
+    userAccount.ssoRefreshToken = refreshToken
+    userAccount.ssoSessionExpiry = getCurrentSsoExpiration(userAccount.thirdPartyAuthType)
+    return userAccountRepository.save(userAccount)
+  }
+
+  fun getCurrentSsoExpiration(type: ThirdPartyAuthType?): Date? {
+    return currentDateProvider.date.addMinutes(
+      when (type) {
+        ThirdPartyAuthType.SSO -> tolgeeProperties.authentication.ssoOrganizations.sessionExpirationMinutes
+        ThirdPartyAuthType.SSO_GLOBAL -> tolgeeProperties.authentication.ssoGlobal.sessionExpirationMinutes
+        else -> return null
+      },
+    )
   }
 
   @Transactional

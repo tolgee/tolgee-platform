@@ -10,7 +10,9 @@ class PublicConfigurationDTO(
   val billing: PublicBillingConfigurationDTO,
   val version: String,
   val authentication: Boolean,
-  var authMethods: AuthMethodsDTO?,
+  val authMethods: AuthMethodsDTO?,
+  val nativeEnabled: Boolean,
+  @Deprecated("Use nativeEnabled instead", ReplaceWith("nativeEnabled"))
   val passwordResettable: Boolean,
   val allowRegistrations: Boolean,
   val screenshotsUrl: String,
@@ -37,6 +39,8 @@ class PublicConfigurationDTO(
     val github: OAuthPublicConfigDTO,
     val google: OAuthPublicConfigDTO,
     val oauth2: OAuthPublicExtendsConfigDTO,
+    val ssoGlobal: SsoGlobalPublicConfigDTO,
+    val ssoOrganizations: SsoOrganizationsPublicConfigDTO,
   )
 
   data class OAuthPublicConfigDTO(val clientId: String?) {
@@ -50,6 +54,18 @@ class PublicConfigurationDTO(
   ) {
     val enabled: Boolean = !clientId.isNullOrEmpty()
   }
+
+  data class SsoGlobalPublicConfigDTO(
+    val enabled: Boolean,
+    val clientId: String?,
+    val domain: String?,
+    val customLogoUrl: String?,
+    val customLoginText: String?,
+  )
+
+  data class SsoOrganizationsPublicConfigDTO(
+    val enabled: Boolean,
+  )
 
   data class MtServicesDTO(
     val defaultPrimaryService: MtServiceType?,

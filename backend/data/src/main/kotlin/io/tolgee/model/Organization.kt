@@ -62,6 +62,9 @@ class Organization(
 
   override var deletedAt: Date? = null
 
+  @OneToOne(mappedBy = "organization", fetch = FetchType.LAZY)
+  var ssoTenant: SsoTenant? = null
+
   @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, orphanRemoval = true)
   var organizationSlackWorkspace: MutableList<OrganizationSlackWorkspace> = mutableListOf()
 }

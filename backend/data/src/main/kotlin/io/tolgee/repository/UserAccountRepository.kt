@@ -3,6 +3,7 @@ package io.tolgee.repository
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.context.annotation.Lazy
@@ -159,8 +160,27 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   )
   fun findThirdByThirdParty(
     thirdPartyAuthId: String,
-    thirdPartyAuthType: String,
-  ): Optional<UserAccount>
+    thirdPartyAuthType: ThirdPartyAuthType,
+  ): UserAccount?
+
+  @Query(
+    """
+    from UserAccount ua 
+      join OrganizationRole orl on orl.user = ua
+      join Organization o on orl.organization = o
+      where ua.thirdPartyAuthId = :thirdPartyAuthId
+        and orl.managed = true
+        and o.ssoTenant.domain = :domain
+        and o.ssoTenant.enabled = true
+        and o.deletedAt is null
+        and ua.deletedAt is null
+        and ua.disabledAt is null
+  """,
+  )
+  fun findEnabledBySsoDomain(
+    thirdPartyAuthId: String,
+    domain: String,
+  ): UserAccount?
 
   @Query(
     """ select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole,

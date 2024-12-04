@@ -5,10 +5,11 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.service.security.SignUpService
-import io.tolgee.service.security.UserAccountService
+import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
+import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -24,18 +25,21 @@ import org.springframework.web.client.RestTemplate
 @Component
 class OAuth2Delegate(
   private val jwtService: JwtService,
-  private val userAccountService: UserAccountService,
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
-  private val signUpService: SignUpService,
-) {
+  private val oAuthUserHandler: OAuthUserHandler,
+) : ThirdPartyAuthDelegate {
   private val oauth2ConfigurationProperties: OAuth2AuthenticationProperties = properties.authentication.oauth2
   private val logger = LoggerFactory.getLogger(this::class.java)
 
-  fun getTokenResponse(
+  override val name: String
+    get() = "oauth2"
+
+  override fun getTokenResponse(
     receivedCode: String?,
     invitationCode: String?,
     redirectUri: String?,
+    domain: String?,
   ): JwtAuthenticationResponse {
     try {
       val body: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>()
@@ -90,33 +94,22 @@ class OAuth2Delegate(
             logger.info("Third party user email is null. Missing scope email?")
             throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
           }
-
-        val userAccountOptional = userAccountService.findByThirdParty("oauth2", userResponse.sub!!)
+        val userData =
+          OAuthUserDetails(
+            sub = userResponse.sub!!,
+            name = userResponse.name,
+            givenName = userResponse.given_name,
+            familyName = userResponse.family_name,
+            email = email,
+          )
         val user =
-          userAccountOptional.orElseGet {
-            userAccountService.findActive(email)?.let {
-              throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
-            }
+          oAuthUserHandler.findOrCreateUser(
+            userData,
+            invitationCode,
+            ThirdPartyAuthType.OAUTH2,
+            UserAccount.AccountType.THIRD_PARTY,
+          )
 
-            val newUserAccount = UserAccount()
-            newUserAccount.username =
-              userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
-
-            // build name for userAccount based on available fields by third party
-            var name = userResponse.email!!.split("@")[0]
-            if (userResponse.name != null) {
-              name = userResponse.name!!
-            } else if (userResponse.given_name != null && userResponse.family_name != null) {
-              name = "${userResponse.given_name} ${userResponse.family_name}"
-            }
-            newUserAccount.name = name
-            newUserAccount.thirdPartyAuthId = userResponse.sub
-            newUserAccount.thirdPartyAuthType = "oauth2"
-            newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-            signUpService.signUp(newUserAccount, invitationCode, null)
-
-            newUserAccount
-          }
         val jwt = jwtService.emitToken(user.id)
         return JwtAuthenticationResponse(jwt)
       }

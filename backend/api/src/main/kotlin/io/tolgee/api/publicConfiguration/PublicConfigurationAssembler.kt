@@ -3,9 +3,12 @@ package io.tolgee.api.publicConfiguration
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.AuthMethodsDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicConfigDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicExtendsConfigDTO
+import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.SsoGlobalPublicConfigDTO
+import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.SsoOrganizationsPublicConfigDTO
 import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.PlausibleDto
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
@@ -62,27 +65,39 @@ class PublicConfigurationAssembler(
           ),
           connected = properties.slack.token != null,
         ),
+      nativeEnabled = properties.authentication.nativeEnabled,
       passwordResettable = properties.authentication.nativeEnabled,
       allowRegistrations = properties.authentication.registrationsAllowed,
-      authMethods = getAuthMethods(),
+      authMethods = properties.authentication.asAuthMethodsDTO(),
     )
   }
 
-  private fun getAuthMethods(): AuthMethodsDTO? {
-    if (properties.authentication.enabled) {
-      return AuthMethodsDTO(
-        OAuthPublicConfigDTO(
-          properties.authentication.github.clientId,
-        ),
-        OAuthPublicConfigDTO(properties.authentication.google.clientId),
-        OAuthPublicExtendsConfigDTO(
-          properties.authentication.oauth2.clientId,
-          properties.authentication.oauth2.authorizationUrl,
-          properties.authentication.oauth2.scopes,
-        ),
-      )
+  private fun AuthenticationProperties.asAuthMethodsDTO(): AuthMethodsDTO? {
+    if (!enabled) {
+      return null
     }
-    return null
+
+    return AuthMethodsDTO(
+      OAuthPublicConfigDTO(
+        github.clientId,
+      ),
+      OAuthPublicConfigDTO(google.clientId),
+      OAuthPublicExtendsConfigDTO(
+        oauth2.clientId,
+        oauth2.authorizationUrl,
+        oauth2.scopes,
+      ),
+      SsoGlobalPublicConfigDTO(
+        ssoGlobal.enabled,
+        ssoGlobal.clientId,
+        ssoGlobal.domain,
+        ssoGlobal.customLogoUrl,
+        ssoGlobal.customLoginText,
+      ),
+      SsoOrganizationsPublicConfigDTO(
+        ssoOrganizations.enabled,
+      ),
+    )
   }
 
   private fun getPrimaryMtService(): MtServiceType? {
