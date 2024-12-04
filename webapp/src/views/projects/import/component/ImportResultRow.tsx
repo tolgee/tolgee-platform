@@ -22,6 +22,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { LanguageSelector } from './LanguageSelector';
 import { ImportNamespaceSelector } from './ImportNamespaceSelector';
 import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledTableRow = styled(TableRow)`
   &:hover {
@@ -72,6 +73,7 @@ export const ImportResultRow = (props: {
   onShowData: () => void;
 }) => {
   const helper = useImportLanguageHelper(props.row);
+  const project = useProject();
 
   return (
     <React.Fragment>
@@ -82,9 +84,11 @@ export const ImportResultRow = (props: {
             row={props.row}
           />
         </TableCell>
-        <TableCell scope="row" data-cy="import-result-namespace-cell">
-          <ImportNamespaceSelector row={props.row} />
-        </TableCell>
+        {project.useNamespaces && (
+          <TableCell scope="row" data-cy="import-result-namespace-cell">
+            <ImportNamespaceSelector row={props.row} />
+          </TableCell>
+        )}
         <TableCell scope="row" data-cy="import-result-file-cell">
           <span>
             {props.row.importFileName} ({props.row.name})
