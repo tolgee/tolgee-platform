@@ -31,10 +31,7 @@ class CsvFileExporter(
     translations.map {
       val converted = convertMessage(it.text, it.key.isPlural)
       val path =
-        pathProvider.getFilePath(
-          it.key.namespace,
-          replaceExtension = false,
-        )
+        pathProvider.getFilePath(it.key.namespace)
       val entry =
         CsvEntry(
           key = it.key.name,
