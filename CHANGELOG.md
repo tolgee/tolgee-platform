@@ -1,3 +1,10 @@
+## [3.84.1](https://github.com/tolgee/tolgee-platform/compare/v3.84.0...v3.84.1) (2024-12-04)
+
+
+### Bug Fixes
+
+* unify badge-like components in activity ([#2754](https://github.com/tolgee/tolgee-platform/issues/2754)) ([5699867](https://github.com/tolgee/tolgee-platform/commit/569986759eea56b94e170aa43e2af64094890be6))
+
 # [3.84.0](https://github.com/tolgee/tolgee-platform/compare/v3.83.4...v3.84.0) (2024-12-04)
 
 
