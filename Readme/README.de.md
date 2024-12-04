@@ -86,7 +86,7 @@ Treten Sie der Tolgee-Community bei [Tolgee Slack Community <img src="https://im
   - [Mehr...](https://tolgee.io/integrations/all)
 - [Tolgee-Plattformdokumente](https://tolgee.io/docs/platform)
   - [Selbsthosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
-- [Entwicklungshinweise (Wie man Tolgee lokal entwickelt)](https://github.com/tolgee/tolgee-platform/wiki/Development)
+- [Entwicklungshinweise (Wie man Tolgee lokal entwickelt)](../DEVELOPMENT.md)
 
 ## Warum Tolgee verwenden?
 

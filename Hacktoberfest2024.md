@@ -27,7 +27,7 @@ Getting started with Tolgee is easy! You have two options to integrate it into y
 
 1. **Self-Host Tolgee**
   - You can deploy Tolgee on your server for complete control and customization. Simply follow our [installation guide](https://tolgee.io/platform/self_hosting/getting_started) to set up the platform locally or on your preferred cloud provider.
-  - You can follow the [development wiki](https://github.com/tolgee/tolgee-platform/wiki/Development) to start the tolgee-platform locally in development mode.
+  - You can follow the [development wiki](DEVELOPMENT.md) to start the tolgee-platform locally in development mode.
 2. **Use Tolgee Cloud**: If you prefer a hassle-free experience, you can use [Tolgee Cloud](https://app.tolgee.io/). This option allows you to access all of Tolgee's features without the need for server management.
 
 ## How to Earn Tolgee Swag?

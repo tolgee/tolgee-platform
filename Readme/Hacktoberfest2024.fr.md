@@ -27,7 +27,7 @@ Commencer avec Tolgee est facile ! Vous avez deux options pour l’intégrer d
 
 1. **Hébergez Tolgee vous-même**
    - Vous pouvez déployer Tolgee sur votre serveur pour un contrôle et une personnalisation totale. Suivez simplement notre [guide d’installation](https://tolgee.io/platform/self_hosting/getting_started) pour configurer la plateforme localement ou sur le fournisseur cloud de votre choix.
-   - Vous pouvez suivre le [wiki de développement](https://github.com/tolgee/tolgee-platform/wiki/Development) pour démarrer la plateforme Tolgee en mode développement local.
+   - Vous pouvez suivre le [wiki de développement](../DEVELOPMENT.md) pour démarrer la plateforme Tolgee en mode développement local.
    
 2. **Utiliser Tolgee Cloud** : Si vous préférez une expérience sans tracas, vous pouvez utiliser [Tolgee Cloud](https://app.tolgee.io/). Cette option vous permet d’accéder à toutes les fonctionnalités de Tolgee sans avoir à gérer de serveurs.
 
