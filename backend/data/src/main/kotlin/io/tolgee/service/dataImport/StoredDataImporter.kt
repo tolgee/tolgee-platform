@@ -235,7 +235,8 @@ class StoredDataImporter(
       if (!importKey.shouldBeImported) {
         return@map
       }
-      addKeyToSave(importKey.file.namespace, importKey.name)
+      val namespace = if (import.project.useNamespaces) importKey.file.namespace else null
+      addKeyToSave(namespace, importKey.name)
     }
   }
 
