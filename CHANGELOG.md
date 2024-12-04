@@ -1,3 +1,10 @@
+# [3.84.0](https://github.com/tolgee/tolgee-platform/compare/v3.83.4...v3.84.0) (2024-12-04)
+
+
+### Features
+
+* non-commercial licences indication ([#2748](https://github.com/tolgee/tolgee-platform/issues/2748)) ([2099a08](https://github.com/tolgee/tolgee-platform/commit/2099a08ecf8f9fdc673db30853a9af2e8786ff23))
+
 ## [3.83.4](https://github.com/tolgee/tolgee-platform/compare/v3.83.3...v3.83.4) (2024-12-03)
 
 
