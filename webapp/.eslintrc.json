@@ -37,7 +37,7 @@
   },
   "overrides": [
     {
-      "files": ["!src/ee/**"], // Adjust the folder and file pattern as needed
+      "files": ["!src/ee/**"],
       "rules": {
         "no-restricted-imports": [
           "error",
