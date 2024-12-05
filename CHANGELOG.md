@@ -1,3 +1,11 @@
+## [3.84.2](https://github.com/tolgee/tolgee-platform/compare/v3.84.1...v3.84.2) (2024-12-05)
+
+
+### Bug Fixes
+
+* csv exporter - use path provider to generate proper structure ([#2753](https://github.com/tolgee/tolgee-platform/issues/2753)) ([89e7d7e](https://github.com/tolgee/tolgee-platform/commit/89e7d7e1e52723856e16646c4d4b3d2fd197c3e5))
+* import - create new keys - use cached existing keys ([#2756](https://github.com/tolgee/tolgee-platform/issues/2756)) ([b82d8ab](https://github.com/tolgee/tolgee-platform/commit/b82d8abf128c0bf295464a71c134f67569b51386))
+
 ## [3.84.1](https://github.com/tolgee/tolgee-platform/compare/v3.84.0...v3.84.1) (2024-12-04)
 
 
