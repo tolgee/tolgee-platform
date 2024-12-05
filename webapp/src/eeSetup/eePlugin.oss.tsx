@@ -1,15 +1,18 @@
 import React from 'react';
 
-const NotIncludedInOss: React.FC = () => {
-  return <div>Not included in OSS</div>;
-};
+const NotIncludedInOss =
+  (name: string): React.FC<any> =>
+  // eslint-disable-next-line react/display-name
+  () => {
+    return <div>Not included in OSS ({name})</div>;
+  };
 
-const Empty: React.FC = () => {
+const Empty: React.FC<any> = () => {
   return null;
 };
 
-export const TaskReference = NotIncludedInOss;
-export const PermissionsAdvancedEe = NotIncludedInOss;
+export const TaskReference = NotIncludedInOss('TaskReference');
+export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
 export const billingMenuItems = [];
 export const apps = [];
@@ -21,9 +24,11 @@ export const routes = {
   Project: Empty,
 };
 export const useUserTaskCount = () => 0;
-export const TranslationTaskIndicator = NotIncludedInOss;
-export const PrefilterTask = NotIncludedInOss;
-export const TranslationsTaskDetail = NotIncludedInOss;
+export const TranslationTaskIndicator = NotIncludedInOss(
+  'TranslationTaskIndicator'
+);
+export const PrefilterTask = NotIncludedInOss('PrefilterTask');
+export const TranslationsTaskDetail = Empty;
 
 export const useAddDeveloperViewItems = () => (existingItems) => existingItems;
 export const useAddBatchOperations = () => (existingItems) => existingItems;

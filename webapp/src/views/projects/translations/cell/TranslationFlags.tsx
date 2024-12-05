@@ -121,7 +121,7 @@ export const TranslationFlags: React.FC<Props> = ({
 
   return (
     <StyledWrapper className={className}>
-      <TranslationTaskIndicator task={task} />
+      {task && <TranslationTaskIndicator task={task} />}
       {translation?.auto && (
         <StyledTranslationFlagsContainer data-cy="translations-auto-translated-indicator">
           <AutoTranslationIcon provider={translation.mtProvider} />
