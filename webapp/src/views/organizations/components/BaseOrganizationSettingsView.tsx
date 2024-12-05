@@ -15,7 +15,7 @@ import {
   useIsAdmin,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import { getEe } from '../../../plugin/getEe';
+import { Usage } from 'tg.ee';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -30,10 +30,6 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   link,
   ...otherProps
 }) => {
-  const {
-    organization: { Usage: EeUsage },
-  } = getEe();
-
   const config = useConfig();
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
@@ -120,7 +116,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       {...otherProps}
       loading={organizationLoadable.isLoading || loading}
       navigation={[...navigationPrefix, ...(navigation || [])]}
-      navigationRight={<EeUsage />}
+      navigationRight={<Usage />}
       menuItems={menuItems}
       hideChildrenOnLoading={false}
     >

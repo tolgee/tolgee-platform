@@ -24,13 +24,6 @@
     "preserveSymlinks": true,
     "emitDecoratorMetadata": true
   },
-  "include": [
-    "src",
-    "tolgee.dev.d.ts",
-    "vite-env.d.ts"
-  ],
-  "exclude": [
-    "eePlugin/eePlugin.ee.tsx",
-    "eePlugin/eePlugin.oss.tsx"
-  ]
+  "include": ["src", "tolgee.dev.d.ts", "vite-env.d.ts"],
+  "exclude": ["src/eePlugin.ee.tsx", "src/eePlugin.oss.tsx"]
 }

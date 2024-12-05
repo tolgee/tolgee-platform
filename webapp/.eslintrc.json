@@ -34,5 +34,18 @@
     "@typescript-eslint/no-non-null-assertion": "off",
     "react/prop-types": "off",
     "@typescript-eslint/no-empty-interface": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["!src/ee/**"], // Adjust the folder and file pattern as needed
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": ["tg.ee.module/*", "**/ee/**", "**/eePlugin.*"]
+          }
+        ]
+      }
+    }
+  ]
 }

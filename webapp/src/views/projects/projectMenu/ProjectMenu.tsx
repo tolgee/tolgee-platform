@@ -21,7 +21,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { Integration } from 'tg.component/CustomIcons';
 import { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
-import { getEe } from '../../../plugin/getEe';
+import { useAddProjectMenuItems } from 'tg.ee';
 
 export const ProjectMenu = ({ id }) => {
   const { satisfiesPermission } = useProjectPermissions();
@@ -136,8 +136,6 @@ export const ProjectMenu = ({ id }) => {
       quickStart: { itemKey: 'menu_settings' },
     },
   ] satisfies ProjectMenuItem[];
-
-  const { useAddProjectMenuItems } = getEe();
 
   const addEeItems = useAddProjectMenuItems();
 

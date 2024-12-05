@@ -26,7 +26,7 @@ import { TranslationsToolbar } from './TranslationsToolbar';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { Prefilter } from './prefilters/Prefilter';
-import { getEe } from '../../../plugin/getEe';
+import { TranslationsTaskDetail } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -34,10 +34,6 @@ const StyledContainer = styled('div')`
 `;
 
 export const Translations = () => {
-  const {
-    tasks: { TranslationsTaskDetail: EeTranslationsTaskDetail },
-  } = getEe();
-
   const { setQuickStartOpen, quickStartForceFloating } = useGlobalActions();
   const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
@@ -168,7 +164,7 @@ export const Translations = () => {
         {toolsPanelOpen && <FloatingToolsPanel />}
       </StyledContainer>
       <TranslationsToolbar />
-      <EeTranslationsTaskDetail />
+      <TranslationsTaskDetail />
     </BaseProjectView>
   );
 };

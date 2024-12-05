@@ -4,9 +4,9 @@ import { SelfHostedPlanAction } from './SelfHostedPlanAction';
 import { PlanType } from '../../component/Plan/types';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 import { excludePreviousPlanFeatures } from '../../component/Plan/plansTools';
-import { Plan } from 'tg.ee/billing/component/Plan/Plan';
-import { AllFromPlanFeature } from 'tg.ee/billing/component/Plan/AllFromPlanFeature';
-import { PlanFeature } from 'tg.ee/billing/component/PlanFeature';
+import { Plan } from 'tg.ee.module/billing/component/Plan/Plan';
+import { AllFromPlanFeature } from 'tg.ee.module/billing/component/Plan/AllFromPlanFeature';
+import { PlanFeature } from 'tg.ee.module/billing/component/PlanFeature';
 
 type BillingPlansProps = {
   plans: PlanType[];

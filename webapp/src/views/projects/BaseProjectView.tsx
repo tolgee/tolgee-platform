@@ -7,7 +7,7 @@ import { OrganizationSwitch } from 'tg.component/organizationSwitch/Organization
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { BatchOperationsSummary } from './translations/BatchOperations/OperationsSummary/OperationsSummary';
-import { getEe } from '../../plugin/getEe';
+import { Usage } from 'tg.ee';
 
 type Props = BaseViewProps;
 
@@ -15,10 +15,6 @@ export const BaseProjectView: React.FC<Props> = ({
   navigation,
   ...otherProps
 }) => {
-  const {
-    organization: { Usage: EeUsage },
-  } = getEe();
-
   const project = useProject() as ReturnType<typeof useProject> | undefined;
 
   const history = useHistory();
@@ -48,7 +44,7 @@ export const BaseProjectView: React.FC<Props> = ({
       navigationRight={
         <Box display="grid">
           <BatchOperationsSummary />
-          <EeUsage />
+          <Usage />
         </Box>
       }
     />

@@ -1,7 +1,7 @@
 import { HierarchyItem, LanguageModel, PermissionAdvancedState } from './types';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from '../common/DisabledFeatureBanner';
-import { getEe } from '../../plugin/getEe';
+import { PermissionsAdvancedEe } from 'tg.ee';
 
 type Props = {
   dependencies: HierarchyItem;
@@ -16,8 +16,6 @@ export const PermissionsAdvanced: React.FC<Props> = ({
   onChange,
   allLangs,
 }) => {
-  const { PermissionsAdvanced: PermissionsAdvancedEe } = getEe();
-
   const { isEnabled } = useEnabledFeatures();
 
   if (!isEnabled('GRANULAR_PERMISSIONS')) {

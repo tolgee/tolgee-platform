@@ -5,14 +5,10 @@ import { LINKS } from 'tg.constants/links';
 import { AdministrationOrganizations } from './AdministrationOrganizations';
 import { AdministrationUsers } from './AdministrationUsers';
 
+import { routes } from 'tg.ee';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { getEe } from '../../plugin/getEe';
 
 export const AdministrationView = () => {
-  const {
-    routes: { Administration: EeRoutes },
-  } = getEe();
-
   const [search, setSearch] = useUrlSearchState('search');
 
   return (
@@ -31,7 +27,7 @@ export const AdministrationView = () => {
           />
         </PrivateRoute>
       </Switch>
-      <EeRoutes />
+      <routes.Administration />
     </>
   );
 };

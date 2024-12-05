@@ -11,8 +11,8 @@ import {
 } from '@untitled-ui/icons-react';
 import { PanelConfig } from './common/types';
 import { KeyboardShortcuts } from './panels/KeyboardShortcuts/KeyboardShortcuts';
-import { getEe } from '../../../../plugin/getEe';
 import { createAdder } from 'tg.fixtures/pluginAdder';
+import { translationPanelAdder } from 'tg.ee';
 
 export const PANELS_WHEN_INACTIVE = [
   {
@@ -56,7 +56,5 @@ const BASE_PANELS = [
 export const addPanel = createAdder<PanelConfig>({ referencingProperty: 'id' });
 
 export function getPanels() {
-  const { translationPanelAdder } = getEe();
-
   return translationPanelAdder(BASE_PANELS);
 }

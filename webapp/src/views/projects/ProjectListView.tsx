@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { getEe } from '../../plugin/getEe';
+import { Usage } from 'tg.ee';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -27,10 +27,6 @@ const StyledWrapper = styled('div')`
 `;
 
 export const ProjectListView = () => {
-  const {
-    organization: { Usage: EeUsage },
-  } = getEe();
-
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const { preferredOrganization } = usePreferredOrganization();
@@ -90,7 +86,7 @@ export const ProjectListView = () => {
             [<OrganizationSwitch key={0} />],
             [t('projects_title'), LINKS.PROJECTS.build()],
           ]}
-          navigationRight={EeUsage}
+          navigationRight={Usage}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList

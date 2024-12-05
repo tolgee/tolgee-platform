@@ -13,8 +13,8 @@ import { OrganizationSwitch } from './OrganizationSwitch';
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-import { getEe } from '../../../plugin/getEe';
 import { UserMenuItems } from './UserMenuItems';
+import { billingMenuItems, useUserTaskCount } from 'tg.ee';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -39,11 +39,6 @@ const StyledDivider = styled('div')`
 `;
 
 export const UserPresentAvatarMenu: React.FC = () => {
-  const {
-    billing: { billingMenuItems },
-    tasks: { useUserTaskCount },
-  } = getEe();
-
   const taskCount = useUserTaskCount();
 
   const { logout } = useGlobalActions();

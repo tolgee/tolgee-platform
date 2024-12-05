@@ -9,7 +9,7 @@ import { AutoTranslationIcon } from 'tg.component/AutoTranslationIcon';
 import { TranslationFlagIcon } from 'tg.component/TranslationFlagIcon';
 
 import { useTranslationsActions } from '../context/TranslationsContext';
-import { getEe } from '../../../../plugin/getEe';
+import { TranslationTaskIndicator } from 'tg.ee';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -64,10 +64,6 @@ export const TranslationFlags: React.FC<Props> = ({
   lang,
   className,
 }) => {
-  const {
-    tasks: { TranslationTaskIndicator: EeTranslationTaskIndicator },
-  } = getEe();
-
   const project = useProject();
   const { t } = useTranslate();
   const translation = keyData.translations[lang];
@@ -125,7 +121,7 @@ export const TranslationFlags: React.FC<Props> = ({
 
   return (
     <StyledWrapper className={className}>
-      <EeTranslationTaskIndicator task={task} />
+      <TranslationTaskIndicator task={task} />
       {translation?.auto && (
         <StyledTranslationFlagsContainer data-cy="translations-auto-translated-indicator">
           <AutoTranslationIcon provider={translation.mtProvider} />

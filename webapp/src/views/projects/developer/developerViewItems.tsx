@@ -1,11 +1,13 @@
 import { Link, LINKS } from 'tg.constants/links';
 import { FC, ReactNode } from 'react';
-import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
 import { useTranslate } from '@tolgee/react';
-import { CdList } from './contentDelivery/CdList';
 import { useRouteMatch } from 'react-router-dom';
+
+import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
 import { createAdder } from 'tg.fixtures/pluginAdder';
-import { getEe } from '../../../plugin/getEe';
+import { useAddDeveloperViewItems } from 'tg.ee';
+
+import { CdList } from './contentDelivery/CdList';
 
 export const addDeveloperViewItems = createAdder<DeveloperViewItem>({
   referencingProperty: 'value',
@@ -15,8 +17,6 @@ export type DeveloperViewItemsAdder = ReturnType<typeof addDeveloperViewItems>;
 
 export const useDeveloperViewItems = () => {
   const { t } = useTranslate();
-
-  const { useAddDeveloperViewItems } = getEe();
 
   const baseItems: DeveloperViewItem[] = [
     {

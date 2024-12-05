@@ -7,7 +7,7 @@ import { LanguageReference } from './LanguageReference';
 import { ContentDeliveryReference } from './ContentDeliveryReference';
 import { ContentStorageReference } from './ContentStorageReference';
 import { WebhookConfigReference } from './WebhookConfigReference';
-import { getEe } from '../../../plugin/getEe';
+import { TaskReference } from 'tg.ee';
 
 export const StyledReferences = styled(Box)`
   display: flex;
@@ -66,10 +66,6 @@ type Props = {
 };
 
 const getReference = (reference: Reference) => {
-  const {
-    activity: { TaskReference },
-  } = getEe();
-
   switch (reference.type) {
     case 'comment':
       return <CommentReference data={reference} />;

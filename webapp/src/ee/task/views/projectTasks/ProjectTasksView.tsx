@@ -10,12 +10,12 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { projectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { TaskFilterType } from 'tg.ee/task/components/taskFilter/TaskFilterPopover';
+import { TaskFilterType } from 'tg.ee.module/task/components/taskFilter/TaskFilterPopover';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
-import { TasksHeader } from 'tg.ee/task/components/tasksHeader/TasksHeader';
-import { TaskView } from 'tg.ee/task/components/tasksHeader/TasksHeaderBig';
-import { TaskCreateDialog } from 'tg.ee/task/components/taskCreate/TaskCreateDialog';
-import { TaskDetail } from 'tg.ee/task/components/TaskDetail';
+import { TasksHeader } from 'tg.ee.module/task/components/tasksHeader/TasksHeader';
+import { TaskView } from 'tg.ee.module/task/components/tasksHeader/TasksHeaderBig';
+import { TaskCreateDialog } from 'tg.ee.module/task/components/taskCreate/TaskCreateDialog';
+import { TaskDetail } from 'tg.ee.module/task/components/TaskDetail';
 
 import { TasksList } from './TasksList';
 import { ProjectTasksBoard } from './ProjectTasksBoard';

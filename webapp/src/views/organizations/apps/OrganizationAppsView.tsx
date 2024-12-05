@@ -3,13 +3,9 @@ import { useTranslate } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../useOrganization';
-import { getEe } from '../../../plugin/getEe';
+import { apps } from 'tg.ee';
 
 export const OrganizationAppsView: FunctionComponent = () => {
-  const {
-    organization: { apps: eeApps },
-  } = getEe();
-
   const organization = useOrganization();
   const { t } = useTranslate();
 
@@ -33,7 +29,7 @@ export const OrganizationAppsView: FunctionComponent = () => {
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
-      {eeApps}
+      {apps}
     </BaseOrganizationSettingsView>
   );
 };

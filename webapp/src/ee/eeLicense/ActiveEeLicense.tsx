@@ -11,10 +11,10 @@ import {
   PlanContainer,
   PlanContent,
   PlanFeaturesBox,
-} from 'tg.ee/billing/component/Plan/PlanStyles';
-import { ActiveSubscriptionBanner } from 'tg.ee/billing/component/ActiveSubscription/ActiveSubscriptionBanner';
-import { ActivePlanTitle } from 'tg.ee/billing/component/ActiveSubscription/ActivePlanTitle';
-import { PlanLicenseKey } from 'tg.ee/billing/component/ActiveSubscription/PlanLicenseKey';
+} from 'tg.ee.module/billing/component/Plan/PlanStyles';
+import { ActiveSubscriptionBanner } from 'tg.ee.module/billing/component/ActiveSubscription/ActiveSubscriptionBanner';
+import { ActivePlanTitle } from 'tg.ee.module/billing/component/ActiveSubscription/ActivePlanTitle';
+import { PlanLicenseKey } from 'tg.ee.module/billing/component/ActiveSubscription/PlanLicenseKey';
 
 type EeSubscriptionModel = components['schemas']['EeSubscriptionModel'];
 

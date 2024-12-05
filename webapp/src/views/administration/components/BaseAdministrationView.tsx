@@ -3,10 +3,10 @@ import { useTranslate } from '@tolgee/react';
 import { BaseViewProps } from 'tg.component/layout/BaseView';
 import { Link, LINKS } from 'tg.constants/links';
 
+import { useAddAdministrationMenuItems } from 'tg.ee';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
 import { createAdder } from 'tg.fixtures/pluginAdder';
-import { getEe } from '../../../plugin/getEe';
 
 type Props = BaseViewProps;
 
@@ -18,7 +18,6 @@ export const BaseAdministrationView: React.FC<Props> = ({
 }) => {
   const { t } = useTranslate();
 
-  const { useAddAdministrationMenuItems } = getEe();
   const addItems = useAddAdministrationMenuItems();
 
   const baseItems: AdministrationMenuItem[] = [

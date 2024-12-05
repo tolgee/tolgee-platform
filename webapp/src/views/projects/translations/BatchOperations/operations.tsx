@@ -13,8 +13,8 @@ import { OperationClearTranslations } from './OperationClearTranslations';
 import { OperationExportTranslations } from './OperationExportTranslations';
 import { FC } from 'react';
 import { OperationProps } from './types';
-import { getEe } from '../../../../plugin/getEe';
 import { createAdder } from 'tg.fixtures/pluginAdder';
+import { useAddBatchOperations as useAddEeBatchOperations } from 'tg.ee';
 
 export type BatchOperation = {
   id: string;
@@ -32,8 +32,6 @@ export const addOperations = createAdder<BatchOperation>({
 export type BatchOperationAdder = ReturnType<typeof addOperations>;
 
 export const useBatchOperations = () => {
-  const { useAddBatchOperations: useAddEeBatchOperations } = getEe();
-
   const { satisfiesPermission } = useProjectPermissions();
 
   const { t } = useTranslate();

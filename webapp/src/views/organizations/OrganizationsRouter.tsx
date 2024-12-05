@@ -13,7 +13,7 @@ import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { useOrganization } from './useOrganization';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
-import { getEe } from '../../plugin/getEe';
+import { routes } from 'tg.ee';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -58,10 +58,6 @@ const SpecificOrganizationRouter = () => {
 };
 
 export const OrganizationsRouter = () => {
-  const {
-    routes: { Organization: EeOrganization },
-  } = getEe();
-
   return (
     <>
       <Switch>
@@ -73,7 +69,7 @@ export const OrganizationsRouter = () => {
           <SpecificOrganizationRouter />
         </PrivateRoute>
       </Switch>
-      <EeOrganization />
+      <routes.Organization />
     </>
   );
 };

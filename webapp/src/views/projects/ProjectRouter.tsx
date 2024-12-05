@@ -20,7 +20,7 @@ import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
 import { TaskRedirect } from './TaskRedirect';
-import { getEe } from '../../plugin/getEe';
+import { routes } from 'tg.ee';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -29,10 +29,6 @@ const IntegrateView = React.lazy(() =>
 );
 
 export const ProjectRouter = () => {
-  const {
-    routes: { Project: EeRoutes },
-  } = getEe();
-
   const match = useRouteMatch();
 
   const projectId = match.params[PARAMS.PROJECT_ID];
@@ -102,7 +98,7 @@ export const ProjectRouter = () => {
               <WebsocketPreview />
             </Route>
           </Switch>
-          <EeRoutes />
+          <routes.Project />
         </React.Suspense>
       </ProjectPage>
     </ProjectContext>

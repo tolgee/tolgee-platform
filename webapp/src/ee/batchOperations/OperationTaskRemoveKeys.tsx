@@ -4,9 +4,9 @@ import { useTranslate } from '@tolgee/react';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { messageService } from 'tg.service/MessageService';
-import { Task } from 'tg.ee/task/components/taskSelect/types';
+import { Task } from 'tg.ee.module/task/components/taskSelect/types';
 import { TextField } from 'tg.component/common/TextField';
-import { TaskLabel } from 'tg.ee/task/components/TaskLabel';
+import { TaskLabel } from 'tg.ee.module/task/components/TaskLabel';
 import { FakeInput } from 'tg.component/FakeInput';
 
 import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';

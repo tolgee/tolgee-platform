@@ -13,38 +13,28 @@ import { ProjectMenuItemsAdder } from 'tg.views/projects/projectMenu/ProjectMenu
 import { AdministrationMenuItemsAdder } from 'tg.views/administration/components/BaseAdministrationView';
 
 export interface EePluginType {
-  ee?: {
-    PermissionsAdvanced: FC<PermissionsAdvancedEeProps>;
-    billing: {
-      billingMenuItems: FC<BillingMenuItemsProps>[];
-      GlobalLimitPopover: FC;
-    };
-    activity: {
-      TaskReference: FC<TaskReferenceProps>;
-    };
-    organization: {
-      apps: FC;
-      Usage: FC;
-    };
-    tasks: {
-      useUserTaskCount: () => number;
-      TranslationTaskIndicator: FC<TranslationTaskIndicatorProps>;
-      PrefilterTask: FC<PrefilterTaskProps>;
-      TranslationsTaskDetail: FC;
-    };
-    routes: {
-      Root: FC;
-      Administration: FC;
-      Organization: FC;
-      Project: FC;
-    };
-    useAddBatchOperations: () => BatchOperationAdder;
-    translationPanelAdder: ReturnType<typeof addPanel>;
-    useAddDeveloperViewItems: () => DeveloperViewItemsAdder;
-    useAddUserMenuItems: () => UserMenuItemsAdder;
-    useAddProjectMenuItems: () => ProjectMenuItemsAdder;
-    useAddAdministrationMenuItems: () => AdministrationMenuItemsAdder;
+  PermissionsAdvancedEe: FC<PermissionsAdvancedEeProps>;
+  billingMenuItems: FC<BillingMenuItemsProps>[];
+  GlobalLimitPopover: FC;
+  TaskReference: FC<TaskReferenceProps>;
+  apps: FC[];
+  Usage: FC;
+  useUserTaskCount: () => number;
+  TranslationTaskIndicator: FC<TranslationTaskIndicatorProps>;
+  PrefilterTask: FC<PrefilterTaskProps>;
+  TranslationsTaskDetail: FC;
+  routes: {
+    Root: FC;
+    Administration: FC;
+    Organization: FC;
+    Project: FC;
   };
+  useAddBatchOperations: () => BatchOperationAdder;
+  translationPanelAdder: ReturnType<typeof addPanel>;
+  useAddDeveloperViewItems: () => DeveloperViewItemsAdder;
+  useAddUserMenuItems: () => UserMenuItemsAdder;
+  useAddProjectMenuItems: () => ProjectMenuItemsAdder;
+  useAddAdministrationMenuItems: () => AdministrationMenuItemsAdder;
 }
 
 export type PermissionsAdvancedEeProps = {
