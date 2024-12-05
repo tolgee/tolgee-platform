@@ -382,15 +382,11 @@ class ImportDataManager(
       if (createNewKeys) {
         key.shouldBeImported = true
       } else {
-        key.shouldBeImported = keyService.find(
-          import.project.id,
-          key.name,
-          getSafeNamespace(key.file.namespace),
-        ) != null
+        key.shouldBeImported = existingKeys[getSafeNamespace(key.file.namespace) to key.name] != null
       }
-      if (saveData) {
-        importService.saveKey(key)
-      }
+    }
+    if (saveData) {
+      saveAllStoredKeys()
     }
   }
 
