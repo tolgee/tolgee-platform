@@ -1,6 +1,6 @@
-package io.tolgee.formats.android.out
+package io.tolgee.formats.xmlResources.out
 
-import io.tolgee.formats.android.*
+import io.tolgee.formats.xmlResources.*
 import io.tolgee.util.attr
 import io.tolgee.util.buildDom
 import io.tolgee.util.comment
@@ -8,7 +8,7 @@ import io.tolgee.util.element
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
+class AndroidStringsXmlFileWriter(private val model: XmlResourcesStringsModel) {
   fun produceFiles(): InputStream {
     return buildDom {
       element("resources") {
@@ -18,7 +18,7 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
     }.write().toByteArray().inputStream()
   }
 
-  private fun Element.addToElement(unit: Map.Entry<String, AndroidXmlNode>) {
+  private fun Element.addToElement(unit: Map.Entry<String, XmlResourcesNode>) {
     when (val node = unit.value) {
       is StringUnit -> {
         optionalComment(node.comment)
@@ -55,7 +55,7 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
     }
   }
 
-  private fun Element.appendXmlIfEnabledOrText(value: AndroidStringValue?) {
+  private fun Element.appendXmlIfEnabledOrText(value: XmlResourcesStringValue?) {
     if (value == null) {
       return
     }

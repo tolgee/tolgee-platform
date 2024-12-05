@@ -1,10 +1,25 @@
 package io.tolgee.formats.android.`in`
 
-import io.tolgee.formats.android.AndroidParsingConstants
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 
-class AndroidStringUnescaper(private val string: String, private val isFirst: Boolean, private val isLast: Boolean) {
+class AndroidStringUnescaper(
+  private val string: Sequence<Char>,
+  private val isFirst: Boolean,
+  private val isLast: Boolean,
+  private val quotationMark: Char = '"',
+  private val escapeMark: Char = '\\',
+  private val spacesToTrim: Set<Char> = XmlResourcesParsingConstants.spaces,
+  private val toUnescape: Map<Char, String> = toUnescapeDefault,
+) {
+  private val initialState
+    get() = if (isFirst) State.AFTER_SPACE else State.NORMAL
+
   companion object {
-    private val toUnescape =
+    val defaultFactory = { string: String, isFirst: Boolean, isLast: Boolean ->
+      AndroidStringUnescaper(string.asSequence(), isFirst, isLast).result
+    }
+
+    private val toUnescapeDefault =
       mapOf(
         'n' to "\n",
         '\'' to "\'",
@@ -13,94 +28,105 @@ class AndroidStringUnescaper(private val string: String, private val isFirst: Bo
         'u' to "\\u",
         '\\' to "\\",
       )
-    private val spacesToTrim = AndroidParsingConstants.spaces
   }
 
-  val unescaped: String by lazy {
-    string.forEach { char ->
-      when (char) {
-        '\\' ->
-          when (state) {
-            State.NORMAL -> state = State.ESCAPED
-            State.ESCAPED -> {
-              result.append('\\')
-              resetIgnoreSpace()
-              state = State.NORMAL
-            }
+  var state = initialState
+
+  var space: Char? = null
+
+  val result: String by lazy {
+    resultSeq.fold(StringBuilder()) { acc, c ->
+      acc.append(c)
+    }.toString()
+  }
+
+  private val resultSeq: Sequence<Char>
+    get() =
+      sequence {
+        for (char in string) {
+          state = handleCharacter(state, char)
+        }
+
+        when (state) {
+          State.NORMAL -> {}
+          State.AFTER_SPACE -> {
+            val lastSpace = space
+            if (lastSpace != null && !isLast) yield(lastSpace)
           }
-
-        '"' ->
-          when (state) {
-            State.ESCAPED -> {
-              result.append('"')
-              resetIgnoreSpace()
-              state = State.NORMAL
-            }
-
-            State.NORMAL ->
-              quotingState =
-                when (quotingState) {
-                  QuotingState.USING_SPACE, QuotingState.IGNORING_SPACE -> QuotingState.QUOTED
-                  QuotingState.QUOTED -> QuotingState.USING_SPACE
-                }
+          State.ESCAPED -> {
+            // Android deletes the last backslash if it is the last character
           }
-
-        in spacesToTrim ->
-          when (quotingState) {
-            QuotingState.USING_SPACE -> {
-              result.append(char)
-              quotingState = QuotingState.IGNORING_SPACE
-            }
-
-            QuotingState.QUOTED -> {
-              result.append(char)
-            }
-
-            QuotingState.IGNORING_SPACE -> {}
+          State.QUOTED -> {
+            // Quoted text was not closed
           }
-
-        else -> {
-          if (state == State.ESCAPED) {
-            if (char in toUnescape.keys) {
-              result.append(toUnescape[char])
-            } else {
-              result.append(char)
-            }
-            state = State.NORMAL
-          } else {
-            result.append(char)
-          }
-          resetIgnoreSpace()
+          State.QUOTED_ESCAPED -> {}
         }
       }
-    }
 
-    if (quotingState == QuotingState.IGNORING_SPACE && result.lastOrNull() in spacesToTrim && isLast) {
-      result.deleteCharAt(result.length - 1)
+  private suspend fun SequenceScope<Char>.handleCharacter(
+    state: State,
+    char: Char,
+  ): State {
+    return when (state) {
+      State.NORMAL ->
+        when (char) {
+          escapeMark -> State.ESCAPED
+          quotationMark -> State.QUOTED
+          in spacesToTrim -> {
+            space = char
+            State.AFTER_SPACE
+          }
+          else -> {
+            yield(char)
+            State.NORMAL
+          }
+        }
+      State.AFTER_SPACE -> {
+        when (char) {
+          in spacesToTrim -> State.AFTER_SPACE
+          else -> {
+            val lastSpace = space
+            if (lastSpace != null) {
+              yield(lastSpace)
+              space = null
+            }
+            handleCharacter(State.NORMAL, char)
+          }
+        }
+      }
+      State.ESCAPED -> {
+        yieldAll(char.unescape().asSequence())
+        when (char) {
+          in spacesToTrim -> State.AFTER_SPACE
+          else -> State.NORMAL
+        }
+      }
+      State.QUOTED ->
+        when (char) {
+          escapeMark -> State.QUOTED_ESCAPED
+          quotationMark -> State.NORMAL
+          else -> {
+            yield(char)
+            State.QUOTED
+          }
+        }
+      State.QUOTED_ESCAPED -> {
+        yieldAll(char.unescape().asSequence())
+        State.QUOTED
+      }
     }
-
-    result.toString()
   }
 
-  private fun resetIgnoreSpace() {
-    if (quotingState == QuotingState.IGNORING_SPACE) {
-      quotingState = QuotingState.USING_SPACE
-    }
+  private fun Char.unescape(): String {
+    // Android always deletes the backslash even if the escaped character is not valid
+    return toUnescape.getOrDefault(this, this.toString())
   }
 
   enum class State {
     NORMAL,
+    AFTER_SPACE,
     ESCAPED,
-  }
-
-  enum class QuotingState {
-    USING_SPACE,
     QUOTED,
-    IGNORING_SPACE,
+    QUOTED_ESCAPED,
   }
-
-  private var state = State.NORMAL
-  private var quotingState = if (isFirst) QuotingState.IGNORING_SPACE else QuotingState.USING_SPACE
-
-  private val result = StringBuilder()
 }
