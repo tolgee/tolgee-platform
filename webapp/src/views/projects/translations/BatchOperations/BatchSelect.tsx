@@ -9,6 +9,7 @@ import {
 import { useTranslate } from '@tolgee/react';
 import { getTextWidth } from 'tg.fixtures/getTextWidth';
 import { useBatchOperations } from './operations';
+import { BatchActions } from './types';
 
 const StyledSeparator = styled('div')`
   width: 100%;
@@ -17,8 +18,8 @@ const StyledSeparator = styled('div')`
 `;
 
 type Props = {
-  value: string | undefined;
-  onChange: (value: string | undefined) => void;
+  value: BatchActions | undefined;
+  onChange: (value: BatchActions | undefined) => void;
 };
 
 export const BatchSelect = ({ value, onChange }: Props) => {

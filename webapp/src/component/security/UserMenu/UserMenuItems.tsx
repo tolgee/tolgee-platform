@@ -10,7 +10,7 @@ import {
 import { MenuItem } from '@mui/material';
 import React, { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
-import { useAddUserMenuItems } from 'eeSetup/eePlugin.oss';
+import { useAddUserMenuItems } from 'tg.ee';
 
 export const UserMenuItems: FC<{ onClose: () => void }> = ({ onClose }) => {
   const location = useLocation();

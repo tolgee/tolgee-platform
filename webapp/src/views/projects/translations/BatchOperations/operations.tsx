@@ -12,12 +12,12 @@ import { OperationCopyTranslations } from './OperationCopyTranslations';
 import { OperationClearTranslations } from './OperationClearTranslations';
 import { OperationExportTranslations } from './OperationExportTranslations';
 import { FC } from 'react';
-import { OperationProps } from './types';
+import { BatchActions, OperationProps } from './types';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddBatchOperations as useAddEeBatchOperations } from 'tg.ee';
 
 export type BatchOperation = {
-  id: string;
+  id: BatchActions;
   label: string;
   enabled: boolean;
   hidden?: boolean;

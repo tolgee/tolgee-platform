@@ -8,7 +8,7 @@ import {
 } from '../context/TranslationsContext';
 import { BatchSelect } from './BatchSelect';
 import { BatchOperationDialog } from './OperationsSummary/BatchOperationDialog';
-import { BatchJobModel } from './types';
+import { BatchActions, BatchJobModel } from './types';
 import { SelectAllCheckbox } from './SelectAllCheckbox';
 import { useBatchOperations } from './operations';
 
@@ -70,7 +70,7 @@ export const BatchOperations = ({ open, onClose }: Props) => {
   const { selectionClear, refetchTranslations } = useTranslationsActions();
   const { refetchBatchJobs } = useProjectActions();
 
-  const [operationId, setOperationId] = useState<string>();
+  const [operationId, setOperationId] = useState<BatchActions>();
   const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
 
   const { findOperation } = useBatchOperations();
