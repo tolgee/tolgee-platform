@@ -1,1 +1,0 @@
-/Users/stepangranat/Developer/tolgee/server/webapp/src/eePlugin.ee.tsx
