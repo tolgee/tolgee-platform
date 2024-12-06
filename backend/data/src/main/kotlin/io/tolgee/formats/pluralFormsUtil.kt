@@ -2,7 +2,7 @@ package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.escaping.ForceIcuEscaper
-import io.tolgee.formats.escaping.IcuUnescper
+import io.tolgee.formats.escaping.IcuUnescaper
 import io.tolgee.formats.escaping.PluralFormIcuEscaper
 import io.tolgee.util.nullIfEmpty
 
@@ -257,7 +257,7 @@ fun String.forceEscapePluralForms(): MessageConvertorResult? {
  */
 fun String.unescapePluralForms(): String? {
   val forms = getPluralForms(this)
-  val unescaped = forms?.forms?.mapValues { IcuUnescper(it.value, isPlural = true).unescaped }
+  val unescaped = forms?.forms?.mapValues { IcuUnescaper(it.value, isPlural = true).unescaped }
   return unescaped?.toIcuPluralString(optimize = false, argName = forms.argName)
 }
 
