@@ -18,6 +18,10 @@ import { ClipboardCheck } from '@untitled-ui/icons-react';
 import { Link, Route, Switch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
+import { AdministrationEeTAView } from '../ee/billing/administration/translationAgencies/AdministrationEeTAView';
+import { AdministrationEeTAEditView } from '../ee/billing/administration/translationAgencies/AdministrationEeTAEditView';
+import { AdministrationEeTACreateView } from '../ee/billing/administration/translationAgencies/AdministrationEeTACreateView';
+
 import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { BillingMenuItem } from '../ee/billing/component/UserMenu/BillingMenuItem';
 import { PrivateRoute } from '../component/common/PrivateRoute';
@@ -71,6 +75,15 @@ export const routes = {
     <Switch>
       <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
         <AdministrationEeLicenseView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA.template}>
+        <AdministrationEeTAView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA_CREATE.template}>
+        <AdministrationEeTACreateView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA_EDIT.template}>
+        <AdministrationEeTAEditView />
       </PrivateRoute>
       <PrivateRoute
         exact
@@ -345,6 +358,12 @@ export const useAddAdministrationMenuItems = () => {
         link: LINKS.ADMINISTRATION_EE_LICENSE,
         label: t('administration_ee_license'),
         condition: () => true,
+      },
+      {
+        id: 'translation_agencies',
+        link: LINKS.ADMINISTRATION_EE_TA,
+        label: t('administration_ee_translation_agencies'),
+        condition: () => config.billing.enabled,
       },
       {
         id: 'cloud_plans',
