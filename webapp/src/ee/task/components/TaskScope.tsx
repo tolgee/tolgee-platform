@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { components } from 'tg.service/apiSchema.generated';
 import { BatchProgress } from 'tg.views/projects/translations/BatchOperations/OperationsSummary/BatchProgress';
-import { TaskState } from './TaskState';
+import { TaskState } from 'tg.component/task/TaskState';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import React from 'react';
 import { UserName } from 'tg.component/common/UserName';

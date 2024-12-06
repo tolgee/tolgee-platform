@@ -40,21 +40,21 @@ type Props = {
   linkTo?: string;
   icon: React.ReactElement;
   text: string;
-  selected?: boolean;
   matchAsPrefix?: boolean | string;
   hidden?: boolean;
   'data-cy': string;
-  quickStart?: Omit<
-    React.ComponentProps<typeof QuickStartHighlight>,
-    'children'
-  >;
+  quickStart?: SideMenuItemQuickStart;
 };
+
+export type SideMenuItemQuickStart = Omit<
+  React.ComponentProps<typeof QuickStartHighlight>,
+  'children'
+>;
 
 export function SideMenuItem({
   linkTo,
   icon,
   text,
-  selected,
   matchAsPrefix,
   hidden,
   quickStart,
@@ -62,15 +62,13 @@ export function SideMenuItem({
 }: Props) {
   const match = useLocation();
 
-  const isSelected = selected
-    ? true
-    : matchAsPrefix
+  const isSelected = matchAsPrefix
     ? match.pathname.startsWith(
         typeof matchAsPrefix === 'string' ? matchAsPrefix : String(linkTo)
       )
     : match.pathname === linkTo;
 
-  const matchesExactly = match.pathname === linkTo || selected;
+  const matchesExactly = match.pathname === linkTo;
 
   function wrapWithQuickStart(children: React.ReactNode) {
     if (quickStart) {

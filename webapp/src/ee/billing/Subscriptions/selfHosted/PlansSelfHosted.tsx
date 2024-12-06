@@ -8,13 +8,13 @@ import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 import { PlansSelfHostedList } from './PlansSelfHostedList';
 import { StyledBillingSectionTitle } from '../../BillingSection';
 import { SelfHostedEeActiveSubscription } from './SelfHostedEeActiveSubscription';
+import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];

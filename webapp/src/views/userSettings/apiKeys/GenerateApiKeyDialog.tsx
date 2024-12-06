@@ -12,7 +12,7 @@ import { FormikProps } from 'formik';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckBoxGroupMultiSelect';
+import { CheckBoxGroupMultiSelect } from 'tg.component/PermissionsSettings/CheckBoxGroupMultiSelect';
 import { Select } from 'tg.component/common/form/fields/Select';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';

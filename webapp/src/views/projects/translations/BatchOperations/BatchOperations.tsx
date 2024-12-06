@@ -1,4 +1,4 @@
-import { styled, Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { useState } from 'react';
 import { useProjectActions } from 'tg.hooks/ProjectContext';
 
@@ -7,23 +7,10 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { BatchSelect } from './BatchSelect';
-import { OperationAddTags } from './OperationAddTags';
-import { OperationChangeNamespace } from './OperationChangeNamespace';
-import { OperationClearTranslations } from './OperationClearTranslations';
-import { OperationCopyTranslations } from './OperationCopyTranslations';
-import { OperationDelete } from './OperationDelete';
-import { OperationMarkAsReviewed } from './OperationMarkAsReviewed';
-import { OperationMarkAsTranslated } from './OperationMarkAsTranslated';
-import { OperationRemoveTags } from './OperationRemoveTags';
 import { BatchOperationDialog } from './OperationsSummary/BatchOperationDialog';
-import { OperationMachineTranslate } from './OperationMachineTranslate';
 import { BatchActions, BatchJobModel } from './types';
-import { OperationPreTranslate } from './OperationPreTranslate';
 import { SelectAllCheckbox } from './SelectAllCheckbox';
-import { OperationExportTranslations } from './OperationExportTranslations';
-import { OperationTaskCreate } from './OperationTaskCreate';
-import { OperationTaskAddKeys } from './OperationTaskAddKeys';
-import { OperationTaskRemoveKeys } from './OperationTaskRemoveKeys';
+import { useBatchOperations } from './operations';
 
 const StyledContainer = styled('div')`
   position: absolute;
@@ -83,19 +70,21 @@ export const BatchOperations = ({ open, onClose }: Props) => {
   const { selectionClear, refetchTranslations } = useTranslationsActions();
   const { refetchBatchJobs } = useProjectActions();
 
-  const [operation, setOperation] = useState<BatchActions>();
+  const [operationId, setOperationId] = useState<BatchActions>();
   const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
+
+  const { findOperation } = useBatchOperations();
 
   function onCloseOnly() {
     selectionClear();
-    setOperation(undefined);
+    setOperationId(undefined);
     onClose();
   }
 
   function onFinished() {
     refetchTranslations();
     selectionClear();
-    setOperation(undefined);
+    setOperationId(undefined);
     onClose();
   }
 
@@ -109,38 +98,8 @@ export const BatchOperations = ({ open, onClose }: Props) => {
     onFinished,
   };
 
-  function pickOperation() {
-    switch (operation) {
-      case 'delete':
-        return <OperationDelete {...sharedProps} />;
-      case 'machine_translate':
-        return <OperationMachineTranslate {...sharedProps} />;
-      case 'pre_translate':
-        return <OperationPreTranslate {...sharedProps} />;
-      case 'mark_as_translated':
-        return <OperationMarkAsTranslated {...sharedProps} />;
-      case 'mark_as_reviewed':
-        return <OperationMarkAsReviewed {...sharedProps} />;
-      case 'task_create':
-        return <OperationTaskCreate {...sharedProps} />;
-      case 'task_add_keys':
-        return <OperationTaskAddKeys {...sharedProps} />;
-      case 'task_remove_keys':
-        return <OperationTaskRemoveKeys {...sharedProps} />;
-      case 'add_tags':
-        return <OperationAddTags {...sharedProps} />;
-      case 'remove_tags':
-        return <OperationRemoveTags {...sharedProps} />;
-      case 'change_namespace':
-        return <OperationChangeNamespace {...sharedProps} />;
-      case 'copy_translations':
-        return <OperationCopyTranslations {...sharedProps} />;
-      case 'clear_translations':
-        return <OperationClearTranslations {...sharedProps} />;
-      case 'export_translations':
-        return <OperationExportTranslations {...sharedProps} />;
-    }
-  }
+  const operation = findOperation(operationId);
+  const OperationComponent = operation?.component;
 
   return (
     <>
@@ -154,13 +113,13 @@ export const BatchOperations = ({ open, onClose }: Props) => {
               <StyledItem>{`${selection.length} / ${totalCount}`}</StyledItem>
               <StyledItem data-cy="batch-operations-select">
                 <BatchSelect
-                  value={operation}
-                  onChange={setOperation}
+                  value={operationId}
+                  onChange={setOperationId}
                   {...sharedProps}
                 />
               </StyledItem>
             </StyledBase>
-            {pickOperation()}
+            {OperationComponent && <OperationComponent {...sharedProps} />}
           </StyledContent>
         </StyledContainer>
       )}

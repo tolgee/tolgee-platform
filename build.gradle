@@ -99,7 +99,9 @@ project(':server-app').afterEvaluate {
     task stopDbChangelogContainer(type: Exec) {
         commandLine "docker", "rm", "--force", dbSchemaContainerName
         mustRunAfter project(':data').tasks.findByName("diffChangelog")
-        mustRunAfter project(':ee-app').tasks.findByName("diffChangelog")
+        if (gradle.ext.eeAppDirectoryExists) {
+            mustRunAfter project(':ee-app').tasks.findByName("diffChangelog")
+        }
     }
 
     task diffChangeLog {
@@ -114,12 +116,15 @@ project(':server-app').afterEvaluate {
                 startDbChangelogContainer,
                 project(':server-app').tasks.findByName("bootRun"),
                 project(':data').tasks.findByName("diffChangelog"),
-                project(':ee-app').tasks.findByName("diffChangelog"),
         ]
 
         if (gradle.ext.billingAppDirectory.exists()) {
             def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangelog")
             finalizedBy.add(billingDiffChangelog)
+        }
+
+        if (gradle.ext.eeAppDirectoryExists) {
+            finalizedBy.add(project(':ee-app').tasks.findByName("diffChangelog"))
         }
 
         finalizedBy.add(stopDbChangelogContainer)
@@ -138,7 +143,9 @@ project(':server-app').afterEvaluate {
 // It would be great to make the tests not collide and therefore this block of code can be deleted.
 gradle.projectsEvaluated {
     project(':server-app').tasks.withType(Test) {
-        dependsOn project(':ee-test').tasks.withType(Test)
+        if (gradle.ext.eeAppDirectoryExists) {
+            dependsOn project(':ee-test').tasks.withType(Test)
+        }
     }
 }
 

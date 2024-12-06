@@ -3,8 +3,7 @@ import { Box, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
-import { planIsPeriodDependant } from 'tg.component/billing/Plan/plansTools';
+
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 import { StyledBillingSectionTitle } from '../../BillingSection';
@@ -12,6 +11,8 @@ import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance
 import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
 import { PlansCloudList } from './PlansCloudList';
 import { useLocation } from 'react-router-dom';
+import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
+import { planIsPeriodDependant } from '../../component/Plan/plansTools';
 
 const StyledShoppingGrid = styled('div')`
   display: grid;

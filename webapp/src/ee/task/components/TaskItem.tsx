@@ -12,10 +12,10 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { Scope } from 'tg.fixtures/permissions';
 import { TaskMenu } from './TaskMenu';
 import { TaskLabel } from './TaskLabel';
-import { getTaskRedirect } from './utils';
-import { TaskState } from './TaskState';
+import { TaskState } from 'tg.component/task/TaskState';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { TaskAssignees } from './TaskAssignees';
+import { getTaskUrl } from './utils';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -81,7 +81,7 @@ export const TaskItem = ({
 
   const linkProps = {
     component: Link,
-    to: getTaskRedirect(project, task.number),
+    to: getTaskUrl(project, task.number),
   };
 
   return (

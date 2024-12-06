@@ -9,8 +9,8 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { User } from 'tg.component/UserAccount';
 import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
-import { TranslationStateType } from './TranslationStateFilter';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
+import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];

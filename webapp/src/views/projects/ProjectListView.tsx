@@ -13,8 +13,8 @@ import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
-import { Usage } from 'tg.component/billing/Usage';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { Usage } from 'tg.ee';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -86,7 +86,7 @@ export const ProjectListView = () => {
             [<OrganizationSwitch key={0} />],
             [t('projects_title'), LINKS.PROJECTS.build()],
           ]}
-          navigationRight={<Usage />}
+          navigationRight={Usage}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList

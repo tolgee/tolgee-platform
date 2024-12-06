@@ -1,23 +1,21 @@
-import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { LINKS, PARAMS } from 'tg.constants/links';
 
-type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 export type TaskModel = components['schemas']['TaskModel'];
 export type TaskState = TaskModel['state'];
-
-export const getTaskRedirect = (
-  project: SimpleProjectModel,
-  taskNumber: number
-) => {
-  return `${LINKS.GO_TO_PROJECT_TASK.build({
-    [PARAMS.PROJECT_ID]: project.id,
-  })}?number=${taskNumber}`;
-};
 
 function toFileName(label: string) {
   return label.replace(/[\s]+/g, '_').toLowerCase();
 }
+
+type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
+
+export const getTaskUrl = (project: SimpleProjectModel, taskNumber: number) => {
+  return `${LINKS.GO_TO_PROJECT_TASK.build({
+    [PARAMS.PROJECT_ID]: project.id,
+  })}?number=${taskNumber}`;
+};
 
 export const useTaskReport = () => {
   const reportMutation = useApiMutation({
@@ -48,5 +46,3 @@ export const useTaskReport = () => {
   }
   return { downloadReport, isLoading: reportMutation.isLoading };
 };
-
-export const TASK_ACTIVE_STATES = ['NEW', 'IN_PROGRESS'] as TaskState[];

@@ -67,11 +67,14 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api "org.springframework.boot:spring-boot-configuration-processor"
     api project(":data")
-    api project(":ee-app")
     api libs.springDocOpenApiCommon
     api libs.springDocWebmvcApi
     implementation libs.kotlinReflect
     implementation libs.kotlinCoroutines
+
+    if (gradle.ext.eeAppDirectoryExists) {
+        api project(":ee-app")
+    }
 }
 
 sourceSets {

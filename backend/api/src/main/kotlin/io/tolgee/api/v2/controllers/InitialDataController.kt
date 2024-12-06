@@ -29,8 +29,10 @@ class InitialDataController(
   private val userController: V2UserController,
   private val userPreferencesService: UserPreferencesService,
   private val preferredOrganizationFacade: PreferredOrganizationFacade,
-  private val eeSubscriptionModelAssembler: IEeSubscriptionModelAssembler,
-  private val eeSubscriptionProvider: EeSubscriptionProvider,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private val eeSubscriptionModelAssembler: IEeSubscriptionModelAssembler?,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private val eeSubscriptionProvider: EeSubscriptionProvider?,
   private val announcementController: AnnouncementController,
 ) : IController {
   @GetMapping(value = [""])
@@ -40,8 +42,8 @@ class InitialDataController(
       InitialDataModel(
         serverConfiguration = configurationController.getPublicConfiguration(),
         eeSubscription =
-          eeSubscriptionProvider.findSubscriptionDto()?.let {
-            eeSubscriptionModelAssembler.toModel(
+          eeSubscriptionProvider?.findSubscriptionDto()?.let {
+            eeSubscriptionModelAssembler?.toModel(
               it,
             )
           },

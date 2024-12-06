@@ -242,6 +242,7 @@ enum class Message {
   TASK_NOT_FOUND,
   TASK_NOT_FINISHED,
   TASK_NOT_OPEN,
+  THIS_FEATURE_IS_NOT_IMPLEMENTED_IN_OSS,
   ;
 
   val code: String

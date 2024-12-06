@@ -8,7 +8,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.model.Invitation
-import io.tolgee.service.InvitationService
+import io.tolgee.service.invitation.InvitationService
 import org.springframework.context.ApplicationContext
 import org.springframework.test.web.servlet.ResultActions
 

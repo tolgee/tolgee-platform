@@ -28,9 +28,9 @@ import { AssigneeSearchSelect } from './assigneeSelect/AssigneeSearchSelect';
 import { TaskLabel } from './TaskLabel';
 import { TaskInfoItem } from './TaskInfoItem';
 import { TaskScope } from './TaskScope';
-import { getTaskRedirect } from './utils';
 import { TaskMenu } from './TaskMenu';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { getTaskUrl } from './utils';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -260,7 +260,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                   <Button
                     color="primary"
                     component={Link}
-                    to={project ? getTaskRedirect(project, data.number) : ''}
+                    to={project ? getTaskUrl(project, data.number) : ''}
                   >
                     <T keyName="task_link_translations_tooltip" />
                   </Button>

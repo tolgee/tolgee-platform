@@ -9,15 +9,15 @@ import { LINKS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { TaskFilterType } from 'tg.ee/task/components/taskFilter/TaskFilterPopover';
-import { TasksHeader } from 'tg.ee/task/components/tasksHeader/TasksHeader';
-import { TaskView } from 'tg.ee/task/components/tasksHeader/TasksHeaderBig';
-import { TaskDetail } from 'tg.ee/task/components/TaskDetail';
 
 import { MyTasksList } from './MyTasksList';
 import { MyTasksBoard } from './MyTasksBoard';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
-import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
+import { TaskFilterType } from '../../components/taskFilter/TaskFilterPopover';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
+import { TasksHeader } from '../../components/tasksHeader/TasksHeader';
+import { TaskView } from '../../components/tasksHeader/TasksHeaderBig';
+import { TaskDetail } from '../../components/TaskDetail';
 
 type TaskWithProjectModel = components['schemas']['TaskWithProjectModel'];
 
@@ -84,7 +84,9 @@ export const MyTasksView = () => {
         ]}
       >
         {!taskFeature ? (
-          <PaidFeatureBanner customMessage={t('tasks_feature_description')} />
+          <DisabledFeatureBanner
+            customMessage={t('tasks_feature_description')}
+          />
         ) : (
           <>
             <TasksHeader

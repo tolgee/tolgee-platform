@@ -1,7 +1,7 @@
-import { Box, styled, alpha, Typography } from '@mui/material';
+import { alpha, Box, styled, Typography } from '@mui/material';
 import clsx from 'clsx';
-import { ALL_LANGUAGES_SCOPES } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { ALL_LANGUAGES_SCOPES } from './hierarchyTools';
 import { RoleLanguages } from './RoleLanguages';
 
 import {

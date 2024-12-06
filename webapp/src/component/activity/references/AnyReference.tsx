@@ -7,7 +7,7 @@ import { LanguageReference } from './LanguageReference';
 import { ContentDeliveryReference } from './ContentDeliveryReference';
 import { ContentStorageReference } from './ContentStorageReference';
 import { WebhookConfigReference } from './WebhookConfigReference';
-import { TaskReference } from './TaskReference';
+import { TaskReference } from 'tg.ee';
 
 export const StyledReferences = styled(Box)`
   display: flex;

@@ -162,8 +162,9 @@ dependencies {
     /**
      * EE MODULE
      */
-    implementation(project(':ee-app'))
-
+    if (gradle.ext.eeAppDirectoryExists) {
+        implementation(project(':ee-app'))
+    }
 
     /**
      * Dev module
@@ -227,6 +228,15 @@ tasks.register('runWebsocketTests', Test) {
     outputs.upToDateWhen { false }
     useJUnitPlatform {
         includeTags "websocket"
+    }
+    maxHeapSize = "4096m"
+    setTestRetry(it)
+}
+
+tasks.register('runWithoutEeTests', Test) {
+    outputs.upToDateWhen { false }
+    useJUnitPlatform {
+        includeTags "withoutEe"
     }
     maxHeapSize = "4096m"
     setTestRetry(it)

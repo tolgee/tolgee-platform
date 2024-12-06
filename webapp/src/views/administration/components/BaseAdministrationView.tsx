@@ -1,12 +1,12 @@
 import { useTranslate } from '@tolgee/react';
 
 import { BaseViewProps } from 'tg.component/layout/BaseView';
-import { LINKS } from 'tg.constants/links';
+import { Link, LINKS } from 'tg.constants/links';
 
+import { useAddAdministrationMenuItems } from 'tg.ee';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
-import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
-import { useConfig } from 'tg.globalContext/helpers';
+import { createAdder } from 'tg.fixtures/pluginAdder';
 
 type Props = BaseViewProps;
 
@@ -17,34 +17,25 @@ export const BaseAdministrationView: React.FC<Props> = ({
   ...otherProps
 }) => {
   const { t } = useTranslate();
-  const config = useConfig();
 
-  const menuItems: SettingsMenuItem[] = [
+  const addItems = useAddAdministrationMenuItems();
+
+  const baseItems: AdministrationMenuItem[] = [
     {
-      link: LINKS.ADMINISTRATION_ORGANIZATIONS.build(),
+      id: 'organizations',
+      link: LINKS.ADMINISTRATION_ORGANIZATIONS,
       label: t('administration_organizations'),
+      condition: () => true,
     },
     {
-      link: LINKS.ADMINISTRATION_USERS.build(),
+      id: 'users',
+      link: LINKS.ADMINISTRATION_USERS,
       label: t('administration_users'),
-    },
-    {
-      link: LINKS.ADMINISTRATION_EE_LICENSE.build(),
-      label: t('administration_ee_license'),
+      condition: () => true,
     },
   ];
 
-  if (config.billing.enabled) {
-    menuItems.push({
-      link: LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
-      label: t('administration_cloud_plans'),
-    });
-
-    menuItems.push({
-      link: LINKS.ADMINISTRATION_BILLING_EE_PLANS.build(),
-      label: t('administration_ee_plans'),
-    });
-  }
+  const menuItems = addItems(baseItems);
 
   const navigationPrefix: NavigationItem[] = [
     [t('administration_title'), LINKS.ADMINISTRATION_ORGANIZATIONS.build()],
@@ -54,7 +45,10 @@ export const BaseAdministrationView: React.FC<Props> = ({
     <BaseSettingsView
       {...otherProps}
       navigation={[...navigationPrefix, ...(navigation || [])]}
-      menuItems={menuItems}
+      menuItems={menuItems.map((item) => ({
+        label: item.label,
+        link: item.link.build(),
+      }))}
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
@@ -62,3 +56,18 @@ export const BaseAdministrationView: React.FC<Props> = ({
     </BaseSettingsView>
   );
 };
+
+export type AdministrationMenuItem = {
+  link: Link;
+  label: string;
+  id: string;
+  condition: () => boolean;
+};
+
+export const addAdministrationMenuItems = createAdder<AdministrationMenuItem>({
+  referencingProperty: 'id',
+});
+
+export type AdministrationMenuItemsAdder = ReturnType<
+  typeof addAdministrationMenuItems
+>;

@@ -43,6 +43,7 @@ e2e/cypress/integration/examples/
 /webapp/.env.development.local
 /webapp/.env.test.local
 /webapp/.env.production.local
+/webapp/src/eeSetup/eeModule.current.tsx
 
 /webapp/npm-debug.log*
 /webapp/yarn-debug.log*
