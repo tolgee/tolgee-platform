@@ -16,9 +16,7 @@ export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
 export const Usage = Empty;
 export const AgencyLabel = NotIncludedInOss('AgencyLabel');
-export const OrderTranslationsDialog = NotIncludedInOss(
-  'OrderTranslationsDialog'
-);
+export const OrderTranslationsDialog = Empty;
 
 export const billingMenuItems = [];
 export const apps = [];

@@ -21,6 +21,7 @@ import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner
 
 import { ProjectTasksBoard } from './ProjectTasksBoard';
 import { ProjectTasksList } from './ProjectTasksList';
+import { OrderTranslationsDialog } from 'tg.ee';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -82,6 +83,7 @@ export const ProjectTasksView = () => {
 
   const [detail, setDetail] = useState<TaskModel>();
   const [addDialog, setAddDialog] = useState(false);
+  const [orderTranslation, setOrderTranslation] = useState(false);
 
   const allLanguages = languagesLoadable.data?._embedded?.languages ?? [];
 
@@ -132,6 +134,9 @@ export const ProjectTasksView = () => {
               onViewChange={setView}
               isSmall={isSmall}
               project={project}
+              onOrderTranslation={
+                canEditTasks ? () => setOrderTranslation(true) : undefined
+              }
             />
 
             {view === 'LIST' && !isSmall ? (
@@ -165,6 +170,21 @@ export const ProjectTasksView = () => {
                 open={addDialog}
                 onClose={() => setAddDialog(false)}
                 onFinished={() => setAddDialog(false)}
+                initialValues={{
+                  languages: allLanguages
+                    .filter((l) => languagesPreference.includes(l.tag))
+                    .filter((l) => !l.base)
+                    .map((l) => l.id),
+                }}
+                projectId={project.id}
+                allLanguages={allLanguages}
+              />
+            )}
+            {orderTranslation && (
+              <OrderTranslationsDialog
+                open={orderTranslation}
+                onClose={() => setOrderTranslation(false)}
+                onFinished={() => setOrderTranslation(false)}
                 initialValues={{
                   languages: allLanguages
                     .filter((l) => languagesPreference.includes(l.tag))
