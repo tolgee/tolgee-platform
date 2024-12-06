@@ -383,4 +383,12 @@ export const actionsConfiguration: Partial<
       Task: [],
     },
   },
+  ORDER_TRANSLATION: {
+    label() {
+      return <T keyName="activity_order_translation" />;
+    },
+    entities: {
+      Task: true,
+    },
+  },
 };

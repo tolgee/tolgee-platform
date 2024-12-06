@@ -22,4 +22,13 @@ interface EnabledFeaturesProvider {
       throw BadRequestException(Message.FEATURE_NOT_ENABLED, listOf(feature))
     }
   }
+
+  fun checkOneOfFeaturesEnabled(
+    organizationId: Long?,
+    features: Collection<Feature>,
+  ) {
+    if (features.find { this.isFeatureEnabled(organizationId, it) } == null) {
+      throw BadRequestException(Message.FEATURE_NOT_ENABLED, features.toList())
+    }
+  }
 }

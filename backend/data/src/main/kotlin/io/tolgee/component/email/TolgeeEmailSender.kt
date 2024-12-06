@@ -17,6 +17,12 @@ class TolgeeEmailSender(
     val helper = mimeMessageHelperFactory.create()
     helper.setFrom(tolgeeProperties.smtp.from!!)
     helper.setTo(params.to)
+    params.replyTo?.let {
+      helper.setReplyTo(it)
+    }
+    if (!params.bcc.isNullOrEmpty()) {
+      helper.setBcc(params.bcc!!)
+    }
     helper.setSubject(params.subject)
     val content =
       """

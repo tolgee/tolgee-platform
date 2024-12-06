@@ -29,11 +29,15 @@ class AvatarService(
   fun storeAvatarFiles(
     avatar: InputStream,
     entity: ModelWithAvatar,
+    dimension: Dimension? = null,
+    thumbnailSize: Int? = null,
   ): String {
+    val dim = dimension ?: Dimension(200, 200)
+    val thumbSize = thumbnailSize ?: 50
     val avatarBytes = avatar.readAllBytes()
     val converter = ImageConverter(avatarBytes.inputStream())
-    val large = converter.getImage(-1f, Dimension(200, 200)).toByteArray()
-    val thumb = converter.getThumbnail(50).toByteArray()
+    val large = converter.getImage(-1f, dim).toByteArray()
+    val thumb = converter.getThumbnail(thumbSize).toByteArray()
     val idByteArray = "${entity::class.simpleName}-${entity.id}---".toByteArray()
     val bytesToHash = idByteArray + large
     val hashBinary = MessageDigest.getInstance("SHA-256").digest(bytesToHash)
@@ -48,8 +52,10 @@ class AvatarService(
   fun setAvatar(
     entity: ModelWithAvatar,
     avatar: InputStream,
+    dimension: Dimension? = null,
+    thumbnailSize: Int? = null,
   ) {
-    val hash = storeAvatarFiles(avatar, entity)
+    val hash = storeAvatarFiles(avatar, entity, dimension, thumbnailSize)
     removeAvatar(entity)
     entity.avatarHash = hash
   }

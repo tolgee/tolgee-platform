@@ -270,7 +270,12 @@ export class Validation {
           ? Yup.string()
               .email(t('validation_email_is_not_valid'))
               .required(t('Validation - required field'))
-          : Yup.string().required(t('Validation - required field'))
+          : val === 'link'
+          ? Yup.string().required(t('Validation - required field'))
+          : Yup.string()
+      ),
+      agency: Yup.number().when('type', (val: string) =>
+        val === 'agency' ? Yup.string().required() : Yup.string()
       ),
     });
 
@@ -412,6 +417,12 @@ export class Validation {
   static readonly UPDATE_TASK_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
       name: Yup.string().min(3).required(),
+    });
+
+  static readonly TRANSLATION_AGENCY_FORM = () =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+      email: Yup.string().min(3).required(),
     });
 }
 
