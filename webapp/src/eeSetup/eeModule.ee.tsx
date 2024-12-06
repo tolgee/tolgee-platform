@@ -13,6 +13,11 @@ export { TaskFilterPopover } from '../ee/task/components/taskFilter/TaskFilterPo
 export type { TaskFilterType } from '../ee/task/components/taskFilter/TaskFilterPopover';
 
 import React from 'react';
+import { T, useTranslate } from '@tolgee/react';
+import { ClipboardCheck } from '@untitled-ui/icons-react';
+import { Link, Route, Switch } from 'react-router-dom';
+import { Badge, Box, MenuItem } from '@mui/material';
+
 import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { BillingMenuItem } from '../ee/billing/component/UserMenu/BillingMenuItem';
 import { PrivateRoute } from '../component/common/PrivateRoute';
@@ -33,7 +38,6 @@ import { OrganizationSubscriptionsView } from '../ee/billing/Subscriptions/Organ
 import { OrganizationInvoicesView } from '../ee/billing/Invoices/OrganizationInvoicesView';
 import { OrganizationBillingView } from '../ee/billing/OrganizationBillingView';
 import { OrganizationBillingTestClockHelperView } from '../ee/billing/OrganizationBillingTestClockHelperView';
-import { Link, Route, Switch } from 'react-router-dom';
 import { ProjectTasksView } from '../ee/task/views/projectTasks/ProjectTasksView';
 import { addOperations } from '../views/projects/translations/BatchOperations/operations';
 import { OperationTaskCreate } from '../ee/batchOperations/OperationTaskCreate';
@@ -41,16 +45,14 @@ import { OperationTaskAddKeys } from '../ee/batchOperations/OperationTaskAddKeys
 import { OperationTaskRemoveKeys } from '../ee/batchOperations/OperationTaskRemoveKeys';
 import { useTranslationsSelector } from '../views/projects/translations/context/TranslationsContext';
 import { useProjectPermissions } from '../hooks/useProjectPermissions';
-import { T, useTranslate } from '@tolgee/react';
 import { addPanel } from '../views/projects/translations/ToolsPanel/panelsList';
-import { ClipboardCheck } from '@untitled-ui/icons-react';
 import { tasksCount, TasksPanel } from '../ee/task/components/TasksPanel';
 import { addDeveloperViewItems } from '../views/projects/developer/developerViewItems';
 import { StorageList } from '../ee/developer/storage/StorageList';
 import { WebhookList } from '../ee/developer/webhook/WebhookList';
-import { Badge, Box, MenuItem } from '@mui/material';
 import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
+import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 
 export const billingMenuItems = [BillingMenuItem];
 export const apps = [SlackApp];
@@ -180,6 +182,13 @@ export const useAddBatchOperations = () => {
         enabled: canEditTasks,
         hidden: !prefilteredTask || !taskFeature,
         component: OperationTaskRemoveKeys,
+      },
+      {
+        id: 'order_translation',
+        label: t('batch_operations_order_translation'),
+        enabled: canEditTasks,
+        hidden: !taskFeature,
+        component: OperationOrderTranslation,
       },
     ],
     { position: 'after', value: 'export_translations' }
