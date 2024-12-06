@@ -1,14 +1,14 @@
 /* eslint-disable no-restricted-imports */
-
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { Usage } from '../ee/billing/component/Usage';
 export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';
-import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 export { PermissionsAdvancedEe } from '../ee/PermissionsAdvanced/PermissionsAdvancedEe';
 export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDetail';
 export { PrefilterTask } from '../ee/task/components/PrefilterTask';
 
+import React from 'react';
+import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { BillingMenuItem } from '../ee/billing/component/UserMenu/BillingMenuItem';
 import { PrivateRoute } from '../component/common/PrivateRoute';
 import { LINKS } from '../constants/links';
@@ -180,6 +180,7 @@ export const useAddBatchOperations = () => {
     { position: 'after', value: 'export_translations' }
   );
 };
+
 export const translationPanelAdder = addPanel(
   [
     {
@@ -196,6 +197,7 @@ export const translationPanelAdder = addPanel(
   ],
   { position: 'after', value: 'history' }
 );
+
 export const useAddDeveloperViewItems = () => {
   const { t } = useTranslate();
   return addDeveloperViewItems(
@@ -229,7 +231,6 @@ export const useAddDeveloperViewItems = () => {
 
 export const useAddUserMenuItems = () => {
   const taskCount = useUserTaskCount();
-
   return addUserMenuItems(
     [
       {
@@ -264,7 +265,6 @@ export const useAddUserMenuItems = () => {
 
 export const useAddEeBatchOperations = () => {
   const taskCount = useUserTaskCount();
-
   return addUserMenuItems(
     [
       {
@@ -319,6 +319,7 @@ export const useAddProjectMenuItems = () => {
     }
   );
 };
+
 export const useAddAdministrationMenuItems = () => {
   const { t } = useTranslate();
   const config = useConfig();
