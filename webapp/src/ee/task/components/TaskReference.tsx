@@ -5,7 +5,7 @@ import { useProject } from 'tg.hooks/useProject';
 
 import { TaskTooltip } from './TaskTooltip';
 import { getTaskUrl } from './utils';
-import { TaskReferenceProps } from '../../../eeSetup/EePluginType';
+import { TaskReferenceProps } from '../../../eeSetup/EeModuleType';
 
 const StyledId = styled('span')`
   font-size: 15px;

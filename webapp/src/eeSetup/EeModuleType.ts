@@ -12,7 +12,7 @@ import { UserMenuItemsAdder } from 'tg.component/security/UserMenu/UserMenuItems
 import { ProjectMenuItemsAdder } from 'tg.views/projects/projectMenu/ProjectMenu';
 import { AdministrationMenuItemsAdder } from 'tg.views/administration/components/BaseAdministrationView';
 
-export interface EePluginType {
+export interface EeModuleType {
   PermissionsAdvancedEe: FC<PermissionsAdvancedEeProps>;
   billingMenuItems: FC<BillingMenuItemsProps>[];
   GlobalLimitPopover: FC;

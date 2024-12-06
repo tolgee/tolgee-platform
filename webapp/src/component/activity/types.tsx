@@ -1,6 +1,6 @@
 import { TranslateParams } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
-import { TaskReferenceData } from '../../eeSetup/EePluginType';
+import { TaskReferenceData } from '../../eeSetup/EeModuleType';
 
 type ModifiedEntityModel = components['schemas']['ModifiedEntityModel'];
 export type TranslationHistoryModel =

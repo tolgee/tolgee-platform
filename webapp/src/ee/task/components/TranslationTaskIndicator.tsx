@@ -5,7 +5,7 @@ import { StyledImgWrapper } from 'tg.component/TranslationFlagIcon';
 import { ClipboardCheck } from '@untitled-ui/icons-react';
 import { TaskTooltip } from './TaskTooltip';
 import { StyledTranslationFlagsContainer } from 'tg.views/projects/translations/cell/TranslationFlags';
-import { TranslationTaskIndicatorProps } from '../../../eeSetup/EePluginType';
+import { TranslationTaskIndicatorProps } from '../../../eeSetup/EeModuleType';
 
 export const TranslationTaskIndicator = ({
   task,

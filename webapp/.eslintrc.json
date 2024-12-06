@@ -42,7 +42,7 @@
         "no-restricted-imports": [
           "error",
           {
-            "patterns": ["tg.ee.module/*", "**/ee/**", "**/eePlugin.*"]
+            "patterns": ["tg.ee.module/*", "**/ee/**", "**/eeModule.*"]
           }
         ]
       }

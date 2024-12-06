@@ -13,7 +13,7 @@
       "tg.error/*": ["error/*"],
       "tg.svgs/*": ["svgs/*"],
       "tg.ee.module/*": ["ee/*"],
-      "tg.ee": ["eeSetup/eePlugin.current"],
+      "tg.ee": ["eeSetup/eeModule.current"],
       "tg.translationTools/*": ["translationTools/*"],
       "tg.websocket-client/*": ["websocket-client/*"]
     }

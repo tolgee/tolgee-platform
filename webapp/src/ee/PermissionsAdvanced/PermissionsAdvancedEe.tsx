@@ -1,6 +1,6 @@
 import { Hierarchy } from 'tg.component/PermissionsSettings/Hierarchy';
 import { usePermissionsStructure } from 'tg.component/PermissionsSettings/usePermissionsStructure';
-import { PermissionsAdvancedEeProps } from '../../eeSetup/EePluginType';
+import { PermissionsAdvancedEeProps } from '../../eeSetup/EeModuleType';
 import { FC } from 'react';
 
 export const PermissionsAdvancedEe: FC<PermissionsAdvancedEeProps> = ({

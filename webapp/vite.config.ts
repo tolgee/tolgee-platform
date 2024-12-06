@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       rollupOptions: {
-        external: ['src/eePlugin.ee.tsx', 'src/eePlugin.oss.tsx'],
+        external: ['src/eeModule.ee.tsx', 'src/eeModule.oss.tsx'],
       },
     },
   };
