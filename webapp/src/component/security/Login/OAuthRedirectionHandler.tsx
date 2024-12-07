@@ -25,6 +25,12 @@ export const OAuthRedirectionHandler: FunctionComponent<
   useEffect(() => {
     const url = new URLSearchParams(window.location.search);
     const code = url.get('code');
+    const error = url.get('error');
+
+    if (error === 'access_denied') {
+      history.replace(LINKS.LOGIN.build());
+      return;
+    }
 
     if (match.params[PARAMS.SERVICE_TYPE] == 'oauth2') {
       const state = url.get('state');
