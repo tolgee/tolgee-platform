@@ -43,6 +43,7 @@ apply plugin: "kotlin-kapt"
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 kotlin {
