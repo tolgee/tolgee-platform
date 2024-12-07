@@ -18,6 +18,7 @@ class KeysTestData {
   lateinit var user: UserAccount
   lateinit var firstKey: Key
   lateinit var secondKey: Key
+  lateinit var thirdKey: Key
   lateinit var english: Language
   lateinit var german: Language
   lateinit var screenshot: Screenshot
@@ -78,6 +79,8 @@ class KeysTestData {
               setDescription("description")
               screenshot = addScreenshot { }.self
             }.self
+
+          thirdKey = addKey("third_key").self
 
           addKey {
             name = "key_with_referecnces"

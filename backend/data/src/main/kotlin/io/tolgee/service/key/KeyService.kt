@@ -150,7 +150,7 @@ class KeyService(
       tagService.tagKey(key, it)
     }
 
-    bigMetaService.store(dto.relatedKeysInOrder, project)
+    bigMetaService.store(dto.relatedKeysInOrder, project, key.id)
 
     storeScreenshots(dto, key)
 
