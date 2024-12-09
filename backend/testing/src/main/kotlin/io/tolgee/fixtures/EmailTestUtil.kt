@@ -5,7 +5,6 @@ import io.tolgee.testing.assertions.Assertions
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.AbstractStringAssert
-import org.assertj.core.api.ObjectAssert
 import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -52,6 +51,14 @@ class EmailTestUtil() {
           .getBodyPart(0).content as String
       }
 
+  fun emailToString(email: MimeMessage): String {
+    return (
+      (email.content as MimeMultipart)
+        .getBodyPart(0).content as MimeMultipart
+    )
+      .getBodyPart(0).content as String
+  }
+
   fun verifyEmailSent() {
     verify(javaMailSender).send(any<MimeMessage>())
   }
@@ -62,8 +69,7 @@ class EmailTestUtil() {
       return Assertions.assertThat(messageArgumentCaptor.firstValue.getHeader("To")[0] as String)
     }
 
-  fun findEmailTo(to: String): ObjectAssert<MimeMessage?> {
-    val email = messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
-    return Assertions.assertThat(email)
+  fun findEmail(to: String): MimeMessage? {
+    return messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
   }
 }
