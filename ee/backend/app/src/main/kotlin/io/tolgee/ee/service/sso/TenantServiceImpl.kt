@@ -9,8 +9,10 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
 import io.tolgee.service.TenantService
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 
+@Primary
 @Service
 class TenantServiceImpl(
   private val tenantRepository: TenantRepository,

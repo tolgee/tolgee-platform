@@ -27,6 +27,7 @@ export interface EeModuleType {
     Root: FC;
     Administration: FC;
     Organization: FC;
+    SpecificOrganization: FC;
     Project: FC;
   };
   useAddBatchOperations: () => BatchOperationAdder;

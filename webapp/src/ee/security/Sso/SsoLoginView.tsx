@@ -13,7 +13,7 @@ import {
   useGlobalActions,
 } from 'tg.globalContext/GlobalContext';
 import { LoginMoreInfo } from 'tg.component/security/Login/LoginMoreInfo';
-import { LoginSsoForm } from 'tg.component/security/Sso/LoginSsoForm';
+import { LoginSsoForm } from 'tg.ee.module/security/Sso/LoginSsoForm';
 import { useLocation } from 'react-router-dom';
 import { GlobalLoading } from 'tg.component/GlobalLoading';
 

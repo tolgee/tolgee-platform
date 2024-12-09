@@ -8,7 +8,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { Alert, AlertTitle, FormControlLabel, Switch } from '@mui/material';
 import Box from '@mui/material/Box';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
-import { PaidFeatureBanner } from 'tg.ee/common/PaidFeatureBanner';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const OrganizationSsoView: FunctionComponent = () => {
@@ -49,7 +49,7 @@ export const OrganizationSsoView: FunctionComponent = () => {
       case !featureEnabled:
         return (
           <Box>
-            <PaidFeatureBanner />
+            <DisabledFeatureBanner />
           </Box>
         );
       case !organizationsSsoEnabled:

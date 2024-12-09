@@ -1,12 +1,10 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 import { LINKS } from 'tg.constants/links';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
-import { useConfig } from 'tg.globalContext/helpers';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
 import { RootView } from 'tg.views/RootView';
 import { routes } from 'tg.ee';
@@ -17,7 +15,7 @@ import { RequirePreferredOrganization } from '../RequirePreferredOrganization';
 import { HelpMenu } from './HelpMenu';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
-import { SsoLoginView } from 'tg.component/security/Sso/SsoLoginView';
+import { RecaptchaProvider } from 'tg.component/common/RecaptchaProvider';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
@@ -63,22 +61,6 @@ const AcceptInvitationHandler = React.lazy(
     )
 );
 
-const RecaptchaProvider: FC = (props) => {
-  const config = useConfig();
-  if (!config.recaptchaSiteKey) {
-    return <>{props.children}</>;
-  }
-
-  return (
-    <GoogleReCaptchaProvider
-      reCaptchaKey={config.recaptchaSiteKey}
-      useRecaptchaNet={true}
-    >
-      {props.children}
-    </GoogleReCaptchaProvider>
-  );
-};
-
 export const RootRouter = () => {
   return (
     <>
@@ -95,11 +77,6 @@ export const RootRouter = () => {
         <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
           <PasswordResetSetView />
         </Route>
-        <PublicOnlyRoute exact path={LINKS.SSO_LOGIN.template}>
-          <RecaptchaProvider>
-            <SsoLoginView />
-          </RecaptchaProvider>
-        </PublicOnlyRoute>
         <PublicOnlyRoute exact path={LINKS.SIGN_UP.template}>
           <RecaptchaProvider>
             <SignUpView />

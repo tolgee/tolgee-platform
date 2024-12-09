@@ -43,9 +43,7 @@ const SpecificOrganizationRouter = () => {
             <OrganizationAppsView />
           </PrivateRoute>
 
-          <PrivateRoute path={LINKS.ORGANIZATION_SSO.template}>
-            <OrganizationSsoView />
-          </PrivateRoute>
+          <routes.SpecificOrganization />
         </>
       ) : (
         <Box
