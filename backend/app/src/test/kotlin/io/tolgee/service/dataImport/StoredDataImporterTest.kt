@@ -31,6 +31,8 @@ class StoredDataImporterTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
+    importTestData.addFilesWithNamespaces()
+
     storedDataImporter =
       StoredDataImporter(
         applicationContext,
@@ -62,6 +64,9 @@ class StoredDataImporterTest : AbstractSpringTest() {
     val keptTranslation = translationService.find(importTestData.root.data.projects[0].data.translations[1].self.id)!!
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(keptTranslation.text).isEqualTo("What a text")
+
+    val keyWithNamespace = keyService.find(importTestData.project.id, "what a key with a namespace", "homepage")!!
+    assertThat(keyWithNamespace.namespace?.name).isEqualTo("homepage")
   }
 
   @Test
