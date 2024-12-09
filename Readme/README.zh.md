@@ -84,7 +84,7 @@ Crowdin、Phrase 或 Lokalise 的开源替代方案
   - [更多...](https://tolgee.io/integrations/all)
 - [Tolgee平台文档](https://tolgee.io/docs/platform)
   - [自托管](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
-- [开发笔记（如何本地开发Tolgee）](https://github.com/tolgee/tolgee-platform/wiki/Development)
+- [开发笔记（如何本地开发Tolgee）](../DEVELOPMENT.md)
 
 ## 为什么使用 Tolgee？
 

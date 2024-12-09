@@ -84,7 +84,7 @@ Pour des informations complètes, consultez notre [Hacktoberfest2024.fr.md](./Ha
   - ➕ [Plus...](https://tolgee.io/integrations/all)
 - 📚 [Documentation de la plateforme Tolgee](https://tolgee.io/docs/platform)
   - 🖥️ [Auto-hébergement](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
-- 💻 [Notes de développement](https://github.com/tolgee/tolgee-platform/wiki/Development)(Comment développer Tolgee localement)
+- 💻 [Notes de développement](../DEVELOPMENT.md)(Comment développer Tolgee localement)
 
 
 ## Pourquoi utiliser Tolgee ?
