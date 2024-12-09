@@ -454,3 +454,18 @@ jobs:
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck
+
+  everything-passed:
+    name: Everything passed 🎉
+    needs:
+      - backend-build
+      - backend-test
+      - backend-code-checks
+      - frontend-build
+      - frontend-code-check
+      - e2e
+      - e2e-code-checks
+      - e2e-install-deps
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Everything passed 🎉"
