@@ -1,6 +1,7 @@
 [*.{kt, kts}]
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_filename = disabled
+ij_kotlin_name_count_to_use_star_import = 5
 indent_size = 2
 insert_final_newline = true
 # possible values: number (e.g. 120) (package name, imports & comments are ignored), "off"
