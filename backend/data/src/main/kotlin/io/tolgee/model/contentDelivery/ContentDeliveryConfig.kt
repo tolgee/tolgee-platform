@@ -60,6 +60,11 @@ class ContentDeliveryConfig(
   @ActivityIgnoredProp
   var lastPublished: Date? = null
 
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  @ActivityIgnoredProp
+  var lastPublishedFiles: List<String>? = null
+
   @ColumnDefault("false")
   var pruneBeforePublish = true
 

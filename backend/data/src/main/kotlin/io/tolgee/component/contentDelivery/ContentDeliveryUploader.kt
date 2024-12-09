@@ -29,6 +29,7 @@ class ContentDeliveryUploader(
     storeToStorage(withFullPaths, storage)
     purgeCacheIfConfigured(config, files.keys)
     config.lastPublished = currentDateProvider.date
+    config.lastPublishedFiles = files.map { it.key }.toList()
     contentDeliveryConfigService.save(config)
   }
 
