@@ -13,7 +13,6 @@ import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { useOrganization } from './useOrganization';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
-import { OrganizationSsoView } from 'tg.views/organizations/sso/OrganizationSsoView';
 import { routes } from 'tg.ee';
 
 const SpecificOrganizationRouter = () => {
