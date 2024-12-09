@@ -3898,7 +3898,6 @@
             <column defaultValueBoolean="true" name="enabled" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="name" type="VARCHAR(255)"/>
             <column name="token_uri" type="VARCHAR(255)"/>
             <column name="organization_id" type="BIGINT"/>
         </createTable>
