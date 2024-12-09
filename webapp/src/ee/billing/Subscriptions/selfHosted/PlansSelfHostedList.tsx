@@ -1,12 +1,12 @@
 import { useTranslate } from '@tolgee/react';
-import { PlanFeature } from 'tg.component/billing/PlanFeature';
-import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
-import { Plan } from 'tg.component/billing/Plan/Plan';
-import { PlanType } from 'tg.component/billing/Plan/types';
-import { excludePreviousPlanFeatures } from 'tg.component/billing/Plan/plansTools';
-import { AllFromPlanFeature } from 'tg.component/billing/Plan/AllFromPlanFeature';
 
 import { SelfHostedPlanAction } from './SelfHostedPlanAction';
+import { PlanType } from '../../component/Plan/types';
+import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
+import { excludePreviousPlanFeatures } from '../../component/Plan/plansTools';
+import { Plan } from 'tg.ee.module/billing/component/Plan/Plan';
+import { AllFromPlanFeature } from 'tg.ee.module/billing/component/Plan/AllFromPlanFeature';
+import { PlanFeature } from 'tg.ee.module/billing/component/PlanFeature';
 
 type BillingPlansProps = {
   plans: PlanType[];
@@ -49,6 +49,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
     free: false,
     hasYearlyPrice: false,
     public: true,
+    nonCommercial: false,
   });
 
   const parentForPublic: PlanType[] = [];
@@ -87,6 +88,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
             period={period}
             filteredFeatures={filteredFeatures}
             featuresMinHeight="210px"
+            nonCommercial={plan.nonCommercial}
             topFeature={
               previousPlanName ? (
                 <AllFromPlanFeature planName={previousPlanName} />

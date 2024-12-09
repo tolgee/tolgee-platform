@@ -9,7 +9,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useTranslate } from '@tolgee/react';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { FlagImage } from 'tg.component/languages/FlagImage';
-import { TaskTypeChip } from '../TaskTypeChip';
+import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { filterEmpty } from './taskFilterUtils';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useApiQuery } from 'tg.service/http/useQueryApi';

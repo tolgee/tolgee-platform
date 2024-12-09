@@ -194,12 +194,14 @@ export const CellKey: React.FC<Props> = ({
                 onClick={stopBubble()}
                 data-cy="translations-row-checkbox"
               />,
-              // @ts-ignore
               <Tooltip
                 title={t('translations_checkbox_select_multiple_hint')}
                 enterDelay={1000}
                 enterNextDelay={1000}
-              />
+                disableInteractive
+              >
+                <div />
+              </Tooltip>
             )}
           <StyledKey>
             <LimitedHeightText width={width} maxLines={3} wrap="break-all">

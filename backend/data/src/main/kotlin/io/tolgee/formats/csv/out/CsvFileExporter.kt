@@ -4,6 +4,7 @@ import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.csv.CsvEntry
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
@@ -13,8 +14,12 @@ class CsvFileExporter(
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
-  private val fileName
-    get() = exportParams.languages?.takeIf { it.size == 1 }?.iterator()?.next() ?: "exported"
+  private val pathProvider by lazy {
+    ExportFilePathProvider(
+      exportParams,
+      "csv",
+    )
+  }
 
   private val messageFormat
     get() = exportParams.messageFormat ?: ExportMessageFormat.ICU
@@ -25,12 +30,16 @@ class CsvFileExporter(
   val entries =
     translations.map {
       val converted = convertMessage(it.text, it.key.isPlural)
-      CsvEntry(
-        key = it.key.name,
-        language = it.languageTag,
-        value = converted,
-      )
-    }
+      val path =
+        pathProvider.getFilePath(it.key.namespace)
+      val entry =
+        CsvEntry(
+          key = it.key.name,
+          language = it.languageTag,
+          value = converted,
+        )
+      path to entry
+    }.groupBy({ it.first }, { it.second })
 
   private fun convertMessage(
     text: String?,
@@ -50,9 +59,7 @@ class CsvFileExporter(
   )
 
   override fun produceFiles(): Map<String, InputStream> {
-    return mapOf(
-      "$fileName.csv" to entries.toCsv(),
-    )
+    return entries.mapValues { (_, entry) -> entry.toCsv() }
   }
 
   private fun List<CsvEntry>.toCsv(): InputStream {

@@ -1,6 +1,8 @@
 import { useTranslate } from '@tolgee/react';
-import { TranslationStateType } from 'tg.ee/task/components/taskCreate/TranslationStateFilter';
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
+import { StateType } from 'tg.constants/translationStates';
+
+export type TranslationStateType = StateType | 'OUTDATED';
 
 export function useStateTranslation() {
   const { t } = useTranslate();

@@ -5,23 +5,19 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
-import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
+import { useIsAdmin } from 'tg.globalContext/helpers';
 
 import { OrganizationCreateView } from './OrganizationCreateView';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
 import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { useOrganization } from './useOrganization';
-import { OrganizationBillingView } from 'tg.ee/billing/OrganizationBillingView';
-import { OrganizationInvoicesView } from 'tg.ee/billing/Invoices/OrganizationInvoicesView';
-import { OrganizationSubscriptionsView } from 'tg.ee/billing/Subscriptions/OrganizationSubscriptionsView';
-import { OrganizationBillingTestClockHelperView } from 'tg.ee/billing/OrganizationBillingTestClockHelperView';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
 import { OrganizationSsoView } from 'tg.views/organizations/sso/OrganizationSsoView';
+import { routes } from 'tg.ee';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
-  const config = useConfig();
   const isAdmin = useIsAdmin();
   const isAdminAccess =
     organization && organization?.currentUserRole !== 'OWNER' && isAdmin;
@@ -42,29 +38,7 @@ const SpecificOrganizationRouter = () => {
           >
             <OrganizationMemberPrivilegesView />
           </PrivateRoute>
-          {config.billing.enabled && (
-            <>
-              <PrivateRoute path={LINKS.ORGANIZATION_SUBSCRIPTIONS.template}>
-                <OrganizationSubscriptionsView />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.ORGANIZATION_INVOICES.template}>
-                <OrganizationInvoicesView />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.ORGANIZATION_BILLING.template}>
-                <OrganizationBillingView />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.ORGANIZATION_BILLING.template}>
-                <OrganizationBillingView />
-              </PrivateRoute>
-              {config.internalControllerEnabled && (
-                <PrivateRoute
-                  path={LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.template}
-                >
-                  <OrganizationBillingTestClockHelperView />
-                </PrivateRoute>
-              )}
-            </>
-          )}
+
           <PrivateRoute path={LINKS.ORGANIZATION_APPS.template}>
             <OrganizationAppsView />
           </PrivateRoute>
@@ -90,14 +64,17 @@ const SpecificOrganizationRouter = () => {
 
 export const OrganizationsRouter = () => {
   return (
-    <Switch>
-      <PrivateRoute exact path={LINKS.ORGANIZATIONS_ADD.template}>
-        <OrganizationCreateView />
-      </PrivateRoute>
+    <>
+      <Switch>
+        <PrivateRoute exact path={LINKS.ORGANIZATIONS_ADD.template}>
+          <OrganizationCreateView />
+        </PrivateRoute>
 
-      <PrivateRoute path={LINKS.ORGANIZATION.template}>
-        <SpecificOrganizationRouter />
-      </PrivateRoute>
-    </Switch>
+        <PrivateRoute path={LINKS.ORGANIZATION.template}>
+          <SpecificOrganizationRouter />
+        </PrivateRoute>
+      </Switch>
+      <routes.Organization />
+    </>
   );
 };

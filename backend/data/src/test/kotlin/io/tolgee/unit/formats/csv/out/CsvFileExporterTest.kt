@@ -14,7 +14,7 @@ class CsvFileExporterTest {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "exported.csv",
+      "all.csv",
       """
     |"key","cs"
     |"key3","{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}"
@@ -55,7 +55,7 @@ class CsvFileExporterTest {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExported(exporter)
     data.assertFile(
-      "exported.csv",
+      "all.csv",
       """
     |"key","cs"
     |"key3","{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}"
@@ -70,7 +70,7 @@ class CsvFileExporterTest {
     val exporter = getExporter(getTranslationWithColon())
     val data = getExported(exporter)
     data.assertFile(
-      "exported.csv",
+      "all.csv",
       """
     |"key","cs"
     |"item","name : {name}"

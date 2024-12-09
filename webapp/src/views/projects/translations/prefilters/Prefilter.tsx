@@ -1,6 +1,6 @@
+import { PrefilterTask } from 'tg.ee';
 import { PrefilterActivity } from './PrefilterActivity';
 import { PrefilterFailedJob } from './PrefilterFailedJob';
-import { PrefilterTask } from './PrefilterTask';
 import { PrefilterType } from './usePrefilter';
 
 type Props = {

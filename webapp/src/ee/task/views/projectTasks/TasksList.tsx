@@ -1,7 +1,7 @@
 import { ListProps, PaperProps, styled } from '@mui/material';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { TaskFilterType } from 'tg.ee/task/components/taskFilter/TaskFilterPopover';
-import { TaskItem } from 'tg.ee/task/components/TaskItem';
+import { TaskFilterType } from 'tg.ee.module/task/components/taskFilter/TaskFilterPopover';
+import { TaskItem } from 'tg.ee.module/task/components/TaskItem';
 import { useProject } from 'tg.hooks/useProject';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';

@@ -1,16 +1,17 @@
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { BillingPeriodType } from 'tg.component/billing/Price/PeriodSwitch';
-import { Plan } from 'tg.component/billing/Plan/Plan';
-import { FreePlan } from 'tg.component/billing/Plan/FreePlan';
-import { PlanType } from 'tg.component/billing/Plan/types';
+
+import { PlanAction } from './CloudPlanAction';
+import { PlanType } from '../../component/Plan/types';
+import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 import {
   excludePreviousPlanFeatures,
   planIsPeriodDependant,
-} from 'tg.component/billing/Plan/plansTools';
-import { AllFromPlanFeature } from 'tg.component/billing/Plan/AllFromPlanFeature';
-import { PlanAction } from './CloudPlanAction';
+} from '../../component/Plan/plansTools';
+import { FreePlan } from '../../component/Plan/FreePlan';
+import { Plan } from '../../component/Plan/Plan';
+import { AllFromPlanFeature } from '../../component/Plan/AllFromPlanFeature';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
@@ -58,6 +59,7 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
     free: false,
     hasYearlyPrice: false,
     public: true,
+    nonCommercial: false,
   });
 
   const parentForPublic: PlanType[] = [];
@@ -125,6 +127,7 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
               filteredFeatures={filteredFeatures}
               featuresMinHeight="155px"
               custom={custom}
+              nonCommercial={plan.nonCommercial}
               topFeature={
                 parentPlan && <AllFromPlanFeature planName={parentPlan} />
               }

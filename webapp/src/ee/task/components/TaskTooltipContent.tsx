@@ -8,12 +8,13 @@ import { useLoadingRegister } from 'tg.component/GlobalLoading';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import { TaskLabel } from './TaskLabel';
-import { TaskState } from './TaskState';
+import { TaskState } from 'tg.component/task/TaskState';
 import { AlarmClock } from '@untitled-ui/icons-react';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { BatchProgress } from 'tg.views/projects/translations/BatchOperations/OperationsSummary/BatchProgress';
 import { useUserName } from 'tg.component/common/UserName';
-import { TASK_ACTIVE_STATES } from './utils';
+
+import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 
 type TaskModel = components['schemas']['TaskModel'];
 

@@ -1,7 +1,7 @@
 import { useProject } from 'tg.hooks/useProject';
 import { components, operations } from 'tg.service/apiSchema.generated';
-import { TaskFilterType } from 'tg.ee/task/components/taskFilter/TaskFilterPopover';
-import { TasksBoard } from 'tg.ee/task/components/TasksBoard';
+import { TaskFilterType } from 'tg.ee.module/task/components/taskFilter/TaskFilterPopover';
+import { TasksBoard } from 'tg.ee.module/task/components/TasksBoard';
 
 import { useProjectBoardTasks } from './useProjectBoardTasks';
 

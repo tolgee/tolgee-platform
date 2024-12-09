@@ -6,7 +6,7 @@ import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useSuccessMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { PlanLicenseKey } from 'tg.component/billing/ActiveSubscription/PlanLicenseKey';
+import { PlanLicenseKey } from '../../component/ActiveSubscription/PlanLicenseKey';
 
 type Props = {
   id: number;

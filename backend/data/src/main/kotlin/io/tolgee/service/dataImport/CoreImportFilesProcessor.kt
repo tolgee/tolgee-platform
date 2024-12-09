@@ -274,8 +274,7 @@ class CoreImportFilesProcessor(
     if (importSettings.createNewKeys) {
       return true
     }
-    val n = this.getNamespaceToPreselect()
-    return keyService.find(import.project.id, keyName, this.getNamespaceToPreselect()) != null
+    return importDataManager.existingKeys[this.getNamespaceToPreselect() to keyName] != null
   }
 
   private fun FileProcessorContext.processTranslation(

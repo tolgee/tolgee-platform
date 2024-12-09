@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, IconButton, Typography, styled } from '@mui/material';
+import { Box, IconButton, styled, Typography } from '@mui/material';
 import { useProject } from 'tg.hooks/useProject';
 
 import {
@@ -8,7 +8,7 @@ import {
 } from '../context/TranslationsContext';
 import { Panel } from './common/Panel';
 
-import { PANELS, PANELS_WHEN_INACTIVE } from './panelsList';
+import { getPanels, PANELS_WHEN_INACTIVE } from './panelsList';
 import { useOpenPanels } from './useOpenPanels';
 import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
@@ -94,23 +94,25 @@ export const ToolsPanel = () => {
     <StyledWrapper>
       {displayPanels ? (
         <StyledPanelList>
-          {PANELS.filter(
-            ({ displayPanel }) => !displayPanel || displayPanel(dataProps)
-          ).map((config) => (
-            <Panel
-              {...config}
-              key={config.id}
-              data={dataProps}
-              onToggle={() => {
-                if (openPanels.includes(config.id)) {
-                  setOpenPanels(openPanels.filter((i) => i !== config.id));
-                } else {
-                  setOpenPanels([...openPanels, config.id]);
-                }
-              }}
-              open={openPanels.includes(config.id)}
-            />
-          ))}
+          {getPanels()
+            .filter(
+              ({ displayPanel }) => !displayPanel || displayPanel(dataProps)
+            )
+            .map((config) => (
+              <Panel
+                {...config}
+                key={config.id}
+                data={dataProps}
+                onToggle={() => {
+                  if (openPanels.includes(config.id)) {
+                    setOpenPanels(openPanels.filter((i) => i !== config.id));
+                  } else {
+                    setOpenPanels([...openPanels, config.id]);
+                  }
+                }}
+                open={openPanels.includes(config.id)}
+              />
+            ))}
         </StyledPanelList>
       ) : (
         <StyledPanelList>

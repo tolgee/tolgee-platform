@@ -1,5 +1,5 @@
 import { ComponentProps, FunctionComponent, useRef, useState } from 'react';
-import { Button, styled, Tooltip, Popover, Checkbox } from '@mui/material';
+import { Button, Checkbox, Popover, styled, Tooltip } from '@mui/material';
 import { ArrowDropDown, CheckBoxOutlineBlank } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
@@ -8,13 +8,11 @@ import { SearchSelectMulti } from 'tg.component/searchSelect/SearchSelectMulti';
 import { StyledInputContent } from 'tg.component/searchSelect/SearchStyled';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { LanguageModel } from 'tg.component/PermissionsSettings/types';
-import { isAllLanguages } from 'tg.ee/PermissionsAdvanced/hierarchyTools';
 import { CompactMenuItem } from 'tg.component/ListComponents';
+import { isAllLanguages } from 'tg.component/PermissionsSettings/hierarchyTools';
 
 const StyledButton = styled(Button)`
-  padding: 0px;
-  padding-left: 7px;
-  padding-right: 5px;
+  padding: 0 5px 0 7px;
   background: ${({ theme }) => theme.palette.background.default};
 `;
 

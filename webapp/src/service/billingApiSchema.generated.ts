@@ -425,6 +425,7 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       free: boolean;
+      nonCommercial: boolean;
     };
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
@@ -476,6 +477,7 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       public: boolean;
+      nonCommercial: boolean;
     };
     CloudSubscriptionModel: {
       /** Format: int64 */
@@ -561,6 +563,7 @@ export interface components {
       usableUntil?: string;
       forOrganizationIds: number[];
       free: boolean;
+      nonCommercial: boolean;
     };
     SelfHostedEePlanAdministrationModel: {
       /** Format: int64 */
@@ -590,12 +593,14 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       free: boolean;
+      nonCommercial: boolean;
       stripeProductId: string;
       forOrganizationIds: number[];
     };
     CloudPlanRequest: {
       name: string;
       free: boolean;
+      nonCommercial: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -660,6 +665,7 @@ export interface components {
       public: boolean;
       stripeProductId: string;
       forOrganizationIds: number[];
+      nonCommercial: boolean;
     };
     CloudSubscribeRequest: {
       /**

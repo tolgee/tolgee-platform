@@ -5,7 +5,7 @@ import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.service.ITaskService
+import io.tolgee.service.task.ITaskService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 

@@ -2,19 +2,19 @@ import { useTranslate } from '@tolgee/react';
 import { Box, styled, useTheme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import {
-  PlanContainer,
-  PlanContent,
-  PlanFeaturesBox,
-} from 'tg.component/billing/Plan/PlanStyles';
-import { ActivePlanTitle } from 'tg.component/billing/ActiveSubscription/ActivePlanTitle';
-import { PlanLicenseKey } from 'tg.component/billing/ActiveSubscription/PlanLicenseKey';
-import { ActiveSubscriptionBanner } from 'tg.component/billing/ActiveSubscription/ActiveSubscriptionBanner';
-import { IncludedFeatures } from 'tg.component/billing/Plan/IncludedFeatures';
 
 import { RefreshButton } from './RefreshButton';
 import { ReleaseKeyButton } from './ReleaseKeyButton';
 import clsx from 'clsx';
+import { IncludedFeatures } from '../billing/component/Plan/IncludedFeatures';
+import {
+  PlanContainer,
+  PlanContent,
+  PlanFeaturesBox,
+} from 'tg.ee.module/billing/component/Plan/PlanStyles';
+import { ActiveSubscriptionBanner } from 'tg.ee.module/billing/component/ActiveSubscription/ActiveSubscriptionBanner';
+import { ActivePlanTitle } from 'tg.ee.module/billing/component/ActiveSubscription/ActivePlanTitle';
+import { PlanLicenseKey } from 'tg.ee.module/billing/component/ActiveSubscription/PlanLicenseKey';
 
 type EeSubscriptionModel = components['schemas']['EeSubscriptionModel'];
 

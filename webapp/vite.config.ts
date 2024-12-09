@@ -39,5 +39,10 @@ export default defineConfig(({ mode }) => {
       // this sets a default port to 3000
       port: Number(process.env.VITE_PORT) || 3000,
     },
+    build: {
+      rollupOptions: {
+        external: ['src/eeModule.ee.tsx', 'src/eeModule.oss.tsx'],
+      },
+    },
   };
 });

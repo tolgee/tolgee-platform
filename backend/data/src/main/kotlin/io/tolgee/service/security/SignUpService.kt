@@ -12,8 +12,8 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.InvitationService
 import io.tolgee.service.QuickStartService
+import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.security.crypto.password.PasswordEncoder

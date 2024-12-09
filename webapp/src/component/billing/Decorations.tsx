@@ -1,4 +1,4 @@
-import { styled, Box, Link } from '@mui/material';
+import { Box, Link, styled } from '@mui/material';
 
 export const StyledBillingHint = styled(Box)`
   display: inline;

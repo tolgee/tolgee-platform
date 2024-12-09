@@ -9,7 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
   description =
     "Configuration of the rate limit behavior of the server.\n" +
       "Rate limits are used to protect against server overload and/or abuse, and are enabled by default.\n\n" +
-      // TODO: dedicated documentation section somewhere about rate limits & link it here
       "You can disable global, per-endpoint and auth-related rate limits, or configure global rate limits.\n" +
       "Per-endpoint and auth-related rate limits are fixed and cannot be configured.\n\n",
 )

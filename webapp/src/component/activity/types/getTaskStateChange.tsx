@@ -1,7 +1,7 @@
 import { styled } from '@mui/material';
 import { DiffValue } from '../types';
 import { components } from 'tg.service/apiSchema.generated';
-import { TaskState } from 'tg.ee/task/components/TaskState';
+import { TaskState } from '../../task/TaskState';
 
 type TaskState = components['schemas']['TaskModel']['state'];
 

@@ -15,7 +15,7 @@ import {
   useIsAdmin,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import { Usage } from 'tg.component/billing/Usage';
+import { Usage } from 'tg.ee';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 

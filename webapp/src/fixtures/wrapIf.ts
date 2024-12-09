@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * If condition is met, wraps conent with element
+ * If condition is met, wraps content with element
  */
 export function wrapIf(
   condition: any,

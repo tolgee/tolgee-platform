@@ -8,10 +8,11 @@ import { Scope } from 'tg.fixtures/permissions';
 import { messageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { TASK_ACTIVE_STATES, useTaskReport } from './utils';
+import { useTaskReport } from './utils';
 import { InitialValues, TaskCreateDialog } from './taskCreate/TaskCreateDialog';
 import { useUser } from 'tg.globalContext/helpers';
 import { TaskDetail } from './TaskDetail';
+import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];

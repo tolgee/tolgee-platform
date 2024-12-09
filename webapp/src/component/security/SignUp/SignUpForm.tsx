@@ -3,9 +3,9 @@ import {
   Box,
   IconButton,
   Link,
+  styled,
   Tooltip,
   Typography,
-  styled,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { T, useTranslate } from '@tolgee/react';
@@ -22,8 +22,8 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { PasswordLabel } from '../SetPasswordField';
 import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
 import { Alert } from '../../common/Alert';
-import { SpendingLimitExceededDescription } from '../../billing/SpendingLimitExceeded';
 import { LabelHint } from 'tg.component/common/LabelHint';
+import { SpendingLimitExceededDescription } from './SpendingLimitExceededDesciption';
 
 const StyledInputFields = styled('div')`
   display: grid;

@@ -1,7 +1,7 @@
 import { Box, styled, SxProps } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
-import { getTaskRedirect } from './utils';
+import { getTaskUrl } from './utils';
 
 export const Container = styled(Box)`
   color: ${({ theme }) => theme.palette.tokens.icon.secondary};
@@ -37,7 +37,7 @@ export const TaskNumberWithLink = ({
     <Container
       component={Link}
       // @ts-ignore
-      to={getTaskRedirect(project, taskNumber)}
+      to={getTaskUrl(project, taskNumber)}
       {...{ sx, className }}
     >
       #{taskNumber}

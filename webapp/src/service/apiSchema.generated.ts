@@ -265,10 +265,6 @@ export interface paths {
     /** Sets user role in organization. Owner or Member. */
     put: operations["setUserRole"];
   };
-  "/v2/organizations/{organizationId}/sso": {
-    get: operations["findProvider"];
-    put: operations["setProvider"];
-  };
   "/v2/organizations/{organizationId}/set-base-permissions": {
     /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
     put: operations["setBasePermissions"];
@@ -575,9 +571,6 @@ export interface paths {
   };
   "/api/public/generatetoken": {
     post: operations["authenticateUser"];
-  };
-  "/api/public/authorize_oauth/sso/authentication-url": {
-    post: operations["getAuthenticationUrl"];
   };
   "/v2/user/single-owned-organizations": {
     /** Returns all organizations owned only by current user */
@@ -1138,18 +1131,7 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open"
-        | "sso_token_exchange_failed"
-        | "sso_user_info_retrieval_failed"
-        | "sso_id_token_expired"
-        | "sso_user_cannot_create_organization"
-        | "sso_cant_verify_user"
-        | "sso_auth_missing_domain"
-        | "sso_domain_not_found_or_disabled"
-        | "native_authentication_disabled"
-        | "invitation_organization_mismatch"
-        | "user_is_managed_by_organization"
-        | "cannot_set_sso_provider_missing_fields";
+        | "task_not_open";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -2307,11 +2289,11 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -2319,23 +2301,6 @@ export interface components {
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
-    };
-    CreateProviderRequest: {
-      enabled: boolean;
-      clientId: string;
-      clientSecret: string;
-      authorizationUri: string;
-      tokenUri: string;
-      domain: string;
-    };
-    SsoTenantModel: {
-      enabled: boolean;
-      authorizationUri: string;
-      clientId: string;
-      clientSecret: string;
-      tokenUri: string;
-      domain: string;
-      global: boolean;
     };
     OrganizationDto: {
       /** @example Beautiful organization */
@@ -2403,7 +2368,6 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
-        | "SSO"
       )[];
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -2473,15 +2437,15 @@ export interface components {
       /** Format: int64 */
       id: number;
       projectName: string;
-      /** Format: int64 */
-      expiresAt?: number;
       username?: string;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       scopes: string[];
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
       userFullName?: string;
     };
     SuperTokenRequest: {
@@ -2592,12 +2556,12 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
-        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       hasYearlyPrice: boolean;
       free: boolean;
+      nonCommercial: boolean;
     };
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
@@ -3082,18 +3046,7 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open"
-        | "sso_token_exchange_failed"
-        | "sso_user_info_retrieval_failed"
-        | "sso_id_token_expired"
-        | "sso_user_cannot_create_organization"
-        | "sso_cant_verify_user"
-        | "sso_auth_missing_domain"
-        | "sso_domain_not_found_or_disabled"
-        | "native_authentication_disabled"
-        | "invitation_organization_mismatch"
-        | "user_is_managed_by_organization"
-        | "cannot_set_sso_provider_missing_fields";
+        | "task_not_open";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3578,13 +3531,6 @@ export interface components {
       password: string;
       otp?: string;
     };
-    DomainRequest: {
-      domain: string;
-      state: string;
-    };
-    SsoUrlResponse: {
-      redirectUrl: string;
-    };
     CollectionModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
@@ -3701,8 +3647,6 @@ export interface components {
       github: components["schemas"]["OAuthPublicConfigDTO"];
       google: components["schemas"]["OAuthPublicConfigDTO"];
       oauth2: components["schemas"]["OAuthPublicExtendsConfigDTO"];
-      ssoGlobal: components["schemas"]["SsoGlobalPublicConfigDTO"];
-      ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
     };
     InitialDataModel: {
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
@@ -3761,18 +3705,17 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
-        | "SSO"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
       basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
@@ -3790,7 +3733,6 @@ export interface components {
       version: string;
       authentication: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
-      nativeEnabled: boolean;
       passwordResettable: boolean;
       allowRegistrations: boolean;
       screenshotsUrl: string;
@@ -3818,16 +3760,6 @@ export interface components {
     SlackDTO: {
       enabled: boolean;
       connected: boolean;
-    };
-    SsoGlobalPublicConfigDTO: {
-      enabled: boolean;
-      clientId?: string;
-      domain?: string;
-      customLogoUrl?: string;
-      customLoginText?: string;
-    };
-    SsoOrganizationsPublicConfigDTO: {
-      enabled: boolean;
     };
     CollectionModelExportFormatModel: {
       _embedded?: {
@@ -3954,9 +3886,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
@@ -3964,9 +3896,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -4567,11 +4499,11 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -4695,15 +4627,15 @@ export interface components {
       /** Format: int64 */
       id: number;
       projectName: string;
-      /** Format: int64 */
-      expiresAt?: number;
       username?: string;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
       scopes: string[];
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
       userFullName?: string;
     };
     PagedModelUserAccountModel: {
@@ -9324,105 +9256,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetOrganizationRoleDto"];
-      };
-    };
-  };
-  findProvider: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SsoTenantModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  setProvider: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SsoTenantModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateProviderRequest"];
       };
     };
   };
@@ -14452,53 +14285,6 @@ export interface operations {
       };
     };
   };
-  getAuthenticationUrl: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SsoUrlResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DomainRequest"];
-      };
-    };
-  };
   /** Returns all organizations owned only by current user */
   getAllSingleOwnedOrganizations: {
     responses: {
@@ -18459,7 +18245,6 @@ export interface operations {
         code?: string;
         redirect_uri?: string;
         invitationCode?: string;
-        domain?: string;
       };
     };
     responses: {

@@ -7,7 +7,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useTaskStateTranslation } from 'tg.translationTools/useTaskStateTranslation';
 
 import { useProjectBoardTasks } from '../views/projectTasks/useProjectBoardTasks';
-import { useStateColor } from './TaskState';
+import { useStateColor } from 'tg.component/task/TaskState';
 import { BoardColumn } from './BoardColumn';
 
 type TaskModel = components['schemas']['TaskModel'];
