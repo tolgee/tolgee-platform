@@ -467,5 +467,47 @@ jobs:
       - e2e-code-checks
       - e2e-install-deps
     runs-on: ubuntu-latest
+    if: always()
     steps:
-      - run: echo "Everything passed 🎉"
+      - run: |
+          # Check the results of all jobs
+          failed_jobs=()
+
+          if [[ "${{ needs.backend-build.result }}" != "success" ]]; then
+            failed_jobs+=("backend-build")
+          fi
+
+          if [[ "${{ needs.backend-test.result }}" != "success" ]]; then
+            failed_jobs+=("backend-test")
+          fi
+
+          if [[ "${{ needs.backend-code-checks.result }}" != "success" ]]; then
+            failed_jobs+=("backend-code-checks")
+          fi
+
+          if [[ "${{ needs.frontend-build.result }}" != "success" ]]; then
+            failed_jobs+=("frontend-build")
+          fi
+
+          if [[ "${{ needs.frontend-code-check.result }}" != "success" ]]; then
+            failed_jobs+=("frontend-code-check")
+          fi
+
+          if [[ "${{ needs.e2e.result }}" != "success" ]]; then
+            failed_jobs+=("e2e")
+          fi
+
+          if [[ "${{ needs.e2e-code-checks.result }}" != "success" ]]; then
+            failed_jobs+=("e2e-code-checks")
+          fi
+
+          if [[ "${{ needs.e2e-install-deps.result }}" != "success" ]]; then
+            failed_jobs+=("e2e-install-deps")
+          fi
+
+          if [[ "${#failed_jobs[@]}" -gt 0 ]]; then
+            echo "The following jobs failed: ${failed_jobs[*]}"
+            exit 1
+          fi
+
+          echo "Everything passed 🎉"
