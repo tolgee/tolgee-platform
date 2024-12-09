@@ -3,7 +3,7 @@ package io.tolgee.formats.escaping
 /**
  * It escapes controlling characters in ICU message, so it's not interpreted when in comes from other formats
  */
-class IcuUnescper(
+class IcuUnescaper(
   private val input: String,
   private val isPlural: Boolean = false,
 ) {
