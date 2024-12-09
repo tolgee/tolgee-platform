@@ -37,6 +37,11 @@ describe('Content delivery', () => {
       .click();
     waitForGlobalLoading();
     assertMessage('Content published successfully!');
+    gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
+      .findDcy('content-delivery-last-published-section')
+      .should('be.visible')
+      .findDcy('content-delivery-published-file')
+      .should('contain', 'en.json');
   });
 
   it('creates content delivery', () => {

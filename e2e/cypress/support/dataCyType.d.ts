@@ -146,8 +146,10 @@ declare namespace DataCy {
         "content-delivery-item-edit" |
         "content-delivery-item-publish" |
         "content-delivery-item-type" |
+        "content-delivery-last-published-section" |
         "content-delivery-list-item" |
         "content-delivery-prune-before-publish-checkbox" |
+        "content-delivery-published-file" |
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
