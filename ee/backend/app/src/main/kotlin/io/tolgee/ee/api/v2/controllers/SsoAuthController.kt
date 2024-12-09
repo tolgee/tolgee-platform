@@ -22,8 +22,6 @@ class SsoAuthController(
   fun getAuthenticationUrl(
     @RequestBody request: DomainRequest,
   ): SsoUrlResponse {
-    // FIXME: Maybe instead of this pretty specific endpoint, we could have an endpoint that returns tenant info and
-    //  frontend can take care of building the URL like it already does for other login providers
     val registrationId = request.domain
     val tenant = tenantService.getEnabledConfigByDomain(registrationId)
     enabledFeaturesProvider.checkFeatureEnabled(

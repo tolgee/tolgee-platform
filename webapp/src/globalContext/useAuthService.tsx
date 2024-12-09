@@ -221,9 +221,6 @@ export const useAuthService = (
     },
     async loginRedirectSso(domain: string) {
       localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
-      // FIXME: oAuth2 uses the same state key with one difference being:
-      //  - It is generated during initialization (instead of during the redirect)
-      //  This way they don't interfere with each other, but this solution feels wrong
       const state = uuidv4();
       localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
       const response = await getSsoAuthLinkByDomain(domain, state);

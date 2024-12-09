@@ -70,9 +70,6 @@ class SsoProviderController(
       return
     }
 
-    // FIXME: Should we validate URIs and domains if they are real?
-    //  (are there some existing spring validators for this?)
-
     listOf(
       req::clientId,
       req::clientSecret,
