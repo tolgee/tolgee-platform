@@ -383,7 +383,9 @@ export const getParsedEmailInvitationLink = () =>
 
 export const getAgencyInvitationLinks = () =>
   getAllEmails().then((emails) => {
-    const email = emails[0].html as string;
+    const email = emails.find((e) =>
+      (e as string).includes('New translation request')
+    );
     const links = Array.from(
       email.matchAll(/(http:\/\/[\w:/]*)/g),
       (m) => m[0]

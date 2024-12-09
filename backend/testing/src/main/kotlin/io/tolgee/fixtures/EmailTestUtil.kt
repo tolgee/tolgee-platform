@@ -5,6 +5,7 @@ import io.tolgee.testing.assertions.Assertions
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.AbstractStringAssert
+import org.assertj.core.api.ObjectAssert
 import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -32,7 +33,9 @@ class EmailTestUtil() {
     messageArgumentCaptor = argumentCaptor()
     Mockito.clearInvocations(javaMailSender)
     tolgeeProperties.smtp.from = "aaa@a.a"
-    whenever(javaMailSender.createMimeMessage()).thenReturn(JavaMailSenderImpl().createMimeMessage())
+    whenever(javaMailSender.createMimeMessage()).thenAnswer {
+      JavaMailSenderImpl().createMimeMessage()
+    }
     whenever(javaMailSender.send(messageArgumentCaptor.capture())).thenAnswer { }
   }
 
@@ -58,4 +61,9 @@ class EmailTestUtil() {
       @Suppress("CAST_NEVER_SUCCEEDS")
       return Assertions.assertThat(messageArgumentCaptor.firstValue.getHeader("To")[0] as String)
     }
+
+  fun findEmailTo(to: String): ObjectAssert<MimeMessage?> {
+    val email = messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
+    return Assertions.assertThat(email)
+  }
 }
