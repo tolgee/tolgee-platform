@@ -21,8 +21,8 @@ import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.QuickStartService
-import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.TenantService
+import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
