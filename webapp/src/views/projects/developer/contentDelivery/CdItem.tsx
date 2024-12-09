@@ -18,21 +18,25 @@ type ContentDeliveryConfigModel =
   components['schemas']['ContentDeliveryConfigModel'];
 
 const StyledContainer = styled('div')`
+  display: grid;
+  & + & {
+    border-top: 1px solid ${({ theme }) => theme.palette.divider};
+  }
+`;
+
+const StyledWrapper = styled('div')`
   display: flex;
   padding: 8px 16px;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  & + & {
-    border-top: 1px solid ${({ theme }) => theme.palette.divider};
-  }
 `;
 
 const StyledLastPublish = styled('div')`
   display: flex;
-  padding: 8px 16px;
-  box-shadow: inset 0px 11px 5px -12px rgba(0, 0, 0, 0.5);
+  padding: 4px 16px;
+  box-shadow: inset 0px 11px 5px -12px rgba(0, 0, 0, 0.3);
   background: ${({ theme }) => theme.palette.tokens.background.floating};
   gap: 12px;
   font-size: 14px;
@@ -42,6 +46,7 @@ const StyledLastPublish = styled('div')`
 const StyledButton = styled('span')`
   color: ${({ theme }) => theme.palette.primary.main};
   cursor: pointer;
+  margin-right: 16px;
 `;
 
 type Props = {
@@ -73,8 +78,8 @@ export const CdItem = ({ data }: Props) => {
   };
 
   return (
-    <Box display="grid">
-      <StyledContainer
+    <StyledContainer>
+      <StyledWrapper
         data-cy="content-delivery-list-item"
         data-cy-name={data.name}
       >
@@ -131,7 +136,7 @@ export const CdItem = ({ data }: Props) => {
             {t('content_delivery_item_publish')}
           </LoadingButton>
         </Box>
-      </StyledContainer>
+      </StyledWrapper>
       {data.lastPublished && (
         <StyledLastPublish>
           <Box>
@@ -141,37 +146,42 @@ export const CdItem = ({ data }: Props) => {
               dateStyle: 'short',
             })}
           </Box>
-          {showAllFiles ? (
-            <Box display="grid">
-              {data.files.map((file) => (
-                <CdFileLink key={file} link={getFileUrl(file)} file={file} />
-              ))}
-              <StyledButton
-                role="button"
-                onClick={() => setShowAllFiles(false)}
-              >
-                <T keyName="content_delivery_show_less_files" />
-              </StyledButton>
-            </Box>
-          ) : (
-            <Box display="flex" justifyContent="space-between" flexGrow="1">
-              <CdFileLink
-                link={getFileUrl(data.files[0])}
-                file={data.files[0]}
-              />
-              {data.files.length > 1 && (
-                <StyledButton
-                  role="button"
-                  onClick={() => setShowAllFiles(true)}
-                >
-                  <T keyName="content_delivery_show_all_files" />
-                </StyledButton>
-              )}
+
+          {Boolean(data.files.length) && (
+            <Box display="grid" flexGrow="1">
+              <Box display="flex" justifyContent="space-between">
+                <CdFileLink
+                  link={getFileUrl(data.files[0])}
+                  file={data.files[0]}
+                />
+                {data.files.length > 1 && (
+                  <StyledButton
+                    role="button"
+                    onClick={() => setShowAllFiles(!showAllFiles)}
+                  >
+                    {showAllFiles ? (
+                      <T keyName="content_delivery_show_less_files" />
+                    ) : (
+                      <T keyName="content_delivery_show_all_files" />
+                    )}
+                  </StyledButton>
+                )}
+              </Box>
+              {showAllFiles &&
+                data.files
+                  .slice(1)
+                  .map((file) => (
+                    <CdFileLink
+                      key={file}
+                      link={getFileUrl(file)}
+                      file={file}
+                    />
+                  ))}
             </Box>
           )}
         </StyledLastPublish>
       )}
       {formOpen && <CdDialog onClose={() => setFormOpen(false)} data={data} />}
-    </Box>
+    </StyledContainer>
   );
 };
