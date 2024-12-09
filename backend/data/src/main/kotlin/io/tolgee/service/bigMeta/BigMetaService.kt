@@ -22,6 +22,8 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.JoinType
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
@@ -39,6 +41,10 @@ class BigMetaService(
   private val currentDateProvider: CurrentDateProvider,
   private val metrics: Metrics,
 ) : Logging {
+  @Lazy
+  @Autowired
+  private lateinit var self: BigMetaService
+
   companion object {
     const val MAX_DISTANCE_SCORE = 10000L
     const val MAX_POINTS = 2000L
@@ -57,10 +63,15 @@ class BigMetaService(
     store(data.relatedKeysInOrder, project)
   }
 
+  /**
+   * @param forKeyId if provided, only distances for this key will be stored synchronously,
+   * other key distances will be stored asynchronously, so the request can finish faster
+   */
   @Transactional
   fun store(
     relatedKeysInOrder: MutableList<RelatedKeyDto>?,
     project: Project,
+    forKeyId: Long? = null,
   ) {
     if (relatedKeysInOrder.isNullOrEmpty()) {
       return
@@ -71,12 +82,31 @@ class BigMetaService(
         KeysDistanceUtil(relatedKeysInOrder, project, this)
       }!!
 
+    val (toStoreSync, toStoreAsync) =
+      if (forKeyId == null) {
+        util.newDistances to emptyList()
+      } else {
+        util.newDistances.partition { it.key1Id == forKeyId || it.key2Id == forKeyId }
+      }
+
     metrics.bigMetaStoringTimer.recordCallable {
-      insertNewDistances(util.newDistances)
+      insertNewDistances(toStoreSync)
+    }
+
+    metrics.bigMetaStoringAsyncTimer.recordCallable {
+      self.asyncInsertNewDistances(toStoreAsync)
     }
   }
 
+  @Async
+  fun asyncInsertNewDistances(toInsert: List<KeysDistanceDto>) {
+    insertNewDistances(toInsert)
+  }
+
   private fun insertNewDistances(toInsert: List<KeysDistanceDto>) {
+    if (toInsert.isEmpty()) {
+      return
+    }
     val timestamp = Timestamp(currentDateProvider.date.time)
     jdbcTemplate.batchUpdate(
       """

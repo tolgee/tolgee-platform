@@ -19,6 +19,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
@@ -304,19 +305,23 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
   @Test
   fun `stores big meta`() {
     this.userAccount = testData.enOnlyUserAccount
+    val thirdKey = testData.addThirdKey()
+    testDataService.saveTestData(testData.root)
     performProjectAuthPut(
       "keys/${testData.firstKey.id}/complex-update",
       ComplexEditKeyDto(
         name = testData.firstKey.name,
         relatedKeysInOrder =
           mutableListOf(
-            RelatedKeyDto(null, "first_key"),
             RelatedKeyDto(null, testData.firstKey.name),
+            RelatedKeyDto(null, testData.secondKey.name),
+            RelatedKeyDto(null, thirdKey.name),
           ),
       ),
     ).andIsOk
 
-    bigMetaService.getCloseKeyIds(testData.firstKey.id).assert.hasSize(1)
+    bigMetaService.getCloseKeyIds(testData.firstKey.id).assert.hasSize(2)
+    verifyKeysDistancesStoredAsynchronously()
   }
 
   @Test
@@ -517,5 +522,13 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
         isPlural = true,
       ),
     )
+  }
+
+  private fun verifyKeysDistancesStoredAsynchronously() {
+    entityManager.createQuery("from KeysDistance kd", KeysDistance::class.java)
+      .resultList.map { it.createdAt }
+      // this means the data is stored in 2 different transactions executed with different timestamps
+      .distinct()
+      .assert.hasSize(2)
   }
 }
