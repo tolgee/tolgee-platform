@@ -59,7 +59,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
       assertThat(it.text).isEqualTo(importTestData.translationWithConflict.text)
     }
     val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
-    val keptTranslation = importTestData.root.data.projects[0].data.translations[1].self
+    val keptTranslation = translationService.find(importTestData.root.data.projects[0].data.translations[1].self.id)!!
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(keptTranslation.text).isEqualTo("What a text")
   }
