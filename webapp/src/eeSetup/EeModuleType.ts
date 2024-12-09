@@ -23,6 +23,8 @@ export interface EeModuleType {
   TranslationTaskIndicator: FC<TranslationTaskIndicatorProps>;
   PrefilterTask: FC<PrefilterTaskProps>;
   TranslationsTaskDetail: FC;
+  AgencyLabel: FC<any>;
+  OrderTranslationsDialog: FC<any>;
   routes: {
     Root: FC;
     Administration: FC;

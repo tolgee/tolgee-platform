@@ -32,7 +32,9 @@ class EmailTestUtil() {
     messageArgumentCaptor = argumentCaptor()
     Mockito.clearInvocations(javaMailSender)
     tolgeeProperties.smtp.from = "aaa@a.a"
-    whenever(javaMailSender.createMimeMessage()).thenReturn(JavaMailSenderImpl().createMimeMessage())
+    whenever(javaMailSender.createMimeMessage()).thenAnswer {
+      JavaMailSenderImpl().createMimeMessage()
+    }
     whenever(javaMailSender.send(messageArgumentCaptor.capture())).thenAnswer { }
   }
 
@@ -49,6 +51,14 @@ class EmailTestUtil() {
           .getBodyPart(0).content as String
       }
 
+  fun emailToString(email: MimeMessage): String {
+    return (
+      (email.content as MimeMultipart)
+        .getBodyPart(0).content as MimeMultipart
+    )
+      .getBodyPart(0).content as String
+  }
+
   fun verifyEmailSent() {
     verify(javaMailSender).send(any<MimeMessage>())
   }
@@ -58,4 +68,8 @@ class EmailTestUtil() {
       @Suppress("CAST_NEVER_SUCCEEDS")
       return Assertions.assertThat(messageArgumentCaptor.firstValue.getHeader("To")[0] as String)
     }
+
+  fun findEmail(to: String): MimeMessage? {
+    return messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
+  }
 }

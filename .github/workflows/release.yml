@@ -2,8 +2,8 @@ name: Release
 
 on:
   workflow_run:
-    workflows: [ "Test" ]
-    branches: [ "main", "next" ]
+    workflows: ["Test"]
+    branches: ["main", "next"]
     types:
       - completed
 
@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          token: '${{ secrets.TOLGEE_MACHINE_PAT }}'
+          token: "${{ secrets.TOLGEE_MACHINE_PAT }}"
 
       - uses: actions/setup-java@v3
         with:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 
       - name: Install node modules
         run: npm ci
@@ -95,7 +95,6 @@ jobs:
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
         working-directory: ./webapp
-
 
       - uses: actions/upload-artifact@v3
         if: always()

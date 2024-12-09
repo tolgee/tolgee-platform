@@ -14,6 +14,7 @@ type Props = {
   roles: RolesMap;
   allLangs?: LanguageModel[];
   hideNone?: boolean;
+  disabled?: boolean;
 };
 
 export const PermissionsBasic: React.FC<Props> = ({
@@ -22,6 +23,7 @@ export const PermissionsBasic: React.FC<Props> = ({
   roles,
   allLangs,
   hideNone,
+  disabled,
 }) => {
   const rolesList = Object.keys(roles).filter(
     (role) => role !== 'NONE' || !hideNone
@@ -38,6 +40,7 @@ export const PermissionsBasic: React.FC<Props> = ({
             scopes={roles[role]}
             onChange={onChange}
             allLangs={allLangs}
+            disabled={disabled}
           />
         );
       })}

@@ -21,6 +21,7 @@ import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
+import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.model.views.KeysScopeView
 import io.tolgee.model.views.TaskPerUserReportView
 import io.tolgee.model.views.TaskWithScopeView
@@ -30,6 +31,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.task.ITaskService
 import io.tolgee.util.executeInNewRepeatableTransaction
@@ -48,8 +50,8 @@ import org.springframework.transaction.PlatformTransactionManager
 import java.util.*
 import kotlin.math.max
 
-@Component
 @Primary
+@Component
 class TaskService(
   private val taskRepository: TaskRepository,
   private val entityManager: EntityManager,
@@ -64,6 +66,9 @@ class TaskService(
   private val currentDateProvider: CurrentDateProvider,
   private val keyService: KeyService,
   private val projectService: ProjectService,
+  private val permissionService: PermissionService,
+  @Lazy
+  private val taskService: TaskService,
 ) : ITaskService {
   fun getAllPaged(
     projectId: Long,
@@ -110,9 +115,10 @@ class TaskService(
     projectId: Long,
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
+    agencyId: Long? = null,
   ): TaskWithScopeView {
-    val task = createSingleTask(projectId, dto, filters)
-    val prefetched = getPrefetchedTasks(listOf(task)).first()
+    val task = taskService.createSingleTask(projectId, dto, filters, agencyId)
+    val prefetched = taskService.getPrefetchedTasks(listOf(task)).first()
     return getTaskWithScope(prefetched)
   }
 
@@ -131,14 +137,14 @@ class TaskService(
     projectId: Long,
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
+    agencyId: Long? = null,
   ): Task {
     var lastErr = DataIntegrityViolationException("Error")
-
     repeat(10) {
       // necessary for proper transaction creation
       try {
         return executeInNewRepeatableTransaction(platformTransactionManager) {
-          val task = createTaskInTransaction(projectId, dto, filters)
+          val task = taskService.createTaskInTransaction(projectId, dto, filters, agencyId)
           entityManager.flush()
           task.assignees.forEach {
             assigneeNotificationService.notifyNewAssignee(it, task)
@@ -157,6 +163,7 @@ class TaskService(
     projectId: Long,
     dto: CreateTaskRequest,
     filters: TranslationScopeFilters,
+    agencyId: Long? = null,
   ): Task {
     val newNumber = getNextTaskNumber(projectId)
     val language = checkLanguage(dto.languageId!!, projectId)
@@ -171,6 +178,7 @@ class TaskService(
       )
 
     val task = Task()
+    val authorId = authenticationFacade.authenticatedUser.id
 
     task.number = newNumber
     task.project = entityManager.getReference(Project::class.java, projectId)
@@ -180,7 +188,10 @@ class TaskService(
     task.dueDate = dto.dueDate?.let { Date(it) }
     task.language = language
     task.assignees = assignees
-    task.author = entityManager.getReference(UserAccount::class.java, authenticationFacade.authenticatedUser.id)
+    task.author = entityManager.getReference(UserAccount::class.java, authorId)
+    task.agency = agencyId?.let {
+      entityManager.getReference(TranslationAgency::class.java, it)
+    } ?: permissionService.findPermissionNonCached(projectId, authorId)?.agency
     task.state = TaskState.NEW
     taskRepository.saveAndFlush(task)
     val keys = keyService.getByIds(keyIds)
@@ -478,6 +489,7 @@ class TaskService(
         doneItems = scope.doneItems,
         baseWordCount = scope.baseWordCount,
         baseCharacterCount = scope.baseCharacterCount,
+        agency = task.agency,
       )
     }
   }
@@ -535,5 +547,9 @@ class TaskService(
       )
     }
     return null
+  }
+
+  override fun getAgencyTasks(agencyId: Long): List<Task> {
+    return taskRepository.getByAgencyId(agencyId)
   }
 }

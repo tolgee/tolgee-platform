@@ -13,6 +13,7 @@ import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
+import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.facade.ProjectWithStatsFacade
@@ -178,8 +179,15 @@ class ProjectsController(
     @PathVariable("projectId") projectId: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search", required = false) search: String?,
+    @ParameterObject filters: UserAccountFilters = UserAccountFilters(),
   ): PagedModel<UserAccountInProjectModel> {
-    return userAccountService.getAllInProjectWithPermittedLanguages(projectId, pageable, search).let { users ->
+    return userAccountService.getAllInProjectWithPermittedLanguages(
+      projectId,
+      pageable,
+      search,
+      filters = filters,
+    ).let {
+        users ->
       userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
     }
   }

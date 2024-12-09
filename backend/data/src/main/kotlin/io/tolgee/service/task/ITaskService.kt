@@ -25,4 +25,6 @@ interface ITaskService {
     userId: Long,
     keyIds: Collection<Long>,
   ): Map<Long, List<TranslationToTaskView>>
+
+  fun getAgencyTasks(agencyId: Long): List<Task>
 }

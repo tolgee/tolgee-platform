@@ -34,6 +34,7 @@ export function useFeatures() {
     ),
     SLACK_INTEGRATION: t('billing_subscriptions_slack_integration'),
     TASKS: t('billing_subscriptions_tasks'),
+    ORDER_TRANSLATION: t('billing_subscriptions_order_translation'),
   } as const satisfies Record<Feature, string>;
 }
 
