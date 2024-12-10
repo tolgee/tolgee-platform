@@ -29,4 +29,19 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
     assertThat(result[0].resolvedCount).isEqualTo(0)
     assertThat(result[0].importFileIssueCount).isEqualTo(4)
   }
+
+  @Test
+  fun `namespaces not detected`() {
+    val testData = ImportTestData()
+    testDataService.saveTestData(testData.root)
+    assertThat(importLanguageRepository.isSomeFileNamespaced(testData.import.id)).isFalse()
+  }
+
+  @Test
+  fun `namespaces detected`() {
+    val testData = ImportTestData()
+    testData.addFilesWithNamespaces()
+    testDataService.saveTestData(testData.root)
+    assertThat(importLanguageRepository.isSomeFileNamespaced(testData.import.id)).isTrue()
+  }
 }

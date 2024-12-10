@@ -129,7 +129,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                   <div>
                     <FieldLabel>
                       <LabelHint title={t('translation_single_namespace_hint')}>
-                        <T keyName="translation_single_label_namespace" />
+                        <T keyName="translation_single_label_namespace" />aaaaaaaaaaaaaaa
                       </LabelHint>
                     </FieldLabel>
                     <StyledEdtorWrapper data-cy="translation-create-namespace-input">

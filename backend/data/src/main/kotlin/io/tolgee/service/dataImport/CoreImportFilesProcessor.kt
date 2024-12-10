@@ -12,7 +12,11 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.ImportFileProcessorFactory
-import io.tolgee.model.dataImport.*
+import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportFile
+import io.tolgee.model.dataImport.ImportKey
+import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -53,6 +57,8 @@ class CoreImportFilesProcessor(
     )
   }
 
+  val warnings = mutableListOf<ErrorResponseBody>()
+
   fun processFiles(files: Collection<ImportFileDto>?): MutableList<ErrorResponseBody> {
     val errors = mutableListOf<ErrorResponseBody>()
     files?.forEach {
@@ -65,6 +71,11 @@ class CoreImportFilesProcessor(
     }
 
     importDataManager.handleConflicts(false)
+
+    if (shouldRenderNamespacesError()) {
+      warnings.add(ErrorResponseBody(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED.code, listOf()))
+    }
+
     return errors
   }
 
@@ -95,6 +106,13 @@ class CoreImportFilesProcessor(
     processor.process()
     processor.processResult()
     savedFileEntity.updateFileEntity(fileProcessorContext)
+  }
+
+  private fun shouldRenderNamespacesError(): Boolean {
+    val anyHasDetectedNamespace = import.files.any { it.detectedNamespace != null }
+    val allLanguages = import.files.flatMap { file -> file.languages.map { language -> language.name } }
+    val languageDuplicated = allLanguages.size != allLanguages.distinct().size
+    return languageDuplicated || anyHasDetectedNamespace
   }
 
   private fun ImportFile.updateFileEntity(fileProcessorContext: FileProcessorContext) {
@@ -145,16 +163,30 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.preselectNamespace() {
-    this.fileEntity.namespace = getNamespaceToPreselect()
+    val namespace = getNamespaceToPreselect()
+    if (namespace != null) {
+      if (useNamespaces) {
+        fileEntity.namespace = namespace
+        return
+      }
+      fileEntity.detectedNamespace = namespace
+    }
   }
 
   private fun FileProcessorContext.getNamespaceToPreselect(): String? {
     val mappedNamespace = findMappedNamespace()
 
     if (mappedNamespace != null) {
+      if (!useNamespaces) {
+        throw BadRequestException(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED)
+      }
       return getSafeNamespace(mappedNamespace)
     }
 
+    return getGuessedNamespace()
+  }
+
+  private fun FileProcessorContext.getGuessedNamespace(): String? {
     if (this.namespace != null) {
       // namespace was selected by processor
       return getSafeNamespace(this.namespace)
@@ -168,6 +200,8 @@ class CoreImportFilesProcessor(
 
     return null
   }
+
+  private val useNamespaces = import.project.useNamespaces
 
   private fun FileProcessorContext.findMappedNamespace(): String? {
     if (mapping != null) {

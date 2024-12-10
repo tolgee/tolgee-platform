@@ -39,6 +39,11 @@ class ImportFile(
 
   var namespace: String? = null
 
+  /**
+   * Used when namespaces are disabled on project level to store information about detected namespace
+   */
+  var detectedNamespace: String? = null
+
   @ColumnDefault("false")
   var needsParamConversion = false
 

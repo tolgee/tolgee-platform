@@ -80,7 +80,7 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: ImportAddFilesParams = ImportAddFilesParams(),
-  ): MutableList<ErrorResponseBody> {
+  ): Pair<MutableList<ErrorResponseBody>, MutableList<ErrorResponseBody>> {
     val import =
       findNotExpired(project.id, userAccount.id) ?: Import(project).also {
         it.author = userAccount
@@ -110,7 +110,8 @@ class ImportService(
     if (findLanguages(import).isEmpty()) {
       TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
     }
-    return errors
+
+    return errors to fileProcessor.warnings
   }
 
   @Transactional
@@ -353,6 +354,15 @@ class ImportService(
   ): Page<ImportLanguageView> {
     return this.getNotExpired(projectId, userId).let {
       this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
+    }
+  }
+
+  fun isSomeFileNamespaced(
+    projectId: Long,
+    userId: Long,
+  ): Boolean {
+    return this.getNotExpired(projectId, userId).let {
+      this.importLanguageRepository.isSomeFileNamespaced(it.id)
     }
   }
 

@@ -124,12 +124,12 @@ export const ImportView: FunctionComponent = () => {
           />
         ))}
         {dataHelper.addFilesMutation.data?.warnings.map((item) => (
-          <Box key={item.messageCode} mt={4} data-cy="import-file-warnings">
+          <Box key={item.code} mt={4} data-cy="import-file-warnings">
             <Alert severity="warning">
               <AlertTitle>
-                <T keyName={'import_file_warning_header_' + item.messageCode} />
+                <T keyName={'import_file_warning_header_' + item.code} />
               </AlertTitle>
-              <T keyName={'import_file_warning_message_' + item.messageCode} />
+              <T keyName={'import_file_warning_message_' + item.code} />
             </Alert>
           </Box>
         ))}

@@ -70,6 +70,17 @@ LEFT JOIN il.existingLanguage el
     pageable: Pageable,
   ): Page<ImportLanguageView>
 
+  @Query(
+    """
+      SELECT EXISTS (
+            SELECT 1 
+            FROM ImportLanguage il JOIN il.file f
+            WHERE f.import.id = :importId AND f.namespace IS NOT NULL
+      )
+    """,
+  )
+  fun isSomeFileNamespaced(importId: Long): Boolean
+
   @Modifying
   @Transactional
   @Query(
