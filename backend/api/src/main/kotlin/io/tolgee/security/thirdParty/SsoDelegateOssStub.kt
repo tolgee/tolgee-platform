@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-class SsoDelegateOssStub: SsoDelegate {
+class SsoDelegateOssStub : SsoDelegate {
   override fun verifyUserSsoAccountAvailable(user: UserAccountDto): Boolean {
     // no-op
     return true
@@ -19,7 +19,7 @@ class SsoDelegateOssStub: SsoDelegate {
     receivedCode: String?,
     invitationCode: String?,
     redirectUri: String?,
-    domain: String?
+    domain: String?,
   ): JwtAuthenticationResponse {
     // no-op
     throw UnsupportedOperationException("Not included in OSS")
