@@ -203,14 +203,14 @@ export const useAddBatchOperations = () => {
         id: 'task_add_keys',
         label: t('batch_operations_task_add_keys'),
         enabled: canEditTasks,
-        hidden: prefilteredTask || !taskFeature || !orderTranslationsFeature,
+        hidden: prefilteredTask || (!taskFeature && !orderTranslationsFeature),
         component: OperationTaskAddKeys,
       },
       {
         id: 'task_remove_keys',
         label: t('batch_operations_task_remove_keys'),
         enabled: canEditTasks,
-        hidden: !prefilteredTask || !taskFeature || !orderTranslationsFeature,
+        hidden: !prefilteredTask || (!taskFeature && !orderTranslationsFeature),
         component: OperationTaskRemoveKeys,
       },
       {
