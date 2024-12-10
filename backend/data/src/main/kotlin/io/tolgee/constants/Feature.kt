@@ -19,4 +19,5 @@ enum class Feature {
   AI_PROMPT_CUSTOMIZATION,
   SLACK_INTEGRATION,
   TASKS,
+  SSO,
 }

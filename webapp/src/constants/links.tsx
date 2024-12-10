@@ -79,6 +79,8 @@ export class LINKS {
     'auth_callback/' + p(PARAMS.SERVICE_TYPE)
   );
 
+  static SSO_LOGIN = Link.ofRoot('sso');
+
   static EMAIL_VERIFICATION = Link.ofParent(
     LINKS.LOGIN,
     'verify_email/' + p(PARAMS.USER_ID) + '/' + p(PARAMS.VERIFICATION_CODE)
@@ -245,6 +247,8 @@ export class LINKS {
   );
 
   static ORGANIZATION_INVOICES = Link.ofParent(LINKS.ORGANIZATION, 'invoices');
+
+  static ORGANIZATION_SSO = Link.ofParent(LINKS.ORGANIZATION, 'sso');
 
   static ORGANIZATION_BILLING_TEST_CLOCK_HELPER = Link.ofParent(
     LINKS.ORGANIZATION,

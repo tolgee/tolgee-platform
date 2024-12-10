@@ -354,7 +354,18 @@ export interface components {
         | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
-        | "task_not_open";
+        | "task_not_open"
+        | "sso_token_exchange_failed"
+        | "sso_user_info_retrieval_failed"
+        | "sso_id_token_expired"
+        | "sso_user_cannot_create_organization"
+        | "sso_cant_verify_user"
+        | "sso_auth_missing_domain"
+        | "sso_domain_not_found_or_disabled"
+        | "native_authentication_disabled"
+        | "invitation_organization_mismatch"
+        | "user_is_managed_by_organization"
+        | "cannot_set_sso_provider_missing_fields";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -408,6 +419,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -458,6 +470,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -536,6 +549,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesRequest"];
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
@@ -573,6 +587,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       prices: components["schemas"]["PlanPricesModel"];
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
@@ -603,6 +618,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesRequest"];
@@ -640,6 +656,7 @@ export interface components {
         | "AI_PROMPT_CUSTOMIZATION"
         | "SLACK_INTEGRATION"
         | "TASKS"
+        | "SSO"
       )[];
       type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
       prices: components["schemas"]["PlanPricesModel"];
@@ -2668,6 +2685,7 @@ export interface operations {
             | "AI_PROMPT_CUSTOMIZATION"
             | "SLACK_INTEGRATION"
             | "TASKS"
+            | "SSO"
           )[];
         };
       };

@@ -1,8 +1,15 @@
 import React, { RefObject } from 'react';
-import { Button, Link as MuiLink, Typography, styled } from '@mui/material';
+import {
+  Button,
+  Link as MuiLink,
+  Typography,
+  styled,
+  Alert,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
+import { LogIn01 } from '@untitled-ui/icons-react';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -31,10 +38,33 @@ type LoginViewCredentialsProps = {
 
 export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
   const remoteConfig = useConfig();
-  const { login } = useGlobalActions();
-  const isLoading = useGlobalContext((c) => c.auth.loginLoadable.isLoading);
+  const { login, loginRedirectSso } = useGlobalActions();
+  const isLoading = useGlobalContext(
+    (c) =>
+      c.auth.loginLoadable.isLoading || c.auth.redirectSsoUrlLoadable.isLoading
+  );
 
   const oAuthServices = useOAuthServices();
+
+  const nativeEnabled = remoteConfig.nativeEnabled;
+  const organizationsSsoEnabled =
+    remoteConfig.authMethods?.ssoOrganizations.enabled ?? false;
+  const globalSsoEnabled = remoteConfig.authMethods?.ssoGlobal.enabled ?? false;
+  const hasNonNativeAuthMethods =
+    oAuthServices.length > 0 || organizationsSsoEnabled || globalSsoEnabled;
+  const noLoginMethods = !nativeEnabled && !hasNonNativeAuthMethods;
+
+  const customLogoUrl = remoteConfig.authMethods?.ssoGlobal.customLogoUrl;
+  const customLoginText = remoteConfig.authMethods?.ssoGlobal.customLoginText;
+  const loginText = customLoginText ? (
+    <span>{customLoginText}</span>
+  ) : (
+    <T keyName="login_sso" />
+  );
+
+  function globalSsoLogin() {
+    loginRedirectSso(remoteConfig.authMethods?.ssoGlobal.domain as string);
+  }
 
   return (
     <StandardForm
@@ -42,30 +72,92 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
       submitButtons={
         <Box>
           <Box display="flex" flexDirection="column" alignItems="stretch">
-            <LoadingButton
-              loading={isLoading}
-              variant="contained"
-              color="primary"
-              type="submit"
-              data-cy="login-button"
-            >
-              <T keyName="login_login_button" />
-            </LoadingButton>
+            {noLoginMethods && (
+              <Alert severity="error">
+                {/* Did you mess up your configuration? */}
+                <T keyName="login_no_login_methods" />
+              </Alert>
+            )}
 
-            <Box display="flex" justifyContent="center" flexWrap="wrap" mt={1}>
-              {remoteConfig.passwordResettable && (
-                <MuiLink
-                  to={LINKS.RESET_PASSWORD_REQUEST.build()}
-                  component={Link}
+            {nativeEnabled && (
+              <>
+                <LoadingButton
+                  loading={isLoading}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  data-cy="login-button"
                 >
-                  <Typography variant="body2">
-                    <T keyName="login_forgot_your_password" />
-                  </Typography>
-                </MuiLink>
-              )}
-            </Box>
+                  <T keyName="login_login_button" />
+                </LoadingButton>
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  flexWrap="wrap"
+                  mt={1}
+                >
+                  <MuiLink
+                    to={LINKS.RESET_PASSWORD_REQUEST.build()}
+                    component={Link}
+                  >
+                    <Typography variant="body2">
+                      <T keyName="login_forgot_your_password" />
+                    </Typography>
+                  </MuiLink>
+                </Box>
+              </>
+            )}
 
-            {oAuthServices.length > 0 && <Box height="0px" mt={5} />}
+            {!nativeEnabled && globalSsoEnabled && customLogoUrl && (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                mb={2}
+              >
+                <img
+                  src={customLogoUrl}
+                  alt="Custom Logo"
+                  style={{ width: 96, height: 96 }}
+                />
+              </Box>
+            )}
+
+            {nativeEnabled && hasNonNativeAuthMethods && (
+              <Box height="0px" mt={5} />
+            )}
+
+            {(organizationsSsoEnabled || globalSsoEnabled) && (
+              <React.Fragment>
+                {organizationsSsoEnabled && (
+                  <Button
+                    component={Link}
+                    to={LINKS.SSO_LOGIN.build()}
+                    size="medium"
+                    endIcon={<LogIn01 />}
+                    variant="outlined"
+                    style={{ marginBottom: '0.5rem' }}
+                    color="inherit"
+                  >
+                    {loginText}
+                  </Button>
+                )}
+                {!organizationsSsoEnabled && (
+                  <LoadingButton
+                    loading={isLoading}
+                    size="medium"
+                    endIcon={<LogIn01 />}
+                    variant="outlined"
+                    style={{ marginBottom: '0.5rem' }}
+                    color="inherit"
+                    onClick={globalSsoLogin}
+                  >
+                    {loginText}
+                  </LoadingButton>
+                )}
+              </React.Fragment>
+            )}
+
             {oAuthServices.map((provider) => (
               <React.Fragment key={provider.id}>
                 <Button
@@ -96,21 +188,23 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
         }
       }}
     >
-      <StyledInputFields>
-        <TextField
-          name="username"
-          label={<T keyName="login_email_label" />}
-          minHeight={false}
-          autoComplete="username email"
-        />
-        <TextField
-          name="password"
-          type="password"
-          autoComplete="password"
-          label={<T keyName="login_password_label" />}
-          minHeight={false}
-        />
-      </StyledInputFields>
+      {nativeEnabled && (
+        <StyledInputFields>
+          <TextField
+            name="username"
+            label={<T keyName="login_email_label" />}
+            minHeight={false}
+            autoComplete="username email"
+          />
+          <TextField
+            name="password"
+            type="password"
+            autoComplete="password"
+            label={<T keyName="login_password_label" />}
+            minHeight={false}
+          />
+        </StyledInputFields>
+      )}
     </StandardForm>
   );
 }

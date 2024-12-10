@@ -1,4 +1,6 @@
 /* eslint-disable no-restricted-imports */
+import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
+
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { Usage } from '../ee/billing/component/Usage';
@@ -8,8 +10,10 @@ export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDe
 export { PrefilterTask } from '../ee/task/components/PrefilterTask';
 
 import React from 'react';
+import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { BillingMenuItem } from '../ee/billing/component/UserMenu/BillingMenuItem';
+import { PublicOnlyRoute } from '../component/common/PublicOnlyRoute';
 import { PrivateRoute } from '../component/common/PrivateRoute';
 import { LINKS } from '../constants/links';
 import { MyTasksView } from '../ee/task/views/myTasks/MyTasksView';
@@ -46,6 +50,7 @@ import { WebhookList } from '../ee/developer/webhook/WebhookList';
 import { Badge, Box, MenuItem } from '@mui/material';
 import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
+import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 
 export const billingMenuItems = [BillingMenuItem];
 export const apps = [SlackApp];
@@ -54,6 +59,11 @@ export const routes = {
   Root: () => {
     return (
       <Switch>
+        <PublicOnlyRoute exact path={LINKS.SSO_LOGIN.template}>
+          <RecaptchaProvider>
+            <SsoLoginView />
+          </RecaptchaProvider>
+        </PublicOnlyRoute>
         <PrivateRoute exact path={LINKS.MY_TASKS.template}>
           <MyTasksView />
         </PrivateRoute>
@@ -124,6 +134,9 @@ export const routes = {
             )}
           </Switch>
         )}
+        <PrivateRoute path={LINKS.ORGANIZATION_SSO.template}>
+          <OrganizationSsoView />
+        </PrivateRoute>
       </>
     );
   },

@@ -1,0 +1,49 @@
+package io.tolgee.service
+
+import io.tolgee.constants.Message
+import io.tolgee.dtos.sso.SsoTenantConfig
+import io.tolgee.dtos.sso.SsoTenantDto
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Organization
+import io.tolgee.model.SsoTenant
+import org.springframework.stereotype.Service
+
+@Service
+class TenantServiceStub : TenantService {
+  override fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
+    throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
+  }
+
+  override fun save(tenant: SsoTenant): SsoTenant {
+    // no-op
+    throw UnsupportedOperationException("Not included in OSS")
+  }
+
+  override fun saveAll(tenants: Iterable<SsoTenant>): List<SsoTenant> {
+    // no-op
+    throw UnsupportedOperationException("Not included in OSS")
+  }
+
+  override fun findAll(): List<SsoTenant> {
+    // no-op
+    return emptyList()
+  }
+
+  override fun findTenant(organizationId: Long): SsoTenant? {
+    // no-op
+    return null
+  }
+
+  override fun getTenant(organizationId: Long): SsoTenant {
+    // no-op
+    throw UnsupportedOperationException("Not included in OSS")
+  }
+
+  override fun createOrUpdate(
+    request: SsoTenantDto,
+    organization: Organization,
+  ): SsoTenant {
+    // no-op
+    throw UnsupportedOperationException("Not included in OSS")
+  }
+}

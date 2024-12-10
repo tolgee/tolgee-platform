@@ -47,6 +47,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
     implementation(project(":data"))
     implementation(project(":security"))
     implementation(project(":api"))
@@ -64,6 +65,9 @@ dependencies {
     /**
      * MISC
      */
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
     implementation libs.hibernateTypes
     implementation libs.jacksonKotlin
     implementation libs.commonsCodec

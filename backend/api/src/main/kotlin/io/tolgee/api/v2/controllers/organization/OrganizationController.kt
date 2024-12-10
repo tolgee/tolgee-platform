@@ -27,6 +27,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authentication.AllowApiAccess
@@ -107,6 +108,11 @@ class OrganizationController(
       authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN
     ) {
       throw PermissionException()
+    }
+    if (authenticationFacade.authenticatedUserEntity.thirdPartyAuthType === ThirdPartyAuthType.SSO &&
+      authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN
+    ) {
+      throw PermissionException(Message.SSO_USER_CANNOT_CREATE_ORGANIZATION)
     }
     this.organizationService.create(dto).let {
       return ResponseEntity(

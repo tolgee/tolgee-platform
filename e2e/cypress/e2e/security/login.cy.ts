@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import * as totp from 'totp-generator';
 import { HOST, PASSWORD, USERNAME } from '../../common/constants';
+import { ssoOrganizationsLoginTestData } from '../../common/apiCalls/testData/testData';
 import { getAnyContainingText } from '../../common/xPath';
 import {
   createUser,
@@ -8,6 +9,11 @@ import {
   disableEmailVerification,
   getParsedResetPasswordEmail,
   login,
+  logout,
+  enableOrganizationsSsoProvider,
+  disableOrganizationsSsoProvider,
+  enableGlobalSsoProvider,
+  disableGlobalSsoProvider,
   userDisableMfa,
   userEnableMfa,
 } from '../../common/apiCalls/common';
@@ -19,6 +25,7 @@ import {
   loginViaForm,
   loginWithFakeGithub,
   loginWithFakeOAuth2,
+  loginWithFakeSso,
 } from '../../common/login';
 import { waitForGlobalLoading } from '../../common/loading';
 
@@ -53,21 +60,6 @@ context('Login', () => {
     cy.gcy('login-button').should('be.visible').click();
     cy.xpath(getAnyContainingText('Login')).should('be.visible');
     cy.contains('Invalid credentials').should('be.visible');
-  });
-
-  it('login with github', () => {
-    disableEmailVerification();
-    checkAnonymousIdSet();
-
-    loginWithFakeGithub();
-
-    checkAnonymousIdUnset();
-    checkAnonymousUserIdentified();
-  });
-  it('login with oauth2', { retries: { runMode: 5 } }, () => {
-    disableEmailVerification();
-
-    loginWithFakeOAuth2();
   });
 
   it('logout', () => {
@@ -148,6 +140,69 @@ context('Login', () => {
       waitForGlobalLoading();
       cy.gcy('login-button').should('not.exist');
       cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
+    });
+  });
+});
+
+context('Login third party', () => {
+  beforeEach(() => {
+    disableEmailVerification();
+    cy.visit(HOST);
+  });
+
+  it('login with github', () => {
+    checkAnonymousIdSet();
+
+    loginWithFakeGithub();
+
+    checkAnonymousIdUnset();
+    checkAnonymousUserIdentified();
+  });
+  it('login with oauth2', { retries: { runMode: 5 } }, () => {
+    loginWithFakeOAuth2();
+  });
+});
+
+context('Login SSO', () => {
+  beforeEach(() => {
+    disableEmailVerification();
+  });
+
+  context('SSO Organizations Login', () => {
+    beforeEach(() => {
+      ssoOrganizationsLoginTestData.clean();
+      ssoOrganizationsLoginTestData.generate();
+      enableOrganizationsSsoProvider();
+
+      cy.visit(HOST);
+    });
+
+    it('login with global sso', { retries: { runMode: 5 } }, () => {
+      cy.contains('SSO login').click();
+      cy.xpath("//*[@name='domain']").type('domain.com');
+      loginWithFakeSso();
+    });
+
+    afterEach(() => {
+      logout();
+      disableOrganizationsSsoProvider();
+      ssoOrganizationsLoginTestData.clean();
+    });
+  });
+
+  context('SSO Global Login', () => {
+    beforeEach(() => {
+      enableGlobalSsoProvider();
+      cy.visit(HOST);
+    });
+
+    it('login with global sso', { retries: { runMode: 5 } }, () => {
+      loginWithFakeSso();
+    });
+
+    afterEach(() => {
+      logout();
+      disableGlobalSsoProvider();
     });
   });
 });

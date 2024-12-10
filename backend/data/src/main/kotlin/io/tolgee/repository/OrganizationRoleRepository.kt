@@ -15,6 +15,8 @@ interface OrganizationRoleRepository : JpaRepository<OrganizationRole, Long> {
     organizationId: Long,
   ): OrganizationRole?
 
+  fun findOneByUserIdAndManagedIsTrue(userId: Long): OrganizationRole?
+
   fun countAllByOrganizationIdAndTypeAndUserIdNot(
     id: Long,
     owner: OrganizationRoleType,
