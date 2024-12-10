@@ -396,10 +396,10 @@ export const getParsedEmailInvitationLink = () =>
 export const getAgencyInvitationLinks = () =>
   getAllEmails().then((emails) => {
     const email = emails.find((e) =>
-      (e as string).includes('New translation request')
+      e.html.includes('New translation request')
     );
     const links = Array.from(
-      email.matchAll(/(http:\/\/[\w:/]*)/g),
+      email.html.matchAll(/(http:\/\/[\w:/]*)/g),
       (m) => m[0]
     );
     const invitation = links.find((l) => l.includes('accept_invitation'));
@@ -414,8 +414,39 @@ export const getAgencyInvitationLinks = () =>
     };
   });
 
+export const getOrderConfirmation = () =>
+  getAllEmails().then((emails) => {
+    const email = emails.find((e) =>
+      e.html.includes(
+        'The Agency will review your request and will get back to you'
+      )
+    );
+    const links = Array.from(
+      email.html.matchAll(/(http:\/\/[\w:/]*)/g),
+      (m) => m[0]
+    );
+    const project = links.find(
+      (l) => l.includes('/projects/') && !l.includes('/task')
+    );
+    const tasks = links.filter((l) => l.includes('/task'));
+    return {
+      project,
+      tasks,
+    };
+  });
+
+type Email = {
+  text: string;
+  to: any;
+  from: any;
+  html: string;
+  subject: string;
+};
+
 export const getAllEmails = () =>
-  cy.request('http://localhost:21080/api/emails').then((r) => r.body);
+  cy
+    .request('http://localhost:21080/api/emails')
+    .then((r) => r.body as Email[]);
 export const deleteAllEmails = () =>
   cy.request({ url: 'http://localhost:21080/api/emails', method: 'DELETE' });
 
@@ -425,7 +456,6 @@ export const getParsedResetPasswordEmail = () =>
       resetLink: r[0].html.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
-      text: r[0].text,
     };
   });
 

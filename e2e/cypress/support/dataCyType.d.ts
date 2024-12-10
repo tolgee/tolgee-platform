@@ -339,6 +339,8 @@ declare namespace DataCy {
         "namespaces-select-text-field" |
         "namespaces-selector" |
         "navigation-item" |
+        "order-translation-confirmation" |
+        "order-translation-confirmation-ok" |
         "order-translation-invitation-checkbox" |
         "order-translation-next" |
         "order-translation-sharing-details-consent-checkbox" |

@@ -181,7 +181,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
   if (successMessage) {
     return (
       <Dialog open={true} onClose={handleFinish}>
-        <DialogTitle>
+        <DialogTitle data-cy="order-translation-confirmation">
           <T
             keyName="order_translation_success_message"
             params={{ count: languages.length }}
@@ -193,7 +193,12 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
           </Alert>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" variant="contained" onClick={handleFinish}>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={handleFinish}
+            data-cy="order-translation-confirmation-ok"
+          >
             <T keyName="order_translation_success_ok_button" />
           </Button>
         </DialogActions>
