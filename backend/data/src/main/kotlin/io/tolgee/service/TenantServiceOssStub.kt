@@ -9,7 +9,7 @@ import io.tolgee.model.SsoTenant
 import org.springframework.stereotype.Service
 
 @Service
-class TenantServiceStub : TenantService {
+class TenantServiceOssStub : TenantService {
   override fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
     throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
   }

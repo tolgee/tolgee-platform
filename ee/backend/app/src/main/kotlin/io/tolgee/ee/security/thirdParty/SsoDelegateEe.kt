@@ -26,6 +26,9 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.context.annotation.Primary
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -38,7 +41,9 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
+@Primary
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class SsoDelegateEe(
   private val jwtService: JwtService,
   private val restTemplate: RestTemplate,
