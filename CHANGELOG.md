@@ -1,3 +1,16 @@
+# [3.85.0](https://github.com/tolgee/tolgee-platform/compare/v3.84.3...v3.85.0) (2024-12-10)
+
+
+### Bug Fixes
+
+* Missing Subscription and Slack in menus ([#2762](https://github.com/tolgee/tolgee-platform/issues/2762)) ([a486807](https://github.com/tolgee/tolgee-platform/commit/a486807b7f3b4c1544a016fd8d32c081f16d4a08))
+* plural handling when project icu is disabled for PoMessage + typo in IcuUnescaper name ([#2732](https://github.com/tolgee/tolgee-platform/issues/2732)) ([8e5213a](https://github.com/tolgee/tolgee-platform/commit/8e5213a377244af71c360c9534b27fa2ea0e73d7))
+
+
+### Features
+
+* SSO (Single Sign-On) support ([#2693](https://github.com/tolgee/tolgee-platform/issues/2693)) ([d78e421](https://github.com/tolgee/tolgee-platform/commit/d78e421fd6cbc96e4e54b679098bb355f3606e12)), closes [#2273](https://github.com/tolgee/tolgee-platform/issues/2273)
+
 ## [3.84.3](https://github.com/tolgee/tolgee-platform/compare/v3.84.2...v3.84.3) (2024-12-09)
 
 
