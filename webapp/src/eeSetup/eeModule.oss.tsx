@@ -1,4 +1,5 @@
 import React from 'react';
+import { EeModuleType } from './EeModuleType';
 
 const NotIncludedInOss =
   (name: string): React.FC<any> =>
@@ -14,8 +15,8 @@ const Empty: React.FC<any> = () => {
 export const TaskReference = NotIncludedInOss('TaskReference');
 export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
-export const billingMenuItems = [];
-export const apps = [];
+export const billingMenuItems = [] as EeModuleType['billingMenuItems'];
+export const apps = [] as EeModuleType['apps'];
 export const Usage = Empty;
 export const routes = {
   Root: Empty,
