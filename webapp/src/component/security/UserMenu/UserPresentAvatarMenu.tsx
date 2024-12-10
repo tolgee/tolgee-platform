@@ -142,7 +142,9 @@ export const UserPresentAvatarMenu: React.FC = () => {
               </MenuItem>
             ))}
 
-            {billingMenuItems}
+            {billingMenuItems.map((Item, index) => (
+              <Item key={index} onClose={handleClose} />
+            ))}
 
             <OrganizationSwitch
               onSelect={handleSelectOrganization}
