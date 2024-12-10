@@ -16,7 +16,6 @@ import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
@@ -33,7 +32,6 @@ class CoreImportFilesProcessor(
   // single step import doesn't save data
   val saveData: Boolean = true,
 ) : Logging {
-  private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
   private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
   private val importFileProcessorFactory: ImportFileProcessorFactory by lazy {
     applicationContext.getBean(
