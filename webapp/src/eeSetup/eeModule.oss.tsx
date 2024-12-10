@@ -18,6 +18,9 @@ export const GlobalLimitPopover = Empty;
 export const billingMenuItems = [] as EeModuleType['billingMenuItems'];
 export const apps = [] as EeModuleType['apps'];
 export const Usage = Empty;
+export const AgencyLabel = NotIncludedInOss('AgencyLabel');
+export const OrderTranslationsDialog = Empty;
+
 export const routes = {
   Root: Empty,
   Administration: Empty,

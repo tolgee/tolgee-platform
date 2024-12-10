@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.task
 
+import io.tolgee.hateoas.TranslationAgencySimpleModel
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.enums.TaskState
@@ -24,4 +25,5 @@ class TaskModel(
   var createdAt: Long? = 0,
   var closedAt: Long? = null,
   var state: TaskState = TaskState.IN_PROGRESS,
+  var agency: TranslationAgencySimpleModel? = null,
 ) : RepresentationModel<TaskModel>()

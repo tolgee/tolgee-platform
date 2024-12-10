@@ -8,9 +8,23 @@ export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskI
 export { PermissionsAdvancedEe } from '../ee/PermissionsAdvanced/PermissionsAdvancedEe';
 export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDetail';
 export { PrefilterTask } from '../ee/task/components/PrefilterTask';
+export { OrderTranslationsDialog } from '../ee/orderTranslations/OrderTranslationsDialog';
+export { AgencyLabel } from '../ee/orderTranslations/AgencyLabel';
+export { TaskItem } from '../ee/task/components/TaskItem';
+export { TaskFilterPopover } from '../ee/task/components/taskFilter/TaskFilterPopover';
+export type { TaskFilterType } from '../ee/task/components/taskFilter/TaskFilterPopover';
 
 import React from 'react';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
+import { T, useTranslate } from '@tolgee/react';
+import { ClipboardCheck } from '@untitled-ui/icons-react';
+import { Link, Route, Switch } from 'react-router-dom';
+import { Badge, Box, MenuItem } from '@mui/material';
+
+import { AdministrationEeTAView } from '../ee/billing/administration/translationAgencies/AdministrationEeTAView';
+import { AdministrationEeTAEditView } from '../ee/billing/administration/translationAgencies/AdministrationEeTAEditView';
+import { AdministrationEeTACreateView } from '../ee/billing/administration/translationAgencies/AdministrationEeTACreateView';
+
 import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { BillingMenuItem } from '../ee/billing/component/UserMenu/BillingMenuItem';
 import { PublicOnlyRoute } from '../component/common/PublicOnlyRoute';
@@ -19,20 +33,19 @@ import { LINKS } from '../constants/links';
 import { MyTasksView } from '../ee/task/views/myTasks/MyTasksView';
 import { useGlobalContext } from '../globalContext/GlobalContext';
 import { useUserTasks } from '../globalContext/useUserTasks';
-import { AdministrationCloudPlansView } from '../ee/billing/administration/AdministrationCloudPlansView';
-import { AdministrationCloudPlanCreateView } from '../ee/billing/administration/AdministrationCloudPlanCreateView';
-import { AdministrationCloudPlanEditView } from '../ee/billing/administration/AdministrationCloudPlanEditView';
-import { AdministrationEePlansView } from '../ee/billing/administration/AdministrationEePlansView';
-import { AdministrationEePlanCreateView } from '../ee/billing/administration/AdministrationEePlanCreateView';
-import { AdministrationEePlanEditView } from '../ee/billing/administration/AdministrationEePlanEditView';
-import { AdministrationEeLicenseView } from '../ee/billing/administration/AdministrationEeLicenseView';
+import { AdministrationCloudPlansView } from '../ee/billing/administration/subscriptionPlans/AdministrationCloudPlansView';
+import { AdministrationCloudPlanCreateView } from '../ee/billing/administration/subscriptionPlans/AdministrationCloudPlanCreateView';
+import { AdministrationCloudPlanEditView } from '../ee/billing/administration/subscriptionPlans/AdministrationCloudPlanEditView';
+import { AdministrationEePlansView } from '../ee/billing/administration/subscriptionPlans/AdministrationEePlansView';
+import { AdministrationEePlanCreateView } from '../ee/billing/administration/subscriptionPlans/AdministrationEePlanCreateView';
+import { AdministrationEePlanEditView } from '../ee/billing/administration/subscriptionPlans/AdministrationEePlanEditView';
+import { AdministrationEeLicenseView } from '../ee/billing/administration/subscriptionPlans/AdministrationEeLicenseView';
 import { SlackApp } from '../ee/organizationApps/SlackApp';
 import { useConfig, useEnabledFeatures } from '../globalContext/helpers';
 import { OrganizationSubscriptionsView } from '../ee/billing/Subscriptions/OrganizationSubscriptionsView';
 import { OrganizationInvoicesView } from '../ee/billing/Invoices/OrganizationInvoicesView';
 import { OrganizationBillingView } from '../ee/billing/OrganizationBillingView';
 import { OrganizationBillingTestClockHelperView } from '../ee/billing/OrganizationBillingTestClockHelperView';
-import { Link, Route, Switch } from 'react-router-dom';
 import { ProjectTasksView } from '../ee/task/views/projectTasks/ProjectTasksView';
 import { addOperations } from '../views/projects/translations/BatchOperations/operations';
 import { OperationTaskCreate } from '../ee/batchOperations/OperationTaskCreate';
@@ -40,17 +53,15 @@ import { OperationTaskAddKeys } from '../ee/batchOperations/OperationTaskAddKeys
 import { OperationTaskRemoveKeys } from '../ee/batchOperations/OperationTaskRemoveKeys';
 import { useTranslationsSelector } from '../views/projects/translations/context/TranslationsContext';
 import { useProjectPermissions } from '../hooks/useProjectPermissions';
-import { T, useTranslate } from '@tolgee/react';
 import { addPanel } from '../views/projects/translations/ToolsPanel/panelsList';
-import { ClipboardCheck } from '@untitled-ui/icons-react';
 import { tasksCount, TasksPanel } from '../ee/task/components/TasksPanel';
 import { addDeveloperViewItems } from '../views/projects/developer/developerViewItems';
 import { StorageList } from '../ee/developer/storage/StorageList';
 import { WebhookList } from '../ee/developer/webhook/WebhookList';
-import { Badge, Box, MenuItem } from '@mui/material';
 import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
+import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 
 export const billingMenuItems = [BillingMenuItem];
 export const apps = [SlackApp];
@@ -74,6 +85,15 @@ export const routes = {
     <Switch>
       <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
         <AdministrationEeLicenseView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA.template}>
+        <AdministrationEeTAView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA_CREATE.template}>
+        <AdministrationEeTACreateView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_TA_EDIT.template}>
+        <AdministrationEeTAEditView />
       </PrivateRoute>
       <PrivateRoute
         exact
@@ -188,6 +208,13 @@ export const useAddBatchOperations = () => {
         enabled: canEditTasks,
         hidden: !prefilteredTask || !taskFeature,
         component: OperationTaskRemoveKeys,
+      },
+      {
+        id: 'order_translation',
+        label: t('batch_operations_order_translation'),
+        enabled: canEditTasks,
+        hidden: !taskFeature,
+        component: OperationOrderTranslation,
       },
     ],
     { position: 'after', value: 'export_translations' }
@@ -310,6 +337,12 @@ export const useAddAdministrationMenuItems = () => {
         link: LINKS.ADMINISTRATION_EE_LICENSE,
         label: t('administration_ee_license'),
         condition: () => true,
+      },
+      {
+        id: 'translation_agencies',
+        link: LINKS.ADMINISTRATION_EE_TA,
+        label: t('administration_ee_translation_agencies'),
+        condition: () => config.billing.enabled,
       },
       {
         id: 'cloud_plans',

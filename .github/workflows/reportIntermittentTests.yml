@@ -2,7 +2,7 @@ name: Report intermittent E2E Tests
 
 on:
   schedule:
-    - cron: '42 04 * * *'
+    - cron: "42 04 * * *"
 
 jobs:
   backend-build:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -86,7 +86,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -142,7 +142,7 @@ jobs:
           reporter: java-junit
 
   e2e:
-    needs: [ frontend-build, backend-build, e2e-install-deps ]
+    needs: [frontend-build, backend-build, e2e-install-deps]
     runs-on: ubuntu-latest
     name: E2E testing ‍🔎
     strategy:
@@ -161,7 +161,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -255,7 +255,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -284,7 +284,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -315,7 +315,7 @@ jobs:
 
   cleanup:
     if: always()
-    needs: [ e2e ]
+    needs: [e2e]
     name: Delete artifacts 🧹
     runs-on: ubuntu-latest
     steps:
@@ -325,4 +325,3 @@ jobs:
             e2e_deps
             webapp
             backend
-

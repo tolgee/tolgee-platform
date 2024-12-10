@@ -89,28 +89,4 @@ class TaskControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/")
       "tasks/${testData.translateTask.self.number}/reopen",
     ).andIsForbidden
   }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `can't access unassigned review task's data`() {
-    userAccount = testData.projectUser.self
-
-    performProjectAuthGet("tasks/${testData.reviewTask.self.number}").andIsForbidden
-    performProjectAuthGet("tasks/${testData.reviewTask.self.number}/per-user-report").andIsForbidden
-    performProjectAuthGet("tasks/${testData.reviewTask.self.number}/xlsx-report").andIsForbidden
-    performProjectAuthGet("tasks/${testData.reviewTask.self.number}/keys").andIsForbidden
-    performProjectAuthPut(
-      "tasks/${testData.reviewTask.self.number}/keys/${testData.keysInTask.first().self.id}",
-      UpdateTaskKeyRequest(done = true),
-    ).andIsForbidden
-    performProjectAuthPut("tasks/${testData.reviewTask.self.number}/finish").andIsForbidden
-    performProjectAuthPut(
-      "tasks/${testData.reviewTask.self.number}/keys",
-      UpdateTaskKeysRequest(addKeys = mutableSetOf(testData.keysOutOfTask.first().self.id)),
-    ).andIsForbidden
-    performProjectAuthPut(
-      "tasks/${testData.reviewTask.self.number}",
-      UpdateTaskRequest(name = "Test"),
-    ).andIsForbidden
-  }
 }

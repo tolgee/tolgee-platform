@@ -1,7 +1,6 @@
 import { ListProps, PaperProps, styled } from '@mui/material';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { TaskFilterType } from 'tg.ee.module/task/components/taskFilter/TaskFilterPopover';
-import { TaskItem } from 'tg.ee.module/task/components/TaskItem';
+import { TaskFilterType, TaskItem } from 'tg.ee';
 import { useProject } from 'tg.hooks/useProject';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';
@@ -23,7 +22,7 @@ type Props = {
   newTaskActions: boolean;
 };
 
-export const TasksList = ({
+export const ProjectTasksList = ({
   showClosed,
   filter,
   search,

@@ -1,7 +1,7 @@
 import { API_URL, PASSWORD, USERNAME } from '../constants';
 import { ArgumentTypes, Scope } from '../types';
 import { components } from '../../../../webapp/src/service/apiSchema.generated';
-import bcrypt = require('bcryptjs');
+import * as bcrypt from 'bcryptjs';
 import Chainable = Cypress.Chainable;
 
 type AccountType =
@@ -392,6 +392,27 @@ export const getParsedEmailInvitationLink = () =>
     (emails) =>
       emails[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
   );
+
+export const getAgencyInvitationLinks = () =>
+  getAllEmails().then((emails) => {
+    const email = emails.find((e) =>
+      (e as string).includes('New translation request')
+    );
+    const links = Array.from(
+      email.matchAll(/(http:\/\/[\w:/]*)/g),
+      (m) => m[0]
+    );
+    const invitation = links.find((l) => l.includes('accept_invitation'));
+    const project = links.find(
+      (l) => l.includes('/projects/') && !l.includes('/task')
+    );
+    const tasks = links.filter((l) => l.includes('/task'));
+    return {
+      invitation,
+      project,
+      tasks,
+    };
+  });
 
 export const getAllEmails = () =>
   cy.request('http://localhost:21080/api/emails').then((r) => r.body);

@@ -97,4 +97,12 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     organizationId: Long,
     userId: Long,
   ): List<Permission>
+
+  @Query(
+    """
+    from Permission p 
+    where p.agency.id = :agencyId
+  """,
+  )
+  fun findAllByAgencyId(agencyId: Long): List<Permission>
 }

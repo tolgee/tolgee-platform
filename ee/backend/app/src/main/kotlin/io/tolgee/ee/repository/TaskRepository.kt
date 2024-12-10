@@ -54,6 +54,10 @@ private const val TASK_FILTERS = """
         or tk.language.id in :#{#filters.filterLanguage}
     )
     and (
+        :#{#filters.filterAgency} is null
+        or tk.agency.id in :#{#filters.filterAgency}
+    )
+    and (
         :#{#filters.filterAssignee} is null
         or exists (
             select 1
@@ -376,4 +380,27 @@ interface TaskRepository : JpaRepository<Task, Long> {
     projectId: Long,
     taskNumber: Long,
   ): Task?
+
+  @Query(
+    """
+      from Task t
+      where t.agency.id = :agencyId
+    """,
+  )
+  fun getByAgencyId(agencyId: Long): List<Task>
+
+  @Query(
+    """
+      select t.agency_id
+      from Task t
+        left join translation_agency a on t.agency_id = a.id
+      where t.agency_id is not null
+        and t.project_id = :projectId
+        and a.deleted_at is null
+      order by t.number desc
+      limit 1
+    """,
+    nativeQuery = true,
+  )
+  fun getLastTaskWithAgency(projectId: Long): Long?
 }

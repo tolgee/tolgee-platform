@@ -18,7 +18,6 @@ type LanguageModel = components['schemas']['LanguageModel'];
 const StyledContainer = styled('div')`
   display: grid;
   padding: 16px 20px;
-  grid-template-columns: 1fr 3fr 2fr;
   border-radius: 8px;
   background: ${({ theme }) => theme.palette.tokens.background.selected};
   ${({ theme }) => theme.breakpoints.down('sm')} {
@@ -53,6 +52,7 @@ type Props = {
   onUpdateAssignees: (users: User[]) => void;
   filters: TranslationStateType[];
   projectId: number;
+  hideAssignees?: boolean;
 };
 
 export const TaskPreview = ({
@@ -63,6 +63,7 @@ export const TaskPreview = ({
   onUpdateAssignees,
   filters,
   projectId,
+  hideAssignees,
 }: Props) => {
   const { t } = useTranslate();
   const formatNumber = useNumberFormatter();
@@ -84,7 +85,12 @@ export const TaskPreview = ({
   });
 
   return (
-    <StyledContainer data-cy="task-preview">
+    <StyledContainer
+      data-cy="task-preview"
+      sx={{
+        gridTemplateColumns: hideAssignees ? '1fr 3fr' : '1fr 3fr 2fr',
+      }}
+    >
       <StyledContent>
         <FlagImage flagEmoji={language.flagEmoji!} height={20} />
         <Box
@@ -148,23 +154,25 @@ export const TaskPreview = ({
           </StyledMetric>
         </Box>
       </Box>
-      <AssigneeSearchSelect
-        value={assigness}
-        projectId={projectId}
-        onChange={onUpdateAssignees}
-        sx={{
-          alignSelf: 'center',
-        }}
-        label={
-          <StyledSmallCaption>
-            {t('create_task_preview_assignee')}
-          </StyledSmallCaption>
-        }
-        filters={{
-          filterMinimalScope: 'TRANSLATIONS_VIEW',
-          filterViewLanguageId: language.id,
-        }}
-      />
+      {!hideAssignees && (
+        <AssigneeSearchSelect
+          value={assigness}
+          projectId={projectId}
+          onChange={onUpdateAssignees}
+          sx={{
+            alignSelf: 'center',
+          }}
+          label={
+            <StyledSmallCaption>
+              {t('create_task_preview_assignee')}
+            </StyledSmallCaption>
+          }
+          filters={{
+            filterMinimalScope: 'TRANSLATIONS_VIEW',
+            filterViewLanguageId: language.id,
+          }}
+        />
+      )}
     </StyledContainer>
   );
 };

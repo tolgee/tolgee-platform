@@ -8,6 +8,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.SCREENSHOTS_VIEW,
       Scope.ACTIVITY_VIEW,
       Scope.KEYS_VIEW,
+      Scope.TASKS_VIEW,
     ),
   ),
   TRANSLATE(
@@ -19,6 +20,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.ACTIVITY_VIEW,
       Scope.TRANSLATIONS_COMMENTS_ADD,
       Scope.TRANSLATIONS_COMMENTS_SET_STATE,
+      Scope.TASKS_VIEW,
     ),
   ),
   REVIEW(
@@ -31,6 +33,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.TRANSLATIONS_COMMENTS_ADD,
       Scope.TRANSLATIONS_COMMENTS_SET_STATE,
       Scope.TRANSLATIONS_STATE_EDIT,
+      Scope.TASKS_VIEW,
     ),
   ),
   EDIT(
@@ -52,6 +55,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.BATCH_PRE_TRANSLATE_BY_TM,
       Scope.BATCH_MACHINE_TRANSLATE,
       Scope.BATCH_JOBS_VIEW,
+      Scope.TASKS_VIEW,
     ),
   ),
   MANAGE(

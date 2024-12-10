@@ -30,6 +30,12 @@ const StyledListItem = styled('div')`
     background-color: ${({ theme }) => theme.palette.emphasis[50]};
     border-color: ${({ theme }) => theme.palette.divider1};
   }
+
+  &.disabled {
+    cursor: default;
+    color: ${({ theme }) => theme.palette.text.disabled};
+    background-color: unset;
+  }
 `;
 
 const StyledTypography = styled(Typography)`
@@ -39,6 +45,10 @@ const StyledTypography = styled(Typography)`
   &.selected {
     color: ${({ theme }) => theme.palette.primary.main};
   }
+
+  &.disabled {
+    color: ${({ theme }) => theme.palette.text.disabled};
+  }
 `;
 
 type Props = {
@@ -47,6 +57,7 @@ type Props = {
   scopes: PermissionModelScope[];
   onChange: (value: PermissionBasicState) => void;
   allLangs?: LanguageModel[];
+  disabled?: boolean;
 };
 
 export const PermissionsRole: React.FC<Props> = ({
@@ -55,9 +66,10 @@ export const PermissionsRole: React.FC<Props> = ({
   onChange,
   scopes,
   allLangs,
+  disabled,
 }) => {
   const handleSelect = () => {
-    if (role !== state.role) {
+    if (role !== state.role && !disabled) {
       onChange({
         ...state,
         role,
@@ -71,9 +83,12 @@ export const PermissionsRole: React.FC<Props> = ({
   );
 
   return (
-    <StyledListItem onClick={handleSelect} className={clsx({ selected })}>
+    <StyledListItem
+      onClick={handleSelect}
+      className={clsx({ selected, disabled })}
+    >
       <Box>
-        <StyledTypography className={clsx({ selected })}>
+        <StyledTypography className={clsx({ selected, disabled })}>
           {getRoleTranslation(role)}
         </StyledTypography>
         <Box>{getRoleHint(role)}</Box>
@@ -87,6 +102,7 @@ export const PermissionsRole: React.FC<Props> = ({
               state={state}
               onChange={onChange}
               allLangs={allLangs}
+              disabled={disabled}
             />
           </Box>
         )}

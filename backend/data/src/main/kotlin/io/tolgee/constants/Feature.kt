@@ -20,4 +20,5 @@ enum class Feature {
   SLACK_INTEGRATION,
   TASKS,
   SSO,
+  ORDER_TRANSLATION,
 }
