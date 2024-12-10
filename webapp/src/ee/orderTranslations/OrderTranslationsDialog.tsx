@@ -98,14 +98,14 @@ type Props = {
   initialValues?: Partial<InitialValues>;
 };
 
-export const OrderTranslationsDialog = ({
+export const OrderTranslationsDialog: React.FC<Props> = ({
   open,
   onClose,
   onFinished,
   projectId,
   allLanguages,
   initialValues,
-}: Props) => {
+}) => {
   const theme = useTheme();
   const { features } = useEnabledFeatures();
   const taskFeature = features.includes('ORDER_TRANSLATION');

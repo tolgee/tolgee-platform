@@ -63,8 +63,8 @@ import { addAdministrationMenuItems } from '../views/administration/components/B
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 
-export const billingMenuItems = [BillingMenuItem];
-export const apps = [SlackApp];
+export const billingMenuItems = [BillingMenuItem] as React.FC[];
+export const apps = [SlackApp] as React.FC[];
 
 export const routes = {
   Root: () => {
