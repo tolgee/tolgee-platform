@@ -9,6 +9,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(
@@ -40,6 +41,7 @@ class OrganizationRole(
 
   // Unique constraint manually created in the schema:
   // - Only one role where managed is true per user
+  @ColumnDefault("false")
   var managed: Boolean = false
 
   @ManyToOne
