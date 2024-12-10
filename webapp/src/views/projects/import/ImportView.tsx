@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Alert, AlertTitle, Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -122,6 +122,16 @@ export const ImportView: FunctionComponent = () => {
             error={e}
             addFilesMutation={dataHelper.addFilesMutation}
           />
+        ))}
+        {dataHelper.addFilesMutation.data?.warnings.map((item) => (
+          <Box key={item.messageCode} mt={4} data-cy="import-file-warnings">
+            <Alert severity="warning">
+              <AlertTitle>
+                <T keyName={'import_file_warning_header_' + item.messageCode} />
+              </AlertTitle>
+              <T keyName={'import_file_warning_message_' + item.messageCode} />
+            </Alert>
+          </Box>
         ))}
         <Box position="relative">
           <ImportResultLoadingOverlay loading={isProgressOverlayActive} />
