@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.test.context.TestContext
 import org.springframework.test.context.TestExecutionListener
 import java.sql.ResultSet
+import java.sql.Statement
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -70,35 +71,17 @@ class CleanDbTestListener : TestExecutionListener {
   private fun doClean(testContext: TestContext) {
     val appContext: ApplicationContext = testContext.applicationContext
     val ds: DataSource = appContext.getBean(DataSource::class.java)
+
     ds.connection.use { conn ->
       val stmt = conn.createStatement()
-      val databaseName: Any = "postgres"
-      val ignoredTablesString = ignoredTables.joinToString(", ") { "'$it'" }
       try {
-        val rs: ResultSet =
-          stmt.executeQuery(
-            String.format(
-              "SELECT table_schema, table_name" +
-                " FROM information_schema.tables" +
-                " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
-                "   and table_name not in ($ignoredTablesString)",
-              databaseName,
-            ),
-          )
-        val tables: MutableList<Pair<String, String>> = ArrayList()
-        while (rs.next()) {
-          tables.add(rs.getString(1) to rs.getString(2))
-        }
-
-        val disableConstraintsSQL = generateDisableConstraintsSQL(tables)
-        disableConstraintsSQL.forEach { stmt.addBatch(it) }
-        stmt.executeBatch()
+        val tables = stmt.getTablesToTruncate()
+        stmt.disableConstraints(tables)
+        val tablesString = tables.joinToString(",")
 
         stmt.execute(
-          java.lang.String.format(
-            "TRUNCATE TABLE %s",
-            tables.joinToString(",") { it.first + "." + it.second },
-          ),
+          "SET statement_timeout = 5000;" +
+            "TRUNCATE TABLE $tablesString;",
         )
 
         val enableConstraintsSQL = generateEnableConstraintsSQL(tables)
@@ -111,15 +94,43 @@ class CleanDbTestListener : TestExecutionListener {
     }
   }
 
-  private fun generateDisableConstraintsSQL(tables: List<Pair<String, String>>): List<String> {
-    return tables.map { (schema, table) ->
-      "ALTER TABLE \"$schema\".\"$table\" DISABLE TRIGGER ALL"
+  private fun Statement.disableConstraints(tables: List<String>) {
+    val disableConstraintsSQL = generateDisableConstraintsSQL(tables)
+    disableConstraintsSQL.forEach { addBatch(it) }
+    executeBatch()
+  }
+
+  private fun Statement.getTablesToTruncate(): List<String> {
+    val databaseName: Any = "postgres"
+    val ignoredTablesString = ignoredTables.joinToString(", ") { "'$it'" }
+
+    val rs: ResultSet =
+      executeQuery(
+        String.format(
+          "SELECT table_schema, table_name" +
+            " FROM information_schema.tables" +
+            " WHERE table_catalog = '%s' and (table_schema in ('public', 'billing', 'ee'))" +
+            "   and table_name not in ($ignoredTablesString)",
+          databaseName,
+        ),
+      )
+    val tables: MutableList<String> = ArrayList()
+    while (rs.next()) {
+      tables.add(rs.getString(1) + "." + rs.getString(2))
+    }
+
+    return tables
+  }
+
+  private fun generateDisableConstraintsSQL(tables: List<String>): List<String> {
+    return tables.map { table ->
+      "ALTER TABLE $table DISABLE TRIGGER ALL"
     }
   }
 
-  private fun generateEnableConstraintsSQL(tables: List<Pair<String, String>>): List<String> {
-    return tables.map { (schema, table) ->
-      "ALTER TABLE \"$schema\".\"$table\" ENABLE TRIGGER ALL"
+  private fun generateEnableConstraintsSQL(tables: List<String>): List<String> {
+    return tables.map { table ->
+      "ALTER TABLE $table ENABLE TRIGGER ALL"
     }
   }
 
