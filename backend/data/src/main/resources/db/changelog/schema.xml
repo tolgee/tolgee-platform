@@ -3904,7 +3904,7 @@
     </changeSet>
     <changeSet author="anty (generated)" id="1731342594097-2">
         <addColumn tableName="organization_role">
-            <column name="managed" type="boolean">
+            <column name="managed" type="boolean" defaultValue="false">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
