@@ -16,8 +16,6 @@ import { TasksHeader } from 'tg.ee.module/task/components/tasksHeader/TasksHeade
 import { TaskView } from 'tg.ee.module/task/components/tasksHeader/TasksHeaderBig';
 import { TaskCreateDialog } from 'tg.ee.module/task/components/taskCreate/TaskCreateDialog';
 import { TaskDetail } from 'tg.ee.module/task/components/TaskDetail';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
-import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 import { ProjectTasksBoard } from './ProjectTasksBoard';
 import { ProjectTasksList } from './ProjectTasksList';
@@ -95,9 +93,6 @@ export const ProjectTasksView = () => {
     project.id
   );
 
-  const { features } = useEnabledFeatures();
-  const taskFeature = features.includes('TASKS');
-
   return (
     <BaseProjectView
       windowTitle={t('tasks_view_title')}
@@ -113,91 +108,81 @@ export const ProjectTasksView = () => {
         ],
       ]}
     >
-      {!taskFeature ? (
-        <Box>
-          <DisabledFeatureBanner
-            customMessage={t('tasks_feature_description')}
-          />
-        </Box>
-      ) : (
-        <>
-          <Box display="grid" gridTemplateRows="auto 1fr">
-            <TasksHeader
-              sx={{ mb: '20px', mt: '-12px' }}
-              onSearchChange={setSearch}
-              showClosed={showClosed === 'true'}
-              onShowClosedChange={(val) => setShowClosed(String(val))}
-              filter={filter}
-              onFilterChange={setFilter}
-              onAddTask={canEditTasks ? () => setAddDialog(true) : undefined}
-              view={view as TaskView}
-              onViewChange={setView}
-              isSmall={isSmall}
-              project={project}
-              onOrderTranslation={
-                canEditTasks ? () => setOrderTranslation(true) : undefined
-              }
-            />
+      <Box display="grid" gridTemplateRows="auto 1fr">
+        <TasksHeader
+          sx={{ mb: '20px', mt: '-12px' }}
+          onSearchChange={setSearch}
+          showClosed={showClosed === 'true'}
+          onShowClosedChange={(val) => setShowClosed(String(val))}
+          filter={filter}
+          onFilterChange={setFilter}
+          onAddTask={canEditTasks ? () => setAddDialog(true) : undefined}
+          view={view as TaskView}
+          onViewChange={setView}
+          isSmall={isSmall}
+          project={project}
+          onOrderTranslation={
+            canEditTasks ? () => setOrderTranslation(true) : undefined
+          }
+        />
 
-            {view === 'LIST' && !isSmall ? (
-              <ProjectTasksList
-                search={search}
-                filter={filter}
-                showClosed={showClosed === 'true'}
-                onOpenDetail={setDetail}
-                newTaskActions={true}
-              />
-            ) : (
-              <ProjectTasksBoard
-                search={search}
-                filter={filter}
-                showClosed={showClosed === 'true'}
-                onOpenDetail={setDetail}
-              />
-            )}
-            {detail !== undefined && (
-              <Dialog open={true} onClose={handleDetailClose} maxWidth="xl">
-                <TaskDetail
-                  taskNumber={detail.number}
-                  onClose={handleDetailClose}
-                  projectId={project.id}
-                  task={detail}
-                />
-              </Dialog>
-            )}
-            {addDialog && (
-              <TaskCreateDialog
-                open={addDialog}
-                onClose={() => setAddDialog(false)}
-                onFinished={() => setAddDialog(false)}
-                initialValues={{
-                  languages: allLanguages
-                    .filter((l) => languagesPreference.includes(l.tag))
-                    .filter((l) => !l.base)
-                    .map((l) => l.id),
-                }}
-                projectId={project.id}
-                allLanguages={allLanguages}
-              />
-            )}
-            {orderTranslation && (
-              <OrderTranslationsDialog
-                open={orderTranslation}
-                onClose={() => setOrderTranslation(false)}
-                onFinished={() => setOrderTranslation(false)}
-                initialValues={{
-                  languages: allLanguages
-                    .filter((l) => languagesPreference.includes(l.tag))
-                    .filter((l) => !l.base)
-                    .map((l) => l.id),
-                }}
-                projectId={project.id}
-                allLanguages={allLanguages}
-              />
-            )}
-          </Box>
-        </>
-      )}
+        {view === 'LIST' && !isSmall ? (
+          <ProjectTasksList
+            search={search}
+            filter={filter}
+            showClosed={showClosed === 'true'}
+            onOpenDetail={setDetail}
+            newTaskActions={true}
+          />
+        ) : (
+          <ProjectTasksBoard
+            search={search}
+            filter={filter}
+            showClosed={showClosed === 'true'}
+            onOpenDetail={setDetail}
+          />
+        )}
+        {detail !== undefined && (
+          <Dialog open={true} onClose={handleDetailClose} maxWidth="xl">
+            <TaskDetail
+              taskNumber={detail.number}
+              onClose={handleDetailClose}
+              projectId={project.id}
+              task={detail}
+            />
+          </Dialog>
+        )}
+        {addDialog && (
+          <TaskCreateDialog
+            open={addDialog}
+            onClose={() => setAddDialog(false)}
+            onFinished={() => setAddDialog(false)}
+            initialValues={{
+              languages: allLanguages
+                .filter((l) => languagesPreference.includes(l.tag))
+                .filter((l) => !l.base)
+                .map((l) => l.id),
+            }}
+            projectId={project.id}
+            allLanguages={allLanguages}
+          />
+        )}
+        {orderTranslation && (
+          <OrderTranslationsDialog
+            open={orderTranslation}
+            onClose={() => setOrderTranslation(false)}
+            onFinished={() => setOrderTranslation(false)}
+            initialValues={{
+              languages: allLanguages
+                .filter((l) => languagesPreference.includes(l.tag))
+                .filter((l) => !l.base)
+                .map((l) => l.id),
+            }}
+            projectId={project.id}
+            allLanguages={allLanguages}
+          />
+        )}
+      </Box>
     </BaseProjectView>
   );
 };

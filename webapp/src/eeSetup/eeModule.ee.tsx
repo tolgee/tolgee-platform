@@ -183,6 +183,7 @@ export const useAddBatchOperations = () => {
   const { features } = useEnabledFeatures();
   const canEditTasks = satisfiesPermission('tasks.edit');
   const taskFeature = features.includes('TASKS');
+  const orderTranslationsFeature = features.includes('ORDER_TRANSLATION');
   const { t } = useTranslate();
 
   return addOperations(
@@ -199,21 +200,21 @@ export const useAddBatchOperations = () => {
         id: 'task_add_keys',
         label: t('batch_operations_task_add_keys'),
         enabled: canEditTasks,
-        hidden: prefilteredTask || !taskFeature,
+        hidden: prefilteredTask || !taskFeature || !orderTranslationsFeature,
         component: OperationTaskAddKeys,
       },
       {
         id: 'task_remove_keys',
         label: t('batch_operations_task_remove_keys'),
         enabled: canEditTasks,
-        hidden: !prefilteredTask || !taskFeature,
+        hidden: !prefilteredTask || !taskFeature || !orderTranslationsFeature,
         component: OperationTaskRemoveKeys,
       },
       {
         id: 'order_translation',
         label: t('batch_operations_order_translation'),
         enabled: canEditTasks,
-        hidden: !taskFeature,
+        hidden: !orderTranslationsFeature,
         component: OperationOrderTranslation,
       },
     ],

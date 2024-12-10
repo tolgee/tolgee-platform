@@ -31,6 +31,8 @@ import { TaskPreview } from './TaskPreview';
 import { TranslationStateFilter } from './TranslationStateFilter';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { StateType } from 'tg.constants/translationStates';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -111,6 +113,8 @@ export const TaskCreateDialog = ({
   const { t } = useTranslate();
 
   const translateTaskType = useTaskTypeTranslation();
+  const { features } = useEnabledFeatures();
+  const taskFeature = features.includes('TASKS');
 
   const createTasksLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/create-multiple-tasks',
@@ -140,6 +144,9 @@ export const TaskCreateDialog = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg">
+      {!taskFeature && (
+        <DisabledFeatureBanner customMessage={t('tasks_feature_description')} />
+      )}
       <StyledMainTitle>
         <T keyName="batch_operation_create_task_title" />
       </StyledMainTitle>
