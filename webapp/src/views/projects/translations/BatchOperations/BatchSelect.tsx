@@ -8,8 +8,9 @@ import {
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { getTextWidth } from 'tg.fixtures/getTextWidth';
-import { useBatchOperations } from './operations';
+import { BatchOperation, useBatchOperations } from './operations';
 import { BatchActions } from './types';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledSeparator = styled('div')`
   width: 100%;
@@ -27,6 +28,7 @@ export const BatchSelect = ({ value, onChange }: Props) => {
   const { t } = useTranslate();
 
   const { operations } = useBatchOperations();
+  hideChangeNamespaceOperationIfNamespacesAreDisabled(operations);
 
   const option = operations.find((o) => o.id === value);
 
@@ -75,3 +77,15 @@ export const BatchSelect = ({ value, onChange }: Props) => {
     />
   );
 };
+
+function hideChangeNamespaceOperationIfNamespacesAreDisabled(
+  operations: BatchOperation[]
+) {
+  const project = useProject();
+  const changeNamespaceOperation = operations.find(
+    (operation) => operation.id === 'change_namespace',
+  );
+  if (changeNamespaceOperation != undefined) {
+    changeNamespaceOperation.hidden = !project.useNamespaces;
+  }
+}
