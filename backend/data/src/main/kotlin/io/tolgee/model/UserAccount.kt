@@ -3,11 +3,14 @@ package io.tolgee.model
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
+import io.tolgee.component.ThirdPartyAuthTypeConverter
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.task.Task
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -57,7 +60,14 @@ data class UserAccount(
   var emailVerification: EmailVerification? = null
 
   @Column(name = "third_party_auth_type")
-  var thirdPartyAuthType: String? = null
+  @Convert(converter = ThirdPartyAuthTypeConverter::class)
+  var thirdPartyAuthType: ThirdPartyAuthType? = null
+
+  @Column(name = "sso_refresh_token", columnDefinition = "TEXT")
+  var ssoRefreshToken: String? = null
+
+  @Column(name = "sso_session_expiry")
+  var ssoSessionExpiry: Date? = null
 
   @Column(name = "third_party_auth_id")
   var thirdPartyAuthId: String? = null
@@ -117,7 +127,7 @@ data class UserAccount(
     permissions: MutableSet<Permission>,
     role: Role = Role.USER,
     accountType: AccountType = AccountType.LOCAL,
-    thirdPartyAuthType: String?,
+    thirdPartyAuthType: ThirdPartyAuthType?,
     thirdPartyAuthId: String?,
     resetPasswordCode: String?,
   ) : this(id = 0L, username = "", password, name = "") {

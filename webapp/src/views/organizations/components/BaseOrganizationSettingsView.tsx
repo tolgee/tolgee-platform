@@ -77,6 +77,12 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_apps'),
     });
+    menuItems.push({
+      link: LINKS.ORGANIZATION_SSO.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_sso_login'),
+    });
     if (config.billing.enabled) {
       menuItems.push({
         link: LINKS.ORGANIZATION_SUBSCRIPTIONS.build({

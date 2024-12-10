@@ -38,6 +38,10 @@ class OrganizationRole(
   @ManyToOne
   var user: UserAccount? = null
 
+  // Unique constraint manually created in the schema:
+  // - Only one role where managed is true per user
+  var managed: Boolean = false
+
   @ManyToOne
   @NotNull
   var organization: Organization? = null

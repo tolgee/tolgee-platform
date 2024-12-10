@@ -413,6 +413,37 @@ export class Validation {
     Yup.object().shape({
       name: Yup.string().min(3).required(),
     });
+
+  private static readonly validateUrlWithPort = (
+    value: string | undefined
+  ): boolean => {
+    if (!value) return false;
+    const urlPattern = /^(http|https):\/\/[\w.-]+(:\d+)?(\/[^\s]*)?$/;
+    return urlPattern.test(value);
+  };
+
+  static readonly SSO_PROVIDER = (t: TranslateFunction) =>
+    Yup.object().shape({
+      clientId: Yup.string().required().max(255),
+      domain: Yup.string().required().max(255),
+      clientSecret: Yup.string().required().max(255),
+      authorizationUri: Yup.string()
+        .required()
+        .max(255)
+        .test(
+          'is-valid-url-with-port',
+          t('sso_invalid_url_format'),
+          Validation.validateUrlWithPort
+        ),
+      tokenUri: Yup.string()
+        .required()
+        .max(255)
+        .test(
+          'is-valid-url-with-port',
+          t('sso_invalid_url_format'),
+          Validation.validateUrlWithPort
+        ),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

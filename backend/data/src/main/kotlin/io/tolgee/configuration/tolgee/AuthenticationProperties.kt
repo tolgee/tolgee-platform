@@ -81,7 +81,9 @@ class AuthenticationProperties(
     description =
       "Whether users are allowed to register on Tolgee.\n" +
         "When set to `false`, existing users must send invites " +
-        "to projects to new users for them to be able to register.",
+        "to projects to new users for them to be able to register.\n" +
+        "When SSO is enabled, users can still register via SSO, " +
+        "even if this setting is set to `false`.",
   )
   var registrationsAllowed: Boolean = false,
   @E2eRuntimeMutable
@@ -137,12 +139,16 @@ class AuthenticationProperties(
         "When `false`, only administrators can create organizations.\n" +
         "By default, when the user has no organization, one is created for them; " +
         "this doesn't apply when this setting is set to `false`. " +
-        "In that case, the user without organization has no permissions on the server.",
+        "In that case, the user without organization has no permissions on the server.\n\n" +
+        "When SSO authentication is enabled, users created by SSO don't have their " +
+        "own organization automatically created no matter the value of this setting.",
   )
   var userCanCreateOrganizations: Boolean = true,
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
+  var ssoGlobal: SsoGlobalProperties = SsoGlobalProperties(),
+  var ssoOrganizations: SsoOrganizationsProperties = SsoOrganizationsProperties(),
 ) {
   fun checkAllowedRegistrations() {
     if (!this.registrationsAllowed) {

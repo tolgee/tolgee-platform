@@ -42,9 +42,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    implementation libs.jjwtApi
+    implementation libs.jjwtImpl
+    implementation libs.jjwtJackson
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(project(":testing"))
+    testImplementation(project(":security"))
     testImplementation(project(":ee-app"))
     testImplementation(project(":server-app"))
     testImplementation(project(":api"))

@@ -11,6 +11,7 @@ import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
+const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
 
 export const OAuthRedirectionHandler: FunctionComponent<
   OAuthRedirectionHandlerProps
@@ -24,9 +25,11 @@ export const OAuthRedirectionHandler: FunctionComponent<
 
   useEffect(() => {
     const url = new URLSearchParams(window.location.search);
+    const type = match.params[PARAMS.SERVICE_TYPE];
     const code = url.get('code');
+    let domain: string | undefined = undefined;
 
-    if (match.params[PARAMS.SERVICE_TYPE] == 'oauth2') {
+    if (type == 'oauth2' || type == 'sso') {
       const state = url.get('state');
       const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
       if (storedState !== state) {
@@ -37,8 +40,16 @@ export const OAuthRedirectionHandler: FunctionComponent<
       }
     }
 
+    if (type == 'sso') {
+      domain = localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY) ?? undefined;
+      if (!domain) {
+        history.replace(LINKS.LOGIN.build());
+        return;
+      }
+    }
+
     if (code && !allowPrivate) {
-      loginWithOAuthCode(match.params[PARAMS.SERVICE_TYPE], code);
+      loginWithOAuthCode(type, code, domain);
     }
   }, [allowPrivate]);
 

@@ -6,6 +6,10 @@ import { components } from '../../../../../webapp/src/service/apiSchema.generate
 export type PermissionModelScopes =
   components['schemas']['PermissionModel']['scopes'];
 
+export const ssoOrganizationsLoginTestData = generateTestDataObject(
+  'sso-organizations-login'
+);
+
 export const organizationTestData = generateTestDataObject('organizations');
 
 export const organizationNewTestData =

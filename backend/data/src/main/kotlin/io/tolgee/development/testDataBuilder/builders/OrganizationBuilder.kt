@@ -5,6 +5,7 @@ import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
+import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
@@ -17,6 +18,7 @@ class OrganizationBuilder(
     var roles: MutableList<OrganizationRoleBuilder> = mutableListOf()
     var avatarFile: ClassPathResource? = null
     var slackWorkspaces: MutableList<OrganizationSlackWorkspaceBuilder> = mutableListOf()
+    var tenant: SsoTenantBuilder? = null
   }
 
   var defaultOrganizationOfUser: UserAccount? = null
@@ -46,5 +48,12 @@ class OrganizationBuilder(
 
   fun setAvatar(filePath: String) {
     data.avatarFile = ClassPathResource(filePath, this.javaClass.classLoader)
+  }
+
+  fun setTenant(ft: FT<SsoTenant>): SsoTenantBuilder {
+    val builder = SsoTenantBuilder(this)
+    ft(builder.self)
+    data.tenant = builder
+    return builder
   }
 }

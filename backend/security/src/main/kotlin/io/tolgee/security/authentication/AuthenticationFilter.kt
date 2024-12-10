@@ -20,9 +20,11 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.security.service.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -50,6 +52,8 @@ class AuthenticationFilter(
   private val apiKeyService: ApiKeyService,
   @Lazy
   private val patService: PatService,
+  @Lazy
+  private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(
     request: HttpServletRequest,
@@ -79,6 +83,8 @@ class AuthenticationFilter(
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val auth = jwtService.validateToken(authorization.substring(7))
+        checkIfSsoUserStillValid(auth.principal)
+
         SecurityContextHolder.getContext().authentication = auth
         return
       }
@@ -111,6 +117,12 @@ class AuthenticationFilter(
     }
   }
 
+  private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {
+    if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
+      throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+    }
+  }
+
   private fun pakAuth(key: String) {
     val parsed =
       apiKeyService.parseApiKey(key)
@@ -128,6 +140,8 @@ class AuthenticationFilter(
     val userAccount =
       userAccountService.findDto(pak.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+
+    checkIfSsoUserStillValid(userAccount)
 
     apiKeyService.updateLastUsedAsync(pak.id)
     SecurityContextHolder.getContext().authentication =
@@ -151,6 +165,8 @@ class AuthenticationFilter(
     val userAccount =
       userAccountService.findDto(pat.userAccountId)
         ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+
+    checkIfSsoUserStillValid(userAccount)
 
     patService.updateLastUsedAsync(pat.id)
     SecurityContextHolder.getContext().authentication =
