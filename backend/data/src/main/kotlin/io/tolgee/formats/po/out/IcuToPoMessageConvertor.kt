@@ -5,7 +5,6 @@ import com.ibm.icu.text.PluralRules.FixedDecimal
 import com.ibm.icu.util.ULocale
 import io.tolgee.formats.FromIcuPlaceholderConvertor
 import io.tolgee.formats.MessageConvertorFactory
-import io.tolgee.formats.escaping.IcuUnescper
 import io.tolgee.formats.getPluralDataOrNull
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.pluralData.PluralData
@@ -69,7 +68,7 @@ class IcuToPoMessageConvertor(
     val plurals =
       languagePluralData.examples.map {
         val form = forms[it.plural] ?: OTHER_KEYWORD
-        it.plural to ((formsResult[form] ?: formsResult[OTHER_KEYWORD])?.forceUnescape() ?: "")
+        it.plural to (formsResult[form] ?: formsResult[OTHER_KEYWORD] ?: "")
       }.sortedBy { it.first }.map { it.second }.toList()
 
     return plurals
@@ -91,13 +90,6 @@ class IcuToPoMessageConvertor(
           }?.key ?: return@mapNotNull null
       index to keyword
     }.toMap()
-  }
-
-  private fun String.forceUnescape(): String {
-    if (!projectIcuPlaceholdersSupport) {
-      return IcuUnescper(this).unescaped
-    }
-    return this
   }
 
   private fun getPluralIndexesForKeyword(keyword: String) =

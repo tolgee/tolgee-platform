@@ -12,12 +12,9 @@ import {
 } from 'tg.globalContext/helpers';
 import { getProgressData } from '../utils';
 import { CircularBillingProgress } from '../CircularBillingProgress';
+import { BillingMenuItemsProps } from '../../../../eeSetup/EeModuleType';
 
-type Props = {
-  onClose: () => void;
-};
-
-export const BillingMenuItem: FC<Props> = ({ onClose }) => {
+export const BillingMenuItem: FC<BillingMenuItemsProps> = ({ onClose }) => {
   const { t } = useTranslate();
 
   const { preferredOrganization } = usePreferredOrganization();

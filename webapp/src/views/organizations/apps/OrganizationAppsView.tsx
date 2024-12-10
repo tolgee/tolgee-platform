@@ -29,7 +29,9 @@ export const OrganizationAppsView: FunctionComponent = () => {
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
-      {apps}
+      {apps.map((App, index) => (
+        <App key={index} />
+      ))}
     </BaseOrganizationSettingsView>
   );
 };

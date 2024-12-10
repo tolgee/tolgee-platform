@@ -276,40 +276,6 @@ export const useAddUserMenuItems = () => {
   );
 };
 
-export const useAddEeBatchOperations = () => {
-  const taskCount = useUserTaskCount();
-  return addUserMenuItems(
-    [
-      {
-        Component: ({ onClose }) => {
-          const { t } = useTranslate();
-
-          return (
-            <MenuItem
-              component={Link}
-              to={LINKS.MY_TASKS.build()}
-              selected={location.pathname === LINKS.MY_TASKS.build()}
-              onClick={onClose}
-              data-cy="user-menu-my-tasks"
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                paddingRight: 3,
-              }}
-            >
-              <Box>{t('user_menu_my_tasks')}</Box>
-              <Badge badgeContent={taskCount} color="primary" />
-            </MenuItem>
-          );
-        },
-        enabled: true,
-        id: 'mu-tasks',
-      },
-    ],
-    { position: 'start' }
-  );
-};
-
 export const useAddProjectMenuItems = () => {
   const { t } = useTranslate();
 
