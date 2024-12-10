@@ -1,3 +1,10 @@
+## [3.85.1](https://github.com/tolgee/tolgee-platform/compare/v3.85.0...v3.85.1) (2024-12-10)
+
+
+### Bug Fixes
+
+* set default value for new column in sso migrations ([#2765](https://github.com/tolgee/tolgee-platform/issues/2765)) ([46488b7](https://github.com/tolgee/tolgee-platform/commit/46488b7d7179e04ce4f572ab6d4d1aa502f23f2e))
+
 # [3.85.0](https://github.com/tolgee/tolgee-platform/compare/v3.84.3...v3.85.0) (2024-12-10)
 
 
