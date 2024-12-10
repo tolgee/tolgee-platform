@@ -1,3 +1,10 @@
+## [3.84.3](https://github.com/tolgee/tolgee-platform/compare/v3.84.2...v3.84.3) (2024-12-09)
+
+
+### Bug Fixes
+
+* Make context (Big Meta) storing faster ([#2746](https://github.com/tolgee/tolgee-platform/issues/2746)) ([c67fdf1](https://github.com/tolgee/tolgee-platform/commit/c67fdf18e0a57143c4f51925581a62b2466cb35d))
+
 ## [3.84.2](https://github.com/tolgee/tolgee-platform/compare/v3.84.1...v3.84.2) (2024-12-05)
 
 

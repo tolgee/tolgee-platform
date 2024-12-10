@@ -134,16 +134,10 @@ export const routes = {
             )}
           </Switch>
         )}
-      </>
-    );
-  },
-  SpecificOrganization: () => {
-    return (
-      <Switch>
         <PrivateRoute path={LINKS.ORGANIZATION_SSO.template}>
           <OrganizationSsoView />
         </PrivateRoute>
-      </Switch>
+      </>
     );
   },
   Project: () => (

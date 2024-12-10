@@ -41,8 +41,7 @@ const SpecificOrganizationRouter = () => {
           <PrivateRoute path={LINKS.ORGANIZATION_APPS.template}>
             <OrganizationAppsView />
           </PrivateRoute>
-
-          <routes.SpecificOrganization />
+          <routes.Organization />
         </>
       ) : (
         <Box
@@ -71,7 +70,6 @@ export const OrganizationsRouter = () => {
           <SpecificOrganizationRouter />
         </PrivateRoute>
       </Switch>
-      <routes.Organization />
     </>
   );
 };

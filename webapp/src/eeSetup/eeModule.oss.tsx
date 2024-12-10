@@ -21,7 +21,6 @@ export const routes = {
   Root: Empty,
   Administration: Empty,
   Organization: Empty,
-  SpecificOrganization: Empty,
   Project: Empty,
 };
 export const useUserTaskCount = () => 0;
