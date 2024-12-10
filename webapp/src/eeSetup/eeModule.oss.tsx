@@ -1,4 +1,5 @@
 import React from 'react';
+import type { BillingMenuItemsProps } from './EeModuleType';
 
 const NotIncludedInOss =
   (name: string): ((props: any) => any) =>
@@ -14,7 +15,7 @@ const Empty: (props?: any) => any = () => {
 export const TaskReference = NotIncludedInOss('TaskReference');
 export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
-export const billingMenuItems = [] as React.FC[];
+export const billingMenuItems = [] as React.FC<BillingMenuItemsProps>[];
 export const apps = [] as React.FC[];
 export const Usage = Empty;
 export const AgencyLabel = NotIncludedInOss('AgencyLabel');

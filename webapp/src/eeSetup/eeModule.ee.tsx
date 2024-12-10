@@ -62,8 +62,11 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
+import { BillingMenuItemsProps } from './EeModuleType';
 
-export const billingMenuItems = [BillingMenuItem] as React.FC[];
+export const billingMenuItems = [
+  BillingMenuItem,
+] as React.FC<BillingMenuItemsProps>[];
 export const apps = [SlackApp] as React.FC[];
 
 export const routes = {
