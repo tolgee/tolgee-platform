@@ -21,7 +21,11 @@ class TenantServiceStub : TenantService {
 
   override fun saveAll(tenants: Iterable<SsoTenant>): List<SsoTenant> {
     // no-op
-    throw UnsupportedOperationException("Not included in OSS")
+    if (tenants.any { true }) {
+      // isn't empty
+      throw UnsupportedOperationException("Not included in OSS")
+    }
+    return emptyList()
   }
 
   override fun findAll(): List<SsoTenant> {
