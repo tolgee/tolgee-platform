@@ -97,6 +97,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
       join fetch it.language il
       join il.file if
       where if.needsParamConversion = true
+      and if.import.id = :importId
       """,
   )
   fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation>
