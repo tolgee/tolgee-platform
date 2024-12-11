@@ -113,8 +113,8 @@ export const TaskCreateDialog = ({
   const { t } = useTranslate();
 
   const translateTaskType = useTaskTypeTranslation();
-  const { features } = useEnabledFeatures();
-  const taskFeature = features.includes('TASKS');
+  const { isEnabled } = useEnabledFeatures();
+  const taskFeature = isEnabled('TASKS');
 
   const createTasksLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/create-multiple-tasks',

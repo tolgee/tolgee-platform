@@ -183,10 +183,10 @@ export const useAddBatchOperations = () => {
   const prefilteredTask = useTranslationsSelector(
     (c) => c.prefilter?.task !== undefined
   );
-  const { features } = useEnabledFeatures();
+  const { isEnabled } = useEnabledFeatures();
   const canEditTasks = satisfiesPermission('tasks.edit');
-  const taskFeature = features.includes('TASKS');
-  const orderTranslationsFeature = features.includes('ORDER_TRANSLATION');
+  const taskFeature = isEnabled('TASKS');
+  const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const { t } = useTranslate();
 
   return addOperations(

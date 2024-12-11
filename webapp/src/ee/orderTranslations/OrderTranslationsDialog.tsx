@@ -107,8 +107,8 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
   initialValues,
 }) => {
   const theme = useTheme();
-  const { features } = useEnabledFeatures();
-  const taskFeature = features.includes('ORDER_TRANSLATION');
+  const { isEnabled } = useEnabledFeatures();
+  const taskFeature = isEnabled('ORDER_TRANSLATION');
   const disabled = !taskFeature;
   const { t } = useTranslate();
   const user = useUser();
