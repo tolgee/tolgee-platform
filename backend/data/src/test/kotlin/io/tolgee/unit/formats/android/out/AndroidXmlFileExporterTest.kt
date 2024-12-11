@@ -2,8 +2,8 @@ package io.tolgee.unit.formats.android.out
 
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
-import io.tolgee.formats.android.ANDROID_CDATA_CUSTOM_KEY
-import io.tolgee.formats.android.out.AndroidStringsXmlExporter
+import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
+import io.tolgee.formats.xmlResources.out.AndroidStringsXmlExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
@@ -59,8 +59,8 @@ class AndroidXmlFileExporterTest {
     |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     |  <string name="i_am_array_english">This is english!</string>
     |  <plurals name="plural_with_placeholders">
-    |    <item quantity="one">%s dog</item>
-    |    <item quantity="other">%s dogs</item>
+    |    <item quantity="one">%1${'$'}s dog</item>
+    |    <item quantity="other">%1${'$'}s dogs</item>
     |  </plurals>
     |</resources>
     |
@@ -179,7 +179,7 @@ class AndroidXmlFileExporterTest {
           text =
             "Forced CDATA <b>Hey!</b> sign!",
           fn = {
-            key.custom = mapOf(ANDROID_CDATA_CUSTOM_KEY to true)
+            key.custom = mapOf(XML_RESOURCES_CDATA_CUSTOM_KEY to true)
           },
         )
         add(

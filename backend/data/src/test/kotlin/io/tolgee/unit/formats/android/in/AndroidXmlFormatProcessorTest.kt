@@ -1,6 +1,6 @@
 package io.tolgee.unit.formats.android.`in`
 
-import io.tolgee.formats.android.`in`.AndroidStringsXmlProcessor
+import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -78,6 +78,16 @@ class AndroidXmlFormatProcessorTest {
     mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
       .assertSingle {
         hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "escape_sequence_within_quoted_spaces")
+      .assertSingle {
+        hasText("Test        ntest")
+      }
+    mockUtil.fileProcessorContext.assertLanguagesCount(1)
+    mockUtil.fileProcessorContext.assertTranslations("en", "backslash_at_the_end")
+      .assertSingle {
+        hasText("Test")
       }
     mockUtil.fileProcessorContext.assertKey("app_name") {
       custom.assert.isNull()
@@ -228,6 +238,6 @@ class AndroidXmlFormatProcessorTest {
   }
 
   private fun processFile() {
-    AndroidStringsXmlProcessor(mockUtil.fileProcessorContext).process()
+    XmlResourcesProcessor(mockUtil.fileProcessorContext).process()
   }
 }
