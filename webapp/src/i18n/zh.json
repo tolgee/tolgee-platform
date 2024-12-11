@@ -373,6 +373,7 @@
   "content_delivery_item_edit": "编辑",
   "content_delivery_item_publish": "发布",
   "content_delivery_last_publish": "上次发布：",
+  "content_delivery_last_publish_files": "文件",
   "content_delivery_last_publish_hint": "上次发布时间",
   "content_delivery_not_configured_message": "要启用内容分发功能，您需要在 Tolgee 服务器设置中添加内容分发配置。请查阅 Tolgee 文档。",
   "content_delivery_not_configured_title": "内容分发未配置",

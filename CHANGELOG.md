@@ -1,3 +1,15 @@
+# [3.86.0](https://github.com/tolgee/tolgee-platform/compare/v3.85.1...v3.86.0) (2024-12-11)
+
+
+### Bug Fixes
+
+* missing query condition when switching ICU conversion for import ([#2767](https://github.com/tolgee/tolgee-platform/issues/2767)) ([88e8ce4](https://github.com/tolgee/tolgee-platform/commit/88e8ce469dd9076c4f275634e9ba6ddd805ab71b))
+
+
+### Features
+
+* order professional translation ([#2621](https://github.com/tolgee/tolgee-platform/issues/2621)) ([135e60b](https://github.com/tolgee/tolgee-platform/commit/135e60b3e2b57db1cbac46d4fbe0c1c58f163de0))
+
 ## [3.85.1](https://github.com/tolgee/tolgee-platform/compare/v3.85.0...v3.85.1) (2024-12-10)
 
 

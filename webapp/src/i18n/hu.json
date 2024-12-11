@@ -373,6 +373,7 @@
   "content_delivery_item_edit": "Szerkesztés",
   "content_delivery_item_publish": "Közzététel",
   "content_delivery_last_publish": "Utoljára közzétéve:",
+  "content_delivery_last_publish_files": "Fájlok",
   "content_delivery_last_publish_hint": "Utoljára közzétéve",
   "content_delivery_not_configured_message": "A tartalom szállítási funkciók engedélyezéséhez be kell állítania a tartalom-szállítást a Tolgee szerver beállításaiban. Erről a Tolgee dokumentációjában talál további információkat.",
   "content_delivery_not_configured_title": "A tartalom szállítás nincs konfigurálva",

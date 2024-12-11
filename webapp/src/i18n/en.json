@@ -433,6 +433,7 @@
   "content_delivery_item_edit": "Edit",
   "content_delivery_item_publish": "Publish",
   "content_delivery_last_publish": "Last publish:",
+  "content_delivery_last_publish_files": "Files",
   "content_delivery_last_publish_hint": "Last publish time",
   "content_delivery_not_configured_message": "To enable content delivery features you need to configure content-delivery in Tolgee server settings. Check Tolgee documentation for that.",
   "content_delivery_not_configured_title": "Content delivery is not configured",

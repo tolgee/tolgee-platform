@@ -433,6 +433,7 @@
   "content_delivery_item_edit": "Editare",
   "content_delivery_item_publish": "Publică",
   "content_delivery_last_publish": "Ultima publicare:",
+  "content_delivery_last_publish_files": "Fișiere",
   "content_delivery_last_publish_hint": "Timpul ultimei publicări",
   "content_delivery_not_configured_message": "Pentru a activa funcțiile de livrare a conținutului, trebuie să configurați livrarea-conținutului în setările serverului Tolgee. Verificați documentația Tolgee pentru aceasta.",
   "content_delivery_not_configured_title": "Livrarea conținutului nu este configurată",

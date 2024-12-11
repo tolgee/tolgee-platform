@@ -424,6 +424,7 @@
   "content_delivery_item_edit": "Editar",
   "content_delivery_item_publish": "Publicar",
   "content_delivery_last_publish": "Última publicação:",
+  "content_delivery_last_publish_files": "Arquivos",
   "content_delivery_last_publish_hint": "Hora da última publicação",
   "content_delivery_not_configured_message": "Para habilitar recursos de entrega de conteúdo, você precisa configurar a entrega de conteúdo nas configurações do servidor Tolgee. Verifique a documentação do Tolgee para isso.",
   "content_delivery_not_configured_title": "A entrega de conteúdo não está configurada",

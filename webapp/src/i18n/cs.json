@@ -433,6 +433,7 @@
   "content_delivery_item_edit": "Editovat",
   "content_delivery_item_publish": "Publikovat",
   "content_delivery_last_publish": "Poslední publikování:",
+  "content_delivery_last_publish_files": "Soubory",
   "content_delivery_last_publish_hint": "Čas posledního publikování",
   "content_delivery_not_configured_message": "Pro povolení funkce doručování obsahu musíte nakonfigurovat doručování obsahu v nastavení serveru Tolgee. Více informací získáte v dokumentaci Tolgee.",
   "content_delivery_not_configured_title": "Doručování obsahu není nakonfigurováno",

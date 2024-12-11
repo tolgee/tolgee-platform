@@ -373,6 +373,7 @@
   "content_delivery_item_edit": "Bewerken",
   "content_delivery_item_publish": "Publiceren",
   "content_delivery_last_publish": "Laatste publicatie:",
+  "content_delivery_last_publish_files": "Bestanden",
   "content_delivery_last_publish_hint": "Laatste publicatietijd",
   "content_delivery_not_configured_message": "Om inhoudsleveringsfuncties in te schakelen, moet u inhoudslevering configureren in de Tolgee-serverinstellingen. Raadpleeg de Tolgee-documentatie daarvoor.",
   "content_delivery_not_configured_title": "Inhoudslevering is niet geconfigureerd",

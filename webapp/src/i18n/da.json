@@ -433,6 +433,7 @@
   "content_delivery_item_edit": "Rediger",
   "content_delivery_item_publish": "Udgiv",
   "content_delivery_last_publish": "Seneste publicering:",
+  "content_delivery_last_publish_files": "Filer",
   "content_delivery_last_publish_hint": "Seneste publiceringstidspunkt",
   "content_delivery_not_configured_message": "For at aktivere indholdsdistributionsfunktioner skal du konfigurere indholdsdistribution i Tolgee-serverindstillingerne. Tjek Tolgee-dokumentationen for dette.",
   "content_delivery_not_configured_title": "Indholdsdistribution er ikke konfigureret",

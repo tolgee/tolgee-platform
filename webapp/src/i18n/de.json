@@ -432,6 +432,7 @@
   "content_delivery_item_edit": "Bearbeiten",
   "content_delivery_item_publish": "Veröffentlichen",
   "content_delivery_last_publish": "Letzte Veröffentlichung:",
+  "content_delivery_last_publish_files": "Dateien",
   "content_delivery_last_publish_hint": "Letzte Veröffentlichungszeit",
   "content_delivery_not_configured_message": "Um die Funktionen der Inhaltsbereitstellung zu aktivieren, müssen Sie die Inhaltsbereitstellung in den Tolgee-Servereinstellungen konfigurieren. Überprüfen Sie die Tolgee-Dokumentation dafür.",
   "content_delivery_not_configured_title": "Inhaltsbereitstellung ist nicht konfiguriert",
