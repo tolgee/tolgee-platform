@@ -8,6 +8,7 @@ import {
   InputAdornment,
   styled,
   SxProps,
+  Tooltip,
 } from '@mui/material';
 import { useDebounceCallback } from 'usehooks-ts';
 import {
@@ -15,6 +16,7 @@ import {
   Plus,
   Rows03,
   SearchSm,
+  ShoppingCart01,
 } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
@@ -48,6 +50,7 @@ type Props = {
   filter: TaskFilterType;
   onFilterChange: (value: TaskFilterType) => void;
   onAddTask?: () => void;
+  onOrderTranslation?: () => void;
   view: TaskView;
   onViewChange: (view: TaskView) => void;
   project?: SimpleProjectModel;
@@ -62,6 +65,7 @@ export const TasksHeaderBig = ({
   filter,
   onFilterChange,
   onAddTask,
+  onOrderTranslation,
   view,
   onViewChange,
   project,
@@ -110,7 +114,7 @@ export const TasksHeaderBig = ({
           }
         />
       </Box>
-      <Box sx={{ display: 'flex', gap: '16px' }}>
+      <Box sx={{ display: 'flex', gap: '12px' }}>
         <ButtonGroup>
           <StyledToggleButton
             color={view === 'LIST' ? 'primary' : 'default'}
@@ -127,6 +131,20 @@ export const TasksHeaderBig = ({
             <BarChartSquare01 style={{ rotate: '180deg' }} />
           </StyledToggleButton>
         </ButtonGroup>
+
+        {onOrderTranslation && (
+          <Tooltip title={t('tasks_order_translation_tooltip')}>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<ShoppingCart01 width={19} height={19} />}
+              onClick={onOrderTranslation}
+              data-cy="tasks-header-order-translation"
+            >
+              {t('tasks_order_translation')}
+            </Button>
+          </Tooltip>
+        )}
 
         {onAddTask && (
           <Button

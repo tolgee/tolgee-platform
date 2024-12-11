@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.IPermission
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.translationAgency.TranslationAgency
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -33,6 +34,7 @@ import org.hibernate.annotations.Type
   indexes = [
     Index(columnList = "user_id"),
     Index(columnList = "project_id"),
+    Index(columnList = "agency_id"),
   ],
 )
 class Permission(
@@ -48,6 +50,8 @@ class Permission(
   var organization: Organization? = null,
   @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var agency: TranslationAgency? = null,
 ) : AuditModel(), IPermission {
   @Type(
     EnumArrayType::class,
@@ -114,6 +118,7 @@ class Permission(
     type: ProjectPermissionType? = ProjectPermissionType.VIEW,
     languagePermissions: LanguagePermissions? = null,
     scopes: Array<Scope>? = null,
+    agency: TranslationAgency? = null,
   ) : this(
     id = id,
     user = user,
@@ -127,6 +132,7 @@ class Permission(
     this.viewLanguages = languagePermissions?.view?.toMutableSet() ?: mutableSetOf()
     this.translateLanguages = languagePermissions?.translate?.toMutableSet() ?: mutableSetOf()
     this.stateChangeLanguages = languagePermissions?.stateChange?.toMutableSet() ?: mutableSetOf()
+    this.agency = agency
   }
 
   @ManyToOne

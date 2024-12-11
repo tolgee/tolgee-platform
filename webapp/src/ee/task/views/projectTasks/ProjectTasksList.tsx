@@ -1,7 +1,9 @@
-import { ListProps, PaperProps, styled } from '@mui/material';
+import { Box, ListProps, PaperProps, styled } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { TaskFilterType } from 'tg.ee.module/task/components/taskFilter/TaskFilterPopover';
-import { TaskItem } from 'tg.ee.module/task/components/TaskItem';
+import { TaskFilterType, TaskItem } from 'tg.ee';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';
@@ -23,7 +25,7 @@ type Props = {
   newTaskActions: boolean;
 };
 
-export const TasksList = ({
+export const ProjectTasksList = ({
   showClosed,
   filter,
   search,
@@ -31,7 +33,10 @@ export const TasksList = ({
   newTaskActions,
 }: Props) => {
   const project = useProject();
+  const { t } = useTranslate();
   const [page, setPage] = useUrlSearchState('page', { defaultVal: '0' });
+  const { isEnabled } = useEnabledFeatures();
+  const tasksFeature = isEnabled('TASKS');
 
   const tasksLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks',
@@ -52,6 +57,17 @@ export const TasksList = ({
       keepPreviousData: true,
     },
   });
+
+  const allReady = tasksLoadable.isFetched;
+  const allEmpty = tasksLoadable.data?.page?.totalElements === 0;
+
+  if (allReady && allEmpty && !tasksFeature) {
+    return (
+      <Box>
+        <DisabledFeatureBanner customMessage={t('tasks_feature_description')} />
+      </Box>
+    );
+  }
 
   return (
     <PaginatedHateoasList

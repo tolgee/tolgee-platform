@@ -6,6 +6,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.TaskKey
+import io.tolgee.model.translationAgency.TranslationAgency
 import java.util.*
 
 data class TaskWithScopeView(
@@ -26,4 +27,5 @@ data class TaskWithScopeView(
   val doneItems: Long,
   val baseWordCount: Long,
   val baseCharacterCount: Long,
+  val agency: TranslationAgency?,
 )

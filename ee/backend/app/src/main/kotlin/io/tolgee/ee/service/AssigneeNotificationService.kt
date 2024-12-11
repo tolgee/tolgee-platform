@@ -20,8 +20,8 @@ class AssigneeNotificationService(
     user: UserAccount,
     task: Task,
   ) {
-    val taskUrl = "${frontendUrlProvider.url}/projects/${task.project.id}/task?number=${task.number}&detail=true"
-    val myTasksUrl = "${frontendUrlProvider.url}/my-tasks"
+    val taskUrl = getTaskUrl(task.project.id, task.number)
+    val myTasksUrl = getMyTasksUrl()
 
     val params =
       EmailParams(
@@ -57,5 +57,16 @@ class AssigneeNotificationService(
     } else {
       "review"
     }
+  }
+
+  fun getTaskUrl(
+    projectId: Long,
+    taskId: Long,
+  ): String {
+    return "${frontendUrlProvider.url}/projects/$projectId/task?number=$taskId&detail=true"
+  }
+
+  fun getMyTasksUrl(): String {
+    return "${frontendUrlProvider.url}/my-tasks"
   }
 }

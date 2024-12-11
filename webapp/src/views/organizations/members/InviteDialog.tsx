@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Formik, Field } from 'formik';
 import {
   Dialog,
@@ -55,11 +54,6 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
     invalidatePrefix: '/v2/organizations/{organizationId}/invitations',
   });
 
-  const yupSchema = useMemo(
-    () => Validation.INVITE_DIALOG_ORGANIZATION(t),
-    [t]
-  );
-
   return (
     <Dialog {...{ open, onClose }} fullWidth>
       <Formik
@@ -68,7 +62,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
           type: 'email' as 'email' | 'link',
           text: '',
         }}
-        validationSchema={yupSchema}
+        validationSchema={Validation.INVITE_DIALOG_ORGANIZATION(t)}
         validateOnMount={true}
         onSubmit={(data) => {
           invite.mutate(

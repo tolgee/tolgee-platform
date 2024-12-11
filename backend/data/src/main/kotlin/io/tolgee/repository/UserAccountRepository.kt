@@ -24,6 +24,10 @@ private const val USER_FILTERS = """
         :#{#filters.filterNotId} is null
         or ua.id not in :#{#filters.filterNotId}
     )
+    and (
+        :#{#filters.filterAgency} is null
+        or p.agency.id in :#{#filters.filterAgency}
+    )
 """
 
 private const val PROJECT_PERMISSIONS_CTE = """

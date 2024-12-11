@@ -4,6 +4,8 @@ import { AvatarImg } from './common/avatar/AvatarImg';
 import { UserName } from './common/UserName';
 
 export type Avatar = components['schemas']['Avatar'];
+export type TranslationAgencySimpleModel =
+  components['schemas']['TranslationAgencySimpleModel'];
 
 export type User = {
   id: number;

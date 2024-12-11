@@ -7,9 +7,16 @@ import {
   IconButton,
   styled,
   SxProps,
+  Tooltip,
 } from '@mui/material';
 import { useDebounceCallback } from 'usehooks-ts';
-import { FilterLines, Plus, SearchSm, XClose } from '@untitled-ui/icons-react';
+import {
+  FilterLines,
+  Plus,
+  SearchSm,
+  ShoppingCart01,
+  XClose,
+} from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import { LabelHint } from 'tg.component/common/LabelHint';
@@ -58,6 +65,7 @@ type Props = {
   onShowClosedChange: (value: boolean) => void;
   filter: TaskFilterType;
   onFilterChange: (value: TaskFilterType) => void;
+  onOrderTranslation?: () => void;
   onAddTask?: () => void;
   view: TaskView;
   onViewChange: (view: TaskView) => void;
@@ -70,6 +78,7 @@ export const TasksHeaderCompact = ({
   onSearchChange,
   showClosed,
   onShowClosedChange,
+  onOrderTranslation,
   filter,
   onFilterChange,
   onAddTask,
@@ -172,7 +181,17 @@ export const TasksHeaderCompact = ({
               }
             />
           </Box>
-          <Box sx={{ display: 'flex', gap: '16px' }}>
+          <Box sx={{ display: 'flex' }}>
+            {onOrderTranslation && (
+              <Tooltip
+                title={t('tasks_order_translation_tooltip')}
+                disableInteractive
+              >
+                <IconButton color="primary" onClick={onOrderTranslation}>
+                  <ShoppingCart01 />
+                </IconButton>
+              </Tooltip>
+            )}
             {onAddTask && (
               <IconButton color="primary" onClick={onAddTask}>
                 <Plus />

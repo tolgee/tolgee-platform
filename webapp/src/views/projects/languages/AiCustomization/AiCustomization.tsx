@@ -12,10 +12,10 @@ import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner
 // TODO: Move to EE
 export const AiCustomization = () => {
   const project = useProject();
-  const { features } = useEnabledFeatures();
+  const { isEnabled } = useEnabledFeatures();
   const { t } = useTranslate();
 
-  const featureEnabled = features.includes('AI_PROMPT_CUSTOMIZATION');
+  const featureEnabled = isEnabled('AI_PROMPT_CUSTOMIZATION');
 
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',

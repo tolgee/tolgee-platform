@@ -5,6 +5,7 @@ export const filterEmpty = (filter: TaskFilterType) => {
     !filter.assignees?.length &&
     !filter.languages?.length &&
     !filter.projects?.length &&
-    !filter.types?.length
+    !filter.types?.length &&
+    !filter.agencies?.length
   );
 };

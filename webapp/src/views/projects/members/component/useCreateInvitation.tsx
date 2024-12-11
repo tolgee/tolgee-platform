@@ -18,6 +18,7 @@ export type CreateInvitationData = {
   permissions: PermissionSettingsState;
   email?: string;
   name?: string;
+  agency?: string;
 };
 
 export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
@@ -30,7 +31,12 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
   const messages = useMessage();
 
   return {
-    async createInvitation({ permissions, email, name }: CreateInvitationData) {
+    async createInvitation({
+      permissions,
+      email,
+      name,
+      agency,
+    }: CreateInvitationData) {
       if (permissions.tab === 'advanced' && permissions.advancedState.scopes) {
         if (permissions.advancedState.scopes.length === 0) {
           messages.error(<T keyName="scopes_at_least_one_scope_error" />);
@@ -54,6 +60,7 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
             'application/json': {
               email,
               name,
+              agencyId: Number(agency),
               scopes: permissions.advancedState.scopes,
               ...languagePermissions,
             },
@@ -83,6 +90,7 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
               type: role,
               email,
               name,
+              agencyId: Number(agency),
               ...languagePermissions,
             },
           },

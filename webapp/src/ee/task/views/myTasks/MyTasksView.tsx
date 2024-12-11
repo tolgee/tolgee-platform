@@ -12,9 +12,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 import { MyTasksList } from './MyTasksList';
 import { MyTasksBoard } from './MyTasksBoard';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { TaskFilterType } from '../../components/taskFilter/TaskFilterPopover';
-import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { TasksHeader } from '../../components/tasksHeader/TasksHeader';
 import { TaskView } from '../../components/tasksHeader/TasksHeaderBig';
 import { TaskDetail } from '../../components/TaskDetail';
@@ -64,10 +62,6 @@ export const MyTasksView = () => {
     setDetail(undefined);
   }
 
-  const { features } = useEnabledFeatures();
-
-  const taskFeature = features.includes('TASKS');
-
   return (
     <DashboardPage>
       <BaseView
@@ -83,39 +77,31 @@ export const MyTasksView = () => {
           [t('my_tasks_title'), LINKS.MY_TASKS.build()],
         ]}
       >
-        {!taskFeature ? (
-          <DisabledFeatureBanner
-            customMessage={t('tasks_feature_description')}
+        <TasksHeader
+          sx={{ mb: '20px', mt: '-12px' }}
+          onSearchChange={setSearch}
+          showClosed={showClosed === 'true'}
+          onShowClosedChange={(val) => setShowClosed(String(val))}
+          filter={filter}
+          onFilterChange={setFilter}
+          view={view as TaskView}
+          onViewChange={setView}
+          isSmall={isSmall}
+        />
+        {view === 'LIST' && !isSmall ? (
+          <MyTasksList
+            search={search}
+            filter={filter}
+            showClosed={showClosed === 'true'}
+            onOpenDetail={setDetail}
           />
         ) : (
-          <>
-            <TasksHeader
-              sx={{ mb: '20px', mt: '-12px' }}
-              onSearchChange={setSearch}
-              showClosed={showClosed === 'true'}
-              onShowClosedChange={(val) => setShowClosed(String(val))}
-              filter={filter}
-              onFilterChange={setFilter}
-              view={view as TaskView}
-              onViewChange={setView}
-              isSmall={isSmall}
-            />
-            {view === 'LIST' && !isSmall ? (
-              <MyTasksList
-                search={search}
-                filter={filter}
-                showClosed={showClosed === 'true'}
-                onOpenDetail={setDetail}
-              />
-            ) : (
-              <MyTasksBoard
-                search={search}
-                filter={filter}
-                showClosed={showClosed === 'true'}
-                onOpenDetail={setDetail}
-              />
-            )}
-          </>
+          <MyTasksBoard
+            search={search}
+            filter={filter}
+            showClosed={showClosed === 'true'}
+            onOpenDetail={setDetail}
+          />
         )}
       </BaseView>
       {detail !== undefined && (

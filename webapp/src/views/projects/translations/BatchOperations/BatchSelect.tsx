@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import {
   Autocomplete,
   ListItem,
-  styled,
   TextField,
+  styled,
   useTheme,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';

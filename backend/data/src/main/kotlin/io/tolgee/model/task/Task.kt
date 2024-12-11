@@ -11,6 +11,7 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.translationAgency.TranslationAgency
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -36,6 +37,7 @@ import java.util.*
   indexes = [
     Index(columnList = "author_id"),
     Index(columnList = "language_id"),
+    Index(columnList = "agency_id"),
   ],
 )
 @ActivityLoggedEntity
@@ -87,4 +89,7 @@ class Task : StandardAuditModel() {
 
   @ActivityLoggedProp
   var closedAt: Date? = null
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var agency: TranslationAgency? = null
 }

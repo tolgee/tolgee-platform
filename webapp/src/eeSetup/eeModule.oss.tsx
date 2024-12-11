@@ -1,23 +1,28 @@
 import React from 'react';
-import { EeModuleType } from './EeModuleType';
+import type { BillingMenuItemsProps } from './EeModuleType';
 
 const NotIncludedInOss =
-  (name: string): React.FC<any> =>
+  (name: string): ((props: any) => any) =>
   // eslint-disable-next-line react/display-name
   () => {
     return <div>Not included in OSS ({name})</div>;
   };
 
-const Empty: React.FC<any> = () => {
+const Empty: (props?: any) => any = () => {
   return null;
 };
 
 export const TaskReference = NotIncludedInOss('TaskReference');
 export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
-export const billingMenuItems = [] as EeModuleType['billingMenuItems'];
-export const apps = [] as EeModuleType['apps'];
+export const billingMenuItems = [] as React.FC<BillingMenuItemsProps>[];
+export const apps = [] as React.FC[];
 export const Usage = Empty;
+export const AgencyLabel = NotIncludedInOss('AgencyLabel');
+export const OrderTranslationsDialog = Empty;
+export const TaskItem = Empty;
+export const TaskFilterPopover = Empty;
+
 export const routes = {
   Root: Empty,
   Administration: Empty,

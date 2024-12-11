@@ -9,6 +9,7 @@ export type BatchActions =
   | 'task_create'
   | 'task_add_keys'
   | 'task_remove_keys'
+  | 'order_translation'
   | 'add_tags'
   | 'remove_tags'
   | 'change_namespace'

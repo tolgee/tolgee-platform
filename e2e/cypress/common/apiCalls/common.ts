@@ -1,7 +1,7 @@
 import { API_URL, PASSWORD, USERNAME } from '../constants';
 import { ArgumentTypes, Scope } from '../types';
 import { components } from '../../../../webapp/src/service/apiSchema.generated';
-import bcrypt = require('bcryptjs');
+import * as bcrypt from 'bcryptjs';
 import Chainable = Cypress.Chainable;
 
 type AccountType =
@@ -393,8 +393,60 @@ export const getParsedEmailInvitationLink = () =>
       emails[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
   );
 
+export const getAgencyInvitationLinks = () =>
+  getAllEmails().then((emails) => {
+    const email = emails.find((e) =>
+      e.html.includes('New translation request')
+    );
+    const links = Array.from(
+      email.html.matchAll(/(http:\/\/[\w:/]*)/g),
+      (m) => m[0]
+    );
+    const invitation = links.find((l) => l.includes('accept_invitation'));
+    const project = links.find(
+      (l) => l.includes('/projects/') && !l.includes('/task')
+    );
+    const tasks = links.filter((l) => l.includes('/task'));
+    return {
+      invitation,
+      project,
+      tasks,
+    };
+  });
+
+export const getOrderConfirmation = () =>
+  getAllEmails().then((emails) => {
+    const email = emails.find((e) =>
+      e.html.includes(
+        'The Agency will review your request and will get back to you'
+      )
+    );
+    const links = Array.from(
+      email.html.matchAll(/(http:\/\/[\w:/]*)/g),
+      (m) => m[0]
+    );
+    const project = links.find(
+      (l) => l.includes('/projects/') && !l.includes('/task')
+    );
+    const tasks = links.filter((l) => l.includes('/task'));
+    return {
+      project,
+      tasks,
+    };
+  });
+
+type Email = {
+  text: string;
+  to: any;
+  from: any;
+  html: string;
+  subject: string;
+};
+
 export const getAllEmails = () =>
-  cy.request('http://localhost:21080/api/emails').then((r) => r.body);
+  cy
+    .request('http://localhost:21080/api/emails')
+    .then((r) => r.body as Email[]);
 export const deleteAllEmails = () =>
   cy.request({ url: 'http://localhost:21080/api/emails', method: 'DELETE' });
 
@@ -404,7 +456,6 @@ export const getParsedResetPasswordEmail = () =>
       resetLink: r[0].html.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
-      text: r[0].text,
     };
   });
 
