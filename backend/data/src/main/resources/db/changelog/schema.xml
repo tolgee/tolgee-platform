@@ -4011,7 +4011,7 @@
     </changeSet>
     <changeSet author="stepangranat (generated)" id="1733757292979-1">
         <addColumn tableName="content_delivery_config">
-            <column name="lastPublishedFiles" type="jsonb"/>
+            <column name="last_published_files" type="jsonb"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>
