@@ -18,9 +18,9 @@ class TaskWithProjectModelAssembler(
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
   private val translationAgencySimpleModelAssembler: TranslationAgencySimpleModelAssembler,
 ) : RepresentationModelAssemblerSupport<TaskWithScopeView, TaskWithProjectModel>(
-  TaskController::class.java,
-  TaskWithProjectModel::class.java,
-) {
+    TaskController::class.java,
+    TaskWithProjectModel::class.java,
+  ) {
   override fun toModel(entity: TaskWithScopeView): TaskWithProjectModel {
     return TaskWithProjectModel(
       number = entity.number,
