@@ -16,6 +16,7 @@ import { TaskState } from 'tg.component/task/TaskState';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { TaskAssignees } from './TaskAssignees';
 import { getTaskUrl } from './utils';
+import { AgencyLabel } from 'tg.ee';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -88,6 +89,7 @@ export const TaskItem = ({
     <StyledContainer data-cy="task-item">
       <StyledItem {...linkProps}>
         <TaskLabel sx={{ padding: '12px 0px 12px 16px' }} task={task} />
+        {task.agency && <AgencyLabel agency={task.agency} />}
       </StyledItem>
       <StyledItem
         {...linkProps}

@@ -40,11 +40,15 @@ export const MyTasksView = () => {
   const [types, setTypes] = useUrlSearchState('type', {
     array: true,
   });
+  const [agencies, setAgencies] = useUrlSearchState('agency', {
+    array: true,
+  });
 
   const filter: TaskFilterType = {
     projects: projects?.map((p) => Number(p)),
     types: types as any[],
     doneMinClosedAt: showClosed === 'true' ? undefined : minus30Days,
+    agencies: agencies?.map((a) => Number(a)),
   };
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
@@ -56,6 +60,7 @@ export const MyTasksView = () => {
   function setFilter(val: TaskFilterType) {
     setProjects(val.projects?.map((p) => String(p)));
     setTypes(val.types?.map((l) => String(l)));
+    setAgencies(val.agencies?.map((a) => String(a)));
   }
 
   function handleDetailClose() {

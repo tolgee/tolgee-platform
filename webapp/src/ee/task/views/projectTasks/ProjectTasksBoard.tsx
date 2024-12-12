@@ -30,6 +30,7 @@ export const ProjectTasksBoard = ({
     filterAssignee: filter.assignees,
     filterLanguage: filter.languages,
     filterType: filter.types,
+    filterAgency: filter.agencies,
   } satisfies QueryParameters;
 
   const newTasks = useProjectBoardTasks({

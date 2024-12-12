@@ -32,6 +32,7 @@ export const ProjectTasksView = () => {
   const [showClosed, setShowClosed] = useUrlSearchState('showClosed', {
     defaultVal: 'false',
   });
+
   const { satisfiesPermission } = useProjectPermissions();
   const [view, setView] = useUrlSearchState('view', {
     defaultVal: 'LIST',
@@ -65,10 +66,14 @@ export const ProjectTasksView = () => {
   const [types, setTypes] = useUrlSearchState('type', {
     array: true,
   });
+  const [agencies, setAgencies] = useUrlSearchState('agencies', {
+    array: true,
+  });
 
   const filter: TaskFilterType = {
     assignees: assignees?.map((a) => Number(a)),
     languages: languages?.map((l) => Number(l)),
+    agencies: agencies?.map((a) => Number(a)),
     types: types as any[],
     doneMinClosedAt: showClosed === 'true' ? undefined : minus30Days,
   };
@@ -76,6 +81,7 @@ export const ProjectTasksView = () => {
   function setFilter(val: TaskFilterType) {
     setAssignees(val.assignees?.map((a) => String(a)));
     setLanguages(val.languages?.map((l) => String(l)));
+    setAgencies(val.agencies?.map((a) => String(a)));
     setTypes(val.types?.map((l) => String(l)));
   }
 
