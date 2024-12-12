@@ -1,3 +1,10 @@
+## [3.86.1](https://github.com/tolgee/tolgee-platform/compare/v3.86.0...v3.86.1) (2024-12-12)
+
+
+### Bug Fixes
+
+* Make hal+json responses just json ([#2773](https://github.com/tolgee/tolgee-platform/issues/2773)) ([a30c7cd](https://github.com/tolgee/tolgee-platform/commit/a30c7cd6f66b19c85b6d9cdd86f1a47588d9ba8a))
+
 # [3.86.0](https://github.com/tolgee/tolgee-platform/compare/v3.85.1...v3.86.0) (2024-12-11)
 
 
