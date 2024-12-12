@@ -435,6 +435,7 @@
   "content_delivery_last_publish": "Seneste publicering:",
   "content_delivery_last_publish_files": "Filer",
   "content_delivery_last_publish_hint": "Seneste publiceringstidspunkt",
+  "content_delivery_missing_files_info": "Hvis du mangler nogle filer her, skal du tjekke indstillingerne for indholdslevering. Der kan være yderligere filtre på navneområder/sprog.",
   "content_delivery_not_configured_message": "For at aktivere indholdsdistributionsfunktioner skal du konfigurere indholdsdistribution i Tolgee-serverindstillingerne. Tjek Tolgee-dokumentationen for dette.",
   "content_delivery_not_configured_title": "Indholdsdistribution er ikke konfigureret",
   "content_delivery_not_enabled_message": "Din plan inkluderer ikke flere indholdsdistributionskonfigurationer. Opgrader din plan for at få adgang til denne funktion.",

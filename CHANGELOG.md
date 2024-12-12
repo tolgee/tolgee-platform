@@ -1,3 +1,10 @@
+## [3.86.2](https://github.com/tolgee/tolgee-platform/compare/v3.86.1...v3.86.2) (2024-12-12)
+
+
+### Bug Fixes
+
+* stuff forgotten in rebase + update enterprise plan ([#2774](https://github.com/tolgee/tolgee-platform/issues/2774)) ([c5b2854](https://github.com/tolgee/tolgee-platform/commit/c5b2854726a68cf79932f62cb559a68b133d26b9))
+
 ## [3.86.1](https://github.com/tolgee/tolgee-platform/compare/v3.86.0...v3.86.1) (2024-12-12)
 
 

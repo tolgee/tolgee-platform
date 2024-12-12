@@ -426,6 +426,7 @@
   "content_delivery_last_publish": "Última publicación:",
   "content_delivery_last_publish_files": "Archivos",
   "content_delivery_last_publish_hint": "Última hora de publicación",
+  "content_delivery_missing_files_info": "Si faltan algunos archivos aquí, revise los ajustes de entrega de contenido. Podría haber filtros adicionales en los espacios de nombres/idiomas.",
   "content_delivery_not_configured_message": "Para habilitar las funciones de entrega de contenido, debe configurar la entrega de contenido en la configuración del servidor Tolgee. Consulte la documentación de Tolgee para ello.",
   "content_delivery_not_configured_title": "La entrega de contenido no está configurada",
   "content_delivery_not_enabled_message": "Tu plan no incluye múltiples configuraciones de entrega de contenido. Actualiza tu plan para acceder a esta función.",

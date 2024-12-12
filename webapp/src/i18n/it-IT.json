@@ -400,6 +400,7 @@
   "content_delivery_last_publish": "Ultima pubblicazione:",
   "content_delivery_last_publish_files": "File",
   "content_delivery_last_publish_hint": "Ultima ora di pubblicazione",
+  "content_delivery_missing_files_info": "Se mancano alcuni file qui, controlla le impostazioni di consegna dei contenuti. Potrebbero esserci filtri aggiuntivi su namespace/lingue.",
   "content_delivery_not_configured_message": "Per abilitare le funzionalità di distribuzione dei contenuti, è necessario configurare la distribuzione dei contenuti nelle impostazioni del server Tolgee. Consulta la documentazione di Tolgee per questo.",
   "content_delivery_not_configured_title": "La consegna dei contenuti non è configurata",
   "content_delivery_not_enabled_message": "Il tuo piano non include configurazioni di consegna dei contenuti multiple. Aggiorna il tuo piano per accedere a questa funzione.",

@@ -435,6 +435,7 @@
   "content_delivery_last_publish": "Ultima publicare:",
   "content_delivery_last_publish_files": "Fișiere",
   "content_delivery_last_publish_hint": "Timpul ultimei publicări",
+  "content_delivery_missing_files_info": "Dacă lipsesc unele fișiere aici, verificați setările de livrare a conținutului. Este posibil să existe filtre suplimentare pe namespace-uri/limbi.",
   "content_delivery_not_configured_message": "Pentru a activa funcțiile de livrare a conținutului, trebuie să configurați livrarea-conținutului în setările serverului Tolgee. Verificați documentația Tolgee pentru aceasta.",
   "content_delivery_not_configured_title": "Livrarea conținutului nu este configurată",
   "content_delivery_not_enabled_message": "Planul dvs. nu include mai multe configurații de livrare a conținutului. Actualizați-vă planul pentru a accesa această funcție.",

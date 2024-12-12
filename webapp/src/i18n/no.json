@@ -375,6 +375,7 @@
   "content_delivery_last_publish": "Siste publisering:",
   "content_delivery_last_publish_files": "Filer",
   "content_delivery_last_publish_hint": "Siste publiseringstidspunkt",
+  "content_delivery_missing_files_info": "Hvis du mangler noen filer her, sjekk innstillingene for innholdslevering. Det kan være ekstra filtre på navneområder/språk.",
   "content_delivery_not_configured_message": "For å aktivere innholdsleveransefunksjoner må du konfigurere innholdsleveranse i Tolgee-serverinnstillingene. Sjekk Tolgee-dokumentasjonen for dette.",
   "content_delivery_not_configured_title": "Innholdsdistribusjon er ikke konfigurert",
   "content_delivery_not_enabled_message": "Ditt abonnement inkluderer ikke flere konfigurasjoner for innholdsdistribusjon. Oppgrader abonnementet ditt for å få tilgang til denne funksjonen.",

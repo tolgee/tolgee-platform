@@ -433,6 +433,7 @@
   "content_delivery_last_publish": "Dernière publication :",
   "content_delivery_last_publish_files": "Fichiers",
   "content_delivery_last_publish_hint": "Heure de la dernière publication",
+  "content_delivery_missing_files_info": "Si certains fichiers manquent ici, vérifiez les paramètres de livraison de contenu. Il peut y avoir des filtres supplémentaires sur les espaces de noms/langues.",
   "content_delivery_not_configured_message": "Pour activer les fonctionnalités de diffusion de contenu, vous devez configurer la diffusion de contenu dans les paramètres du serveur Tolgee.  Vous pouvez consulter la documentation de Tolgee.",
   "content_delivery_not_configured_title": "La diffusion de contenu n'est pas configurée",
   "content_delivery_not_enabled_message": "Votre plan ne comprend pas plusieurs configurations de diffusion de contenu. Mettez à niveau votre plan pour accéder à cette fonctionnalité.",

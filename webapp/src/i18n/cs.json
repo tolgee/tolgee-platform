@@ -435,6 +435,7 @@
   "content_delivery_last_publish": "Poslední publikování:",
   "content_delivery_last_publish_files": "Soubory",
   "content_delivery_last_publish_hint": "Čas posledního publikování",
+  "content_delivery_missing_files_info": "Pokud vám zde chybí nějaké soubory, zkontrolujte nastavení doručování obsahu. Mohou zde být další filtry na namespaces/jazyky.",
   "content_delivery_not_configured_message": "Pro povolení funkce doručování obsahu musíte nakonfigurovat doručování obsahu v nastavení serveru Tolgee. Více informací získáte v dokumentaci Tolgee.",
   "content_delivery_not_configured_title": "Doručování obsahu není nakonfigurováno",
   "content_delivery_not_enabled_message": "Váš plán nezahrnuje více konfigurací doručování obsahu. Upgradujte svůj plán, abyste mohli využívat tuto funkci.",

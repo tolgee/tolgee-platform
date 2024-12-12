@@ -375,6 +375,7 @@
   "content_delivery_last_publish": "Utoljára közzétéve:",
   "content_delivery_last_publish_files": "Fájlok",
   "content_delivery_last_publish_hint": "Utoljára közzétéve",
+  "content_delivery_missing_files_info": "Ha hiányoznak fájlok, ellenőrizze a tartalomszolgáltatási beállításokat. Lehet, hogy további szűrők vannak a névterekre/nyelvekre.",
   "content_delivery_not_configured_message": "A tartalom szállítási funkciók engedélyezéséhez be kell állítania a tartalom-szállítást a Tolgee szerver beállításaiban. Erről a Tolgee dokumentációjában talál további információkat.",
   "content_delivery_not_configured_title": "A tartalom szállítás nincs konfigurálva",
   "content_delivery_not_enabled_message": "Az előfizetésed nem tartalmaz több tartalomkiszállítási konfigurációt. Frissítsd az előfizetésed, hogy hozzáférj ehhez a funkcióhoz.",

@@ -375,6 +375,7 @@
   "content_delivery_last_publish": "Laatste publicatie:",
   "content_delivery_last_publish_files": "Bestanden",
   "content_delivery_last_publish_hint": "Laatste publicatietijd",
+  "content_delivery_missing_files_info": "Als u hier enkele bestanden mist, controleer dan de instellingen voor contentlevering. Er kunnen extra filters op namespaces/talen zijn.",
   "content_delivery_not_configured_message": "Om inhoudsleveringsfuncties in te schakelen, moet u inhoudslevering configureren in de Tolgee-serverinstellingen. Raadpleeg de Tolgee-documentatie daarvoor.",
   "content_delivery_not_configured_title": "Inhoudslevering is niet geconfigureerd",
   "content_delivery_not_enabled_message": "Uw abonnement bevat geen meerdere inhoudsleveringsconfiguraties. Upgrade uw plan om toegang te krijgen tot deze functie.",

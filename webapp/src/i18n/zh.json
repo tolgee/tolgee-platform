@@ -375,6 +375,7 @@
   "content_delivery_last_publish": "上次发布：",
   "content_delivery_last_publish_files": "文件",
   "content_delivery_last_publish_hint": "上次发布时间",
+  "content_delivery_missing_files_info": "如果您在此处缺少某些文件，请检查内容交付设置。命名空间/语言可能有额外的过滤器。",
   "content_delivery_not_configured_message": "要启用内容分发功能，您需要在 Tolgee 服务器设置中添加内容分发配置。请查阅 Tolgee 文档。",
   "content_delivery_not_configured_title": "内容分发未配置",
   "content_delivery_not_enabled_message": "您的计划不包括多个内容交付配置。升级您的计划以访问此功能。",
