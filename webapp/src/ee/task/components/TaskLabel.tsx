@@ -3,6 +3,7 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { components } from 'tg.service/apiSchema.generated';
 import { TaskNumber, TaskNumberWithLink } from './TaskId';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
+import { AgencyLabel } from 'tg.ee';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -58,6 +59,7 @@ export const TaskLabel = ({
         <TaskNumber taskNumber={task.number} />
       )}
       {!hideType && <TaskTypeChip type={task.type} />}
+      {task.agency && <AgencyLabel agency={task.agency} />}
     </StyledContainer>
   );
 };
