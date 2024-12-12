@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.task
 
+import io.tolgee.hateoas.TranslationAgencySimpleModel
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.project.SimpleProjectModel
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
@@ -26,4 +27,5 @@ data class TaskWithProjectModel(
   var closedAt: Long? = null,
   var state: TaskState = TaskState.IN_PROGRESS,
   var project: SimpleProjectModel,
+  var agency: TranslationAgencySimpleModel? = null,
 ) : RepresentationModel<TaskWithProjectModel>()

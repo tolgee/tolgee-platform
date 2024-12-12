@@ -107,8 +107,7 @@ export const TaskFilter = ({
       size: 1000,
     },
     options: {
-      enabled:
-        !project && Boolean(value.agencies?.length) && config.billing.enabled,
+      enabled: Boolean(value.agencies?.length) && config.billing.enabled,
       keepPreviousData: true,
     },
   });

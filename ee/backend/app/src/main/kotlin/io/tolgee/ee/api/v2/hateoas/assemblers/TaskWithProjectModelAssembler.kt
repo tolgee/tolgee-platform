@@ -2,6 +2,7 @@ package io.tolgee.ee.api.v2.hateoas.assemblers
 
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.ee.api.v2.controllers.TaskController
+import io.tolgee.hateoas.TranslationAgencySimpleModelAssembler
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.hateoas.task.TaskWithProjectModel
@@ -15,6 +16,7 @@ class TaskWithProjectModelAssembler(
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
   private val languageModelAssembler: LanguageModelAssembler,
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
+  private val translationAgencySimpleModelAssembler: TranslationAgencySimpleModelAssembler,
 ) : RepresentationModelAssemblerSupport<TaskWithScopeView, TaskWithProjectModel>(
     TaskController::class.java,
     TaskWithProjectModel::class.java,
@@ -45,6 +47,7 @@ class TaskWithProjectModelAssembler(
       baseCharacterCount = entity.baseCharacterCount,
       state = entity.state,
       project = entity.project.let { simpleProjectModelAssembler.toModel(it) },
+      agency = entity.agency?.let { translationAgencySimpleModelAssembler.toModel(it) },
     )
   }
 }

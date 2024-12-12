@@ -15,7 +15,7 @@ import { SubfilterAssignees } from './SubfilterAssignees';
 import { SubfilterLanguages } from './SubfilterLanguages';
 import { SubfilterProjects } from './SubfilterProjects';
 import { SubfilterAgencies } from './SubfilterAgencies';
-import { useConfig, useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useConfig } from 'tg.globalContext/helpers';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 type TaskType = components['schemas']['TaskModel']['type'];
@@ -59,10 +59,8 @@ export const TaskFilterPopover: React.FC<Props> = ({
   const debouncedOnChange = useDebouncedCallback(onChange, 200);
 
   const config = useConfig();
-  const { isEnabled } = useEnabledFeatures();
 
-  const agencyVisible =
-    config.billing.enabled && isEnabled('ORDER_TRANSLATION');
+  const agencyVisible = config.billing.enabled;
 
   function handleChange(value: TaskFilterType) {
     setValue(value);
@@ -115,7 +113,7 @@ export const TaskFilterPopover: React.FC<Props> = ({
         />
       )}
 
-      {project && agencyVisible && (
+      {agencyVisible && (
         <SubfilterAgencies
           value={value.agencies ?? []}
           onChange={(agencies) => handleChange({ ...value, agencies })}
