@@ -17,7 +17,7 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
-import org.springframework.hateoas.MediaTypes
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -38,7 +38,7 @@ class ProjectStatsController(
   private val languageService: LanguageService,
 ) {
   @Operation(summary = "Get project stats")
-  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("", produces = [MediaType.APPLICATION_JSON_VALUE])
   @UseDefaultPermissions
   @AllowApiAccess
   fun getProjectStats(): ProjectStatsModel {
@@ -73,7 +73,7 @@ class ProjectStatsController(
   }
 
   @Operation(summary = "Get project daily amount of events")
-  @GetMapping("/daily-activity", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/daily-activity")
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
   @AllowApiAccess
   fun getProjectDailyActivity(): Map<LocalDate, Long> {

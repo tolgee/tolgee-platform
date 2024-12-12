@@ -23,7 +23,6 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -46,7 +45,7 @@ class ProjectActivityController(
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
 ) {
   @Operation(summary = "Get project activity")
-  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("")
   @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
   @AllowApiAccess
   fun getActivity(
@@ -57,7 +56,7 @@ class ProjectActivityController(
   }
 
   @Operation(summary = "Get one revision data")
-  @GetMapping("/revisions/{revisionId}", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/revisions/{revisionId}")
   @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
   @AllowApiAccess
   fun getSingleRevision(

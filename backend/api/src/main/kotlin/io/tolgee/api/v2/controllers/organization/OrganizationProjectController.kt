@@ -19,7 +19,6 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
-import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -81,7 +80,7 @@ class OrganizationProjectController(
       "Returns all projects (including statistics)" +
         " where current user has any permission (except none)",
   )
-  @GetMapping("/{organizationId:[0-9]+}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/{organizationId:[0-9]+}/projects-with-stats")
   @UseDefaultPermissions
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
@@ -98,7 +97,7 @@ class OrganizationProjectController(
       "Returns all projects (including statistics) " +
         "where current user has any permission (except none)",
   )
-  @GetMapping("/{slug:.*[a-z].*}/projects-with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/{slug:.*[a-z].*}/projects-with-stats")
   @UseDefaultPermissions
   fun getAllWithStatistics(
     @ParameterObject

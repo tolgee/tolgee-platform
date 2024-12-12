@@ -44,7 +44,6 @@ import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -111,7 +110,7 @@ class ProjectsController(
   }
 
   @Operation(summary = "Get all permitted", description = "Returns all projects where current user has any permission")
-  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("")
   @IsGlobalRoute
   @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAT)
   @OpenApiOrderExtension(3)
@@ -157,7 +156,7 @@ class ProjectsController(
     summary = "Get all with stats",
     description = "Returns all projects (including statistics) where current user has any permission",
   )
-  @GetMapping("/with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("/with-stats")
   @IsGlobalRoute
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
