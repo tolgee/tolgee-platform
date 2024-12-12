@@ -140,6 +140,7 @@ declare namespace DataCy {
         "content-delivery-add-button" |
         "content-delivery-auto-publish-checkbox" |
         "content-delivery-delete-button" |
+        "content-delivery-files-button" |
         "content-delivery-form-custom-slug" |
         "content-delivery-form-name" |
         "content-delivery-form-save" |
@@ -148,6 +149,7 @@ declare namespace DataCy {
         "content-delivery-item-type" |
         "content-delivery-list-item" |
         "content-delivery-prune-before-publish-checkbox" |
+        "content-delivery-published-file" |
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |

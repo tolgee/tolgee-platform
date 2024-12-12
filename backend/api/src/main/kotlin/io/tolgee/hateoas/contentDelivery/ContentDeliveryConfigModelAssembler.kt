@@ -25,6 +25,7 @@ class ContentDeliveryConfigModelAssembler(
       publicUrl = getPublicUrl(entity),
       autoPublish = entity.automationActions.isNotEmpty(),
       lastPublished = entity.lastPublished?.time,
+      lastPublishedFiles = entity.lastPublishedFiles ?: listOf(),
     ).also {
       it.copyPropsFrom(entity)
     }
