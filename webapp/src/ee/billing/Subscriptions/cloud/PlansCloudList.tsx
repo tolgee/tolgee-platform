@@ -36,29 +36,27 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
   const publicPlans = plans.filter((p) => p !== defaultPlan && p.public);
   const customPlans = plans.filter((p) => !p.public);
 
-  const allEnabled = [
-    'ACCOUNT_MANAGER',
-    'AI_PROMPT_CUSTOMIZATION',
-    'DEDICATED_SLACK_CHANNEL',
-    'SLACK_INTEGRATION',
-    'GRANULAR_PERMISSIONS',
-    'MULTIPLE_CONTENT_DELIVERY_CONFIGS',
-    'PREMIUM_SUPPORT',
-    'PRIORITIZED_FEATURE_REQUESTS',
-    'PROJECT_LEVEL_CONTENT_STORAGES',
-    'STANDARD_SUPPORT',
-    'WEBHOOKS',
-    'TASKS',
-    'ORDER_TRANSLATION',
-    'SSO',
-  ] as const satisfies PlanType['enabledFeatures'];
-
   // add enterprise plan
   publicPlans.push({
     id: -1,
     type: 'CONTACT_US',
     name: 'Enterprise',
-    enabledFeatures: allEnabled,
+    enabledFeatures: [
+      'ACCOUNT_MANAGER',
+      'AI_PROMPT_CUSTOMIZATION',
+      'DEDICATED_SLACK_CHANNEL',
+      'SLACK_INTEGRATION',
+      'GRANULAR_PERMISSIONS',
+      'MULTIPLE_CONTENT_DELIVERY_CONFIGS',
+      'PREMIUM_SUPPORT',
+      'PRIORITIZED_FEATURE_REQUESTS',
+      'PROJECT_LEVEL_CONTENT_STORAGES',
+      'STANDARD_SUPPORT',
+      'WEBHOOKS',
+      'TASKS',
+      'ORDER_TRANSLATION',
+      'SSO',
+    ] as const satisfies PlanType['enabledFeatures'],
     free: false,
     hasYearlyPrice: false,
     public: true,
