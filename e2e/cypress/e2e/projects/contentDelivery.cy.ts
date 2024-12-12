@@ -31,17 +31,16 @@ describe('Content delivery', () => {
     contentDeliveryTestData.clean();
   });
 
-  it('publishes content manually', () => {
+  it('publishes content manually and shows files', () => {
     gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
       .findDcy('content-delivery-item-publish')
       .click();
     waitForGlobalLoading();
     assertMessage('Content published successfully!');
     gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })
-      .findDcy('content-delivery-last-published-section')
-      .should('be.visible')
-      .findDcy('content-delivery-published-file')
-      .should('contain', 'en.json');
+      .findDcy('content-delivery-files-button')
+      .click();
+    gcy('content-delivery-published-file').should('contain', 'en.json');
   });
 
   it('creates content delivery', () => {

@@ -140,13 +140,13 @@ declare namespace DataCy {
         "content-delivery-add-button" |
         "content-delivery-auto-publish-checkbox" |
         "content-delivery-delete-button" |
+        "content-delivery-files-button" |
         "content-delivery-form-custom-slug" |
         "content-delivery-form-name" |
         "content-delivery-form-save" |
         "content-delivery-item-edit" |
         "content-delivery-item-publish" |
         "content-delivery-item-type" |
-        "content-delivery-last-published-section" |
         "content-delivery-list-item" |
         "content-delivery-prune-before-publish-checkbox" |
         "content-delivery-published-file" |

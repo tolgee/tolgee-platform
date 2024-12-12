@@ -36,12 +36,13 @@ export const CdFilesRow = ({ data }: Props) => {
   };
 
   return (
-    <StyledLastPublish data-cy="content-delivery-last-published-section">
+    <StyledLastPublish>
       <Box display="flex" justifyContent="space-between" gap={2}>
         {Boolean(data.lastPublishedFiles.length) && (
           <StyledButton
             role="button"
             onClick={() => setShowAllFiles(!showAllFiles)}
+            data-cy="content-delivery-files-button"
           >
             <Box sx={{ fontWeight: 500 }}>
               <T keyName="content_delivery_last_publish_files" />
