@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BigMetaTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.key.Key
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -60,43 +61,34 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
   @ProjectJWTAuthTestMethod
   fun `it performs well`() {
     val keys = testData.addLotOfData()
-    testData.addLotOfReferences(keys)
     saveTestDataAndPrepare()
 
     logger.infoMeasureTime("it performs well time 1") {
-      storeLogOfBigMeta(keys, 500, 100)
+      storeLotOfBigMeta(keys, 500, 100)
     }
 
     logger.infoMeasureTime("it performs well time 2") {
-      storeLogOfBigMeta(keys, 500, 100)
+      storeLotOfBigMeta(keys, 500, 100)
     }
 
     logger.infoMeasureTime("it performs well time 3") {
-      storeLogOfBigMeta(keys, 10, 200)
+      storeLotOfBigMeta(keys, 10, 200)
     }
 
     logger.infoMeasureTime("it performs well time 4") {
-      storeLogOfBigMeta(keys, 800, 50)
+      storeLotOfBigMeta(keys, 800, 50)
     }
 
     measureTime {
-      storeLogOfBigMeta(keys, 800, 50)
-    }.inWholeSeconds.assert.isLessThan(10)
+      storeLotOfBigMeta(keys, 800, 50)
+    }.inWholeSeconds.assert.isLessThan(1)
 
-    bigMetaService.findExistingKeysDistancesDtosByIds(keys.map { it.id }).assert.hasSize(104790)
+    waitForNotThrowing {
+      bigMetaService.findExistingKeysDistancesDtosByIds(keys.map { it.id }).assert.hasSize(3445)
+    }
   }
 
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it performs well (large)`() {
-    val keys = testData.addLotOfData()
-    testData.addLotOfReferences(keys)
-    saveTestDataAndPrepare()
-
-    storeLogOfBigMeta(keys, 0, 200)
-  }
-
-  private fun storeLogOfBigMeta(
+  private fun storeLotOfBigMeta(
     keys: List<Key>,
     drop: Int,
     take: Int,

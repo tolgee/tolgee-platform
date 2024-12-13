@@ -5,7 +5,6 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
-import io.tolgee.service.bigMeta.BigMetaService
 import kotlin.math.abs
 
 class BigMetaTestData {
@@ -42,9 +41,10 @@ class BigMetaTestData {
   fun addLotOfReferences(keys: List<Key>) {
     keys.forEachIndexed forEach1@{ idx1, key1 ->
       keys.forEachIndexed forEach2@{ idx2, key2 ->
-        if (idx1 >= idx2 || abs(idx1 - idx2) > (BigMetaService.MAX_ORDER_DISTANCE + 1)) return@forEach2
+        val distance = abs(idx1 - idx2).toDouble()
+        if (idx1 >= idx2 || distance > (20 + 1)) return@forEach2
         projectBuilder.addKeysDistance(key1, key2) {
-          score = 10000
+          this.distance = distance
           hits = 1
         }
       }
