@@ -168,7 +168,7 @@ class AndroidStringsXmlExporter(
     units[normalizedName] = NodeWrapper(node, isExactKeyName, keyName)
   }
 
-  private fun String.normalizedKeyName() = replace(KEY_REPLACE_REGEX, "_").replace("__", "_")
+  private fun String.normalizedKeyName() = replace(KEY_REPLACE_REGEX, "_")
 
   private class NodeWrapper(
     val node: AndroidXmlNode,
@@ -216,7 +216,7 @@ class AndroidStringsXmlExporter(
       Regex("(?<name>.*)\\[(?<index>\\d+)\\]$")
     }
     val KEY_REPLACE_REGEX by lazy {
-      Regex("[^a-zA-Z0-9_]")
+      Regex("[^a-zA-Z0-9_]+")
     }
   }
 }
