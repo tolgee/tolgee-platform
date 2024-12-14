@@ -71,7 +71,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   }
 
   @Test
-  fun `Doesn't send a message if the subscription isn't global and modified language isn't in preferred languages`() {
+  fun `doesn't send a message if the subscription isn't global and modified language isn't in preferred languages`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
@@ -99,7 +99,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   }
 
   @Test
-  fun `Doesn't send a message if the event isn't in subscribed by user`() {
+  fun `doesn't send a message if the event isn't in subscribed by user`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
