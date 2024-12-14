@@ -1,3 +1,10 @@
+## [3.86.3](https://github.com/tolgee/tolgee-platform/compare/v3.86.2...v3.86.3) (2024-12-14)
+
+
+### Bug Fixes
+
+* android xml export - name normalization - consistently replace unsupported characters with single underscore ([#2779](https://github.com/tolgee/tolgee-platform/issues/2779)) ([da9bfad](https://github.com/tolgee/tolgee-platform/commit/da9bfad1e857e1749d1c4da8a24f3a803217c46d))
+
 ## [3.86.2](https://github.com/tolgee/tolgee-platform/compare/v3.86.1...v3.86.2) (2024-12-12)
 
 
