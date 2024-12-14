@@ -7,11 +7,10 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.key.Key
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
-import io.tolgee.util.infoMeasureTime
-import io.tolgee.util.logger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,7 +53,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
       ),
     ).andIsOk
 
-    bigMetaService.findExistingKeysDistancesDtosByIds(listOf(testData.yepKey.id)).assert.hasSize(1)
+    getDistances(listOf(testData.yepKey.id)).assert.hasSize(1)
   }
 
   @Test
@@ -63,41 +62,61 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
     val keys = testData.addLotOfData()
     saveTestDataAndPrepare()
 
-    logger.infoMeasureTime("it performs well time 1") {
-      storeLotOfBigMeta(keys, 500, 100)
-    }
-
-    logger.infoMeasureTime("it performs well time 2") {
-      storeLotOfBigMeta(keys, 500, 100)
-    }
-
-    logger.infoMeasureTime("it performs well time 3") {
-      storeLotOfBigMeta(keys, 10, 200)
-    }
-
-    logger.infoMeasureTime("it performs well time 4") {
-      storeLotOfBigMeta(keys, 800, 50)
-    }
-
     measureTime {
-      storeLotOfBigMeta(keys, 800, 50)
-    }.inWholeSeconds.assert.isLessThan(1)
+      storeAndAssertSize(keys, 0, 30, 354)
+      storeAndAssertSize(keys, 500, 100, 1409)
+      storeAndAssertSize(keys, 10, 200, 3155)
+      storeAndAssertSize(keys, 800, 50, 3710)
+      storeAndAssertSize(keys, 800, 50, 3710)
+    }.inWholeSeconds.assert.isLessThan(5)
+  }
 
-    waitForNotThrowing {
-      bigMetaService.findExistingKeysDistancesDtosByIds(keys.map { it.id }).assert.hasSize(3445)
+  private fun storeAndAssertSize(
+    allKeys: List<Key>,
+    drop: Int,
+    take: Int,
+    expectedSize: Int,
+  ) {
+    val keyIds = allKeys.map { it.id }
+
+    val stored = storeLotOfBigMeta(allKeys, drop, take)
+    waitForNotThrowing(pollTime = 50, timeout = 2000) {
+      val distances = getDistances(keyIds)
+      assertAllHaveAtLeast20Distances(stored, distances)
+      getDistances(keyIds).assert.hasSize(expectedSize)
     }
+  }
+
+  private fun getDistances(keyIds: List<Long>) = bigMetaService.findExistingKeysDistancesDtosByIds(keyIds)
+
+  private fun assertAllHaveAtLeast20Distances(
+    stored: List<Key>,
+    distances: Set<KeysDistanceDto>,
+  ) {
+    val distancesPerKey =
+      stored.associate { storedKey ->
+        val filtered =
+          distances.filter {
+              distance ->
+            distance.key1Id == storedKey.id || distance.key2Id == storedKey.id
+          }
+        storedKey.id to filtered
+      }
+
+    distancesPerKey.values.assert.allSatisfy { it.assert.hasSizeGreaterThanOrEqualTo(20) }
   }
 
   private fun storeLotOfBigMeta(
     keys: List<Key>,
     drop: Int,
     take: Int,
-  ) {
+  ): List<Key> {
+    val toStore = keys.drop(drop).take(take)
     performProjectAuthPost(
       "big-meta",
       mapOf(
         "relatedKeysInOrder" to
-          keys.drop(drop).take(take).reversed().map {
+          toStore.reversed().map {
             mapOf(
               "namespace" to it.namespace,
               "keyName" to it.name,
@@ -105,6 +124,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
           },
       ),
     ).andIsOk
+    return toStore
   }
 
   @Test

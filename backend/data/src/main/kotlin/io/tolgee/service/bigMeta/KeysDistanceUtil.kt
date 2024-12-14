@@ -27,6 +27,11 @@ class KeysDistanceUtil(
       toStore.addAll(sortedByDistance.take(MAX_STORED))
       toDelete.addAll(sortedByDistance.drop(MAX_STORED).filter { it.stored })
     }
+
+    // for some keys, distance might be out of the window, but for others,
+    // it can still be in the window, we don't want to delete such distances
+    toDelete.removeAll(toStore)
+
     toStore to toDelete
   }
 
