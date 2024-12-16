@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Alert, AlertTitle, Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -21,6 +21,7 @@ import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { BaseProjectView } from '../BaseProjectView';
 import { ImportResultLoadingOverlay } from './component/ImportResultLoadingOverlay';
 import { ImportSettingsPanel } from './component/ImportSettingsPanel';
+import { useImportWarningTranslation } from 'tg.translationTools/useImportWarningTranslation';
 
 export const ImportView: FunctionComponent = () => {
   const dataHelper = useImportDataHelper();
@@ -36,6 +37,7 @@ export const ImportView: FunctionComponent = () => {
   const { refetchUsage } = useGlobalActions();
 
   const { t } = useTranslate();
+  const importWarningTranslation = useImportWarningTranslation();
 
   const onConflictResolutionDialogClose = () => {
     dataHelper.refetchData();
@@ -122,6 +124,20 @@ export const ImportView: FunctionComponent = () => {
             error={e}
             addFilesMutation={dataHelper.addFilesMutation}
           />
+        ))}
+        {dataHelper.addFilesMutation.data?.warnings.map((item) => (
+          <Box key={item.code} mt={4} data-cy="import-file-warnings">
+            <Alert severity="warning">
+              <AlertTitle>
+                {importWarningTranslation(
+                  'import_file_warning_header_' + item.code
+                )}
+              </AlertTitle>
+              {importWarningTranslation(
+                'import_file_warning_message_' + item.code
+              )}
+            </Alert>
+          </Box>
         ))}
         <Box position="relative">
           <ImportResultLoadingOverlay loading={isProgressOverlayActive} />

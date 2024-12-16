@@ -223,6 +223,7 @@ declare namespace DataCy {
         "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
+        "import-file-warnings" |
         "import-override-key-descriptions-checkbox" |
         "import-progress" |
         "import-progress-overlay" |

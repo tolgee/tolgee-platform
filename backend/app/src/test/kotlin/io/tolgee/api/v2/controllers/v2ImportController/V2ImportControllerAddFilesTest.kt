@@ -15,6 +15,7 @@ import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.InMemoryFileStorage
 import io.tolgee.util.performImport
+import net.javacrumbs.jsonunit.core.internal.Node.JsonMap
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
@@ -241,6 +242,8 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `pre-selects namespaces and languages correctly`() {
     val base = dbPopulator.createBase()
+    base.project.useNamespaces = true
+    projectService.save(base.project)
     commitTransaction()
     tolgeeProperties.maxTranslationTextLength = 20
 
@@ -248,7 +251,9 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
       performImport(
         projectId = base.project.id,
         listOf(Pair("namespaces.zip", namespacesZip)),
-      ).andIsOk
+      ).andIsOk.andAssertThatJson {
+        node("warnings").isArray.isEmpty()
+      }
     }
 
     executeInNewTransaction {
@@ -258,6 +263,27 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
         homepageEn!!.languages[0].existingLanguage?.tag.assert.isEqualTo("en")
         val movies = it.files.find { it.namespace == "movies" && it.name == "movies/de.json" }
         movies!!.languages[0].existingLanguage?.tag.assert.isEqualTo("de")
+      }
+    }
+  }
+
+  @Test
+  fun `returns warning and blank namespaces when namespaces are detected but disabled`() {
+    val base = dbPopulator.createBase()
+    base.project.useNamespaces = false
+    projectService.save(base.project)
+    commitTransaction()
+
+    executeInNewTransaction {
+      performImport(
+        projectId = base.project.id,
+        listOf(Pair("namespaces.zip", namespacesZip)),
+      ).andIsOk.andAssertThatJson {
+        node("warnings").isArray.hasSize(1)
+        node("warnings[0].code").isEqualTo("namespace_cannot_be_used_when_feature_is_disabled")
+        node("result._embedded.languages").isArray.allSatisfy {
+          (it as JsonMap)["namespace"].assert.isNull()
+        }
       }
     }
   }

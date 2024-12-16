@@ -80,7 +80,7 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: ImportAddFilesParams = ImportAddFilesParams(),
-  ): MutableList<ErrorResponseBody> {
+  ): Pair<List<ErrorResponseBody>, List<ErrorResponseBody>> {
     val import =
       findNotExpired(project.id, userAccount.id) ?: Import(project).also {
         it.author = userAccount
@@ -110,7 +110,7 @@ class ImportService(
     if (findLanguages(import).isEmpty()) {
       TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
     }
-    return errors
+    return errors to fileProcessor.warnings
   }
 
   @Transactional

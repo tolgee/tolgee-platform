@@ -78,7 +78,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `correctly maps language in single language file`() {
     saveAndPrepare()
-    enableNamespaces()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -96,7 +95,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `correctly maps language in multi language file`() {
     saveAndPrepare()
-    enableNamespaces()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -112,7 +110,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `throws when language not mapped`() {
     saveAndPrepare()
-    enableNamespaces()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -125,7 +122,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `maps languages automatically when possible`() {
     saveAndPrepare()
-    enableNamespaces()
     val fileName = xliffFileName
     performImport(
       projectId = testData.project.id,
@@ -159,6 +155,30 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `namespace mapping fails if namespaces are disabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+      getFileMappings(jsonFileName, namespace = "test"),
+    ).andIsBadRequest.andHasErrorMessage(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `detected namespaces are ignored if namespaces are disabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair("test-namespace/$jsonFileName", simpleJson)),
+    ).andIsOk
+    executeInNewTransaction {
+      getTestTranslation(namespace = null).assert.isNotNull
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `maps null namespace from non-null mapping`() {
     saveAndPrepare()
     enableNamespaces()
@@ -172,6 +192,13 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     executeInNewTransaction {
       getTestTranslation().assert.isNotNull
     }
+
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, simpleJson)),
+      getFileMappings(fileName, namespace = ""),
+    ).andIsOk
+
     performImport(
       projectId = testData.project.id,
       listOf(Pair(fileName, simpleJson)),
@@ -187,7 +214,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `respects provided format`() {
     saveAndPrepare()
-    enableNamespaces()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -213,7 +239,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `imports apple strings file`() {
     saveAndPrepare()
-    enableNamespaces()
     val fileName = "en/Localizable.strings"
     performImport(
       projectId = testData.project.id,
@@ -226,7 +251,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `imports xliff file`() {
     saveAndPrepare()
-    enableNamespaces()
     importXliffFile()
   }
 
@@ -239,7 +263,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     }
 
     saveAndPrepare()
-    enableNamespaces()
     importXliffFile()
 
     assertAutoTranslationTriggered()
@@ -261,7 +284,6 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   fun `removes other keys`() {
     testData.addConflictTranslation()
     saveAndPrepare()
-    enableNamespaces()
     val params = getFileMappings(jsonFileName)
     params["removeOtherKeys"] = true
 
