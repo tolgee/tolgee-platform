@@ -59,6 +59,7 @@ class EeSubscription : AuditModel(), IEeSubscription {
       enabledFeatures = enabledFeatures,
       status = status,
       lastValidCheck = lastValidCheck,
+      nonCommercial = nonCommercial,
     )
   }
 }

@@ -23,7 +23,7 @@ class EeSubscriptionModelAssembler(
       currentUserCount = currentUserCount,
       status = eeSubscription.status,
       lastValidCheck = eeSubscription.lastValidCheck,
-      nonCommerical = eeSubscription.nonCommercial
+      nonCommerical = eeSubscription.nonCommercial,
     )
   }
 }
