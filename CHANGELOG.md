@@ -1,3 +1,10 @@
+# [3.87.0](https://github.com/tolgee/tolgee-platform/compare/v3.86.3...v3.87.0) (2024-12-16)
+
+
+### Features
+
+* content delivery view published files ([#2759](https://github.com/tolgee/tolgee-platform/issues/2759)) ([fc4aa1c](https://github.com/tolgee/tolgee-platform/commit/fc4aa1c84b00e4e9943d5b6005748f4704c8b4e2))
+
 ## [3.86.3](https://github.com/tolgee/tolgee-platform/compare/v3.86.2...v3.86.3) (2024-12-14)
 
 
