@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { Box, styled, useTheme } from '@mui/material';
+import { Box, Chip, styled, Tooltip, useTheme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -46,9 +46,11 @@ export const ActiveEeLicense = ({ info }: Props) => {
             name={info.name}
             status={info.status}
             highlightColor={highlightColor}
+            nonCommercial={false}
           />
           <RefreshButton />
         </Box>
+
         {info.status === 'ACTIVE' ? (
           <PlanFeaturesBox sx={{ gap: '18px', mb: 1 }}>
             <StyledFeatures features={info.enabledFeatures} />
