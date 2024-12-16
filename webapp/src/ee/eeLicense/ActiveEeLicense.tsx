@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { Box, Chip, styled, Tooltip, useTheme } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -46,7 +46,7 @@ export const ActiveEeLicense = ({ info }: Props) => {
             name={info.name}
             status={info.status}
             highlightColor={highlightColor}
-            nonCommercial={false}
+            nonCommercial={info.nonCommerical}
           />
           <RefreshButton />
         </Box>

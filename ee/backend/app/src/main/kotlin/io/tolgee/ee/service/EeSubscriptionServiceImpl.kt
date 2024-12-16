@@ -197,6 +197,7 @@ class EeSubscriptionServiceImpl(
       subscription.enabledFeatures = responseBody.plan.enabledFeatures
       subscription.status = responseBody.status
       subscription.lastValidCheck = currentDateProvider.date
+      subscription.nonCommercial = responseBody.plan.nonCommercial
       self.save(subscription)
     }
   }

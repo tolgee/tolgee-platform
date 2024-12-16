@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Box, Chip, styled, Tooltip, useTheme } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 import { SelfHostedEeSubscriptionActions } from './SelfHostedEeSubscriptionActions';
@@ -12,7 +12,6 @@ import { CollapsedFeatures } from 'tg.ee.module/billing/component/ActiveSubscrip
 import { IncludedUsage } from 'tg.ee.module/billing/component/Plan/IncludedUsage';
 import { PayAsYouGoPrices } from 'tg.ee.module/billing/component/Price/PayAsYouGoPrices';
 import { PricePrimary } from '../../component/Price/PricePrimary';
-import { useTranslate } from '@tolgee/react';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -33,7 +32,6 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
   isNew,
 }) => {
   const period = subscription.currentBillingPeriod;
-  const { t } = useTranslate();
 
   const theme = useTheme();
   const plan = subscription.plan;

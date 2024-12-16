@@ -47,6 +47,9 @@ class EeSubscription : AuditModel(), IEeSubscription {
 
   override var lastValidCheck: Date? = null
 
+  @ColumnDefault("false")
+  var nonCommercial: Boolean = false
+
   fun toDto(): EeSubscriptionDto {
     return EeSubscriptionDto(
       licenseKey = licenseKey,
