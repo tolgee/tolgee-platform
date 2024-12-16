@@ -8,7 +8,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { deleteProject } from '../../common/apiCalls/common';
+import { deleteProject, enableNamespaces } from '../../common/apiCalls/common';
 import {
   getAnyContainingText,
   getClosestContainingText,
@@ -112,6 +112,7 @@ describe('Translations Base', () => {
   });
 
   it('will create translation with namespace', () => {
+    enableNamespaces(project.id);
     cy.wait(100);
     cy.gcy('global-empty-list').should('be.visible');
     createTranslation({

@@ -1,6 +1,7 @@
 import {
   createTestProject,
   deleteProject,
+  enableNamespaces,
   login,
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
@@ -48,6 +49,8 @@ describe('Projects Basics', () => {
   });
 
   it('update default namespace properly', () => {
+    enableNamespaces(projectId);
+
     cy.visit(`${HOST}/projects/${projectId}/translations`);
     createTranslation({ namespace: 'test_namespace', key: 'test' });
 
@@ -62,6 +65,8 @@ describe('Projects Basics', () => {
   });
 
   it('remove default namespace when all keys are removed and selected "none" as a default', () => {
+    enableNamespaces(projectId);
+
     cy.visit(`${HOST}/projects/${projectId}/translations`);
     createTranslation({ namespace: 'test_namespace', key: 'test' });
 
@@ -81,6 +86,8 @@ describe('Projects Basics', () => {
   });
 
   it('remove default namespace when all keys are removed and selected other as a default', () => {
+    enableNamespaces(projectId);
+
     cy.visit(`${HOST}/projects/${projectId}/translations`);
     createTranslation({ namespace: 'test_namespace1', key: 'test1' });
     createTranslation({ namespace: 'test_namespace2', key: 'test2' });
@@ -102,6 +109,8 @@ describe('Projects Basics', () => {
   });
 
   it('default namespace works correctly with single key view', () => {
+    enableNamespaces(projectId);
+
     const key = 'test1';
     const namespace = 'test_namespace1';
     cy.visit(`${HOST}/projects/${projectId}/translations`);

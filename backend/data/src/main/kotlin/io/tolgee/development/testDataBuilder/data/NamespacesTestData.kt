@@ -39,6 +39,7 @@ class NamespacesTestData : BaseTestData() {
     root.apply {
       addProject {
         name = "Project 2"
+        useNamespaces = true
       }.build {
         addKeyWithTranslation("key", null)
         addKeyWithTranslation("key", "ns-1")
@@ -47,6 +48,7 @@ class NamespacesTestData : BaseTestData() {
     root.apply {
       addProject {
         name = "Project 3"
+        useNamespaces = true
         defaultUnusedProject = this
       }.build {
         addKeyWithTranslation("key", "ns-1")
@@ -55,6 +57,7 @@ class NamespacesTestData : BaseTestData() {
     root.apply {
       addProject {
         name = "Project 4"
+        useNamespaces = true
         dotProject = this
       }.build {
         addKeyWithTranslation("key", "ns.1")

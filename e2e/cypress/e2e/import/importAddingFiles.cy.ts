@@ -6,15 +6,17 @@ import {
   visitImport,
 } from '../../common/import';
 import { importTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import { enableNamespaces, login } from '../../common/apiCalls/common';
 
 describe('Import Adding files', () => {
+  let projectId: number;
   beforeEach(() => {
     importTestData.clean();
 
     importTestData.generateBase().then((project) => {
       login('franta');
-      visitImport(project.body.id);
+      projectId = project.body.id;
+      visitImport(projectId);
     });
   });
 
@@ -31,6 +33,7 @@ describe('Import Adding files', () => {
   });
 
   it('uploads .zip with namespaces', () => {
+    enableNamespaces(projectId);
     cy.get('[data-cy=dropzone]').attachFile('import/namespaces.zip', {
       subjectType: 'drag-n-drop',
     });

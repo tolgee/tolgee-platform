@@ -25,10 +25,7 @@ import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -152,6 +149,16 @@ class ProjectsE2eDataController(
         userAccountService.deleteByUserNames(usernames)
       }
     }
+  }
+
+  @PutMapping(value = ["/enable-namespaces"])
+  fun enableNamespaces(
+    @RequestParam("projectId") projectId: Long,
+    @RequestParam("enable", required = false, defaultValue = "true") enable: Boolean,
+  ) {
+    val project = projectService.get(projectId)
+    project.useNamespaces = enable
+    projectService.save(project)
   }
 
   companion object {
