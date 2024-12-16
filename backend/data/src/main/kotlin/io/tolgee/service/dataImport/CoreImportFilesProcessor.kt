@@ -53,7 +53,11 @@ class CoreImportFilesProcessor(
     )
   }
 
-  fun processFiles(files: Collection<ImportFileDto>?): MutableList<ErrorResponseBody> {
+  fun processFiles(files: Collection<ImportFileDto>?): List<ErrorResponseBody> {
+    return processFilesRecursive(files)
+  }
+
+  private fun processFilesRecursive(files: Collection<ImportFileDto>?): List<ErrorResponseBody> {
     val errors = mutableListOf<ErrorResponseBody>()
     files?.forEach {
       try {
@@ -68,7 +72,7 @@ class CoreImportFilesProcessor(
     return errors
   }
 
-  private fun processFileOrArchive(file: ImportFileDto): MutableList<ErrorResponseBody> {
+  private fun processFileOrArchive(file: ImportFileDto): List<ErrorResponseBody> {
     val errors = mutableListOf<ErrorResponseBody>()
 
     if (file.isArchive) {
@@ -76,7 +80,7 @@ class CoreImportFilesProcessor(
     }
 
     processFile(file)
-    return mutableListOf()
+    return listOf()
   }
 
   private fun processFile(file: ImportFileDto) {
@@ -113,7 +117,7 @@ class CoreImportFilesProcessor(
     val processor = importFileProcessorFactory.getArchiveProcessor(archive)
     val files = processor.process(archive)
     val filtered = filterFiles(files.map { it.name to it })
-    errors.addAll(processFiles(filtered))
+    errors.addAll(processFilesRecursive(filtered))
     return errors
   }
 
