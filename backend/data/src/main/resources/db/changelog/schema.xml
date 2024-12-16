@@ -4039,4 +4039,9 @@
         </addColumn>
         <sqlFile path="classpath:db/changelog/enableUseNamespacesForProjectsWithNamespaces.sql" splitStatements="false"/>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1733843923166-1">
+        <addColumn tableName="import_file">
+            <column name="detected_namespace" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
