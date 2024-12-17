@@ -3,7 +3,6 @@ import { T, useTranslate } from '@tolgee/react';
 import {
   Box,
   Button,
-  Chip,
   IconButton,
   ListItem,
   ListItemText,
@@ -21,6 +20,7 @@ import { BaseAdministrationView } from 'tg.views/administration/components/BaseA
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
+import { PlanPublicChip } from '../../component/Plan/PlanPublicChip';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];
 
@@ -86,13 +86,7 @@ export const AdministrationCloudPlansView = () => {
               >
                 <Box display="flex" gap={2} alignItems="center">
                   <ListItemText>{plan.name}</ListItemText>
-                  {plan.public && (
-                    <Chip
-                      data-cy="administration-cloud-plans-item-public-badge"
-                      size="small"
-                      label={t('administration_cloud_plan_public_badge')}
-                    />
-                  )}
+                  <PlanPublicChip isPublic={plan.public} />
                 </Box>
                 <Box>
                   <Button
