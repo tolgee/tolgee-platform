@@ -31,6 +31,10 @@ describe('Projects Basics', () => {
       .first()
       .type('Test description');
 
+    cy.gcy('default-namespace-select').should('not.exist');
+    cy.gcy('project-settings-use-namespaces-checkbox').click();
+    cy.gcy('default-namespace-select').should('be.visible');
+
     cy.gcy('global-form-save-button').click();
     cy.reload();
     cy.gcy('project-settings-name')
@@ -40,6 +44,10 @@ describe('Projects Basics', () => {
     cy.gcy('project-settings-description')
       .contains('Test description')
       .should('be.visible');
+
+    cy.gcy('project-settings-use-namespaces-checkbox')
+      .find('input[type=checkbox]')
+      .should('be.checked');
 
     // shows description on dashboard page
     cy.visit(`${HOST}/projects/${projectId}`);
