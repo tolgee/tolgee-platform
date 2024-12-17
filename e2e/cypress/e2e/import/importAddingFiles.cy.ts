@@ -56,6 +56,15 @@ describe('Import Adding files', () => {
     ).should('have.length', 2);
   });
 
+  it('uploads .zip with namespaces when namespaces are disabled', () => {
+    cy.get('[data-cy=dropzone]').attachFile('import/namespaces.zip', {
+      subjectType: 'drag-n-drop',
+    });
+
+    cy.gcy('import-file-warnings').should('be.visible');
+    cy.gcy('namespaces-selector').should('not.exist');
+  });
+
   it(
     'uploads multiple xliffs',
     {
