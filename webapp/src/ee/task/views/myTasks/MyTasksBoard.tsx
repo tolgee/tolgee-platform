@@ -41,6 +41,7 @@ export const MyTasksBoard = ({
       ...query,
       filterState: showClosed ? ['DONE', 'CLOSED'] : ['DONE'],
       filterDoneMinClosedAt: filter.doneMinClosedAt,
+      filterAgency: filter.agencies,
     },
   });
 

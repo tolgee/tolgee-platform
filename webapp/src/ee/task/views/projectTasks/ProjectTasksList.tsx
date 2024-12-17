@@ -52,6 +52,7 @@ export const ProjectTasksList = ({
       filterLanguage: filter.languages,
       filterType: filter.types,
       filterDoneMinClosedAt: filter.doneMinClosedAt,
+      filterAgency: filter.agencies,
     },
     options: {
       keepPreviousData: true,

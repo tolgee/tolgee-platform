@@ -114,7 +114,6 @@ describe('project tasks', () => {
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-languages').click();
     cy.gcy('create-task-field-languages-item').contains('Czech').click();
-    cy.gcy('create-task-field-languages-item').contains('English').click();
     dismissMenu();
     cy.waitForDom();
 
@@ -124,13 +123,6 @@ describe('project tasks', () => {
       alert: false,
       words: 8,
       characters: 52,
-    });
-    checkTaskPreview({
-      language: 'English',
-      keys: 2,
-      alert: true,
-      words: 4,
-      characters: 26,
     });
   });
 
@@ -164,7 +156,6 @@ describe('project tasks', () => {
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-languages').click();
     cy.gcy('create-task-field-languages-item').contains('Czech').click();
-    cy.gcy('create-task-field-languages-item').contains('English').click();
     dismissMenu();
 
     cy.gcy('translations-state-filter').click();
@@ -178,13 +169,6 @@ describe('project tasks', () => {
       alert: false,
       words: 4,
       characters: 26,
-    });
-    checkTaskPreview({
-      language: 'English',
-      keys: 0,
-      alert: false,
-      words: 0,
-      characters: 0,
     });
   });
 });

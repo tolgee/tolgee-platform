@@ -47,6 +47,7 @@ export const MyTasksList = ({
       filterProject: filter.projects,
       filterType: filter.types,
       filterDoneMinClosedAt: filter.doneMinClosedAt,
+      filterAgency: filter.agencies,
     },
     options: {
       keepPreviousData: true,

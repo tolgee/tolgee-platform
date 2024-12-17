@@ -1,3 +1,31 @@
+# [3.87.0](https://github.com/tolgee/tolgee-platform/compare/v3.86.3...v3.87.0) (2024-12-16)
+
+
+### Features
+
+* content delivery view published files ([#2759](https://github.com/tolgee/tolgee-platform/issues/2759)) ([fc4aa1c](https://github.com/tolgee/tolgee-platform/commit/fc4aa1c84b00e4e9943d5b6005748f4704c8b4e2))
+
+## [3.86.3](https://github.com/tolgee/tolgee-platform/compare/v3.86.2...v3.86.3) (2024-12-14)
+
+
+### Bug Fixes
+
+* android xml export - name normalization - consistently replace unsupported characters with single underscore ([#2779](https://github.com/tolgee/tolgee-platform/issues/2779)) ([da9bfad](https://github.com/tolgee/tolgee-platform/commit/da9bfad1e857e1749d1c4da8a24f3a803217c46d))
+
+## [3.86.2](https://github.com/tolgee/tolgee-platform/compare/v3.86.1...v3.86.2) (2024-12-12)
+
+
+### Bug Fixes
+
+* stuff forgotten in rebase + update enterprise plan ([#2774](https://github.com/tolgee/tolgee-platform/issues/2774)) ([c5b2854](https://github.com/tolgee/tolgee-platform/commit/c5b2854726a68cf79932f62cb559a68b133d26b9))
+
+## [3.86.1](https://github.com/tolgee/tolgee-platform/compare/v3.86.0...v3.86.1) (2024-12-12)
+
+
+### Bug Fixes
+
+* Make hal+json responses just json ([#2773](https://github.com/tolgee/tolgee-platform/issues/2773)) ([a30c7cd](https://github.com/tolgee/tolgee-platform/commit/a30c7cd6f66b19c85b6d9cdd86f1a47588d9ba8a))
+
 # [3.86.0](https://github.com/tolgee/tolgee-platform/compare/v3.85.1...v3.86.0) (2024-12-11)
 
 

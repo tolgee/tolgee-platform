@@ -4009,6 +4009,11 @@
             <column name="deleted_at" type="timestamp(6)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1733757292979-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="last_published_files" type="jsonb"/>
+        </addColumn>
+    </changeSet>
     <changeSet author="jenik" id="1734092854306-1">
         <addColumn tableName="keys_distance">
             <column name="distance" type="float(53)" defaultValue="0">

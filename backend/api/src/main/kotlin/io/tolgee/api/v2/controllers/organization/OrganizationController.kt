@@ -51,7 +51,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
-import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -148,7 +147,7 @@ class OrganizationController(
     return OrganizationView.of(organization, roleType).toModel()
   }
 
-  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("")
   @Operation(
     summary = "Get all permitted organizations",
     description = "Returns all organizations, which is current user allowed to view",
