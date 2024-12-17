@@ -88,12 +88,13 @@ export function loginAndGetInfo(user: UserMail, projectId: number) {
 
 export function visitProjectWithPermissions(
   options: Partial<PermissionsOptions>,
+  useNamespaces = false,
   user: UserMail = 'me@me.me'
 ): Promise<ProjectInfo> {
   return new Cypress.Promise<ProjectInfo>((resolve) => {
     generatePermissionsData
       .clean()
-      .then(() => generatePermissionsData.generate(options))
+      .then(() => generatePermissionsData.generate(options, useNamespaces))
       .then((res) => {
         return res.body.projects[0].id;
       })

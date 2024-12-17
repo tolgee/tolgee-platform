@@ -6,7 +6,7 @@ import {
 
 describe('Permissions translations 1', () => {
   it('translations.view', () => {
-    visitProjectWithPermissions({ scopes: ['translations.view'] }).then(
+    visitProjectWithPermissions({ scopes: ['translations.view'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
@@ -19,7 +19,7 @@ describe('Permissions translations 1', () => {
   });
 
   it('translations.edit', () => {
-    visitProjectWithPermissions({ scopes: ['translations.edit'] }).then(
+    visitProjectWithPermissions({ scopes: ['translations.edit'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,

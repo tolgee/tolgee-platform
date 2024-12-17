@@ -6,10 +6,13 @@ import {
 
 describe('Permissions per language 2', () => {
   it('translations.state-edit', () => {
-    visitProjectWithPermissions({
-      scopes: ['translations.view', 'translations.state-edit'],
-      stateChangeLanguageTags: ['de'],
-    }).then((projectInfo) => {
+    visitProjectWithPermissions(
+      {
+        scopes: ['translations.view', 'translations.state-edit'],
+        stateChangeLanguageTags: ['de'],
+      },
+      true
+    ).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,
@@ -20,11 +23,14 @@ describe('Permissions per language 2', () => {
   });
 
   it('combined translations.edit and translations.state-edit', () => {
-    visitProjectWithPermissions({
-      scopes: ['translations.edit', 'translations.state-edit'],
-      translateLanguageTags: ['cs'],
-      stateChangeLanguageTags: ['de'],
-    }).then((projectInfo) => {
+    visitProjectWithPermissions(
+      {
+        scopes: ['translations.edit', 'translations.state-edit'],
+        translateLanguageTags: ['cs'],
+        stateChangeLanguageTags: ['de'],
+      },
+      true
+    ).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,

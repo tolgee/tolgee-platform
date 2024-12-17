@@ -6,7 +6,7 @@ import {
 
 describe('Permissions task', () => {
   it('tasks.view', () => {
-    visitProjectWithPermissions({ scopes: ['tasks.view'] }).then(
+    visitProjectWithPermissions({ scopes: ['tasks.view'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
@@ -20,7 +20,7 @@ describe('Permissions task', () => {
   });
 
   it('tasks.edit', () => {
-    visitProjectWithPermissions({ scopes: ['tasks.edit'] }).then(
+    visitProjectWithPermissions({ scopes: ['tasks.edit'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
