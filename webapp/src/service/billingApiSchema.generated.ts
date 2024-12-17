@@ -130,6 +130,9 @@ export interface paths {
   "/v2/administration/billing/self-hosted-ee-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations"];
   };
+  "/v2/administration/billing/organizations": {
+    get: operations["getOrganizations"];
+  };
   "/v2/administration/billing/features": {
     get: operations["getAllFeatures"];
   };
@@ -651,6 +654,16 @@ export interface components {
       stripeProductId: string;
       forOrganizationIds: number[];
     };
+    AutoAssignOrganizationDto: {
+      /** Format: int64 */
+      organizationId: number;
+      /**
+       * Format: int64
+       * @description Trial end in milliseconds since epoch
+       * @example 1630000000000
+       */
+      trialEnd?: number;
+    };
     CloudPlanRequest: {
       name: string;
       free: boolean;
@@ -687,7 +700,7 @@ export interface components {
       /** Format: date-time */
       usableUntil?: string;
       forOrganizationIds: number[];
-      autoAssignOrganizationIds: number[];
+      autoAssignOrganizations: components["schemas"]["AutoAssignOrganizationDto"][];
     };
     CloudPlanAdministrationModel: {
       /** Format: int64 */
@@ -1001,6 +1014,17 @@ export interface components {
       description?: string;
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
+    };
+    OrganizationWithSubscriptionsModel: {
+      organization: components["schemas"]["SimpleOrganizationModel"];
+      cloudSubscription?: components["schemas"]["CloudSubscriptionModel"];
+      selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionModel"][];
+    };
+    PagedModelOrganizationWithSubscriptionsModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["OrganizationWithSubscriptionsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     CollectionModelCloudPlanAdministrationModel: {
       _embedded?: {
@@ -3276,6 +3300,61 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getOrganizations: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+        withCloudPlanId?: number;
+        hasSelfHostedSubscription?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelOrganizationWithSubscriptionsModel"];
         };
       };
       /** Bad Request */

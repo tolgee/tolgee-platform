@@ -65,6 +65,7 @@ import { addAdministrationMenuItems } from '../views/administration/components/B
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import { BillingMenuItemsProps } from './EeModuleType';
+import { AdministrationSubscriptions } from '../ee/billing/administration/subscriptions/AdministrationSubscriptions';
 
 export const billingMenuItems = [
   BillingMenuItem,
@@ -105,6 +106,9 @@ export const routes = {
         path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.template}
       >
         <AdministrationCloudPlansView />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.ADMINISTRATION_BILLING_SUBSCRIPTIONS.template}>
+        <AdministrationSubscriptions />
       </PrivateRoute>
       <PrivateRoute
         exact
@@ -343,6 +347,12 @@ export const useAddAdministrationMenuItems = () => {
         link: LINKS.ADMINISTRATION_EE_LICENSE,
         label: t('administration_ee_license'),
         condition: () => true,
+      },
+      {
+        id: 'subscriptions',
+        link: LINKS.ADMINISTRATION_BILLING_SUBSCRIPTIONS,
+        label: t('administration_subscriptions'),
+        condition: () => config.billing.enabled,
       },
       {
         id: 'translation_agencies',
