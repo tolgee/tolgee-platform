@@ -1225,6 +1225,11 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+      /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
        */
@@ -1258,11 +1263,6 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -1945,8 +1945,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2384,15 +2384,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2550,17 +2550,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      scopes: string[];
-      description: string;
+      userFullName?: string;
+      projectName: string;
       username?: string;
+      scopes: string[];
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      projectName: string;
-      userFullName?: string;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -3713,6 +3713,7 @@ export interface components {
       closedAt?: number;
       state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
       project: components["schemas"]["SimpleProjectModel"];
+      agency?: components["schemas"]["TranslationAgencySimpleModel"];
     };
     UserPreferencesModel: {
       language?: string;
@@ -3851,11 +3852,6 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
       /**
        * @description The role of currently authorized user.
        *
@@ -3863,6 +3859,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -4037,20 +4038,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
-      description?: string;
       baseTranslation?: string;
+      translation?: string;
+      description?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
-      description?: string;
       baseTranslation?: string;
+      translation?: string;
+      description?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4651,15 +4652,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      description: string;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4778,17 +4779,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      scopes: string[];
-      description: string;
+      userFullName?: string;
+      projectName: string;
       username?: string;
+      scopes: string[];
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      projectName: string;
-      userFullName?: string;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -11217,7 +11218,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectModel"];
+          "application/json": components["schemas"]["PagedModelProjectModel"];
         };
       };
       /** Bad Request */
@@ -13939,7 +13940,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
+          "application/json": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
       /** Bad Request */
@@ -15899,7 +15900,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["ProjectActivityModel"];
+          "application/json": components["schemas"]["ProjectActivityModel"];
         };
       };
       /** Bad Request */
@@ -15954,7 +15955,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
+          "application/json": components["schemas"]["PagedModelProjectActivityModel"];
         };
       };
       /** Bad Request */
@@ -17054,7 +17055,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": { [key: string]: number };
+          "application/json": { [key: string]: number };
         };
       };
       /** Bad Request */
@@ -17101,7 +17102,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["ProjectStatsModel"];
+          "application/json": components["schemas"]["ProjectStatsModel"];
         };
       };
       /** Bad Request */
@@ -17300,7 +17301,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -17547,7 +17548,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -17842,7 +17843,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */

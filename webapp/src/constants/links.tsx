@@ -219,6 +219,11 @@ export class LINKS {
     'ee-plans'
   );
 
+  static ADMINISTRATION_BILLING_SUBSCRIPTIONS = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'subscriptions'
+  );
+
   static ADMINISTRATION_BILLING_EE_PLAN_EDIT = Link.ofParent(
     LINKS.ADMINISTRATION_BILLING_EE_PLANS,
     p(PARAMS.PLAN_ID)

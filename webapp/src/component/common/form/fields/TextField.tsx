@@ -13,8 +13,7 @@ export const TextField: FunctionComponent<Props> = (props) => {
   const [field, meta] = useField(props.name);
   const [oldValue, setOldValue] = useState(field.value);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { onValueChange, ...otherProps } = props;
+  const { onValueChange: _, ...otherProps } = props;
 
   useEffect(() => {
     if (typeof props.onValueChange === 'function' && oldValue !== field.value) {
