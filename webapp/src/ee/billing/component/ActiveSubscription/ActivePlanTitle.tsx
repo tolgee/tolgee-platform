@@ -1,5 +1,5 @@
-import { T } from '@tolgee/react';
-import { Box, Typography } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import { Box, Chip, Tooltip, Typography } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
@@ -14,6 +14,7 @@ type Props = {
   periodStart?: number;
   periodEnd?: number;
   highlightColor: string;
+  nonCommercial: boolean;
 };
 
 export const ActivePlanTitle = ({
@@ -22,14 +23,28 @@ export const ActivePlanTitle = ({
   periodStart,
   periodEnd,
   highlightColor,
+  nonCommercial,
 }: Props) => {
   const formatDate = useDateFormatter();
+  const { t } = useTranslate();
 
   return (
     <Box sx={{ mb: 1 }}>
-      <PlanTitleText sx={{ color: highlightColor, mb: 1 }}>
-        {name}
-      </PlanTitleText>
+      <Box display="flex" alignItems="center" gap={2}>
+        <PlanTitleText sx={{ color: highlightColor, mb: 1 }}>
+          {name}
+        </PlanTitleText>
+        {nonCommercial && (
+          <Tooltip title={t('billing_plan_non_commercial_hint')}>
+            <Chip
+              sx={{ mt: -1 }}
+              label={t('billing_plan_non_commercial_label')}
+              size="small"
+              color="success"
+            />
+          </Tooltip>
+        )}
+      </Box>
       <Box display="grid">
         {createdAt && (
           <Typography variant="caption">

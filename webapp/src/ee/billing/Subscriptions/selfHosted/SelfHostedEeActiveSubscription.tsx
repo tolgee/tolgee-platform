@@ -52,6 +52,7 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
         <Box display="flex" justifyContent="space-between">
           <ActivePlanTitle
             name={plan.name}
+            nonCommercial={plan.nonCommercial}
             status={subscription.status}
             createdAt={subscription.createdAt}
             periodStart={subscription.currentPeriodStart}

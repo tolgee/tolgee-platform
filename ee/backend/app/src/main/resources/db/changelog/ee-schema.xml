@@ -60,4 +60,11 @@
     <changeSet author="jenik (generated)" id="1706777078864-1">
         <dropNotNullConstraint columnDataType="timestamp(6)" columnName="current_period_end" tableName="ee_subscription"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1734364086358-1">
+        <addColumn tableName="ee_subscription">
+            <column defaultValueBoolean="false" name="non_commercial" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
