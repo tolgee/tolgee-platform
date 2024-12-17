@@ -8,8 +8,8 @@ import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
 import { assertMessage, dismissMenu, gcyAdvanced } from './shared';
-import Chainable = Cypress.Chainable;
 import { selectNamespace } from './namespace';
+import Chainable = Cypress.Chainable;
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -44,6 +44,7 @@ type Props = {
   namespace?: string;
   description?: string;
   variableName?: string;
+  assertPresenceOfNamespaceSelectBox?: boolean;
 };
 
 export function createTranslation({
@@ -53,9 +54,15 @@ export function createTranslation({
   namespace,
   description,
   variableName,
+  assertPresenceOfNamespaceSelectBox,
 }: Props) {
   waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
+  if (assertPresenceOfNamespaceSelectBox != undefined) {
+    cy.gcy('namespaces-selector').should(
+      assertPresenceOfNamespaceSelectBox ? 'exist' : 'not.exist'
+    );
+  }
   cy.gcy('translation-create-key-input').type(key);
   if (namespace) {
     selectNamespace(namespace);

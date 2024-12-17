@@ -42,7 +42,7 @@ describe('Translations Base', () => {
   });
 
   it(
-    'will create translation',
+    'will create translation without namespace',
     {
       retries: { openMode: 0, runMode: 10 },
     },
@@ -52,6 +52,7 @@ describe('Translations Base', () => {
       createTranslation({
         key: 'Test key',
         translation: 'Translated test key',
+        assertPresenceOfNamespaceSelectBox: false,
       });
       cy.contains('Key created').should('be.visible');
       cy.wait(100);
@@ -119,6 +120,7 @@ describe('Translations Base', () => {
       key: 'Test key',
       translation: 'Translated test key',
       namespace: 'test-ns',
+      assertPresenceOfNamespaceSelectBox: true,
     });
 
     cy.gcy('translations-namespace-banner')
