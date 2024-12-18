@@ -243,11 +243,13 @@ class ApiKeyService(
   }
 
   private fun logTransactionIsolation() {
+    val isolationLevel =
+      entityManager.createNativeQuery("show transaction_isolation")
+        .singleResult as String
+    val message = "Transaction isolation level: $isolationLevel"
+    Sentry.addBreadcrumb(message)
     if (logger.isDebugEnabled) {
-      val isolationLevel =
-        entityManager.createNativeQuery("show transaction_isolation")
-          .singleResult as String
-      logger.debug("Transaction isolation level: $isolationLevel")
+      logger.debug(message)
     }
   }
 
