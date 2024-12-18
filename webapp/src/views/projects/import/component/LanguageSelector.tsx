@@ -24,6 +24,7 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 
 const StyledItem = styled(MenuItem)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
+
   &.addNewItem {
     color: ${({ theme }) => theme.palette.primary.main};
   }
@@ -106,9 +107,7 @@ export const LanguageSelector: React.FC<{
                   <XClose />
                 </IconButton>
               </StyledInputAdornment>
-            ) : (
-              <></>
-            )
+            ) : null
           }
           labelId="import_row_language_select"
           value={props.value || ''}

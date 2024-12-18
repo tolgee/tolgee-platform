@@ -19,7 +19,7 @@ export const ProjectProfileAvatar = () => {
   const project = useProject();
 
   if (!project) {
-    return <></>;
+    return null;
   }
 
   return (
