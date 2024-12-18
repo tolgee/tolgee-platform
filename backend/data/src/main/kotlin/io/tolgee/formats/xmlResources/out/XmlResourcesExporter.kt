@@ -16,7 +16,7 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
 
-class AndroidStringsXmlExporter(
+class XmlResourcesExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
@@ -207,7 +207,7 @@ class AndroidStringsXmlExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     return getModels().map { (path, model) ->
-      path to AndroidStringsXmlFileWriter(model).produceFiles()
+      path to XmlResourcesFileWriter(model, exportParams.format).produceFiles()
     }.toMap()
   }
 

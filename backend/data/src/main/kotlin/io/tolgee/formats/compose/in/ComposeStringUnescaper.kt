@@ -24,13 +24,7 @@ class ComposeStringUnescaper(
 
   val result: String
     get() =
-      resultSeq.fold(StringBuilder()) { acc, c ->
-        acc.append(c)
-      }.toString()
-
-  val resultSeq: Sequence<Char>
-    get() =
-      sequence {
+      buildString {
         var state = initialState
         for (char in string) {
           state =
@@ -39,12 +33,12 @@ class ComposeStringUnescaper(
                 when (char) {
                   escapeMark -> State.ESCAPED
                   else -> {
-                    yield(char)
+                    append(char)
                     state
                   }
                 }
               State.ESCAPED -> {
-                char.unescape().forEach { yield(it) }
+                char.unescape().forEach { append(it) }
                 State.NORMAL
               }
             }
@@ -52,7 +46,7 @@ class ComposeStringUnescaper(
 
         when (state) {
           State.NORMAL -> {}
-          State.ESCAPED -> yield(escapeMark)
+          State.ESCAPED -> append(escapeMark)
         }
       }
 

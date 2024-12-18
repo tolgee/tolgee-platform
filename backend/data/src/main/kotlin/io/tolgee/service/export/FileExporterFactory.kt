@@ -13,7 +13,7 @@ import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
-import io.tolgee.formats.xmlResources.out.AndroidStringsXmlExporter
+import io.tolgee.formats.xmlResources.out.XmlResourcesExporter
 import io.tolgee.formats.yaml.out.YamlFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
@@ -78,14 +78,9 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport,
         )
 
-      ExportFormat.ANDROID_XML -> AndroidStringsXmlExporter(data, exportParams, projectIcuPlaceholdersSupport)
+      ExportFormat.ANDROID_XML -> XmlResourcesExporter(data, exportParams, projectIcuPlaceholdersSupport)
 
-      ExportFormat.COMPOSE_XML ->
-        AndroidStringsXmlExporter(
-          data,
-          exportParams,
-          projectIcuPlaceholdersSupport,
-        ) // TODO: Compose XML exporter
+      ExportFormat.COMPOSE_XML -> XmlResourcesExporter(data, exportParams, projectIcuPlaceholdersSupport)
 
       ExportFormat.PO ->
         PoFileExporter(
