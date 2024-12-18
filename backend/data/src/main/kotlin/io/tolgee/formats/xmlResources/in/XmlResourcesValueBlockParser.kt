@@ -4,7 +4,6 @@ import io.tolgee.formats.blockXmlParser.BlockXmlParser
 import io.tolgee.formats.blockXmlParser.ModelCharacters
 import io.tolgee.formats.blockXmlParser.ModelElement
 import io.tolgee.formats.blockXmlParser.ModelNode
-import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import javax.xml.stream.events.XMLEvent
 
@@ -19,7 +18,10 @@ import javax.xml.stream.events.XMLEvent
  *  - removes unsupported tags
  *  - replaces CDATA nodes with inner text
  */
-class XmlResourcesValueBlockParser(private val stringUnescaper: StringUnescaper) {
+class XmlResourcesValueBlockParser(
+  private val stringUnescaper: StringUnescaper,
+  private val supportedTags: Set<String>,
+) {
   private val blockXmlParser = BlockXmlParser()
 
   fun onXmlEvent(event: XMLEvent) {
@@ -73,7 +75,7 @@ class XmlResourcesValueBlockParser(private val stringUnescaper: StringUnescaper)
 
   private fun replaceWithTextIfUnsupported(node: ModelNode) {
     if (node !is ModelElement) return
-    if (node.name !in XmlResourcesParsingConstants.supportedTags) {
+    if (node.name !in supportedTags) {
       val parentsChildren = node.parent?.children
       val index = parentsChildren?.indexOf(node) ?: return
       parentsChildren[index] = ModelCharacters(node.getText(), false, blockXmlParser.getAndIncrementId(), node.parent)

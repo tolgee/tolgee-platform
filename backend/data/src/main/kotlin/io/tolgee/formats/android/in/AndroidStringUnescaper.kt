@@ -89,7 +89,7 @@ class AndroidStringUnescaper(
         }
       }
       State.ESCAPED -> {
-        append(char.unescape().asSequence())
+        append(char.unescape())
         when (char) {
           in spacesToTrim -> State.AFTER_SPACE
           else -> State.NORMAL
@@ -105,7 +105,7 @@ class AndroidStringUnescaper(
           }
         }
       State.QUOTED_ESCAPED -> {
-        append(char.unescape().asSequence())
+        append(char.unescape())
         State.QUOTED
       }
     }

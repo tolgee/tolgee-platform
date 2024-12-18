@@ -10,6 +10,7 @@ import io.tolgee.formats.xmlResources.PluralUnit
 import io.tolgee.formats.xmlResources.StringArrayUnit
 import io.tolgee.formats.xmlResources.StringUnit
 import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
+import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLEventReader
@@ -33,7 +34,11 @@ class XmlResourcesProcessor(
 
   private fun parse() =
     try {
-      XmlResourcesParser(xmlEventReader, stringUnescaper).parse()
+      XmlResourcesParser(
+        xmlEventReader,
+        stringUnescaper,
+        supportedTags,
+      ).parse()
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
     }
@@ -158,6 +163,13 @@ class XmlResourcesProcessor(
       ComposeStringUnescaper.defaultFactory
     } else {
       AndroidStringUnescaper.defaultFactory
+    }
+
+  private val supportedTags =
+    if (importFormat == ImportFormat.COMPOSE_XML) {
+      emptySet()
+    } else {
+      XmlResourcesParsingConstants.androidSupportedTags
     }
 
   companion object {

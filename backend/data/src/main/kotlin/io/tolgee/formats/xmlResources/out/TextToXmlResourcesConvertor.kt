@@ -132,7 +132,7 @@ class TextToXmlResourcesConvertor(
         textNodes.add(node)
       }
       if (node.nodeType == Node.ELEMENT_NODE) {
-        if (node.nodeName.lowercase() !in XmlResourcesParsingConstants.supportedTags) {
+        if (!isAndroid || node.nodeName.lowercase() !in XmlResourcesParsingConstants.androidSupportedTags) {
           unsupportedTagNodes.add(node)
         } else {
           containsTags = true

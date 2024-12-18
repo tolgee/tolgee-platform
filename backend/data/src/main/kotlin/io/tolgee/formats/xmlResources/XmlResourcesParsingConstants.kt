@@ -1,7 +1,7 @@
 package io.tolgee.formats.xmlResources
 
 object XmlResourcesParsingConstants {
-  val supportedTags =
+  val androidSupportedTags =
     setOf(
       "b", "i", "cite", "dfn", "em",
       "big", "small", "font",
