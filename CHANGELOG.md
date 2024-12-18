@@ -1,3 +1,10 @@
+## [3.87.2](https://github.com/tolgee/tolgee-platform/compare/v3.87.1...v3.87.2) (2024-12-18)
+
+
+### Bug Fixes
+
+* enabledFeatures on self-hosted instances & Sentry false positives ([#2787](https://github.com/tolgee/tolgee-platform/issues/2787)) ([9be6420](https://github.com/tolgee/tolgee-platform/commit/9be6420e434e7424c55ff71e85da19c19f3e6408))
+
 ## [3.87.1](https://github.com/tolgee/tolgee-platform/compare/v3.87.0...v3.87.1) (2024-12-17)
 
 
