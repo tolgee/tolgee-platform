@@ -33,7 +33,11 @@ class FlutterArbFileProcessor(
   }
 
   private val parsed by lazy {
-    FlutterArbFileParser(context.file.data, objectMapper).parse()
+    try {
+      FlutterArbFileParser(context.file.data, objectMapper).parse()
+    } catch (e: Exception) {
+      throw FlutterArbFileParseException(context.file.name, e)
+    }
   }
 
   fun convertMessage(text: String?): MessageConvertorResult {
