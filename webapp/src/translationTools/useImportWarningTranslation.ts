@@ -5,16 +5,20 @@ export function useImportWarningTranslation() {
 
   return (code: string) => {
     switch (code.toLocaleLowerCase()) {
-      case 'import_file_warning_header_namespace_cannot_be_used_when_feature_is_disabled':
-        return t(
-          'import_file_warning_header_namespace_cannot_be_used_when_feature_is_disabled'
-        );
-      case 'import_file_warning_message_namespace_cannot_be_used_when_feature_is_disabled':
-        return t(
-          'import_file_warning_message_namespace_cannot_be_used_when_feature_is_disabled'
-        );
+      case 'namespace_cannot_be_used_when_feature_is_disabled':
+        return {
+          title: t(
+            'warning_header_namespace_cannot_be_used_when_feature_is_disabled'
+          ),
+          message: t(
+            'warning_message_namespace_cannot_be_used_when_feature_is_disabled'
+          ),
+        };
       default:
-        return code;
+        return {
+          title: `warning_header_${code}`,
+          message: `warning_message_${code}`,
+        };
     }
   };
 }

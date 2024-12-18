@@ -155,14 +155,6 @@ export function useErrorTranslation() {
         return t('namespace_cannot_be_used_when_feature_is_disabled');
       case 'namespaces_cannot_be_disabled_when_namespace_exists':
         return t('namespaces_cannot_be_disabled_when_namespace_exists');
-      case 'import_file_warning_header_namespace_cannot_be_used_when_feature_is_disabled':
-        return t(
-          'import_file_warning_header_namespace_cannot_be_used_when_feature_is_disabled'
-        );
-      case 'import_file_warning_message_namespace_cannot_be_used_when_feature_is_disabled':
-        return t(
-          'import_file_warning_message_namespace_cannot_be_used_when_feature_is_disabled'
-        );
       default:
         return code;
     }
