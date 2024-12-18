@@ -399,10 +399,11 @@ class ImportTestData {
     }.build {
       addImportLanguage {
         name = "fr"
+        existingLanguage = french
         importFrenchInNs = this
       }.build addFrLang@{
         addImportKey {
-          name = "what a key"
+          name = "what a key with a namespace"
         }.build addImportKey@{
           addImportTranslation {
             language = this@addFrLang.self
