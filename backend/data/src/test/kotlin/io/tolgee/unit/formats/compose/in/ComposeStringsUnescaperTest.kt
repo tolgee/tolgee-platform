@@ -13,7 +13,7 @@ class ComposeStringsUnescaperTest {
   @Test
   fun `unquoted spaces are kept`() {
     " \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 ".assertUnescaped(
-      " \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 "
+      " \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 a \n\t\u0020\u2008\u2003 ",
     )
   }
 
