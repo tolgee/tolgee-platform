@@ -16,6 +16,7 @@ import javax.xml.stream.events.XMLEvent
 class XmlResourcesParser(
   private val xmlEventReader: XMLEventReader,
   private val stringUnescaper: StringUnescaper,
+  private val supportedTags: Set<String>,
 ) {
   private val result = XmlResourcesStringsModel()
   private var currentComment: String? = null
@@ -37,7 +38,11 @@ class XmlResourcesParser(
         }
         event.isStartElement -> {
           if (!isAnyToContentSaveOpen) {
-            blockParser = XmlResourcesValueBlockParser(stringUnescaper)
+            blockParser =
+              XmlResourcesValueBlockParser(
+                stringUnescaper,
+                supportedTags,
+              )
           }
           val startElement = event as StartElement
           when (startElement.name.localPart.lowercase()) {
