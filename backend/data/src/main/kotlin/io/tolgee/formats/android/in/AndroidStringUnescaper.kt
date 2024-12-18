@@ -35,35 +35,29 @@ class AndroidStringUnescaper(
   var space: Char? = null
 
   val result: String by lazy {
-    resultSeq.fold(StringBuilder()) { acc, c ->
-      acc.append(c)
-    }.toString()
-  }
-
-  private val resultSeq: Sequence<Char>
-    get() =
-      sequence {
-        for (char in string) {
-          state = handleCharacter(state, char)
-        }
-
-        when (state) {
-          State.NORMAL -> {}
-          State.AFTER_SPACE -> {
-            val lastSpace = space
-            if (lastSpace != null && !isLast) yield(lastSpace)
-          }
-          State.ESCAPED -> {
-            // Android deletes the last backslash if it is the last character
-          }
-          State.QUOTED -> {
-            // Quoted text was not closed
-          }
-          State.QUOTED_ESCAPED -> {}
-        }
+    buildString {
+      for (char in string) {
+        state = handleCharacter(state, char)
       }
 
-  private suspend fun SequenceScope<Char>.handleCharacter(
+      when (state) {
+        State.NORMAL -> {}
+        State.AFTER_SPACE -> {
+          val lastSpace = space
+          if (lastSpace != null && !isLast) append(lastSpace)
+        }
+        State.ESCAPED -> {
+          // Android deletes the last backslash if it is the last character
+        }
+        State.QUOTED -> {
+          // Quoted text was not closed
+        }
+        State.QUOTED_ESCAPED -> {}
+      }
+    }
+  }
+
+  private fun StringBuilder.handleCharacter(
     state: State,
     char: Char,
   ): State {
@@ -77,7 +71,7 @@ class AndroidStringUnescaper(
             State.AFTER_SPACE
           }
           else -> {
-            yield(char)
+            append(char)
             State.NORMAL
           }
         }
@@ -87,7 +81,7 @@ class AndroidStringUnescaper(
           else -> {
             val lastSpace = space
             if (lastSpace != null) {
-              yield(lastSpace)
+              append(lastSpace)
               space = null
             }
             handleCharacter(State.NORMAL, char)
@@ -95,7 +89,7 @@ class AndroidStringUnescaper(
         }
       }
       State.ESCAPED -> {
-        yieldAll(char.unescape().asSequence())
+        append(char.unescape().asSequence())
         when (char) {
           in spacesToTrim -> State.AFTER_SPACE
           else -> State.NORMAL
@@ -106,12 +100,12 @@ class AndroidStringUnescaper(
           escapeMark -> State.QUOTED_ESCAPED
           quotationMark -> State.NORMAL
           else -> {
-            yield(char)
+            append(char)
             State.QUOTED
           }
         }
       State.QUOTED_ESCAPED -> {
-        yieldAll(char.unescape().asSequence())
+        append(char.unescape().asSequence())
         State.QUOTED
       }
     }

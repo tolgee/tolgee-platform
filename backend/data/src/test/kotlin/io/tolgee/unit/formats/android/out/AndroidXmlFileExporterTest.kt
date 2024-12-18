@@ -3,7 +3,7 @@ package io.tolgee.unit.formats.android.out
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
-import io.tolgee.formats.xmlResources.out.AndroidStringsXmlExporter
+import io.tolgee.formats.xmlResources.out.XmlResourcesExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
@@ -131,7 +131,7 @@ class AndroidXmlFileExporterTest {
     )
   }
 
-  private fun getExported(exporter: AndroidStringsXmlExporter): Map<String, String> {
+  private fun getExported(exporter: XmlResourcesExporter): Map<String, String> {
     val files = exporter.produceFiles()
     val data = files.map { it.key to it.value.bufferedReader().readText() }.toMap()
     return data
@@ -144,7 +144,7 @@ class AndroidXmlFileExporterTest {
     this[file]!!.assert.isEqualTo(content)
   }
 
-  private fun getExporter(params: ExportParams = getExportParams()): AndroidStringsXmlExporter {
+  private fun getExporter(params: ExportParams = getExportParams()): XmlResourcesExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -271,7 +271,7 @@ class AndroidXmlFileExporterTest {
     return getExporter(built.translations, params = params)
   }
 
-  private fun getIcuPlaceholdersEnabledExporter(): AndroidStringsXmlExporter {
+  private fun getIcuPlaceholdersEnabledExporter(): XmlResourcesExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -290,7 +290,7 @@ class AndroidXmlFileExporterTest {
     return getExporter(built.translations, true)
   }
 
-  private fun getIcuPlaceholdersDisabledExporter(): AndroidStringsXmlExporter {
+  private fun getIcuPlaceholdersDisabledExporter(): XmlResourcesExporter {
     val built =
       buildExportTranslationList {
         add(
@@ -313,8 +313,8 @@ class AndroidXmlFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-  ): AndroidStringsXmlExporter {
-    return AndroidStringsXmlExporter(
+  ): XmlResourcesExporter {
+    return XmlResourcesExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,

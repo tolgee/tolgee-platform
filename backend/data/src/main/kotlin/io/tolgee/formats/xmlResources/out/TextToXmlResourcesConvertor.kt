@@ -1,5 +1,6 @@
 package io.tolgee.formats.xmlResources.out
 
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.MobileStringEscaper
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
@@ -12,6 +13,7 @@ import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
 import java.io.StringWriter
+import java.lang.Exception
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
@@ -19,10 +21,13 @@ import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
+import kotlin.collections.forEach
+import kotlin.sequences.forEach
 
-class TextToAndroidXmlConvertor(
+class TextToXmlResourcesConvertor(
   private val document: Document,
   private val value: XmlResourcesStringValue,
+  private val format: ExportFormat,
 ) : Logging {
   val string = value.string
 
@@ -38,7 +43,7 @@ class TextToAndroidXmlConvertor(
       return ContentToAppend(
         children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
       )
-    } catch (ex: java.lang.Exception) {
+    } catch (ex: Exception) {
       logger.debug("Cannot value '$string'", ex)
       return ContentToAppend(text = string)
     }
@@ -203,21 +208,24 @@ class TextToAndroidXmlConvertor(
   ): String {
     return MobileStringEscaper(
       string = this,
-      escapeApos = escapeApos,
+      escapeApos = isAndroid && escapeApos,
       keepPercentSignEscaped = keepPercentSignEscaped,
-      quoteMoreWhitespaces = quoteMoreWhitespaces,
-      escapeNewLines = escapeNewLines,
+      quoteMoreWhitespaces = isAndroid && quoteMoreWhitespaces,
+      escapeNewLines = isAndroid && escapeNewLines,
       utfSymbolCharacter = 'u',
-      escapeQuotes = true,
+      escapeQuotes = isAndroid,
     ).escape()
   }
 
-  data class ContentToAppend(val text: String? = null, val children: Collection<Node>? = null)
-}
+  val isAndroid
+    get() = format == ExportFormat.ANDROID_XML
 
-private data class AnalysisResult(
-  val containsXml: Boolean,
-  val containsPlaceholders: Boolean,
-  val unsupportedTagNodes: List<Node>,
-  val textNodes: MutableList<Node>,
-)
+  data class ContentToAppend(val text: String? = null, val children: Collection<Node>? = null)
+
+  private data class AnalysisResult(
+    val containsXml: Boolean,
+    val containsPlaceholders: Boolean,
+    val unsupportedTagNodes: List<Node>,
+    val textNodes: MutableList<Node>,
+  )
+}
