@@ -17,4 +17,5 @@ data class EeSubscriptionDto(
   var enabledFeatures: Array<Feature>,
   var status: SubscriptionStatus = SubscriptionStatus.ACTIVE,
   var lastValidCheck: Date? = null,
+  var nonCommercial: Boolean = false,
 )

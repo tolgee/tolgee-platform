@@ -1,3 +1,10 @@
+## [3.87.1](https://github.com/tolgee/tolgee-platform/compare/v3.87.0...v3.87.1) (2024-12-17)
+
+
+### Bug Fixes
+
+* display non-commercial license on self-hosted  ([#2783](https://github.com/tolgee/tolgee-platform/issues/2783)) ([54c6019](https://github.com/tolgee/tolgee-platform/commit/54c60191964e6e4c94235681c2d83a3bb4dab402))
+
 # [3.87.0](https://github.com/tolgee/tolgee-platform/compare/v3.86.3...v3.87.0) (2024-12-16)
 
 

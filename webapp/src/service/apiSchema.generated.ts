@@ -1201,14 +1201,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1218,6 +1210,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -2197,10 +2197,10 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
     };
@@ -2472,6 +2472,7 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
+      nonCommerical: boolean;
       /** Format: date-time */
       lastValidCheck?: string;
     };
@@ -2527,16 +2528,16 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      projectName: string;
       username?: string;
       description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
       lastUsedAt?: number;
+      projectName: string;
       userFullName?: string;
     };
     SuperTokenRequest: {
@@ -3743,13 +3744,13 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       /** @example btforg */
       slug: string;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3924,9 +3925,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       namespace?: string;
       description?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
@@ -3934,9 +3935,9 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
       namespace?: string;
       description?: string;
+      translation?: string;
       baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
@@ -4665,16 +4666,16 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      projectName: string;
       username?: string;
       description: string;
-      /** Format: int64 */
-      expiresAt?: number;
       scopes: string[];
       /** Format: int64 */
       projectId: number;
       /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
       lastUsedAt?: number;
+      projectName: string;
       userFullName?: string;
     };
     PagedModelUserAccountModel: {

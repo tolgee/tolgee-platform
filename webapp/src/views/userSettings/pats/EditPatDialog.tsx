@@ -40,7 +40,7 @@ export const EditPatDialog: FunctionComponent = () => {
   const { t } = useTranslate();
 
   if (!patLoadable.data) {
-    return <></>;
+    return null;
   }
 
   return (

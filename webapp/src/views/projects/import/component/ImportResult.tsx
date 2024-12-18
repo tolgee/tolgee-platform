@@ -40,7 +40,7 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
   );
 
   if (!rows) {
-    return <></>;
+    return null;
   }
 
   return (
