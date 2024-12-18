@@ -57,12 +57,12 @@ class CoreImportFilesProcessor(
     )
   }
 
+  val errors = mutableListOf<ErrorResponseBody>()
   val warnings = mutableListOf<ErrorResponseBody>()
 
-  fun processFiles(files: Collection<ImportFileDto>?): List<ErrorResponseBody> {
-    val errors = processFilesRecursive(files)
+  fun processFiles(files: Collection<ImportFileDto>?) {
+    errors.addAll(processFilesRecursive(files))
     renderPossibleNamespacesWarning()
-    return errors
   }
 
   private fun processFilesRecursive(files: Collection<ImportFileDto>?): List<ErrorResponseBody> {

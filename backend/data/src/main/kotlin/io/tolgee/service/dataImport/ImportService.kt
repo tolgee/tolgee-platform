@@ -99,12 +99,12 @@ class ImportService(
         projectIcuPlaceholdersEnabled = project.icuPlaceholders,
         importSettings = importSettingsService.get(userAccount, project.id),
       )
-    val errors = fileProcessor.processFiles(files)
+    fileProcessor.processFiles(files)
 
     if (findLanguages(import).isEmpty()) {
       TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
     }
-    return errors to fileProcessor.warnings
+    return fileProcessor.errors to fileProcessor.warnings
   }
 
   @Transactional
@@ -135,11 +135,11 @@ class ImportService(
         importSettings = params,
         saveData = false,
       )
-    val errors = fileProcessor.processFiles(files)
+    fileProcessor.processFiles(files)
 
-    if (errors.isNotEmpty()) {
+    if (fileProcessor.errors.isNotEmpty()) {
       @Suppress("UNCHECKED_CAST")
-      throw BadRequestException(Message.IMPORT_FAILED, errors as List<Serializable>)
+      throw BadRequestException(Message.IMPORT_FAILED, fileProcessor.errors as List<Serializable>)
     }
 
     if (fileProcessor.importDataManager.storedLanguages.isEmpty()) {
