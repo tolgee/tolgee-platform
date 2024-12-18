@@ -1,7 +1,6 @@
 package io.tolgee.service.security
 
 import com.google.common.io.BaseEncoding
-import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
@@ -244,9 +243,9 @@ class ApiKeyService(
   }
 
   private fun logTransactionIsolation() {
-      val isolationLevel =
-        entityManager.createNativeQuery("show transaction_isolation")
-          .singleResult as String
+    val isolationLevel =
+      entityManager.createNativeQuery("show transaction_isolation")
+        .singleResult as String
     val message = "Transaction isolation level: $isolationLevel"
     if (logger.isDebugEnabled) {
       Sentry.addBreadcrumb(message)

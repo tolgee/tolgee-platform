@@ -1,7 +1,6 @@
 package io.tolgee.ee.unit
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.constants.Feature
 import io.tolgee.hateoas.ee.PlanPricesModel
@@ -18,17 +17,17 @@ class SelfHostedEePlanModelTest {
 
   @Test
   fun `parses plan response with unknown features`() {
-
-    val parsed = objectMapper.readValue<SelfHostedEePlanModel>(
-      """
-      {
-      "enabledFeatures": ["I've made this up", "ASSISTED_UPDATES"],
-      "prices": $pricesJson,
-      "free": false,
-      "nonCommercial": false
-      }
-    """.trimIndent()
-    )
+    val parsed =
+      objectMapper.readValue<SelfHostedEePlanModel>(
+        """
+        {
+        "enabledFeatures": ["I've made this up", "ASSISTED_UPDATES"],
+        "prices": $pricesJson,
+        "free": false,
+        "nonCommercial": false
+        }
+        """.trimIndent(),
+      )
 
     parsed.enabledFeatures.toList().assert.containsExactly(Feature.ASSISTED_UPDATES)
   }
@@ -37,5 +36,4 @@ class SelfHostedEePlanModelTest {
     get() {
       return objectMapper.writeValueAsString(PlanPricesModel())
     }
-
 }

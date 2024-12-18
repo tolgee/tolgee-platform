@@ -21,7 +21,6 @@ open class SelfHostedEePlanModel(
   val free: Boolean,
   val nonCommercial: Boolean,
 ) : RepresentationModel<SelfHostedEePlanModel>() {
-
   /**
    * We need to provide this setter so unrecognized features are ignored in situation
    * that self-hosted instance is not upgraded to version containing the new features introduced
@@ -31,7 +30,6 @@ open class SelfHostedEePlanModel(
   fun setJsonEnabledFeatures(features: Set<String>) {
     this.enabledFeatures = features.mapNotNull { Feature.findByName(it) }.toTypedArray()
   }
-
 
   @JsonGetter("enabledFeatures")
   fun getJsonEnabledFeatures(): Array<Feature> {
