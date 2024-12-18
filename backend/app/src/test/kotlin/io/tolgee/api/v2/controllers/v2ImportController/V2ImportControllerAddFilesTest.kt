@@ -348,6 +348,23 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     }
   }
 
+  @Test
+  fun `import gets deleted after namespaces feature is toggled`() {
+    val base = dbPopulator.createBase()
+
+    performImport(projectId = base.project.id, listOf("simple.json" to simpleJson))
+      .andIsOk
+
+    assertThat(importService.getAllByProject(base.project.id)).isNotEmpty()
+
+    val project = projectService.get(base.project.id)
+    project.useNamespaces = !project.useNamespaces
+    projectService.save(project)
+    commitTransaction()
+
+    assertThat(importService.getAllByProject(project.id)).isEmpty()
+  }
+
   private fun validateSavedJsonImportData(
     project: Project,
     userAccount: UserAccount,

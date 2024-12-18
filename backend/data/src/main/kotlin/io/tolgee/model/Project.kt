@@ -126,6 +126,7 @@ class Project(
   override var icuPlaceholders: Boolean = true
 
   @ColumnDefault("false")
+  @ActivityLoggedProp
   var useNamespaces: Boolean = false
 
   @ColumnDefault("0")

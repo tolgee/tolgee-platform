@@ -12,6 +12,7 @@ import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.events.OnImportSoftDeleted
+import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -19,21 +20,13 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportFile
-import io.tolgee.model.dataImport.ImportKey
-import io.tolgee.model.dataImport.ImportLanguage
-import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
-import io.tolgee.repository.dataImport.ImportFileRepository
-import io.tolgee.repository.dataImport.ImportKeyRepository
-import io.tolgee.repository.dataImport.ImportLanguageRepository
-import io.tolgee.repository.dataImport.ImportRepository
-import io.tolgee.repository.dataImport.ImportTranslationRepository
+import io.tolgee.repository.dataImport.*
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
@@ -41,6 +34,7 @@ import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.jdbc.core.JdbcTemplate
@@ -411,6 +405,20 @@ class ImportService(
     entityManager.refresh(entityManager.merge(import))
     val dataManager = ImportDataManager(applicationContext, import)
     dataManager.resetCollisionsBetweenFiles(language, null)
+  }
+
+  @EventListener
+  fun deleteExistingImportsOnUseNamespacesModification(event: OnProjectActivityEvent) {
+    val modifiedProjects = event.modifiedEntities[Project::class]
+
+    modifiedProjects
+      ?.values
+      ?.filter { project -> project.modifications.containsKey("useNamespaces") }
+      ?.forEach { project ->
+        getAllByProject(project.entityId).forEach { import ->
+          deleteImport(import)
+        }
+      }
   }
 
   fun findTranslation(translationId: Long): ImportTranslation? {
