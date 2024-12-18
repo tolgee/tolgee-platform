@@ -49,7 +49,7 @@ export const RegeneratePatDialog: FunctionComponent<{
   });
 
   if (!patLoadable.data) {
-    return <></>;
+    return null;
   }
 
   let initialExpiresAt = patLoadable.data.expiresAt;

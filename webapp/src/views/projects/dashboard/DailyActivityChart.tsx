@@ -155,9 +155,7 @@ export const DailyActivityChart: React.FC<Props> = ({ dailyActivity }) => {
         </LineChart>
       </ResponsiveContainer>
     </StyledContainer>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 
 const getAllDates = (firstDate: Date, lastDate: Date) => {
