@@ -247,8 +247,8 @@ class ApiKeyService(
       entityManager.createNativeQuery("show transaction_isolation")
         .singleResult as String
     val message = "Transaction isolation level: $isolationLevel"
+    Sentry.addBreadcrumb(message)
     if (logger.isDebugEnabled) {
-      Sentry.addBreadcrumb(message)
       logger.debug(message)
     }
   }
