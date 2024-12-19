@@ -117,13 +117,13 @@ class ComposeXmlFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<resources>
     |  <plurals name="key3">
-    |    <item quantity="one"># den {icuParam} \'</item>
+    |    <item quantity="one"># den {icuParam} '</item>
     |    <item quantity="few"># dny</item>
     |    <item quantity="many"># dní</item>
     |    <item quantity="other"># dní</item>
     |  </plurals>
     |  <string-array name="i_am_array_item">
-    |    <item>I will be first {icuParam} \'{hey}\'</item>
+    |    <item>I will be first {icuParam} '{hey}'</item>
     |  </string-array>
     |</resources>
     |
