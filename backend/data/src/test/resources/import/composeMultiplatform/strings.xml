@@ -29,6 +29,6 @@
         Dont'translate this
     </string>
     <string name="with_params">
-        %1$d %4$s %2$.2f %3$e %5$+d
+        %1$d %4$s %3$.2f %4$e %5$+d
     </string>
 </resources>
