@@ -10,6 +10,7 @@ import jakarta.persistence.IdClass
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnDefault
 import org.springframework.data.domain.Persistable
 
 @Entity
@@ -31,7 +32,12 @@ class KeysDistance(
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
-  var score: Long = MAX_SCORE
+  // TODO: Remove this
+  @Deprecated("Kept for backward compatibility. Can be removed in any next path version.")
+  @ColumnDefault("10000")
+  var score: Long = 10000
+
+  var distance: Double = 0.0
 
   var hits: Long = 1
 
@@ -43,14 +49,14 @@ class KeysDistance(
 
     if (key1Id != other.key1Id) return false
     if (key2Id != other.key2Id) return false
-    if (score != other.score) return false
+    if (distance != other.distance) return false
     return hits == other.hits
   }
 
   override fun hashCode(): Int {
     var result = key1Id.hashCode()
     result = 31 * result + key2Id.hashCode()
-    result = 31 * result + score.hashCode()
+    result = 31 * result + distance.hashCode()
     result = 31 * result + hits.hashCode()
     return result
   }
@@ -66,8 +72,4 @@ class KeysDistance(
   @Transient
   @Column(insertable = false, updatable = false)
   var new = false
-
-  companion object {
-    const val MAX_SCORE = 10000L
-  }
 }

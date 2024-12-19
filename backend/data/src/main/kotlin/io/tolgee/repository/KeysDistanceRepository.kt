@@ -17,7 +17,7 @@ interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
     select (case when kd.key1Id = :keyId then kd.key2Id else kd.key1Id end) from KeysDistance kd 
     where kd.key1Id = :keyId or 
           kd.key2Id = :keyId 
-    order by kd.score desc
+    order by kd.distance
         """,
   )
   fun getCloseKeys(
@@ -36,7 +36,7 @@ interface KeysDistanceRepository : JpaRepository<KeysDistance, Long> {
       select (case when kd.key1Id = :keyId then kd.key2Id else kd.key1Id end) from KeysDistance kd 
       where kd.key1Id = :keyId or 
             kd.key2Id = :keyId
-      order by kd.score desc
+      order by kd.distance
     ) and k.project.id = :projectId
     """,
   )

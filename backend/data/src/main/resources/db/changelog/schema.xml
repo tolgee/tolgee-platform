@@ -4014,4 +4014,21 @@
             <column name="last_published_files" type="jsonb"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik" id="1734092854306-1">
+        <addColumn tableName="keys_distance">
+            <column name="distance" type="float(53)" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <!-- Max score was 10000. We want to push all current distances to be sorted in descending order, -->
+        <!-- max distance should be usually greater than 100 -->
+        <sql>
+            update keys_distance
+            set distance = 10100 - score;
+        </sql>
+        <sql>
+            alter table keys_distance
+                alter column score set default 10000;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

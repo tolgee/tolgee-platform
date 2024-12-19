@@ -103,34 +103,34 @@ class SuggestionTestData : BaseTestData() {
 
   private fun ProjectBuilder.addKeyDistances() {
     this.addKeysDistance(data.keys[0].self, data.keys[1].self) {
-      score = 10000
+      distance = 1000.0
     }
     this.addKeysDistance(data.keys[0].self, data.keys[2].self) {
-      score = 8000
+      distance = 8.0
     }
     this.addKeysDistance(data.keys[0].self, data.keys[3].self) {
-      score = 8000
+      distance = 8.0
     }
     this.addKeysDistance(data.keys[0].self, data.keys[4].self) {
-      score = 8000
+      distance = 8.0
     }
     this.addKeysDistance(data.keys[1].self, data.keys[2].self) {
-      score = 2000
+      distance = 2.0
     }
     this.addKeysDistance(data.keys[1].self, data.keys[3].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[1].self, data.keys[4].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[2].self, data.keys[3].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[2].self, data.keys[4].self) {
-      score = 1000
+      distance = 1.0
     }
     this.addKeysDistance(data.keys[3].self, data.keys[4].self) {
-      score = 1000
+      distance = 1.0
     }
   }
 

@@ -41,6 +41,12 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  val bigMetaDeletingAsyncTimer: Timer by lazy {
+    Timer.builder("tolgee.big_meta.deleting-async.timer")
+      .description("Time spent deleting big meta data (async)")
+      .register(meterRegistry)
+  }
+
   val bigMetaNewDistancesComputeTimer: Timer by lazy {
     Timer.builder("tolgee.big_meta.new_distances.compute.timer")
       .description("Time spent computing new distances for big meta data")
