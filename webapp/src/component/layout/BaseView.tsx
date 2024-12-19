@@ -175,9 +175,7 @@ export const BaseView = (props: BaseViewProps) => {
                   ? props.children()
                   : props.children}
               </Box>
-            ) : (
-              <></>
-            )}
+            ) : null}
           </StyledContainerInner>
         </Box>
       </Box>

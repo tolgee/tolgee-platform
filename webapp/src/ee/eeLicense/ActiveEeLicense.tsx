@@ -46,9 +46,11 @@ export const ActiveEeLicense = ({ info }: Props) => {
             name={info.name}
             status={info.status}
             highlightColor={highlightColor}
+            nonCommercial={info.nonCommerical}
           />
           <RefreshButton />
         </Box>
+
         {info.status === 'ACTIVE' ? (
           <PlanFeaturesBox sx={{ gap: '18px', mb: 1 }}>
             <StyledFeatures features={info.enabledFeatures} />

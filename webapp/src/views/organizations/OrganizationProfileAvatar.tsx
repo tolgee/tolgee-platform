@@ -23,7 +23,7 @@ export const OrganizationProfileAvatar: React.FC<Props> = ({ disabled }) => {
   const organization = useOrganization();
 
   if (!organization) {
-    return <></>;
+    return null;
   }
 
   return (

@@ -105,6 +105,7 @@ class EeSubscriptionServiceImpl(
       entity.name = responseBody.plan.name
       entity.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
       entity.enabledFeatures = responseBody.plan.enabledFeatures
+      entity.nonCommercial = responseBody.plan.nonCommercial
       return self.save(entity)
     }
 
@@ -197,6 +198,7 @@ class EeSubscriptionServiceImpl(
       subscription.enabledFeatures = responseBody.plan.enabledFeatures
       subscription.status = responseBody.status
       subscription.lastValidCheck = currentDateProvider.date
+      subscription.nonCommercial = responseBody.plan.nonCommercial
       self.save(subscription)
     }
   }

@@ -107,9 +107,7 @@ export const ImportResultRow = (props: {
                 {props.row.importFileIssueCount}
               </ChipButton>
             </Box>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </TableCell>
         <TableCell
           scope="row"

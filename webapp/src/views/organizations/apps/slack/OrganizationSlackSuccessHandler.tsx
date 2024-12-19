@@ -53,5 +53,5 @@ export const OrganizationSlackSuccessHandler: FunctionComponent = () => {
     );
   }, [search['code']]);
 
-  return <></>;
+  return null;
 };

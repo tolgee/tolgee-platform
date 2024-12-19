@@ -21,4 +21,12 @@ enum class Feature {
   TASKS,
   SSO,
   ORDER_TRANSLATION,
+
+  ;
+
+  companion object {
+    fun findByName(name: String): Feature? {
+      return entries.find { it.name == name }
+    }
+  }
 }

@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Frontend for E2E tests" type="js.build_tools.npm">
+    <package-json value="$PROJECT_DIR$/webapp/package.json" />
+    <command value="run" />
+    <scripts>
+      <script value="start" />
+    </scripts>
+    <arguments value="-- --port 8081 --host" />
+    <node-interpreter value="project" />
+    <envs>
+      <env name="VITE_APP_API_URL" value="http://localhost:8201" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

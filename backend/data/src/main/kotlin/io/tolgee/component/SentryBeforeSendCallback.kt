@@ -18,6 +18,7 @@ class SentryBeforeSendCallback : SentryOptions.BeforeSendCallback {
       listOf(
         "FailedDontRequeueException",
         "ClientAbortException",
+        "AsyncRequestNotUsableException",
       )
   }
 
