@@ -1,3 +1,10 @@
+## [3.87.3](https://github.com/tolgee/tolgee-platform/compare/v3.87.2...v3.87.3) (2024-12-19)
+
+
+### Bug Fixes
+
+* BigMeta (context) storing -> reduce the amount of stored data ([#2780](https://github.com/tolgee/tolgee-platform/issues/2780)) ([f22421c](https://github.com/tolgee/tolgee-platform/commit/f22421c0dcafd2862d6810f4c90705f4a6451b98))
+
 ## [3.87.2](https://github.com/tolgee/tolgee-platform/compare/v3.87.1...v3.87.2) (2024-12-18)
 
 
