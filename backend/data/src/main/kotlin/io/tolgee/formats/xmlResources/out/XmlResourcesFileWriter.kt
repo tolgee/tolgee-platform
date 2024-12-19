@@ -1,6 +1,7 @@
-package io.tolgee.formats.android.out
+package io.tolgee.formats.xmlResources.out
 
-import io.tolgee.formats.android.*
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.xmlResources.*
 import io.tolgee.util.attr
 import io.tolgee.util.buildDom
 import io.tolgee.util.comment
@@ -8,17 +9,19 @@ import io.tolgee.util.element
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
+class XmlResourcesFileWriter(private val model: XmlResourcesStringsModel, private val exportFormat: ExportFormat) {
   fun produceFiles(): InputStream {
     return buildDom {
       element("resources") {
-        attr("xmlns:xliff", "urn:oasis:names:tc:xliff:document:1.2")
+        if (isAndroid) {
+          attr("xmlns:xliff", "urn:oasis:names:tc:xliff:document:1.2")
+        }
         model.items.forEach { this.addToElement(it) }
       }
     }.write().toByteArray().inputStream()
   }
 
-  private fun Element.addToElement(unit: Map.Entry<String, AndroidXmlNode>) {
+  private fun Element.addToElement(unit: Map.Entry<String, XmlResourcesNode>) {
     when (val node = unit.value) {
       is StringUnit -> {
         optionalComment(node.comment)
@@ -55,12 +58,12 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
     }
   }
 
-  private fun Element.appendXmlIfEnabledOrText(value: AndroidStringValue?) {
+  private fun Element.appendXmlIfEnabledOrText(value: XmlResourcesStringValue?) {
     if (value == null) {
       return
     }
     val contentToAppend =
-      TextToAndroidXmlConvertor(this.ownerDocument, value)
+      TextToXmlResourcesConvertor(this.ownerDocument, value, exportFormat)
         .convert()
     if (contentToAppend.text != null) {
       this.textContent = contentToAppend.text
@@ -75,4 +78,7 @@ class AndroidStringsXmlFileWriter(private val model: AndroidStringsXmlModel) {
   private fun Element.optionalComment(comment: String?) {
     comment?.takeIf { it.isNotBlank() }?.let { comment(" $it ") }
   }
+
+  val isAndroid
+    get() = exportFormat == ExportFormat.ANDROID_XML
 }

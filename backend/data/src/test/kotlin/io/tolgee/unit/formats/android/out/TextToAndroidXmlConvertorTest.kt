@@ -1,7 +1,8 @@
 package io.tolgee.unit.formats.android.out
 
-import io.tolgee.formats.android.AndroidStringValue
-import io.tolgee.formats.android.out.TextToAndroidXmlConvertor
+import io.tolgee.formats.ExportFormat
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.out.TextToXmlResourcesConvertor
 import io.tolgee.testing.assert
 import org.assertj.core.api.AbstractStringAssert
 import org.junit.jupiter.api.Test
@@ -155,7 +156,11 @@ class TextToAndroidXmlConvertorTest {
   }
 
   private fun String.getConverted(isWrappedWithCdata: Boolean = false) =
-    TextToAndroidXmlConvertor(document, AndroidStringValue(this, isWrappedWithCdata)).convert()
+    TextToXmlResourcesConvertor(
+      document,
+      XmlResourcesStringValue(this, isWrappedWithCdata),
+      ExportFormat.ANDROID_XML,
+    ).convert()
 
   private fun String.convertedNodes(isWrappedWithCdata: Boolean = false): Collection<Node> {
     val result = this.getConverted(isWrappedWithCdata)
