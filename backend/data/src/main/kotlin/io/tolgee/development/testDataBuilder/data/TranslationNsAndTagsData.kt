@@ -63,7 +63,7 @@ class TranslationNsAndTagsData {
               text = "Překlad $paddedNum"
               state = TranslationState.REVIEWED
             }
-
+            newProject.useNamespaces = true
             setNamespace("Namespace $paddedNum")
             addMeta {
               self {

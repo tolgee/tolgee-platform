@@ -126,13 +126,14 @@ export type PermissionsOptions = {
 };
 
 export const generatePermissionsData = {
-  generate: (options: Partial<PermissionsOptions>) => {
+  generate: (options: Partial<PermissionsOptions>, useNamespaces = false) => {
     const params = new URLSearchParams();
     Object.entries(options).forEach(([key, values]) => {
       values.forEach((value) => {
         params.append(key, value);
       });
     });
+    params.append('useNamespaces', String(useNamespaces));
     return internalFetch(
       `e2e-data/permissions/generate-with-user?${params.toString()}`
     );

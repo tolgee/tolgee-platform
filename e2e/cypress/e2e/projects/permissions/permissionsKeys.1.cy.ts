@@ -7,7 +7,7 @@ import {
 
 describe('Keys permissions 1', () => {
   it('screenshots.view', { retries: { runMode: 3 } }, () => {
-    visitProjectWithPermissions({ scopes: ['screenshots.view'] }).then(
+    visitProjectWithPermissions({ scopes: ['screenshots.view'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,
@@ -19,7 +19,7 @@ describe('Keys permissions 1', () => {
   });
 
   it('screenshots.upload', { retries: { runMode: 3 } }, () => {
-    visitProjectWithPermissions({ scopes: ['screenshots.upload'] }).then(
+    visitProjectWithPermissions({ scopes: ['screenshots.upload'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
@@ -31,7 +31,7 @@ describe('Keys permissions 1', () => {
   });
 
   it('screenshots.delete', () => {
-    visitProjectWithPermissions({ scopes: ['screenshots.delete'] }).then(
+    visitProjectWithPermissions({ scopes: ['screenshots.delete'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,
@@ -43,7 +43,7 @@ describe('Keys permissions 1', () => {
   });
 
   it('keys.view', () => {
-    visitProjectWithPermissions({ scopes: ['keys.view'] }).then(
+    visitProjectWithPermissions({ scopes: ['keys.view'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,

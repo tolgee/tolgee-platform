@@ -39,6 +39,11 @@ class ImportFile(
 
   var namespace: String? = null
 
+  /**
+   * The actual detected namespace, even if we decide we want to use a different value in the `namespace` column.
+   */
+  var detectedNamespace: String? = null
+
   @ColumnDefault("false")
   var needsParamConversion = false
 

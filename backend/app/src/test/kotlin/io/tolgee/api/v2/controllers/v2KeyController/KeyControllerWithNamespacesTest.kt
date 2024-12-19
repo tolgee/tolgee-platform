@@ -38,6 +38,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `creates key and namespace`() {
+    enableNamespaces()
     performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to "new_ns"))
       .andIsCreated.andAssertThatJson {
         node("name").isEqualTo("super_key")
@@ -50,6 +51,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `blank namespace doesn't create ns`() {
+    enableNamespaces()
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", namespace = ""))
       .andIsCreated
     namespaceService.find("", project.id).assert.isNull()
@@ -58,6 +60,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `creates key in existing namespace`() {
+    enableNamespaces()
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", namespace = "ns-1"))
       .andIsCreated.andAssertThatJson {
         node("name").isEqualTo("super_key")
@@ -69,6 +72,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not create key when not unique in ns`() {
+    enableNamespaces()
     performProjectAuthPost("keys", CreateKeyDto(name = "key", "ns-1"))
       .andAssertError
       .isCustomValidation.hasMessage("key_exists")
@@ -77,6 +81,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `updates key in ns`() {
+    enableNamespaces()
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", "ns-2"))
       .andIsOk.andAssertThatJson {
         node("id").isValidId
@@ -109,6 +114,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `throws error when moving key to default ns where a key with same name already exists`() {
+    enableNamespaces()
     val keyName = "super_ultra_cool_key"
     val namespace = "super_ultra_cool_namespace"
 
@@ -155,6 +161,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes ns when empty on update`() {
+    enableNamespaces()
     performProjectAuthPut("keys/${testData.singleKeyInNs2.id}", EditKeyDto(name = "super_k", "ns-1"))
       .andIsOk
     namespaceService.find("ns-2", project.id).assert.isNull()
@@ -170,5 +177,58 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
     }
 
     namespaceService.getAllInProject(testData.projectBuilder.self.id).assert.isEmpty()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `key with namespace cannot be created when useNamespaces feature is disabled`() {
+    performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to ""))
+      .andIsCreated.andAssertThatJson {
+        node("namespace").isNull()
+      }
+
+    performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to "new_ns"))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `key with namespace cannot be edited when useNamespaces feature is disabled`() {
+    performProjectAuthPut("keys/${testData.keyWithoutNs.id}", EditKeyDto(name = "super_k", ""))
+      .andIsOk.andAssertThatJson {
+        node("namespace").isNull()
+      }
+
+    performProjectAuthPut("keys/${testData.keyWithoutNs.id}", EditKeyDto(name = "super_k", "ns-2"))
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `key with namespace cannot be complex-edited when useNamespaces feature is disabled`() {
+    performProjectAuthPut(
+      "keys/${testData.keyWithoutNs.id}/complex-update",
+      mapOf("name" to "new-name", "namespace" to ""),
+    ).andIsOk.andAssertThatJson {
+      node("namespace").isNull()
+    }
+
+    performProjectAuthPut(
+      "keys/${testData.keyWithoutNs.id}/complex-update",
+      mapOf("name" to "new-name", "namespace" to "ns-2"),
+    )
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+  }
+
+  private fun enableNamespaces() {
+    val projectFetched = projectService.get(project.id)
+    projectFetched.useNamespaces = true
+    projectService.save(projectFetched)
   }
 }

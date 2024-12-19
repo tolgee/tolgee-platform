@@ -7,7 +7,7 @@ import {
 
 describe('Keys permissions 2', () => {
   it('keys.edit', () => {
-    visitProjectWithPermissions({ scopes: ['keys.edit'] }).then(
+    visitProjectWithPermissions({ scopes: ['keys.edit'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,
@@ -19,7 +19,7 @@ describe('Keys permissions 2', () => {
   });
 
   it('keys.delete', () => {
-    visitProjectWithPermissions({ scopes: ['keys.delete'] }).then(
+    visitProjectWithPermissions({ scopes: ['keys.delete'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,
@@ -31,7 +31,7 @@ describe('Keys permissions 2', () => {
   });
 
   it('keys.create', () => {
-    visitProjectWithPermissions({ scopes: ['keys.create'] }).then(
+    visitProjectWithPermissions({ scopes: ['keys.create'] }, true).then(
       (projectInfo) => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': SKIP,

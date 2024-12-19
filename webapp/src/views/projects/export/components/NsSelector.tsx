@@ -12,6 +12,7 @@ import {
 import { useTranslate } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
+import { useProject } from 'tg.hooks/useProject';
 
 type Props = {
   namespaces: string[] | undefined;
@@ -20,6 +21,7 @@ type Props = {
 
 export const NsSelector: React.FC<Props> = ({ namespaces, className }) => {
   const { t } = useTranslate();
+  const project = useProject();
 
   const [field, meta, helper] = useField('namespaces');
 
@@ -30,6 +32,10 @@ export const NsSelector: React.FC<Props> = ({ namespaces, className }) => {
   const onChange = (e: SelectChangeEvent<StateType[]>) => {
     helper.setValue(e.target.value);
   };
+
+  if (!project.useNamespaces) {
+    return null;
+  }
 
   return (
     <FormControl className={className} error={!!meta.error} variant="standard">

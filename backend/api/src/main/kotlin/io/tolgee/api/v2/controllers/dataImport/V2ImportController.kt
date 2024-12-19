@@ -82,24 +82,27 @@ class V2ImportController(
       filteredFiles.map {
         ImportFileDto(it.originalFilename ?: "", it.inputStream.readAllBytes())
       }
-    val errors =
+    val (errors, warnings) =
       importService.addFiles(
         files = fileDtos,
         project = projectHolder.projectEntity,
         userAccount = authenticationFacade.authenticatedUserEntity,
         params = params,
       )
-    return getImportAddFilesResultModel(errors)
+    return getImportAddFilesResultModel(errors, warnings)
   }
 
-  private fun getImportAddFilesResultModel(errors: List<ErrorResponseBody>): ImportAddFilesResultModel {
+  private fun getImportAddFilesResultModel(
+    errors: List<ErrorResponseBody>,
+    warnings: List<ErrorResponseBody>,
+  ): ImportAddFilesResultModel {
     val result: PagedModel<ImportLanguageModel>? =
       try {
         this.getImportResult(PageRequest.of(0, 100))
       } catch (e: NotFoundException) {
         null
       }
-    return ImportAddFilesResultModel(errors, result)
+    return ImportAddFilesResultModel(errors, warnings, result)
   }
 
   @PutMapping("/apply")

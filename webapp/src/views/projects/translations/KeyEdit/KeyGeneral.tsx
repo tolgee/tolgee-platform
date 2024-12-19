@@ -12,13 +12,20 @@ import { Tag } from '../Tags/Tag';
 import { RequiredField } from 'tg.component/common/form/RequiredField';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { useProject } from 'tg.hooks/useProject';
+import clsx from 'clsx';
 
 const StyledSection = styled('div')``;
 
 const StyledKeyNsContainer = styled('div')`
   display: grid;
-  grid-template-columns: 1fr 300px;
   gap: 0px 16px;
+  grid-template-columns: 1fr;
+
+  &.useNamespaces {
+    grid-template-columns: 1fr 300px;
+  }
+
   @media (max-width: 800px) {
     grid-template-columns: 1fr;
   }
@@ -39,13 +46,16 @@ const StyledTags = styled('div')`
 
 export const KeyGeneral = () => {
   const { t } = useTranslate();
+  const project = useProject();
   const { values, setFieldValue, submitForm, errors } =
     useFormikContext<KeyFormType>();
   const theme = useTheme();
 
   return (
     <>
-      <StyledKeyNsContainer>
+      <StyledKeyNsContainer
+        className={clsx({ useNamespaces: project.useNamespaces })}
+      >
         <StyledSection>
           <FieldLabel>
             <RequiredField>{t('translations_key_edit_label')}</RequiredField>
@@ -67,23 +77,27 @@ export const KeyGeneral = () => {
           </EditorWrapper>
           <FieldError error={errors.name} />
         </StyledSection>
-        <StyledSection>
-          <FieldLabel>
-            <LabelHint title={t('translations_key_edit_label_namespace_hint')}>
-              {t('translations_key_edit_label_namespace')}
-            </LabelHint>
-          </FieldLabel>
-          <NamespaceSelector
-            value={values.namespace}
-            onChange={(value) => setFieldValue('namespace', value)}
-            SearchSelectProps={{
-              SelectProps: {
-                sx: { background: theme.palette.background.default },
-              },
-            }}
-          />
-          <FieldError error={errors.namespace} />
-        </StyledSection>
+        {project.useNamespaces && (
+          <StyledSection>
+            <FieldLabel>
+              <LabelHint
+                title={t('translations_key_edit_label_namespace_hint')}
+              >
+                {t('translations_key_edit_label_namespace')}
+              </LabelHint>
+            </FieldLabel>
+            <NamespaceSelector
+              value={values.namespace}
+              onChange={(value) => setFieldValue('namespace', value)}
+              SearchSelectProps={{
+                SelectProps: {
+                  sx: { background: theme.palette.background.default },
+                },
+              }}
+            />
+            <FieldError error={errors.namespace} />
+          </StyledSection>
+        )}
       </StyledKeyNsContainer>
 
       <StyledSection>

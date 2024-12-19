@@ -13,6 +13,7 @@ data class ProjectDto(
   var aiTranslatorPromptDescription: String?,
   override var avatarHash: String? = null,
   override var icuPlaceholders: Boolean,
+  var useNamespaces: Boolean,
 ) : Serializable, ISimpleProject {
   companion object {
     fun fromEntity(entity: Project) =
@@ -25,6 +26,7 @@ data class ProjectDto(
         aiTranslatorPromptDescription = entity.aiTranslatorPromptDescription,
         avatarHash = entity.avatarHash,
         icuPlaceholders = entity.icuPlaceholders,
+        useNamespaces = entity.useNamespaces,
       )
   }
 }

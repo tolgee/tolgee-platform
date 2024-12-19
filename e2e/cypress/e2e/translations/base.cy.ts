@@ -8,7 +8,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { deleteProject } from '../../common/apiCalls/common';
+import { deleteProject, enableNamespaces } from '../../common/apiCalls/common';
 import {
   getAnyContainingText,
   getClosestContainingText,
@@ -42,7 +42,7 @@ describe('Translations Base', () => {
   });
 
   it(
-    'will create translation',
+    'will create translation without namespace',
     {
       retries: { openMode: 0, runMode: 10 },
     },
@@ -52,6 +52,7 @@ describe('Translations Base', () => {
       createTranslation({
         key: 'Test key',
         translation: 'Translated test key',
+        assertPresenceOfNamespaceSelectBox: false,
       });
       cy.contains('Key created').should('be.visible');
       cy.wait(100);
@@ -112,12 +113,14 @@ describe('Translations Base', () => {
   });
 
   it('will create translation with namespace', () => {
+    enableNamespaces(project.id);
     cy.wait(100);
     cy.gcy('global-empty-list').should('be.visible');
     createTranslation({
       key: 'Test key',
       translation: 'Translated test key',
       namespace: 'test-ns',
+      assertPresenceOfNamespaceSelectBox: true,
     });
 
     cy.gcy('translations-namespace-banner')

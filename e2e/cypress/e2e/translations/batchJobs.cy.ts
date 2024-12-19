@@ -9,7 +9,7 @@ import {
   selectOperation,
 } from '../../common/batchOperations';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
-import { login } from '../../common/apiCalls/common';
+import { enableNamespaces, login } from '../../common/apiCalls/common';
 import { selectNamespace } from '../../common/namespace';
 import { assertHasState } from '../../common/state';
 import {
@@ -51,6 +51,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
   });
 
   it('will change namespace', () => {
+    enableNamespaces(project.id);
     selectAll();
     selectOperation('Change namespace');
     selectNamespace('new-namespace');

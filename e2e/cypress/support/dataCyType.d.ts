@@ -223,6 +223,7 @@ declare namespace DataCy {
         "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
+        "import-file-warnings" |
         "import-override-key-descriptions-checkbox" |
         "import-progress" |
         "import-progress-overlay" |
@@ -451,6 +452,7 @@ declare namespace DataCy {
         "project-settings-menu-general" |
         "project-settings-name" |
         "project-settings-transfer-button" |
+        "project-settings-use-namespaces-checkbox" |
         "project-settings-use-tolgee-placeholders-checkbox" |
         "project-states-bar-bar" |
         "project-states-bar-dot" |

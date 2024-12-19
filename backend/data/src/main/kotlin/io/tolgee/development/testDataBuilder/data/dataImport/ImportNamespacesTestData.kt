@@ -140,6 +140,7 @@ class ImportNamespacesTestData {
       addProject {
         name = "test"
         project = this
+        useNamespaces = true
       }.build project@{
         addPermission {
           project = this@project.self
