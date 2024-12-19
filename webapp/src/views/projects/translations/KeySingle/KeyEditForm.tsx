@@ -190,15 +190,17 @@ export const KeyEditForm: React.FC = () => {
           </StyledField>
         </div>
 
-        <div>
-          <FieldLabel>
-            <T keyName="translation_single_label_namespace" />
-          </FieldLabel>
-          <NamespaceSelector
-            value={keyData.keyNamespace}
-            onChange={handleNamespaceChange}
-          />
-        </div>
+        {project.useNamespaces && (
+          <div>
+            <FieldLabel>
+              <T keyName="translation_single_label_namespace" />
+            </FieldLabel>
+            <NamespaceSelector
+              value={keyData.keyNamespace}
+              onChange={handleNamespaceChange}
+            />
+          </div>
+        )}
 
         <div>
           <FieldLabel>

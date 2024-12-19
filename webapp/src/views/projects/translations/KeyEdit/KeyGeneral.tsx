@@ -13,13 +13,19 @@ import { RequiredField } from 'tg.component/common/form/RequiredField';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 import { useProject } from 'tg.hooks/useProject';
+import clsx from 'clsx';
 
 const StyledSection = styled('div')``;
 
 const StyledKeyNsContainer = styled('div')`
   display: grid;
-  grid-template-columns: 1fr 300px;
   gap: 0px 16px;
+  grid-template-columns: 1fr;
+
+  &.useNamespaces {
+    grid-template-columns: 1fr 300px;
+  }
+
   @media (max-width: 800px) {
     grid-template-columns: 1fr;
   }
@@ -47,7 +53,9 @@ export const KeyGeneral = () => {
 
   return (
     <>
-      <StyledKeyNsContainer>
+      <StyledKeyNsContainer
+        className={clsx({ useNamespaces: project.useNamespaces })}
+      >
         <StyledSection>
           <FieldLabel>
             <RequiredField>{t('translations_key_edit_label')}</RequiredField>
