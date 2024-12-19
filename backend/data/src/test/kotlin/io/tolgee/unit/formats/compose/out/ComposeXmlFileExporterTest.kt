@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.android.out
+package io.tolgee.unit.formats.compose.out
 
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
@@ -9,7 +9,7 @@ import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 
-class AndroidXmlFileExporterTest {
+class ComposeXmlFileExporterTest {
   @Test
   fun exports() {
     val exporter = getExporter()
@@ -20,12 +20,12 @@ class AndroidXmlFileExporterTest {
       "values-cs/strings.xml",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-    |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    |<resources>
     |  <string name="key1">Ahoj! I%d, %s, %e, %f</string>
     |  <string name="percent_no_placeholders">I am just a percent \% sign!</string>
     |  <!-- This is a description -->
     |  <string name="percent_and_placeholders">I am not just a percent %s %% sign!</string>
-    |  <string name="percent_and_placeholders_and_tags"><![CDATA[I am not just a percent <b>%s</b> %% sign!]]></string>
+    |  <string name="percent_and_placeholders_and_tags">I am not just a percent <![CDATA[<b>%s</b>]]> %% sign!</string>
     |  <string name="forced_CDATA"><![CDATA[Forced CDATA <b>Hey!</b> sign!]]></string>
     |  <plurals name="Empty_plural">
     |    <item quantity="one"/>
@@ -56,7 +56,7 @@ class AndroidXmlFileExporterTest {
       "values-en/strings.xml",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-    |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    |<resources>
     |  <string name="i_am_array_english">This is english!</string>
     |  <plurals name="plural_with_placeholders">
     |    <item quantity="one">%1${'$'}s dog</item>
@@ -91,7 +91,7 @@ class AndroidXmlFileExporterTest {
       "values-cs/strings.xml",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-    |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    |<resources>
     |  <plurals name="key3">
     |    <item quantity="one">%d den %s</item>
     |    <item quantity="few">%d dny</item>
@@ -115,15 +115,15 @@ class AndroidXmlFileExporterTest {
       "values-cs/strings.xml",
       """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-    |<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    |<resources>
     |  <plurals name="key3">
-    |    <item quantity="one"># den {icuParam} \'</item>
+    |    <item quantity="one"># den {icuParam} '</item>
     |    <item quantity="few"># dny</item>
     |    <item quantity="many"># dní</item>
     |    <item quantity="other"># dní</item>
     |  </plurals>
     |  <string-array name="i_am_array_item">
-    |    <item>I will be first {icuParam} \'{hey}\'</item>
+    |    <item>I will be first {icuParam} '{hey}'</item>
     |  </string-array>
     |</resources>
     |
@@ -322,6 +322,6 @@ class AndroidXmlFileExporterTest {
   }
 
   private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.format = ExportFormat.ANDROID_XML }
+    return ExportParams().also { it.format = ExportFormat.COMPOSE_XML }
   }
 }

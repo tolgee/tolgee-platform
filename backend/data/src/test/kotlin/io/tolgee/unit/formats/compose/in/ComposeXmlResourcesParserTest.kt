@@ -1,8 +1,7 @@
-package io.tolgee.unit.formats.android.`in`
+package io.tolgee.unit.formats.compose.`in`
 
-import io.tolgee.formats.android.`in`.AndroidStringUnescaper
+import io.tolgee.formats.compose.`in`.ComposeStringUnescaper
 import io.tolgee.formats.xmlResources.StringUnit
-import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
 import io.tolgee.formats.xmlResources.`in`.XmlResourcesParser
@@ -11,17 +10,7 @@ import org.junit.jupiter.api.Test
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 
-class AndroidStringsXmlParserTest {
-  @Test
-  fun `quoted string is parsed correctly`() {
-    "\"  \"".assertParsedTo("  ", false)
-  }
-
-  @Test
-  fun `it unescapes correctly`() {
-    "\\' \\\" \\n<b>\\' \\\" \\n</b>\\' \\\" \\n".assertParsedTo("' \" \n<b>' \" \n</b>' \" \n", false)
-  }
-
+class ComposeXmlResourcesParserTest {
   @Test
   fun `it removes unsupported tags`() {
     "<unsupported><b>text</b></unsupported>".assertParsedTo("text", false)
@@ -29,23 +18,28 @@ class AndroidStringsXmlParserTest {
 
   @Test
   fun `replaces CDATA elements with inner text`() {
-    "\n<![CDATA[<b>text</b>]]>\n".assertParsedTo("<b>text</b>", true)
+    "\n<![CDATA[<b>text</b>]]>\n".assertParsedTo("\n<b>text</b>\n", false)
+  }
+
+  @Test
+  fun `sets wrapped with CDATA when the only node is wrapped with CDATA`() {
+    "<![CDATA[<b>text</b>]]>".assertParsedTo("<b>text</b>", true)
   }
 
   @Test
   fun `it parses self-closing tag`() {
-    "text <br/>".assertParsedTo("text <br/>", false)
+    "text <br/>".assertParsedTo("text ", false)
   }
 
   @Test
   fun `CDATA block is unescaped`() {
-    """<![CDATA[<a href=\"Cool\">text</a>]]>""".assertParsedTo("<a href=\"Cool\">text</a>", true)
+    """<![CDATA[<a href="Cool">text\n</a>]]>""".assertParsedTo("<a href=\"Cool\">text\n</a>", true)
   }
 
   @Test
   fun `correctly handles spaces between tags`() {
     "   <b> text </b><br/>  <b> a a a </b> <b></b> "
-      .assertParsedTo("<b>text</b><br/> <b>a a a</b> <b></b>", false)
+      .assertParsedTo("    text    a a a   ", false)
   }
 
   @Test
@@ -57,13 +51,13 @@ class AndroidStringsXmlParserTest {
   @Test
   fun `parses element with attributes`() {
     "<a href=\"hey\" />"
-      .assertParsedTo("<a href=\"hey\" />", false)
+      .assertParsedTo("", false)
   }
 
   @Test
-  fun `doesnt unescape amp XML entity in XML context`() {
+  fun `doesnt unescape amp XML entity when XML context is removed`() {
     "I am just a text! <b>&amp;</b>"
-      .assertParsedTo("I am just a text! <b>&amp;</b>", false)
+      .assertParsedTo("I am just a text! &amp;", false)
   }
 
   private fun getReader(data: String): XMLEventReader {
@@ -85,8 +79,8 @@ class AndroidStringsXmlParserTest {
     val parser =
       XmlResourcesParser(
         reader,
-        AndroidStringUnescaper.defaultFactory,
-        XmlResourcesParsingConstants.androidSupportedTags,
+        ComposeStringUnescaper.defaultFactory,
+        emptySet(),
       )
     return parser.parse()
   }
