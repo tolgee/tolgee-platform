@@ -1,8 +1,11 @@
 package io.tolgee.service
 
+import io.sentry.Sentry
 import io.tolgee.component.HttpClient
 import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.dtos.TelemetryReportRequest
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.http.HttpMethod
 import org.springframework.scheduling.annotation.Scheduled
@@ -15,7 +18,7 @@ class TelemetryService(
   private val entityManager: EntityManager,
   private val httpClient: HttpClient,
   private val telemetryProperties: TelemetryProperties,
-) {
+) : Logging {
   companion object {
     const val TELEMETRY_REPORT_PERIOD_MS = 24 * 60 * 60 * 1000L
   }
@@ -27,12 +30,17 @@ class TelemetryService(
     val data: TelemetryReportRequest = getTelemetryData()
     if (data.projectsCount == 0L) return
     if (data.usersCount == 0L) return
-    httpClient.requestForJson(
-      "${telemetryProperties.server}/v2/public/telemetry/report",
-      data,
-      HttpMethod.POST,
-      Unit::class.java,
-    )
+    try {
+      httpClient.requestForJson(
+        "${telemetryProperties.server}/v2/public/telemetry/report",
+        data,
+        HttpMethod.POST,
+        Unit::class.java,
+      )
+    } catch (e: Throwable) {
+      Sentry.captureException(e)
+      logger.error("Cannot send telemetry data", e)
+    }
   }
 
   private fun getTelemetryData(): TelemetryReportRequest {
