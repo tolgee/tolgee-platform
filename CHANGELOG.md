@@ -1,3 +1,10 @@
+# [3.88.0](https://github.com/tolgee/tolgee-platform/compare/v3.87.3...v3.88.0) (2024-12-20)
+
+
+### Features
+
+* Make namespaces opt-in ([#2786](https://github.com/tolgee/tolgee-platform/issues/2786)) ([0cdb095](https://github.com/tolgee/tolgee-platform/commit/0cdb0951d994268c62075395bf6b059a261d7c25)), closes [#2594](https://github.com/tolgee/tolgee-platform/issues/2594)
+
 ## [3.87.3](https://github.com/tolgee/tolgee-platform/compare/v3.87.2...v3.87.3) (2024-12-19)
 
 
