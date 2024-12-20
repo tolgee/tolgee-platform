@@ -13,6 +13,7 @@ class ProjectWithStatsView(
     view.description,
     view.slug,
     view.avatarHash,
+    view.useNamespaces,
     view.defaultNamespace,
     view.organizationOwner,
     view.organizationRole,

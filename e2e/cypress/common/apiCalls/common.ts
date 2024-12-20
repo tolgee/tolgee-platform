@@ -156,6 +156,13 @@ export const createTestProject = () =>
     ],
   });
 
+export function enableNamespaces(projectId: number) {
+  internalFetch(`e2e-data/projects/enable-namespaces?projectId=${projectId}`, {
+    method: 'PUT',
+  });
+  cy.reload();
+}
+
 type CreateKeyOptions = {
   isPlural?: boolean;
 };

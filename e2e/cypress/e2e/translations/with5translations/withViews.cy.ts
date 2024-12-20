@@ -15,6 +15,7 @@ import {
 } from '../../../common/translations';
 import { gcy } from '../../../common/shared';
 import { selectNamespace } from '../../../common/namespace';
+import { enableNamespaces } from '../../../common/apiCalls/common';
 
 describe('Views with 5 Translations', () => {
   let project: ProjectDTO = null;
@@ -65,6 +66,7 @@ describe('Views with 5 Translations', () => {
       });
 
       it('will edit key namespace', () => {
+        enableNamespaces(project.id);
         getCell('Cool key 01').click();
 
         selectNamespace('test-ns');

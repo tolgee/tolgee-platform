@@ -34,8 +34,14 @@ export const DefaultNamespaceSelect: FC<{
   label?: ReactNode;
   name: string;
   valueKey?: keyof NamespaceModel;
+  hidden: boolean;
 }> = (props) => {
   const { t } = useTranslate();
+
+  if (props.hidden) {
+    return null;
+  }
+
   const namespaces = props.namespaces.map(({ id, name }) => ({
     value: id ?? ('' as const),
     label: name ?? t('namespace_default'),

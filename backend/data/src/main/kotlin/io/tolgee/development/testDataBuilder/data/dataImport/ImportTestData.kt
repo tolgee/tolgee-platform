@@ -396,6 +396,7 @@ class ImportTestData {
     importBuilder.addImportFile {
       name = "file.json"
       namespace = "homepage"
+      detectedNamespace = "homepage"
     }.build {
       addImportLanguage {
         name = "fr"

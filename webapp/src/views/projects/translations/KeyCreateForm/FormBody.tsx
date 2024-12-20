@@ -7,6 +7,8 @@ import {
 } from 'formik';
 import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
+import { useState } from 'react';
+import clsx from 'clsx';
 
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -25,7 +27,6 @@ import { PluralEditor } from '../translationVisual/PluralEditor';
 import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
-import { useState } from 'react';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -35,8 +36,13 @@ const StyledContainer = styled('div')`
 
 const StyledKeyNsContainer = styled('div')`
   display: grid;
-  grid-template-columns: 1fr 300px;
   gap: 0px 16px;
+  grid-template-columns: 1fr;
+
+  &.useNamespaces {
+    grid-template-columns: 1fr 300px;
+  }
+
   @media (max-width: 800px) {
     grid-template-columns: 1fr;
   }
@@ -84,7 +90,9 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   return (
     <>
       <StyledContainer>
-        <StyledKeyNsContainer>
+        <StyledKeyNsContainer
+          className={clsx({ useNamespaces: project.useNamespaces })}
+        >
           <FastField name="name">
             {({ field, form, meta }: FieldProps<any>) => {
               return (
@@ -122,27 +130,29 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             }}
           </FastField>
 
-          <FastField name="namespace">
-            {({ field, form }: FieldProps<any>) => {
-              return (
-                <div>
-                  <FieldLabel>
-                    <LabelHint title={t('translation_single_namespace_hint')}>
-                      <T keyName="translation_single_label_namespace" />
-                    </LabelHint>
-                  </FieldLabel>
-                  <StyledEdtorWrapper data-cy="translation-create-namespace-input">
-                    <NamespaceSelector
-                      value={field.value}
-                      onChange={(value) =>
-                        form.setFieldValue(field.name, value)
-                      }
-                    />
-                  </StyledEdtorWrapper>
-                </div>
-              );
-            }}
-          </FastField>
+          {project.useNamespaces && (
+            <FastField name="namespace">
+              {({ field, form }: FieldProps<any>) => {
+                return (
+                  <div>
+                    <FieldLabel>
+                      <LabelHint title={t('translation_single_namespace_hint')}>
+                        <T keyName="translation_single_label_namespace" />
+                      </LabelHint>
+                    </FieldLabel>
+                    <StyledEdtorWrapper data-cy="translation-create-namespace-input">
+                      <NamespaceSelector
+                        value={field.value}
+                        onChange={(value) =>
+                          form.setFieldValue(field.name, value)
+                        }
+                      />
+                    </StyledEdtorWrapper>
+                  </div>
+                );
+              }}
+            </FastField>
+          )}
         </StyledKeyNsContainer>
 
         <FastField name={`description`}>

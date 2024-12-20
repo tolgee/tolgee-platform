@@ -21,6 +21,7 @@ import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { BaseProjectView } from '../BaseProjectView';
 import { ImportResultLoadingOverlay } from './component/ImportResultLoadingOverlay';
 import { ImportSettingsPanel } from './component/ImportSettingsPanel';
+import { TranslatedWarningBox } from 'tg.translationTools/TranslatedWarningBox';
 
 export const ImportView: FunctionComponent = () => {
   const dataHelper = useImportDataHelper();
@@ -122,6 +123,11 @@ export const ImportView: FunctionComponent = () => {
             error={e}
             addFilesMutation={dataHelper.addFilesMutation}
           />
+        ))}
+        {dataHelper.addFilesMutation.data?.warnings.map((item) => (
+          <Box key={item.code} mt={4} data-cy="import-file-warnings">
+            <TranslatedWarningBox code={item.code} />
+          </Box>
         ))}
         <Box position="relative">
           <ImportResultLoadingOverlay loading={isProgressOverlayActive} />

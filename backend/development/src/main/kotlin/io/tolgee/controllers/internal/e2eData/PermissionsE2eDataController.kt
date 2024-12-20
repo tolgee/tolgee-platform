@@ -28,6 +28,7 @@ class PermissionsE2eDataController() : AbstractE2eDataController() {
     @RequestParam viewLanguageTags: List<String>?,
     @RequestParam translateLanguageTags: List<String>?,
     @RequestParam stateChangeLanguageTags: List<String>?,
+    @RequestParam useNamespaces: Boolean = false,
   ): StandardTestDataResult {
     val user =
       this.permissionsTestData.addUserWithPermissions(
@@ -36,6 +37,7 @@ class PermissionsE2eDataController() : AbstractE2eDataController() {
         viewLanguageTags = viewLanguageTags,
         translateLanguageTags = translateLanguageTags,
         stateChangeLanguageTags = stateChangeLanguageTags,
+        useNamespaces = useNamespaces,
       )
     this.permissionsTestData.addTasks(
       mutableSetOf(user, permissionsTestData.serverAdmin.self),

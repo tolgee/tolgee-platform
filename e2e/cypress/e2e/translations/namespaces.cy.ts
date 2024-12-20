@@ -1,6 +1,6 @@
 import { waitForGlobalLoading } from '../../common/loading';
 import { namespaces } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import { enableNamespaces, login } from '../../common/apiCalls/common';
 import {
   createTranslation,
   visitTranslations,
@@ -24,6 +24,7 @@ describe('namespaces in translations', () => {
         const testProject = projects.find(
           ({ name }) => name === 'test_project'
         );
+        enableNamespaces(testProject.id);
         visitTranslations(testProject.id);
       });
     waitForGlobalLoading();

@@ -97,6 +97,7 @@ class PermissionsTestData {
     translateLanguageTags: List<String>? = null,
     stateChangeLanguageTags: List<String>? = null,
     organizationBaseScopes: List<Scope>? = null,
+    useNamespaces: Boolean = false,
   ): UserAccount {
     val me =
       root.addUserAccount {
@@ -113,6 +114,8 @@ class PermissionsTestData {
         stateChangeLanguages = getLanguagesByTags(stateChangeLanguageTags)
       }
     }
+
+    projectBuilder.self.useNamespaces = useNamespaces
 
     if (organizationBaseScopes != null) {
       organizationBuilder.self.basePermission.type = null

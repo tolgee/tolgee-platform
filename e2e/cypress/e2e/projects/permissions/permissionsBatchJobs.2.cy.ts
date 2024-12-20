@@ -7,9 +7,12 @@ import {
 
 describe('Batch jobs permissions 2', () => {
   it('translations.batch-by-mt', () => {
-    visitProjectWithPermissions({
-      scopes: ['translations.batch-by-tm'],
-    }).then((projectInfo) => {
+    visitProjectWithPermissions(
+      {
+        scopes: ['translations.batch-by-tm'],
+      },
+      true
+    ).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,

@@ -142,6 +142,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @ProjectJWTAuthTestMethod
   fun `maps namespace`() {
     saveAndPrepare()
+    enableNamespaces()
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
@@ -154,8 +155,33 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `namespace mapping fails if namespaces are disabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(jsonFileName, simpleJson)),
+      getFileMappings(jsonFileName, namespace = "test"),
+    ).andIsBadRequest.andHasErrorMessage(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `detected namespaces are ignored if namespaces are disabled`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair("test-namespace/$jsonFileName", simpleJson)),
+    ).andIsOk
+    executeInNewTransaction {
+      getTestTranslation(namespace = null).assert.isNotNull
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `maps null namespace from non-null mapping`() {
     saveAndPrepare()
+    enableNamespaces()
     val fileName = "guessed-ns/en.json"
     performImport(
       projectId = testData.project.id,
@@ -166,6 +192,13 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     executeInNewTransaction {
       getTestTranslation().assert.isNotNull
     }
+
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(fileName, simpleJson)),
+      getFileMappings(fileName, namespace = ""),
+    ).andIsOk
+
     performImport(
       projectId = testData.project.id,
       listOf(Pair(fileName, simpleJson)),
@@ -365,5 +398,11 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }
+  }
+
+  private fun enableNamespaces() {
+    val fetchedProject = projectService.find(testData.project.id)!!
+    fetchedProject.useNamespaces = true
+    projectService.save(fetchedProject)
   }
 }
