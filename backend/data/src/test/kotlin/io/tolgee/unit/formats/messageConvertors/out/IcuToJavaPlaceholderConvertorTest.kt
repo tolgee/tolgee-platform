@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 class IcuToJavaPlaceholderConvertorTest {
   @Test
   fun `when same placeholder is used multiple times`() {
-    "{0} {0} {0}".assertConvertedTo("%s %1\$s %1\$s")
+    "{0} {0} {0}".assertConvertedTo("%1\$s %1\$s %1\$s")
   }
 
   private fun String.assertConvertedTo(expected: String) {
