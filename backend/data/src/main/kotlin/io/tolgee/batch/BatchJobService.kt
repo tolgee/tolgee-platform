@@ -118,7 +118,7 @@ class BatchJobService(
 
     entityManager.flushAndClear()
 
-    val executions = storeExecutions(chunked, job)
+    val executions = storeExecutions(chunked = chunked, job = job, executeAfter = processor.getExecuteAfter(request))
 
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
@@ -128,12 +128,14 @@ class BatchJobService(
   private fun storeExecutions(
     chunked: List<List<Any>>,
     job: BatchJob,
+    executeAfter: Date?,
   ): List<BatchJobChunkExecution> {
     val executions =
       List(chunked.size) { chunkNumber ->
         BatchJobChunkExecution().apply {
           batchJob = job
           this.chunkNumber = chunkNumber
+          this.executeAfter = executeAfter
         }
       }
 
