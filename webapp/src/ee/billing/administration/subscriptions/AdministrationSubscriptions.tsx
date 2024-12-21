@@ -53,7 +53,7 @@ export const AdministrationSubscriptions = () => {
     <StyledWrapper>
       <DashboardPage>
         <BaseAdministrationView
-          windowTitle={t('administration_organizations')}
+          windowTitle={t('administration_subscriptions')}
           navigation={[
             [
               t('administration_organizations'),
