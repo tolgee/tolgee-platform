@@ -20,6 +20,10 @@ export interface paths {
     /** When applied, current subscription will be cancelled at the period end. */
     put: operations["cancelSubscription"];
   };
+  "/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan": {
+    /** Assigns a private free plan or trial plan to an organization. */
+    put: operations["assignPlan"];
+  };
   "/v2/administration/billing/translation-agency/{agencyId}": {
     get: operations["get_1"];
     put: operations["update"];
@@ -395,7 +399,8 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
-        | "cannot_set_sso_provider_missing_fields";
+        | "cannot_set_sso_provider_missing_fields"
+        | "date_has_to_be_in_the_future";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -547,6 +552,12 @@ export interface components {
       prorationDate: number;
       endingBalance: number;
     };
+    AssignPlanRequest: {
+      /** Format: int64 */
+      trialEnd?: number;
+      /** Format: int64 */
+      planId: number;
+    };
     UpdateTranslationAgencyRequest: {
       name: string;
       description: string;
@@ -654,16 +665,6 @@ export interface components {
       stripeProductId: string;
       forOrganizationIds: number[];
     };
-    AutoAssignOrganizationDto: {
-      /** Format: int64 */
-      organizationId: number;
-      /**
-       * Format: int64
-       * @description Trial end in milliseconds since epoch
-       * @example 1630000000000
-       */
-      trialEnd?: number;
-    };
     CloudPlanRequest: {
       name: string;
       free: boolean;
@@ -700,7 +701,6 @@ export interface components {
       /** Format: date-time */
       usableUntil?: string;
       forOrganizationIds: number[];
-      autoAssignOrganizations: components["schemas"]["AutoAssignOrganizationDto"][];
     };
     CloudPlanAdministrationModel: {
       /** Format: int64 */
@@ -1270,6 +1270,55 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Assigns a private free plan or trial plan to an organization. */
+  assignPlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignPlanRequest"];
       };
     };
   };
@@ -2338,6 +2387,16 @@ export interface operations {
     };
   };
   getPlans_2: {
+    parameters: {
+      query: {
+        /**
+         * Can be
+         * - private free, visible for organization
+         * - or paid (Assignable as trial)
+         */
+        filterAssignableToOrganization?: number;
+      };
+    };
     responses: {
       /** OK */
       200: {
