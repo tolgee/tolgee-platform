@@ -2,27 +2,22 @@ package io.tolgee.batch.data
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.ChunkProcessor
-import io.tolgee.batch.processors.AutoTranslateChunkProcessor
-import io.tolgee.batch.processors.AutomationChunkProcessor
-import io.tolgee.batch.processors.ClearTranslationsChunkProcessor
-import io.tolgee.batch.processors.CopyTranslationsChunkProcessor
-import io.tolgee.batch.processors.DeleteKeysChunkProcessor
-import io.tolgee.batch.processors.MachineTranslationChunkProcessor
-import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
-import io.tolgee.batch.processors.SetKeysNamespaceChunkProcessor
-import io.tolgee.batch.processors.SetTranslationsStateChunkProcessor
-import io.tolgee.batch.processors.TagKeysChunkProcessor
-import io.tolgee.batch.processors.UntagKeysChunkProcessor
+import io.tolgee.batch.processors.*
 import kotlin.reflect.KClass
 
 enum class BatchJobType(
-  val activityType: ActivityType,
+  val activityType: ActivityType? = null,
   /**
    * 0 means no chunking
    */
   val maxRetries: Int,
   val processor: KClass<out ChunkProcessor<*, *, *>>,
   val defaultRetryWaitTimeInMs: Int = 2000,
+
+  /**
+   * Whether run of this job type should be exclusive for a project
+   * So only one job can run at a time for a project
+   */
   val exclusive: Boolean = true,
 ) {
   PRE_TRANSLATE_BT_TM(
@@ -80,5 +75,10 @@ enum class BatchJobType(
     maxRetries = 3,
     processor = AutomationChunkProcessor::class,
     exclusive = false,
+  ),
+  SCHEDULED_SERVER_TASK(
+    // we can always handle the retries in the exception thrown by the processor
+    maxRetries = 0,
+    processor = ScheduledServerTaskChunkProcessor::class,
   ),
 }
