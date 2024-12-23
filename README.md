@@ -51,7 +51,7 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
   - [Next.js](https://tolgee.io/integrations/next)
   - [More...](https://tolgee.io/integrations/all)
 - [Tolgee platform docs](https://tolgee.io/docs/platform)
-  - [Self-hosting](https://tolgee.io/docs/platform/self_hosting/running_with_docker)
+  - [Self-hosting](https://docs.tolgee.io/platform/self_hosting/running_with_docker)
 - [How to develop Tolgee locally](DEVELOPMENT.md)
 
 ## Why use Tolgee?
