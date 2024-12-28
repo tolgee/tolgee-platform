@@ -6,11 +6,7 @@ import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.AbstractStringAssert
 import org.mockito.Mockito
-import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
@@ -40,6 +36,9 @@ class EmailTestUtil() {
 
   val firstMessageContent: String
     get() = messageContents.first()
+
+  val singleEmailContent
+    get() = messageContents.single()
 
   val messageContents: List<String>
     get() =
@@ -72,4 +71,5 @@ class EmailTestUtil() {
   fun findEmail(to: String): MimeMessage? {
     return messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
   }
+
 }

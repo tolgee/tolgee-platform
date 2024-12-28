@@ -47,9 +47,10 @@ class BatchJobProjectLockingManager(
   }
 
   fun unlockJobForProject(
-    projectId: Long,
+    projectId: Long?,
     jobId: Long,
   ) {
+    projectId ?: return
     getMap().compute(projectId) { _, lockedJobId ->
       logger.debug("Unlocking job: $jobId for project $projectId")
       if (lockedJobId == jobId) {
@@ -69,8 +70,9 @@ class BatchJobProjectLockingManager(
   }
 
   private fun tryLockWithRedisson(batchJobDto: BatchJobDto): Boolean {
+    val projectId = batchJobDto.projectId ?: return true
     val computed =
-      getRedissonProjectLocks().compute(batchJobDto.projectId) { _, value ->
+      getRedissonProjectLocks().compute(projectId) { _, value ->
         computeFnBody(batchJobDto, value)
       }
     return computed == batchJobDto.id
@@ -84,8 +86,9 @@ class BatchJobProjectLockingManager(
   }
 
   private fun tryLockLocal(toLock: BatchJobDto): Boolean {
+    val projectId = toLock.projectId ?: return true
     val computed =
-      localProjectLocks.compute(toLock.projectId) { _, value ->
+      localProjectLocks.compute(projectId) { _, value ->
         val newLocked = computeFnBody(toLock, value)
         logger.debug("While trying to lock ${toLock.id} for project ${toLock.projectId} new lock value is $newLocked")
         newLocked
@@ -97,6 +100,8 @@ class BatchJobProjectLockingManager(
     toLock: BatchJobDto,
     currentValue: Long?,
   ): Long {
+    val projectId = toLock.projectId
+      ?: throw IllegalStateException("Project id is required. Locking for project should not happen for non-project jobs.")
     // nothing is locked
     if (currentValue == 0L) {
       logger.debug("Locking job ${toLock.id} for project ${toLock.projectId}, nothing is locked")
@@ -107,7 +112,7 @@ class BatchJobProjectLockingManager(
     if (currentValue == null) {
       logger.debug("Getting initial locked state from DB state")
       // we have to find out from database if there is any running job for the project
-      val initial = getInitialJobId(toLock.projectId)
+      val initial = getInitialJobId(projectId)
       logger.debug("Initial locked job $initial for project ${toLock.projectId}")
       if (initial == null) {
         logger.debug("No job found, locking ${toLock.id}")
