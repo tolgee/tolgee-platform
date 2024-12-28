@@ -30,8 +30,8 @@ import java.util.*
   ],
 )
 class BatchJob : StandardAuditModel(), IBatchJob {
-  @ManyToOne(fetch = FetchType.LAZY)
-  lateinit var project: Project
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var project: Project? = null
 
   @ManyToOne(fetch = FetchType.LAZY)
   var author: UserAccount? = null

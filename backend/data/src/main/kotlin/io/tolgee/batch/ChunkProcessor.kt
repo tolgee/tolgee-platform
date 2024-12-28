@@ -35,7 +35,7 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
 
   fun getChunkSize(
     request: RequestType,
-    projectId: Long,
+    projectId: Long?,
   ): Int {
     return 0
   }
