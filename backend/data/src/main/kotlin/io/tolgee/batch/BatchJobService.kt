@@ -151,8 +151,8 @@ class BatchJobService(
     jdbcTemplate.batchUpdate(
       """
         insert into tolgee_batch_job_chunk_execution 
-        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets) 
-        values (?, ?, ?, ?, ?, ?, ?)
+        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets, execute_after) 
+        values (?, ?, ?, ?, ?, ?, ?, ?)
         """,
       executions,
       100,
@@ -172,6 +172,7 @@ class BatchJobService(
           value = objectMapper.writeValueAsString(execution.successTargets)
         },
       )
+      ps.setTimestamp(8, execution.executeAfter?.time?.let { Timestamp(it) })
     }
   }
 
