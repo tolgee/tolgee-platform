@@ -340,4 +340,9 @@ class OrganizationRoleService(
     val cache = cacheManager.getCache(Caches.ORGANIZATION_ROLES)
     cache?.evict(arrayListOf(organizationId, userId))
   }
+
+  @Transactional
+  fun getOwners(organization: Organization): List<UserAccount> {
+    return organizationRoleRepository.getOwners(organization)
+  }
 }

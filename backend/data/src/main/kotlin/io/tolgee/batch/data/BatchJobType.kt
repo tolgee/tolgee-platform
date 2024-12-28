@@ -76,9 +76,8 @@ enum class BatchJobType(
     processor = AutomationChunkProcessor::class,
     exclusive = false,
   ),
-  SCHEDULED_SERVER_TASK(
-    // we can always handle the retries in the exception thrown by the processor
-    maxRetries = 0,
-    processor = ScheduledServerTaskChunkProcessor::class,
+  BILLING_TRIAL_EXPIRATION_NOTICE(
+    maxRetries = 3,
+    processor = TrialExpirationNoticeProcessor::class,
   ),
 }
