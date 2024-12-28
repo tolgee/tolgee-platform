@@ -26,9 +26,10 @@ class AutoTranslateChunkProcessor(
     coroutineContext: CoroutineContext,
     onProgress: (Int) -> Unit,
   ) {
+    val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
     genericAutoTranslationChunkProcessor.iterateCatching(chunk, coroutineContext) { item ->
       val (keyId, languageId) = item
-      autoTranslationService.softAutoTranslate(job.projectId, keyId, languageId)
+      autoTranslationService.softAutoTranslate(projectId, keyId, languageId)
     }
   }
 
@@ -50,8 +51,9 @@ class AutoTranslateChunkProcessor(
 
   override fun getChunkSize(
     request: AutoTranslationRequest,
-    projectId: Long,
+    projectId: Long?,
   ): Int {
+    projectId ?: throw IllegalArgumentException("Project id is required")
     val languageIds = request.target.map { it.languageId }.distinct()
     val project = projectService.getDto(projectId)
     val services = mtServiceConfigService.getPrimaryServices(languageIds, project.id).values.toSet()

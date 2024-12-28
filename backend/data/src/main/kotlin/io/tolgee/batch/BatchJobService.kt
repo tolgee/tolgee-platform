@@ -67,8 +67,8 @@ class BatchJobService(
   @Transactional
   fun startJob(
     request: Any,
-    project: Project,
-    author: UserAccount?,
+    project: Project? = null,
+    author: UserAccount? = null,
     type: BatchJobType,
     isHidden: Boolean = false,
     debounceDuration: Duration? = null,
@@ -79,7 +79,7 @@ class BatchJobService(
 
     val params =
       BatchOperationParams(
-        projectId = project.id,
+        projectId = project?.id,
         type = type,
         request = request,
         target = target,
@@ -100,7 +100,7 @@ class BatchJobService(
         this.author = author
         this.target = target
         this.totalItems = target.size
-        this.chunkSize = processor.getChunkSize(projectId = project.id, request = request)
+        this.chunkSize = processor.getChunkSize(projectId = project?.id, request = request)
         this.jobCharacter = processor.getJobCharacter()
         this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
         this.type = type

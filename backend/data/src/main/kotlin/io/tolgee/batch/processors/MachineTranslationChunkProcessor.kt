@@ -57,8 +57,9 @@ class MachineTranslationChunkProcessor(
 
   override fun getChunkSize(
     request: MachineTranslationRequest,
-    projectId: Long,
+    projectId: Long?,
   ): Int {
+    projectId ?: throw IllegalArgumentException("Project id is required")
     val languageIds = request.targetLanguageIds
     val services = mtServiceConfigService.getPrimaryServices(languageIds, projectId).values.toSet()
     if (services.map { it?.serviceType }.contains(MtServiceType.TOLGEE)) {

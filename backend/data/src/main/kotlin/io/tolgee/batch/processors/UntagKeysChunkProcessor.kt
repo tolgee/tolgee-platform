@@ -25,9 +25,10 @@ class UntagKeysChunkProcessor(
     val subChunked = chunk.chunked(100) as List<List<Long>>
     var progress = 0
     val params = getParams(job)
+    val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      tagService.untagKeys(job.projectId, subChunk.associateWith { params.tags })
+      tagService.untagKeys(projectId, subChunk.associateWith { params.tags })
       entityManager.flush()
       progress += subChunk.size
       onProgress.invoke(progress)
