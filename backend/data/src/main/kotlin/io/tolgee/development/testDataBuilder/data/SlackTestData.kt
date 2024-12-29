@@ -1,8 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
-import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
-import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.development.testDataBuilder.builders.*
 import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
@@ -148,4 +146,12 @@ class SlackTestData {
           )
         }.self
     }
+
+  fun add100Keys(): List<Key> {
+    return (1..100).map {
+      projectBuilder.addKey("key$it").build {
+        addTranslation("en", "Hello")
+      }.self
+    }
+  }
 }
