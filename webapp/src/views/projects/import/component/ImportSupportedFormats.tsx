@@ -8,6 +8,7 @@ import CLogo from 'tg.svgs/logos/c.svg?react';
 import PythonLogo from 'tg.svgs/logos/python.svg?react';
 import AppleLogo from 'tg.svgs/logos/apple.svg?react';
 import AndroidLogo from 'tg.svgs/logos/android.svg?react';
+import ComposeMultiplatformLogo from 'tg.svgs/logos/compose-multiplatform.svg?react';
 import FluttrerLogo from 'tg.svgs/logos/flutter.svg?react';
 import RailsLogo from 'tg.svgs/logos/rails.svg?react';
 import I18nextLogo from 'tg.svgs/logos/i18next.svg?react';
@@ -53,7 +54,7 @@ const FORMATS = [
   { name: 'Apple Stringsdict', logo: <AppleLogo /> },
   { name: 'Apple XLIFF', logo: <AppleLogo /> },
   { name: 'Android XML', logo: <AndroidLogo /> },
-  // TODO: Compose multiplatform logo
+  { name: 'Compose Multiplatform XML', logo: <ComposeMultiplatformLogo /> },
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
   { name: 'i18next', logo: <I18nextLogo /> },
