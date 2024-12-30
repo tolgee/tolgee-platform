@@ -482,6 +482,7 @@ export interface components {
         | "PAST_DUE"
         | "UNPAID"
         | "ERROR"
+        | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
       licenseKey?: string;
       estimatedCosts?: number;
@@ -1041,6 +1042,14 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       trialEnd?: number;
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
       stripeSubscriptionId?: string;
     };
     OrganizationWithSubscriptionsModel: {

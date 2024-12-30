@@ -22,7 +22,7 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
 }) => {
   const formatDate = useDateFormatter();
 
-  const isTrial = Boolean(item.cloudSubscription?.trialEnd);
+  const isTrial = Boolean(item.cloudSubscription?.status === 'TRIALING');
 
   return (
     <Tooltip
