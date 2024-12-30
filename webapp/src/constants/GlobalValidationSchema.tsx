@@ -306,6 +306,7 @@ export class Validation {
 
   static readonly CLOUD_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
+    type: Yup.string().required(),
     stripeProductId: Yup.string().when('free', {
       is: false,
       then: Yup.string().required(),

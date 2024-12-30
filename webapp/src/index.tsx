@@ -46,7 +46,11 @@ const tolgee = Tolgee()
     fallbackLanguage: 'en',
     apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL,
     apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY,
-    tagNewKeys: [`draft: ${getFeatureName(branchName)}`],
+    tagNewKeys: [
+      `draft: ${getFeatureName(branchName)}`,
+      // TODO: REMOVE this one
+      'internal-billing',
+    ],
     staticData: {
       en: () => import('./i18n/en.json').then((m) => m.default),
       es: () => import('./i18n/es.json').then((m) => m.default),

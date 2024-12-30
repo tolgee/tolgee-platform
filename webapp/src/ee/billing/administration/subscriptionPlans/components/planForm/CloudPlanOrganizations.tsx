@@ -11,17 +11,16 @@ import { useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { AssignSwitchCheckbox } from './AssignSwitchCheckbox';
 
 type Props = {
-  planId?: number;
+  editPlanId?: number;
   originalOrganizations: number[];
   organizations: number[];
   setOrganizations: (orgs: number[]) => void;
 };
 
 export function CloudPlanOrganizations({
-  planId,
+  editPlanId,
   originalOrganizations,
   organizations,
   setOrganizations,
@@ -40,11 +39,11 @@ export function CloudPlanOrganizations({
   const planOrganizations = useBillingApiQuery({
     url: '/v2/administration/billing/cloud-plans/{planId}/organizations',
     method: 'get',
-    path: { planId: planId! },
+    path: { planId: editPlanId! },
     query: { size: 10, page, search },
     options: {
       keepPreviousData: true,
-      enabled: planId !== undefined && onlyAllowed,
+      enabled: editPlanId !== undefined && onlyAllowed,
     },
   });
 
@@ -69,7 +68,7 @@ export function CloudPlanOrganizations({
           {t('administration_cloud_plan_form_organizations_title')} (
           {organizations.length})
         </Typography>
-        {planId && (
+        {editPlanId && (
           <FormControlLabel
             control={
               <Switch checked={onlyAllowed} onChange={toggleFilterOwn} />
@@ -115,12 +114,7 @@ export function CloudPlanOrganizations({
                     }}
                   />
                 }
-                label={
-                  <ListItemText>
-                    {label}
-                    <AssignSwitchCheckbox organizationId={o.id} />
-                  </ListItemText>
-                }
+                label={<ListItemText>{label}</ListItemText>}
               />
             </ListItem>
           );

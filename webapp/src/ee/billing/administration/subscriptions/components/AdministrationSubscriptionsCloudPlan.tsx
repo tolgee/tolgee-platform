@@ -1,7 +1,7 @@
 import { Box, styled, Tooltip } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { AdministrationSubscriptionsCloudSubscriptionPopover } from './AdministrationSubscriptionsCloudSubscriptionPopover';
+import { SubscriptionCloudPlanPopover } from './SubscriptionCloudPlanPopover';
 import { AssignCloudTrialDialog } from './AssignCloudTrialDialog';
 
 type Props = {
@@ -17,21 +17,17 @@ export const AdministrationSubscriptionsCloudPlan: FC<Props> = ({ item }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   return (
     <>
-      <Tooltip
-        title={
-          <AdministrationSubscriptionsCloudSubscriptionPopover
-            item={item}
-            onOpenAssignTrialDialog={() => setDialogOpen(true)}
-          />
-        }
+      <SubscriptionCloudPlanPopover
+        item={item}
+        onOpenAssignTrialDialog={() => setDialogOpen(true)}
       >
         <StyledContainer>{item.cloudSubscription?.plan.name}</StyledContainer>
-      </Tooltip>
+      </SubscriptionCloudPlanPopover>
       <AssignCloudTrialDialog
         organizationId={item.organization.id}
         open={dialogOpen}
         handleClose={() => setDialogOpen(false)}
-      ></AssignCloudTrialDialog>
+      />
     </>
   );
 };
