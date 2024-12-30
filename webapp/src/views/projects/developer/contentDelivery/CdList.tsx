@@ -17,7 +17,6 @@ import { CdDialog } from './CdDialog';
 import { CdItem } from './CdItem';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
-// TODO: Move Content Delivery to EE
 export const CdList = () => {
   const project = useProject();
   const [page, setPage] = useState(0);

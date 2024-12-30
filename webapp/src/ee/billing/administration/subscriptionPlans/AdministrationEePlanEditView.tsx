@@ -11,7 +11,7 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { EePlanForm } from './components/EePlanForm';
+import { EePlanForm } from './components/planForm/EePlanForm';
 
 export const AdministrationEePlanEditView = () => {
   const match = useRouteMatch();

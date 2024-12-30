@@ -27,12 +27,12 @@ declare namespace DataCy {
         "administration-cloud-plan-field-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
-        "administration-cloud-plan-organization-assign-switch" |
         "administration-cloud-plan-submit-button" |
         "administration-cloud-plans-item" |
         "administration-cloud-plans-item-delete" |
         "administration-cloud-plans-item-edit" |
         "administration-cloud-plans-item-public-badge" |
+        "administration-customize-plan-switch" |
         "administration-debug-customer-account-message" |
         "administration-debug-customer-exit-button" |
         "administration-ee-license-key-input" |
