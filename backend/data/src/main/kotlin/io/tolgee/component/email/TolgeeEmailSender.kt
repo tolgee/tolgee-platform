@@ -57,4 +57,14 @@ class TolgeeEmailSender(
       )
     }
   }
+
+  fun getSignature(): String {
+    return """
+             <br /><br />
+             Best regards,
+             <br />
+             Tolgee Team
+             """.trimIndent()
+  }
+
 }
