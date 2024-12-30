@@ -190,7 +190,7 @@ export class ApiHttpService {
 
   buildQuery(object: { [key: string]: any }): string {
     return Object.keys(object)
-      .filter((k) => !!object[k])
+      .filter((k) => object[k] !== null && object[k] !== undefined)
       .map((k) => {
         if (Array.isArray(object[k])) {
           return object[k]

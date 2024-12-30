@@ -1135,7 +1135,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -1151,7 +1150,11 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
-        | "cannot_set_sso_provider_missing_fields";
+        | "cannot_set_sso_provider_missing_fields"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -2087,6 +2090,7 @@ export interface components {
       autoPublish: boolean;
       /** Format: int64 */
       lastPublished?: number;
+      lastPublishedFiles: string[];
       /**
        * @description Languages to be contained in export.
        *
@@ -2384,15 +2388,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
+      description: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2553,14 +2557,14 @@ export interface components {
       userFullName?: string;
       projectName: string;
       username?: string;
+      description: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      projectId: number;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -3159,7 +3163,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -3175,7 +3178,11 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
-        | "cannot_set_sso_provider_missing_fields";
+        | "cannot_set_sso_provider_missing_fields"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3208,7 +3215,8 @@ export interface components {
         | "TAG_KEYS"
         | "UNTAG_KEYS"
         | "SET_KEYS_NAMESPACE"
-        | "AUTOMATION";
+        | "AUTOMATION"
+        | "BILLING_TRIAL_EXPIRATION_NOTICE";
       /**
        * Format: int32
        * @description Total items, that have been processed so far
@@ -3859,11 +3867,11 @@ export interface components {
        */
       currentUserRole?: "MEMBER" | "OWNER";
       basePermissions: components["schemas"]["PermissionModel"];
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -4039,9 +4047,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -4049,9 +4057,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4652,15 +4660,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
+      description: string;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      updatedAt: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4782,14 +4790,14 @@ export interface components {
       userFullName?: string;
       projectName: string;
       username?: string;
+      description: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      projectId: number;
     };
     PagedModelUserAccountModel: {
       _embedded?: {

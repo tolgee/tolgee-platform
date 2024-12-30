@@ -19,7 +19,8 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import Toolbar from '@mui/material/Toolbar';
-import { AdministrationSubscriptionsCloudPlan } from './AdministrationSubscriptionsCloudPlan';
+import { AdministrationSubscriptionsCloudPlan } from './components/AdministrationSubscriptionsCloudPlan';
+import { AdministrationSubscriptionsListItem } from './components/AdministrationSubscriptionsListItem';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -31,7 +32,7 @@ const StyledWrapper = styled('div')`
   }
 `;
 
-export const AdministrationSubscriptions = () => {
+export const AdministrationSubscriptionsView = () => {
   const [page, setPage] = useState(0);
 
   const [search, setSearch] = useUrlSearchState('search');
@@ -72,20 +73,7 @@ export const AdministrationSubscriptions = () => {
             searchText={search}
             loadable={listPermitted}
             renderItem={(item) => (
-              <ListItem data-cy="administration-organizations-list-item">
-                <ListItemText>
-                  <Link
-                    href={LINKS.ORGANIZATION_PROFILE.build({
-                      [PARAMS.ORGANIZATION_SLUG]: item.organization.slug,
-                    })}
-                  >
-                    {item.organization.name}
-                  </Link>{' '}
-                  <Chip size="small" label={item.organization.id} />
-                  <AdministrationSubscriptionsCloudPlan item={item} />
-                </ListItemText>
-                <ListItemSecondaryAction></ListItemSecondaryAction>
-              </ListItem>
+              <AdministrationSubscriptionsListItem item={item} />
             )}
           />
         </BaseAdministrationView>

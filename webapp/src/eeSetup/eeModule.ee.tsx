@@ -63,7 +63,7 @@ import { addAdministrationMenuItems } from '../views/administration/components/B
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import { BillingMenuItemsProps } from './EeModuleType';
-import { AdministrationSubscriptions } from '../ee/billing/administration/subscriptions/AdministrationSubscriptions';
+import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 
 export const billingMenuItems = [
   BillingMenuItem,
@@ -106,7 +106,7 @@ export const routes = {
         <AdministrationCloudPlansView />
       </PrivateRoute>
       <PrivateRoute path={LINKS.ADMINISTRATION_BILLING_SUBSCRIPTIONS.template}>
-        <AdministrationSubscriptions />
+        <AdministrationSubscriptionsView />
       </PrivateRoute>
       <PrivateRoute
         exact
