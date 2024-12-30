@@ -31,6 +31,7 @@ export const AdministrationCloudPlansView = () => {
   const plansLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/cloud-plans',
     method: 'get',
+    query: {},
   });
 
   const deletePlanLoadable = useBillingApiMutation({

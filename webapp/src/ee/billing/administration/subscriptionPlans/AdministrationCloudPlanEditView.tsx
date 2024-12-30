@@ -1,47 +1,17 @@
 import { Box, Typography } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import { useTranslate } from '@tolgee/react';
+import { useRouteMatch } from 'react-router-dom';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
-import {
-  useBillingApiMutation,
-  useBillingApiQuery,
-} from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { CloudPlanForm } from './components/CloudPlanForm';
+import { EditCloudPlanForm } from './components/planForm/EditCloudPlanForm';
 
 export const AdministrationCloudPlanEditView = () => {
   const match = useRouteMatch();
   const { t } = useTranslate();
-  const messaging = useMessage();
-  const history = useHistory();
 
   const planId = match.params[PARAMS.PLAN_ID];
-
-  const planLoadable = useBillingApiQuery({
-    url: '/v2/administration/billing/cloud-plans/{planId}',
-    method: 'get',
-    path: { planId },
-  });
-
-  const planEditLoadable = useBillingApiMutation({
-    url: '/v2/administration/billing/cloud-plans/{planId}',
-    method: 'put',
-    invalidatePrefix: '/v2/administration/billing/cloud-plans',
-  });
-
-  if (planLoadable.isLoading) {
-    return <SpinnerProgress />;
-  }
-
-  const planData = planLoadable.data;
-
-  if (!planData) {
-    return null;
-  }
 
   return (
     <DashboardPage>
@@ -66,49 +36,8 @@ export const AdministrationCloudPlanEditView = () => {
           <Typography variant="h5">
             {t('administration_cloud_plan_edit')}
           </Typography>
-          <CloudPlanForm
-            planId={planId}
-            loading={planEditLoadable.isLoading}
-            initialData={{
-              ...planData,
-              autoAssignOrganizationIds: [],
-              includedUsage: {
-                seats: planData.includedUsage.seats,
-                mtCredits: planData.includedUsage.mtCredits,
-                translations:
-                  planData.type === 'SLOTS_FIXED'
-                    ? planData.includedUsage.translationSlots
-                    : planData.includedUsage.translations,
-              },
-            }}
-            onSubmit={(values) => {
-              planEditLoadable.mutate(
-                {
-                  path: { planId },
-                  content: {
-                    'application/json': {
-                      ...values,
-                      stripeProductId: values.stripeProductId!,
-                      forOrganizationIds: values.public
-                        ? []
-                        : values.forOrganizationIds,
-                    },
-                  },
-                },
-                {
-                  onSuccess() {
-                    messaging.success(
-                      <T keyName="administration_cloud_plan_updated_success" />
-                    );
-                    history.push(
-                      LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build()
-                    );
-                  },
-                }
-              );
-            }}
-          />
         </Box>
+        <EditCloudPlanForm planId={planId} />
       </BaseAdministrationView>
     </DashboardPage>
   );

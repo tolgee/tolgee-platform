@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Form, Formik } from 'formik';
+import { Form, Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import {
   Button,
@@ -8,13 +8,21 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
+  FormHelperText,
+  Switch,
 } from '@mui/material';
 import { DateTimePickerField } from 'tg.component/common/form/fields/DateTimePickerField';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
-import { PlanSelectorField } from './CloudPlanSelector';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { CloudPlanFields } from '../../subscriptionPlans/components/planForm/fields/CloudPlanFields';
+import { getCloudPlanInitialValues } from '../../subscriptionPlans/components/planForm/getCloudPlanInitialValues';
+import { components } from 'tg.service/billingApiSchema.generated';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { PlanSelectorField } from '../../subscriptionPlans/components/planForm/fields/PlanSelectorField';
+import { CloudPlanFormData } from '../../subscriptionPlans/components/planForm/CloudPlanFormBase';
 
 export const AssignCloudTrialDialog: FC<{
   open: boolean;
@@ -31,14 +39,19 @@ export const AssignCloudTrialDialog: FC<{
 
   const messaging = useMessage();
 
+  const [customize, setCustomize] = React.useState(false);
+
   function handleSave(value: ValuesType) {
     assignMutation.mutate(
       {
         path: { organizationId },
         content: {
           'application/json': {
-            planId: value.planId!,
+            planId: customize ? undefined : value.planId!,
             trialEnd: value.trialEnd.getTime(),
+            customPlan: customize
+              ? { ...value.customPlan, public: false }
+              : undefined,
           },
         },
       },
@@ -55,12 +68,25 @@ export const AssignCloudTrialDialog: FC<{
 
   const currentDaPlus2weeks = new Date(Date.now() + 1000 * 60 * 60 * 24 * 14);
 
+  const cloudPlanInitialData = getCloudPlanInitialValues();
+
+  function setCustomPlanValues(
+    formikProps: FormikProps<any>,
+    planData: components['schemas']['AdministrationCloudPlanModel']
+  ) {
+    formikProps.setFieldValue('customPlan', {
+      ...getCloudPlanInitialValues(planData),
+      name: planData.name + ' (trial)',
+    });
+  }
+
   return (
     <Formik
       initialValues={
         {
           trialEnd: currentDaPlus2weeks,
           planId: undefined,
+          customPlan: cloudPlanInitialData,
         } satisfies ValuesType
       }
       onSubmit={handleSave}
@@ -69,11 +95,12 @@ export const AssignCloudTrialDialog: FC<{
           .required()
           .min(new Date(), t('date-must-be-in-future-error-message')),
         planId: Yup.number().required(),
+        customPlan: Validation.CLOUD_PLAN_FORM,
       })}
     >
       {(formikProps) => (
         <Form>
-          <Dialog open={open} fullWidth maxWidth="sm" onClose={handleClose}>
+          <Dialog open={open} fullWidth maxWidth="lg" onClose={handleClose}>
             <DialogTitle>
               <T keyName="administration-subscription-assign-trial-dialog-title" />
             </DialogTitle>
@@ -88,7 +115,35 @@ export const AssignCloudTrialDialog: FC<{
                 }}
                 name="trialEnd"
               />
-              <PlanSelectorField organizationId={organizationId} />
+              <FormHelperText>
+                <T keyName="administration-subscription-assign-trial-plan-help" />
+              </FormHelperText>
+              <PlanSelectorField
+                organizationId={organizationId}
+                onPlanChange={(plan) => setCustomPlanValues(formikProps, plan)}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={customize}
+                    onChange={() => setCustomize(!customize)}
+                  />
+                }
+                data-cy="administration-customize-plan-switch"
+                label={t('administration_customize_plan_switch')}
+              />
+              {customize && (
+                <>
+                  <FormHelperText>
+                    <T keyName="administration-customize-trial-plan-help" />
+                  </FormHelperText>
+                  <CloudPlanFields
+                    parentName="customPlan"
+                    isUpdate={false}
+                    canEditPrices={true}
+                  />
+                </>
+              )}
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose}>
@@ -116,4 +171,5 @@ export const AssignCloudTrialDialog: FC<{
 type ValuesType = {
   planId: number | undefined;
   trialEnd: Date;
+  customPlan: CloudPlanFormData;
 };

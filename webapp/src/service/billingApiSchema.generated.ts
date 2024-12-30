@@ -22,7 +22,7 @@ export interface paths {
   };
   "/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan": {
     /** Assigns a private free plan or trial plan to an organization. */
-    put: operations["assignPlan"];
+    put: operations["assignCloudPlan"];
   };
   "/v2/administration/billing/translation-agency/{agencyId}": {
     get: operations["get_1"];
@@ -383,7 +383,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -400,7 +399,10 @@ export interface components {
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
-        | "date_has_to_be_in_the_future";
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -529,6 +531,8 @@ export interface components {
       estimatedCosts?: number;
       /** Format: int64 */
       createdAt: number;
+      /** Format: int64 */
+      trialEnd?: number;
     };
     UpdateSubscriptionPrepareRequest: {
       /**
@@ -556,7 +560,60 @@ export interface components {
       /** Format: int64 */
       trialEnd?: number;
       /** Format: int64 */
-      planId: number;
+      planId?: number;
+      customPlan?: components["schemas"]["CloudPlanRequest"];
+    };
+    CloudPlanRequest: {
+      name: string;
+      free: boolean;
+      nonCommercial: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+      )[];
+      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      prices: components["schemas"]["PlanPricesRequest"];
+      includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      public: boolean;
+      stripeProductId: string;
+      /** Format: date-time */
+      notAvailableBefore?: string;
+      /** Format: date-time */
+      availableUntil?: string;
+      /** Format: date-time */
+      usableUntil?: string;
+      forOrganizationIds: number[];
+    };
+    PlanIncludedUsageRequest: {
+      /** Format: int64 */
+      seats: number;
+      /** Format: int64 */
+      translations: number;
+      /** Format: int64 */
+      mtCredits: number;
+    };
+    PlanPricesRequest: {
+      perSeat: number;
+      perThousandTranslations?: number;
+      perThousandMtCredits?: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
     };
     UpdateTranslationAgencyRequest: {
       name: string;
@@ -580,21 +637,6 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       email?: string;
       emailBcc: string[];
-    };
-    PlanIncludedUsageRequest: {
-      /** Format: int64 */
-      seats: number;
-      /** Format: int64 */
-      translations: number;
-      /** Format: int64 */
-      mtCredits: number;
-    };
-    PlanPricesRequest: {
-      perSeat: number;
-      perThousandTranslations?: number;
-      perThousandMtCredits?: number;
-      subscriptionMonthly: number;
-      subscriptionYearly: number;
     };
     SelfHostedEePlanRequest: {
       name: string;
@@ -665,44 +707,7 @@ export interface components {
       stripeProductId: string;
       forOrganizationIds: number[];
     };
-    CloudPlanRequest: {
-      name: string;
-      free: boolean;
-      nonCommercial: boolean;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "WEBHOOKS"
-        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
-        | "AI_PROMPT_CUSTOMIZATION"
-        | "SLACK_INTEGRATION"
-        | "TASKS"
-        | "SSO"
-        | "ORDER_TRANSLATION"
-      )[];
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
-      prices: components["schemas"]["PlanPricesRequest"];
-      includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
-      public: boolean;
-      stripeProductId: string;
-      /** Format: date-time */
-      notAvailableBefore?: string;
-      /** Format: date-time */
-      availableUntil?: string;
-      /** Format: date-time */
-      usableUntil?: string;
-      forOrganizationIds: number[];
-    };
-    CloudPlanAdministrationModel: {
+    AdministrationCloudPlanModel: {
       /** Format: int64 */
       id: number;
       name: string;
@@ -734,6 +739,12 @@ export interface components {
       public: boolean;
       stripeProductId: string;
       forOrganizationIds: number[];
+      /**
+       * Format: int64
+       * @description Only single organization is using this plan or can see this plan. This is the organization id.When provided, we are sure that no other organization is currently using or have been invoiced with this plan.
+       */
+      exclusiveForOrganizationId?: number;
+      canEditPrices: boolean;
       nonCommercial: boolean;
     };
     CreateTaskRequest: {
@@ -1015,9 +1026,26 @@ export interface components {
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
     };
+    AdministrationCloudSubscriptionModel: {
+      /** Format: int64 */
+      organizationId: number;
+      plan: components["schemas"]["AdministrationCloudPlanModel"];
+      /** Format: int64 */
+      currentPeriodStart?: number;
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      cancelAtPeriodEnd: boolean;
+      estimatedCosts?: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      trialEnd?: number;
+      stripeSubscriptionId?: string;
+    };
     OrganizationWithSubscriptionsModel: {
       organization: components["schemas"]["SimpleOrganizationModel"];
-      cloudSubscription?: components["schemas"]["CloudSubscriptionModel"];
+      cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
       selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionModel"][];
     };
     PagedModelOrganizationWithSubscriptionsModel: {
@@ -1026,9 +1054,9 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    CollectionModelCloudPlanAdministrationModel: {
+    CollectionModelAdministrationCloudPlanModel: {
       _embedded?: {
-        plans?: components["schemas"]["CloudPlanAdministrationModel"][];
+        plans?: components["schemas"]["AdministrationCloudPlanModel"][];
       };
     };
   };
@@ -1274,7 +1302,7 @@ export interface operations {
     };
   };
   /** Assigns a private free plan or trial plan to an organization. */
-  assignPlan: {
+  assignCloudPlan: {
     parameters: {
       path: {
         organizationId: number;
@@ -1710,7 +1738,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -1757,7 +1785,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -2395,13 +2423,15 @@ export interface operations {
          * - or paid (Assignable as trial)
          */
         filterAssignableToOrganization?: number;
+        filterPlanIds?: number[];
+        filterPublic?: boolean;
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CollectionModelCloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["CollectionModelAdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -2443,7 +2473,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
