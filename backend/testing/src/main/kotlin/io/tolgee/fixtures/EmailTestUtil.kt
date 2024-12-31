@@ -1,6 +1,7 @@
 package io.tolgee.fixtures
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
@@ -37,8 +38,11 @@ class EmailTestUtil() {
   val firstMessageContent: String
     get() = messageContents.first()
 
-  val singleEmailContent
-    get() = messageContents.single()
+  val singleEmailContent: String
+    get() {
+      messageContents.assert.hasSize(1)
+      return messageContents.single()
+    }
 
   val messageContents: List<String>
     get() =
