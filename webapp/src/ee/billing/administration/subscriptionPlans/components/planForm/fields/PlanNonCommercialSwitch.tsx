@@ -20,7 +20,7 @@ export const PlanNonCommercialSwitch: FC = () => {
             }
           />
         }
-        data-cy="administration-cloud-plan-field-non-commercial"
+        data-cy="administration-plan-field-non-commercial"
         label={t('administration_cloud_plan_field_non_commercial')}
       />
     </>

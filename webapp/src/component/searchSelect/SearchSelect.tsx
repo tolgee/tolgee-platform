@@ -34,6 +34,7 @@ type Props<T> = {
   SelectProps?: React.ComponentProps<typeof Select>;
   compareFunction?: (prompt: string, label: string) => boolean;
   noContain?: boolean;
+  dataCy?: string;
 };
 
 export function SearchSelect<T extends React.Key>({
@@ -51,6 +52,7 @@ export function SearchSelect<T extends React.Key>({
   SelectProps,
   compareFunction,
   noContain,
+  dataCy = 'search-select',
 }: Props<T>) {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -86,7 +88,7 @@ export function SearchSelect<T extends React.Key>({
   const valueItem = items.find((i) => i.value === value);
 
   return (
-    <Box display="grid" data-cy="search-select">
+    <Box display="grid" data-cy={dataCy}>
       <Select
         ref={anchorEl}
         onOpen={handleOpen}
