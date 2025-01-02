@@ -54,10 +54,10 @@ const PasswordResetView = React.lazy(
       /* webpackChunkName: "reset-password-view" */ './security/ResetPasswordView'
     )
 );
-const AcceptInvitationHandler = React.lazy(
+const AcceptInvitationView = React.lazy(
   () =>
     import(
-      /* webpackChunkName: "accept-invitation-handler" */ './security/AcceptInvitationHandler'
+      /* webpackChunkName: "accept-invitation-view" */ './security/AcceptInvitationView'
     )
 );
 
@@ -86,7 +86,7 @@ export const RootRouter = () => {
           <LoginRouter />
         </Route>
         <Route path={LINKS.ACCEPT_INVITATION.template}>
-          <AcceptInvitationHandler />
+          <AcceptInvitationView />
         </Route>
         <PrivateRoute path={LINKS.GO_TO_CLOUD_BILLING.template}>
           <OrganizationBillingRedirect selfHosted={false} />

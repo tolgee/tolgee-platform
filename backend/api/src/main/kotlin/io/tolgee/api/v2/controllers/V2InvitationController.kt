@@ -10,10 +10,7 @@ import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.facade.ProjectPermissionFacade
-import io.tolgee.hateoas.invitation.OrganizationInvitationModel
-import io.tolgee.hateoas.invitation.OrganizationInvitationModelAssembler
-import io.tolgee.hateoas.invitation.ProjectInvitationModel
-import io.tolgee.hateoas.invitation.ProjectInvitationModelAssembler
+import io.tolgee.hateoas.invitation.*
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
@@ -59,6 +56,7 @@ class V2InvitationController(
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
   private val translationAgencyService: TranslationAgencyService,
+  private val publicInvitationModelAssembler: PublicInvitationModelAssembler
 ) {
   @GetMapping("/v2/invitations/{code}/accept")
   @Operation(summary = "Accepts invitation to project or organization")
