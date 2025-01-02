@@ -12,6 +12,7 @@ import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { TranslatedError } from 'tg.translationTools/TranslatedError';
 
 export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
 
@@ -60,12 +61,19 @@ const AcceptInvitationView: React.FC = () => {
     path: {
       code,
     },
+    options: {
+      onError(e) {
+        history.replace(LINKS.PROJECT.build());
+        if (e.code) {
+          messageService.error(<TranslatedError code={e.code} />);
+        }
+      },
+    },
   });
 
   function handleAccept() {
     if (!tokenService.getToken()) {
       setInvitationCode(code);
-      messageService.success(<T keyName="invitation_log_in_first" />);
       history.push(LINKS.LOGIN.build());
     } else {
       acceptCode.mutate(
