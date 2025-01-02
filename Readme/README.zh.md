@@ -14,7 +14,11 @@ Crowdin、Phrase 或 Lokalise 的开源替代方案
 
 <h2 align="center" style="border-bottom: none">
 
-[**English**](../README.md) | [**Français**](README.fr.md) | **中国人**
+[**English**](../README.md) |
+[**Français**](README.fr.md) |
+[**Deutsch**](README.de.md) |
+[**हिंदी**](README.hi.md) |
+[**中国人**](README.zh.md)
 
 </h2>
 
@@ -34,37 +38,6 @@ Crowdin、Phrase 或 Lokalise 的开源替代方案
 [<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
-
-[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktobefest2024.md)
-
-我们正在为精彩的演示合并 PR 发送赠品！有关完整信息，请检查
-我们的 [Hacktobefest2024.md](./Hacktobefest2024.md)
-
-### 提交类型
-- **拉取请求**：提交拉取请求，解决标有 #hacktoberfest 的问题
-- 您可以使用以下任何框架**创建演示**：React、Angular、Vue、Svelte、PHP、Flutter、Ruby、iOS、Android
-
-### 质量标准
-
-您提交的作品将根据以下标准进行评估，每个项目的得分在 10-50 分之间：
-- **质量**：代码是否编写良好、经过测试且可维护
-- **用户体验 (UX)**：实施的直观性和用户友好性如何？
-- **创造力**：该项目是否提供独特的方法或创新功能？
-- **有用性**：对用户的贡献有多大价值？
-    
-根据积分，您将获得一定数量的赠品：
-    
-- 30 - 40 分 - Tolgee 贴纸套装
-- 40 - 45 分 - Tolgee 贴纸套装 + Tolgee 袜子
-- 45 - 50 分 - Tolgee 贴纸套装 + Tolgee 袜子 + Tolgee T 恤
-    
-### 存储库之星 ⭐
-
-请启动 [Tolgee 存储库](https://github.com/tolgee/tolgee-platform) 作为您贡献的一部分！
-
-有关完整信息，请查看我们的 [Hacktobefest2024.md](./Hacktobefest2024.md)
-
-加入 Tolgee 社区 [Tolgee Slack 社区 <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) 分享您的想法、建议或问题并与其他用户和贡献者联系。
 
 ![托尔吉](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 

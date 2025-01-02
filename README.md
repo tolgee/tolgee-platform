@@ -14,7 +14,11 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 
 <h2 align="center" style="border-bottom: none">
 
-[**Français**](Readme/README.fr.md)
+[**English**](README.md) |
+[**Français**](Readme/README.fr.md) |
+[**Deutsch**](Readme/README.de.md) |
+[**हिंदी**](Readme/README.hi.md) |
+[**中国人**](Readme/README.zh.md)
 
 </h2>
 
@@ -35,6 +39,8 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
+
+![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
 ## Quick links
 - [Tolgee Website](https://tolgee.io)

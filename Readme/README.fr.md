@@ -14,7 +14,11 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 
 <h2 align="center" style="border-bottom: none">
 
-[**English**](README.md)
+[**English**](../README.md) |
+[**Français**](README.fr.md) |
+[**Deutsch**](README.de.md) |
+[**हिंदी**](README.hi.md) |
+[**中国人**](README.zh.md)
 
 </h2>
 
@@ -34,38 +38,6 @@ Une alternative open-source à Crowdin, Phrase ou Lokalise
 [<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
-
-[![Hacktoberfest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktoberfest2024.fr.md)
-
-Nous envoyons des goodies pour des démonstrations impressionnantes avec des PRs fusionnées ! Pour des informations complètes, consultez notre [Hacktoberfest2024.fr.md](Hacktoberfest2024.fr.md).
-
-### Types de Soumission
-- **Pull Requests** : Soumettez une pull request en traitant des problèmes étiquetés avec #hacktoberfest.
-- Vous pouvez **créer une démonstration** avec l'un des frameworks suivants : React, Angular, Vue, Svelte, PHP, Flutter, Ruby, iOS, Android.
-
-### Critères de Qualité
-
-Vos soumissions seront évaluées selon les critères suivants, chaque projet recevant une note comprise entre 10 et 50 points :
-- **Qualité** : Le code est-il bien écrit, testé et maintenable ?
-- **Expérience Utilisateur (UX)** : La mise en œuvre est-elle intuitive et facile à utiliser ?
-- **Créativité** : Le projet propose-t-il une approche unique ou des fonctionnalités innovantes ?
-- **Utilité** : Quelle est la valeur de la contribution pour les utilisateurs ?
-    
-En fonction des points obtenus, vous recevrez des goodies :
-    
-- 30 - 40 points : Set de stickers Tolgee
-- 40 - 45 points : Set de stickers Tolgee + Chaussettes Tolgee
-- 45 - 50 points : Set de stickers Tolgee + Chaussettes Tolgee + T-shirt Tolgee
-
-### Étoile du Répertoire ⭐
-
-Veuillez donner une étoile au [répertoire Tolgee](https://github.com/tolgee/tolgee-platform) dans le cadre de votre contribution !
-
-Pour des informations complètes, consultez notre [Hacktoberfest2024.fr.md](./Hacktoberfest2024.fr.md).
-
-**Rejoignez la famille. Participez à notre [canal Slack <img src="https://img.shields.io/badge/-Communauté Tolgee-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ)**
-
-
 
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 

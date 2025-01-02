@@ -14,8 +14,11 @@ Eine Open-Source-Alternative zu Crowdin, Phrase oder Lokalise
 
 <h2 align="center" style="border-bottom: none">
 
-[**English**](Readme/README.md)
-[**Français**](Readme/README.fr.md)
+[**English**](../README.md) |
+[**Français**](README.fr.md) |
+[**Deutsch**](README.de.md) |
+[**हिंदी**](README.hi.md) |
+[**中国人**](README.zh.md)
 
 </h2>
 
@@ -36,37 +39,6 @@ Eine Open-Source-Alternative zu Crowdin, Phrase oder Lokalise
 [<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
 [<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
 </div>
-
-[![Hacktobefest 2024](https://github.com/user-attachments/assets/c25ea58a-4bcf-4cd1-8fb6-e418466a57cf)](./Hacktoberfest2024.de.md)
-
-Wir verschicken Swags für tolle Demos zusammengeführte PRs! Ausführliche Informationen finden Sie in
-unserem [Hacktoberfest2024.de.md](./Hacktoberfest2024.de.md)
-
-### Übermittlungsarten
-- **Pull Requests**: Senden Sie einen Pull Request zu Problemen, die mit #hacktoberfest markiert sind
-- Sie können mit einem der folgenden Frameworks **eine Demo erstellen**: React, Angular, Vue, Svelte, PHP, Flutter, Ruby, iOS, Android
-
-### Qualitätskriterien
-
-Ihre Einsendungen werden anhand der folgenden Kriterien bewertet, wobei jedes Projekt eine Punktzahl zwischen 10 und 50 Punkten erhält:
-- **Qualität**: Ist der Code gut geschrieben, getestet und wartbar?
-- **Benutzererfahrung (UX)**: Wie intuitiv und benutzerfreundlich ist die Implementierung?
-- **Kreativität**: Bietet das Projekt einen einzigartigen Ansatz oder innovative Funktionen?
-- **Nützlichkeit**: Wie wertvoll ist der Beitrag für die Benutzer?
-    
-Je nach den Punkten erhältst du eine bestimmte Menge an Beute:
-
-- 30 - 40 Punkte - Tolgee-Aufkleberset
-- 40 - 45 Punkte - Tolgee-Aufkleberset + Tolgee-Socken
-- 45 - 50 Punkte - Tolgee-Aufkleberset + Tolgee-Socken + Tolgee-T-Shirt
-    
-### Repository Star ⭐
-
-Bitte starten Sie das [Tolgee-Repository](https://github.com/tolgee/tolgee-platform) als Teil Ihres Beitrags!
-
-Ausführliche Informationen finden Sie in unserem [Hacktoberfest2024.de.md](./Hacktoberfest2024.de.md)
-
-Treten Sie der Tolgee-Community bei [Tolgee Slack Community <img src="https://img.shields.io/badge/-Tolgee Comunity-424549?style=social&logo=slack" height=25 />](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ), um Ihre Ideen, Vorschläge oder Fragen zu teilen und sich mit anderen Benutzern und Mitwirkenden zu vernetzen.
 
 ![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
 
