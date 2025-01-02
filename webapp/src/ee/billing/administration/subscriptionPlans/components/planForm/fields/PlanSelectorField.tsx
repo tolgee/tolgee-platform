@@ -84,6 +84,7 @@ export const PlanSelector: FC<
 
   return (
     <SearchSelect
+      dataCy="administration-plan-selector"
       SelectProps={selectProps}
       items={selectItems}
       value={value}
