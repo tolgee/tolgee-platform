@@ -40,11 +40,14 @@ abstract class AbstractE2eDataController {
   @Autowired
   private lateinit var applicationContext: ApplicationContext
 
+  open fun afterTestDataStored(data: TestDataBuilder) {}
+
   @GetMapping(value = ["/generate-standard"])
   @Transactional
   open fun generate(): StandardTestDataResult {
     val data = this.testData
     testDataService.saveTestData(data)
+    afterTestDataStored(data)
     return getStandardResult(data)
   }
 
