@@ -52,6 +52,7 @@ apply plugin: 'org.hibernate.orm'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 idea {
@@ -70,6 +71,7 @@ allOpen {
     annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
+apply from: "$rootDir/gradle/email.gradle"
 apply from: "$rootDir/gradle/liquibase.gradle"
 
 configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
@@ -97,6 +99,10 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+
+    implementation 'com.github.transferwise:spring-icu:0.3.0'
 
     /**
      * DB
@@ -169,6 +175,7 @@ dependencies {
     implementation("org.apache.commons:commons-configuration2:2.10.1")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
     implementation("com.opencsv:opencsv:5.9")
+    implementation 'ognl:ognl:3.3.4'
 
     /**
      * Google translation API
@@ -230,18 +237,14 @@ tasks.named('compileJava') {
     inputs.files(tasks.named('processResources'))
 }
 
+tasks.named('compileKotlin') {
+    dependsOn 'buildEmails'
+}
+
 ktlint {
     debug = true
     verbose = true
     filter {
         exclude("**/PluralData.kt")
-    }
-}
-
-hibernate {
-    enhancement {
-        enableDirtyTracking = false
-        enableAssociationManagement = false
-        enableExtendedEnhancement = false
     }
 }

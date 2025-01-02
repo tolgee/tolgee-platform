@@ -57,6 +57,7 @@ project(':server-app').afterEvaluate {
         }
     }
 
+    apply from: "./gradle/email.gradle"
     apply from: "./gradle/webapp.gradle"
     apply from: "./gradle/docker.gradle"
     apply from: "./gradle/e2e.gradle"
@@ -66,6 +67,7 @@ project(':server-app').afterEvaluate {
     task packResources(type: Zip) {
         dependsOn "unpack"
         dependsOn "copyDist"
+        dependsOn "copyEmailResources"
         dependsOn "addVersionFile"
         from "${project.projectDir}/build/dependency"
         archiveFileName = "tolgee.jar"
