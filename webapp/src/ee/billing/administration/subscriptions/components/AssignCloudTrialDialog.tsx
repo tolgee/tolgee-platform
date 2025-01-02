@@ -106,7 +106,10 @@ export const AssignCloudTrialDialog: FC<{
             </DialogTitle>
             <DialogContent sx={{ display: 'grid', gap: '16px' }}>
               <DateTimePickerField
-                formControlProps={{ sx: { mt: 1 } }}
+                formControlProps={{
+                  'data-cy': 'administration-trial-end-date-field',
+                  sx: { mt: 1 },
+                }}
                 dateTimePickerProps={{
                   disablePast: true,
                   label: (
@@ -156,9 +159,9 @@ export const AssignCloudTrialDialog: FC<{
                 loading={assignMutation.isLoading}
                 color="primary"
                 variant="contained"
-                data-cy="project-ai-prompt-dialog-save"
+                data-cy="administration-assign-trial-assign-button"
               >
-                <T keyName="global_form_save" />
+                <T keyName="administartion_billing_assign-trial-save_button" />
               </LoadingButton>
             </DialogActions>
           </Dialog>

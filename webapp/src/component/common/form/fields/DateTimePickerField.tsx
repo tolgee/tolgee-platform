@@ -7,7 +7,9 @@ import { PropsOf } from '@emotion/react';
 
 type DateTimePickerFieldProps = PropsOf<typeof DateTimePicker>;
 
-type FormControlProps = ComponentProps<typeof FormControl>;
+type FormControlProps = ComponentProps<typeof FormControl> & {
+  'data-cy'?: string;
+};
 type DateTimePickerProps = PropsOf<typeof DateTimePicker>;
 
 export const DateTimePickerField: FC<
@@ -17,7 +19,7 @@ export const DateTimePickerField: FC<
     formControlProps?: FormControlProps;
     dateTimePickerProps: DateTimePickerProps;
   } & DateTimePickerFieldProps
-> = ({ name, label, formControlProps, dateTimePickerProps }) => {
+> = ({ name, formControlProps, dateTimePickerProps }) => {
   const [field, _, helpers] = useField(name);
   const { error, helperText } = useFieldError({ fieldName: name });
   return (

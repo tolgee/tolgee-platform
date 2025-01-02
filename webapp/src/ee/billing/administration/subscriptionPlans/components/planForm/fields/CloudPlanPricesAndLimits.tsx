@@ -3,6 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { CloudPlanFormData } from '../CloudPlanFormBase';
+import { CloudPlanPrices } from './CloudPlanPrices';
 
 export const CloudPlanPricesAndLimits: FC<{
   parentName?: string;
@@ -11,72 +12,11 @@ export const CloudPlanPricesAndLimits: FC<{
 }> = ({ values, parentName, canEditPrices }) => {
   const { t } = useTranslate();
 
-  const Wrapper = ({ children }) => {
-    if (!canEditPrices) {
-      return (
-        <Tooltip title={t('admin-billing-cannot-edit-prices-tooltip')}>
-          <span>
-            <Box sx={{ pointerEvents: 'none', opacity: 0.5 }}>{children}</Box>
-          </span>
-        </Tooltip>
-      );
-    }
-
-    return <>{children}</>;
-  };
-
   return (
-    <Wrapper>
+    <Wrapper canEditPrices={canEditPrices}>
       {!values.free && (
         <>
-          <Typography sx={{ mt: 2 }}>
-            {t('administration_cloud_plan_form_prices_title')}
-          </Typography>
-          <Box
-            display="grid"
-            gridTemplateColumns="repeat(4, 1fr)"
-            gap={2}
-            sx={{ mt: 1 }}
-          >
-            <TextField
-              name={`${parentName}prices.subscriptionMonthly`}
-              size="small"
-              data-cy="administration-cloud-plan-field-price-monthly"
-              label={t('administration_cloud_plan_field_price_monthly')}
-              type="number"
-              fullWidth
-            />
-            <TextField
-              name={`${parentName}prices.subscriptionYearly`}
-              size="small"
-              data-cy="administration-cloud-plan-field-price-yearly"
-              label={t('administration_cloud_plan_field_price_yearly')}
-              type="number"
-              fullWidth
-            />
-            <TextField
-              name={`${parentName}prices.perThousandTranslations`}
-              size="small"
-              data-cy="administration-cloud-plan-field-price-per-thousand-translations"
-              label={t(
-                'administration_cloud_plan_field_price_per_thousand_translations'
-              )}
-              type="number"
-              fullWidth
-              disabled={values.type !== 'PAY_AS_YOU_GO'}
-            />
-            <TextField
-              name={`${parentName}prices.perThousandMtCredits`}
-              size="small"
-              data-cy="administration-cloud-plan-field-price-per-thousand-mt-credits"
-              label={t(
-                'administration_cloud_plan_field_price_per_thousand_mt_credits'
-              )}
-              type="number"
-              fullWidth
-              disabled={values.type !== 'PAY_AS_YOU_GO'}
-            />
-          </Box>
+          <CloudPlanPrices parentName={parentName} />
         </>
       )}
       <Typography sx={{ mt: 2 }}>
@@ -111,4 +51,20 @@ export const CloudPlanPricesAndLimits: FC<{
       </Box>
     </Wrapper>
   );
+};
+
+const Wrapper = ({ children, canEditPrices }) => {
+  const { t } = useTranslate();
+
+  if (!canEditPrices) {
+    return (
+      <Tooltip title={t('admin-billing-cannot-edit-prices-tooltip')}>
+        <span>
+          <Box sx={{ pointerEvents: 'none', opacity: 0.5 }}>{children}</Box>
+        </span>
+      </Tooltip>
+    );
+  }
+
+  return <>{children}</>;
 };

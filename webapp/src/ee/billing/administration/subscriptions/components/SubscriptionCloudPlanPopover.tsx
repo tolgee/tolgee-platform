@@ -86,7 +86,11 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
               </>
             )}
             <Box display="flex">
-              <Button color="primary" onClick={() => onOpenAssignTrialDialog()}>
+              <Button
+                color="primary"
+                onClick={() => onOpenAssignTrialDialog()}
+                data-cy="administration-assign-trial-button"
+              >
                 <T keyName="administration-subscriptions-assign-trial" />
               </Button>
               <Button
@@ -98,6 +102,7 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
                   '?creatingForOrganizationId=' +
                   item.organization.id
                 }
+                data-cy="administraton-create-custom-plan-button"
               >
                 <T keyName="administration-subscriptions-create-custom-plan" />
               </Button>

@@ -12,12 +12,13 @@ declare namespace DataCy {
         "activity-detail-dialog" |
         "add-box" |
         "administration-access-message" |
+        "administration-assign-trial-assign-button" |
+        "administration-assign-trial-button" |
         "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-mt-credits" |
         "administration-cloud-plan-field-included-translations" |
         "administration-cloud-plan-field-name" |
-        "administration-cloud-plan-field-non-commercial" |
         "administration-cloud-plan-field-price-monthly" |
         "administration-cloud-plan-field-price-per-thousand-mt-credits" |
         "administration-cloud-plan-field-price-per-thousand-translations" |
@@ -63,6 +64,10 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-plan-field-non-commercial" |
+        "administration-plan-selector" |
+        "administration-subscriptions-cloud-plan-name" |
+        "administration-trial-end-date-field" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
         "administration-user-disable-user" |
@@ -70,6 +75,7 @@ declare namespace DataCy {
         "administration-user-menu" |
         "administration-user-role-select" |
         "administration-users-list-item" |
+        "administraton-create-custom-plan-button" |
         "agency-label" |
         "agency-select" |
         "agency-select-item" |

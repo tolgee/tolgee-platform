@@ -21,7 +21,9 @@ export const AdministrationSubscriptionsCloudPlan: FC<Props> = ({ item }) => {
         item={item}
         onOpenAssignTrialDialog={() => setDialogOpen(true)}
       >
-        <StyledContainer>{item.cloudSubscription?.plan.name}</StyledContainer>
+        <StyledContainer data-cy="administration-subscriptions-cloud-plan-name">
+          {item.cloudSubscription?.plan.name}
+        </StyledContainer>
       </SubscriptionCloudPlanPopover>
       <AssignCloudTrialDialog
         organizationId={item.organization.id}
