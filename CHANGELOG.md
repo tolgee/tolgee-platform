@@ -1,3 +1,15 @@
+# [3.89.0](https://github.com/tolgee/tolgee-platform/compare/v3.88.1...v3.89.0) (2025-01-03)
+
+
+### Bug Fixes
+
+* use proper base type for flutter parse exceptions ([#2655](https://github.com/tolgee/tolgee-platform/issues/2655)) ([efac14c](https://github.com/tolgee/tolgee-platform/commit/efac14cc401172866d5dadcab656a460996fb9ee))
+
+
+### Features
+
+* Compose multiplatform strings import & export ([#2649](https://github.com/tolgee/tolgee-platform/issues/2649)) ([07cf4f5](https://github.com/tolgee/tolgee-platform/commit/07cf4f5c419a03cb0dde5130a73c0670bb362820)), closes [#2397](https://github.com/tolgee/tolgee-platform/issues/2397)
+
 ## [3.88.1](https://github.com/tolgee/tolgee-platform/compare/v3.88.0...v3.88.1) (2025-01-03)
 
 
