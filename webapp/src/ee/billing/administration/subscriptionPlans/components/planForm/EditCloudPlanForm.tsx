@@ -63,10 +63,6 @@ export const EditCloudPlanForm: FC<{ planId: number }> = ({ planId }) => {
       return null;
     }
 
-    if (editingForOrganizationId === undefined) {
-      return null;
-    }
-
     const isExclusive =
       planData.exclusiveForOrganizationId === editingForOrganizationId;
 
@@ -94,6 +90,13 @@ export const EditCloudPlanForm: FC<{ planId: number }> = ({ planId }) => {
       loading={planEditLoadable.isLoading}
       canEditPrices={planLoadable.data?.canEditPrices || false}
       initialData={initialData}
+      publicSwitchFieldProps={{
+        disabled:
+          !!planData.exclusiveForOrganizationId || !!editingForOrganizationId,
+        disabledInfo: (
+          <T keyName="administration_billing_custom_plan_public_state_disabled_info" />
+        ),
+      }}
       onSubmit={(values) => {
         planEditLoadable.mutate(
           {

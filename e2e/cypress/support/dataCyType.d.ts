@@ -11,6 +11,9 @@ declare namespace DataCy {
         "administration-access-message" |
         "administration-assign-trial-assign-button" |
         "administration-assign-trial-button" |
+        "administration-billing-edit-custom-plan-button" |
+        "administration-billing-exclusive-plan-chip" |
+        "administration-billing-trial-badge" |
         "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-mt-credits" |
@@ -29,9 +32,11 @@ declare namespace DataCy {
         "administration-cloud-plans-item-delete" |
         "administration-cloud-plans-item-edit" |
         "administration-cloud-plans-item-public-badge" |
+        "administration-create-custom-plan-button" |
         "administration-customize-plan-switch" |
         "administration-debug-customer-account-message" |
         "administration-debug-customer-exit-button" |
+        "administration-edit-current-plan-button" |
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-cancel-button" |
@@ -64,6 +69,8 @@ declare namespace DataCy {
         "administration-plan-field-non-commercial" |
         "administration-plan-selector" |
         "administration-subscriptions-cloud-plan-name" |
+        "administration-subscriptions-custom-plans-item" |
+        "administration-subscriptions-plan-popover" |
         "administration-trial-end-date-field" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
@@ -72,7 +79,6 @@ declare namespace DataCy {
         "administration-user-menu" |
         "administration-user-role-select" |
         "administration-users-list-item" |
-        "administraton-create-custom-plan-button" |
         "agency-label" |
         "agency-select" |
         "agency-select-item" |
