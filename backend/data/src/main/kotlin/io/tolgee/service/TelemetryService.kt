@@ -37,7 +37,7 @@ class TelemetryService(
         HttpMethod.POST,
         Unit::class.java,
       )
-    } catch (e: Throwable) {
+    } catch (e: Exception) {
       Sentry.captureException(e)
       logger.error("Cannot send telemetry data", e)
     }
