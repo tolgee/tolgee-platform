@@ -28,13 +28,16 @@ export const SubscriptionsCloudEditPlanButton: FC<{
     <Tooltip title={tooltipTitle}>
       <span>
         <IconButton
+          data-cy={'administration-edit-current-plan-button'}
           sx={{ ml: 1 }}
           size="small"
           disabled={disabled}
           component={Link}
-          to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
-            [PARAMS.PLAN_ID]: planId,
-          })}
+          to={
+            LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
+              [PARAMS.PLAN_ID]: planId,
+            }) + `?editingForOrganizationId=${item.organization.id}`
+          }
         >
           <Edit02 />
         </IconButton>
