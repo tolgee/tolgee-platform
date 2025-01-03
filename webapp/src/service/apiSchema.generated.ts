@@ -823,6 +823,9 @@ export interface paths {
     /** Returns all organization projects the user has access to */
     get: operations["getAllProjects_1"];
   };
+  "/v2/notifications": {
+    get: operations["getNotifications"];
+  };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
@@ -4794,6 +4797,16 @@ export interface components {
       organizationRole?: "MEMBER" | "OWNER";
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       avatar?: components["schemas"]["Avatar"];
+    };
+    Notification: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      linkedEntityId: number;
+      linkedEntityName: string;
+    };
+    NotificationsResponse: {
+      notifications: components["schemas"]["Notification"][];
     };
     ApiKeyWithLanguagesModel: {
       /**
@@ -18008,6 +18021,48 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getNotifications: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationsResponse"];
         };
       };
       /** Bad Request */
