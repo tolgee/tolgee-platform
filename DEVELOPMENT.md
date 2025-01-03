@@ -8,7 +8,7 @@
 ## Clone this repo
 
 ```shell
-git clone git@github.com:tolgee/tolgee-platform.git
+git clone --depth 1 git@github.com:tolgee/tolgee-platform.git
 ```
 
 ## Run the stack
