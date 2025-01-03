@@ -33,6 +33,9 @@ class Invitation(
 
   var email: String? = null
 
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
+  var createdBy: UserAccount? = null
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false

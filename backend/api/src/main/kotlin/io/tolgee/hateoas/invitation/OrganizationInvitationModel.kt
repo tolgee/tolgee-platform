@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.invitation
 
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -13,4 +14,5 @@ open class OrganizationInvitationModel(
   val createdAt: Date,
   val invitedUserName: String?,
   val invitedUserEmail: String?,
+  val createdBy: SimpleUserAccountModel?,
 ) : RepresentationModel<OrganizationInvitationModel>()

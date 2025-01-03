@@ -1,5 +1,8 @@
 declare namespace DataCy {
     export type Value = 
+        "accept-invitation-accept" |
+        "accept-invitation-decline" |
+        "accept-invitation-info-text" |
         "account-security-initial-password-set" |
         "account-security-set-password-instructions-sent" |
         "active-plan-license-key-input" |
@@ -376,6 +379,8 @@ declare namespace DataCy {
         "pat-list-item-last-used" |
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
+        "pending-invitation-banner" |
+        "pending-invitation-dismiss" |
         "permissions-advanced-checkbox" |
         "permissions-advanced-item" |
         "permissions-language-menu-button" |

@@ -16,6 +16,8 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.DisabledFunctionalityException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.hateoas.invitation.PublicInvitationModel
+import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.JwtService
@@ -24,6 +26,7 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.SignUpService
@@ -59,6 +62,8 @@ class PublicController(
   private val userCredentialsService: UserCredentialsService,
   private val authProperties: AuthenticationProperties,
   private val thirdPartyAuthDelegates: List<ThirdPartyAuthDelegate>,
+  private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
+  private val invitationService: InvitationService,
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -243,6 +248,15 @@ class PublicController(
     return thirdPartyAuthDelegates.find { it.name == serviceType }
       ?.getTokenResponse(code, invitationCode, redirectUri, domain)
       ?: throw NotFoundException(Message.SERVICE_NOT_FOUND)
+  }
+
+  @GetMapping("/invitation_info/{code}")
+  @Operation(summary = "Info about invitation")
+  fun invitationInfo(
+    @PathVariable("code") code: String?,
+  ): PublicInvitationModel {
+    val invitation = invitationService.getInvitation(code)
+    return publicInvitationModelAssembler.toModel(invitation)
   }
 
   private fun getFakeGithubUser(): UserAccount {

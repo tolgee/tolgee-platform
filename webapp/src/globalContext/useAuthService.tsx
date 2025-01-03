@@ -183,6 +183,7 @@ export const useAuthService = (
     authorizeOAuthLoadable,
     redirectSsoUrlLoadable,
     allowRegistration,
+    invitationCode,
   };
 
   const actions = {

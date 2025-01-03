@@ -5,11 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import {
-  useConfig,
-  useIsEmailVerified,
-  useUser,
-} from 'tg.globalContext/helpers';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 
 import { UserMenu } from '../../security/UserMenu/UserMenu';
@@ -68,11 +64,13 @@ const StyledTolgeeLink = styled(Link)`
 type Props = {
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
+  hideQuickStart?: boolean;
 };
 
 export const TopBar: React.FC<Props> = ({
   isAdminAccess = false,
   isDebuggingCustomerAccount = false,
+  hideQuickStart = false,
 }) => {
   const config = useConfig();
 
@@ -81,7 +79,6 @@ export const TopBar: React.FC<Props> = ({
   const user = useUser();
 
   const theme = useTheme();
-  const isEmailVerified = useIsEmailVerified();
 
   return (
     <StyledAppBar
@@ -124,7 +121,7 @@ export const TopBar: React.FC<Props> = ({
             debuggingCustomerAccount={isDebuggingCustomerAccount}
           />
         </Box>
-        {isEmailVerified && <QuickStartTopBarButton />}
+        {!hideQuickStart && <QuickStartTopBarButton />}
         {!user && <LanguageMenu />}
         {user && <UserMenu />}
       </StyledToolbar>

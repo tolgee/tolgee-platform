@@ -120,6 +120,7 @@ context('Sign up', () => {
 
     cy.contains('Check your inbox');
 
+    cy.wait(1000);
     getUser(TEST_USERNAME).then((u) => {
       expect(u[0]).be.equal(TEST_USERNAME);
       expect(u[1]).be.not.null;
@@ -176,6 +177,11 @@ context('Sign up', () => {
       fillAndSubmitSignUpForm(TEST_USERNAME);
       cy.contains('Projects').should('be.visible');
       cy.visit(invitationLink);
+      cy.gcy('accept-invitation-info-text').should(
+        'contain',
+        'admin invited you to the project Test'
+      );
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
       assertMessage('Invitation successfully accepted');
     });
   });
@@ -184,11 +190,34 @@ context('Sign up', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
-      assertMessage('Log in or sign up first please');
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
+      cy.gcy('pending-invitation-banner').should('be.visible');
       cy.visit(HOST + '/sign_up');
+      cy.gcy('pending-invitation-banner').should('be.visible');
       fillAndSubmitSignUpForm(TEST_USERNAME, false);
       assertMessage('Thank you for signing up!');
       cy.contains('Crazy project').should('be.visible');
+    });
+  });
+
+  it('Invitation can be declined right away', () => {
+    disableEmailVerification();
+    createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
+      cy.visit(invitationLink);
+      cy.gcy('accept-invitation-decline').should('be.visible').click();
+      cy.gcy('login-button').should('be.visible');
+      cy.gcy('pending-invitation-banner').should('not.exist');
+    });
+  });
+
+  it('Invitation can be declined later', () => {
+    disableEmailVerification();
+    createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
+      cy.visit(invitationLink);
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
+      cy.gcy('login-button').should('be.visible');
+      cy.gcy('pending-invitation-dismiss').should('be.visible').click();
+      cy.gcy('pending-invitation-banner').should('not.exist');
     });
   });
 
@@ -197,7 +226,8 @@ context('Sign up', () => {
     disableRegistration();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
-      assertMessage('Log in or sign up first please');
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
+      cy.gcy('pending-invitation-banner').should('be.visible');
       cy.visit(HOST + '/sign_up');
       fillAndSubmitSignUpForm(TEST_USERNAME, false);
       assertMessage('Thank you for signing up!');
@@ -223,7 +253,8 @@ context('Sign up', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
-      assertMessage('Log in or sign up first please');
+      cy.gcy('accept-invitation-accept').click();
+      cy.gcy('pending-invitation-banner').should('be.visible');
       cy.intercept('/api/public/authorize_oauth/github**').as('GithubSignup');
       loginWithFakeGithub();
       cy.wait('@GithubSignup').then((interception) => {
