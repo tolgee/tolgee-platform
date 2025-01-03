@@ -28,7 +28,7 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
     <Tooltip
       componentsProps={{ tooltip: { sx: { maxWidth: 'none' } } }}
       title={
-        <Box sx={{ p: 1 }}>
+        <Box sx={{ p: 1 }} data-cy="administration-subscriptions-plan-popover">
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Typography
               variant={'h3'}
@@ -44,6 +44,7 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
             {isTrial && (
               <>
                 <Chip
+                  data-cy="administration-billing-trial-badge"
                   color="secondary"
                   size="small"
                   label={<T keyName="admin_billing_trial_badge" />}
@@ -102,7 +103,7 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
                   '?creatingForOrganizationId=' +
                   item.organization.id
                 }
-                data-cy="administraton-create-custom-plan-button"
+                data-cy="administration-create-custom-plan-button"
               >
                 <T keyName="administration-subscriptions-create-custom-plan" />
               </Button>

@@ -37,8 +37,15 @@ export function XPathBuilder(initialXpath = '') {
   }
 
   function getElement() {
-    console.log('xpath', xpath);
     return cy.xpath(xpath);
+  }
+
+  function getInputUnderDataCy(dataCy: DataCy.Value) {
+    return builder
+      .descendant()
+      .withDataCy(dataCy)
+      .descendant('input')
+      .getElement();
   }
 
   const builder = {
@@ -50,6 +57,7 @@ export function XPathBuilder(initialXpath = '') {
     containsText,
     hasText,
     getElement,
+    getInputUnderDataCy,
     getXpath: () => xpath,
   };
 
