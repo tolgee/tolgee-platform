@@ -88,7 +88,7 @@ class InvitationService(
     val invitation = Invitation(code = code)
     invitation.email = params.email
     invitation.name = params.name
-    invitation.createdBy = authenticationFacade.authenticatedUserEntity
+    invitation.createdBy = authenticationFacade.authenticatedUserEntityOrNull
     return invitation
   }
 
