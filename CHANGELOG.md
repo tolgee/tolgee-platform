@@ -1,3 +1,10 @@
+## [3.88.1](https://github.com/tolgee/tolgee-platform/compare/v3.88.0...v3.88.1) (2025-01-03)
+
+
+### Bug Fixes
+
+* vue to vite template in integrations ([#2790](https://github.com/tolgee/tolgee-platform/issues/2790)) ([3e93d30](https://github.com/tolgee/tolgee-platform/commit/3e93d3017ef4ca5fec8bd50f1528c5cf86fa5223))
+
 # [3.88.0](https://github.com/tolgee/tolgee-platform/compare/v3.87.3...v3.88.0) (2024-12-20)
 
 
