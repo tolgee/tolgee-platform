@@ -56,7 +56,7 @@ class V2InvitationController(
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
   private val translationAgencyService: TranslationAgencyService,
-  private val publicInvitationModelAssembler: PublicInvitationModelAssembler
+  private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
 ) {
   @GetMapping("/v2/invitations/{code}/accept")
   @Operation(summary = "Accepts invitation to project or organization")
