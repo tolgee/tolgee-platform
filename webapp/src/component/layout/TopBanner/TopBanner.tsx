@@ -70,7 +70,8 @@ export function TopBanner() {
   const showEmailVerificationBanner = !isEmailVerified && isAuthenticated;
 
   const announcement = bannerType && getAnnouncement(bannerType);
-  const showCloseButton = showEmailVerificationBanner && !pendingInvitationCode;
+  const showCloseButton =
+    !showEmailVerificationBanner && !pendingInvitationCode;
 
   useResizeObserver({
     ref: bannerRef,
