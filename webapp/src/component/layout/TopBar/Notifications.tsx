@@ -9,6 +9,7 @@ import {
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useHistory } from 'react-router-dom';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -39,23 +40,10 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
 
   const history = useHistory();
 
-  const notifications = [
-    {
-      id: 1,
-      linkedEntityId: 1000000001,
-      linkedEntityName: 'Task One',
-    },
-    {
-      id: 2,
-      linkedEntityId: 1000000002,
-      linkedEntityName: 'Task Two',
-    },
-    {
-      id: 3,
-      linkedEntityId: 1000000003,
-      linkedEntityName: 'Task Three',
-    },
-  ];
+  const notifications = useApiQuery({
+    url: '/v2/notifications',
+    method: 'get',
+  });
 
   return (
     <>
@@ -85,7 +73,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         }}
       >
         <List>
-          {notifications.map((notification) => (
+          {notifications.data?.notifications.map((notification) => (
             <ListItemButton
               key={notification.id}
               divider
@@ -102,7 +90,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
             </ListItemButton>
           ))}
         </List>
-        {notifications.length === 0 && (
+        {notifications.data?.notifications.length === 0 && (
           <MenuItem>No notifications</MenuItem>
         )}
       </StyledMenu>
