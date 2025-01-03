@@ -1,0 +1,13 @@
+<resources>
+    <plurals name="dogs_count">
+        <item quantity="one">%1$d dog %2$s {escape}</item>
+        <item quantity="other">%1$d dogs %2$s</item>
+    </plurals>
+    <string-array name="string_array">
+        <item>First item %1$d {escape}</item>
+        <item>Second item %1$d</item>
+    </string-array>
+    <string name="with_params">
+        %1$d %4$s %3$.2f %4$e %5$+d {escape}
+    </string>
+</resources>

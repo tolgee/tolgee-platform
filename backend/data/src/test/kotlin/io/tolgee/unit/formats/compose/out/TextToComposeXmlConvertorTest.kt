@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.android.out
+package io.tolgee.unit.formats.compose.out
 
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
@@ -10,25 +10,10 @@ import org.w3c.dom.Document
 import org.w3c.dom.Node
 import javax.xml.parsers.DocumentBuilderFactory
 
-class TextToAndroidXmlConvertorTest {
+class TextToComposeXmlConvertorTest {
   @Test
   fun `xml and placeholders is converted to CDATA`() {
     "<b>%s</b>".assertSingleCdataNodeText().isEqualTo("<b>%s</b>")
-  }
-
-  @Test
-  fun `apostrophe is escaped in the HTML CDATA node`() {
-    "<b>%s ' </b>".assertSingleCdataNodeText().isEqualTo("<b>%s \\' </b>")
-  }
-
-  @Test
-  fun `double quotes and escape chars are escaped in the HTML CDATA node`() {
-    "<b>%s \" \\ </b>".assertSingleCdataNodeText().isEqualTo("<b>%s \\\" \\\\ </b>")
-  }
-
-  @Test
-  fun `more whitespaces are not converted in the HTML CDATA node`() {
-    "<b>%s   </b>".assertSingleCdataNodeText().isEqualTo("<b>%s   </b>")
   }
 
   @Test
@@ -43,7 +28,7 @@ class TextToAndroidXmlConvertorTest {
 
   @Test
   fun `trailing spaces are handled`() {
-    "%s     ".assertSingleTextNode().isEqualTo("%s\"     \"")
+    "%s     ".assertSingleTextNode().isEqualTo("%s     ")
   }
 
   @Test
@@ -58,7 +43,7 @@ class TextToAndroidXmlConvertorTest {
         .convertedNodes().toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
-      "<unsupported attr=\\\"https://example.com\\\">link \\' \\% \\\" " +
+      "<unsupported attr=\"https://example.com\">link \' \\% \" " +
         "</unsupported>",
     )
     nodes[2].assertTextContent(".")
@@ -70,15 +55,15 @@ class TextToAndroidXmlConvertorTest {
       ).convertedNodes().toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
-      "<unsupported attr=\\\"https://example.com\\\">link \\' %% %s \\\"    " +
+      "<unsupported attr=\"https://example.com\">link \' %% %s \"    " +
         "</unsupported>",
     )
     nodes[2].assertTextContent(".")
   }
 
   @Test
-  fun `all possible spaces are quoted`() {
-    "a\n\t   \u0020 \u2008 \u2003a".assertSingleTextNode("a\\n\"\t   \u0020 \u2008 \u2003\"a")
+  fun `all possible spaces are preserved`() {
+    "a\n\t   \u0020 \u2008 \u2003a".assertSingleTextNode("a\n\t   \u0020 \u2008 \u2003a")
   }
 
   @Test
@@ -99,15 +84,8 @@ class TextToAndroidXmlConvertorTest {
   @Test
   fun `escapes in text nodes`() {
     val nodes = "'\"  <b></b>\n\n   \u0020\u2008\u2003".convertedNodes().toList()
-    nodes[0].textContent.assert.isEqualTo("\\'\\\"\"  \"")
-    nodes[1].nodeName.assert.isEqualTo("b")
-    nodes[2].textContent.assert.isEqualTo("\"\n\n   \u0020\u2008\u2003\"")
-  }
-
-  @Test
-  fun `new lines are escaped in cdata string`() {
-    val nodes = "\n\n".convertedNodes(isWrappedWithCdata = true)
-    nodes.getSingleNode().assertSingleCdataNodeText().isEqualTo("\\n\\n")
+    nodes[0].textContent.assert.isEqualTo("'\"  ")
+    nodes[2].textContent.assert.isEqualTo("\n\n   \u0020\u2008\u2003")
   }
 
   @Test
@@ -117,8 +95,8 @@ class TextToAndroidXmlConvertorTest {
   }
 
   @Test
-  fun `multiple newlines are not quoted`() {
-    "a\n\na".assertSingleTextNode("a\\n\\na")
+  fun `new lines wrapped with text kept unchanged`() {
+    "a\n\na".assertSingleTextNode("a\n\na")
   }
 
   private fun Node.assertTextContent(text: String) {
@@ -159,7 +137,7 @@ class TextToAndroidXmlConvertorTest {
     TextToXmlResourcesConvertor(
       document,
       XmlResourcesStringValue(this, isWrappedWithCdata),
-      ExportFormat.ANDROID_XML,
+      ExportFormat.COMPOSE_XML,
     ).convert()
 
   private fun String.convertedNodes(isWrappedWithCdata: Boolean = false): Collection<Node> {

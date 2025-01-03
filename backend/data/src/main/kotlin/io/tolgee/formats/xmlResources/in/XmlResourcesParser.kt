@@ -1,10 +1,11 @@
-import io.tolgee.formats.android.AndroidStringValue
-import io.tolgee.formats.android.AndroidStringsXmlModel
-import io.tolgee.formats.android.PluralUnit
-import io.tolgee.formats.android.StringArrayItem
-import io.tolgee.formats.android.StringArrayUnit
-import io.tolgee.formats.android.StringUnit
-import io.tolgee.formats.android.`in`.AndroidXmlValueBlockParser
+package io.tolgee.formats.xmlResources.`in`
+
+import io.tolgee.formats.xmlResources.PluralUnit
+import io.tolgee.formats.xmlResources.StringArrayItem
+import io.tolgee.formats.xmlResources.StringArrayUnit
+import io.tolgee.formats.xmlResources.StringUnit
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLStreamConstants
@@ -12,30 +13,36 @@ import javax.xml.stream.events.Comment
 import javax.xml.stream.events.StartElement
 import javax.xml.stream.events.XMLEvent
 
-class AndroidStringsXmlParser(
+class XmlResourcesParser(
   private val xmlEventReader: XMLEventReader,
+  private val stringUnescaper: StringUnescaper,
+  private val supportedTags: Set<String>,
 ) {
-  private val result = AndroidStringsXmlModel()
+  private val result = XmlResourcesStringsModel()
   private var currentComment: String? = null
   private var currentStringEntry: StringUnit? = null
   private var currentArrayEntry: StringArrayUnit? = null
   private var currentPluralEntry: PluralUnit? = null
   private var currentPluralQuantity: String? = null
-  private var blockParser: AndroidXmlValueBlockParser? = null
+  private var blockParser: XmlResourcesValueBlockParser? = null
   private var isArrayItemOpen = false
   private var arrayItemComment: String? = null
 
-  fun parse(): AndroidStringsXmlModel {
+  fun parse(): XmlResourcesStringsModel {
     while (xmlEventReader.hasNext()) {
       val event = xmlEventReader.nextEvent()
       val wasAnyToContentSaveOpenBefore = isAnyToContentSaveOpen
       when {
-        event.eventType == XMLStreamConstants.COMMENT -> {
+        event.isComment -> {
           currentComment = event.asComment().text
         }
         event.isStartElement -> {
           if (!isAnyToContentSaveOpen) {
-            blockParser = AndroidXmlValueBlockParser()
+            blockParser =
+              XmlResourcesValueBlockParser(
+                stringUnescaper,
+                supportedTags,
+              )
           }
           val startElement = event as StartElement
           when (startElement.name.localPart.lowercase()) {
@@ -128,14 +135,17 @@ class AndroidStringsXmlParser(
       QName(null, "name"),
     )?.value
 
-  private fun getCurrentTextOrXml(): AndroidStringValue {
-    return blockParser?.result ?: AndroidStringValue("", false)
+  private fun getCurrentTextOrXml(): XmlResourcesStringValue {
+    return blockParser?.result ?: XmlResourcesStringValue("", false)
   }
 
   private val isAnyToContentSaveOpen: Boolean
     get() {
       return currentStringEntry != null || isArrayItemOpen || currentPluralQuantity != null
     }
+
+  private val XMLEvent.isComment: Boolean
+    get() = this.eventType == XMLStreamConstants.COMMENT
 
   private fun XMLEvent.asComment(): Comment = this as Comment
 }

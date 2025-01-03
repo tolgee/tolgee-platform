@@ -196,6 +196,13 @@ export const testExportFormats = (
   });
 
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'Compose Multiplatform .xml',
+    expectedParams: {
+      format: 'COMPOSE_XML',
+    },
+  });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
     format: 'Flutter .arb',
     expectedParams: {
       format: 'FLUTTER_ARB',

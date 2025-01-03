@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.android.`in`
+package io.tolgee.unit.formats.compose.`in`
 
 import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.testing.assert
@@ -14,13 +14,13 @@ import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class AndroidXmlFormatProcessorTest {
+class ComposeXmlFormatProcessorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
 
   @BeforeEach
   fun setup() {
     mockUtil = FileProcessorContextMockUtil()
-    mockUtil.mockIt("values-en/strings.xml", "src/test/resources/import/android/strings.xml")
+    mockUtil.mockIt("values-en/strings.xml", "src/test/resources/import/composeMultiplatform/strings.xml")
   }
 
   @Test
@@ -65,29 +65,9 @@ class AndroidXmlFormatProcessorTest {
         hasText("<b>Hello!</b>")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_xliff_gs")
-      .assertSingle {
-        hasText(
-          "<b>Hello!\n" +
-            "{0, number}" +
-            "</b>\n" +
-            "Dont'translate this",
-        )
-      }
-    mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
       .assertSingle {
-        hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d")
-      }
-    mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "escape_sequence_within_quoted_spaces")
-      .assertSingle {
-        hasText("Test        ntest")
-      }
-    mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "backslash_at_the_end")
-      .assertSingle {
-        hasText("Test")
+        hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %5${'$'}+d")
       }
     mockUtil.fileProcessorContext.assertKey("app_name") {
       custom.assert.isNull()
@@ -117,8 +97,8 @@ class AndroidXmlFormatProcessorTest {
         hasText(
           """
           {value, plural,
-          one {%d dog %s '{'escape'}'}
-          other {%d dogs %s}
+          one {%1${'$'}d dog %2${'$'}s '{'escape'}'}
+          other {%1${'$'}d dogs %2${'$'}s}
           }
           """.trimIndent(),
         )
@@ -126,11 +106,11 @@ class AndroidXmlFormatProcessorTest {
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
       .assertSingle {
-        hasText("First item %d {escape}")
+        hasText("First item %1${'$'}d {escape}")
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
       .assertSingle {
-        hasText("%d %4${'$'}s %.2f %e %+d {escape}")
+        hasText("%1${'$'}d %4${'$'}s %3${'$'}.2f %4${'$'}e %5${'$'}+d {escape}")
       }
   }
 
@@ -144,8 +124,8 @@ class AndroidXmlFormatProcessorTest {
         hasText(
           """
           {value, plural,
-          one {%d dog %s '{'escape'}'}
-          other {%d dogs %s}
+          one {%1${'$'}d dog %2${'$'}s '{'escape'}'}
+          other {%1${'$'}d dogs %2${'$'}s}
           }
           """.trimIndent(),
         )
@@ -153,11 +133,11 @@ class AndroidXmlFormatProcessorTest {
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
       .assertSingle {
-        hasText("First item %d '{'escape'}'")
+        hasText("First item %1${'$'}d '{'escape'}'")
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
       .assertSingle {
-        hasText("%d %4${'$'}s %.2f %e %+d '{'escape'}'")
+        hasText("%1${'$'}d %4${'$'}s %3${'$'}.2f %4${'$'}e %5${'$'}+d '{'escape'}'")
       }
   }
 
@@ -188,7 +168,7 @@ class AndroidXmlFormatProcessorTest {
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
       .assertSingle {
-        hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %+d '{'escape'}'")
+        hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %5${'$'}+d '{'escape'}'")
       }
     mockUtil.fileProcessorContext.assertKey("dogs_count") {
       custom.assert.isNull()
@@ -231,7 +211,7 @@ class AndroidXmlFormatProcessorTest {
   ) {
     mockUtil.mockIt(
       "values-en/strings.xml",
-      "src/test/resources/import/android/strings_params_everywhere.xml",
+      "src/test/resources/import/composeMultiplatform/strings_params_everywhere.xml",
       convertPlaceholders,
       projectIcuPlaceholdersEnabled,
     )

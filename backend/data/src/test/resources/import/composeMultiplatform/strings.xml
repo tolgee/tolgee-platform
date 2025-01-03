@@ -1,11 +1,11 @@
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources>
     <!-- This is a comment -->
     <string name="app_name">Tolgee test</string>
     <!-- This is a comment above a plural -->
     <plurals name="dogs_count">
         <!-- This comment will be ignored -->
-        <item quantity="one">%d dog</item>
-        <item quantity="other">%d dogs</item>
+        <item quantity="one">%1$d dog</item>
+        <item quantity="other">%1$d dogs</item>
     </plurals>
     <!-- This comment will be ignored -->
     <string-array name="string_array">
@@ -22,15 +22,13 @@
     <string name="with_html">
         <b>Hello!</b>
     </string>
-    <string name="with_xliff_gs">
+    <string name="with_tags_multiline">
         <b>Hello!
-            <xliff:g id="number">%d</xliff:g>
+            %1$d
         </b>
-        <xliff:g id="number">Dont'translate this</xliff:g>
+        Dont'translate this
     </string>
     <string name="with_params">
-        %d %4$s %.2f %e %+d
+        %1$d %4$s %3$.2f %4$e %5$+d
     </string>
-    <string name="escape_sequence_within_quoted_spaces">Test"\        n"test</string>
-    <string name="backslash_at_the_end">Test\</string>
 </resources>

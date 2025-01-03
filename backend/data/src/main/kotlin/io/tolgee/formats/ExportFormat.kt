@@ -26,6 +26,11 @@ enum class ExportFormat(
     "application/xml",
     defaultFileStructureTemplate = "values-{androidLanguageTag}/strings.{extension}",
   ),
+  COMPOSE_XML(
+    "xml",
+    "application/xml",
+    defaultFileStructureTemplate = "values-{androidLanguageTag}/strings.{extension}",
+  ),
   FLUTTER_ARB(
     "arb",
     "application/json",

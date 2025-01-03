@@ -145,6 +145,10 @@ enum class ImportFormat(
     ImportFileFormat.XML,
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
   ),
+  COMPOSE_XML(
+    ImportFileFormat.XML,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
 
   FLUTTER_ARB(
     ImportFileFormat.ARB,
