@@ -194,7 +194,7 @@ export const SignUpForm = (props: Props) => {
               <T
                 keyName="sign-up-terms-and-conditions-message"
                 params={{
-                  Link: <Link href="https://tolgee.io/docs/terms_of_use" />,
+                  Link: <Link href="https://tolgee.io/terms_and_conditions" />,
                 }}
               />
             </Typography>
