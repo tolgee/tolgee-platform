@@ -67,8 +67,10 @@ export function TopBanner() {
   const getAnnouncement = useAnnouncement();
   const isEmailVerified = useIsEmailVerified();
 
+  const showEmailVerificationBanner = !isEmailVerified && isAuthenticated;
+
   const announcement = bannerType && getAnnouncement(bannerType);
-  const showCloseButton = isEmailVerified && !pendingInvitationCode;
+  const showCloseButton = showEmailVerificationBanner && !pendingInvitationCode;
 
   useResizeObserver({
     ref: bannerRef,
@@ -80,13 +82,9 @@ export function TopBanner() {
   useEffect(() => {
     const height = bannerRef.current?.offsetHeight;
     setTopBannerHeight(height ?? 0);
-  }, [announcement, isEmailVerified]);
+  }, [announcement, isEmailVerified, pendingInvitationCode]);
 
-  if (
-    !announcement &&
-    !pendingInvitationCode &&
-    (isEmailVerified || !isAuthenticated)
-  ) {
+  if (!announcement && !pendingInvitationCode && !showEmailVerificationBanner) {
     return null;
   }
 
@@ -94,11 +92,11 @@ export function TopBanner() {
     <StyledContainer
       ref={bannerRef}
       data-cy="top-banner"
-      className={clsx({ emailNotVerified: !isEmailVerified })}
+      className={clsx({ emailNotVerified: showEmailVerificationBanner })}
     >
       <div />
       <StyledContent data-cy="top-banner-content">
-        {!isEmailVerified ? (
+        {showEmailVerificationBanner ? (
           <Announcement
             content={null}
             title={t('verify_email_account_not_verified_title')}
