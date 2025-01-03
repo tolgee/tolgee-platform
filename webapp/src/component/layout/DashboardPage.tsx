@@ -41,12 +41,14 @@ const AdminFrame = styled(Box)`
 type Props = {
   isAdminAccess?: boolean;
   fixedContent?: React.ReactNode;
+  hideQuickStart?: boolean;
 };
 
 export const DashboardPage: FunctionComponent<Props> = ({
   children,
   isAdminAccess = false,
   fixedContent,
+  hideQuickStart = false,
 }) => {
   const isDebuggingCustomerAccount = useGlobalContext(
     (c) => Boolean(c.auth.jwtToken) && Boolean(c.auth.adminToken)
@@ -55,6 +57,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
 
   const isEmailVerified = useIsEmailVerified();
+  const quickStartHiden = !isEmailVerified || hideQuickStart;
 
   const { setQuickStartOpen } = useGlobalActions();
   const quickStartEnabled = useGlobalContext(
@@ -82,6 +85,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
         <TopBar
           isAdminAccess={isAdminAccess}
           isDebuggingCustomerAccount={isDebuggingCustomerAccount}
+          hideQuickStart={quickStartHiden}
         />
         <TopSpacer />
         <StyledHorizontal>
@@ -93,9 +97,9 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {quickStartEnabled &&
-          (quickStartOpen || quickStartFloating) &&
-          isEmailVerified && (
+        {!quickStartHiden &&
+          quickStartEnabled &&
+          (quickStartOpen || quickStartFloating) && (
             <RightSidePanel
               open={quickStartOpen}
               onClose={() => setQuickStartOpen(false)}

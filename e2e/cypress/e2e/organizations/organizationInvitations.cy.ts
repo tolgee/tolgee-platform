@@ -8,6 +8,7 @@ import {
 import {
   getParsedEmailInvitationLink,
   login,
+  logout,
   setBypassSeatCountCheck,
 } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
@@ -68,11 +69,36 @@ describe('Organization Invitations', () => {
   });
 
   it('owner invitation by email can be accepted', () => {
-    testAcceptInvitation('OWNER', false);
+    testAcceptInvitation('OWNER', true);
   });
 
   it('member invitation by email can be accepted', () => {
-    testAcceptInvitation('MEMBER', false);
+    testAcceptInvitation('MEMBER', true);
+  });
+
+  it('invitation can be declined right away', () => {
+    generateInvitation('MEMBER').then((code) => {
+      logout();
+      cy.visit(code as string);
+      cy.gcy('accept-invitation-decline').click();
+      cy.gcy('login-button').should('be.visible');
+      cy.gcy('pending-invitation-banner').should('not.exist');
+    });
+  });
+
+  it('invitation can be declined later', () => {
+    generateInvitation('MEMBER').then((code) => {
+      logout();
+      cy.visit(code as string);
+      cy.gcy('accept-invitation-accept').click();
+      cy.gcy('login-button').should('be.visible');
+      cy.gcy('pending-invitation-banner').should(
+        'contain',
+        'By logging in, you are accepting invitation to organization Tolgee.'
+      );
+      cy.gcy('pending-invitation-dismiss').click();
+      cy.gcy('pending-invitation-banner').should('not.exist');
+    });
   });
 
   after(() => {
@@ -136,7 +162,11 @@ describe('Organization Invitations', () => {
       login('owner@zzzcool12.com', 'admin');
       cy.visit(code as string);
 
-      assertMessage('Invitation successfully accepted');
+      cy.gcy('accept-invitation-info-text').should(
+        'contain',
+        'admin invited you to the organization Tolgee'
+      );
+      cy.gcy('accept-invitation-accept').should('be.visible').click();
       cy.visit(`${HOST}/projects`);
       assertSwitchedToOrganization('Tolgee');
     });

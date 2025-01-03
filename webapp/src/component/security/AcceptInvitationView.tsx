@@ -107,55 +107,41 @@ const AcceptInvitationView: React.FC = () => {
     invitationInfo.data.createdBy?.username;
   const project = invitationInfo.data.projectName;
   const organization = invitationInfo.data.organizationName;
+  const params = {
+    username,
+    project,
+    organization,
+    b: <b />,
+  };
 
   if (project) {
     if (username) {
       infoText = (
         <T
           keyName="accept_invitation_description_project_user"
-          params={{
-            username,
-            project,
-            b: <b />,
-          }}
+          params={params}
         />
       );
     } else {
       infoText = (
-        <T
-          keyName="accept_invitation_description_project"
-          params={{
-            project,
-            b: <b />,
-          }}
-        />
+        <T keyName="accept_invitation_description_project" params={params} />
       );
     }
   } else if (invitationInfo.data.createdBy) {
     infoText = (
       <T
         keyName="accept_invitation_description_organization_user"
-        params={{
-          username,
-          organization,
-          b: <b />,
-        }}
+        params={params}
       />
     );
   } else {
     infoText = (
-      <T
-        keyName="accept_invitation_description_organization"
-        params={{
-          organization,
-          b: <b />,
-        }}
-      />
+      <T keyName="accept_invitation_description_organization" params={params} />
     );
   }
 
   return (
-    <DashboardPage>
+    <DashboardPage hideQuickStart>
       <StyledContainer>
         <StyledContent>
           <StyledPaper>
@@ -178,7 +164,9 @@ const AcceptInvitationView: React.FC = () => {
             )}
 
             <Box display="grid" gap="24px" justifyItems="center">
-              <Box textAlign="center">{infoText}</Box>
+              <Box textAlign="center" data-cy="accept-invitation-info-text">
+                {infoText}
+              </Box>
               <Box
                 display="flex"
                 gap={3}
@@ -190,10 +178,15 @@ const AcceptInvitationView: React.FC = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleAccept}
+                  data-cy="accept-invitation-accept"
                 >
                   {t('accept_invitation_accept')}
                 </LoadingButton>
-                <Button variant="outlined" onClick={handleDecline}>
+                <Button
+                  variant="outlined"
+                  onClick={handleDecline}
+                  data-cy="accept-invitation-decline"
+                >
                   {t('accept_invitation_decline')}
                 </Button>
               </Box>

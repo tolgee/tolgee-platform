@@ -78,7 +78,11 @@ export const PendingInvitationBanner = ({ code }: Props) => {
 
   return (
     <Announcement
-      content={<Box sx={{ fontWeight: 'normal' }}>{infoText}</Box>}
+      content={
+        <Box sx={{ fontWeight: 'normal' }} data-cy="pending-invitation-banner">
+          {infoText}
+        </Box>
+      }
       icon={<User01 />}
       action={
         <StyledDismiss
@@ -86,6 +90,7 @@ export const PendingInvitationBanner = ({ code }: Props) => {
           tabIndex={0}
           sx={{ marginLeft: 1 }}
           onClick={handleDecline}
+          data-cy="pending-invitation-dismiss"
         >
           {t('pending_invitation_decline')}
         </StyledDismiss>
