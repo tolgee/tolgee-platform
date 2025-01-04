@@ -1,7 +1,9 @@
 package io.tolgee.formats.resx.out
 
 import io.tolgee.dtos.IExportParams
+import io.tolgee.formats.IcuToIcuPlaceholderConvertor
 import io.tolgee.formats.PossiblePluralConversionResult
+import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.resx.ResxEntry
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -27,7 +29,7 @@ class ResxExporter(
       val entry =
         ResxEntry(
           key = translation.key.name,
-          data = converted.singleResult,
+          data = converted,
           comment = translation.description,
         )
 
@@ -55,27 +57,19 @@ class ResxExporter(
   private fun getConvertedMessage(
     translation: ExportTranslationView,
     isPlural: Boolean = translation.key.isPlural,
-  ): PossiblePluralConversionResult {
-//    val converted =
-//      IcuToIcuMessageConvertor(
-//        translation.text ?: "",
-//        isPlural,
-//        isProjectIcuPlaceholdersEnabled,
-//      ).convert()
-    // TODO: ICU format needs any conversion?
-    val converted =
-      PossiblePluralConversionResult(
-        singleResult = translation.text,
-      )
-
-    return converted
+  ): String? {
+    return IcuToGenericFormatMessageConvertor(
+      translation.text,
+      isPlural,
+      isProjectIcuPlaceholdersEnabled
+    ) {
+      IcuToIcuPlaceholderConvertor()
+    }.convert()
   }
 
   override fun produceFiles(): Map<String, InputStream> {
-    // TODO
-    return emptyMap()
-//    return getModels().map { (path, model) ->
-//      path to ResxWriter(model).produceFiles()
-//    }.toMap()
+    return getModels().map { (path, model) ->
+      path to ResxWriter(model).produceFiles()
+    }.toMap()
   }
 }

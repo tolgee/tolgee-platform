@@ -10,8 +10,13 @@ import javax.xml.stream.XMLInputFactory
 
 class ResxProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
   override fun process() {
-    val data = parse()
-    data.importAll()
+    try {
+      val parser = ResxParser(xmlEventReader)
+      val data = parser.parse()
+      data.importAll()
+    } catch (e: Exception) {
+      throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
+    }
   }
 
   fun Sequence<ResxEntry>.importAll() {
@@ -36,15 +41,6 @@ class ResxProcessor(override val context: FileProcessorContext) : ImportFileProc
       rawData = data,
       convertedBy = importFormat,
     )
-  }
-
-  private fun parse(): Sequence<ResxEntry> {
-    try {
-      val parser = ResxParser(xmlEventReader)
-      return parser.parse()
-    } catch (e: Exception) {
-      throw ImportCannotParseFileException(context.file.name, e.message ?: "", e)
-    }
   }
 
   private val xmlEventReader: XMLEventReader by lazy {
