@@ -11,6 +11,7 @@ import io.tolgee.formats.importCommon.ImportFileFormat
 import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
+import io.tolgee.formats.resx.`in`.ResxProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
 import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
@@ -62,6 +63,7 @@ class ImportFileProcessorFactory(
       ImportFileFormat.ARB -> FlutterArbFileProcessor(context, objectMapper)
       ImportFileFormat.YAML -> YamlFileProcessor(context, yamlObjectMapper)
       ImportFileFormat.CSV -> CsvFileProcessor(context)
+      ImportFileFormat.RESX -> ResxProcessor(context)
     }
   }
 

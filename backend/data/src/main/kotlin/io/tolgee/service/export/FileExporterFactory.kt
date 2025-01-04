@@ -12,6 +12,7 @@ import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
+import io.tolgee.formats.resx.out.ResxExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.formats.xmlResources.out.XmlResourcesExporter
 import io.tolgee.formats.yaml.out.YamlFileExporter
@@ -105,6 +106,9 @@ class FileExporterFactory(
 
       ExportFormat.PROPERTIES ->
         PropertiesFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
+
+      ExportFormat.RESX_XML ->
+        ResxExporter(data, exportParams, projectIcuPlaceholdersSupport)
     }
   }
 }
