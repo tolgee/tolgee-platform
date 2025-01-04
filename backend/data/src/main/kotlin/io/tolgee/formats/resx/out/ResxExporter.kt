@@ -2,7 +2,6 @@ package io.tolgee.formats.resx.out
 
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.IcuToIcuPlaceholderConvertor
-import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.resx.ResxEntry
 import io.tolgee.service.export.ExportFilePathProvider
@@ -61,7 +60,7 @@ class ResxExporter(
     return IcuToGenericFormatMessageConvertor(
       translation.text,
       isPlural,
-      isProjectIcuPlaceholdersEnabled
+      isProjectIcuPlaceholdersEnabled,
     ) {
       IcuToIcuPlaceholderConvertor()
     }.convert()
