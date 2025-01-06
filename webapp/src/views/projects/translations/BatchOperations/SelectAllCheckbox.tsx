@@ -8,7 +8,7 @@ import {
 const StyledToggleAllButton = styled(Box)`
   width: 38px;
   height: 38px;
-  margin: 0px -12px;
+  margin: 0px -12px 0px -12.5px;
 `;
 
 export const SelectAllCheckbox = () => {
