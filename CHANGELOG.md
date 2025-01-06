@@ -1,3 +1,10 @@
+## [3.90.2](https://github.com/tolgee/tolgee-platform/compare/v3.90.1...v3.90.2) (2025-01-06)
+
+
+### Bug Fixes
+
+* Update QuickStart state when preferred organization changes ([#2806](https://github.com/tolgee/tolgee-platform/issues/2806)) ([0413889](https://github.com/tolgee/tolgee-platform/commit/04138892524f3d6f0022d7baea4aff9dbc33670a))
+
 ## [3.90.1](https://github.com/tolgee/tolgee-platform/compare/v3.90.0...v3.90.1) (2025-01-06)
 
 
