@@ -15,7 +15,7 @@ class ResxParser(
       var currentData: String? = null
       var currentComment: String? = null
 
-      fun isAnyToContentSaveOpen(): Boolean = currentData != null && currentComment != null
+      fun isAnyToContentSaveOpen(): Boolean = currentData != null || currentComment != null
 
       while (xmlEventReader.hasNext()) {
         val event = xmlEventReader.nextEvent()

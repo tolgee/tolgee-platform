@@ -41,5 +41,5 @@ enum class ExportFormat(
   YAML("yaml", "application/x-yaml"),
   JSON_I18NEXT("json", "application/json"),
   CSV("csv", "text/csv"),
-  RESX_XML("xml", "text/microsoft-resx"),
+  RESX_XML("resx", "text/microsoft-resx"),
 }

@@ -259,7 +259,7 @@ export const formatGroups: FormatGroup[] = [
     formats: [
       {
         id: 'resx_xml',
-        extension: 'xml',
+        extension: 'resx',
         name: <T keyName="export-format-resx-xml" />,
         format: 'RESX_XML',
       },

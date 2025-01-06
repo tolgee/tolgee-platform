@@ -217,7 +217,7 @@ enum class ImportFormat(
   ),
 
   RESX_ICU(
-    ImportFileFormat.XML,
+    ImportFileFormat.RESX,
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(
         canContainIcu = true,

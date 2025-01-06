@@ -11,7 +11,7 @@ enum class ImportFileFormat(val extensions: Array<String>) {
   ARB(arrayOf("arb")),
   YAML(arrayOf("yaml", "yml")),
   CSV(arrayOf("csv")),
-  RESX(arrayOf("xml")),
+  RESX(arrayOf("resx")),
   ;
 
   companion object {

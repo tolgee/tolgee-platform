@@ -49,7 +49,7 @@ class ResxExporter(
   private val pathProvider by lazy {
     ExportFilePathProvider(
       exportParams,
-      "xml",
+      "resx",
     )
   }
 
