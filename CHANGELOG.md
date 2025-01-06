@@ -1,3 +1,10 @@
+# [3.90.0](https://github.com/tolgee/tolgee-platform/compare/v3.89.0...v3.90.0) (2025-01-06)
+
+
+### Features
+
+* accept invitation improved ([#2800](https://github.com/tolgee/tolgee-platform/issues/2800)) ([8f65990](https://github.com/tolgee/tolgee-platform/commit/8f659908d93098869eed3f287c1232249292b872)), closes [#1567](https://github.com/tolgee/tolgee-platform/issues/1567)
+
 # [3.89.0](https://github.com/tolgee/tolgee-platform/compare/v3.88.1...v3.89.0) (2025-01-03)
 
 
