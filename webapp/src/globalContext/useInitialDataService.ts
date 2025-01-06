@@ -37,6 +37,7 @@ export const useInitialDataService = () => {
   const [announcement, setAnnouncement] = useState<AnnouncementDto | undefined>(
     initialDataLoadable.data?.announcement
   );
+
   const [quickStart, setQuickStart] = useState<QuickStartModel | undefined>(
     initialDataLoadable.data?.preferredOrganization?.quickStart
   );
@@ -153,6 +154,7 @@ export const useInitialDataService = () => {
 
         // load new preferred organization
         const data = await preferredOrganizationLoadable.mutateAsync({});
+        setQuickStart(data.quickStart);
         setOrganization(data);
       } finally {
         setOrganizationLoading(false);

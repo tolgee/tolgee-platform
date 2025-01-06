@@ -3,12 +3,12 @@ package io.tolgee.service
 import io.tolgee.component.demoProject.DemoProjectCreator
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.queryResults.organization.QuickStartView
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.QuickStart
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.QuickStartRepository
 import org.springframework.context.ApplicationContext
-import org.springframework.data.crossstore.ChangeSetPersister
 import org.springframework.stereotype.Component
 
 @Component
@@ -44,7 +44,7 @@ class QuickStartService(
   ): QuickStart {
     val quickStart =
       quickStartRepository.findByUserAccountId(userAccount.id)
-        ?: throw ChangeSetPersister.NotFoundException()
+        ?: throw NotFoundException()
     quickStart.finished = finished
     quickStartRepository.save(quickStart)
     return quickStart
@@ -56,7 +56,7 @@ class QuickStartService(
   ): QuickStart {
     val quickStart =
       quickStartRepository.findByUserAccountId(userAccount.id)
-        ?: throw ChangeSetPersister.NotFoundException()
+        ?: throw NotFoundException()
     quickStart.open = open
     quickStartRepository.save(quickStart)
     return quickStart
