@@ -1,3 +1,10 @@
+## [3.90.1](https://github.com/tolgee/tolgee-platform/compare/v3.90.0...v3.90.1) (2025-01-06)
+
+
+### Bug Fixes
+
+* group checkbox slightly off ([#2808](https://github.com/tolgee/tolgee-platform/issues/2808)) ([0d6cfd8](https://github.com/tolgee/tolgee-platform/commit/0d6cfd8e9fc354c65f4277681074334ec90c5950))
+
 # [3.90.0](https://github.com/tolgee/tolgee-platform/compare/v3.89.0...v3.90.0) (2025-01-06)
 
 
