@@ -4798,15 +4798,17 @@ export interface components {
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       avatar?: components["schemas"]["Avatar"];
     };
-    Notification: {
+    NotificationModel: {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      linkedEntityId: number;
-      linkedEntityName: string;
+      linkedProjectId?: number;
+      /** Format: int64 */
+      linkedTaskNumber?: number;
+      linkedTaskName?: string;
     };
     NotificationsResponse: {
-      notifications: components["schemas"]["Notification"][];
+      notifications: components["schemas"]["NotificationModel"][];
     };
     ApiKeyWithLanguagesModel: {
       /**

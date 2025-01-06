@@ -47,7 +47,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const notifications = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
-  });
+  }).data?.notifications;
 
   return (
     <>
@@ -77,14 +77,14 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         }}
       >
         <List>
-          {notifications.data?.notifications.map((notification) => (
+          {notifications?.map((notification, i) => (
             <ListItemButton
               key={notification.id}
-              divider
+              divider={i !== notifications.length - 1}
               onClick={() => {
                 handleClose();
                 history.push(
-                  `/projects/1/languages/language/${notification.linkedEntityId}`
+                  `/projects/${notification.linkedProjectId}/task?number=${notification.linkedTaskNumber}`
                 );
               }}
             >
