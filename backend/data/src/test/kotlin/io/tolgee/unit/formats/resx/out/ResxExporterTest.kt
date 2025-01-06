@@ -15,7 +15,9 @@ class ResxExporterTest {
     val data = getExported(exporter)
     // generate this with:
     // data.map { "data.assertFile(\"${it.key}\", \"\"\"\n    |${it.value.replace("\$", "\${'$'}").replace("\n", "\n    |")}\n    \"\"\".trimMargin())" }.joinToString("\n")
-    data.assertFile("cs.resx", """
+    data.assertFile(
+      "cs.resx",
+      """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<root>
     |  <resheader name="resmimetype">
@@ -39,8 +41,11 @@ class ResxExporterTest {
     |  <data name="i_am_array_item[100]" xml:space="preserve"><value>I will be second</value></data>
     |</root>
     |
-    """.trimMargin())
-    data.assertFile("en.resx", """
+      """.trimMargin(),
+    )
+    data.assertFile(
+      "en.resx",
+      """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<root>
     |  <resheader name="resmimetype">
@@ -59,7 +64,8 @@ class ResxExporterTest {
     |  <data name="plural with placeholders" xml:space="preserve"><value>{count, plural, one {{0} dog} other {{0} dogs}}</value></data>
     |</root>
     |
-    """.trimMargin())
+      """.trimMargin(),
+    )
   }
 
   @Test
@@ -81,7 +87,9 @@ class ResxExporterTest {
   fun `exports with placeholders (ICU placeholders enabled)`() {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExported(exporter)
-    data.assertFile("cs.resx", """
+    data.assertFile(
+      "cs.resx",
+      """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<root>
     |  <resheader name="resmimetype">
@@ -100,14 +108,17 @@ class ResxExporterTest {
     |  <data name="i_am_array_item[20]" xml:space="preserve"><value>I will be first '{'icuParam'}'</value></data>
     |</root>
     |
-    """.trimMargin())
+      """.trimMargin(),
+    )
   }
 
   @Test
   fun `exports with placeholders (ICU placeholders disabled)`() {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExported(exporter)
-    data.assertFile("cs.resx", """
+    data.assertFile(
+      "cs.resx",
+      """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<root>
     |  <resheader name="resmimetype">
@@ -126,7 +137,8 @@ class ResxExporterTest {
     |  <data name="i_am_array_item[20]" xml:space="preserve"><value>I will be first {icuParam} '{hey}'</value></data>
     |</root>
     |
-    """.trimMargin())
+      """.trimMargin(),
+    )
   }
 
   private fun getExported(exporter: ResxExporter): Map<String, String> {

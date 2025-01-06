@@ -57,7 +57,9 @@ class ResxProcessorTest {
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "test2")
       .assertSingle {
-        hasText("special \" \\\\ characters\n handling 	 could 耀 be  <value>asdf</value>    interesting </value> <p>a</p> lot </data> also")
+        hasText(
+          "special \" \\\\ characters\n handling 	 could 耀 be  <value>asdf</value>    interesting </value> <p>a</p> lot </data> also",
+        )
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "test3")
       .assertSingle {
@@ -114,7 +116,7 @@ class ResxProcessorTest {
           one {Showing '#' item}
           other {Showing '{'num'}' items}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
@@ -122,7 +124,7 @@ class ResxProcessorTest {
       .assertSingle {
         hasText("Text with named placeholders {asdf}")
       }
-    mockUtil.fileProcessorContext.assertKey("test2"){
+    mockUtil.fileProcessorContext.assertKey("test2") {
       custom.assert.isNull()
       description.assert.isNull()
     }
@@ -145,7 +147,7 @@ class ResxProcessorTest {
           one {Showing # item}
           other {Showing {num} items}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
@@ -153,7 +155,7 @@ class ResxProcessorTest {
       .assertSingle {
         hasText("Text with named placeholders {asdf}")
       }
-    mockUtil.fileProcessorContext.assertKey("test2"){
+    mockUtil.fileProcessorContext.assertKey("test2") {
       custom.assert.isNull()
       description.assert.isNull()
     }
@@ -176,7 +178,7 @@ class ResxProcessorTest {
           one {Showing # item}
           other {Showing {num} items}
           }
-          """.trimIndent()
+          """.trimIndent(),
         )
         isPluralOptimized()
       }
@@ -184,7 +186,7 @@ class ResxProcessorTest {
       .assertSingle {
         hasText("Text with named placeholders {asdf}")
       }
-    mockUtil.fileProcessorContext.assertKey("test2"){
+    mockUtil.fileProcessorContext.assertKey("test2") {
       custom.assert.isNull()
       description.assert.isNull()
     }
