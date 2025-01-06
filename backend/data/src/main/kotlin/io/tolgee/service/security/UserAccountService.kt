@@ -203,6 +203,9 @@ class UserAccountService(
     toDelete.preferences?.let {
       entityManager.remove(it)
     }
+    toDelete.invitations?.forEach {
+      entityManager.remove(it)
+    }
     organizationService.getAllSingleOwnedByUser(toDelete).forEach {
       it.preferredBy.removeIf { preferences ->
         preferences.userAccount.id == toDelete.id

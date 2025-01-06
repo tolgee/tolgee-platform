@@ -88,6 +88,9 @@ data class UserAccount(
   @OneToMany(mappedBy = "userAccount", orphanRemoval = true)
   var apiKeys: MutableList<ApiKey>? = mutableListOf()
 
+  @OneToMany(mappedBy = "createdBy", orphanRemoval = true)
+  var invitations: MutableList<Invitation>? = mutableListOf()
+
   override var avatarHash: String? = null
 
   @Column(name = "deleted_at")

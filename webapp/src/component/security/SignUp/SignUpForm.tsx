@@ -16,7 +16,6 @@ import {
   StandardForm,
 } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useConfig } from 'tg.globalContext/helpers';
 import { PasswordLabel } from '../SetPasswordField';
@@ -24,6 +23,7 @@ import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent
 import { Alert } from '../../common/Alert';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { SpendingLimitExceededDescription } from './SpendingLimitExceededDesciption';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -86,9 +86,9 @@ const Error: React.FC<{ loadable: LoadableType }> = ({ loadable }) => {
 };
 
 export const SignUpForm = (props: Props) => {
+  const invitationCode = useGlobalContext((c) => c.auth.invitationCode);
   const config = useConfig();
-  const orgRequired =
-    !InvitationCodeService.getCode() && config.userCanCreateOrganizations;
+  const orgRequired = !invitationCode && config.userCanCreateOrganizations;
   const userSourceField = config.userSourceField;
 
   const [showPassword, setShowPassword] = useState(false);

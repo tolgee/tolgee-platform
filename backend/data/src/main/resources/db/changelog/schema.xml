@@ -4044,4 +4044,12 @@
             <column name="detected_namespace" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1735822703703-1">
+        <addColumn tableName="invitation">
+            <column name="created_by_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1735822703703-2">
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="invitation" constraintName="FK2q6wi3un2qq40cgjoln871ak2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

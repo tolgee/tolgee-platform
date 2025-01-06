@@ -12,10 +12,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useInitialDataService } from './useInitialDataService';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import {
-  INVITATION_CODE_STORAGE_KEY,
-  InvitationCodeService,
-} from 'tg.service/InvitationCodeService';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
@@ -25,6 +21,8 @@ type JwtAuthenticationResponse =
   components['schemas']['JwtAuthenticationResponse'];
 type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
+
+export const INVITATION_CODE_STORAGE_KEY = 'invitationCode';
 
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
@@ -94,7 +92,7 @@ export const useAuthService = (
     tokenService.getToken()
   );
 
-  const [adminToken, setAdminToken] = useLocalStorageState<string | undefined>({
+  const [adminToken, setAdminToken] = useLocalStorageState({
     initial: undefined,
     key: ADMIN_JWT_LOCAL_STORAGE_KEY,
   });
@@ -103,9 +101,7 @@ export const useAuthService = (
     []
   );
   const [userId, setUserId] = useState<number>();
-  const [invitationCode, _setInvitationCode] = useLocalStorageState<
-    string | undefined
-  >({
+  const [invitationCode, _setInvitationCode] = useLocalStorageState({
     initial: undefined,
     key: INVITATION_CODE_STORAGE_KEY,
   });
@@ -148,11 +144,10 @@ export const useAuthService = (
   }
 
   async function handleAcceptInvitation() {
-    const code = InvitationCodeService.getCode();
-    if (code) {
+    if (invitationCode) {
       try {
         await acceptInvitationLoadable.mutateAsync({
-          path: { code },
+          path: { code: invitationCode },
         });
       } catch (error: any) {
         // we want to continue regardless, error will be logged
@@ -183,6 +178,7 @@ export const useAuthService = (
     authorizeOAuthLoadable,
     redirectSsoUrlLoadable,
     allowRegistration,
+    invitationCode,
   };
 
   const actions = {

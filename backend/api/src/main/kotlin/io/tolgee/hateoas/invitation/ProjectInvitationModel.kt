@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.invitation
 
 import io.tolgee.hateoas.permission.PermissionWithAgencyModel
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.enums.ProjectPermissionType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -18,4 +19,5 @@ open class ProjectInvitationModel(
   val invitedUserName: String?,
   val invitedUserEmail: String?,
   val permission: PermissionWithAgencyModel,
+  val createdBy: SimpleUserAccountModel?,
 ) : RepresentationModel<ProjectInvitationModel>()
