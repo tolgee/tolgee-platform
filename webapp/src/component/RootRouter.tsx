@@ -17,48 +17,24 @@ import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
 import { RecaptchaProvider } from 'tg.component/common/RecaptchaProvider';
 
-const LoginRouter = React.lazy(
-  () => import(/* webpackChunkName: "login" */ './security/Login/LoginRouter')
-);
+const LoginRouter = React.lazy(() => import('./security/Login/LoginRouter'));
 
-const SlackConnectView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "slack-connect-view" */ './slack/SlackConnectView'
-    )
-);
+const SlackConnectView = React.lazy(() => import('./slack/SlackConnectView'));
 
 const SlackConnectedView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "slack-connected-view" */ './slack/SlackConnectedView'
-    )
+  () => import('./slack/SlackConnectedView')
 );
 
-const SignUpView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "sign-up-view" */ './security/SignUp/SignUpView'
-    )
-);
+const SignUpView = React.lazy(() => import('./security/SignUp/SignUpView'));
 
 const PasswordResetSetView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "reset-password-set-view" */ './security/ResetPasswordSetView'
-    )
+  () => import('./security/ResetPasswordSetView')
 );
 const PasswordResetView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "reset-password-view" */ './security/ResetPasswordView'
-    )
+  () => import('./security/ResetPasswordView')
 );
 const AcceptInvitationView = React.lazy(
-  () =>
-    import(
-      /* webpackChunkName: "accept-invitation-view" */ './security/AcceptInvitationView'
-    )
+  () => import('./security/AcceptInvitationView')
 );
 
 export const RootRouter = () => {
