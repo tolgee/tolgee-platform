@@ -58,7 +58,8 @@ class ResxProcessorTest {
     mockUtil.fileProcessorContext.assertTranslations("en", "test2")
       .assertSingle {
         hasText(
-          "special \" \\\\ characters\n handling 	 could 耀 be  <value>asdf</value>    interesting </value> <p>a</p> lot </data> also",
+          "special \" \\\\ characters\n handling 	 could 耀 be  <value>asdf</value>    interesting " +
+            "</value> <p>a</p> lot </data> also",
         )
       }
     mockUtil.fileProcessorContext.assertTranslations("en", "test3")
