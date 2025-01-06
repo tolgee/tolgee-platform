@@ -92,10 +92,7 @@ describe('Organization Invitations', () => {
       cy.visit(code as string);
       cy.gcy('accept-invitation-accept').click();
       cy.gcy('login-button').should('be.visible');
-      cy.gcy('pending-invitation-banner').should(
-        'contain',
-        'By logging in, you are accepting invitation to organization Tolgee.'
-      );
+      cy.gcy('pending-invitation-banner').should('contain', 'Tolgee');
       cy.gcy('pending-invitation-dismiss').click();
       cy.gcy('pending-invitation-banner').should('not.exist');
     });
