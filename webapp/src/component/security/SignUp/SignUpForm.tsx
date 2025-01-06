@@ -88,8 +88,7 @@ const Error: React.FC<{ loadable: LoadableType }> = ({ loadable }) => {
 export const SignUpForm = (props: Props) => {
   const invitationCode = useGlobalContext((c) => c.auth.invitationCode);
   const config = useConfig();
-  const orgRequired =
-    Boolean(invitationCode) && config.userCanCreateOrganizations;
+  const orgRequired = !invitationCode && config.userCanCreateOrganizations;
   const userSourceField = config.userSourceField;
 
   const [showPassword, setShowPassword] = useState(false);
