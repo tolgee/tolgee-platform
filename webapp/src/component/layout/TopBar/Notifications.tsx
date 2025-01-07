@@ -81,7 +81,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               onClick={() => {
                 handleClose();
                 history.push(
-                  `/projects/${notification.linkedProjectId}/task?number=${notification.linkedTaskNumber}`
+                  `/projects/${notification.projectId}/task?number=${notification.linkedTaskNumber}`
                 );
               }}
             >

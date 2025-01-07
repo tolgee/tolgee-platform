@@ -4802,7 +4802,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      linkedProjectId?: number;
+      projectId?: number;
       /** Format: int64 */
       linkedTaskNumber?: number;
       linkedTaskName?: string;
