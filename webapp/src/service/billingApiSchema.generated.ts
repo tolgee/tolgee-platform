@@ -10,6 +10,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/refresh-subscriptions": {
     put: operations["refreshSelfHostedEeSubscriptions"];
   };
+  "/v2/organizations/{organizationId}/billing/restore-cancelled-subscription": {
+    /** When subscription is scheduled to cancel on the period end, it can be restored. */
+    put: operations["keepSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     put: operations["refresh"];
   };
@@ -402,7 +406,9 @@ export interface components {
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
-        | "custom_plans_has_to_be_private";
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -534,6 +540,16 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       trialEnd?: number;
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      trialRenew: boolean;
+      hasPaymentMethod: boolean;
     };
     UpdateSubscriptionPrepareRequest: {
       /**
@@ -1051,6 +1067,8 @@ export interface components {
         | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
       stripeSubscriptionId?: string;
+      trialRenew: boolean;
+      hasPaymentMethod: boolean;
     };
     OrganizationWithSubscriptionsModel: {
       organization: components["schemas"]["SimpleOrganizationModel"];
@@ -1133,6 +1151,50 @@ export interface operations {
           "application/json": components["schemas"]["CollectionModelSelfHostedEeSubscriptionModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** When subscription is scheduled to cancel on the period end, it can be restored. */
+  keepSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

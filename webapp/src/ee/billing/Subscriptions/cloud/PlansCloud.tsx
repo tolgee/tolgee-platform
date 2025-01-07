@@ -8,11 +8,11 @@ import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 import { StyledBillingSectionTitle } from '../../BillingSection';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
-import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
+import { CurrentCloudSubscriptionInfo } from '../../currentCloudSubscription/CurrentCloudSubscriptionInfo';
 import { PlansCloudList } from './PlansCloudList';
 import { useLocation } from 'react-router-dom';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
-import { planIsPeriodDependant } from '../../component/Plan/plansTools';
+import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
 
 const StyledShoppingGrid = styled('div')`
   display: grid;
@@ -35,14 +35,6 @@ export const PlansCloud = () => {
     },
   });
 
-  const plansLoadable = useBillingApiQuery({
-    url: `/v2/organizations/{organizationId}/billing/plans`,
-    method: 'get',
-    path: {
-      organizationId: organization!.id,
-    },
-  });
-
   const activeSubscription = useBillingApiQuery({
     url: '/v2/organizations/{organizationId}/billing/subscription',
     method: 'get',
@@ -52,7 +44,7 @@ export const PlansCloud = () => {
     options: {
       onSuccess(data) {
         if (!period)
-          if (data.plan && planIsPeriodDependant(data.plan.prices)) {
+          if (data.plan && isPlanPeriodDependant(data.plan.prices)) {
             setPeriod(data.currentBillingPeriod);
           } else {
             setPeriod('YEARLY');
@@ -81,14 +73,13 @@ export const PlansCloud = () => {
 
   return (
     <>
-      {plansLoadable.data?._embedded?.plans &&
-        activeSubscription.data &&
+      {activeSubscription.data &&
         usage.data &&
         creditBalance.data &&
         period && (
           <>
             <Box>
-              <CurrentUsage
+              <CurrentCloudSubscriptionInfo
                 activeSubscription={activeSubscription.data}
                 usage={usage.data}
               />
@@ -100,7 +91,6 @@ export const PlansCloud = () => {
             </Box>
             <StyledShoppingGrid>
               <PlansCloudList
-                plans={plansLoadable.data._embedded.plans}
                 activeSubscription={activeSubscription.data}
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
