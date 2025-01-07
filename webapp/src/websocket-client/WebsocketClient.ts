@@ -90,7 +90,7 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
     };
 
     client.connect(
-      { ...options.authentication },
+      options.authentication.jwtToken ? { ...options.authentication } : null,
       onConnected,
       onError,
       onDisconnect

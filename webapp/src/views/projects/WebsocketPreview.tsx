@@ -11,7 +11,7 @@ export const WebsocketPreview = () => {
   const client = useGlobalContext((c) => c.wsClient.client);
 
   useEffect(() => {
-    if (jwtToken && client) {
+    if (client) {
       return client.subscribe(
         `/projects/${project.id}/translation-data-modified`,
         (data) => addMessage(JSON.stringify(data, undefined, 2))
