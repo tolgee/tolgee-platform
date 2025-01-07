@@ -23,13 +23,12 @@ class NotificationController(
   private val notificationService: NotificationService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
-
   @GetMapping
   @Operation(summary = "Gets notifications of the currently logged in user, newest is first.")
   @AllowApiAccess
   fun getNotifications(): NotificationResponse {
     return NotificationResponse(
-      notificationService.getNotifications(authenticationFacade.authenticatedUser.id)
+      notificationService.getNotifications(authenticationFacade.authenticatedUser.id),
     )
   }
 }
