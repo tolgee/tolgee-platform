@@ -1,4 +1,4 @@
-package io.tolgee.service
+package io.tolgee.service.notification
 
 import io.tolgee.repository.NotificationRepository
 import org.springframework.stereotype.Service
@@ -12,10 +12,3 @@ class NotificationService(
       .map { NotificationModel(it.id, it.linkedTask?.project?.id, it.linkedTask?.number, it.linkedTask?.name) }
   }
 }
-
-data class NotificationModel(
-  val id: Long,
-  val linkedProjectId: Long?,
-  val linkedTaskNumber: Long?,
-  val linkedTaskName: String?,
-)
