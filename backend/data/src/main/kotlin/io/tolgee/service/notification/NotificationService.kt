@@ -1,5 +1,6 @@
 package io.tolgee.service.notification
 
+import io.tolgee.model.Notification
 import io.tolgee.repository.NotificationRepository
 import org.springframework.stereotype.Service
 
@@ -10,5 +11,9 @@ class NotificationService(
   fun getNotifications(userId: Long): List<NotificationModel> {
     return notificationRepository.fetchNotificationsByUserId(userId)
       .map { NotificationModel(it.id, it.linkedTask?.project?.id, it.linkedTask?.number, it.linkedTask?.name) }
+  }
+
+  fun createNotification(notification: Notification) {
+    notificationRepository.save(notification)
   }
 }
