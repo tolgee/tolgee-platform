@@ -2018,7 +2018,7 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_XML";
+        | "RESX_ICU";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2121,7 +2121,7 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_XML";
+        | "RESX_ICU";
       /**
        * @description Delimiter to structure file content.
        *
@@ -3471,7 +3471,7 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_XML";
+        | "RESX_ICU";
       /**
        * @description Delimiter to structure file content.
        *
@@ -3956,7 +3956,7 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_XML";
+        | "RESX_ICU";
       extension: string;
       mediaType: string;
       defaultFileStructureTemplate: string;
@@ -13085,7 +13085,7 @@ export interface operations {
           | "YAML"
           | "JSON_I18NEXT"
           | "CSV"
-          | "RESX_XML";
+          | "RESX_ICU";
         /**
          * Delimiter to structure file content.
          *

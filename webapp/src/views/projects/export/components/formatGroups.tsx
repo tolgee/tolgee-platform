@@ -258,10 +258,10 @@ export const formatGroups: FormatGroup[] = [
     name: '.NET',
     formats: [
       {
-        id: 'resx_xml',
+        id: 'resx_icu',
         extension: 'resx',
         name: <T keyName="export-format-resx-xml" />,
-        format: 'RESX_XML',
+        format: 'RESX_ICU',
       },
     ],
   },

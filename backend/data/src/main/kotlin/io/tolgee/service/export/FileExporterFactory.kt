@@ -107,7 +107,7 @@ class FileExporterFactory(
       ExportFormat.PROPERTIES ->
         PropertiesFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
 
-      ExportFormat.RESX_XML ->
+      ExportFormat.RESX_ICU ->
         ResxExporter(data, exportParams, projectIcuPlaceholdersSupport)
     }
   }

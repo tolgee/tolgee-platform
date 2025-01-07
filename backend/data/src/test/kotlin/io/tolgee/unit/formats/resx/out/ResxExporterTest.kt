@@ -275,6 +275,6 @@ class ResxExporterTest {
   }
 
   private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.format = ExportFormat.RESX_XML }
+    return ExportParams().also { it.format = ExportFormat.RESX_ICU }
   }
 }
