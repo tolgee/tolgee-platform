@@ -61,7 +61,7 @@ class ActivityDatabaseInterceptor : Interceptor, Logging {
     propertyNames: Array<out String>?,
     types: Array<out Type>?,
   ): Boolean {
-    preCommitEventsPublisher.onUpdate(entity)
+    preCommitEventsPublisher.onUpdate(entity, previousState, propertyNames)
     interceptedEventsManager.onFieldModificationsActivity(
       entity,
       currentState,
