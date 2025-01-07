@@ -21,8 +21,7 @@ task docker {
     doLast {
         exec {
             workingDir dockerPath
-            commandLine "docker", "build", ".", "-t", "tolgee/tolgee"
-            environment.put("DOCKER_BUILDKIT", "0")
+            commandLine "docker", "build", ".", "-t", "tolgee/tolgee", "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
         }
     }
     dependsOn("dockerPrepare")
