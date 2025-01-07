@@ -1,17 +1,16 @@
 import { default as React, FunctionComponent, useState } from 'react';
 import {
   IconButton,
-  List, ListItem,
+  List,
+  ListItem,
   ListItemButton,
-  ListItemText,
   styled,
 } from '@mui/material';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import { useHistory } from 'react-router-dom';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -29,8 +28,6 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
-  const { t } = useTranslate();
-
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
     setAnchorEl(event.currentTarget);
