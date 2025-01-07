@@ -21,7 +21,10 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
     const auth = useAuthService(initialData);
     const quickStart = useQuickStartGuideService(initialData);
 
-    const wsClient = useWebsocketService(auth.state.jwtToken);
+    const wsClient = useWebsocketService(
+      auth.state.jwtToken,
+      auth.state.allowPrivate
+    );
     const isVerified =
       initialData.state?.userInfo?.emailAwaitingVerification === null ||
       !initialData.state?.serverConfiguration.needsEmailVerification;
