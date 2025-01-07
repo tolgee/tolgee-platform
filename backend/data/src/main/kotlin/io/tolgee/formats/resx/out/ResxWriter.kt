@@ -11,33 +11,37 @@ class ResxWriter(private val model: List<ResxEntry>) {
   fun produceFiles(): InputStream {
     return buildDom {
       element("root") {
-        element("resheader") {
-          attr("name", "resmimetype")
-          element("value") {
-            textContent = "text/microsoft-resx"
-          }
-        }
-        element("resheader") {
-          attr("name", "version")
-          element("value") {
-            textContent = "2.0"
-          }
-        }
-        element("resheader") {
-          attr("name", "reader")
-          element("value") {
-            textContent = "System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral"
-          }
-        }
-        element("resheader") {
-          attr("name", "writer")
-          element("value") {
-            textContent = "System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral"
-          }
-        }
-        model.forEach { this.addToElement(it) }
+        addHeaders()
+        model.forEach { addToElement(it) }
       }
     }.write().toByteArray().inputStream()
+  }
+
+  private fun Element.addHeaders() {
+    element("resheader") {
+      attr("name", "resmimetype")
+      element("value") {
+        textContent = "text/microsoft-resx"
+      }
+    }
+    element("resheader") {
+      attr("name", "version")
+      element("value") {
+        textContent = "2.0"
+      }
+    }
+    element("resheader") {
+      attr("name", "reader")
+      element("value") {
+        textContent = "System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral"
+      }
+    }
+    element("resheader") {
+      attr("name", "writer")
+      element("value") {
+        textContent = "System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral"
+      }
+    }
   }
 
   private fun Element.addToElement(entry: ResxEntry) {
