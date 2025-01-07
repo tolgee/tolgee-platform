@@ -97,7 +97,7 @@ project(':server-app').afterEvaluate {
     }
 
     task stopDbChangelogContainer(type: Exec) {
-        commandLine "docker", "rm", "--force", dbSchemaContainerName
+        commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
         mustRunAfter project(':data').tasks.findByName("diffChangelog")
         if (gradle.ext.eeAppDirectoryExists) {
             mustRunAfter project(':ee-app').tasks.findByName("diffChangelog")
