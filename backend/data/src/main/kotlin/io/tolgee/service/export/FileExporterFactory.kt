@@ -14,6 +14,7 @@ import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.resx.out.ResxExporter
 import io.tolgee.formats.xliff.out.XliffFileExporter
+import io.tolgee.formats.xlsx.out.XlsxFileExporter
 import io.tolgee.formats.xmlResources.out.XmlResourcesExporter
 import io.tolgee.formats.yaml.out.YamlFileExporter
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -109,6 +110,9 @@ class FileExporterFactory(
 
       ExportFormat.RESX_ICU ->
         ResxExporter(data, exportParams, projectIcuPlaceholdersSupport)
+
+      ExportFormat.XLSX ->
+        XlsxFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
     }
   }
 }

@@ -14,6 +14,7 @@ import RailsLogo from 'tg.svgs/logos/rails.svg?react';
 import I18nextLogo from 'tg.svgs/logos/i18next.svg?react';
 import CsvLogo from 'tg.svgs/logos/csv.svg?react';
 import DotnetLogo from 'tg.svgs/logos/dotnet.svg?react';
+import XlsxLogo from 'tg.svgs/logos/xlsx.svg?react';
 
 const TechLogo = ({
   svg,
@@ -61,6 +62,7 @@ const FORMATS = [
   { name: 'i18next', logo: <I18nextLogo /> },
   { name: 'CSV', logo: <CsvLogo /> },
   { name: '.NET RESX', logo: <DotnetLogo /> },
+  { name: 'XLSX', logo: <XlsxLogo /> },
 ];
 
 export const ImportSupportedFormats = () => {

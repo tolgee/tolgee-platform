@@ -1,13 +1,13 @@
 package io.tolgee.formats.csv.out
 
 import com.opencsv.CSVWriterBuilder
-import io.tolgee.formats.csv.CsvEntry
+import io.tolgee.formats.genericTable.TableEntry
 import java.io.InputStream
 import java.io.StringWriter
 
 class CsvFileWriter(
   private val languageTags: Array<String>,
-  private val data: List<CsvEntry>,
+  private val data: List<TableEntry>,
   private val delimiter: Char,
 ) {
   val translations: Map<String, Map<String, String?>> by lazy {
