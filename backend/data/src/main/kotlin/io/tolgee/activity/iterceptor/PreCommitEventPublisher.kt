@@ -12,12 +12,8 @@ class PreCommitEventPublisher(private val applicationContext: ApplicationContext
     applicationContext.publishEvent(OnEntityPrePersist(this, entity))
   }
 
-  fun onUpdate(
-    entity: Any?,
-    previousState: Array<out Any>?,
-    propertyNames: Array<out String>?,
-  ) {
-    applicationContext.publishEvent(OnEntityPreUpdate(this, entity, previousState, propertyNames))
+  fun onUpdate(entity: Any?) {
+    applicationContext.publishEvent(OnEntityPreUpdate(this, entity))
   }
 
   fun onDelete(entity: Any?) {
