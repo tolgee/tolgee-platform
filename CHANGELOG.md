@@ -1,3 +1,10 @@
+# [3.91.0](https://github.com/tolgee/tolgee-platform/compare/v3.90.2...v3.91.0) (2025-01-07)
+
+
+### Features
+
+* Authenticate user paths for websockets ([#2809](https://github.com/tolgee/tolgee-platform/issues/2809)) ([df85f38](https://github.com/tolgee/tolgee-platform/commit/df85f3899292f440917781799d1c0d750653f031))
+
 ## [3.90.2](https://github.com/tolgee/tolgee-platform/compare/v3.90.1...v3.90.2) (2025-01-06)
 
 
