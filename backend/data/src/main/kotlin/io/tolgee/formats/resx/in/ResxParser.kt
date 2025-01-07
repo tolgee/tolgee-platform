@@ -4,94 +4,92 @@ import io.tolgee.formats.resx.ResxEntry
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.events.Characters
+import javax.xml.stream.events.EndElement
 import javax.xml.stream.events.StartElement
+import javax.xml.stream.events.XMLEvent
 
 class ResxParser(
   private val xmlEventReader: XMLEventReader,
 ) {
+  var curState: State? = null
+  var currentEntry: ResxEntry? = null
+  var currentText: String = ""
+
   fun parse(): Sequence<ResxEntry> =
     sequence {
-      var currentEntry: ResxEntry? = null
-      var currentData: String? = null
-      var currentComment: String? = null
-
-      fun isAnyToContentSaveOpen(): Boolean = currentData != null || currentComment != null
-
       while (xmlEventReader.hasNext()) {
         val event = xmlEventReader.nextEvent()
-        val wasAnyToContentSaveOpenBefore = isAnyToContentSaveOpen()
         when {
-          event.isStartElement -> {
-            val element = event.asStartElement()
-            val name = element.name.localPart.lowercase()
-            if (isAnyToContentSaveOpen()) {
-              throw IllegalStateException("Unexpected start of xml element: $name")
-            }
-            when (name) {
-              "data" -> {
-                element.getKeyName()?.let { keyName ->
-                  val entry = ResxEntry(keyName)
-                  currentEntry = entry
-                }
-              }
-
-              "value" -> {
-                if (currentEntry != null) {
-                  currentData = ""
-                  currentComment = null
-                }
-              }
-
-              "comment" -> {
-                if (currentEntry != null) {
-                  currentComment = ""
-                  currentData = null
-                }
-              }
-            }
-          }
-
-          event.isEndElement -> {
-            val element = event.asEndElement()
-            val name = element.name.localPart.lowercase()
-            when (name) {
-              "data" -> {
-                currentEntry?.let { yield(it) }
-                currentEntry = null
-                currentData = null
-                currentComment = null
-              }
-
-              "value" -> {
-                currentData?.let {
-                  currentEntry = currentEntry?.copy(data = it)
-                }
-                currentData = null
-              }
-
-              "comment" -> {
-                currentComment?.let {
-                  currentEntry = currentEntry?.copy(comment = it)
-                }
-                currentComment = null
-              }
-            }
-          }
+          event.isStartElement -> handleStartElement(event.asStartElement())
+          event.isEndElement -> handleEndElement(event.asEndElement())
         }
-
-        if (isAnyToContentSaveOpen() && wasAnyToContentSaveOpenBefore && event is Characters) {
-          val text = event.asCharacters().data
-          when {
-            currentData != null -> {
-              currentData += text
-            }
-            currentComment != null -> {
-              currentComment += text
-            }
-          }
-        }
+        handleText(event)
       }
     }
 
+  fun handleStartElement(element: StartElement) {
+    val name = element.name.localPart.lowercase()
+    if (isAnyToContentSaveOpen()) {
+      throw IllegalStateException("Unexpected start of xml element: $name")
+    }
+    when (name) {
+      "data" -> {
+        element.getKeyName()?.let {
+          currentEntry = ResxEntry(it)
+        }
+      }
+
+      "value" -> {
+        currentText = ""
+        curState = State.READING_VALUE
+      }
+
+      "comment" -> {
+        currentText = ""
+        curState = State.READING_COMMENT
+      }
+    }
+  }
+
+  suspend fun SequenceScope<ResxEntry>.handleEndElement(element: EndElement) {
+    val name = element.name.localPart.lowercase()
+    when (name) {
+      "data" -> {
+        currentEntry?.let { yield(it) }
+        currentEntry = null
+        currentText = ""
+        curState = null
+      }
+
+      "value" -> {
+        if (curState == State.READING_VALUE) {
+          currentEntry = currentEntry?.copy(data = currentText)
+        }
+        curState = null
+      }
+
+      "comment" -> {
+        if (curState == State.READING_COMMENT) {
+          currentEntry = currentEntry?.copy(comment = currentText)
+        }
+        curState = null
+      }
+    }
+  }
+
+  fun handleText(event: XMLEvent) {
+    if (!isAnyToContentSaveOpen() || event !is Characters) {
+      return
+    }
+    currentText += event.asCharacters().data
+  }
+
+  fun isAnyToContentSaveOpen(): Boolean = curState != null
+
   private fun StartElement.getKeyName() = getAttributeByName(QName(null, "name"))?.value
+
+  enum class State {
+    READING_VALUE,
+    READING_COMMENT,
+  }
 }
