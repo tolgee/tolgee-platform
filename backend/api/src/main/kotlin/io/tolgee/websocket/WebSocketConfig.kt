@@ -1,5 +1,6 @@
 package io.tolgee.websocket
 
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
@@ -49,29 +50,52 @@ class WebSocketConfig(
             accessor.user = if (tokenString == null) null else jwtService.validateToken(tokenString)
           }
 
+          val user = (accessor?.user as? TolgeeAuthentication)?.principal
+
           if (accessor?.command == StompCommand.SUBSCRIBE) {
-            val projectId =
-              accessor.destination?.let {
-                "/projects/([0-9]+)".toRegex().find(it)?.groupValues
-                  ?.getOrNull(1)?.toLong()
-              }
-
-            if (projectId != null) {
-              val user =
-                (accessor.user as? TolgeeAuthentication)?.principal
-                  ?: throw MessagingException("Unauthenticated")
-
-              try {
-                securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
-              } catch (e: Exception) {
-                throw MessagingException("Forbidden")
-              }
-            }
+            checkProjectPathPermissions(user, accessor.destination)
+            checkUserPathPermissions(user, accessor.destination)
           }
 
           return message
         }
       },
     )
+  }
+
+  fun checkProjectPathPermissions(
+    user: UserAccountDto?,
+    destination: String?,
+  ) {
+    val projectId =
+      destination?.let {
+        "/projects/([0-9]+)".toRegex().find(it)?.groupValues
+          ?.getOrNull(1)?.toLong()
+      } ?: return
+
+    if (user == null) {
+      throw MessagingException("Unauthenticated")
+    }
+
+    try {
+      securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
+    } catch (e: Exception) {
+      throw MessagingException("Forbidden")
+    }
+  }
+
+  fun checkUserPathPermissions(
+    user: UserAccountDto?,
+    destination: String?,
+  ) {
+    val userId =
+      destination?.let {
+        "/user/([0-9]+)".toRegex().find(it)?.groupValues
+          ?.getOrNull(1)?.toLong()
+      } ?: return
+
+    if (user?.id != userId) {
+      throw MessagingException("Forbidden")
+    }
   }
 }
