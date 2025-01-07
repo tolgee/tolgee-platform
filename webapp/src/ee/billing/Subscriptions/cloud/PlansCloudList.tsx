@@ -1,17 +1,12 @@
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-
-import { PlanAction } from './CloudPlanAction';
 import { PlanType } from '../../component/Plan/types';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
-import {
-  excludePreviousPlanFeatures,
-  planIsPeriodDependant,
-} from '../../component/Plan/plansTools';
 import { FreePlan } from '../../component/Plan/FreePlan';
-import { Plan } from '../../component/Plan/Plan';
-import { AllFromPlanFeature } from '../../component/Plan/AllFromPlanFeature';
+import { useCloudPlans } from './useCloudPlans';
+import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
+import { CloudPlanItem } from './CloudPlanItem';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
@@ -20,63 +15,24 @@ const StyledFreePlanWrapper = styled('div')`
 `;
 
 type BillingPlansProps = {
-  plans: PlanType[];
   activeSubscription: CloudSubscriptionModel;
   period: BillingPeriodType;
   onPeriodChange: (period: BillingPeriodType) => void;
 };
 
 export const PlansCloudList: React.FC<BillingPlansProps> = ({
-  plans,
   activeSubscription,
   period,
   onPeriodChange,
 }) => {
-  const defaultPlan = plans.find((p) => p.free && p.public);
-  const publicPlans = plans.filter((p) => p !== defaultPlan && p.public);
-  const customPlans = plans.filter((p) => !p.public);
-
-  // add enterprise plan
-  publicPlans.push({
-    id: -1,
-    type: 'CONTACT_US',
-    name: 'Enterprise',
-    enabledFeatures: [
-      'ACCOUNT_MANAGER',
-      'AI_PROMPT_CUSTOMIZATION',
-      'DEDICATED_SLACK_CHANNEL',
-      'SLACK_INTEGRATION',
-      'GRANULAR_PERMISSIONS',
-      'MULTIPLE_CONTENT_DELIVERY_CONFIGS',
-      'PREMIUM_SUPPORT',
-      'PRIORITIZED_FEATURE_REQUESTS',
-      'PROJECT_LEVEL_CONTENT_STORAGES',
-      'STANDARD_SUPPORT',
-      'WEBHOOKS',
-      'TASKS',
-      'ORDER_TRANSLATION',
-      'SSO',
-    ] as const satisfies PlanType['enabledFeatures'],
-    free: false,
-    hasYearlyPrice: false,
-    public: true,
-    nonCommercial: false,
-  });
-
-  const parentForPublic: PlanType[] = [];
-  const parentForCustom: PlanType[] = [];
-  if (defaultPlan) {
-    parentForPublic.push(defaultPlan);
-    parentForCustom.push(defaultPlan);
-  }
-  publicPlans.forEach((p) => parentForCustom.push(p));
+  const { defaultPlan, plans } = useCloudPlans();
 
   function isActive(plan: PlanType) {
     const planPeriod = plan.free ? undefined : period;
     return (
       activeSubscription.plan.id === plan.id &&
       (activeSubscription.currentBillingPeriod === planPeriod ||
-        !planIsPeriodDependant(plan.prices))
+        !isPlanPeriodDependant(plan.prices))
     );
   }
 
@@ -84,22 +40,9 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
     return isActive(plan) && activeSubscription.cancelAtPeriodEnd;
   }
 
-  const combinedPlans = [
-    ...customPlans.map((plan) => ({
-      plan,
-      custom: true,
-      ...excludePreviousPlanFeatures(plan, parentForCustom),
-    })),
-    ...publicPlans.map((plan) => {
-      const featuresInfo = excludePreviousPlanFeatures(plan, parentForPublic);
-      parentForPublic.push(plan);
-      return {
-        plan,
-        custom: false,
-        ...featuresInfo,
-      };
-    }),
-  ];
+  if (!plans || !activeSubscription) {
+    return null;
+  }
 
   return (
     <>
@@ -112,41 +55,17 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
           />
         </StyledFreePlanWrapper>
       )}
-      {combinedPlans.map((info) => {
-        const { filteredFeatures, previousPlanName, plan, custom } = info;
-
-        const parentPlan = previousPlanName;
+      {plans.map((info) => {
         return (
-          activeSubscription && (
-            <Plan
-              key={plan.id}
-              plan={plan}
-              active={isActive(plan)}
-              ended={isEnded(plan)}
-              onPeriodChange={onPeriodChange}
-              period={period}
-              filteredFeatures={filteredFeatures}
-              featuresMinHeight="155px"
-              custom={custom}
-              nonCommercial={plan.nonCommercial}
-              topFeature={
-                parentPlan && <AllFromPlanFeature planName={parentPlan} />
-              }
-              action={
-                <PlanAction
-                  active={isActive(plan)}
-                  ended={isEnded(plan)}
-                  custom={custom}
-                  show={!plan.free}
-                  organizationHasSomeSubscription={
-                    !activeSubscription.plan.free
-                  }
-                  period={period}
-                  planId={plan.id}
-                />
-              }
-            />
-          )
+          <CloudPlanItem
+            activeSubscription={activeSubscription}
+            key={info.plan.id}
+            info={info}
+            active={isActive(info.plan)}
+            ended={isEnded(info.plan)}
+            onPeriodChange={onPeriodChange}
+            period={period}
+          />
         );
       })}
     </>

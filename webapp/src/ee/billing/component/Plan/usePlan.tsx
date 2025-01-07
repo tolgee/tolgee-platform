@@ -14,7 +14,6 @@ type Props = {
 export const usePlan = ({ planId, period }: Props) => {
   const organization = useOrganization();
   const messaging = useMessage();
-  const { refetchInitialData } = useGlobalActions();
 
   const onPrepareUpgrade = () => {
     prepareUpgradeMutation.mutate({
@@ -71,32 +70,10 @@ export const usePlan = ({ planId, period }: Props) => {
     method: 'post',
   });
 
-  const cancelMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/cancel-subscription',
-    method: 'put',
-    invalidatePrefix: '/',
-  });
-
-  const onCancel = () => {
-    cancelMutation.mutate(
-      { path: { organizationId: organization!.id } },
-      {
-        onSuccess() {
-          refetchInitialData();
-          messaging.success(
-            <T keyName="billing_plan_cancel_success_message" />
-          );
-        },
-      }
-    );
-  };
-
   return {
     onPrepareUpgrade,
     prepareUpgradeMutation,
     onSubscribe,
     subscribeMutation,
-    onCancel,
-    cancelMutation,
   };
 };

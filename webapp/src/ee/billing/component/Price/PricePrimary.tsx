@@ -4,7 +4,7 @@ import { useMoneyFormatter } from 'tg.hooks/useLocale';
 
 import { BillingPeriodType } from './PeriodSwitch';
 import { PlanType } from '../Plan/types';
-import { planIsPeriodDependant } from '../Plan/plansTools';
+import { isPlanPeriodDependant } from '../Plan/plansTools';
 
 type PlanPricesModel = NonNullable<PlanType['prices']>;
 
@@ -34,7 +34,7 @@ export const PricePrimary = ({
   const { subscriptionMonthly, subscriptionYearly } = prices;
   const formatMoney = useMoneyFormatter();
 
-  const needsPeriodSwitch = planIsPeriodDependant(prices);
+  const needsPeriodSwitch = isPlanPeriodDependant(prices);
 
   const subscriptionPrice =
     period === 'MONTHLY' ? subscriptionMonthly : subscriptionYearly / 12;

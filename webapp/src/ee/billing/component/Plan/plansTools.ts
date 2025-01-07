@@ -34,7 +34,7 @@ export function isPlanLegacy(plan: PlanType) {
   return slots !== undefined && slots !== -1;
 }
 
-export function planIsPeriodDependant(prices: PlanType['prices'] | undefined) {
+export function isPlanPeriodDependant(prices: PlanType['prices'] | undefined) {
   return (
     prices && Boolean(prices.subscriptionYearly || prices.subscriptionMonthly)
   );
