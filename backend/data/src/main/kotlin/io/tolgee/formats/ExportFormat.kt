@@ -42,4 +42,5 @@ enum class ExportFormat(
   JSON_I18NEXT("json", "application/json"),
   CSV("csv", "text/csv"),
   RESX_ICU("resx", "text/microsoft-resx"),
+  XLSX("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
 }
