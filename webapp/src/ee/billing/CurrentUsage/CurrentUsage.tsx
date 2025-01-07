@@ -65,6 +65,7 @@ export const CurrentUsage: FC<Props> = ({ activeSubscription, usage }) => {
         </StyledBillingSectionTitle>
         <StyledBillingSectionSubtitle>
           {activeSubscription.plan.name}
+
           {Boolean(usage.extraCreditBalance) && (
             <StyledBillingSectionSubtitleSmall>
               {' '}

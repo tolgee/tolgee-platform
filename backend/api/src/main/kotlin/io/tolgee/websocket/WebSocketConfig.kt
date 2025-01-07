@@ -56,11 +56,20 @@ class WebSocketConfig(
                   ?.getOrNull(1)?.toLong()
               }
 
-            if (projectId != null) {
-              val user =
-                (accessor.user as? TolgeeAuthentication)?.principal
-                  ?: throw MessagingException("Unauthenticated")
+            val userId = accessor.destination?.let {
+              "/user/([0-9]+)".toRegex().find(it)?.groupValues
+                ?.getOrNull(1)?.toLong()
+            }
 
+            val user =
+              (accessor.user as? TolgeeAuthentication)?.principal
+                ?: throw MessagingException("Unauthenticated")
+
+            if (userId != null && user.id != userId) {
+              throw MessagingException("Forbidden")
+            }
+
+            if (projectId != null) {
               try {
                 securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
               } catch (e: Exception) {
