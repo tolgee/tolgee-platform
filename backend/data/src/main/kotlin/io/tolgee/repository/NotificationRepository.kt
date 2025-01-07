@@ -21,7 +21,5 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      ORDER BY n.id DESC
     """,
   )
-  fun fetchNotificationsByUserId(
-    userId: Long,
-  ): List<Notification>
+  fun fetchNotificationsByUserId(userId: Long): List<Notification>
 }

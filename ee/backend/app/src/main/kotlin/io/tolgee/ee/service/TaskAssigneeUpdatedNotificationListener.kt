@@ -18,8 +18,9 @@ class TaskAssigneeUpdatedNotificationListener(
   fun onTaskAssigneeChange(event: OnEntityPreUpdate) {
     val entity = event.entity
 
-    if (entity !is Task)
+    if (entity !is Task) {
       return
+    }
 
     getNewAssignees(event, entity).forEach {
       notificationRepository.save(
@@ -28,12 +29,15 @@ class TaskAssigneeUpdatedNotificationListener(
           linkedTask = entity,
           originatingUser = entity.author,
           project = entity.project,
-        )
+        ),
       )
     }
   }
 
-  private fun getNewAssignees(event: OnEntityPreUpdate, entity: Task) : List<UserAccount> {
+  private fun getNewAssignees(
+    event: OnEntityPreUpdate,
+    entity: Task,
+  ): List<UserAccount> {
     val assigneesIndex = event.propertyNames?.indexOf("assignees")
 
     if (assigneesIndex == null || assigneesIndex == -1) {

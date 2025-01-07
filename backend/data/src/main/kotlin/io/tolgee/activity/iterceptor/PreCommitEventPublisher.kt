@@ -15,7 +15,7 @@ class PreCommitEventPublisher(private val applicationContext: ApplicationContext
   fun onUpdate(
     entity: Any?,
     previousState: Array<out Any>?,
-    propertyNames: Array<out String>?
+    propertyNames: Array<out String>?,
   ) {
     applicationContext.publishEvent(OnEntityPreUpdate(this, entity, previousState, propertyNames))
   }
