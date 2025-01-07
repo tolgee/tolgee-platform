@@ -2,7 +2,6 @@ package io.tolgee.model
 
 import io.tolgee.model.task.Task
 import jakarta.persistence.*
-import java.util.*
 
 @Entity
 @Table(
@@ -10,17 +9,16 @@ import java.util.*
     Index(columnList = "user_id"),
   ],
 )
-class Notification(
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long = 0L,
+class Notification : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
-  var user: UserAccount,
-  var createdAt: Date = Date(),
+  lateinit var user: UserAccount
+
   @ManyToOne(fetch = FetchType.LAZY)
-  var project: Project? = null,
+  var project: Project? = null
+
   @ManyToOne(fetch = FetchType.LAZY)
-  var originatingUser: UserAccount? = null,
+  var originatingUser: UserAccount? = null
+
   @ManyToOne(fetch = FetchType.LAZY)
-  var linkedTask: Task? = null,
-)
+  var linkedTask: Task? = null
+}

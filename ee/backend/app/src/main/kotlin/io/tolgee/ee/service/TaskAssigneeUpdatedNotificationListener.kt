@@ -24,12 +24,12 @@ class TaskAssigneeUpdatedNotificationListener(
 
     getNewAssignees(event, entity).forEach {
       notificationRepository.save(
-        Notification(
-          user = it,
-          linkedTask = entity,
-          originatingUser = entity.author,
-          project = entity.project,
-        ),
+        Notification().apply {
+          user = it
+          linkedTask = entity
+          originatingUser = entity.author
+          project = entity.project
+        },
       )
     }
   }
