@@ -28,6 +28,7 @@ import { ThemeProvider } from './ThemeProvider';
 import reportWebVitals from './reportWebVitals';
 import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
+import { GlobalStyles } from './GlobalStyles';
 import { branchName } from './branch.json';
 
 function getFeatureName(branch: string) {
@@ -74,9 +75,13 @@ const MainWrapper = () => {
                 <QueryClientProvider client={queryClient}>
                   {/* @ts-ignore */}
                   <ErrorBoundary>
-                    <SnackbarProvider data-cy="global-snackbars">
+                    <SnackbarProvider
+                      data-cy="global-snackbars"
+                      anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+                    >
                       <GlobalContext>
                         <BottomPanelProvider>
+                          <GlobalStyles />
                           <MuiLocalizationProvider>
                             <App />
                             <GlobalErrorModal />
