@@ -1,8 +1,7 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
-import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.allPluralKeywords
-import io.tolgee.formats.getULocaleFromTag
+import io.tolgee.formats.getPluralFormsForLocaleOrAll
 import io.tolgee.formats.importCommon.ParsedPluralsKey
 import io.tolgee.formats.importCommon.PluralsKeyParser
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -79,11 +78,6 @@ class GenericSuffixedPluralsPreprocessor(
   }
 
   private val pluralKeywords by lazy {
-    try {
-      val locale = getULocaleFromTag(languageTag)
-      PluralRules.forLocale(locale)?.keywords?.toList() ?: allPluralKeywords
-    } catch (_: Exception) {
-      allPluralKeywords
-    }
+    getPluralFormsForLocaleOrAll(languageTag)
   }
 }
