@@ -4803,12 +4803,13 @@ export interface components {
       id: number;
       /** Format: int64 */
       projectId?: number;
-      /** Format: int64 */
-      linkedTaskNumber?: number;
-      linkedTaskName?: string;
+      linkedTask?: components["schemas"]["TaskModel"];
     };
-    NotificationsResponse: {
-      notifications: components["schemas"]["NotificationModel"][];
+    PagedModelNotificationModel: {
+      _embedded?: {
+        notificationModelList?: components["schemas"]["NotificationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     ApiKeyWithLanguagesModel: {
       /**
@@ -18060,11 +18061,21 @@ export interface operations {
     };
   };
   getNotifications: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["NotificationsResponse"];
+          "application/json": components["schemas"]["PagedModelNotificationModel"];
         };
       };
       /** Bad Request */

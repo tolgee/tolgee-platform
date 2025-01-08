@@ -44,7 +44,8 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const notifications = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
-  }).data?.notifications;
+    query: { size: 10000 },
+  }).data?._embedded?.notificationModelList;
 
   return (
     <>
@@ -81,13 +82,13 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               onClick={() => {
                 handleClose();
                 history.push(
-                  `/projects/${notification.projectId}/task?number=${notification.linkedTaskNumber}`
+                  `/projects/${notification.projectId}/task?number=${notification.linkedTask?.number}`
                 );
               }}
             >
               <T
                 keyName="notifications-task-assigned"
-                params={{ taskName: notification.linkedTaskName }}
+                params={{ taskName: notification.linkedTask?.name }}
               />
             </ListItemButton>
           ))}

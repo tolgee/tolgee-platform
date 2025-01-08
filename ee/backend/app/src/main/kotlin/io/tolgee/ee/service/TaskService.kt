@@ -468,6 +468,11 @@ class TaskService(
     }
   }
 
+  fun getTasksWithScope(taskIds: List<Long>): List<TaskWithScopeView> {
+    val tasks = taskRepository.findAllById(taskIds)
+    return getTasksWithScope(tasks)
+  }
+
   private fun getTasksWithScope(tasks: Collection<Task>): List<TaskWithScopeView> {
     val scopes = taskRepository.getTasksScopes(tasks)
     return tasks.map { task ->
