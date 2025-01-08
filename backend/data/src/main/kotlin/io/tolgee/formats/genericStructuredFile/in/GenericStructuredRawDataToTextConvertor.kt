@@ -77,7 +77,7 @@ class GenericStructuredRawDataToTextConvertor(
       return null
     }
 
-    if (!map.keys.all { it in pluralKeywords }) {
+    if (!map.keys.all { it in allPluralKeywords }) {
       return null
     }
 

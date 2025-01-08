@@ -40,7 +40,7 @@ class GenericSuffixedPluralsPreprocessor(
   private fun Any?.parsePluralsKey(keyParser: PluralsKeyParser): ParsedPluralsKey? {
     val key = this as? String ?: return null
     return keyParser.parse(key).takeIf {
-      it.key != null && it.plural in pluralKeywords
+      it.key != null && it.plural in allPluralKeywords
     } ?: ParsedPluralsKey(null, null, key)
   }
 
