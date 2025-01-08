@@ -75,23 +75,26 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         }}
       >
         <List>
-          {notifications?.map((notification, i) => (
-            <ListItemButton
-              key={notification.id}
-              divider={i !== notifications.length - 1}
-              onClick={() => {
-                handleClose();
-                history.push(
-                  `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`
-                );
-              }}
-            >
-              <T
-                keyName="notifications-task-assigned"
-                params={{ taskName: notification.linkedTask?.name }}
-              />
-            </ListItemButton>
-          ))}
+          {notifications?.map((notification, i) => {
+            const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
+            return (
+              <ListItemButton
+                key={notification.id}
+                divider={i !== notifications.length - 1}
+                href={destinationUrl}
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleClose();
+                  history.push(destinationUrl);
+                }}
+              >
+                <T
+                  keyName="notifications-task-assigned"
+                  params={{ taskName: notification.linkedTask?.name }}
+                />
+              </ListItemButton>
+            );
+          })}
           {notifications?.length === 0 && (
             <ListItem>
               <T keyName="notifications-empty" />
