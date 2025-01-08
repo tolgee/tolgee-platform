@@ -23,5 +23,8 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      ORDER BY n.id DESC
     """,
   )
-  fun fetchNotificationsByUserId(userId: Long, pageable: Pageable): Page<Notification>
+  fun fetchNotificationsByUserId(
+    userId: Long,
+    pageable: Pageable,
+  ): Page<Notification>
 }

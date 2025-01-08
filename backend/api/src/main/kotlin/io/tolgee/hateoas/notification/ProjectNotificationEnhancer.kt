@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class ProjectNotificationEnhancer(
   private val projectService: ProjectService,
-  private val simpleProjectModelAssembler: SimpleProjectModelAssembler
+  private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
 ) : NotificationEnhancer {
   override fun enhanceNotifications(notifications: Collection<Pair<Notification, NotificationModel>>) {
     val projectIds = notifications.mapNotNull { it.first.project?.id }.distinct()
