@@ -216,6 +216,15 @@ enum class ImportFormat(
     messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
   ),
 
+  RESX_ICU(
+    ImportFileFormat.RESX,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
+
   ;
 
   val messageConvertor: ImportMessageConvertor

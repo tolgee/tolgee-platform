@@ -254,6 +254,17 @@ export const formatGroups: FormatGroup[] = [
       },
     ],
   },
+  {
+    name: '.NET',
+    formats: [
+      {
+        id: 'resx_icu',
+        extension: 'resx',
+        name: <T keyName="export-format-resx-xml" />,
+        format: 'RESX_ICU',
+      },
+    ],
+  },
 ];
 
 type ExportParamsWithoutZip = Omit<

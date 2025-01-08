@@ -343,6 +343,12 @@ export interface paths {
     /** Pairs user account with slack account. */
     post: operations["userLogin"];
   };
+  "/v2/public/translator/translate": {
+    post: operations["translate"];
+  };
+  "/v2/public/telemetry/report": {
+    post: operations["report"];
+  };
   "/v2/public/slack": {
     post: operations["slackCommand"];
   };
@@ -358,8 +364,26 @@ export interface paths {
      */
     post: operations["fetchBotEvent"];
   };
+  "/v2/public/licensing/subscription": {
+    post: operations["getMySubscription"];
+  };
+  "/v2/public/licensing/set-key": {
+    post: operations["onLicenceSetKey"];
+  };
+  "/v2/public/licensing/report-usage": {
+    post: operations["reportUsage"];
+  };
+  "/v2/public/licensing/report-error": {
+    post: operations["reportError"];
+  };
+  "/v2/public/licensing/release-key": {
+    post: operations["releaseKey"];
+  };
+  "/v2/public/licensing/prepare-set-key": {
+    post: operations["prepareSetLicenseKey"];
+  };
   "/v2/public/business-events/report": {
-    post: operations["report"];
+    post: operations["report_1"];
   };
   "/v2/public/business-events/identify": {
     post: operations["identify"];
@@ -438,7 +462,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm": {
     /** Pre-translate provided keys to provided languages by TM. */
-    post: operations["translate"];
+    post: operations["translate_1"];
   };
   "/v2/projects/{projectId}/start-batch-job/machine-translate": {
     /** Translate provided keys to provided languages through primary MT provider. */
@@ -524,7 +548,7 @@ export interface paths {
   };
   "/v2/ee-license/prepare-set-license-key": {
     /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-    post: operations["prepareSetLicenseKey"];
+    post: operations["prepareSetLicenseKey_1"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
@@ -1207,23 +1231,10 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
+      viewLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1259,10 +1270,23 @@ export interface components {
         | "tasks.edit"
       )[];
       /**
-       * @description List of languages user can view. If null, all languages view is permitted.
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        * @example 200001,200004
        */
-      viewLanguageIds?: number[];
+      permittedLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1911,6 +1935,7 @@ export interface components {
       invitedUserName?: string;
       invitedUserEmail?: string;
       permission: components["schemas"]["PermissionWithAgencyModel"];
+      createdBy?: components["schemas"]["SimpleUserAccountModel"];
     };
     AzureContentStorageConfigDto: {
       connectionString?: string;
@@ -1928,8 +1953,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      enabled?: boolean;
       contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -1992,7 +2017,8 @@ export interface components {
         | "YAML_RUBY"
         | "YAML"
         | "JSON_I18NEXT"
-        | "CSV";
+        | "CSV"
+        | "RESX_ICU";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2094,7 +2120,8 @@ export interface components {
         | "YAML_RUBY"
         | "YAML"
         | "JSON_I18NEXT"
-        | "CSV";
+        | "CSV"
+        | "RESX_ICU";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2206,12 +2233,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2368,13 +2395,13 @@ export interface components {
     };
     RevealedPatModel: {
       token: string;
-      description: string;
       /** Format: int64 */
       id: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -2442,6 +2469,7 @@ export interface components {
       createdAt: string;
       invitedUserName?: string;
       invitedUserEmail?: string;
+      createdBy?: components["schemas"]["SimpleUserAccountModel"];
     };
     SetLicenseKeyDto: {
       licenseKey: string;
@@ -2535,19 +2563,19 @@ export interface components {
     RevealedApiKeyModel: {
       /** @description Resulting user's api key */
       key: string;
-      description: string;
       /** Format: int64 */
       id: number;
+      userFullName?: string;
       projectName: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
+      username?: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
-      username?: string;
-      userFullName?: string;
+      description: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2558,6 +2586,49 @@ export interface components {
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
+    };
+    ExampleItem: {
+      source: string;
+      target: string;
+      key: string;
+      keyNamespace?: string;
+    };
+    Metadata: {
+      examples: components["schemas"]["ExampleItem"][];
+      closeItems: components["schemas"]["ExampleItem"][];
+      keyDescription?: string;
+      projectDescription?: string;
+      languageDescription?: string;
+    };
+    TolgeeTranslateParams: {
+      text: string;
+      keyName?: string;
+      sourceTag: string;
+      targetTag: string;
+      metadata?: components["schemas"]["Metadata"];
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      pluralForms?: { [key: string]: string };
+      pluralFormExamples?: { [key: string]: string };
+    };
+    MtResult: {
+      translated?: string;
+      /** Format: int32 */
+      price: number;
+      contextDescription?: string;
+    };
+    TelemetryReportRequest: {
+      instanceId: string;
+      /** Format: int64 */
+      projectsCount: number;
+      /** Format: int64 */
+      translationsCount: number;
+      /** Format: int64 */
+      languagesCount: number;
+      /** Format: int64 */
+      distinctLanguagesCount: number;
+      /** Format: int64 */
+      usersCount: number;
     };
     SlackCommandDto: {
       token?: string;
@@ -2570,6 +2641,130 @@ export interface components {
       text: string;
       trigger_id?: string;
       team_domain: string;
+    };
+    GetMySubscriptionDto: {
+      licenseKey: string;
+      instanceId: string;
+    };
+    PlanIncludedUsageModel: {
+      /** Format: int64 */
+      seats: number;
+      /** Format: int64 */
+      translationSlots: number;
+      /** Format: int64 */
+      translations: number;
+      /** Format: int64 */
+      mtCredits: number;
+    };
+    PlanPricesModel: {
+      perSeat: number;
+      perThousandTranslations?: number;
+      perThousandMtCredits?: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
+    };
+    SelfHostedEePlanModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      public: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+      )[];
+      prices: components["schemas"]["PlanPricesModel"];
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      hasYearlyPrice: boolean;
+      free: boolean;
+      nonCommercial: boolean;
+    };
+    SelfHostedEeSubscriptionModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      currentPeriodStart?: number;
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
+      /** Format: int64 */
+      createdAt: number;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      licenseKey?: string;
+      estimatedCosts?: number;
+    };
+    SetLicenseKeyLicensingDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+      instanceId: string;
+    };
+    ReportUsageDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
+    ReportErrorDto: {
+      stackTrace: string;
+      licenseKey: string;
+    };
+    ReleaseKeyDto: {
+      licenseKey: string;
+    };
+    PrepareSetLicenseKeyDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
+    AverageProportionalUsageItemModel: {
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    PrepareSetEeLicenceKeyModel: {
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      usage: components["schemas"]["UsageModel"];
+    };
+    SumUsageItemModel: {
+      total: number;
+      /** Format: int64 */
+      unusedQuantity: number;
+      /** Format: int64 */
+      usedQuantity: number;
+      /** Format: int64 */
+      usedQuantityOverPlan: number;
+    };
+    UsageModel: {
+      subscriptionPrice?: number;
+      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
+      appliedStripeCredits?: number;
+      seats: components["schemas"]["AverageProportionalUsageItemModel"];
+      translations: components["schemas"]["AverageProportionalUsageItemModel"];
+      credits?: components["schemas"]["SumUsageItemModel"];
+      total: number;
     };
     BusinessEventReportRequest: {
       eventName: string;
@@ -3138,7 +3333,8 @@ export interface components {
         | "XLIFF_ICU"
         | "XLIFF_JAVA"
         | "XLIFF_PHP"
-        | "XLIFF_RUBY";
+        | "XLIFF_RUBY"
+        | "RESX_ICU";
       /**
        * @description The existing language tag in the Tolgee platform to which the imported language should be mapped.
        *
@@ -3274,7 +3470,8 @@ export interface components {
         | "YAML_RUBY"
         | "YAML"
         | "JSON_I18NEXT"
-        | "CSV";
+        | "CSV"
+        | "RESX_ICU";
       /**
        * @description Delimiter to structure file content.
        *
@@ -3445,82 +3642,6 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
       location?: string;
-    };
-    AverageProportionalUsageItemModel: {
-      total: number;
-      unusedQuantity: number;
-      usedQuantity: number;
-      usedQuantityOverPlan: number;
-    };
-    PlanIncludedUsageModel: {
-      /** Format: int64 */
-      seats: number;
-      /** Format: int64 */
-      translationSlots: number;
-      /** Format: int64 */
-      translations: number;
-      /** Format: int64 */
-      mtCredits: number;
-    };
-    PlanPricesModel: {
-      perSeat: number;
-      perThousandTranslations?: number;
-      perThousandMtCredits?: number;
-      subscriptionMonthly: number;
-      subscriptionYearly: number;
-    };
-    PrepareSetEeLicenceKeyModel: {
-      plan: components["schemas"]["SelfHostedEePlanModel"];
-      usage: components["schemas"]["UsageModel"];
-    };
-    SelfHostedEePlanModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      public: boolean;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "WEBHOOKS"
-        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
-        | "AI_PROMPT_CUSTOMIZATION"
-        | "SLACK_INTEGRATION"
-        | "TASKS"
-        | "SSO"
-        | "ORDER_TRANSLATION"
-      )[];
-      prices: components["schemas"]["PlanPricesModel"];
-      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
-      hasYearlyPrice: boolean;
-      free: boolean;
-      nonCommercial: boolean;
-    };
-    SumUsageItemModel: {
-      total: number;
-      /** Format: int64 */
-      unusedQuantity: number;
-      /** Format: int64 */
-      usedQuantity: number;
-      /** Format: int64 */
-      usedQuantityOverPlan: number;
-    };
-    UsageModel: {
-      subscriptionPrice?: number;
-      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
-      appliedStripeCredits?: number;
-      seats: components["schemas"]["AverageProportionalUsageItemModel"];
-      translations: components["schemas"]["AverageProportionalUsageItemModel"];
-      credits?: components["schemas"]["SumUsageItemModel"];
-      total: number;
     };
     CreateApiKeyDto: {
       /** Format: int64 */
@@ -3749,15 +3870,10 @@ export interface components {
         | "ORDER_TRANSLATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example btforg */
-      slug: string;
       basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
@@ -3765,6 +3881,11 @@ export interface components {
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
+      /** @example btforg */
+      slug: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3834,15 +3955,16 @@ export interface components {
         | "YAML_RUBY"
         | "YAML"
         | "JSON_I18NEXT"
-        | "CSV";
+        | "CSV"
+        | "RESX_ICU";
       extension: string;
       mediaType: string;
       defaultFileStructureTemplate: string;
     };
     DocItem: {
-      description?: string;
       name: string;
       displayName?: string;
+      description?: string;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -3937,23 +4059,23 @@ export interface components {
       formalitySupported: boolean;
     };
     KeySearchResultView: {
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
       baseTranslation?: string;
+      translation?: string;
+      description?: string;
+      namespace?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
-      description?: string;
       name: string;
       /** Format: int64 */
       id: number;
-      translation?: string;
-      namespace?: string;
       baseTranslation?: string;
+      translation?: string;
+      description?: string;
+      namespace?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4552,13 +4674,13 @@ export interface components {
     };
     PatWithUserModel: {
       user: components["schemas"]["SimpleUserAccountModel"];
-      description: string;
       /** Format: int64 */
       id: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
+      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -4679,19 +4801,19 @@ export interface components {
        * @description Languages for which user has translate permission.
        */
       permittedLanguageIds?: number[];
-      description: string;
       /** Format: int64 */
       id: number;
+      userFullName?: string;
       projectName: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
+      username?: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
-      username?: string;
-      userFullName?: string;
+      description: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -10497,6 +10619,96 @@ export interface operations {
       };
     };
   };
+  translate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["MtResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TolgeeTranslateParams"];
+      };
+    };
+  };
+  report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TelemetryReportRequest"];
+      };
+    };
+  };
   slackCommand: {
     parameters: {
       header: {
@@ -10661,7 +10873,277 @@ export interface operations {
       };
     };
   };
-  report: {
+  getMySubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetMySubscriptionDto"];
+      };
+    };
+  };
+  onLicenceSetKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
+      };
+    };
+  };
+  reportUsage: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportUsageDto"];
+      };
+    };
+  };
+  reportError: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportErrorDto"];
+      };
+    };
+  };
+  releaseKey: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReleaseKeyDto"];
+      };
+    };
+  };
+  prepareSetLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
+      };
+    };
+  };
+  report_1: {
     responses: {
       /** OK */
       200: unknown;
@@ -12160,7 +12642,7 @@ export interface operations {
     };
   };
   /** Pre-translate provided keys to provided languages by TM. */
-  translate: {
+  translate_1: {
     parameters: {
       path: {
         projectId: number;
@@ -12602,7 +13084,8 @@ export interface operations {
           | "YAML_RUBY"
           | "YAML"
           | "JSON_I18NEXT"
-          | "CSV";
+          | "CSV"
+          | "RESX_ICU";
         /**
          * Delimiter to structure file content.
          *
@@ -13679,7 +14162,7 @@ export interface operations {
     };
   };
   /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-  prepareSetLicenseKey: {
+  prepareSetLicenseKey_1: {
     responses: {
       /** OK */
       200: {
