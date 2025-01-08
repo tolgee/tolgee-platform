@@ -1,4 +1,8 @@
-FROM tolgee/base:jdk-21-postgres-13
+FROM postgres:13.18-alpine3.21
+
+ENTRYPOINT []
+
+RUN apk --no-cache add openjdk21
 
 #############
 ### Tolgee  #
@@ -18,13 +22,15 @@ ENV HEALTHCHECK_PORT=8080 \
 COPY BOOT-INF/lib /app/lib
 COPY META-INF /app/META-INF
 COPY BOOT-INF/classes /app
+COPY --chmod=755 cmd.sh /app
 
 #################
 ### Let's go   ##
 #################
 
 # Define the startup command
-CMD ["java", "-cp", "app:app/lib/*", "io.tolgee.Application"]
+ENTRYPOINT ["/app/cmd.sh"]
+
 
 # Health check to ensure the app is up and running
 HEALTHCHECK --interval=10s --timeout=3s --retries=20 \

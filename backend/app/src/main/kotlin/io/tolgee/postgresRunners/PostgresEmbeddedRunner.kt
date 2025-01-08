@@ -45,7 +45,7 @@ class PostgresEmbeddedRunner(
   private fun buildProcess(): ProcessBuilder {
     val processBuilder =
       ProcessBuilder()
-        .command("bash", "-c", "postgres-entrypoint.sh postgres")
+        .command("bash", "-c", "docker-entrypoint.sh postgres")
 
     initProcessEnv(processBuilder)
     return processBuilder

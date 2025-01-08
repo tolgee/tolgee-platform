@@ -66,8 +66,8 @@ jobs:
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
           docker buildx create --use
-          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
-          docker buildx build . -t tolgee/tolgee:latest --platform linux/arm64,linux/amd64 --push
+          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --push
+          docker buildx build . -t tolgee/tolgee:latest --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --push
         working-directory: build/docker
 
       - name: Pack with webapp
