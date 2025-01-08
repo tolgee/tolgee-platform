@@ -15,7 +15,11 @@ task copyDist(type: Copy) {
 
 task installWebappDeps(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
-    commandLine npmCommandName, "ci"
+    try {
+        commandLine npmCommandName, "ci"
+    } catch (ignored) {
+        commandLine npmCommandName, "ci"
+    }
     workingDir = webappPath
     inputs.file("${project.projectDir}/webapp/package.json")
     inputs.file("${project.projectDir}/webapp/package-lock.json")

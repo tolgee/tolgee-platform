@@ -78,7 +78,11 @@ task installE2eDeps(type: Exec, group: "e2e") {
     inputs.file("$E2E_DIR/package-lock.json")
     outputs.dir("$E2E_DIR/node_modules")
 
-    commandLine npmCommandName, "install"
+    try {
+        commandLine npmCommandName, "install"
+    } catch (ignored) {
+        commandLine npmCommandName, "install"
+    }
     workingDir E2E_DIR
 }
 
