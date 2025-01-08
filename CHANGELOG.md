@@ -1,3 +1,10 @@
+# [3.92.0](https://github.com/tolgee/tolgee-platform/compare/v3.91.0...v3.92.0) (2025-01-08)
+
+
+### Features
+
+* import and export in dotnet resx format ([#2803](https://github.com/tolgee/tolgee-platform/issues/2803)) ([c414b29](https://github.com/tolgee/tolgee-platform/commit/c414b293a9f1d6f87152e19652382f943cf48440))
+
 # [3.91.0](https://github.com/tolgee/tolgee-platform/compare/v3.90.2...v3.91.0) (2025-01-07)
 
 
