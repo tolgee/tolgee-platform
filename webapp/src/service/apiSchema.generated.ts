@@ -4801,8 +4801,7 @@ export interface components {
     NotificationModel: {
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      projectId?: number;
+      project?: components["schemas"]["SimpleProjectModel"];
       linkedTask?: components["schemas"]["TaskModel"];
     };
     PagedModelNotificationModel: {
