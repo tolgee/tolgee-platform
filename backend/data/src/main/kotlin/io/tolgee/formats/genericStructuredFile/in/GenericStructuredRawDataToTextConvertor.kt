@@ -1,7 +1,9 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
+import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.allPluralKeywords
+import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.importCommon.unwrapString
 
@@ -75,11 +77,11 @@ class GenericStructuredRawDataToTextConvertor(
       return null
     }
 
-    if (!map.keys.all { it in allPluralKeywords }) {
+    if (!map.keys.all { it in pluralKeywords }) {
       return null
     }
 
-    if (map.size < 2) {
+    if (map.size < pluralKeywords.size && map.size < 2) {
       return null
     }
 
@@ -99,5 +101,14 @@ class GenericStructuredRawDataToTextConvertor(
       )
 
     return listOf(converted)
+  }
+
+  private val pluralKeywords by lazy {
+    try {
+      val locale = getULocaleFromTag(languageTag)
+      PluralRules.forLocale(locale)?.keywords?.toList() ?: allPluralKeywords
+    } catch (_: Exception) {
+      allPluralKeywords
+    }
   }
 }

@@ -1,6 +1,8 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
+import com.ibm.icu.text.PluralRules
 import io.tolgee.formats.allPluralKeywords
+import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.importCommon.ParsedPluralsKey
 import io.tolgee.formats.importCommon.PluralsKeyParser
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -9,6 +11,7 @@ class GenericSuffixedPluralsPreprocessor(
   val context: FileProcessorContext,
   private val data: Any?,
   private val pluralsViaSuffixesParser: PluralsKeyParser,
+  private val languageTag: String,
 ) {
   fun preprocess(): Any? {
     return data.preprocess()
@@ -37,7 +40,7 @@ class GenericSuffixedPluralsPreprocessor(
   private fun Any?.parsePluralsKey(keyParser: PluralsKeyParser): ParsedPluralsKey? {
     val key = this as? String ?: return null
     return keyParser.parse(key).takeIf {
-      it.key != null && it.plural in allPluralKeywords
+      it.key != null && it.plural in pluralKeywords
     } ?: ParsedPluralsKey(null, null, key)
   }
 
@@ -68,10 +71,19 @@ class GenericSuffixedPluralsPreprocessor(
 
   private fun Map<*, *>.preprocessMap(): Map<*, *> {
     return this.groupByPlurals(pluralsViaSuffixesParser).flatMap { (commonKey, values) ->
-      if (commonKey == null || values.size < 2) {
+      if (commonKey == null || (values.size < pluralKeywords.size && values.size < 2)) {
         return@flatMap values.useOriginalKey()
       }
       return@flatMap values.usePluralsKey(commonKey)
     }.toMap()
+  }
+
+  private val pluralKeywords by lazy {
+    try {
+      val locale = getULocaleFromTag(languageTag)
+      PluralRules.forLocale(locale)?.keywords?.toList() ?: allPluralKeywords
+    } catch (_: Exception) {
+      allPluralKeywords
+    }
   }
 }
