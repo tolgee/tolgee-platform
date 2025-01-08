@@ -38,10 +38,12 @@ import { TranslationAgency } from './TranslationAgency';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { TaskCreateForm } from 'tg.ee.module/task/components/taskCreate/TaskCreateForm';
+import { EmptyScopeDialog } from 'tg.ee.module/task/components/taskCreate/EmptyScopeDialog';
 
 type CreateTaskRequest = components['schemas']['CreateTaskRequest'];
 type TaskType = CreateTaskRequest['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
+type KeysScopeView = components['schemas']['KeysScopeView'];
 
 const StyledMainTitle = styled(DialogTitle)`
   padding-bottom: 0px;
@@ -168,6 +170,11 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
   const selectedKeys =
     initialValues?.selection ?? selectedLoadable.data?.ids ?? [];
 
+  const [scope, setScope] = useState<(KeysScopeView | undefined)[]>([]);
+  const [emptyScope, setEmptyScope] = useState<LanguageModel | true>();
+
+  const canBeSubmitted = scope.every(Boolean);
+
   const isLoading =
     preferredAgencyLoadable.isLoading ||
     agenciesLoadable.isLoading ||
@@ -240,6 +247,14 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
           }}
           validationSchema={Validation.CREATE_TASK_FORM(t)}
           onSubmit={async (values) => {
+            const emptyScope = scope.findIndex((sc) => !sc?.keyCount);
+            if (emptyScope != -1) {
+              const language = allLanguages.find(
+                (l) => l.id === languages[emptyScope]
+              );
+              setEmptyScope(language || true);
+              return;
+            }
             const data = languages.map(
               (languageId) =>
                 ({
@@ -364,6 +379,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
                           hideDueDate
                           hideAssignees
                           disabled={disabled}
+                          onScopeChange={setScope}
                         />
 
                         <Box display="grid" mt={2}>
@@ -434,7 +450,9 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
                     </Button>
                   ) : (
                     <LoadingButton
-                      disabled={!languages.length || disabled}
+                      disabled={
+                        !languages.length || disabled || !canBeSubmitted
+                      }
                       onClick={submitForm}
                       color="primary"
                       variant="contained"
@@ -449,6 +467,12 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
             );
           }}
         </Formik>
+      )}
+      {emptyScope && (
+        <EmptyScopeDialog
+          language={emptyScope}
+          onClose={() => setEmptyScope(undefined)}
+        />
       )}
     </Dialog>
   );
