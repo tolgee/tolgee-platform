@@ -18,7 +18,7 @@ const StyledSeparator = styled('div')`
 `;
 
 type Props = {
-  showClosed: boolean;
+  showAll: boolean;
   filter: TaskFilterType;
   onOpenDetail: (task: TaskModel) => void;
   search: string;
@@ -26,7 +26,6 @@ type Props = {
 };
 
 export const ProjectTasksList = ({
-  showClosed,
   filter,
   search,
   onOpenDetail,
@@ -47,11 +46,10 @@ export const ProjectTasksList = ({
       page: Number(page),
       search,
       sort: ['number,desc'],
-      filterNotState: showClosed ? undefined : ['CLOSED'],
       filterAssignee: filter.assignees,
       filterLanguage: filter.languages,
       filterType: filter.types,
-      filterDoneMinClosedAt: filter.doneMinClosedAt,
+      excludeClosedBefore: filter.excludeClosedBefore,
       filterAgency: filter.agencies,
     },
     options: {

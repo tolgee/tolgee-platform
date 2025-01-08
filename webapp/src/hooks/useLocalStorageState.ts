@@ -7,7 +7,7 @@ type Props = {
 };
 
 export function useLocalStorageState({ initial, key, derive }: Props) {
-  const [value, _setValue] = useState<string | undefined>(() => {
+  function getLocalStorageValue() {
     try {
       const storedValue = localStorage.getItem(key);
       if (storedValue) {
@@ -18,7 +18,7 @@ export function useLocalStorageState({ initial, key, derive }: Props) {
     } catch (e) {
       return initial;
     }
-  });
+  }
 
   function setLocalStorageValue(value: string | undefined) {
     if (value === undefined) {
@@ -27,6 +27,10 @@ export function useLocalStorageState({ initial, key, derive }: Props) {
       localStorage.setItem(key, value);
     }
   }
+
+  const [value, _setValue] = useState<string | undefined>(() =>
+    getLocalStorageValue()
+  );
 
   const setValue: Dispatch<SetStateAction<string | undefined>> = useCallback(
     (valueOrFunction) => {
@@ -45,6 +49,7 @@ export function useLocalStorageState({ initial, key, derive }: Props) {
     },
     [_setValue]
   );
+
   derive?.(value, true);
-  return [value, setValue, setLocalStorageValue] as const;
+  return [value, setValue, getLocalStorageValue] as const;
 }

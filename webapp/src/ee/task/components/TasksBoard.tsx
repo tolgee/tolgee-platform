@@ -30,7 +30,7 @@ const StyledContainer = styled(Box)`
 type TasksLoadable = ReturnType<typeof useProjectBoardTasks>;
 
 type Props = {
-  showClosed: boolean;
+  showAll: boolean;
   onOpenDetail: (task: TaskModel) => void;
   newTasks: TasksLoadable;
   inProgressTasks: TasksLoadable;
@@ -40,7 +40,7 @@ type Props = {
 };
 
 export const TasksBoard = ({
-  showClosed,
+  showAll,
   onOpenDetail,
   newTasks,
   inProgressTasks,
@@ -116,7 +116,7 @@ export const TasksBoard = ({
         <BoardColumn
           state="DONE"
           title={
-            showClosed ? (
+            showAll ? (
               <Box>
                 <Box display="inline" color={stateColor('DONE')}>
                   {translateState('DONE')}
@@ -130,6 +130,10 @@ export const TasksBoard = ({
               <Box>
                 <Box display="inline" color={stateColor('DONE')}>
                   {translateState('DONE')}
+                </Box>
+                <Box display="inline" color={stateColor('CLOSED')}>
+                  {' & '}
+                  {translateState('CLOSED')}
                 </Box>
                 <Box
                   display="inline"

@@ -4,6 +4,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { TaskNumber, TaskNumberWithLink } from './TaskId';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { AgencyLabel } from 'tg.ee';
+import { useTranslate } from '@tolgee/react';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -40,6 +41,7 @@ export const TaskLabel = ({
   project,
   hideType,
 }: Props) => {
+  const { t } = useTranslate();
   return (
     <StyledContainer {...{ sx, className }}>
       <Tooltip
@@ -59,7 +61,13 @@ export const TaskLabel = ({
         <TaskNumber taskNumber={task.number} />
       )}
       {!hideType && <TaskTypeChip type={task.type} />}
-      {task.agency && <AgencyLabel agency={task.agency} />}
+      {task.agency && (
+        <Tooltip title={t('task_label_agency_tooltip')}>
+          <span>
+            <AgencyLabel agency={task.agency} />
+          </span>
+        </Tooltip>
+      )}
     </StyledContainer>
   );
 };

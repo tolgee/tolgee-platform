@@ -45,8 +45,8 @@ type Props = {
   sx?: SxProps;
   className?: string;
   onSearchChange: (value: string) => void;
-  showClosed: boolean;
-  onShowClosedChange: (value: boolean) => void;
+  showAll: boolean;
+  onShowAllChange: (value: boolean) => void;
   filter: TaskFilterType;
   onFilterChange: (value: TaskFilterType) => void;
   onAddTask?: () => void;
@@ -60,8 +60,8 @@ export const TasksHeaderBig = ({
   sx,
   className,
   onSearchChange,
-  showClosed,
-  onShowClosedChange,
+  showAll,
+  onShowAllChange,
   filter,
   onFilterChange,
   onAddTask,
@@ -100,14 +100,14 @@ export const TasksHeaderBig = ({
           project={project}
         />
         <FormControlLabel
-          checked={showClosed}
-          onChange={() => onShowClosedChange(!showClosed)}
+          checked={showAll}
+          onChange={() => onShowAllChange(!showAll)}
           control={<Checkbox size="small" />}
-          data-cy="tasks-header-show-closed"
+          data-cy="tasks-header-show-all"
           label={
             <Box display="flex">
-              {t('tasks_show_closed_label')}
-              <LabelHint title={t('tasks_show_closed_label_tooltip')}>
+              {t('tasks_show_all_label')}
+              <LabelHint title={t('tasks_show_all_label_tooltip')}>
                 <span />
               </LabelHint>
             </Box>

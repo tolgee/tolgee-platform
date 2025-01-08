@@ -87,6 +87,7 @@ export const TranslationStateFilter = ({
               size="small"
               onClick={stopBubble(() => onChange([]))}
               tabIndex={-1}
+              data-cy="translations-state-filter-clear"
             >
               <XClose />
             </StyledInputButton>

@@ -1,11 +1,15 @@
 import React from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, IconButton, styled, Tooltip } from '@mui/material';
-import { AlertCircle, ClipboardCheck, X } from '@untitled-ui/icons-react';
+import {
+  AlertCircle,
+  ClipboardCheck,
+  InfoCircle,
+  X,
+} from '@untitled-ui/icons-react';
 
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { TaskDetail as TaskDetailIcon } from 'tg.component/CustomIcons';
 
 import { PrefilterContainer } from 'tg.views/projects/translations/prefilters/ContainerPrefilter';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -16,6 +20,7 @@ import { TaskTooltip } from './TaskTooltip';
 import { TaskLabel } from './TaskLabel';
 import { PrefilterTaskProps } from '../../../eeSetup/EeModuleType';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
+import { QUERY } from 'tg.constants/links';
 
 const StyledWarning = styled('div')`
   display: flex;
@@ -50,7 +55,8 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
     path: { projectId: project.id, taskNumber },
   });
 
-  const [_, setTaskDetail] = useUrlSearchState('taskDetail');
+  const [_, setTaskDetail] = useUrlSearchState(QUERY.TRANSLATIONS_TASK_DETAIL);
+
   const { clear } = usePrefilter();
 
   function handleShowDetails() {
@@ -112,7 +118,7 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
             <TaskLabel task={data} />
             <Tooltip title={t('task_detail_tooltip')} disableInteractive>
               <IconButton size="small" onClick={handleShowDetails}>
-                <TaskDetailIcon width={20} height={20} />
+                <InfoCircle width={20} height={20} />
               </IconButton>
             </Tooltip>
             {!isActive && <TaskState state={data.state} />}

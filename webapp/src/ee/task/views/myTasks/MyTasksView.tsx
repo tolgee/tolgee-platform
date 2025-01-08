@@ -5,7 +5,7 @@ import { useTranslate } from '@tolgee/react';
 
 import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { LINKS } from 'tg.constants/links';
+import { LINKS, QUERY } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
@@ -30,9 +30,12 @@ export const MyTasksView = () => {
   });
 
   const [search, setSearch] = useUrlSearchState('search', { defaultVal: '' });
-  const [showClosed, setShowClosed] = useUrlSearchState('showClosed', {
-    defaultVal: 'false',
-  });
+  const [showAll, setShowAll] = useUrlSearchState(
+    QUERY.TASKS_FILTERS_SHOW_ALL,
+    {
+      defaultVal: 'false',
+    }
+  );
 
   const [projects, setProjects] = useUrlSearchState('project', {
     array: true,
@@ -47,7 +50,7 @@ export const MyTasksView = () => {
   const filter: TaskFilterType = {
     projects: projects?.map((p) => Number(p)),
     types: types as any[],
-    doneMinClosedAt: showClosed === 'true' ? undefined : minus30Days,
+    excludeClosedBefore: showAll === 'true' ? undefined : minus30Days,
     agencies: agencies?.map((a) => Number(a)),
   };
 
@@ -85,8 +88,8 @@ export const MyTasksView = () => {
         <TasksHeader
           sx={{ mb: '20px', mt: '-12px' }}
           onSearchChange={setSearch}
-          showClosed={showClosed === 'true'}
-          onShowClosedChange={(val) => setShowClosed(String(val))}
+          showAll={showAll === 'true'}
+          onShowAllChange={(val) => setShowAll(String(val))}
           filter={filter}
           onFilterChange={setFilter}
           view={view as TaskView}
@@ -97,14 +100,14 @@ export const MyTasksView = () => {
           <MyTasksList
             search={search}
             filter={filter}
-            showClosed={showClosed === 'true'}
+            showAll={showAll === 'true'}
             onOpenDetail={setDetail}
           />
         ) : (
           <MyTasksBoard
             search={search}
             filter={filter}
-            showClosed={showClosed === 'true'}
+            showAll={showAll === 'true'}
             onOpenDetail={setDetail}
           />
         )}
