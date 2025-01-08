@@ -1,3 +1,10 @@
+## [3.92.1](https://github.com/tolgee/tolgee-platform/compare/v3.92.0...v3.92.1) (2025-01-08)
+
+
+### Bug Fixes
+
+* Apple m4 CPU issue + simplify Dockerfile ([#2812](https://github.com/tolgee/tolgee-platform/issues/2812)) ([4a5ee7c](https://github.com/tolgee/tolgee-platform/commit/4a5ee7ce11d73603cfdf4d917b1be2c9bb150d96))
+
 # [3.92.0](https://github.com/tolgee/tolgee-platform/compare/v3.91.0...v3.92.0) (2025-01-08)
 
 
