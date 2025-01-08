@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service
 class NotificationService(
   private val notificationRepository: NotificationRepository,
 ) {
-  fun getNotifications(userId: Long, pageable: Pageable): Page<Notification> {
+  fun getNotifications(
+    userId: Long,
+    pageable: Pageable,
+  ): Page<Notification> {
     return notificationRepository.fetchNotificationsByUserId(userId, pageable)
   }
 

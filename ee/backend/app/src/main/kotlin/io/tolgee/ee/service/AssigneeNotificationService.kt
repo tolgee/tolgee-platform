@@ -8,7 +8,6 @@ import io.tolgee.model.Notification
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
-import io.tolgee.repository.NotificationRepository
 import io.tolgee.service.notification.NotificationService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -24,12 +23,14 @@ class AssigneeNotificationService(
     user: UserAccount,
     task: Task,
   ) {
-    notificationService.createNotification(Notification().apply {
-      this.user = user
-      this.linkedTask = task
-      this.project = task.project
-      this.originatingUser = task.author
-    })
+    notificationService.createNotification(
+      Notification().apply {
+        this.user = user
+        this.linkedTask = task
+        this.project = task.project
+        this.originatingUser = task.author
+      },
+    )
     val taskUrl = getTaskUrl(task.project.id, task.number)
     val myTasksUrl = getMyTasksUrl()
 
