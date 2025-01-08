@@ -16,7 +16,6 @@ class NotificationModelAssembler(
         val notificationsWithModel = notifications.content.map { notification ->
             notification to NotificationModel(
                 id = notification.id,
-                projectId = notification.project?.id,
             )
         }
         enhancers.forEach { enhancer ->
