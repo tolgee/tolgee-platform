@@ -8,7 +8,14 @@ import {
   LayoutGrid02,
   LayoutLeft,
 } from '@untitled-ui/icons-react';
-import { Badge, Button, ButtonGroup, IconButton, styled } from '@mui/material';
+import {
+  Badge,
+  Box,
+  Button,
+  ButtonGroup,
+  IconButton,
+  styled,
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -28,8 +35,8 @@ import { ViewMode } from '../context/types';
 import { StickyHeader } from './StickyHeader';
 
 const StyledContainer = styled('div')`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   margin-left: ${({ theme }) => theme.spacing(-1)};
   margin-right: ${({ theme }) => theme.spacing(-2)};
@@ -181,10 +188,17 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 filtersContent={filtersContent}
                 onChange={setFilters}
               />
-              {taskPrefilter && (
-                <PrefilterTaskShowDoneSwitch sx={{ ml: 0, fontSize: 14 }} />
-              )}
             </StyledSpaced>
+
+            <Box overflow="hidden" position="relative">
+              {taskPrefilter && (
+                <PrefilterTaskShowDoneSwitch
+                  sx={{
+                    ml: 0,
+                  }}
+                />
+              )}
+            </Box>
 
             <StyledSpaced>
               <StyledIconButton

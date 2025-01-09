@@ -8,6 +8,7 @@ const StyledLabel = styled('div')`
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  flex-shrink: 1;
 `;
 
 type Props = {
