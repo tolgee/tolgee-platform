@@ -21,7 +21,7 @@ export const SubscriptionsTrialAlert: FC<SubscriptionsTrialAlertProps> = ({
 
   return (
     <>
-      <Alert severity="info" sx={{ mb: 2 }}>
+      <Alert severity="info" sx={{ mb: 2 }} data-cy="subscriptions-trial-alert">
         <TrialAlertContent subscription={subscription} />
       </Alert>
     </>
@@ -31,6 +31,10 @@ export const SubscriptionsTrialAlert: FC<SubscriptionsTrialAlertProps> = ({
 export const TrialAlertContent: FC<SubscriptionsTrialAlertProps> = ({
   subscription,
 }) => {
+  if (subscription.plan.free) {
+    return <TrialAlertFreePlanContent subscription={subscription} />;
+  }
+
   if (subscription.trialRenew) {
     return <TrialAlertPlanAutoRenewsContent subscription={subscription} />;
   }
@@ -67,8 +71,9 @@ export const TrialAlertKeepPlanContentWithPaymentMethod: FC<
           variant="contained"
           loading={restoreMutation.isLoading}
           onClick={onRestore}
+          data-cy={'billing-subscription-trial-alert-keep-button'}
         >
-          <T keyName="billing-subscription-trial-allert-keep-button" />
+          <T keyName="billing-subscription-trial-alert-keep-button" />
         </LoadingButton>
       </Box>
     </>
@@ -90,6 +95,7 @@ export const TrialAlertKeepPlanContentWithoutPaymentMethod: FC<
       />
       <Box mt={2}>
         <Button
+          data-cy="billing-trial-setup-payment-method-button"
           onClick={goToStripeCustomerPortal}
           variant="contained"
           color="primary"
@@ -97,6 +103,21 @@ export const TrialAlertKeepPlanContentWithoutPaymentMethod: FC<
           <T keyName="billing-trial-setup-payment-method-button" />{' '}
         </Button>
       </Box>
+    </>
+  );
+};
+
+export const TrialAlertFreePlanContent: FC<SubscriptionsTrialAlertProps> = ({
+  subscription,
+}) => {
+  const formatDate = useDateFormatter();
+
+  return (
+    <>
+      <T
+        keyName="billing-subscription-free-trial-alert"
+        params={{ trialEnd: formatDate(subscription.trialEnd), b: <b /> }}
+      />
     </>
   );
 };
@@ -118,7 +139,13 @@ export const TrialAlertPlanAutoRenewsContent: FC<
         <T
           keyName="billing-subscription-auto-renews-alert-cancel-message"
           params={{
-            link: <Link onClick={doCancel} sx={{ cursor: 'pointer' }} />,
+            link: (
+              <Link
+                data-cy="billing-subscription-auto-renews-alert-cancel-button"
+                onClick={doCancel}
+                sx={{ cursor: 'pointer' }}
+              />
+            ),
           }}
         />
       </Box>
