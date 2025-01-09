@@ -23,12 +23,16 @@ import { useEffect } from 'react';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { useApiQueries } from 'tg.service/http/useQueryApi';
 import { stringHash } from 'tg.fixtures/stringHash';
+import { StateType } from 'tg.constants/translationStates';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeysScopeView = components['schemas']['KeysScopeView'];
 
 const TASK_TYPES: TaskType[] = ['TRANSLATE', 'REVIEW'];
+
+export const DEFAULT_STATE_FILTERS_TRANSLATE: StateType[] = ['UNTRANSLATED'];
+export const DEFAULT_STATE_FILTERS_REVIEW: StateType[] = ['TRANSLATED'];
 
 const StyledTopPart = styled(Box)`
   display: grid;

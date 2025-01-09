@@ -37,7 +37,11 @@ import { useEnabledFeatures, useUser } from 'tg.globalContext/helpers';
 import { TranslationAgency } from './TranslationAgency';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
-import { TaskCreateForm } from 'tg.ee.module/task/components/taskCreate/TaskCreateForm';
+import {
+  DEFAULT_STATE_FILTERS_REVIEW,
+  DEFAULT_STATE_FILTERS_TRANSLATE,
+  TaskCreateForm,
+} from 'tg.ee.module/task/components/taskCreate/TaskCreateForm';
 import { EmptyScopeDialog } from 'tg.ee.module/task/components/taskCreate/EmptyScopeDialog';
 
 type CreateTaskRequest = components['schemas']['CreateTaskRequest'];
@@ -122,7 +126,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
   });
 
   const [filters, setFilters] = useState<FiltersType>({});
-  const [stateFilters, setStateFilters] = useState<TranslationStateType[]>([]);
+  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
   const [languages, setLanguages] = useState(initialValues?.languages ?? []);
   const [successMessage, setSuccessMessage] = useState(false);
 
@@ -174,6 +178,15 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
   const [emptyScope, setEmptyScope] = useState<LanguageModel | true>();
 
   const canBeSubmitted = scope.every(Boolean);
+
+  function getStateFilters(taskType: TaskType) {
+    if (_stateFilters) {
+      return _stateFilters;
+    }
+    return taskType === 'TRANSLATE'
+      ? DEFAULT_STATE_FILTERS_TRANSLATE
+      : DEFAULT_STATE_FILTERS_REVIEW;
+  }
 
   const isLoading =
     preferredAgencyLoadable.isLoading ||
@@ -268,6 +281,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
                   keys: selectedKeys,
                 } satisfies CreateTaskRequest)
             );
+            const stateFilters = getStateFilters(values.type);
             createTasksLoadable.mutate(
               {
                 path: { projectId },
@@ -373,7 +387,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
                           setFilters={
                             !initialValues?.selection ? setFilters : undefined
                           }
-                          stateFilters={stateFilters}
+                          stateFilters={getStateFilters(values.type)}
                           setStateFilters={setStateFilters}
                           projectId={projectId}
                           hideDueDate

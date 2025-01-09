@@ -15,7 +15,11 @@ import { StateType } from 'tg.constants/translationStates';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
-import { TaskCreateForm } from './TaskCreateForm';
+import {
+  DEFAULT_STATE_FILTERS_REVIEW,
+  DEFAULT_STATE_FILTERS_TRANSLATE,
+  TaskCreateForm,
+} from './TaskCreateForm';
 import { EmptyScopeDialog } from './EmptyScopeDialog';
 
 type TaskType = components['schemas']['TaskModel']['type'];
@@ -54,6 +58,8 @@ export type InitialValues = {
   dueDate: number;
   languageAssignees: Record<number, User[]>;
   selection: number[];
+  filters: FiltersType;
+  stateFilters: TranslationStateType[];
 };
 
 type Props = {
@@ -85,7 +91,7 @@ export const TaskCreateDialog = ({
   });
 
   const [filters, setFilters] = useState<FiltersType>({});
-  const [stateFilters, setStateFilters] = useState<TranslationStateType[]>([]);
+  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
   const [languages, setLanguages] = useState(initialValues?.languages ?? []);
 
   const selectedLoadable = useApiQuery({
@@ -108,6 +114,15 @@ export const TaskCreateDialog = ({
   const [emptyScope, setEmptyScope] = useState<LanguageModel | true>();
 
   const canBeSubmitted = scope.every(Boolean);
+
+  function getStateFilters(taskType: TaskType) {
+    if (_stateFilters) {
+      return _stateFilters;
+    }
+    return taskType === 'TRANSLATE'
+      ? DEFAULT_STATE_FILTERS_TRANSLATE
+      : DEFAULT_STATE_FILTERS_REVIEW;
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg">
@@ -153,6 +168,8 @@ export const TaskCreateDialog = ({
             keys: selectedKeys,
           }));
 
+          const stateFilters = getStateFilters(values.type);
+
           createTasksLoadable.mutate(
             {
               path: { projectId },
@@ -180,7 +197,7 @@ export const TaskCreateDialog = ({
           );
         }}
       >
-        {({ submitForm }) => {
+        {({ submitForm, values }) => {
           return (
             <StyledContainer>
               <TaskCreateForm
@@ -191,7 +208,7 @@ export const TaskCreateDialog = ({
                 setLanguages={setLanguages}
                 filters={filters}
                 setFilters={initialValues?.selection ? undefined : setFilters}
-                stateFilters={stateFilters}
+                stateFilters={getStateFilters(values.type)}
                 setStateFilters={setStateFilters}
                 projectId={projectId}
                 onScopeChange={setScope}
