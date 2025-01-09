@@ -12,22 +12,21 @@ class NotificationModelAssembler(
     NotificationController::class.java,
     NotificationModel::class.java,
   ) {
-  private val toReturn =
+  private val prefetchedNotifications =
     run {
       val notificationsWithModel =
-        notifications.content.map { notification ->
-          notification to
-            NotificationModel(
-              id = notification.id,
-            )
+        notifications.content.associateWith { notification ->
+          NotificationModel(
+            id = notification.id,
+          )
         }
       enhancers.forEach { enhancer ->
         enhancer.enhanceNotifications(notificationsWithModel)
       }
-      notificationsWithModel.toMap()
+      notificationsWithModel
     }
 
   override fun toModel(view: Notification): NotificationModel {
-    return toReturn[view] ?: throw IllegalStateException("Notification $view was not found")
+    return prefetchedNotifications[view] ?: throw IllegalStateException("Notification $view was not found")
   }
 }
