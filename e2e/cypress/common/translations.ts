@@ -28,10 +28,6 @@ export const getCell = (value: string) => {
   return cy.gcy('translations-table-cell').contains(value);
 };
 
-export const getTranslationCell = (key: string, language: string) => {
-  return gcyAdvanced({ value: 'translations-table-cell', key, language });
-};
-
 export const getPluralEditor = (variant: string) => {
   return gcyAdvanced({ value: 'translation-editor', variant }).find(
     '[contenteditable]'
@@ -141,7 +137,7 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   if (newValue !== undefined) {
     // select all, delete and type new text
-    getEditor().clear().type(newValue);
+    getTranslationEditor().clear().type(newValue);
 
     if (save) {
       getCellSaveButton().click();
@@ -150,12 +146,25 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
   }
 };
 
-function getEditor() {
+export function getTranslationEditor() {
   return buildXpath()
     .descendant()
     .withDataCy('global-editor')
     .descendant()
     .withAttribute('contenteditable')
+    .getElement();
+}
+
+export function getTranslationCell(key: string, languageTag: string) {
+  return buildXpath()
+    .descendant()
+    .withDataCy('translations-key-name')
+    .descendantOrSelf()
+    .hasText(key)
+    .closestAncestor()
+    .withDataCy('translations-row')
+    .descendant()
+    .attributeEquals('data-cy-language', languageTag)
     .getElement();
 }
 
@@ -168,19 +177,10 @@ export function editTranslation({
   languageTag: string;
   newValue: string;
 }) {
-  const translationCell = buildXpath()
-    .descendant()
-    .withDataCy('translations-key-name')
-    .descendantOrSelf()
-    .hasText(key)
-    .closestAncestor()
-    .withDataCy('translations-row')
-    .descendant()
-    .attributeEquals('data-cy-language', languageTag)
-    .getElement();
+  const translationCell = getTranslationCell(key, languageTag);
 
   translationCell.click();
-  getEditor().clear().type(newValue);
+  getTranslationEditor().clear().type(newValue);
   getCellSaveButton().click();
 }
 
