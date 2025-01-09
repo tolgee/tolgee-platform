@@ -27,6 +27,10 @@ const StyledIconButton = styled(IconButton)`
   }
 `;
 
+const ListItemHeader = styled(ListItem)`
+  font-weight: bold;
+`;
+
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
@@ -78,6 +82,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         }}
       >
         <List>
+          <ListItemHeader divider>
+            <T keyName="notifications-header" />
+          </ListItemHeader>
           {notificationsData?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
             return (
