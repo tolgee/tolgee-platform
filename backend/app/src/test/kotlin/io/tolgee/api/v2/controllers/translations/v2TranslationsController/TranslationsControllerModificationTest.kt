@@ -329,7 +329,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `updates outdated flag when base updated`() {
+  fun `updates outdated flag and base state when base updated`() {
     testData.addTranslationsWithStates()
     saveTestData()
     performProjectAuthPut(
@@ -342,6 +342,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
       ),
     ).andAssertThatJson {
       node("translations.en.outdated").isEqualTo(false)
+      node("translations.en.state").isEqualTo("TRANSLATED")
       node("translations.de.outdated").isEqualTo(true)
     }
   }

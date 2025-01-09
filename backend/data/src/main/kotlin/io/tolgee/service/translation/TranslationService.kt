@@ -186,17 +186,24 @@ class TranslationService(
     translation: Translation,
     text: String?,
   ): Translation {
-    if (translation.text !== text) {
+    val hasTextChanged = translation.text != text
+
+    if (hasTextChanged) {
       translation.resetFlags()
     }
+
     translation.text = text
-    if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
-      translation.state = TranslationState.TRANSLATED
-    }
-    if (text.isNullOrEmpty()) {
-      translation.state = TranslationState.UNTRANSLATED
-      translation.text = null
-    }
+
+    val hasText = !text.isNullOrEmpty()
+
+    translation.state =
+      when {
+        translation.isUntranslated && hasText -> TranslationState.TRANSLATED
+        hasTextChanged -> TranslationState.TRANSLATED
+        text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
+        else -> translation.state
+      }
+
     return save(translation)
   }
 
