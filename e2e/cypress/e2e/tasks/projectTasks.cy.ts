@@ -171,4 +171,28 @@ describe('project tasks', () => {
       characters: 26,
     });
   });
+
+  it('wont allow creation of empty task', () => {
+    cy.gcy('tasks-header-add-task').click();
+    cy.gcy('create-task-field-name').click().type('new task');
+    cy.gcy('create-task-field-languages').click();
+    cy.gcy('create-task-field-languages-item').contains('Czech').click();
+    dismissMenu();
+
+    cy.gcy('translations-state-filter').click();
+    cy.gcy('translations-state-filter-option').contains('Outdated').click();
+    dismissMenu();
+    cy.waitForDom();
+
+    checkTaskPreview({
+      language: 'Czech',
+      keys: 0,
+      alert: false,
+      words: 0,
+      characters: 0,
+    });
+
+    cy.gcy('create-task-submit').click();
+    cy.gcy('empty-scope-dialog').should('be.visible');
+  });
 });

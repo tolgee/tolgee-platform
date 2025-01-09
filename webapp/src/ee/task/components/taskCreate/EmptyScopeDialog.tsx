@@ -17,7 +17,7 @@ type Props = {
 
 export const EmptyScopeDialog = ({ language, onClose }: Props) => {
   return (
-    <Dialog open={true} onClose={onClose}>
+    <Dialog open={true} onClose={onClose} data-cy="empty-scope-dialog">
       <DialogTitle>
         {typeof language === 'object' && language.name ? (
           <T
