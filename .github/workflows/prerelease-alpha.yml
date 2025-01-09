@@ -93,7 +93,7 @@ jobs:
         env:
           KUBERNETES_DO_SERVICE_CONFIG: ${{secrets.KUBERNETES_DO_SERVICE_CONFIG}}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test

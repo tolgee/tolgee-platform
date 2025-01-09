@@ -48,7 +48,7 @@ jobs:
           tar -czf ~/ee-backend-app.tgz ./ee/backend/app/build
           tar -czf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend
@@ -101,7 +101,7 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Download backend build result
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: backend
           path: ~/
@@ -141,7 +141,7 @@ jobs:
           reportName=${{ matrix.command }}
           echo "reportName=${reportName//\:/_}" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend_test_reports_${{ steps.reportName.outputs.reportName }}
@@ -193,7 +193,7 @@ jobs:
           key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Download backend build result
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: backend
           path: ~/
@@ -211,13 +211,13 @@ jobs:
           tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - name: Download frontend build result
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: webapp
           path: ./webapp/dist
 
       - name: Download dependencies
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: e2e_deps
           path: ~/
@@ -252,7 +252,7 @@ jobs:
           E2E_JOB_INDEX: ${{matrix.job_index}}
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: e2e
@@ -261,7 +261,7 @@ jobs:
             ./e2e/cypress/screenshots/**/*
             ./e2e/server
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: e2e_server_log_${{ matrix.job_index }}
@@ -305,7 +305,7 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Upload built webapp
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: webapp
           path: webapp/dist
@@ -419,7 +419,7 @@ jobs:
           tar -czf ~/cypress_cache.tgz ./Cypress
         working-directory: /home/runner/.cache/
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: e2e_deps
