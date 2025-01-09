@@ -45,7 +45,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     url: '/v2/notifications',
     method: 'get',
     query: { size: 10000 },
-  }).data?._embedded?.notificationModelList;
+  }).data;
+
+  const notificationsData = notifications?._embedded?.notificationModelList;
 
   return (
     <>
@@ -75,12 +77,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         }}
       >
         <List>
-          {notifications?.map((notification, i) => {
+          {notificationsData?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
             return (
               <ListItemButton
                 key={notification.id}
-                divider={i !== notifications.length - 1}
+                divider={i !== notificationsData.length - 1}
                 href={destinationUrl}
                 onClick={(event) => {
                   event.preventDefault();
@@ -95,7 +97,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               </ListItemButton>
             );
           })}
-          {notifications?.length === 0 && (
+          {notifications?.page?.totalElements === 0 && (
             <ListItem>
               <T keyName="notifications-empty" />
             </ListItem>
