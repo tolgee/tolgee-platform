@@ -42,7 +42,7 @@ export const TranslationsHeader = () => {
   };
 
   const isSmall = useMediaQuery(
-    `@media(max-width: ${rightPanelWidth + 1000}px)`
+    `@media(max-width: ${rightPanelWidth + 1200}px)`
   );
 
   const translationsTotal = useTranslationsSelector((c) => c.translationsTotal);

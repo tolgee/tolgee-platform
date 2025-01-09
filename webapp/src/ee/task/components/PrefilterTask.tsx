@@ -16,6 +16,7 @@ import { TaskTooltip } from './TaskTooltip';
 import { TaskLabel } from './TaskLabel';
 import { PrefilterTaskProps } from '../../../eeSetup/EeModuleType';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
+import { QUERY } from 'tg.constants/links';
 
 const StyledWarning = styled('div')`
   display: flex;
@@ -50,7 +51,8 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
     path: { projectId: project.id, taskNumber },
   });
 
-  const [_, setTaskDetail] = useUrlSearchState('taskDetail');
+  const [_, setTaskDetail] = useUrlSearchState(QUERY.TRANSLATIONS_TASK_DETAIL);
+
   const { clear } = usePrefilter();
 
   function handleShowDetails() {

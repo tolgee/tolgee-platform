@@ -2406,6 +2406,8 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -4685,6 +4687,8 @@ export interface components {
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -8493,6 +8497,10 @@ export interface operations {
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
         filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -16882,6 +16890,10 @@ export interface operations {
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
         filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
       };
       path: {
         projectId: number;
@@ -16982,6 +16994,10 @@ export interface operations {
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
         filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
       };
       path: {
         projectId: number;

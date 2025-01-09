@@ -1,9 +1,11 @@
+import { QUERY } from 'tg.constants/links';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 export type PrefilterType = {
   activity?: number;
   failedJob?: number;
   task?: number;
+  taskFilterNotDone?: boolean;
   clear: () => void;
 };
 
@@ -16,18 +18,35 @@ const stringToNumber = (input: string | undefined) => {
 };
 
 export const usePrefilter = (): PrefilterType => {
-  const [activity, setActivity] = useUrlSearchState('activity', {
-    defaultVal: undefined,
-    history: true,
-  });
-  const [failedJob, setFailedJob] = useUrlSearchState('failedJob', {
-    defaultVal: undefined,
-    history: true,
-  });
-  const [task, setTask] = useUrlSearchState('task', {
-    defaultVal: undefined,
-    history: true,
-  });
+  const [activity, setActivity] = useUrlSearchState(
+    QUERY.TRANSLATIONS_PREFILTERS_ACTIVITY,
+    {
+      defaultVal: undefined,
+      history: true,
+    }
+  );
+  const [failedJob, setFailedJob] = useUrlSearchState(
+    QUERY.TRANSLATIONS_PREFILTERS_FAILED_JOB,
+    {
+      defaultVal: undefined,
+      history: true,
+    }
+  );
+  const [task, setTask] = useUrlSearchState(
+    QUERY.TRANSLATIONS_PREFILTERS_TASK,
+    {
+      defaultVal: undefined,
+      history: true,
+    }
+  );
+
+  const [taskHideDone, setTaskHideDone] = useUrlSearchState(
+    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE,
+    {
+      defaultVal: undefined,
+      history: true,
+    }
+  );
 
   const activityId = stringToNumber(activity);
   const failedJobId = stringToNumber(failedJob);
@@ -37,6 +56,7 @@ export const usePrefilter = (): PrefilterType => {
     setActivity(undefined);
     setFailedJob(undefined);
     setTask(undefined);
+    setTaskHideDone(undefined);
   }
 
   const result: PrefilterType = {
@@ -49,6 +69,9 @@ export const usePrefilter = (): PrefilterType => {
     result.failedJob = failedJobId;
   } else if (taskNumber !== undefined) {
     result.task = taskNumber;
+    if (taskHideDone !== undefined) {
+      result.taskFilterNotDone = taskHideDone === 'true';
+    }
   }
 
   return result;

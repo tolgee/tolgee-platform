@@ -18,6 +18,7 @@ import { getActiveFilters } from 'tg.component/translation/translationFilters/ge
 import { FiltersMenu } from 'tg.component/translation/translationFilters/FiltersMenu';
 import { useFiltersContent } from 'tg.component/translation/translationFilters/useFiltersContent';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
+import { PrefilterTaskShowDoneSwitch } from 'tg.ee';
 
 import {
   useTranslationsActions,
@@ -103,6 +104,9 @@ export const TranslationControlsCompact: React.FC<Props> = ({
     setSearch(value);
   };
   const filters = useTranslationsSelector((c) => c.filters);
+  const taskPrefilter = useTranslationsSelector(
+    (c) => c.prefilter?.task !== undefined
+  );
   const activeFilters = getActiveFilters(filters);
   const { setFilters } = useTranslationsActions();
   const selectedLanguagesMapped =
@@ -177,6 +181,9 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 filtersContent={filtersContent}
                 onChange={setFilters}
               />
+              {taskPrefilter && (
+                <PrefilterTaskShowDoneSwitch sx={{ ml: 0, fontSize: 14 }} />
+              )}
             </StyledSpaced>
 
             <StyledSpaced>

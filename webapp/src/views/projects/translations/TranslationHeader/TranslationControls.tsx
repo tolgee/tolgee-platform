@@ -7,6 +7,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
+import { PrefilterTaskShowDoneSwitch } from 'tg.ee';
 
 import {
   useTranslationsActions,
@@ -18,7 +19,6 @@ const StyledContainer = styled('div')`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  flex-wrap: wrap;
   padding-bottom: 8px;
   padding-top: 13px;
 `;
@@ -57,6 +57,9 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { setFilters } = useTranslationsActions();
   const selectedLanguagesMapped =
     allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
+  const taskPrefilter = useTranslationsSelector(
+    (c) => c.prefilter?.task !== undefined
+  );
 
   const handleAddTranslation = () => {
     onDialogOpen();
@@ -78,6 +81,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             value={filters}
             onChange={setFilters}
           />
+          {taskPrefilter && <PrefilterTaskShowDoneSwitch sx={{ ml: 0 }} />}
         </StyledSpaced>
 
         <StyledSpaced>
