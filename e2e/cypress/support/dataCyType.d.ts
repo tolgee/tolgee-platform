@@ -610,6 +610,7 @@ declare namespace DataCy {
         "translations-select-all-button" |
         "translations-shortcuts-command" |
         "translations-state-filter" |
+        "translations-state-filter-clear" |
         "translations-state-filter-option" |
         "translations-state-indicator" |
         "translations-table-cell" |

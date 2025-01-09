@@ -77,6 +77,7 @@ describe('project tasks', () => {
     cy.gcy('create-task-field-description').type(
       'This is task description ...'
     );
+    cy.gcy('translations-state-filter-clear').click();
     getTaskPreview('Czech').findDcy('assignee-select').click();
     cy.gcy('assignee-search-select-popover')
       .contains('Organization member')
@@ -119,10 +120,10 @@ describe('project tasks', () => {
 
     checkTaskPreview({
       language: 'Czech',
-      keys: 4,
+      keys: 2,
       alert: false,
-      words: 8,
-      characters: 52,
+      words: 4,
+      characters: 26,
     });
   });
 
@@ -138,10 +139,10 @@ describe('project tasks', () => {
 
     checkTaskPreview({
       language: 'Czech',
-      keys: 2,
+      keys: 0,
       alert: true,
-      words: 4,
-      characters: 26,
+      words: 0,
+      characters: 0,
     });
     checkTaskPreview({
       language: 'English',
@@ -157,11 +158,6 @@ describe('project tasks', () => {
     cy.gcy('create-task-field-languages').click();
     cy.gcy('create-task-field-languages-item').contains('Czech').click();
     dismissMenu();
-
-    cy.gcy('translations-state-filter').click();
-    cy.gcy('translations-state-filter-option').contains('Untranslated').click();
-    dismissMenu();
-    cy.waitForDom();
 
     checkTaskPreview({
       language: 'Czech',
@@ -181,6 +177,7 @@ describe('project tasks', () => {
 
     cy.gcy('translations-state-filter').click();
     cy.gcy('translations-state-filter-option').contains('Outdated').click();
+    cy.gcy('translations-state-filter-option').contains('Untranslated').click();
     dismissMenu();
     cy.waitForDom();
 
