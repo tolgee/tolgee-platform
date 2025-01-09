@@ -53,16 +53,17 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     <>
       <StyledIconButton
         color="inherit"
-        aria-controls="language-menu"
+        aria-controls="notifications-button"
         aria-haspopup="true"
-        data-cy="global-language-menu"
+        data-cy="notifications-button"
         onClick={handleOpen}
         size="large"
       >
         <Bell01 />
       </StyledIconButton>
       <StyledMenu
-        id="language-menu"
+        id="notifications-list"
+        data-cy="notifications-list"
         keepMounted
         open={!!anchorEl}
         anchorEl={anchorEl}
