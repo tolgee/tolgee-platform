@@ -23,7 +23,7 @@ export const useRestoreCloudSubscription = () => {
         onSuccess() {
           refetchInitialData();
           messaging.success(
-            <T keyName="billing_plan_cancel_success_message" />
+            <T keyName="billing_plan_restore_success_message" />
           );
         },
       }
