@@ -55,7 +55,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `creates new task`() {
+  fun `creates new task which triggers notification`() {
     val keys = testData.keysOutOfTask.map { it.self.id }.toMutableSet()
     performProjectAuthPost(
       "tasks",
@@ -66,20 +66,24 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         languageId = testData.englishLanguage.id,
         assignees =
           mutableSetOf(
-            testData.orgMember.self.id,
+            testData.user.id,
           ),
         keys = keys,
       ),
     ).andAssertThatJson {
       node("number").isNumber
       node("name").isEqualTo("Another task")
-      node("assignees[0].name").isEqualTo(testData.orgMember.self.name)
+      node("assignees[0].name").isEqualTo(testData.user.name)
       node("language.tag").isEqualTo(testData.englishLanguage.tag)
       node("totalItems").isEqualTo(keys.size)
     }
 
     performProjectAuthGet("tasks").andAssertThatJson {
       node("page.totalElements").isNumber.isEqualTo(BigDecimal(3))
+    }
+
+    performAuthGet("/v2/notifications").andAssertThatJson {
+      node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Another task")
     }
   }
 
