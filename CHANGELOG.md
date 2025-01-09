@@ -1,3 +1,10 @@
+## [3.92.2](https://github.com/tolgee/tolgee-platform/compare/v3.92.1...v3.92.2) (2025-01-09)
+
+
+### Bug Fixes
+
+* Telemetry blocks startup when offline ([#2794](https://github.com/tolgee/tolgee-platform/issues/2794)) ([3228b35](https://github.com/tolgee/tolgee-platform/commit/3228b354c0344080635f2908e190856247fdbf4e))
+
 ## [3.92.1](https://github.com/tolgee/tolgee-platform/compare/v3.92.0...v3.92.1) (2025-01-08)
 
 
