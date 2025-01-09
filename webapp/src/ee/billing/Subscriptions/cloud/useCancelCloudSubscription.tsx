@@ -24,7 +24,7 @@ export const useCancelCloudSubscription = () => {
         onSuccess() {
           refetchInitialData();
           messaging.success(
-            <T keyName="billing_plan_cancel_success_message" />
+            <T keyName="billing_subscription_will_be_cancelled_success_message" />
           );
         },
       }
