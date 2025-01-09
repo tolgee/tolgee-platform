@@ -10,8 +10,8 @@ class ProjectNotificationEnhancer(
   private val projectService: ProjectService,
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
 ) : NotificationEnhancer {
-  override fun enhanceNotifications(notifications: Collection<Pair<Notification, NotificationModel>>) {
-    val projectIds = notifications.mapNotNull { it.first.project?.id }.distinct()
+  override fun enhanceNotifications(notifications: Map<Notification, NotificationModel>) {
+    val projectIds = notifications.mapNotNull { (source, _) -> source.project?.id }.distinct()
     val projects = projectService.findAll(projectIds).associateBy { it.id }
 
     notifications.forEach { (source, target) ->

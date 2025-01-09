@@ -12,8 +12,8 @@ class TaskNotificationEnhancer(
   private val taskService: TaskService,
   private val taskModelAssembler: TaskModelAssembler,
 ) : NotificationEnhancer {
-  override fun enhanceNotifications(notifications: Collection<Pair<Notification, NotificationModel>>) {
-    val taskIds = notifications.mapNotNull { it.first.linkedTask?.id }
+  override fun enhanceNotifications(notifications: Map<Notification, NotificationModel>) {
+    val taskIds = notifications.mapNotNull { (source, _) -> source.linkedTask?.id }
     val convertedTasks = taskService.getTasksWithScope(taskIds)
 
     notifications.forEach { (source, target) ->

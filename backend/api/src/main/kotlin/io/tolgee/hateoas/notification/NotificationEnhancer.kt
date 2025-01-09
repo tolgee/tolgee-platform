@@ -11,5 +11,5 @@ fun interface NotificationEnhancer {
    * Takes list of input Notification and output NotificationModel.
    * It iterates over the pairs and alters the output NotificationModel by enhancing it of the new information.
    */
-  fun enhanceNotifications(notifications: Collection<Pair<Notification, NotificationModel>>)
+  fun enhanceNotifications(notifications: Map<Notification, NotificationModel>)
 }
