@@ -10,6 +10,7 @@ import { waitForGlobalLoading } from './loading';
 import { assertMessage, dismissMenu, gcyAdvanced } from './shared';
 import Chainable = Cypress.Chainable;
 import { selectNamespace } from './namespace';
+import { buildXpath } from './XpathBuilder';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -133,11 +134,7 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   if (newValue !== undefined) {
     // select all, delete and type new text
-    cy.gcy('global-editor')
-      .first()
-      .find('[contenteditable]')
-      .clear()
-      .type(newValue);
+    getEditor().clear().type(newValue);
 
     if (save) {
       getCellSaveButton().click();
@@ -145,6 +142,40 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
     waitForGlobalLoading();
   }
 };
+
+function getEditor() {
+  return buildXpath()
+    .descendant()
+    .withDataCy('global-editor')
+    .descendant()
+    .withAttribute('contenteditable')
+    .getElement();
+}
+
+export function editTranslation({
+  key,
+  languageTag,
+  newValue,
+}: {
+  key: string;
+  languageTag: string;
+  newValue: string;
+}) {
+  const translationCell = buildXpath()
+    .descendant()
+    .withDataCy('translations-key-name')
+    .descendantOrSelf()
+    .hasText(key)
+    .closestAncestor()
+    .withDataCy('translations-row')
+    .descendant()
+    .attributeEquals('data-cy-language', languageTag)
+    .getElement();
+
+  translationCell.click();
+  getEditor().clear().type(newValue);
+  getCellSaveButton().click();
+}
 
 export function confirmDiscard() {
   cy.gcy('global-confirmation-confirm').contains('Discard').click();
