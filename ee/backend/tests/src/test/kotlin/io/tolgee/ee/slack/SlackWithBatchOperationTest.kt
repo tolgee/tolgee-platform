@@ -4,9 +4,8 @@ import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.slack.api.model.block.SectionBlock
 import io.tolgee.development.testDataBuilder.data.SlackTestData
-import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.MachineTranslationTest
-import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -24,7 +23,7 @@ import org.springframework.test.annotation.DirtiesContext
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ContextRecreatingTest
-class SlackWithAutoTranslationTest : MachineTranslationTest() {
+class SlackWithBatchOperationTest : MachineTranslationTest() {
   @Autowired
   @MockBean
   lateinit var slackClient: Slack
@@ -32,7 +31,6 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
     private const val TRANSLATED_WITH_GOOGLE_RESPONSE = "Translated with Google"
-    private const val BASE_LANGUAGE_TAG = "en"
     private const val BASE_LANGUAGE_TRANSLATION = "base text"
   }
 
@@ -54,25 +52,14 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `sends auto translated text on a new key added with base translation`() {
+  fun `sends only 1 message per whole operation`() {
+    val keys = testData.add100Keys()
     saveTestData()
+    val keyIds = keys.map { it.id }
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
-    performCreateKey("new key", mapOf(BASE_LANGUAGE_TAG to BASE_LANGUAGE_TRANSLATION)).andIsCreated
-    waitForNotThrowing(timeout = 3_000) {
-      mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
-      val request = mockedSlackClient.chatPostMessageRequests.first()
-      assertThatActualTranslationsEqualToExpected(request)
-    }
-  }
+    performBatchOperation(keyIds)
 
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `sends auto translated text when base provided (non-existing)`() {
-    saveTestData()
-    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
-
-    performSetBaseTranslation(testData.baseTranslationNotExistKey.name)
     waitForNotThrowing(timeout = 3_000) {
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
       val request = mockedSlackClient.chatPostMessageRequests.first()
@@ -92,14 +79,11 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
     assertThat(actualMap).isEqualTo(getExpectedMapOfTranslations())
   }
 
-  private fun performSetBaseTranslation(key: String) {
-    performProjectAuthPut(
-      "translations",
-      SetTranslationsWithKeyDto(
-        key = key,
-        translations = mapOf(BASE_LANGUAGE_TAG to BASE_LANGUAGE_TRANSLATION),
-      ),
-    )
+  private fun performBatchOperation(keyIds: List<Long>) {
+    performProjectAuthPost(
+      "start-batch-job/machine-translate",
+      mapOf("keyIds" to keyIds, "targetLanguageIds" to listOf(testData.secondLanguage.id)),
+    ).andIsOk
   }
 
   fun getExpectedMapOfTranslations(baseTranslation: String = BASE_LANGUAGE_TRANSLATION) =
