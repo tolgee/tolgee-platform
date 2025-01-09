@@ -86,7 +86,8 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
           </StyledBillingSectionSubtitle>
           <Box flexGrow={1}>
             {activeSubscription.plan.type === 'PAY_AS_YOU_GO' &&
-              activeSubscription.estimatedCosts !== undefined && (
+              activeSubscription.estimatedCosts !== undefined &&
+              activeSubscription.status !== 'TRIALING' && (
                 <CloudEstimatedCosts
                   estimatedCosts={activeSubscription.estimatedCosts}
                 />

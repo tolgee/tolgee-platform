@@ -12,16 +12,8 @@ export const PlanPublicSwitchField: FC<{
 
   const { setFieldValue, values } = useFormikContext<CloudPlanFormData>();
 
-  function Wrapper({ children }: { children: ReactElement }) {
-    if (!disabled || !disabledInfo) {
-      return children;
-    }
-
-    return <Tooltip title={disabledInfo}>{children}</Tooltip>;
-  }
-
   return (
-    <Wrapper>
+    <Wrapper disabled={disabled} disabledInfo={disabledInfo}>
       <span>
         <FormControlLabel
           disabled={disabled}
@@ -43,3 +35,19 @@ export const PlanPublicSwitchField: FC<{
     </Wrapper>
   );
 };
+
+function Wrapper({
+  children,
+  disabledInfo,
+  disabled,
+}: {
+  children: ReactElement;
+  disabled?: boolean;
+  disabledInfo?: ReactNode;
+}) {
+  if (!disabled || !disabledInfo) {
+    return children;
+  }
+
+  return <Tooltip title={disabledInfo}>{children}</Tooltip>;
+}
