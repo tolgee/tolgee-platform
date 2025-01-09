@@ -11,12 +11,17 @@ export function XPathBuilder(initialXpath = '') {
     return builder;
   }
 
+  function withAttribute(attribute: string) {
+    xpath += `[@${attribute}]`;
+    return builder;
+  }
+
   function closestAncestor(tag = '*') {
     xpath += `/ancestor::${tag}`;
     return builder;
   }
 
-  function descendantOrSelf(tag: string) {
+  function descendantOrSelf(tag: string = '*') {
     xpath += `/descendant-or-self::${tag}`;
     return builder;
   }
@@ -59,6 +64,7 @@ export function XPathBuilder(initialXpath = '') {
     getElement,
     getInputUnderDataCy,
     getXpath: () => xpath,
+    withAttribute,
   };
 
   return builder;
