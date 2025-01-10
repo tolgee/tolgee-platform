@@ -95,7 +95,7 @@ export const TaskItem = ({
         alignItems="center"
         justifyContent="center"
       >
-        {t('task_keys_count', { value: task.totalItems })}
+        {t('task_word_count', { value: task.baseWordCount })}
       </StyledItem>
       <StyledProgress {...linkProps}>
         {task.state === 'IN_PROGRESS' ? (
