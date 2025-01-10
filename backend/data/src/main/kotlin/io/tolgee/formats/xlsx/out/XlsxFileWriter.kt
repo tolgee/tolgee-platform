@@ -4,8 +4,11 @@ import io.tolgee.formats.genericTable.TableEntry
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.util.Date
+import java.util.Optional
 
 class XlsxFileWriter(
+  private val createdDate: Date,
   private val languageTags: Array<String>,
   private val data: List<TableEntry>,
 ) {
@@ -18,6 +21,7 @@ class XlsxFileWriter(
   fun produceFiles(): InputStream {
     val output = ByteArrayOutputStream()
     val workbook = XSSFWorkbook()
+    workbook.properties.coreProperties.setCreated(Optional.of(createdDate))
     val sheet = workbook.createSheet()
 
     val header = sheet.createRow(0)
