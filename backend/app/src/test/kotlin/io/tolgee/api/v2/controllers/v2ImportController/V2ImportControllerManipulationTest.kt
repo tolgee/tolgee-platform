@@ -162,6 +162,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     // assign the existing french to the import french
     testData.importFrench.existingLanguage = testData.french
     val nsData = testData.addFilesWithNamespaces()
+    nsData.importFrenchInNs.existingLanguage = null
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
@@ -181,6 +182,7 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     // assign the existing french to the import french
     testData.importFrench.existingLanguage = testData.french
     val nsData = testData.addFilesWithNamespaces()
+    nsData.importFrenchInNs.existingLanguage = null
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
