@@ -3,7 +3,7 @@ import { Box, Dialog, useMediaQuery } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { LINKS, PARAMS, QUERY } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -29,9 +29,12 @@ export const ProjectTasksView = () => {
   const project = useProject();
   const { t } = useTranslate();
   const [search, setSearch] = useUrlSearchState('search', { defaultVal: '' });
-  const [showClosed, setShowClosed] = useUrlSearchState('showClosed', {
-    defaultVal: 'false',
-  });
+  const [showAll, setShowAll] = useUrlSearchState(
+    QUERY.TASKS_FILTERS_SHOW_ALL,
+    {
+      defaultVal: 'false',
+    }
+  );
 
   const { satisfiesPermission } = useProjectPermissions();
   const [view, setView] = useUrlSearchState('view', {
@@ -75,7 +78,7 @@ export const ProjectTasksView = () => {
     languages: languages?.map((l) => Number(l)),
     agencies: agencies?.map((a) => Number(a)),
     types: types as any[],
-    doneMinClosedAt: showClosed === 'true' ? undefined : minus30Days,
+    excludeClosedBefore: showAll === 'true' ? undefined : minus30Days,
   };
 
   function setFilter(val: TaskFilterType) {
@@ -118,8 +121,8 @@ export const ProjectTasksView = () => {
         <TasksHeader
           sx={{ mb: '20px', mt: '-12px' }}
           onSearchChange={setSearch}
-          showClosed={showClosed === 'true'}
-          onShowClosedChange={(val) => setShowClosed(String(val))}
+          showAll={showAll === 'true'}
+          onShowAllChange={(val) => setShowAll(String(val))}
           filter={filter}
           onFilterChange={setFilter}
           onAddTask={canEditTasks ? () => setAddDialog(true) : undefined}
@@ -136,7 +139,7 @@ export const ProjectTasksView = () => {
           <ProjectTasksList
             search={search}
             filter={filter}
-            showClosed={showClosed === 'true'}
+            showAll={showAll === 'true'}
             onOpenDetail={setDetail}
             newTaskActions={true}
           />
@@ -144,7 +147,7 @@ export const ProjectTasksView = () => {
           <ProjectTasksBoard
             search={search}
             filter={filter}
-            showClosed={showClosed === 'true'}
+            showAll={showAll === 'true'}
             onOpenDetail={setDetail}
           />
         )}

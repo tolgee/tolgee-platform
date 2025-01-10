@@ -8,14 +8,14 @@ type TaskWithProjectModel = components['schemas']['TaskWithProjectModel'];
 type QueryParameters = operations['getTasks_1']['parameters']['query'];
 
 type Props = {
-  showClosed: boolean;
+  showAll: boolean;
   filter: TaskFilterType;
   onOpenDetail: (task: TaskWithProjectModel) => void;
   search: string;
 };
 
 export const MyTasksBoard = ({
-  showClosed,
+  showAll,
   filter,
   onOpenDetail,
   search,
@@ -39,15 +39,15 @@ export const MyTasksBoard = ({
   const doneTasks = useMyBoardTask({
     query: {
       ...query,
-      filterState: showClosed ? ['DONE', 'CLOSED'] : ['DONE'],
-      filterDoneMinClosedAt: filter.doneMinClosedAt,
+      filterState: ['DONE', 'CLOSED'],
+      excludeClosedBefore: filter.excludeClosedBefore,
       filterAgency: filter.agencies,
     },
   });
 
   return (
     <TasksBoard
-      showClosed={showClosed}
+      showAll={showAll}
       onOpenDetail={(t) => onOpenDetail(t as TaskWithProjectModel)}
       doneTasks={doneTasks}
       inProgressTasks={inProgressTasks}

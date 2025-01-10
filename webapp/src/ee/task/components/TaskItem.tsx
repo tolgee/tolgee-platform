@@ -140,13 +140,15 @@ export const TaskItem = ({
             <TaskDetail />
           </IconButton>
         </Tooltip>
-        <IconButton
-          size="small"
-          onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
-          data-cy="task-item-menu"
-        >
-          <DotsVertical />
-        </IconButton>
+        <Tooltip title={t('task_actions_tooltip')} disableInteractive>
+          <IconButton
+            size="small"
+            onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
+            data-cy="task-item-menu"
+          >
+            <DotsVertical />
+          </IconButton>
+        </Tooltip>
       </StyledItem>
       <TaskMenu
         anchorEl={anchorEl}

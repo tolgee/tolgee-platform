@@ -550,7 +550,7 @@ declare namespace DataCy {
         "tasks-header-add-task" |
         "tasks-header-filter-select" |
         "tasks-header-order-translation" |
-        "tasks-header-show-closed" |
+        "tasks-header-show-all" |
         "tasks-view-board-button" |
         "tasks-view-list-button" |
         "this-is-the-element" |
