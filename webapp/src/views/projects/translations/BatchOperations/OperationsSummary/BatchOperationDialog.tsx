@@ -22,6 +22,7 @@ import { useBatchOperationTypeTranslate } from 'tg.translationTools/useBatchOper
 import { useOperationCancel } from './useOperationCancel';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 type Props = {
   operation: BatchJobModel;
@@ -36,6 +37,7 @@ export const BatchOperationDialog = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
+  const { incrementPlanLimitErrors } = useGlobalActions();
 
   const liveBatch = useProjectContext((c) =>
     c.batchOperations?.find((o) => o.id === operation.id)
@@ -71,6 +73,12 @@ export const BatchOperationDialog = ({
       onFinished();
     }
   }, [isFinished]);
+
+  useEffect(() => {
+    if (data.errorMessage === 'out_of_credits') {
+      incrementPlanLimitErrors();
+    }
+  }, [data.errorMessage]);
 
   return (
     <Dialog open>
