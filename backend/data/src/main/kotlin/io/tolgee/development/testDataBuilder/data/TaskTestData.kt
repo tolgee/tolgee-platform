@@ -11,6 +11,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.task.TaskKey
 
 class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   var projectUser: UserAccountBuilder
@@ -20,6 +21,7 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   var projectViewRoleUser: UserAccountBuilder
   var projectManageRoleUser: UserAccountBuilder
   var translateTask: TaskBuilder
+  var translateTaskKeys: MutableSet<TaskKey> = mutableSetOf()
   var reviewTask: TaskBuilder
   var relatedProject: ProjectBuilder
   var keysInTask: MutableSet<KeyBuilder> = mutableSetOf()
@@ -151,6 +153,7 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
         addTaskKey {
           task = translateTask.self
           key = it.self
+          translateTaskKeys.add(this)
         }
       }
 
@@ -265,5 +268,11 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
       }
     }
     return keys
+  }
+
+  fun processFirstKeyOfTranslateTask(): TaskKey {
+    val firstKey = translateTaskKeys.first()
+    firstKey.done = true
+    return firstKey
   }
 }
