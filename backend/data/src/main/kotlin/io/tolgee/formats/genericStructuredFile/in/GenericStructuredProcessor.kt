@@ -20,6 +20,7 @@ class GenericStructuredProcessor(
           context = context,
           data = data,
           pluralsViaSuffixesParser = format.pluralsViaSuffixesParser,
+          languageTag = languageTagOrGuess,
         ).preprocess()
     }
     processedData.import("")

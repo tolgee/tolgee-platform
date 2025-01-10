@@ -1,6 +1,7 @@
 package io.tolgee.formats.genericStructuredFile.`in`
 
 import io.tolgee.formats.allPluralKeywords
+import io.tolgee.formats.getPluralFormsForLocaleOrAll
 import io.tolgee.formats.importCommon.ParsedPluralsKey
 import io.tolgee.formats.importCommon.PluralsKeyParser
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -9,6 +10,7 @@ class GenericSuffixedPluralsPreprocessor(
   val context: FileProcessorContext,
   private val data: Any?,
   private val pluralsViaSuffixesParser: PluralsKeyParser,
+  private val languageTag: String,
 ) {
   fun preprocess(): Any? {
     return data.preprocess()
@@ -68,10 +70,14 @@ class GenericSuffixedPluralsPreprocessor(
 
   private fun Map<*, *>.preprocessMap(): Map<*, *> {
     return this.groupByPlurals(pluralsViaSuffixesParser).flatMap { (commonKey, values) ->
-      if (commonKey == null || values.size < 2) {
+      if (commonKey == null || (values.size < pluralKeywords.size && values.size < 2)) {
         return@flatMap values.useOriginalKey()
       }
       return@flatMap values.usePluralsKey(commonKey)
     }.toMap()
+  }
+
+  private val pluralKeywords by lazy {
+    getPluralFormsForLocaleOrAll(languageTag)
   }
 }
