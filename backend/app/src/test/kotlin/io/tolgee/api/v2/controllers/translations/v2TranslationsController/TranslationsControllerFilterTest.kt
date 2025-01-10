@@ -367,25 +367,30 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
-    performProjectAuthGet("/translations?filterTaskNumber=${testData.translateTask.self.number}").andIsOk.andAssertThatJson {
+    performProjectAuthGet(
+      "/translations?filterTaskNumber=${testData.translateTask.self.number}",
+    ).andIsOk.andAssertThatJson {
       node("_embedded.keys") {
         isArray.hasSize(2)
         node("[0].keyName").isEqualTo("key 0")
         node("[1].keyName").isEqualTo("key 1")
       }
     }
-    performProjectAuthGet("/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysNotDone=true").andIsOk.andAssertThatJson {
+    performProjectAuthGet(
+      "/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysNotDone=true",
+    ).andIsOk.andAssertThatJson {
       node("_embedded.keys") {
         isArray.hasSize(1)
         node("[0].keyName").isEqualTo("key 1")
       }
     }
-    performProjectAuthGet("/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysDone=true").andIsOk.andAssertThatJson {
+    performProjectAuthGet(
+      "/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysDone=true",
+    ).andIsOk.andAssertThatJson {
       node("_embedded.keys") {
         isArray.hasSize(1)
         node("[0].keyName").isEqualTo("key 0")
       }
     }
-
   }
 }
