@@ -1270,14 +1270,6 @@ export interface components {
         | "tasks.edit"
       )[];
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1287,6 +1279,14 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2018,7 +2018,8 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_ICU";
+        | "RESX_ICU"
+        | "XLSX";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2121,7 +2122,8 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_ICU";
+        | "RESX_ICU"
+        | "XLSX";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2397,11 +2399,11 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -2566,16 +2568,16 @@ export interface components {
       /** Format: int64 */
       id: number;
       userFullName?: string;
-      projectName: string;
+      username?: string;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
-      username?: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
-      description: string;
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -3334,7 +3336,11 @@ export interface components {
         | "XLIFF_JAVA"
         | "XLIFF_PHP"
         | "XLIFF_RUBY"
-        | "RESX_ICU";
+        | "RESX_ICU"
+        | "XLSX_ICU"
+        | "XLSX_JAVA"
+        | "XLSX_PHP"
+        | "XLSX_RUBY";
       /**
        * @description The existing language tag in the Tolgee platform to which the imported language should be mapped.
        *
@@ -3471,7 +3477,8 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_ICU";
+        | "RESX_ICU"
+        | "XLSX";
       /**
        * @description Delimiter to structure file content.
        *
@@ -3874,18 +3881,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -3956,7 +3963,8 @@ export interface components {
         | "YAML"
         | "JSON_I18NEXT"
         | "CSV"
-        | "RESX_ICU";
+        | "RESX_ICU"
+        | "XLSX";
       extension: string;
       mediaType: string;
       defaultFileStructureTemplate: string;
@@ -4063,9 +4071,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -4073,9 +4081,9 @@ export interface components {
       /** Format: int64 */
       id: number;
       baseTranslation?: string;
-      translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
+      translation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4676,11 +4684,11 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
-      description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
@@ -4804,16 +4812,16 @@ export interface components {
       /** Format: int64 */
       id: number;
       userFullName?: string;
-      projectName: string;
+      username?: string;
+      description: string;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
       projectId: number;
-      username?: string;
       scopes: string[];
       /** Format: int64 */
       expiresAt?: number;
-      description: string;
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -13085,7 +13093,8 @@ export interface operations {
           | "YAML"
           | "JSON_I18NEXT"
           | "CSV"
-          | "RESX_ICU";
+          | "RESX_ICU"
+          | "XLSX";
         /**
          * Delimiter to structure file content.
          *
