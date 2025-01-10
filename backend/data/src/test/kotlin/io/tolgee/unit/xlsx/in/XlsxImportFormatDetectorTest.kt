@@ -1,15 +1,15 @@
-package io.tolgee.unit.formats.csv.`in`
+package io.tolgee.unit.xlsx.`in`
 
-import io.tolgee.formats.csv.`in`.CSVImportFormatDetector
-import io.tolgee.formats.csv.`in`.CsvFileParser
 import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.xlsx.`in`.XlsxFileParser
+import io.tolgee.formats.xlsx.`in`.XlsxImportFormatDetector
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class CsvImportFormatDetectorTest {
+class XlsxImportFormatDetectorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
 
   @BeforeEach
@@ -19,40 +19,39 @@ class CsvImportFormatDetectorTest {
 
   @Test
   fun `detected i18next`() {
-    "src/test/resources/import/csv/example.csv".assertDetected(ImportFormat.CSV_ICU)
+    "src/test/resources/import/xlsx/example.xlsx".assertDetected(ImportFormat.XLSX_ICU)
   }
 
   @Test
   fun `detected icu`() {
-    "src/test/resources/import/csv/icu.csv".assertDetected(ImportFormat.CSV_ICU)
+    "src/test/resources/import/xlsx/icu.xlsx".assertDetected(ImportFormat.XLSX_ICU)
   }
 
   @Test
   fun `detected java`() {
-    "src/test/resources/import/csv/java.csv".assertDetected(ImportFormat.CSV_JAVA)
+    "src/test/resources/import/xlsx/java.xlsx".assertDetected(ImportFormat.XLSX_JAVA)
   }
 
   @Test
   fun `detected php`() {
-    "src/test/resources/import/csv/php.csv".assertDetected(ImportFormat.CSV_PHP)
+    "src/test/resources/import/xlsx/php.xlsx".assertDetected(ImportFormat.XLSX_PHP)
   }
 
   @Test
   fun `fallbacks to icu`() {
-    "src/test/resources/import/csv/unknown.csv".assertDetected(ImportFormat.CSV_ICU)
+    "src/test/resources/import/xlsx/unknown.xlsx".assertDetected(ImportFormat.XLSX_ICU)
   }
 
   private fun parseFile(path: String): Any? {
     val parser =
-      CsvFileParser(
+      XlsxFileParser(
         inputStream = File(path).inputStream(),
-        delimiter = ',',
         languageFallback = "unknown",
       )
-    return parser.tableParser.rows
+    return parser.rawData
   }
 
   private fun String.assertDetected(format: ImportFormat) {
-    CSVImportFormatDetector().detectFormat(parseFile(this)).assert.isEqualTo(format)
+    XlsxImportFormatDetector().detectFormat(parseFile(this)).assert.isEqualTo(format)
   }
 }

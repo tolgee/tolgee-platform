@@ -1,6 +1,7 @@
 package io.tolgee.service.export
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.ExportFormat
@@ -28,6 +29,7 @@ class FileExporterFactory(
   @Qualifier("yamlObjectMapper")
   private val yamlObjectMapper: ObjectMapper,
   private val customPrettyPrinter: CustomPrettyPrinter,
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   fun create(
     data: List<ExportTranslationView>,
@@ -112,7 +114,12 @@ class FileExporterFactory(
         ResxExporter(data, exportParams, projectIcuPlaceholdersSupport)
 
       ExportFormat.XLSX ->
-        XlsxFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
+        XlsxFileExporter(
+          currentDateProvider.date,
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+        )
     }
   }
 }
