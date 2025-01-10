@@ -15,7 +15,6 @@ import java.util.Calendar
 import java.util.Date
 
 class XlsxFileExporterTest {
-
   private val currentDateProvider = Mockito.mock(CurrentDateProvider::class.java)
 
   @BeforeEach
@@ -33,7 +32,9 @@ class XlsxFileExporterTest {
   fun `exports with placeholders (ICU placeholders disabled)`() {
     val exporter = getIcuPlaceholdersDisabledExporter()
     val data = getExportedCompressed(exporter)
-    data.assertFile("all.xlsx", """
+    data.assertFile(
+      "all.xlsx",
+      """
     |====================
     |[Content_Types].xml
     |--------------------
@@ -77,7 +78,8 @@ class XlsxFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8"?>
     |<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:B4"/><sheetViews><sheetView workbookViewId="0" tabSelected="true"/></sheetViews><sheetFormatPr defaultRowHeight="15.0"/><sheetData><row r="1"><c r="A1" t="s" s="0"><v>0</v></c><c r="B1" t="s" s="0"><v>1</v></c></row><row r="2"><c r="A2" t="s" s="0"><v>2</v></c><c r="B2" t="s" s="0"><v>3</v></c></row><row r="3"><c r="A3" t="s" s="0"><v>4</v></c><c r="B3" t="s" s="0"><v>5</v></c></row><row r="4"><c r="A4" t="s" s="0"><v>0</v></c><c r="B4" t="s" s="0"><v>6</v></c></row></sheetData><pageMargins bottom="0.75" footer="0.3" header="0.3" left="0.7" right="0.7" top="0.75"/></worksheet>
     |
-    """.trimMargin())
+      """.trimMargin(),
+    )
   }
 
   private fun getIcuPlaceholdersDisabledExporter(): XlsxFileExporter {
@@ -108,7 +110,9 @@ class XlsxFileExporterTest {
   fun `exports with placeholders (ICU placeholders enabled)`() {
     val exporter = getIcuPlaceholdersEnabledExporter()
     val data = getExportedCompressed(exporter)
-    data.assertFile("all.xlsx", """
+    data.assertFile(
+      "all.xlsx",
+      """
     |====================
     |[Content_Types].xml
     |--------------------
@@ -151,14 +155,17 @@ class XlsxFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8"?>
     |<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:B3"/><sheetViews><sheetView workbookViewId="0" tabSelected="true"/></sheetViews><sheetFormatPr defaultRowHeight="15.0"/><sheetData><row r="1"><c r="A1" t="s" s="0"><v>0</v></c><c r="B1" t="s" s="0"><v>1</v></c></row><row r="2"><c r="A2" t="s" s="0"><v>2</v></c><c r="B2" t="s" s="0"><v>3</v></c></row><row r="3"><c r="A3" t="s" s="0"><v>4</v></c><c r="B3" t="s" s="0"><v>5</v></c></row></sheetData><pageMargins bottom="0.75" footer="0.3" header="0.3" left="0.7" right="0.7" top="0.75"/></worksheet>
     |
-    """.trimMargin())
+      """.trimMargin(),
+    )
   }
 
   @Test
   fun `correct exports translation with colon`() {
     val exporter = getExporter(getTranslationWithColon())
     val data = getExportedCompressed(exporter)
-    data.assertFile("all.xlsx", """
+    data.assertFile(
+      "all.xlsx",
+      """
     |====================
     |[Content_Types].xml
     |--------------------
@@ -201,7 +208,8 @@ class XlsxFileExporterTest {
     |<?xml version="1.0" encoding="UTF-8"?>
     |<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:B2"/><sheetViews><sheetView workbookViewId="0" tabSelected="true"/></sheetViews><sheetFormatPr defaultRowHeight="15.0"/><sheetData><row r="1"><c r="A1" t="s" s="0"><v>0</v></c><c r="B1" t="s" s="0"><v>1</v></c></row><row r="2"><c r="A2" t="s" s="0"><v>2</v></c><c r="B2" t="s" s="0"><v>3</v></c></row></sheetData><pageMargins bottom="0.75" footer="0.3" header="0.3" left="0.7" right="0.7" top="0.75"/></worksheet>
     |
-    """.trimMargin())
+      """.trimMargin(),
+    )
   }
 
   private fun getTranslationWithColon(): MutableList<ExportTranslationView> {
@@ -248,4 +256,3 @@ class XlsxFileExporterTest {
     )
   }
 }
-
