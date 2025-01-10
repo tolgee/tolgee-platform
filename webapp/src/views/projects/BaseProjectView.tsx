@@ -42,7 +42,7 @@ export const BaseProjectView: React.FC<Props> = ({
       {...otherProps}
       navigation={[...prefixNavigation, ...(navigation || [])]}
       navigationRight={
-        <Box display="grid">
+        <Box display="grid" gridAutoFlow="column" gap={1}>
           <BatchOperationsSummary />
           <Usage />
         </Box>

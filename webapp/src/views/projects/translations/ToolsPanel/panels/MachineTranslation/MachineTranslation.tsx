@@ -9,6 +9,7 @@ import { useMTStreamed } from './useMTStreamed';
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
 import { MachineTranslationItem } from './MachineTranslationItem';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -41,6 +42,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   activeVariant,
 }) => {
   const { t } = useTranslate();
+  const { incrementPlanLimitErrors } = useGlobalActions();
 
   const deps = {
     keyId: keyData.keyId,
@@ -80,6 +82,12 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
     arrayResults.every((i) => i?.errorMessage === 'OUT_OF_CREDITS') &&
     Boolean(arrayResults.length);
   const contextPresent = keyData.contextPresent;
+
+  useEffect(() => {
+    if (outOfCredit) {
+      incrementPlanLimitErrors();
+    }
+  }, [outOfCredit]);
 
   useEffect(() => {
     setItemsCount(arrayResults.length);
