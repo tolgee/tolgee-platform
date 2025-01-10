@@ -8,6 +8,7 @@ export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskI
 export { PermissionsAdvancedEe } from '../ee/PermissionsAdvanced/PermissionsAdvancedEe';
 export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDetail';
 export { PrefilterTask } from '../ee/task/components/PrefilterTask';
+export { PrefilterTaskHideDoneSwitch as PrefilterTaskShowDoneSwitch } from '../ee/task/components/PrefilterTaskHideDoneSwitch';
 export { OrderTranslationsDialog } from '../ee/orderTranslations/OrderTranslationsDialog';
 export { AgencyLabel } from '../ee/orderTranslations/AgencyLabel';
 export { TaskItem } from '../ee/task/components/TaskItem';

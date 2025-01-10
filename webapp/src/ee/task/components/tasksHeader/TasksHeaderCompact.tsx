@@ -61,8 +61,8 @@ type Props = {
   sx?: SxProps;
   className?: string;
   onSearchChange: (value: string) => void;
-  showClosed: boolean;
-  onShowClosedChange: (value: boolean) => void;
+  showAll: boolean;
+  onShowAllChange: (value: boolean) => void;
   filter: TaskFilterType;
   onFilterChange: (value: TaskFilterType) => void;
   onOrderTranslation?: () => void;
@@ -76,8 +76,8 @@ export const TasksHeaderCompact = ({
   sx,
   className,
   onSearchChange,
-  showClosed,
-  onShowClosedChange,
+  showAll,
+  onShowAllChange,
   onOrderTranslation,
   filter,
   onFilterChange,
@@ -167,14 +167,14 @@ export const TasksHeaderCompact = ({
               />
             )}
             <FormControlLabel
-              checked={showClosed}
-              onChange={() => onShowClosedChange(!showClosed)}
+              checked={showAll}
+              onChange={() => onShowAllChange(!showAll)}
               control={<Checkbox size="small" />}
               sx={{ pl: 1 }}
               label={
                 <Box display="flex">
-                  {t('tasks_show_closed_label')}
-                  <LabelHint title={t('tasks_show_closed_label_tooltip')}>
+                  {t('tasks_show_all_label')}
+                  <LabelHint title={t('tasks_show_all_label_tooltip')}>
                     <span />
                   </LabelHint>
                 </Box>

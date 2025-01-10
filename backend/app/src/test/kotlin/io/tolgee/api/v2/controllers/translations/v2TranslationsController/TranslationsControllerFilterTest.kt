@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
+import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.development.testDataBuilder.data.TranslationSourceChangeStateTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertError
@@ -356,5 +357,40 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       .andIsOk.andAssertThatJson {
         node("_embedded.keys").isArray.hasSize(2)
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by task`() {
+    val testData = TaskTestData()
+    testData.processFirstKeyOfTranslateTask()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet(
+      "/translations?filterTaskNumber=${testData.translateTask.self.number}",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(2)
+        node("[0].keyName").isEqualTo("key 0")
+        node("[1].keyName").isEqualTo("key 1")
+      }
+    }
+    performProjectAuthGet(
+      "/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysNotDone=true",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("key 1")
+      }
+    }
+    performProjectAuthGet(
+      "/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysDone=true",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("key 0")
+      }
+    }
   }
 }

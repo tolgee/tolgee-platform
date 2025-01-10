@@ -135,7 +135,7 @@ export const BoardItem = ({
       </StyledRow>
       <StyledRow>
         <StyledSecondaryItem>
-          {t('task_keys_count', { value: task.totalItems })}
+          {t('task_word_count', { value: task.baseWordCount })}
         </StyledSecondaryItem>
         <StyledSecondaryItem>
           {task.dueDate ? (

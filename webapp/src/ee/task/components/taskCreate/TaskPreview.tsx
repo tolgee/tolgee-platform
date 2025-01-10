@@ -3,17 +3,15 @@ import { Box, Skeleton, styled, Tooltip, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { stringHash } from 'tg.fixtures/stringHash';
 import { FlagImage } from 'tg.component/languages/FlagImage';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { User } from 'tg.component/UserAccount';
 import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
-import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
+type KeysScopeView = components['schemas']['KeysScopeView'];
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -47,42 +45,26 @@ const StyledSmallCaption = styled('div')`
 type Props = {
   type: TaskType;
   language: LanguageModel;
-  keys: number[];
-  assigness: User[];
+  assignees: User[];
   onUpdateAssignees: (users: User[]) => void;
-  filters: TranslationStateType[];
   projectId: number;
   hideAssignees?: boolean;
+  scope: KeysScopeView | undefined;
 };
 
 export const TaskPreview = ({
   type,
   language,
-  keys,
-  assigness,
+  assignees,
   onUpdateAssignees,
-  filters,
   projectId,
   hideAssignees,
+  scope,
 }: Props) => {
   const { t } = useTranslate();
   const formatNumber = useNumberFormatter();
   const theme = useTheme();
   const translateTaskType = useTaskTypeTranslation();
-
-  const content = { keys, type, languageId: language.id };
-  const statsLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/tasks/calculate-scope',
-    method: 'post',
-    path: { projectId },
-    content: { 'application/json': content },
-    query: {
-      // @ts-ignore add dependencies to url, so react query works correctly
-      hash: stringHash(JSON.stringify(content)),
-      filterState: filters.filter((i) => i !== 'OUTDATED'),
-      filterOutdated: filters.includes('OUTDATED'),
-    },
-  });
 
   return (
     <StyledContainer
@@ -105,11 +87,10 @@ export const TaskPreview = ({
         <Box display="grid" alignContent="center">
           <StyledMetric>{t('create_task_preview_keys')}</StyledMetric>
           <StyledMetric data-cy="task-preview-keys">
-            {statsLoadable.data ? (
+            {scope ? (
               <Box display="flex" alignItems="center">
-                {formatNumber(statsLoadable.data.keyCount)}
-                {statsLoadable.data.keyCount !==
-                  statsLoadable.data.keyCountIncludingConflicts && (
+                {formatNumber(scope.keyCount)}
+                {scope.keyCount !== scope.keyCountIncludingConflicts && (
                   <Tooltip
                     title={t('create_task_preview_missing_keys_hint', {
                       type: translateTaskType(type).toLocaleLowerCase(),
@@ -136,27 +117,19 @@ export const TaskPreview = ({
         <Box display="grid" alignContent="center">
           <StyledMetric>{t('create_task_preview_words')}</StyledMetric>
           <StyledMetric data-cy="task-preview-words">
-            {statsLoadable.data ? (
-              formatNumber(statsLoadable.data.wordCount)
-            ) : (
-              <Skeleton />
-            )}
+            {scope ? formatNumber(scope.wordCount) : <Skeleton />}
           </StyledMetric>
         </Box>
         <Box display="grid" alignContent="center">
           <StyledMetric>{t('create_task_preview_characters')}</StyledMetric>
           <StyledMetric data-cy="task-preview-characters">
-            {statsLoadable.data ? (
-              formatNumber(statsLoadable.data.characterCount)
-            ) : (
-              <Skeleton />
-            )}
+            {scope ? formatNumber(scope.characterCount) : <Skeleton />}
           </StyledMetric>
         </Box>
       </Box>
       {!hideAssignees && (
         <AssigneeSearchSelect
-          value={assigness}
+          value={assignees}
           projectId={projectId}
           onChange={onUpdateAssignees}
           sx={{

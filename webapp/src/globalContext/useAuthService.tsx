@@ -101,10 +101,11 @@ export const useAuthService = (
     []
   );
   const [userId, setUserId] = useState<number>();
-  const [invitationCode, _setInvitationCode] = useLocalStorageState({
-    initial: undefined,
-    key: INVITATION_CODE_STORAGE_KEY,
-  });
+  const [invitationCode, _setInvitationCode, getInvitationCode] =
+    useLocalStorageState({
+      initial: undefined,
+      key: INVITATION_CODE_STORAGE_KEY,
+    });
 
   const [allowRegistration, setAllowRegistration] = useState(
     Boolean(invitationCode)
@@ -144,10 +145,13 @@ export const useAuthService = (
   }
 
   async function handleAcceptInvitation() {
-    if (invitationCode) {
+    // use code directly from localstorage
+    // react state might be outdated, but we don't want to wait for next render
+    const code = getInvitationCode();
+    if (code) {
       try {
         await acceptInvitationLoadable.mutateAsync({
-          path: { code: invitationCode },
+          path: { code },
         });
       } catch (error: any) {
         // we want to continue regardless, error will be logged
@@ -199,7 +203,7 @@ export const useAuthService = (
           query: {
             code,
             redirect_uri: redirectUri,
-            invitationCode: invitationCode,
+            invitationCode: getInvitationCode(),
             domain,
           },
         },
@@ -226,7 +230,12 @@ export const useAuthService = (
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(
         {
-          content: { 'application/json': { ...data, invitationCode } },
+          content: {
+            'application/json': {
+              ...data,
+              invitationCode: getInvitationCode(),
+            },
+          },
         },
         {
           onError: (error) => {

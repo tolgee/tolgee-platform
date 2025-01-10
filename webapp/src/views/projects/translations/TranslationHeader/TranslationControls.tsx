@@ -1,5 +1,5 @@
 import { LayoutGrid02, LayoutLeft, Plus } from '@untitled-ui/icons-react';
-import { Button, ButtonGroup, styled } from '@mui/material';
+import { Box, Button, ButtonGroup, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
@@ -7,6 +7,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
+import { PrefilterTaskShowDoneSwitch } from 'tg.ee';
 
 import {
   useTranslationsActions,
@@ -15,10 +16,9 @@ import {
 import { StickyHeader } from './StickyHeader';
 
 const StyledContainer = styled('div')`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
   padding-bottom: 8px;
   padding-top: 13px;
 `;
@@ -27,7 +27,6 @@ const StyledSpaced = styled('div')`
   display: flex;
   gap: 10px;
   padding: 0px 5px;
-  flex-wrap: wrap;
 `;
 
 const StyledTranslationsSearchField = styled(HeaderSearchField)`
@@ -57,6 +56,9 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { setFilters } = useTranslationsActions();
   const selectedLanguagesMapped =
     allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
+  const taskPrefilter = useTranslationsSelector(
+    (c) => c.prefilter?.task !== undefined
+  );
 
   const handleAddTranslation = () => {
     onDialogOpen();
@@ -79,6 +81,16 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             onChange={setFilters}
           />
         </StyledSpaced>
+
+        <Box overflow="hidden" position="relative">
+          {taskPrefilter && (
+            <PrefilterTaskShowDoneSwitch
+              sx={{
+                ml: 0,
+              }}
+            />
+          )}
+        </Box>
 
         <StyledSpaced>
           <LanguagesSelect

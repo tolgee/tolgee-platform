@@ -1231,6 +1231,24 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
        */
@@ -1269,24 +1287,6 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -2233,12 +2233,12 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
     };
     TranslationCommentModel: {
       /**
@@ -2397,15 +2397,15 @@ export interface components {
       token: string;
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2566,16 +2566,16 @@ export interface components {
       /** Format: int64 */
       id: number;
       userFullName?: string;
-      projectName: string;
+      description: string;
+      username?: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      projectId: number;
-      username?: string;
-      scopes: string[];
-      /** Format: int64 */
       expiresAt?: number;
-      description: string;
+      scopes: string[];
+      projectName: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -3874,18 +3874,18 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
@@ -4064,8 +4064,8 @@ export interface components {
       id: number;
       baseTranslation?: string;
       translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
@@ -4074,8 +4074,8 @@ export interface components {
       id: number;
       baseTranslation?: string;
       translation?: string;
-      description?: string;
       namespace?: string;
+      description?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4676,15 +4676,15 @@ export interface components {
       user: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      /** Format: int64 */
-      expiresAt?: number;
       description: string;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      expiresAt?: number;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4804,16 +4804,16 @@ export interface components {
       /** Format: int64 */
       id: number;
       userFullName?: string;
-      projectName: string;
+      description: string;
+      username?: string;
+      /** Format: int64 */
+      projectId: number;
       /** Format: int64 */
       lastUsedAt?: number;
       /** Format: int64 */
-      projectId: number;
-      username?: string;
-      scopes: string[];
-      /** Format: int64 */
       expiresAt?: number;
-      description: string;
+      scopes: string[];
+      projectName: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
@@ -8493,6 +8493,10 @@ export interface operations {
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
         filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -11636,6 +11640,8 @@ export interface operations {
         filterAgency?: number[];
         /** Exclude "done" tasks which are older than specified timestamp */
         filterDoneMinClosedAt?: number;
+        /** Exclude tasks closed before timestamp */
+        excludeClosedBefore?: number;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -14690,6 +14696,8 @@ export interface operations {
         filterAgency?: number[];
         /** Exclude "done" tasks which are older than specified timestamp */
         filterDoneMinClosedAt?: number;
+        /** Exclude tasks closed before timestamp */
+        excludeClosedBefore?: number;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -16882,6 +16890,10 @@ export interface operations {
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
         filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
       };
       path: {
         projectId: number;
@@ -16982,6 +16994,10 @@ export interface operations {
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
         filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
       };
       path: {
         projectId: number;

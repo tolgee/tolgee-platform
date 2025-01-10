@@ -21,11 +21,18 @@ import { FiltersType } from 'tg.component/translation/translationFilters/tools';
 import { Select } from 'tg.component/common/Select';
 import { useEffect } from 'react';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
+import { useApiQueries } from 'tg.service/http/useQueryApi';
+import { stringHash } from 'tg.fixtures/stringHash';
+import { StateType } from 'tg.constants/translationStates';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
+type KeysScopeView = components['schemas']['KeysScopeView'];
 
 const TASK_TYPES: TaskType[] = ['TRANSLATE', 'REVIEW'];
+
+export const DEFAULT_STATE_FILTERS_TRANSLATE: StateType[] = ['UNTRANSLATED'];
+export const DEFAULT_STATE_FILTERS_REVIEW: StateType[] = ['TRANSLATED'];
 
 const StyledTopPart = styled(Box)`
   display: grid;
@@ -60,6 +67,7 @@ type Props = {
   projectId: number;
   hideDueDate?: boolean;
   hideAssignees?: boolean;
+  onScopeChange?: (data: (KeysScopeView | undefined)[]) => void;
 };
 
 export const TaskCreateForm = ({
@@ -75,11 +83,38 @@ export const TaskCreateForm = ({
   projectId,
   hideDueDate,
   hideAssignees,
+  onScopeChange,
 }: Props) => {
   const { t } = useTranslate();
   const translateTaskType = useTaskTypeTranslation();
 
   const { values, setFieldValue } = useFormikContext<any>();
+
+  const taskScopes = useApiQueries(
+    languages.map((languageId) => {
+      const content = {
+        keys: selectedKeys,
+        type: values.type,
+        languageId,
+      };
+      return {
+        url: '/v2/projects/{projectId}/tasks/calculate-scope',
+        method: 'post',
+        path: { projectId },
+        content: { 'application/json': content },
+        query: {
+          // @ts-ignore
+          hash: stringHash(JSON.stringify(content)),
+          filterState: stateFilters.filter((i) => i !== 'OUTDATED'),
+          filterOutdated: stateFilters.includes('OUTDATED'),
+        },
+      };
+    })
+  );
+
+  useEffect(() => {
+    onScopeChange?.(taskScopes.map((i) => i.data));
+  }, [taskScopes.map((i) => String(i.dataUpdatedAt)).join(',')]);
 
   useEffect(() => {
     // make sure base language is not selected
@@ -215,19 +250,18 @@ export const TaskCreateForm = ({
 
           {allLanguages && (
             <Box display="grid" gap={2} mt={1}>
-              {languages?.map((language) => (
+              {languages?.map((language, i) => (
                 <TaskPreview
                   key={language}
                   language={allLanguages.find((l) => l.id === language)!}
                   type={values.type}
-                  keys={selectedKeys}
-                  assigness={values.assignees[language] ?? []}
+                  projectId={projectId}
+                  assignees={values.assignees[language] ?? []}
                   onUpdateAssignees={(users) => {
                     setFieldValue(`assignees[${language}]`, users);
                   }}
-                  filters={stateFilters}
-                  projectId={projectId}
                   hideAssignees={hideAssignees}
+                  scope={taskScopes[i]?.data}
                 />
               ))}
             </Box>

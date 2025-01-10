@@ -18,14 +18,14 @@ const StyledSeparator = styled('div')`
 `;
 
 type Props = {
-  showClosed: boolean;
+  showAll: boolean;
   filter: TaskFilterType;
   onOpenDetail: (task: TaskWithProjectModel) => void;
   search: string;
 };
 
 export const MyTasksList = ({
-  showClosed,
+  showAll,
   filter,
   search,
   onOpenDetail,
@@ -43,10 +43,9 @@ export const MyTasksList = ({
       page: Number(page),
       search,
       sort: ['number,desc'],
-      filterNotState: showClosed ? undefined : ['CLOSED'],
       filterProject: filter.projects,
       filterType: filter.types,
-      filterDoneMinClosedAt: filter.doneMinClosedAt,
+      excludeClosedBefore: filter.excludeClosedBefore,
       filterAgency: filter.agencies,
     },
     options: {

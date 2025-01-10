@@ -174,6 +174,7 @@ declare namespace DataCy {
         "edit-pat-dialog-content" |
         "edit-pat-dialog-description-input" |
         "edit-pat-dialog-title" |
+        "empty-scope-dialog" |
         "expiration-date-field" |
         "expiration-date-picker" |
         "expiration-select" |
@@ -549,7 +550,7 @@ declare namespace DataCy {
         "tasks-header-add-task" |
         "tasks-header-filter-select" |
         "tasks-header-order-translation" |
-        "tasks-header-show-closed" |
+        "tasks-header-show-all" |
         "tasks-view-board-button" |
         "tasks-view-list-button" |
         "this-is-the-element" |
@@ -609,6 +610,7 @@ declare namespace DataCy {
         "translations-select-all-button" |
         "translations-shortcuts-command" |
         "translations-state-filter" |
+        "translations-state-filter-clear" |
         "translations-state-filter-option" |
         "translations-state-indicator" |
         "translations-table-cell" |

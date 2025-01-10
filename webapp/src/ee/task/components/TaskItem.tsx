@@ -95,7 +95,7 @@ export const TaskItem = ({
         alignItems="center"
         justifyContent="center"
       >
-        {t('task_keys_count', { value: task.totalItems })}
+        {t('task_word_count', { value: task.baseWordCount })}
       </StyledItem>
       <StyledProgress {...linkProps}>
         {task.state === 'IN_PROGRESS' ? (
@@ -140,13 +140,15 @@ export const TaskItem = ({
             <TaskDetail />
           </IconButton>
         </Tooltip>
-        <IconButton
-          size="small"
-          onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
-          data-cy="task-item-menu"
-        >
-          <DotsVertical />
-        </IconButton>
+        <Tooltip title={t('task_actions_tooltip')} disableInteractive>
+          <IconButton
+            size="small"
+            onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
+            data-cy="task-item-menu"
+          >
+            <DotsVertical />
+          </IconButton>
+        </Tooltip>
       </StyledItem>
       <TaskMenu
         anchorEl={anchorEl}

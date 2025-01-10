@@ -145,12 +145,22 @@ class QueryGlobalFiltering(
 
   private fun filterTask() {
     if (params.filterTaskNumber != null) {
-      val translationTaskJoin =
+      val translationTaskKeyJoin =
         queryBase.root
           .join(Key_.tasks, JoinType.LEFT)
+      val translationTaskJoin =
+        translationTaskKeyJoin
           .join(TaskKey_.task, JoinType.LEFT)
 
       queryBase.whereConditions.add(translationTaskJoin.get(Task_.number).`in`(params.filterTaskNumber))
+
+      if (params.filterTaskKeysNotDone == true) {
+        queryBase.whereConditions.add(translationTaskKeyJoin.get(TaskKey_.done).`in`(false))
+      }
+
+      if (params.filterTaskKeysDone == true) {
+        queryBase.whereConditions.add(translationTaskKeyJoin.get(TaskKey_.done).`in`(true))
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 import { T, useTranslate } from '@tolgee/react';
-import { Chip, styled } from '@mui/material';
+import { Chip, styled, Tooltip } from '@mui/material';
 
 import { AgencyLabel } from 'tg.ee';
 import { PermissionsMenu } from 'tg.component/PermissionsSettings/PermissionsMenu';
@@ -100,7 +100,11 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
             <Chip size="small" label={project.organizationOwner?.name} />
           )}
           {user.directPermission?.agency && (
-            <AgencyLabel agency={user.directPermission.agency} />
+            <Tooltip title={t('member_item_agency_tooltip')}>
+              <span>
+                <AgencyLabel agency={user.directPermission.agency} />
+              </span>
+            </Tooltip>
           )}
         </StyledItemText>
       </StyledItemUser>

@@ -15,10 +15,16 @@ import { StateType } from 'tg.constants/translationStates';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
-import { TaskCreateForm } from './TaskCreateForm';
+import {
+  DEFAULT_STATE_FILTERS_REVIEW,
+  DEFAULT_STATE_FILTERS_TRANSLATE,
+  TaskCreateForm,
+} from './TaskCreateForm';
+import { EmptyScopeDialog } from './EmptyScopeDialog';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
+type KeysScopeView = components['schemas']['KeysScopeView'];
 
 const StyledMainTitle = styled(DialogTitle)`
   padding-bottom: 0px;
@@ -52,6 +58,8 @@ export type InitialValues = {
   dueDate: number;
   languageAssignees: Record<number, User[]>;
   selection: number[];
+  filters: FiltersType;
+  stateFilters: TranslationStateType[];
 };
 
 type Props = {
@@ -83,7 +91,7 @@ export const TaskCreateDialog = ({
   });
 
   const [filters, setFilters] = useState<FiltersType>({});
-  const [stateFilters, setStateFilters] = useState<TranslationStateType[]>([]);
+  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
   const [languages, setLanguages] = useState(initialValues?.languages ?? []);
 
   const selectedLoadable = useApiQuery({
@@ -101,6 +109,20 @@ export const TaskCreateDialog = ({
 
   const selectedKeys =
     initialValues?.selection ?? selectedLoadable.data?.ids ?? [];
+
+  const [scope, setScope] = useState<(KeysScopeView | undefined)[]>([]);
+  const [emptyScope, setEmptyScope] = useState<LanguageModel | true>();
+
+  const canBeSubmitted = scope.every(Boolean);
+
+  function getStateFilters(taskType: TaskType) {
+    if (_stateFilters) {
+      return _stateFilters;
+    }
+    return taskType === 'TRANSLATE'
+      ? DEFAULT_STATE_FILTERS_TRANSLATE
+      : DEFAULT_STATE_FILTERS_REVIEW;
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg">
@@ -127,6 +149,15 @@ export const TaskCreateDialog = ({
         }}
         validationSchema={Validation.CREATE_TASK_FORM(t)}
         onSubmit={async (values) => {
+          const emptyScope = scope.findIndex((sc) => !sc?.keyCount);
+          if (emptyScope != -1) {
+            const language = allLanguages.find(
+              (l) => l.id === languages[emptyScope]
+            );
+            setEmptyScope(language || true);
+            return;
+          }
+
           const data = languages.map((languageId) => ({
             type: values.type,
             name: values.name,
@@ -136,6 +167,9 @@ export const TaskCreateDialog = ({
             assignees: values.assignees[languageId]?.map((u) => u.id) ?? [],
             keys: selectedKeys,
           }));
+
+          const stateFilters = getStateFilters(values.type);
+
           createTasksLoadable.mutate(
             {
               path: { projectId },
@@ -163,7 +197,7 @@ export const TaskCreateDialog = ({
           );
         }}
       >
-        {({ submitForm }) => {
+        {({ submitForm, values }) => {
           return (
             <StyledContainer>
               <TaskCreateForm
@@ -174,14 +208,17 @@ export const TaskCreateDialog = ({
                 setLanguages={setLanguages}
                 filters={filters}
                 setFilters={initialValues?.selection ? undefined : setFilters}
-                stateFilters={stateFilters}
+                stateFilters={getStateFilters(values.type)}
                 setStateFilters={setStateFilters}
                 projectId={projectId}
+                onScopeChange={setScope}
               />
               <StyledActions>
                 <Button onClick={onClose}>{t('global_cancel_button')}</Button>
                 <LoadingButton
-                  disabled={!languages.length || !taskFeature}
+                  disabled={
+                    !languages.length || !taskFeature || !canBeSubmitted
+                  }
                   onClick={submitForm}
                   color="primary"
                   variant="contained"
@@ -191,6 +228,12 @@ export const TaskCreateDialog = ({
                   {t('create_task_submit_button')}
                 </LoadingButton>
               </StyledActions>
+              {emptyScope && (
+                <EmptyScopeDialog
+                  language={emptyScope}
+                  onClose={() => setEmptyScope(undefined)}
+                />
+              )}
             </StyledContainer>
           );
         }}
