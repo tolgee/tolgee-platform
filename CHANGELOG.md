@@ -1,3 +1,10 @@
+## [3.92.3](https://github.com/tolgee/tolgee-platform/compare/v3.92.2...v3.92.3) (2025-01-10)
+
+
+### Bug Fixes
+
+* move notifications to top-right corner ([#2814](https://github.com/tolgee/tolgee-platform/issues/2814)) ([fd687fe](https://github.com/tolgee/tolgee-platform/commit/fd687fe7bc99473f42d232c70f16f3ad3d1827b4))
+
 ## [3.92.2](https://github.com/tolgee/tolgee-platform/compare/v3.92.1...v3.92.2) (2025-01-09)
 
 
