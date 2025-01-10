@@ -241,6 +241,16 @@ export const testExportFormats = (
       },
     }
   );
+
+  testFormatWithMessageFormats(
+    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    {
+      format: 'XLSX',
+      expectedParams: {
+        format: 'XLSX',
+      },
+    }
+  );
 };
 
 const testFormat = (

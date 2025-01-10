@@ -225,6 +225,27 @@ enum class ImportFormat(
       ),
   ),
 
+  XLSX_ICU(
+    ImportFileFormat.XLSX,
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        canContainIcu = true,
+        toIcuPlaceholderConvertorFactory = null,
+      ),
+  ),
+  XLSX_JAVA(
+    ImportFileFormat.XLSX,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { JavaToIcuPlaceholderConvertor() },
+  ),
+  XLSX_PHP(
+    ImportFileFormat.XLSX,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { PhpToIcuPlaceholderConvertor() },
+  ),
+  XLSX_RUBY(
+    ImportFileFormat.XLSX,
+    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor { RubyToIcuPlaceholderConvertor() },
+  ),
+
   ;
 
   val messageConvertor: ImportMessageConvertor
