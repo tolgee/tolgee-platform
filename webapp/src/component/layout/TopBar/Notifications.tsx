@@ -5,7 +5,7 @@ import {
   List,
   ListItem,
   ListItemButton,
-  styled, useTheme,
+  styled,
 } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import { useHistory } from 'react-router-dom';
@@ -70,7 +70,10 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         onClick={handleOpen}
         size="large"
       >
-        <StyledBadge badgeContent={3} color="secondary">
+        <StyledBadge
+          badgeContent={notifications?.page?.totalElements}
+          color="secondary"
+        >
           <Bell01 />
         </StyledBadge>
       </StyledIconButton>
