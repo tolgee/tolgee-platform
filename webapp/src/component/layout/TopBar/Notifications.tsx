@@ -5,7 +5,7 @@ import {
   List,
   ListItem,
   ListItemButton,
-  styled,
+  styled, useTheme,
 } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import { useHistory } from 'react-router-dom';
@@ -25,6 +25,12 @@ const StyledIconButton = styled(IconButton)`
 
   img {
     user-drag: none;
+  }
+`;
+
+const StyledBadge = styled(Badge)`
+  .MuiBadge-badge {
+    color: ${({ theme }) => theme.palette.background.default};
   }
 `;
 
@@ -64,9 +70,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         onClick={handleOpen}
         size="large"
       >
-        <Badge badgeContent={3} color="secondary">
+        <StyledBadge badgeContent={3} color="secondary">
           <Bell01 />
-        </Badge>
+        </StyledBadge>
       </StyledIconButton>
       <StyledMenu
         id="notifications-list"
