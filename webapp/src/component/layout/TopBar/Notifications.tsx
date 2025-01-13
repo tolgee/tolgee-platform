@@ -28,12 +28,6 @@ const StyledIconButton = styled(IconButton)`
   }
 `;
 
-const StyledBadge = styled(Badge)`
-  .MuiBadge-badge {
-    color: ${({ theme }) => theme.palette.background.default};
-  }
-`;
-
 const ListItemHeader = styled(ListItem)`
   font-weight: bold;
 `;
@@ -70,12 +64,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         onClick={handleOpen}
         size="large"
       >
-        <StyledBadge
+        <Badge
           badgeContent={notifications?.page?.totalElements}
           color="secondary"
         >
           <Bell01 />
-        </StyledBadge>
+        </Badge>
       </StyledIconButton>
       <StyledMenu
         id="notifications-list"
