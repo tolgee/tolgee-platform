@@ -17,12 +17,8 @@ val allPluralKeywords =
   )
 
 fun getPluralFormsForLocaleOrAll(languageTag: String): List<String> {
-  return try {
-    val locale = getULocaleFromTag(languageTag)
-    PluralRules.forLocale(locale)?.keywords?.toList() ?: allPluralKeywords
-  } catch (_: Exception) {
-    allPluralKeywords
-  }
+  val locale = getULocaleFromTag(languageTag)
+  return PluralRules.forLocale(locale)?.keywords?.toList() ?: allPluralKeywords
 }
 
 fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
