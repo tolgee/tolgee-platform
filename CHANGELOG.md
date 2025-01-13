@@ -1,3 +1,10 @@
+## [3.92.5](https://github.com/tolgee/tolgee-platform/compare/v3.92.4...v3.92.5) (2025-01-13)
+
+
+### Bug Fixes
+
+* Fixed multiple subscribed websockets ([#2834](https://github.com/tolgee/tolgee-platform/issues/2834)) ([9c123c5](https://github.com/tolgee/tolgee-platform/commit/9c123c5f40d14660a4904944accad4f28371859e))
+
 ## [3.92.4](https://github.com/tolgee/tolgee-platform/compare/v3.92.3...v3.92.4) (2025-01-13)
 
 
