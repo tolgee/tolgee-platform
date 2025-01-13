@@ -22,6 +22,7 @@ export const AgencyLabel = NotIncludedInOss('AgencyLabel');
 export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
+export const TaskAllDonePlaceholder = Empty;
 
 export const routes = {
   Root: Empty,

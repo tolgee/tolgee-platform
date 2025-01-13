@@ -16,13 +16,15 @@ type Props = {
 
 export const useTaskService = ({ translations }: Props) => {
   const project = useProject();
-  const finishTask = useFinishTask();
+  const finishTaskLoadable = useFinishTask();
   const putTaskTranslation = usePutTaskTranslation();
 
-  const handleFinishTask = (taskNumber: number) => {
-    return finishTask.mutateAsync({
+  const finishTask = async (taskNumber: number) => {
+    await finishTaskLoadable.mutateAsync({
       path: { projectId: project.id, taskNumber },
     });
+    messageService.success(<T keyName="task_finished_confirmation_success" />);
+    await translations.refetchTranslations();
   };
 
   const setTaskTranslationState = (data: SetTaskTranslationState) =>
@@ -64,12 +66,7 @@ export const useTaskService = ({ translations }: Props) => {
                 <T keyName="task_finished_confirmation_confirm" />
               ),
               onConfirm() {
-                handleFinishTask(data.taskNumber).then(() => {
-                  translations.refetchTranslations();
-                });
-                messageService.success(
-                  <T keyName="task_finished_confirmation_success" />
-                );
+                finishTask(data.taskNumber);
               },
             });
           }
@@ -79,6 +76,7 @@ export const useTaskService = ({ translations }: Props) => {
 
   return {
     setTaskTranslationState,
-    isLoading: putTaskTranslation.isLoading || finishTask.isLoading,
+    finishTask,
+    isLoading: putTaskTranslation.isLoading || finishTaskLoadable.isLoading,
   };
 };
