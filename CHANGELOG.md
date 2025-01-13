@@ -1,3 +1,10 @@
+## [3.92.4](https://github.com/tolgee/tolgee-platform/compare/v3.92.3...v3.92.4) (2025-01-13)
+
+
+### Bug Fixes
+
+* show out of credits error at machine translations and batch operations ([#2830](https://github.com/tolgee/tolgee-platform/issues/2830)) ([0eb095d](https://github.com/tolgee/tolgee-platform/commit/0eb095dd710054be4055063e8960a3e51c1ae5cc))
+
 ## [3.92.3](https://github.com/tolgee/tolgee-platform/compare/v3.92.2...v3.92.3) (2025-01-10)
 
 
