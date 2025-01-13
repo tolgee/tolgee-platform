@@ -36,13 +36,11 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
   const subscriptions: Subscription<any>[] = [];
 
   const resubscribe = () => {
-    subscriptions.forEach(() => {
-      if (_client) {
-        subscriptions.forEach((subscription) => {
-          subscribeToStompChannel(subscription);
-        });
-      }
-    });
+    if (_client) {
+      subscriptions.forEach((subscription) => {
+        subscribeToStompChannel(subscription);
+      });
+    }
   };
 
   const subscribeToStompChannel = (subscription) => {
