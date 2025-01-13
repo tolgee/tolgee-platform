@@ -250,7 +250,7 @@ export const TaskMenu = ({
         {newTaskActions && <Divider />}
 
         <MenuItem onClick={handleGetExcelReport}>
-          {t('task_menu_generate_report')}
+          {t('task_menu_download_report')}
         </MenuItem>
       </Menu>
       {taskCreate && languagesLoadable.data && (
