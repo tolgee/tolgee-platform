@@ -79,9 +79,9 @@ private const val TASK_FILTERS = """
         or tk.closedAt > :#{#filters.filterDoneMinClosedAt}
     )
     and (
-        :#{#filters.excludeClosedBefore} is null
+        :#{#filters.filterNotClosedBefore} is null
         or tk.closedAt is null
-        or tk.closedAt > :#{#filters.excludeClosedBefore}
+        or tk.closedAt > :#{#filters.filterNotClosedBefore}
     )
 """
 
