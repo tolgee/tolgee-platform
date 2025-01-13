@@ -13,8 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
-import java.time.Instant
-import java.time.ZonedDateTime
 
 class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TaskTestData
@@ -371,7 +369,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     // should be included
     performProjectAuthGet(
-      "tasks?filterNotClosedBefore=${timeBeforeCreation}",
+      "tasks?filterNotClosedBefore=$timeBeforeCreation",
     ).andIsOk.andAssertThatJson {
       node("page").node("totalElements").isEqualTo(2)
       node("_embedded.tasks[0].name").isEqualTo("Translate task")
@@ -379,7 +377,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     // should be excluded
     performProjectAuthGet(
-      "tasks?filterNotClosedBefore=${timeAfterCreation}",
+      "tasks?filterNotClosedBefore=$timeAfterCreation",
     ).andIsOk.andAssertThatJson {
       node("page").node("totalElements").isEqualTo(1)
       node("_embedded.tasks[0].name").isEqualTo("Review task")
