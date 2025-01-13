@@ -19,7 +19,7 @@ class XlsxFileExporterTest {
 
   @BeforeEach
   fun setup() {
-    val now = Date(2025, Calendar.JANUARY, 10)
+    val now = Date(Date.UTC(2025-1900, Calendar.JANUARY, 10, 0, 0, 0))
     Mockito.`when`(currentDateProvider.date).thenReturn(now)
   }
 
@@ -51,7 +51,7 @@ class XlsxFileExporterTest {
     |====================
     |docProps/core.xml
     |--------------------
-    |<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dcterms:created xsi:type="dcterms:W3CDTF">3925-01-09T23:00:00Z</dcterms:created><dc:creator>Apache POI</dc:creator></cp:coreProperties>
+    |<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dcterms:created xsi:type="dcterms:W3CDTF">2025-01-10T00:00:00Z</dcterms:created><dc:creator>Apache POI</dc:creator></cp:coreProperties>
     |====================
     |xl/sharedStrings.xml
     |--------------------
@@ -129,7 +129,7 @@ class XlsxFileExporterTest {
     |====================
     |docProps/core.xml
     |--------------------
-    |<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dcterms:created xsi:type="dcterms:W3CDTF">3925-01-09T23:00:00Z</dcterms:created><dc:creator>Apache POI</dc:creator></cp:coreProperties>
+    |<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dcterms:created xsi:type="dcterms:W3CDTF">2025-01-10T00:00:00Z</dcterms:created><dc:creator>Apache POI</dc:creator></cp:coreProperties>
     |====================
     |xl/sharedStrings.xml
     |--------------------
@@ -182,7 +182,7 @@ class XlsxFileExporterTest {
     |====================
     |docProps/core.xml
     |--------------------
-    |<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dcterms:created xsi:type="dcterms:W3CDTF">3925-01-09T23:00:00Z</dcterms:created><dc:creator>Apache POI</dc:creator></cp:coreProperties>
+    |<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dcterms:created xsi:type="dcterms:W3CDTF">2025-01-10T00:00:00Z</dcterms:created><dc:creator>Apache POI</dc:creator></cp:coreProperties>
     |====================
     |xl/sharedStrings.xml
     |--------------------
