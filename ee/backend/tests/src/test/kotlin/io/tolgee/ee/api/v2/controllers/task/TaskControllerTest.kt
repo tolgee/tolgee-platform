@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
+import java.time.Instant
+import java.time.ZonedDateTime
 
 class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TaskTestData
@@ -353,6 +355,34 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "tasks/${testData.translateTask.self.number}/reopen",
     ).andIsOk.andAssertThatJson {
       node("state").isEqualTo("NEW")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `closed tasks can be filtered out by timestamp`() {
+    val timeBeforeCreation = System.currentTimeMillis()
+    performProjectAuthPut(
+      "tasks/${testData.translateTask.self.number}/close",
+    ).andIsOk.andAssertThatJson {
+      node("state").isEqualTo("CLOSED")
+    }
+    val timeAfterCreation = System.currentTimeMillis()
+
+    // should be included
+    performProjectAuthGet(
+      "tasks?filterNotClosedBefore=${timeBeforeCreation}",
+    ).andIsOk.andAssertThatJson {
+      node("page").node("totalElements").isEqualTo(2)
+      node("_embedded.tasks[0].name").isEqualTo("Translate task")
+    }
+
+    // should be excluded
+    performProjectAuthGet(
+      "tasks?filterNotClosedBefore=${timeAfterCreation}",
+    ).andIsOk.andAssertThatJson {
+      node("page").node("totalElements").isEqualTo(1)
+      node("_embedded.tasks[0].name").isEqualTo("Review task")
     }
   }
 }
