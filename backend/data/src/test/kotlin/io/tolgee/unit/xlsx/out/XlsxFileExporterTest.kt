@@ -19,7 +19,7 @@ class XlsxFileExporterTest {
 
   @BeforeEach
   fun setup() {
-    val now = Date(Date.UTC(2025-1900, Calendar.JANUARY, 10, 0, 0, 0))
+    val now = Date(Date.UTC(2025 - 1900, Calendar.JANUARY, 10, 0, 0, 0))
     Mockito.`when`(currentDateProvider.date).thenReturn(now)
   }
 
