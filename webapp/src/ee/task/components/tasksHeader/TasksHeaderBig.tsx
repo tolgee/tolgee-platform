@@ -104,6 +104,7 @@ export const TasksHeaderBig = ({
           onChange={() => onShowAllChange(!showAll)}
           control={<Checkbox size="small" />}
           data-cy="tasks-header-show-all"
+          sx={{ whiteSpace: 'nowrap' }}
           label={
             <Box display="flex">
               {t('tasks_show_all_label')}

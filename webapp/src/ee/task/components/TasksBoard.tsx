@@ -127,7 +127,7 @@ export const TasksBoard = ({
                 </Box>
               </Box>
             ) : (
-              <Box>
+              <Box display="inline">
                 <Box display="inline" color={stateColor('DONE')}>
                   {translateState('DONE')}
                 </Box>

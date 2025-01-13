@@ -129,7 +129,7 @@ export const TasksHeaderCompact = ({
         </StyledSearchSpaced>
       ) : (
         <>
-          <Box sx={{ display: 'flex', gap: '8px' }}>
+          <Box sx={{ display: 'grid', gap: '8px', gridAutoFlow: 'column' }}>
             <Badge
               color="primary"
               badgeContent={localSearch.length}
@@ -170,9 +170,9 @@ export const TasksHeaderCompact = ({
               checked={showAll}
               onChange={() => onShowAllChange(!showAll)}
               control={<Checkbox size="small" />}
-              sx={{ pl: 1 }}
+              sx={{ pl: 1, overflow: 'hidden' }}
               label={
-                <Box display="flex">
+                <Box display="flex" whiteSpace="nowrap">
                   {t('tasks_show_all_label')}
                   <LabelHint title={t('tasks_show_all_label_tooltip')}>
                     <span />
