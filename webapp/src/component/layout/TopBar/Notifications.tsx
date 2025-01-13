@@ -80,6 +80,13 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           vertical: 'top',
           horizontal: 'right',
         }}
+        slotProps={{
+          paper: {
+            style: {
+              maxHeight: 400,
+            },
+          },
+        }}
       >
         <List>
           <ListItemHeader divider>
