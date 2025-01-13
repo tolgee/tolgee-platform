@@ -90,7 +90,7 @@ class WebSocketConfig(
   ) {
     val userId =
       destination?.let {
-        "/user/([0-9]+)".toRegex().find(it)?.groupValues
+        "/users/([0-9]+)".toRegex().find(it)?.groupValues
           ?.getOrNull(1)?.toLong()
       } ?: return
 
