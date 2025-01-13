@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { LINKS, PARAMS, QUERY } from 'tg.constants/links';
 import { useUser } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -45,17 +46,23 @@ export const TaskRedirect = () => {
     return url;
   };
 
-  const taskLoadable = useApiQuery({
+  const taskLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}',
     method: 'get',
-    path: { projectId: project.id, taskNumber: Number(taskNum) },
   });
 
   useEffect(() => {
-    if (taskLoadable.data) {
-      history.replace(getLinkToTask(taskLoadable.data));
-    }
-  }, [taskLoadable.data]);
+    taskLoadable.mutate(
+      {
+        path: { projectId: project.id, taskNumber: Number(taskNum) },
+      },
+      {
+        onSuccess(data) {
+          history.replace(getLinkToTask(data));
+        },
+      }
+    );
+  }, []);
 
   return <BoxLoading />;
 };
