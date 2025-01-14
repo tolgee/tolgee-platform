@@ -1,8 +1,6 @@
 import { Box, styled } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { PrepareUpgradeDialog } from '../../PrepareUpgradeDialog';
-
-import { confirmation } from 'tg.hooks/confirmation';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 import { usePlan } from '../../component/Plan/usePlan';
@@ -20,7 +18,7 @@ export const StyledContainer = styled(Box)`
 `;
 
 type Props = {
-  organizationHasSomeSubscription: boolean;
+  hasActivePaidSubscription: boolean;
   active: boolean;
   ended: boolean;
   custom?: boolean;
@@ -33,7 +31,7 @@ export const PlanAction = ({
   active,
   ended,
   custom,
-  organizationHasSomeSubscription,
+  hasActivePaidSubscription,
   planId,
   period,
   show,
@@ -66,7 +64,7 @@ export const PlanAction = ({
         onClick: onRestore,
         label: t('billing_plan_resubscribe'),
       };
-    } else if (organizationHasSomeSubscription) {
+    } else if (hasActivePaidSubscription) {
       return {
         loading: prepareUpgradeMutation.isLoading,
         onClick: () => onPrepareUpgrade(),
