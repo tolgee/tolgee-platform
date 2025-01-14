@@ -23,7 +23,7 @@ describe('tasks notifications', () => {
     waitForGlobalLoading();
   });
 
-  it('sends email to assignee of newly created task', () => {
+  it('sends email to assignee of newly created task and creates notification', () => {
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-name').type('New review task');
     cy.gcy('create-task-field-languages').click();
@@ -32,6 +32,9 @@ describe('tasks notifications', () => {
     getTaskPreview('Czech').findDcy('assignee-select').click();
     cy.gcy('assignee-search-select-popover')
       .contains('Organization member')
+      .click();
+    cy.gcy('assignee-search-select-popover')
+      .contains('Tasks test user')
       .click();
     dismissMenu();
 
@@ -47,6 +50,12 @@ describe('tasks notifications', () => {
       .should('be.visible')
       .findDcy('task-label-name')
       .should('contain', 'New review task');
+    dismissMenu();
+
+    cy.gcy('notifications-button').click();
+    cy.gcy('notifications-list').contains('New review task').click();
+
+    cy.url().should('include', '/translations?task=');
   });
 
   it('sends email to new assignee', () => {

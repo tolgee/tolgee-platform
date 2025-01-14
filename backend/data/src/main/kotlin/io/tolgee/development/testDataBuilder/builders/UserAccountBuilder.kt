@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
+import io.tolgee.model.Notification
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
@@ -20,6 +21,7 @@ class UserAccountBuilder(
     var userPreferences: UserPreferencesBuilder? = null
     var pats: MutableList<PatBuilder> = mutableListOf()
     var slackUserConnections: MutableList<SlackUserConnectionBuilder> = mutableListOf()
+    var notifications: MutableList<NotificationBuilder> = mutableListOf()
   }
 
   var data = DATA()
@@ -37,4 +39,6 @@ class UserAccountBuilder(
   fun addPat(ft: FT<Pat>) = addOperation(data.pats, ft)
 
   fun addSlackUserConnection(ft: FT<SlackUserConnection>) = addOperation(data.slackUserConnections, ft)
+
+  fun addNotification(ft: FT<Notification>) = addOperation(data.notifications, ft)
 }
