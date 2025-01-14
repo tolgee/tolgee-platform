@@ -290,13 +290,6 @@ const getTheme = (mode: PaletteMode) => {
           },
         },
       },
-      MuiBadge: {
-        styleOverrides: {
-          colorSecondary: {
-            color: c.background,
-          },
-        },
-      },
     },
   });
 };
