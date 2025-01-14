@@ -468,9 +468,13 @@ class TaskService(
     }
   }
 
-  fun getTasksWithScope(taskIds: List<Long>): List<TaskWithScopeView> {
+  fun getTasksWithScope(taskIds: List<Long>): Map<Long, TaskWithScopeView> {
     val tasks = taskRepository.findAllById(taskIds)
-    return getTasksWithScope(tasks)
+    val taskIdsWithProjectIdAndNumber = tasks.associate { (it.project.id to it.number) to it.id }
+    val tasksWithScope = getTasksWithScope(tasks)
+    return tasksWithScope.associateBy {
+      taskIdsWithProjectIdAndNumber[it.project.id to it.number] ?: throw IllegalStateException("Item not found")
+    }
   }
 
   private fun getTasksWithScope(tasks: Collection<Task>): List<TaskWithScopeView> {

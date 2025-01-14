@@ -18,7 +18,7 @@ class TaskNotificationEnhancer(
 
     notifications.forEach { (source, target) ->
       target.linkedTask =
-        convertedTasks.find { it.project.id == source.project?.id && it.number == source.linkedTask?.number }
+        convertedTasks[source.linkedTask?.id]
           ?.let { taskModelAssembler.toModel(it) }
     }
   }
