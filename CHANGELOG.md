@@ -1,3 +1,10 @@
+## [3.92.7](https://github.com/tolgee/tolgee-platform/compare/v3.92.6...v3.92.7) (2025-01-14)
+
+
+### Bug Fixes
+
+* Proper unsubscribing from websockets ([#2838](https://github.com/tolgee/tolgee-platform/issues/2838)) ([55ee489](https://github.com/tolgee/tolgee-platform/commit/55ee4898e40fe0e4dee1da78b32f123d98f46fba))
+
 ## [3.92.6](https://github.com/tolgee/tolgee-platform/compare/v3.92.5...v3.92.6) (2025-01-14)
 
 
