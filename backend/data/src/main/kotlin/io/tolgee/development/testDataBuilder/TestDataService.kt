@@ -464,7 +464,7 @@ class TestDataService(
       .flatMap { it.data.notifications }
       .sortedBy { it.self.linkedTask?.name }
       .forEach {
-        notificationService.createNotification(it.self)
+        notificationService.save(it.self)
       }
   }
 

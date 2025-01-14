@@ -23,7 +23,7 @@ class AssigneeNotificationService(
     user: UserAccount,
     task: Task,
   ) {
-    notificationService.createNotification(
+    notificationService.save(
       Notification().apply {
         this.user = user
         this.linkedTask = task

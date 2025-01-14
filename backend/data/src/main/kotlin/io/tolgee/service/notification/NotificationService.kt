@@ -17,7 +17,7 @@ class NotificationService(
     return notificationRepository.fetchNotificationsByUserId(userId, pageable)
   }
 
-  fun createNotification(notification: Notification) {
+  fun save(notification: Notification) {
     notificationRepository.save(notification)
   }
 }
