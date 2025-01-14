@@ -9,9 +9,9 @@ const StyledChip = styled(Chip)``;
 export function getBackgroundColor(type: TaskType, theme: Theme) {
   switch (type) {
     case 'TRANSLATE':
-      return theme.palette.tokens.success._states.focusVisible;
+      return theme.palette.tokens.text._states.focus;
     case 'REVIEW':
-      return theme.palette.tokens.secondary._states.focus;
+      return theme.palette.tokens.success._states.focusVisible;
   }
 }
 
