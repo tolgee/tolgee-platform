@@ -355,4 +355,32 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("state").isEqualTo("NEW")
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `closed tasks can be filtered out by timestamp`() {
+    val timeBeforeCreation = System.currentTimeMillis()
+    performProjectAuthPut(
+      "tasks/${testData.translateTask.self.number}/close",
+    ).andIsOk.andAssertThatJson {
+      node("state").isEqualTo("CLOSED")
+    }
+    val timeAfterCreation = System.currentTimeMillis()
+
+    // should be included
+    performProjectAuthGet(
+      "tasks?filterNotClosedBefore=$timeBeforeCreation",
+    ).andIsOk.andAssertThatJson {
+      node("page").node("totalElements").isEqualTo(2)
+      node("_embedded.tasks[0].name").isEqualTo("Translate task")
+    }
+
+    // should be excluded
+    performProjectAuthGet(
+      "tasks?filterNotClosedBefore=$timeAfterCreation",
+    ).andIsOk.andAssertThatJson {
+      node("page").node("totalElements").isEqualTo(1)
+      node("_embedded.tasks[0].name").isEqualTo("Review task")
+    }
+  }
 }

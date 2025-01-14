@@ -241,6 +241,7 @@ class TaskService(
     }
     if (state == TaskState.NEW || state == TaskState.IN_PROGRESS) {
       task.state = if (taskWithScope.doneItems == 0L) TaskState.NEW else TaskState.IN_PROGRESS
+      task.closedAt = null
     } else {
       task.closedAt = currentDateProvider.date
       task.state = state

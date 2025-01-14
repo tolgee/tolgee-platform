@@ -225,6 +225,9 @@ export const [
     setTaskState(state: SetTaskTranslationState) {
       return taskService.setTaskTranslationState(state);
     },
+    finishTask(taskNumber: number) {
+      return taskService.finishTask(taskNumber);
+    },
     addTag(tag: AddTag) {
       return tagsService.addTag(tag);
     },

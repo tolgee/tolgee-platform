@@ -2,7 +2,7 @@ import React from 'react';
 import type { BillingMenuItemsProps } from './EeModuleType';
 
 const NotIncludedInOss =
-  (name: string): ((props: any) => any) =>
+  (name: string): ((props?: any) => any) =>
   // eslint-disable-next-line react/display-name
   () => {
     return <div>Not included in OSS ({name})</div>;
@@ -22,6 +22,7 @@ export const AgencyLabel = NotIncludedInOss('AgencyLabel');
 export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
+export const TaskAllDonePlaceholder = Empty;
 
 export const routes = {
   Root: Empty,
@@ -34,6 +35,9 @@ export const TranslationTaskIndicator = NotIncludedInOss(
   'TranslationTaskIndicator'
 );
 export const PrefilterTask = NotIncludedInOss('PrefilterTask');
+export const PrefilterTaskShowDoneSwitch = NotIncludedInOss(
+  'PrefilterTaskShowDoneSwitch'
+);
 export const TranslationsTaskDetail = Empty;
 
 export const useAddDeveloperViewItems = () => (existingItems) => existingItems;

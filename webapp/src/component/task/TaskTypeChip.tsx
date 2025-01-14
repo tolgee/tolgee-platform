@@ -11,7 +11,7 @@ export function getBackgroundColor(type: TaskType, theme: Theme) {
     case 'TRANSLATE':
       return theme.palette.tokens.text._states.focus;
     case 'REVIEW':
-      return theme.palette.tokens.secondary._states.focus;
+      return theme.palette.tokens.success._states.focusVisible;
   }
 }
 

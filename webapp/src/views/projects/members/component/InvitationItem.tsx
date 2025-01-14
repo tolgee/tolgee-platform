@@ -92,7 +92,11 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
           {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
         </StyledItemText>
         {invitation.permission.agency && (
-          <AgencyLabel agency={invitation.permission.agency} />
+          <Tooltip title={t('invite_user_agency_tooltip')}>
+            <span>
+              <AgencyLabel agency={invitation.permission.agency} />
+            </span>
+          </Tooltip>
         )}
       </Box>
       <StyledItemActions>

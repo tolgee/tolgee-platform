@@ -390,3 +390,12 @@ export class LINKS {
   static SLACK_CONNECT = Link.ofParent(LINKS.SLACK, 'connect');
   static SLACK_CONNECTED = Link.ofParent(LINKS.SLACK, 'connected');
 }
+
+export enum QUERY {
+  TRANSLATIONS_PREFILTERS_ACTIVITY = 'activity',
+  TRANSLATIONS_PREFILTERS_FAILED_JOB = 'failedJob',
+  TRANSLATIONS_PREFILTERS_TASK = 'task',
+  TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE = 'taskHideDone',
+  TRANSLATIONS_TASK_DETAIL = 'taskDetail',
+  TASKS_FILTERS_SHOW_ALL = 'showAll',
+}

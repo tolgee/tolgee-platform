@@ -6,6 +6,7 @@ import {
   UseInfiniteQueryOptions,
   useMutation,
   UseMutationOptions,
+  useQueries,
   useQuery,
   useQueryClient,
   UseQueryOptions,
@@ -37,6 +38,20 @@ export type QueryProps<
   options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError> &
     CustomOptions;
 } & RequestParamsType<Url, Method, Paths>;
+
+export type QueriesProps<
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+> = {
+  queries: ({
+    url: Url;
+    method: Method;
+  } & RequestParamsType<Url, Method, Paths>)[];
+  fetchOptions?: RequestOptions;
+  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError> &
+    CustomOptions;
+};
 
 export type InfiniteQueryProps<
   Url extends keyof Paths,
@@ -122,6 +137,32 @@ export const useApiQuery = <
       options as UseQueryOptions<any, ApiError>,
       Boolean(fetchOptions?.disableAutoErrorHandle)
     )
+  );
+};
+
+export const useApiQueries = <
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+>(
+  props: QueryProps<Url, Method, Paths>[]
+) => {
+  return useQueries(
+    props.map((query) => {
+      const { url, method, fetchOptions, options, ...request } = query;
+      return {
+        queryKey: [url, (request as any)?.path, (request as any)?.query],
+        queryFn: () =>
+          apiSchemaHttpService.schemaRequest<Url, Method, Paths>(url, method, {
+            ...fetchOptions,
+            disableAutoErrorHandle: true,
+          })(request),
+        options: autoErrorHandling(
+          options as UseQueryOptions<any, ApiError>,
+          Boolean(fetchOptions?.disableAutoErrorHandle)
+        ),
+      };
+    })
   );
 };
 

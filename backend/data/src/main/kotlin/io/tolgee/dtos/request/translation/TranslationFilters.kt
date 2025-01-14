@@ -104,4 +104,14 @@ To filter default namespace, set to empty string.
     description = "Select only keys which are in specified task",
   )
   var filterTaskNumber: List<Long>? = null
+
+  @field:Parameter(
+    description = "Filter task keys which are `not done`",
+  )
+  var filterTaskKeysNotDone: Boolean? = null
+
+  @field:Parameter(
+    description = "Filter task keys which are `done`",
+  )
+  var filterTaskKeysDone: Boolean? = null
 }

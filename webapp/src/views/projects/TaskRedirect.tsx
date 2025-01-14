@@ -1,17 +1,20 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { LINKS, PARAMS, QUERY } from 'tg.constants/links';
+import { useUser } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 type TaskModel = components['schemas']['TaskModel'];
 
 export const TaskRedirect = () => {
   const project = useProject();
   const history = useHistory();
+  const user = useUser();
   const [taskNum] = useUrlSearchState('number', {
     defaultVal: undefined,
   });
@@ -22,10 +25,17 @@ export const TaskRedirect = () => {
 
     let url = `${LINKS.PROJECT_TRANSLATIONS.build({
       [PARAMS.PROJECT_ID]: project.id,
-    })}?task=${task.number}`;
+    })}?${QUERY.TRANSLATIONS_PREFILTERS_TASK}=${task.number}`;
 
     if (detail === 'true') {
-      url += `&taskDetail=${task.number}`;
+      url += `&${QUERY.TRANSLATIONS_TASK_DETAIL}=${task.number}`;
+    }
+
+    if (
+      task.assignees.find((u) => u.id === user?.id) &&
+      (task.state === 'IN_PROGRESS' || task.state === 'NEW')
+    ) {
+      url += `&${QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE}=true`;
     }
 
     url +=
@@ -36,17 +46,23 @@ export const TaskRedirect = () => {
     return url;
   };
 
-  const taskLoadable = useApiQuery({
+  const taskLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}',
     method: 'get',
-    path: { projectId: project.id, taskNumber: Number(taskNum) },
   });
 
   useEffect(() => {
-    if (taskLoadable.data) {
-      history.replace(getLinkToTask(taskLoadable.data));
-    }
-  }, [taskLoadable.data]);
+    taskLoadable.mutate(
+      {
+        path: { projectId: project.id, taskNumber: Number(taskNum) },
+      },
+      {
+        onSuccess(data) {
+          history.replace(getLinkToTask(data));
+        },
+      }
+    );
+  }, []);
 
   return <BoxLoading />;
 };

@@ -27,6 +27,7 @@ import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperation
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { Prefilter } from './prefilters/Prefilter';
 import { TranslationsTaskDetail } from 'tg.ee';
+import { TaskAllDonePlaceholder } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -106,6 +107,11 @@ export const Translations = () => {
       >
         <T keyName="translations_nothing_found" />
       </EmptyListMessage>
+    ) : prefilter?.task && prefilter.taskFilterNotDone ? (
+      <TaskAllDonePlaceholder
+        taskNumber={prefilter.task}
+        projectId={project.id}
+      />
     ) : (
       <EmptyListMessage
         loading={isLoading || isFetching}

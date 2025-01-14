@@ -7,7 +7,7 @@ import { TaskState } from 'tg.component/task/TaskState';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import React from 'react';
 import { UserName } from 'tg.component/common/UserName';
-import { File06 } from '@untitled-ui/icons-react';
+import { FileDownload03 } from '@untitled-ui/icons-react';
 import { useTaskReport } from './utils';
 
 type TaskModel = components['schemas']['TaskModel'];
@@ -59,7 +59,7 @@ export const TaskScope = ({ task, perUserData, projectId }: Props) => {
           onClick={() => downloadReport(projectId, task)}
           sx={{ margin: -1, position: 'relative', left: -8 }}
         >
-          <File06 />
+          <FileDownload03 />
         </IconButton>
       </Tooltip>
 
