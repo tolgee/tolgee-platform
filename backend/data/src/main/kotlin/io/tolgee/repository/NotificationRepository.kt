@@ -15,7 +15,6 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     """
     SELECT n
      FROM Notification n
-     LEFT JOIN FETCH n.project
      LEFT JOIN FETCH n.user AS u
      LEFT JOIN FETCH n.originatingUser
      LEFT JOIN FETCH n.linkedTask
