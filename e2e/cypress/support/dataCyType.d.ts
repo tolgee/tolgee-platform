@@ -348,6 +348,8 @@ declare namespace DataCy {
         "namespaces-select-text-field" |
         "namespaces-selector" |
         "navigation-item" |
+        "notifications-button" |
+        "notifications-list" |
         "notistack-snackbar" |
         "order-translation-confirmation" |
         "order-translation-confirmation-ok" |
