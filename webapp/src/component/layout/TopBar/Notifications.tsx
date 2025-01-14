@@ -1,5 +1,6 @@
 import { default as React, FunctionComponent, useState } from 'react';
 import {
+  Badge,
   IconButton,
   List,
   ListItem,
@@ -63,7 +64,13 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         onClick={handleOpen}
         size="large"
       >
-        <Bell01 />
+        <Badge
+          badgeContent={notifications?.page?.totalElements}
+          color="secondary"
+          data-cy="notifications-count"
+        >
+          <Bell01 />
+        </Badge>
       </StyledIconButton>
       <StyledMenu
         id="notifications-list"
