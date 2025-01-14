@@ -25,6 +25,12 @@ class NotificationService(
     return notificationRepository.fetchNotificationsByUserId(userId, pageable)
   }
 
+  fun getCountOfUnseenNotifications(
+    userId: Long,
+  ): Int {
+    return notificationRepository.getUnseenCountByUserId(userId)
+  }
+
   fun save(notification: Notification) {
     notificationRepository.save(notification)
     applicationEventPublisher.publishEvent(OnNotificationsChangedForUser(notification.user.id))

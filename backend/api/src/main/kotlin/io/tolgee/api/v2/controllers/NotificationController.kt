@@ -37,8 +37,24 @@ class NotificationController(
   @AllowApiAccess
   fun getNotifications(
     @ParameterObject pageable: Pageable,
-  ): PagedModel<NotificationModel> {
+  ): NotificationPagedModel {
     val notifications = notificationService.getNotifications(authenticationFacade.authenticatedUser.id, pageable)
-    return pagedResourcesAssembler.toModel(notifications, NotificationModelAssembler(enhancers, notifications))
+    val unseenCount =
+      notificationService.getCountOfUnseenNotifications(authenticationFacade.authenticatedUser.id)
+    val pagedNotifications = pagedResourcesAssembler.toModel(notifications, NotificationModelAssembler(enhancers, notifications))
+    return NotificationPagedModel.of(pagedNotifications, unseenCount)
+  }
+}
+
+class NotificationPagedModel(
+  content: Collection<NotificationModel> = emptyList(),
+  metadata: PageMetadata? = null,
+  links: Iterable<Link> = Links.NONE,
+  val unseenCount: Int,
+) : PagedModel<NotificationModel>(content, metadata, links) {
+  companion object {
+    fun of(original: PagedModel<NotificationModel>, unseenCount: Int): NotificationPagedModel {
+      return NotificationPagedModel(original.content, original.metadata, original.links, unseenCount)
+    }
   }
 }

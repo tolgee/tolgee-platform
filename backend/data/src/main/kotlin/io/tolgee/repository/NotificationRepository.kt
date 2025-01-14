@@ -26,4 +26,14 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     userId: Long,
     pageable: Pageable,
   ): Page<Notification>
+
+  @Query(
+    """
+    SELECT COUNT(n)
+     FROM Notification n
+     WHERE n.user.id = :userId
+        AND n.beenSeen = false
+    """,
+  )
+  fun getUnseenCountByUserId(userId: Long): Int
 }
