@@ -1,3 +1,10 @@
+# [3.93.0](https://github.com/tolgee/tolgee-platform/compare/v3.92.7...v3.93.0) (2025-01-14)
+
+
+### Features
+
+* tasks and order-translations improvements ([#2822](https://github.com/tolgee/tolgee-platform/issues/2822)) ([c4505f4](https://github.com/tolgee/tolgee-platform/commit/c4505f4e613da555446d002e940ea571ddf591a0))
+
 ## [3.92.7](https://github.com/tolgee/tolgee-platform/compare/v3.92.6...v3.92.7) (2025-01-14)
 
 
