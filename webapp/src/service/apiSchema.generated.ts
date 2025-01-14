@@ -823,6 +823,9 @@ export interface paths {
     /** Returns all organization projects the user has access to */
     get: operations["getAllProjects_1"];
   };
+  "/v2/notifications": {
+    get: operations["getNotifications"];
+  };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
@@ -4794,6 +4797,18 @@ export interface components {
       organizationRole?: "MEMBER" | "OWNER";
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       avatar?: components["schemas"]["Avatar"];
+    };
+    NotificationModel: {
+      /** Format: int64 */
+      id: number;
+      project?: components["schemas"]["SimpleProjectModel"];
+      linkedTask?: components["schemas"]["TaskModel"];
+    };
+    PagedModelNotificationModel: {
+      _embedded?: {
+        notificationModelList?: components["schemas"]["NotificationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     ApiKeyWithLanguagesModel: {
       /**
@@ -18008,6 +18023,58 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getNotifications: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelNotificationModel"];
         };
       };
       /** Bad Request */

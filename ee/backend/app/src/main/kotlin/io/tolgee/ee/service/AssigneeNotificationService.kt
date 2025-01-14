@@ -4,9 +4,11 @@ import io.sentry.Sentry
 import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.dtos.misc.EmailParams
+import io.tolgee.model.Notification
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.stereotype.Component
@@ -15,11 +17,20 @@ import org.springframework.stereotype.Component
 class AssigneeNotificationService(
   private val tolgeeEmailSender: TolgeeEmailSender,
   private val frontendUrlProvider: FrontendUrlProvider,
+  private val notificationService: NotificationService,
 ) : Logging {
   fun notifyNewAssignee(
     user: UserAccount,
     task: Task,
   ) {
+    notificationService.save(
+      Notification().apply {
+        this.user = user
+        this.linkedTask = task
+        this.project = task.project
+        this.originatingUser = task.author
+      },
+    )
     val taskUrl = getTaskUrl(task.project.id, task.number)
     val myTasksUrl = getMyTasksUrl()
 
