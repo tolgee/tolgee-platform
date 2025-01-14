@@ -4059,4 +4059,38 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1736241788882-1">
+        <createTable tableName="notification">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notificationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="linked_task_id" type="BIGINT"/>
+            <column name="originating_user_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stanov (generated)" id="1736241788882-2">
+        <createIndex indexName="IDX1urdwwsh2ti15ta6f6p5dbdcp" tableName="notification">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stanov (generated)" id="1736241788882-3">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="notification" constraintName="FKequx0eq1uplra48lb6wvict34" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stanov (generated)" id="1736241788882-4">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="notification" constraintName="FKi35sfx0x08fonfxf2l8cp2xcp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="stanov (generated)" id="1736241788882-5">
+        <addForeignKeyConstraint baseColumnNames="originating_user_id" baseTableName="notification" constraintName="FKj06xil3dgg5920q5wmvbulaho" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stanov (generated)" id="1736241788882-6">
+        <addForeignKeyConstraint baseColumnNames="linked_task_id" baseTableName="notification" constraintName="FKm1auuxar5ovwae9fqjp1eo05k" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
