@@ -52,6 +52,9 @@ describe('tasks notifications', () => {
       .should('contain', 'New review task');
     dismissMenu();
 
+    cy.gcy('notifications-count')
+      .find('.MuiBadge-badge')
+      .should('have.text', '1');
     cy.gcy('notifications-button').click();
     cy.gcy('notifications-list').contains('New review task').click();
 
