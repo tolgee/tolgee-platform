@@ -11,6 +11,7 @@ import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import { colors } from './colors';
 import { tolgeeColors, tolgeePalette } from 'figmaTheme';
+import { fromFigmaColor } from 'tg.fixtures/figma';
 
 const LOCALSTORAGE_THEME_MODE = 'themeMode';
 
@@ -124,13 +125,13 @@ const getTheme = (mode: PaletteMode) => {
     },
     palette: {
       mode,
-      primary: tPalette.primary,
+      primary: fromFigmaColor(tPalette.primary),
       primaryText: c.primaryText,
-      secondary: tPalette.secondary,
+      secondary: fromFigmaColor(tPalette.secondary),
       default: createColor(c.default),
-      info: tPalette.info,
-      warning: tPalette.warning,
-      error: tPalette.error,
+      info: fromFigmaColor(tPalette.info),
+      warning: fromFigmaColor(tPalette.warning),
+      error: fromFigmaColor(tPalette.error),
       common: {
         white: c.white,
       },
