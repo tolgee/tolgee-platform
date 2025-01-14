@@ -84,7 +84,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         size="large"
       >
         <Badge
-          badgeContent={notifications?.page?.totalElements}
+          badgeContent={notifications?.unseenCount}
           color="secondary"
           data-cy="notifications-count"
         >
