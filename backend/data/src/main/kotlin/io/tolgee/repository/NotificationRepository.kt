@@ -1,10 +1,12 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Notification
+import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -36,4 +38,20 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     """,
   )
   fun getUnseenCountByUserId(userId: Long): Int
+
+  @Query(
+    """
+    UPDATE Notification n
+    SET n.beenSeen = true
+    WHERE n.user.id = :userId
+        AND n.id IN :notificationIds 
+        AND n.beenSeen = false
+    """,
+  )
+  @Modifying
+  @Transactional
+  fun markNotificationsAsSeen(
+    notificationIds: List<Long>,
+    userId: Long,
+  ): Int
 }

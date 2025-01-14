@@ -12,11 +12,10 @@ import io.tolgee.service.notification.NotificationService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.Link
+import org.springframework.hateoas.Links
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -43,6 +42,15 @@ class NotificationController(
       notificationService.getCountOfUnseenNotifications(authenticationFacade.authenticatedUser.id)
     val pagedNotifications = pagedResourcesAssembler.toModel(notifications, NotificationModelAssembler(enhancers, notifications))
     return NotificationPagedModel.of(pagedNotifications, unseenCount)
+  }
+
+  @PutMapping("/mark-seen")
+  @Operation(summary = "Marks notifications of the currently logged in user with given IDs as seen.")
+  @AllowApiAccess
+  fun markNotificationsAsSeen(
+    @RequestBody notificationIds: List<Long>,
+  ) {
+    notificationService.markNotificationsAsSeen(notificationIds, authenticationFacade.authenticatedUser.id)
   }
 }
 
