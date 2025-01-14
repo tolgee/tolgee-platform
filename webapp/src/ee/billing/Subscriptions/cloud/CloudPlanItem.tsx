@@ -53,7 +53,10 @@ export const CloudPlanItem: FC<{
           ended={ended}
           custom={custom}
           show={shouldShow}
-          organizationHasSomeSubscription={!activeSubscription.plan.free}
+          hasActivePaidSubscription={
+            !activeSubscription.plan.free &&
+            activeSubscription.status != 'TRIALING'
+          }
           period={period}
           planId={plan.id}
         />
