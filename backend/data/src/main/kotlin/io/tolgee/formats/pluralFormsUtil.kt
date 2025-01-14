@@ -16,6 +16,11 @@ val allPluralKeywords =
     PluralRules.KEYWORD_OTHER,
   )
 
+fun getPluralFormsForLocaleOrAll(languageTag: String): List<String> {
+  val locale = getULocaleFromTag(languageTag)
+  return PluralRules.forLocale(locale)?.keywords?.toList() ?: allPluralKeywords
+}
+
 fun getPluralFormsForLocale(languageTag: String): MutableSet<String> {
   val uLocale = getULocaleFromTag(languageTag)
   val pluralRules = PluralRules.forLocale(uLocale)
