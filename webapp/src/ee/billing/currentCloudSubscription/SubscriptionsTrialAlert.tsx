@@ -151,6 +151,7 @@ export const TrialAlertPlanAutoRenewsContent: FC<
   );
 };
 
+// TODO: Test this and that it can subscribe to the same plan when on trial
 const ReachingTheLimitMessage: FC<SubscriptionsTrialAlertProps> = (props) => {
   if (props.subscription.plan.type !== 'PAY_AS_YOU_GO') {
     return null;
