@@ -67,6 +67,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         <Badge
           badgeContent={notifications?.page?.totalElements}
           color="secondary"
+          data-cy="notifications-count"
         >
           <Bell01 />
         </Badge>
