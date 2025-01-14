@@ -136,6 +136,10 @@ class ProjectService(
     return projectRepository.find(id)
   }
 
+  fun findAll(ids: List<Long>): List<Project> {
+    return projectRepository.findAllById(ids)
+  }
+
   @Transactional
   fun getView(id: Long): ProjectWithLanguagesView {
     val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
