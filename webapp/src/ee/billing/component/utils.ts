@@ -9,7 +9,6 @@ export type ProgressData = {
   translationsMax: number;
   translationsProgress: number;
   isPayAsYouGo: boolean;
-  // translationsLimit: number;
   creditUsed: number;
   creditMax: number;
   creditProgress: number;

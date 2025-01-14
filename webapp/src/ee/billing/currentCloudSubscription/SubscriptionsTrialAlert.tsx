@@ -7,13 +7,16 @@ import { useCancelCloudSubscription } from '../Subscriptions/cloud/useCancelClou
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useRestoreCloudSubscription } from '../Subscriptions/cloud/useRestoreCloudSubscription';
 import { useGoToStripeCustomerPortal } from '../Subscriptions/cloud/useGoToStripeCustomerPortal';
+import { ProgressData } from '../component/utils';
 
 type SubscriptionsTrialAlertProps = {
   subscription: components['schemas']['CloudSubscriptionModel'];
+  usage: ProgressData;
 };
 
 export const SubscriptionsTrialAlert: FC<SubscriptionsTrialAlertProps> = ({
   subscription,
+  usage,
 }) => {
   if (subscription.status != 'TRIALING') {
     return null;
@@ -22,39 +25,31 @@ export const SubscriptionsTrialAlert: FC<SubscriptionsTrialAlertProps> = ({
   return (
     <>
       <Alert severity="info" sx={{ mb: 2 }} data-cy="subscriptions-trial-alert">
-        <TrialAlertContent subscription={subscription} />
+        <TrialAlertContent subscription={subscription} usage={usage} />
       </Alert>
     </>
   );
 };
 
-export const TrialAlertContent: FC<SubscriptionsTrialAlertProps> = ({
-  subscription,
-}) => {
-  if (subscription.plan.free) {
-    return <TrialAlertFreePlanContent subscription={subscription} />;
+export const TrialAlertContent: FC<SubscriptionsTrialAlertProps> = (props) => {
+  if (props.subscription.plan.free) {
+    return <TrialAlertFreePlanContent {...props} />;
   }
 
-  if (subscription.trialRenew) {
-    return <TrialAlertPlanAutoRenewsContent subscription={subscription} />;
+  if (props.subscription.trialRenew) {
+    return <TrialAlertPlanAutoRenewsContent {...props} />;
   }
 
-  if (subscription.hasPaymentMethod) {
-    return (
-      <TrialAlertKeepPlanContentWithPaymentMethod subscription={subscription} />
-    );
+  if (props.subscription.hasPaymentMethod) {
+    return <TrialAlertKeepPlanContentWithPaymentMethod {...props} />;
   }
 
-  return (
-    <TrialAlertKeepPlanContentWithoutPaymentMethod
-      subscription={subscription}
-    />
-  );
+  return <TrialAlertKeepPlanContentWithoutPaymentMethod {...props} />;
 };
 
 export const TrialAlertKeepPlanContentWithPaymentMethod: FC<
   SubscriptionsTrialAlertProps
-> = ({ subscription }) => {
+> = (props) => {
   const formatDate = useDateFormatter();
 
   const { restoreMutation, onRestore } = useRestoreCloudSubscription();
@@ -63,7 +58,7 @@ export const TrialAlertKeepPlanContentWithPaymentMethod: FC<
     <>
       <T
         keyName="billing-subscription-trial-cancelled-alert"
-        params={{ trialEnd: formatDate(subscription.trialEnd), b: <b /> }}
+        params={{ trialEnd: formatDate(props.subscription.trialEnd), b: <b /> }}
       />
       <Box sx={{ mt: 2 }}>
         <LoadingButton
@@ -76,13 +71,14 @@ export const TrialAlertKeepPlanContentWithPaymentMethod: FC<
           <T keyName="billing-subscription-trial-alert-keep-button" />
         </LoadingButton>
       </Box>
+      <ReachingTheLimitMessage {...props}></ReachingTheLimitMessage>
     </>
   );
 };
 
 export const TrialAlertKeepPlanContentWithoutPaymentMethod: FC<
   SubscriptionsTrialAlertProps
-> = ({ subscription }) => {
+> = (props) => {
   const formatDate = useDateFormatter();
 
   const goToStripeCustomerPortal = useGoToStripeCustomerPortal();
@@ -91,7 +87,7 @@ export const TrialAlertKeepPlanContentWithoutPaymentMethod: FC<
     <>
       <T
         keyName="billing-subscription-not-to-renew-alert"
-        params={{ trialEnd: formatDate(subscription.trialEnd), b: <b /> }}
+        params={{ trialEnd: formatDate(props.subscription.trialEnd), b: <b /> }}
       />
       <Box mt={2}>
         <Button
@@ -103,6 +99,7 @@ export const TrialAlertKeepPlanContentWithoutPaymentMethod: FC<
           <T keyName="billing-trial-setup-payment-method-button" />{' '}
         </Button>
       </Box>
+      <ReachingTheLimitMessage {...props}></ReachingTheLimitMessage>
     </>
   );
 };
@@ -124,7 +121,7 @@ export const TrialAlertFreePlanContent: FC<SubscriptionsTrialAlertProps> = ({
 
 export const TrialAlertPlanAutoRenewsContent: FC<
   SubscriptionsTrialAlertProps
-> = ({ subscription }) => {
+> = (props) => {
   const formatDate = useDateFormatter();
 
   const { doCancel } = useCancelCloudSubscription();
@@ -133,7 +130,7 @@ export const TrialAlertPlanAutoRenewsContent: FC<
     <>
       <T
         keyName="billing-subscription-auto-renews-alert"
-        params={{ trialEnd: formatDate(subscription.trialEnd), b: <b /> }}
+        params={{ trialEnd: formatDate(props.subscription.trialEnd), b: <b /> }}
       />
       <Box mt={2}>
         <T
@@ -149,6 +146,26 @@ export const TrialAlertPlanAutoRenewsContent: FC<
           }}
         />
       </Box>
+      <ReachingTheLimitMessage {...props}></ReachingTheLimitMessage>
     </>
+  );
+};
+
+const ReachingTheLimitMessage: FC<SubscriptionsTrialAlertProps> = (props) => {
+  if (props.subscription.plan.type !== 'PAY_AS_YOU_GO') {
+    return null;
+  }
+
+  const runningOutOfMtCredits = props.usage.creditProgress > 0.9 || true;
+  const runningOutOfTranslations = props.usage.translationsProgress > 0.9;
+
+  if (!runningOutOfMtCredits && !runningOutOfTranslations) {
+    return null;
+  }
+
+  return (
+    <Box mt={2}>
+      <T keyName="billing-subscription-trial-alert-reaching-the-limit-message" />
+    </Box>
   );
 };

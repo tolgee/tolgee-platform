@@ -43,6 +43,8 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
+  const progressData = getProgressData(usage);
+
   const {
     translationsUsed,
     translationsMax,
@@ -50,7 +52,7 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
     creditUsed,
     isPayAsYouGo,
     usesSlots,
-  } = getProgressData(usage);
+  } = progressData;
 
   const planName =
     activeSubscription.status === 'TRIALING' ? (
@@ -141,7 +143,10 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
           <BillingPeriodInfo subscription={activeSubscription} />
         </StyledContent>
       </StyledBillingSection>
-      <SubscriptionsTrialAlert subscription={activeSubscription} />
+      <SubscriptionsTrialAlert
+        subscription={activeSubscription}
+        usage={progressData}
+      />
     </>
   );
 };
