@@ -12,6 +12,7 @@ import { UserMenu } from '../../security/UserMenu/UserMenu';
 import { AdminInfo } from './AdminInfo';
 import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
 import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
+import { Notifications } from 'tg.component/layout/TopBar/Notifications';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -121,6 +122,7 @@ export const TopBar: React.FC<Props> = ({
             debuggingCustomerAccount={isDebuggingCustomerAccount}
           />
         </Box>
+        {user && <Notifications />}
         {quickStartEnabled && <QuickStartTopBarButton />}
         {!user && <LanguageMenu />}
         {user && <UserMenu />}
