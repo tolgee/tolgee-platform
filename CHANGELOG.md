@@ -1,3 +1,10 @@
+## [3.93.1](https://github.com/tolgee/tolgee-platform/compare/v3.93.0...v3.93.1) (2025-01-14)
+
+
+### Bug Fixes
+
+* use figma contrast colors ([#2841](https://github.com/tolgee/tolgee-platform/issues/2841)) ([38df038](https://github.com/tolgee/tolgee-platform/commit/38df03803b286fd0ca77e4a054ddbac17278648f))
+
 # [3.93.0](https://github.com/tolgee/tolgee-platform/compare/v3.92.7...v3.93.0) (2025-01-14)
 
 
