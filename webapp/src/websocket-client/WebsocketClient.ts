@@ -33,7 +33,7 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
 
   let _client: CompatClient | undefined;
   let connected = false;
-  const subscriptions: Subscription<any>[] = [];
+  let subscriptions: Subscription<any>[] = [];
 
   const resubscribe = () => {
     if (_client) {
@@ -79,6 +79,7 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
       subscriptions.forEach((s) => {
         s.unsubscribe = undefined;
         s.id = undefined;
+        removeSubscription(s);
       });
       options.onConnectionClose?.();
     };
@@ -120,6 +121,7 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
 
     return () => {
       subscription.unsubscribe?.();
+      removeSubscription(subscription);
     };
   }
 
@@ -127,6 +129,10 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
     if (_client) {
       _client.disconnect();
     }
+  }
+
+  function removeSubscription(subscription: Subscription<any>) {
+    subscriptions = subscriptions.filter((it) => it !== subscription);
   }
 
   return Object.freeze({ subscribe, disconnect });
