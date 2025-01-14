@@ -1,3 +1,10 @@
+## [3.92.6](https://github.com/tolgee/tolgee-platform/compare/v3.92.5...v3.92.6) (2025-01-14)
+
+
+### Bug Fixes
+
+* correctly handle plurals for languages with single plural form ([#2820](https://github.com/tolgee/tolgee-platform/issues/2820)) ([05653dc](https://github.com/tolgee/tolgee-platform/commit/05653dcedafb3df61cc3ab3772c53e98ece1240d))
+
 ## [3.92.5](https://github.com/tolgee/tolgee-platform/compare/v3.92.4...v3.92.5) (2025-01-13)
 
 
