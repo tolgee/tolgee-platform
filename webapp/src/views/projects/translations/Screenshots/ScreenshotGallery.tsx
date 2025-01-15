@@ -66,7 +66,7 @@ const StyledHintText = styled(Box)`
 `;
 
 export const MAX_FILE_COUNT = 20;
-const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
+export const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const fileRef = createRef<HTMLInputElement>();

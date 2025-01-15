@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { T } from '@tolgee/react';
-import { Camera01, Edit02 } from '@untitled-ui/icons-react';
-import { styled, useTheme } from '@mui/material';
+import { CameraPlus, Edit02 } from '@untitled-ui/icons-react';
+import { styled } from '@mui/material';
 
 import { CELL_SHOW_ON_HOVER } from './styles';
 import { ControlsButton } from './ControlsButton';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ScreenshotUploadInput } from './ScreenshotUploadInput';
 
 const StyledControls = styled('div')`
   display: flex;
@@ -15,27 +16,23 @@ const StyledControls = styled('div')`
 type ControlsProps = {
   editEnabled?: boolean;
   onEdit?: () => void;
-  onScreenshots?: () => void;
-  screenshotRef?: React.Ref<any>;
-  screenshotsPresent?: boolean;
-  screenshotsOpen?: boolean;
+  showScreenshotsAddition: boolean;
+  keyId: number;
 };
 
 export const ControlsKey: React.FC<ControlsProps> = ({
   editEnabled,
   onEdit,
-  onScreenshots,
-  screenshotRef,
-  screenshotsPresent,
-  screenshotsOpen,
+  showScreenshotsAddition,
+  keyId,
 }) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canViewScreenshots = satisfiesPermission('screenshots.view');
-  const theme = useTheme();
+  const openFileDialogRef = useRef<() => void>(null);
 
   // right section
   const displayEdit = editEnabled && onEdit;
-  const displayScreenshots = onScreenshots && canViewScreenshots;
+  const displayScreenshots = showScreenshotsAddition && canViewScreenshots;
 
   return (
     <StyledControls>
@@ -50,21 +47,17 @@ export const ControlsKey: React.FC<ControlsProps> = ({
         </ControlsButton>
       )}
       {displayScreenshots && (
-        <ControlsButton
-          onClick={onScreenshots}
-          ref={screenshotRef}
-          tooltip={<T keyName="translations_screenshots_tooltip" />}
-          data-cy="translations-cell-screenshots-button"
-          className={
-            screenshotsPresent || screenshotsOpen
-              ? undefined
-              : CELL_SHOW_ON_HOVER
-          }
-        >
-          <Camera01
-            color={screenshotsPresent ? theme.palette.primary.main : undefined}
-          />
-        </ControlsButton>
+        <>
+          <ScreenshotUploadInput keyId={keyId} handlerRef={openFileDialogRef} />
+          <ControlsButton
+            tooltip={<T keyName="translations_screenshots_add_tooltip" />}
+            data-cy="translations-cell-screenshots-button"
+            className={CELL_SHOW_ON_HOVER}
+            onClick={() => openFileDialogRef.current?.()}
+          >
+            <CameraPlus />
+          </ControlsButton>
+        </>
       )}
     </StyledControls>
   );
