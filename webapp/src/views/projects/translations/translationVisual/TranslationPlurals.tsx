@@ -9,15 +9,18 @@ import {
 const StyledContainer = styled('div')`
   display: grid;
   gap: 2px;
+  grid-template-rows: auto 1fr;
 `;
 
 const StyledContainerSimple = styled('div')`
   padding-top: 4px;
+  display: grid;
 `;
 
 const StyledVariants = styled('div')`
   display: grid;
   grid-template-columns: 56px 1fr;
+  align-content: start;
   gap: 8px;
 `;
 
