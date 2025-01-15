@@ -43,7 +43,6 @@ type Props = {
 
 export const RowTable: React.FC<Props> = React.memo(function RowTable({
   data,
-  columnSizes,
   columnSizesPercent,
   languages,
   onResize,
@@ -85,7 +84,6 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
         data={data}
         active={relaxedActive}
         className={allClassName}
-        width={columnSizes[0]}
       />
       {languages.map((language, index) => {
         return (
