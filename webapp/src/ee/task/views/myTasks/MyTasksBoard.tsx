@@ -40,7 +40,7 @@ export const MyTasksBoard = ({
     query: {
       ...query,
       filterState: ['DONE', 'CLOSED'],
-      excludeClosedBefore: filter.excludeClosedBefore,
+      filterNotClosedBefore: filter.filterNotClosedBefore,
       filterAgency: filter.agencies,
     },
   });

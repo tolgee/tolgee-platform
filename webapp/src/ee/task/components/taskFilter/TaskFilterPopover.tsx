@@ -33,7 +33,7 @@ export type TaskFilterType = {
   agencies?: number[];
   projects?: number[];
   types?: TaskType[];
-  excludeClosedBefore?: number;
+  filterNotClosedBefore?: number;
 };
 
 type Props = {

@@ -45,7 +45,7 @@ export const MyTasksList = ({
       sort: ['number,desc'],
       filterProject: filter.projects,
       filterType: filter.types,
-      excludeClosedBefore: filter.excludeClosedBefore,
+      filterNotClosedBefore: filter.filterNotClosedBefore,
       filterAgency: filter.agencies,
     },
     options: {

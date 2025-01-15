@@ -48,7 +48,7 @@ export const ProjectTasksBoard = ({
     query: {
       ...query,
       filterState: ['DONE', 'CLOSED'],
-      excludeClosedBefore: filter.excludeClosedBefore,
+      filterNotClosedBefore: filter.filterNotClosedBefore,
     },
   });
 
