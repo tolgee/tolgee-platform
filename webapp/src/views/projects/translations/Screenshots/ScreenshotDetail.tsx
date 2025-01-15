@@ -27,7 +27,11 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
     >
       <Box display="flex">
         {screenshot && (
-          <ScreenshotWithLabels showTooltips screenshot={screenshot} />
+          <ScreenshotWithLabels
+            showTooltips
+            screenshot={screenshot}
+            showSecondaryHighlights
+          />
         )}
       </Box>
     </Dialog>
