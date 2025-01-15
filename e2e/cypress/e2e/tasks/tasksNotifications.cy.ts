@@ -42,6 +42,10 @@ describe('tasks notifications', () => {
 
     assertMessage('1 task created');
 
+    cy.gcy('notifications-count')
+      .find('.MuiBadge-badge')
+      .should('have.text', '1');
+
     getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
       cy.visit(taskLink);
@@ -51,10 +55,6 @@ describe('tasks notifications', () => {
       .findDcy('task-label-name')
       .should('contain', 'New review task');
     dismissMenu();
-
-    cy.gcy('notifications-count')
-      .find('.MuiBadge-badge')
-      .should('have.text', '1');
     cy.gcy('notifications-button').click();
     cy.gcy('notifications-list').contains('New review task').click();
 
