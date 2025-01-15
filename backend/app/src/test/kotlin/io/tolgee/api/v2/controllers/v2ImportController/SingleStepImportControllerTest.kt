@@ -35,9 +35,13 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   @Value("classpath:import/xliff/simple.xliff")
   lateinit var simpleXliff: Resource
 
+  @Value("classpath:import/po/codeReferences.po")
+  lateinit var codeReferencesPo: Resource
+
   lateinit var testData: SingleStepImportTestData
 
   private val xliffFileName: String = "file.xliff"
+  private val poFileName = "file.po"
   private val jsonFileName = "en.json"
 
   @BeforeEach
@@ -57,6 +61,20 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     executeInNewTransaction {
       assertJsonImported()
       getTestTranslation().key.keyMeta!!.tags.map { it.name }.assert.contains("new-tag")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `import po with code references`() {
+    saveAndPrepare()
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair(poFileName, codeReferencesPo)),
+    )
+    executeInNewTransaction {
+      assertPoImported()
+      getTestTranslation().key.keyMeta!!.codeReferences.map { it.path }.assert.contains("dir/file.py")
     }
   }
 
@@ -392,6 +410,10 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   private fun assertJsonImported() {
     getTestTranslation().text.assert.isEqualTo("test")
+  }
+
+  private fun assertPoImported() {
+    getTestTranslation().text.assert.isEqualTo("In English!")
   }
 
   private fun saveAndPrepare() {

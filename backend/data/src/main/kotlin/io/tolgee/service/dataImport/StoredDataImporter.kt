@@ -162,13 +162,13 @@ class StoredDataImporter(
   }
 
   private fun saveKeyMetaData(keyEntitiesToSave: Collection<Key>) {
-    keyMetaService.saveAll(keyMetasToSave)
     keyEntitiesToSave.flatMap {
       it.keyMeta?.comments ?: emptyList()
     }.also { keyMetaService.saveAllComments(it) }
     keyEntitiesToSave.flatMap {
       it.keyMeta?.codeReferences ?: emptyList()
     }.also { keyMetaService.saveAllCodeReferences(it) }
+    keyMetaService.saveAll(keyMetasToSave)
   }
 
   private fun saveTranslations() {
