@@ -13,8 +13,8 @@ import { useTranslationsActions } from '../context/TranslationsContext';
 
 type ScreenshotModel = components['schemas']['ScreenshotModel'];
 
-const MAX_SIZE = 375;
-const MIN_SIZE = 150;
+const MAX_SIZE = 350;
+const MIN_SIZE = 100;
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -46,7 +46,7 @@ export const Screenshots = ({ screenshots, keyId, sx }: Props) => {
     ref: containerRef,
     onResize(size) {
       if (size.width) {
-        setSize(Math.floor(size.width / 75) * 75);
+        setSize(Math.floor(size.width / 50) * 50);
       }
     },
   });
@@ -87,6 +87,11 @@ export const Screenshots = ({ screenshots, keyId, sx }: Props) => {
     );
   };
 
+  const calculatedHeight = Math.min(
+    Math.max(...screenshots.map((sc) => 100 / (sc.width! / sc.height!))),
+    100
+  );
+
   return (
     <StyledContainer {...{ sx }} onClick={stopAndPrevent()} ref={containerRef}>
       <StyledScrollWrapper>
@@ -114,7 +119,7 @@ export const Screenshots = ({ screenshots, keyId, sx }: Props) => {
                 height:
                   oneOnly && boundedSize
                     ? boundedSize / (sc.width! / sc.height!)
-                    : 100,
+                    : calculatedHeight,
               }}
             />
           );
