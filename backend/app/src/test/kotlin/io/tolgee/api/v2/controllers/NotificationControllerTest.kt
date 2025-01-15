@@ -10,23 +10,8 @@ class NotificationControllerTest : AuthorizedControllerTest() {
   fun `gets notifications from newest`() {
     val testData = NotificationsTestData()
 
-    (101L..103).forEach { i ->
-      executeInNewTransaction {
-        val task =
-          testData.projectBuilder.addTask {
-            this.name = "Notification task $i"
-            this.language = testData.englishLanguage
-            this.author = testData.originatingUser.self
-            this.number = i
-          }
-
-        testData.userAccountBuilder.addNotification {
-          this.user = testData.user
-          this.project = testData.project
-          this.linkedTask = task.self
-          this.originatingUser = testData.originatingUser.self
-        }
-      }
+    (101L..103).forEach { taskNumber ->
+      testData.generateNotificationWithTask(taskNumber)
     }
 
     testDataService.saveTestData(testData.root)
