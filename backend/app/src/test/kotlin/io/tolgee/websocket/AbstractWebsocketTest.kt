@@ -5,9 +5,11 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.Notification
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.server.LocalServerPort
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -26,6 +29,9 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   lateinit var key: Key
   lateinit var notPermittedUser: UserAccount
   lateinit var helper: WebsocketTestHelper
+
+  @Autowired
+  lateinit var notificationService: NotificationService
 
   @LocalServerPort
   private val port: Int? = null
@@ -38,8 +44,8 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
         port,
         jwtService.emitToken(testData.user.id),
         testData.projectBuilder.self.id,
+        testData.user.id,
       )
-    helper.listenForTranslationDataModified()
   }
 
   @AfterEach
@@ -50,6 +56,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key modification`() {
+    helper.listenForTranslationDataModified()
     helper.assertNotified(
       {
         performProjectAuthPut("keys/${key.id}", mapOf("name" to "name edited"))
@@ -85,6 +92,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key deletion`() {
+    helper.listenForTranslationDataModified()
     helper.assertNotified(
       {
         performProjectAuthDelete("keys/${key.id}")
@@ -113,6 +121,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key creation`() {
+    helper.listenForTranslationDataModified()
     helper.assertNotified(
       {
         performProjectAuthPost("keys", mapOf("name" to "new key"))
@@ -141,6 +150,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on translation modification`() {
+    helper.listenForTranslationDataModified()
     helper.assertNotified(
       {
         performProjectAuthPut(
@@ -191,11 +201,13 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesn't subscribe without permissions`() {
+    helper.listenForTranslationDataModified()
     val notPermittedSubscriptionHelper =
       WebsocketTestHelper(
         port,
         jwtService.emitToken(notPermittedUser.id),
         testData.projectBuilder.self.id,
+        notPermittedUser.id,
       )
     notPermittedSubscriptionHelper.listenForTranslationDataModified()
     performProjectAuthPut(
@@ -210,6 +222,32 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
 
     // but authorized user received the message
     helper.receivedMessages.assert.isNotEmpty
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `doesn't subscribe as another user`() {
+    helper.listenForNotificationsChanged()
+    val notPermittedSubscriptionHelper =
+      WebsocketTestHelper(
+        port,
+        jwtService.emitToken(notPermittedUser.id),
+        testData.projectBuilder.self.id,
+        testData.user.id, // notPermittedUser trying to spy on other user's websocket
+      )
+    notPermittedSubscriptionHelper.listenForNotificationsChanged()
+    saveNotificationForCurrentUser()
+    Thread.sleep(1000)
+    notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()
+
+    // but authorized user received the message
+    helper.receivedMessages.assert.isNotEmpty
+  }
+
+  private fun saveNotificationForCurrentUser() {
+    executeInNewTransaction {
+      notificationService.save(Notification().apply { user = testData.user })
+    }
   }
 
   private fun prepareTestData() {
