@@ -1,17 +1,36 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { useTrialInfo } from './announcements/useTrialInfo';
 import { Box, Chip, Tooltip } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 
 export const TrialChip: FC = () => {
-  const { shouldShowChip, subscriptionsLink, daysLeft } = useTrialInfo();
+  const {
+    shouldShowChip,
+    subscriptionsLink,
+    daysLeft,
+    isCurrentSubscriptionPage,
+  } = useTrialInfo();
 
   const { t } = useTranslate();
 
   if (!shouldShowChip) {
     return null;
   }
+
+  const Wrapper = useMemo(() => {
+    return function Wrapper({ children }) {
+      if (isCurrentSubscriptionPage) {
+        return children;
+      }
+
+      return (
+        <Tooltip title={t('topbar-trial-chip-tooltip', { daysLeft })}>
+          {children}
+        </Tooltip>
+      );
+    };
+  }, [isCurrentSubscriptionPage]);
 
   return (
     <Box
@@ -22,7 +41,7 @@ export const TrialChip: FC = () => {
         alignItems: 'center',
       }}
     >
-      <Tooltip title={t('topbar-trial-chip-tooltip', { daysLeft })}>
+      <Wrapper>
         <Chip
           sx={(theme) => ({
             flexGrow: 0,
@@ -38,7 +57,7 @@ export const TrialChip: FC = () => {
           component={Link}
           to={subscriptionsLink}
         />
-      </Tooltip>
+      </Wrapper>
     </Box>
   );
 };

@@ -40,5 +40,6 @@ export const useTrialInfo = () => {
     subscriptionsLink,
     shouldShowAnnouncement,
     shouldShowChip,
+    isCurrentSubscriptionPage,
   };
 };

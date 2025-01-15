@@ -25,14 +25,15 @@ export const TopBarTestClockInfo: FC = () => {
         to={LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.build({
           [PARAMS.ORGANIZATION_SLUG]: organization.slug,
         })}
-        sx={{
+        sx={(theme) => ({
           p: 0,
           mr: 1,
           mx: 0,
           display: 'flex',
           alignItems: 'center',
           flexDirection: 'column',
-        }}
+          boxShadow: `0px 0px 10px ${theme.palette.colors.red['100']}`,
+        })}
       >
         <Box sx={{ fontSize: 14 }}>
           {formatDate(testClock, { dateStyle: 'short' })}
