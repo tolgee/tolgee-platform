@@ -78,7 +78,7 @@ export const ProjectTasksView = () => {
     languages: languages?.map((l) => Number(l)),
     agencies: agencies?.map((a) => Number(a)),
     types: types as any[],
-    excludeClosedBefore: showAll === 'true' ? undefined : minus30Days,
+    filterNotClosedBefore: showAll === 'true' ? undefined : minus30Days,
   };
 
   function setFilter(val: TaskFilterType) {

@@ -49,7 +49,7 @@ export const ProjectTasksList = ({
       filterAssignee: filter.assignees,
       filterLanguage: filter.languages,
       filterType: filter.types,
-      excludeClosedBefore: filter.excludeClosedBefore,
+      filterNotClosedBefore: filter.filterNotClosedBefore,
       filterAgency: filter.agencies,
     },
     options: {

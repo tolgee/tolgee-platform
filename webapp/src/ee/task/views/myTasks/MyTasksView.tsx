@@ -50,7 +50,7 @@ export const MyTasksView = () => {
   const filter: TaskFilterType = {
     projects: projects?.map((p) => Number(p)),
     types: types as any[],
-    excludeClosedBefore: showAll === 'true' ? undefined : minus30Days,
+    filterNotClosedBefore: showAll === 'true' ? undefined : minus30Days,
     agencies: agencies?.map((a) => Number(a)),
   };
 
