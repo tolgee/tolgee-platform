@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { Box, styled } from '@mui/material';
 import { green, red } from '@mui/material/colors';
 import { XCircle } from '@untitled-ui/icons-react';
@@ -7,8 +7,8 @@ import { XCircle } from '@untitled-ui/icons-react';
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
-import { MAX_FILE_COUNT } from './ScreenshotGallery';
 import { Dropzone } from 'tg.component/CustomIcons';
+import { MAX_FILE_COUNT } from './Screenshots';
 
 export interface ScreenshotDropzoneProps {
   validateAndUpload: (files: File[]) => void;
@@ -16,19 +16,12 @@ export interface ScreenshotDropzoneProps {
 
 const StyledDropZoneValidation = styled(Box)`
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s;
-
   &.valid {
-    backdrop-filter: blur(5px);
-    border: 1px solid ${green[200]};
-    background-color: ${green[50]};
-    opacity: 0.9;
+    opacity: 1;
   }
 
   &.invalid {
     border: 1px solid ${red[200]};
-    opacity: 0.9;
     background-color: ${red[50]};
     backdrop-filter: blur(5px);
   }
@@ -63,9 +56,19 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
   );
   const projectPermissions = useProjectPermissions();
 
+  useEffect(() => {
+    const listener = (e) => {
+      e.preventDefault();
+    };
+    window.addEventListener('dragover', listener);
+    window.addEventListener('drop', listener);
+    return () => {
+      window.removeEventListener('dragover', listener);
+      window.removeEventListener('drop', listener);
+    };
+  }, []);
+
   const onDragEnter = (e: React.DragEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
     setDragEnterTarget(e.target);
     if (e.dataTransfer.items) {
       const files = FileUploadFixtures.dataTransferItemsToArray(
@@ -80,15 +83,12 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
   };
 
   const onDragLeave = (e: React.DragEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
     if (e.target === dragEnterTarget) {
       setDragOver(null);
     }
   };
 
   const onDrop = async (e: React.DragEvent) => {
-    e.stopPropagation();
     e.preventDefault();
     if (e.dataTransfer.items) {
       const files = FileUploadFixtures.dataTransferItemsToArray(
@@ -108,7 +108,7 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
     <>
       <Box
         position="relative"
-        display="flex"
+        display="grid"
         {...dropZoneAllowedProps}
         overflow="visible"
         data-cy="dropzone"

@@ -4,17 +4,22 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useResizeObserver } from 'usehooks-ts';
 
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
-import { ScreenshotDetail } from '../Screenshots/ScreenshotDetail';
+import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotProps } from 'tg.component/ScreenshotWithLabels';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsActions } from '../context/TranslationsContext';
 
+export const MAX_FILE_COUNT = 20;
+export const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
+
 type ScreenshotModel = components['schemas']['ScreenshotModel'];
 
 const MAX_SIZE = 350;
 const MIN_SIZE = 100;
+
+const MAX_HEIGHT = 350;
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -34,11 +39,11 @@ const StyledScrollWrapper = styled(Box)`
 type Props = {
   screenshots: ScreenshotModel[];
   keyId: number;
-  screenshotMaxWidth?: number;
+  oneBig?: boolean;
   sx?: SxProps;
 };
 
-export const Screenshots = ({ screenshots, keyId, sx }: Props) => {
+export const Screenshots = ({ screenshots, keyId, oneBig, sx }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState(0);
 
@@ -61,7 +66,7 @@ export const Screenshots = ({ screenshots, keyId, sx }: Props) => {
   }
   const { updateScreenshots } = useTranslationsActions();
 
-  const oneOnly = screenshots.length === 1 && boundedSize;
+  const oneOnly = screenshots.length === 1 && boundedSize && oneBig;
   const [detailData, setDetailData] = useState<ScreenshotProps>();
 
   const deleteLoadable = useApiMutation({
@@ -96,30 +101,43 @@ export const Screenshots = ({ screenshots, keyId, sx }: Props) => {
     <StyledContainer {...{ sx }} onClick={stopAndPrevent()} ref={containerRef}>
       <StyledScrollWrapper>
         {screenshots.map((sc) => {
+          let width = oneOnly && boundedSize ? boundedSize : 100;
+          let height =
+            oneOnly && boundedSize
+              ? boundedSize / (sc.width! / sc.height!)
+              : calculatedHeight;
+
+          if (height > MAX_HEIGHT && oneOnly) {
+            height = MAX_HEIGHT;
+            width = height * (sc.width! / sc.height!);
+          }
+
+          const isLarge = height > 100 || width > 100;
+          const isReadable = height > 250 || width > 250;
+
           const screenshot = {
-            src: sc.fileUrl,
+            src: isLarge ? sc.fileUrl : sc.thumbnailUrl,
             width: sc.width,
             height: sc.height,
             highlightedKeyId: keyId,
             keyReferences: sc.keyReferences,
           };
+
           return (
             <ScreenshotThumbnail
               key={sc.id}
               screenshot={screenshot}
               objectFit={oneOnly ? 'cover' : 'contain'}
+              highlightFilled={!isReadable}
               onClick={() => {
-                setDetailData(screenshot);
+                setDetailData({ ...screenshot, src: sc.fileUrl });
               }}
               onDelete={() => {
                 handleDelete(sc.id);
               }}
               sx={{
-                width: oneOnly ? boundedSize : 100,
-                height:
-                  oneOnly && boundedSize
-                    ? boundedSize / (sc.width! / sc.height!)
-                    : calculatedHeight,
+                width,
+                height,
               }}
             />
           );

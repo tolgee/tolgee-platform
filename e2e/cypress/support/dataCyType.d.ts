@@ -10,7 +10,6 @@ declare namespace DataCy {
         "activity-compact-detail-button" |
         "activity-detail" |
         "activity-detail-dialog" |
-        "add-box" |
         "administration-access-message" |
         "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |

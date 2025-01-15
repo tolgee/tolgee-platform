@@ -82,6 +82,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
         width={columnSizes[0]}
         active={relaxedActive}
         className={keyClassName}
+        oneScreenshotBig
       />
       <StyledLanguages style={{ width: columnSizes[1] }}>
         {languages.map((language, index) => {
