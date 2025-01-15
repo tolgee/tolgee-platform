@@ -18,11 +18,13 @@ type Props = {
   className?: string;
   screenshot: ScreenshotProps;
   showTooltips?: boolean;
+  objectFit?: 'contain' | 'cover';
 };
 
 export const ScreenshotWithLabels: React.FC<Props> = ({
   screenshot,
   showTooltips,
+  objectFit = 'contain',
   className,
 }) => {
   const imageRefs = screenshot.keyReferences?.filter((ref) => ref.position);
@@ -32,7 +34,7 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
     <img
       src={screenshot.src}
       className={className}
-      style={{ maxWidth: '100%' }}
+      style={{ maxWidth: '100%', width: screenshot.width, objectFit }}
       data-cy="screenshot-image"
       alt="Screenshot"
     />
@@ -44,6 +46,7 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
         width: screenshot.width,
         maxWidth: '100%',
       }}
+      preserveAspectRatio={objectFit === 'cover' ? 'xMinYMin slice' : ''}
       data-cy="screenshot-image"
     >
       <image

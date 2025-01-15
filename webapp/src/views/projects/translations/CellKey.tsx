@@ -27,6 +27,7 @@ import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
 import { KeyEditModal } from './KeyEdit/KeyEditModal';
 import { useKeyCell } from './useKeyCell';
+import { Screenshots } from './ScreenshotsNew/Screenshots';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -34,13 +35,14 @@ type KeyWithTranslationsModel =
 const StyledContainer = styled(StyledCell)`
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto auto auto 1fr auto;
   grid-template-areas:
-    'checkbox key          '
-    '.        description  '
-    '.        tags         '
-    'editor   editor       '
-    'controls controls     ';
+    'checkbox  key          '
+    '.         description  '
+    '.         screenshots  '
+    '.         tags         '
+    'editor    editor       '
+    'controls  controls     ';
 
   & .controls {
     grid-area: controls;
@@ -99,6 +101,14 @@ const StyledTags = styled('div')`
   min-height: 28px;
 `;
 
+const StyledScreenshots = styled('div')`
+  grid-area: screenshots;
+  position: relative;
+  overflow: hidden;
+  margin-top: -12px;
+  padding-bottom: 8px;
+`;
+
 const StyledContextButton = styled(Box)`
   position: absolute;
   bottom: 12px;
@@ -112,7 +122,7 @@ const StyledBolt = styled(Zap)`
 
 type Props = {
   data: KeyWithTranslationsModel;
-  width?: string | number;
+  width?: number;
   editEnabled: boolean;
   active: boolean;
   simple?: boolean;
@@ -215,6 +225,17 @@ export const CellKey: React.FC<Props> = ({
               </LimitedHeightText>
             </StyledDescription>
           )}
+          {data.screenshots && (
+            <StyledScreenshots>
+              <Screenshots
+                screenshots={data.screenshots}
+                screenshotMaxWidth={
+                  width === undefined ? undefined : width - 52
+                }
+                keyId={data.keyId}
+              />
+            </StyledScreenshots>
+          )}
           {!simple && (
             <>
               <StyledTags
@@ -241,6 +262,7 @@ export const CellKey: React.FC<Props> = ({
               </StyledTags>
             </>
           )}
+
           {data.contextPresent && (
             <Tooltip title={t('key-context-present-hint')}>
               <StyledContextButton

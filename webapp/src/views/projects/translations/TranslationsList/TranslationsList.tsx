@@ -143,7 +143,8 @@ export const TranslationsList = ({ toolsPanelOpen }: Props) => {
                 bannerAfter={Boolean(nsBannerAfter)}
                 data={row}
                 languages={languagesRow}
-                columnSizes={columnSizesPercent}
+                columnSizesPercent={columnSizesPercent}
+                columnSizes={columnSizes}
                 onResize={startResize}
               />
             </div>

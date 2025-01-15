@@ -74,7 +74,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const canUploadScreenshots = satisfiesPermission('screenshots.upload');
   const config = useConfig();
   const project = useProject();
-  const { updateScreenshotCount } = useTranslationsActions();
+  const { updateScreenshots } = useTranslationsActions();
   const lang = useCurrentLanguage();
   const { t } = useTranslate();
 
@@ -223,10 +223,9 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
 
   useEffect(() => {
     if (screenshotsLoadable.data) {
-      updateScreenshotCount({
+      updateScreenshots({
         keyId: props.keyId,
-        screenshotCount:
-          screenshotsLoadable.data._embedded?.screenshots?.length,
+        screenshots: screenshotsLoadable.data._embedded?.screenshots ?? [],
       });
     }
   }, [screenshotsLoadable.data?._embedded?.screenshots?.length]);
