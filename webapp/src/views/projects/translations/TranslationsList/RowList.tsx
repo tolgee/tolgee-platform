@@ -30,8 +30,7 @@ const StyledLanguages = styled('div')`
 type Props = {
   data: DeletableKeyWithTranslationsModelType;
   languages: LanguageModel[];
-  columnSizesPercent: string[];
-  columnSizes: number[];
+  columnSizes: string[];
   onResize: (colIndex: number) => void;
   bannerBefore: boolean;
   bannerAfter: boolean;
@@ -39,7 +38,6 @@ type Props = {
 
 export const RowList: React.FC<Props> = React.memo(function RowList({
   data,
-  columnSizesPercent,
   columnSizes,
   languages,
   onResize,
@@ -85,7 +83,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
         active={relaxedActive}
         className={keyClassName}
       />
-      <StyledLanguages style={{ width: columnSizesPercent[1] }}>
+      <StyledLanguages style={{ width: columnSizes[1] }}>
         {languages.map((language, index) => {
           return (
             <CellTranslation
@@ -94,7 +92,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
               language={language}
               colIndex={0}
               onResize={onResize}
-              width={columnSizesPercent[1]}
+              width={columnSizes[1]}
               active={relaxedActive}
               className={clsx({
                 [firstTranslationClassName]: index === 0,

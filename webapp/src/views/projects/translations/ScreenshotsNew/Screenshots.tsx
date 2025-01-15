@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Box, styled, SxProps } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
+import { useResizeObserver } from 'usehooks-ts';
 
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import { ScreenshotDetail } from '../Screenshots/ScreenshotDetail';
@@ -12,7 +13,7 @@ import { useTranslationsActions } from '../context/TranslationsContext';
 
 type ScreenshotModel = components['schemas']['ScreenshotModel'];
 
-const MAX_SIZE = 450;
+const MAX_SIZE = 375;
 const MIN_SIZE = 150;
 
 const StyledContainer = styled(Box)`
@@ -37,17 +38,26 @@ type Props = {
   sx?: SxProps;
 };
 
-export const Screenshots = ({
-  screenshots,
-  keyId,
-  screenshotMaxWidth,
-  sx,
-}: Props) => {
+export const Screenshots = ({ screenshots, keyId, sx }: Props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState(0);
+
+  useResizeObserver({
+    ref: containerRef,
+    onResize(size) {
+      if (size.width) {
+        setSize(Math.floor(size.width / 75) * 75);
+      }
+    },
+  });
+
   const project = useProject();
   let boundedSize: number | undefined = undefined;
-  if (screenshotMaxWidth !== undefined) {
-    const size = Math.floor(screenshotMaxWidth / 75) * 75;
-    boundedSize = Math.max(Math.min(MAX_SIZE, size), MIN_SIZE);
+  if (size) {
+    boundedSize = Math.max(Math.min(MAX_SIZE, size), MIN_SIZE) - 24;
+    if (boundedSize < MIN_SIZE) {
+      boundedSize = undefined;
+    }
   }
   const { updateScreenshots } = useTranslationsActions();
 
@@ -78,7 +88,7 @@ export const Screenshots = ({
   };
 
   return (
-    <StyledContainer {...{ sx }} onClick={stopAndPrevent()}>
+    <StyledContainer {...{ sx }} onClick={stopAndPrevent()} ref={containerRef}>
       <StyledScrollWrapper>
         {screenshots.map((sc) => {
           const screenshot = {
