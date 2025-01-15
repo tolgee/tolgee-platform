@@ -1,3 +1,10 @@
+## [3.93.3](https://github.com/tolgee/tolgee-platform/compare/v3.93.2...v3.93.3) (2025-01-15)
+
+
+### Bug Fixes
+
+* schema not updated on FE ([#2844](https://github.com/tolgee/tolgee-platform/issues/2844)) ([520ff07](https://github.com/tolgee/tolgee-platform/commit/520ff0763ea12eec33f81840242ef8eea25bd7bd))
+
 ## [3.93.2](https://github.com/tolgee/tolgee-platform/compare/v3.93.1...v3.93.2) (2025-01-15)
 
 
