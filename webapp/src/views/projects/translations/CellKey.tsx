@@ -274,25 +274,16 @@ export const CellKey: React.FC<Props> = ({
             active || screenshotsOpen || screenshotsOpenDebounced ? (
               <ControlsKey
                 onEdit={() => handleOpen()}
-                onScreenshots={
-                  simple ? undefined : () => setScreenshotsOpen(true)
-                }
-                screenshotRef={screenshotEl}
-                screenshotsPresent={data.screenshotCount > 0}
-                screenshotsOpen={screenshotsOpen || screenshotsOpenDebounced}
+                showScreenshotsAddition={!simple}
                 editEnabled={editEnabled}
+                keyId={data.keyId}
               />
             ) : (
               // hide as many components as possible in order to be performant
               <ControlsKey
-                onScreenshots={
-                  data.screenshotCount > 0
-                    ? () => setScreenshotsOpen(true)
-                    : undefined
-                }
-                screenshotRef={screenshotEl}
-                screenshotsPresent={data.screenshotCount > 0}
                 editEnabled={editEnabled}
+                keyId={data.keyId}
+                showScreenshotsAddition={false}
               />
             )
           ) : null}
