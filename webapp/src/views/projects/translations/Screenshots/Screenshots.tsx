@@ -101,10 +101,11 @@ export const Screenshots = ({ screenshots, keyId, oneBig, sx }: Props) => {
     <StyledContainer {...{ sx }} onClick={stopAndPrevent()} ref={containerRef}>
       <StyledScrollWrapper>
         {screenshots.map((sc) => {
-          let width = oneOnly && boundedSize ? boundedSize : 100;
+          let width =
+            oneOnly && boundedSize ? Math.min(boundedSize, sc.width!) : 100;
           let height =
             oneOnly && boundedSize
-              ? boundedSize / (sc.width! / sc.height!)
+              ? width / (sc.width! / sc.height!)
               : calculatedHeight;
 
           if (height > MAX_HEIGHT && oneOnly) {
