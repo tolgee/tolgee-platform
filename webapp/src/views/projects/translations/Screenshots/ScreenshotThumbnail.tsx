@@ -73,7 +73,7 @@ type Props = {
   onDelete: () => void;
   sx?: SxProps;
   objectFit: 'contain' | 'cover';
-  highlightFilled?: boolean;
+  scaleHighlight?: number;
 };
 
 export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
@@ -126,7 +126,7 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
           <StyledScreenshotWithLabels
             screenshot={props.screenshot}
             objectFit={props.objectFit}
-            highlightFilled={props.highlightFilled}
+            scaleHighlight={props.scaleHighlight}
           />
         </StyledScreenshotOverflowWrapper>
       </StyledScreenshotBox>

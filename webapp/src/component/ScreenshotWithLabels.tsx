@@ -19,7 +19,8 @@ type Props = {
   screenshot: ScreenshotProps;
   showTooltips?: boolean;
   objectFit?: 'contain' | 'cover';
-  highlightFilled?: boolean;
+  scaleHighlight?: number;
+  showSecondaryHighlights?: boolean;
 };
 
 export const ScreenshotWithLabels: React.FC<Props> = ({
@@ -27,8 +28,10 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
   showTooltips,
   objectFit = 'contain',
   className,
-  highlightFilled,
+  scaleHighlight = 1,
+  showSecondaryHighlights = false,
 }) => {
+  const strokeWidth = STROKE_WIDTH * scaleHighlight;
   const imageRefs = screenshot.keyReferences?.filter((ref) => ref.position);
   const theme = useTheme();
 
@@ -56,42 +59,43 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
         width={screenshot.width}
         height={screenshot.height}
       />
-      {screenshot.keyReferences?.map((key, i) => {
-        if (key.position) {
-          const rectangle = (
-            <rect
-              key={i}
-              width={key.position.width + STROKE_WIDTH}
-              height={key.position.height + STROKE_WIDTH}
-              x={key.position.x - STROKE_WIDTH / 2}
-              y={key.position.y - STROKE_WIDTH / 2}
-              fill={
-                highlightFilled && key.keyId === screenshot.highlightedKeyId
-                  ? theme.palette.marker.primary
-                  : 'transparent'
-              }
-              stroke={
-                key.keyId === screenshot.highlightedKeyId
-                  ? theme.palette.marker.primary
-                  : theme.palette.marker.secondary
-              }
-              strokeWidth={STROKE_WIDTH}
-              paintOrder="stroke"
-              rx={STROKE_WIDTH / 2}
-            />
-          );
-          if (showTooltips) {
-            return (
-              <Tooltip key={i} title={key.keyName} placement="right">
-                {rectangle}
-              </Tooltip>
+      {screenshot.keyReferences
+        ?.filter(
+          (key) =>
+            showSecondaryHighlights || key.keyId === screenshot.highlightedKeyId
+        )
+        ?.map((key, i) => {
+          if (key.position) {
+            const rectangle = (
+              <rect
+                key={i}
+                width={key.position.width + strokeWidth}
+                height={key.position.height + strokeWidth}
+                x={key.position.x - strokeWidth / 2}
+                y={key.position.y - strokeWidth / 2}
+                fill="transparent"
+                stroke={
+                  key.keyId === screenshot.highlightedKeyId
+                    ? theme.palette.marker.primary
+                    : theme.palette.marker.secondary
+                }
+                strokeWidth={strokeWidth}
+                paintOrder="stroke"
+                rx={strokeWidth / 2}
+              />
             );
-          } else {
-            return rectangle;
+            if (showTooltips) {
+              return (
+                <Tooltip key={i} title={key.keyName} placement="right">
+                  {rectangle}
+                </Tooltip>
+              );
+            } else {
+              return rectangle;
+            }
           }
-        }
-        return null;
-      })}
+          return null;
+        })}
     </svg>
   );
 };

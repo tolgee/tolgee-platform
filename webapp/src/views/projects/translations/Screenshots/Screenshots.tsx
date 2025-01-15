@@ -113,7 +113,6 @@ export const Screenshots = ({ screenshots, keyId, oneBig, sx }: Props) => {
           }
 
           const isLarge = height > 100 || width > 100;
-          const isReadable = height > 250 || width > 250;
 
           const screenshot = {
             src: isLarge ? sc.fileUrl : sc.thumbnailUrl,
@@ -128,7 +127,7 @@ export const Screenshots = ({ screenshots, keyId, oneBig, sx }: Props) => {
               key={sc.id}
               screenshot={screenshot}
               objectFit={oneOnly ? 'cover' : 'contain'}
-              highlightFilled={!isReadable}
+              scaleHighlight={sc.width! / width}
               onClick={() => {
                 setDetailData({ ...screenshot, src: sc.fileUrl });
               }}
