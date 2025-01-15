@@ -13,6 +13,7 @@ import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.formats.properties.`in`.PropertiesFileProcessor
 import io.tolgee.formats.resx.`in`.ResxProcessor
 import io.tolgee.formats.xliff.`in`.XliffFileProcessor
+import io.tolgee.formats.xlsx.`in`.XlsxFileProcessor
 import io.tolgee.formats.xmlResources.`in`.XmlResourcesProcessor
 import io.tolgee.formats.yaml.`in`.YamlFileProcessor
 import io.tolgee.service.dataImport.processors.FileProcessorContext
@@ -64,6 +65,7 @@ class ImportFileProcessorFactory(
       ImportFileFormat.YAML -> YamlFileProcessor(context, yamlObjectMapper)
       ImportFileFormat.CSV -> CsvFileProcessor(context)
       ImportFileFormat.RESX -> ResxProcessor(context)
+      ImportFileFormat.XLSX -> XlsxFileProcessor(context)
     }
   }
 

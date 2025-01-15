@@ -1,6 +1,6 @@
-package io.tolgee.formats.csv
+package io.tolgee.formats.genericTable
 
-data class CsvEntry(
+data class TableEntry(
   val key: String,
   val language: String,
   val value: String?,

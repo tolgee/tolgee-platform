@@ -156,6 +156,19 @@ export const formatGroups: FormatGroup[] = [
           'RUBY_SPRINTF',
         ],
       },
+      {
+        id: 'generic_xlsx',
+        extension: 'xlsx',
+        name: <T keyName="export-format-xlsx" />,
+        format: 'XLSX',
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+        ],
+      },
     ],
   },
   {
