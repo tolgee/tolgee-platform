@@ -34,7 +34,6 @@ const StyledFakeContainer = styled('div')`
 type Props = {
   data: DeletableKeyWithTranslationsModelType;
   languages: LanguageModel[];
-  columnSizes: number[];
   columnSizesPercent: string[];
   onResize: (colIndex: number) => void;
   bannerBefore: boolean;
