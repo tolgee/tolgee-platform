@@ -213,8 +213,8 @@ export const [
       translationService.updateQuery({});
       return handleTranslationsReset();
     },
-    updateScreenshotCount(count: ChangeScreenshotNum) {
-      return translationService.updateScreenshotCount(count);
+    updateScreenshots(data: ChangeScreenshotNum) {
+      return translationService.updateScreenshots(data);
     },
     changeView(view: ViewMode) {
       return setView(view);

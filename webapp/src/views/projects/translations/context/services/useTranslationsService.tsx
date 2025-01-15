@@ -293,7 +293,9 @@ export const useTranslationsService = (props: Props) => {
       data.forEach((mod) => {
         result = result?.map((k) => {
           if (k.keyId === mod.keyId) {
-            return { ...k, ...mod.value };
+            const value =
+              typeof mod.value === 'function' ? mod.value(k) : mod.value;
+            return { ...k, ...value };
           } else {
             return k;
           }
@@ -303,9 +305,21 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const updateScreenshotCount = (data: ChangeScreenshotNum) =>
+  const updateScreenshots = (data: ChangeScreenshotNum) =>
     updateTranslationKeys([
-      { keyId: data.keyId, value: { screenshotCount: data.screenshotCount } },
+      {
+        keyId: data.keyId,
+        value: (existing) => {
+          const value =
+            typeof data.screenshots === 'function'
+              ? data.screenshots(existing.screenshots || [])
+              : data.screenshots;
+          return {
+            screenshots: value,
+            screenshotCount: value.length,
+          };
+        },
+      },
     ]);
 
   const changeTranslations = (
@@ -396,7 +410,7 @@ export const useTranslationsService = (props: Props) => {
     updateTranslation,
     insertAsFirst,
     urlSearch: urlSearch as string | undefined,
-    updateScreenshotCount,
+    updateScreenshots,
     getAllIds,
   };
 };
