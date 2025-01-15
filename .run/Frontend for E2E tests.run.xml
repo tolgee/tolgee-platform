@@ -10,6 +10,13 @@
     <envs>
       <env name="VITE_APP_API_URL" value="http://localhost:8201" />
     </envs>
-    <method v="2" />
+    <method v="2">
+      <option name="NpmBeforeRunTask" enabled="true">
+        <package-json value="$PROJECT_DIR$/webapp/package.json" />
+        <command value="install" />
+        <node-interpreter value="project" />
+        <envs />
+      </option>
+    </method>
   </configuration>
 </component>
