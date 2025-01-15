@@ -34,7 +34,7 @@ const StyledFakeContainer = styled('div')`
 type Props = {
   data: DeletableKeyWithTranslationsModelType;
   languages: LanguageModel[];
-  columnSizesPercent: string[];
+  columnSizes: string[];
   onResize: (colIndex: number) => void;
   bannerBefore: boolean;
   bannerAfter: boolean;
@@ -42,7 +42,7 @@ type Props = {
 
 export const RowTable: React.FC<Props> = React.memo(function RowTable({
   data,
-  columnSizesPercent,
+  columnSizes,
   languages,
   onResize,
   bannerBefore,
@@ -73,8 +73,8 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
       data-cy="translations-row"
       className={clsx(data.deleted && 'deleted')}
       style={{
-        gridTemplateColumns: columnSizesPercent.join(' '),
-        width: `calc(${columnSizesPercent.join(' + ')})`,
+        gridTemplateColumns: columnSizes.join(' '),
+        width: `calc(${columnSizes.join(' + ')})`,
       }}
     >
       <CellKey
@@ -101,7 +101,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
       })}
       <StyledFakeContainer
         ref={containerRef}
-        style={{ left: columnSizesPercent[0] }}
+        style={{ left: columnSizes[0] }}
       />
     </StyledContainer>
   );

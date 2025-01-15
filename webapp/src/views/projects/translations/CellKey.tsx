@@ -122,7 +122,7 @@ const StyledBolt = styled(Zap)`
 
 type Props = {
   data: KeyWithTranslationsModel;
-  width?: number;
+  width?: string | number;
   editEnabled: boolean;
   active: boolean;
   simple?: boolean;
@@ -227,13 +227,7 @@ export const CellKey: React.FC<Props> = ({
           )}
           {data.screenshots && (
             <StyledScreenshots>
-              <Screenshots
-                screenshots={data.screenshots}
-                screenshotMaxWidth={
-                  width === undefined ? undefined : width - 52
-                }
-                keyId={data.keyId}
-              />
+              <Screenshots screenshots={data.screenshots} keyId={data.keyId} />
             </StyledScreenshots>
           )}
           {!simple && (
