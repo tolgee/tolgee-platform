@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { useResetTestClock } from 'tg.service/useTestClock';
 
 type InfoType = {
   currentTimestamp: number;
@@ -51,10 +52,17 @@ export const OrganizationBillingTestClockHelperView: FunctionComponent = () => {
     invalidatePrefix: '/internal/test-clock-helper' as any,
   });
 
+  const resetTestClock = useResetTestClock();
+
   const resetMutation = useApiMutation({
     url: '/internal/time' as any,
     method: 'delete',
     invalidatePrefix: '/internal/test-clock-helper' as any,
+    options: {
+      onSuccess: () => {
+        resetTestClock();
+      },
+    },
   });
 
   const info = infoLoadable.data;

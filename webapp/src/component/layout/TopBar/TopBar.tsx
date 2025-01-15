@@ -9,9 +9,12 @@ import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 
 import { UserMenu } from '../../security/UserMenu/UserMenu';
-import { AdminInfo } from './AdminInfo';
 import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
 import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
+import { TopBarAnnouncements } from './announcements/TopBarAnnouncements';
+import { TopBarTestClockInfo } from './TopBarTestClockInfo';
+import React, { FC } from 'react';
+import { TrialChip } from './TrialChip';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -66,10 +69,7 @@ type Props = {
   isDebuggingCustomerAccount?: boolean;
 };
 
-export const TopBar: React.FC<Props> = ({
-  isAdminAccess = false,
-  isDebuggingCustomerAccount = false,
-}) => {
+export const TopBar: FC<Props> = ({ ...announcementProps }) => {
   const config = useConfig();
 
   const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);
@@ -108,6 +108,7 @@ export const TopBar: React.FC<Props> = ({
                 <StyledLogoTitle variant="h5" color="inherit">
                   {config.appName}
                 </StyledLogoTitle>
+                <TrialChip />
                 {config.showVersion && (
                   <StyledVersion variant="body1">
                     {config.version}
@@ -116,11 +117,9 @@ export const TopBar: React.FC<Props> = ({
               </Box>
             </StyledTolgeeLink>
           </Box>
-          <AdminInfo
-            adminAccess={isAdminAccess}
-            debuggingCustomerAccount={isDebuggingCustomerAccount}
-          />
+          <TopBarAnnouncements {...announcementProps} />
         </Box>
+        <TopBarTestClockInfo />
         {quickStartEnabled && <QuickStartTopBarButton />}
         {!user && <LanguageMenu />}
         {user && <UserMenu />}

@@ -23,6 +23,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { PlanSelectorField } from '../../subscriptionPlans/components/planForm/fields/PlanSelectorField';
 import { CloudPlanFormData } from '../../subscriptionPlans/components/planForm/CloudPlanFormBase';
+import { useTestClock } from 'tg.service/useTestClock';
 
 export const AssignCloudTrialDialog: FC<{
   open: boolean;
@@ -66,7 +67,9 @@ export const AssignCloudTrialDialog: FC<{
     );
   }
 
-  const currentDaPlus2weeks = new Date(Date.now() + 1000 * 60 * 60 * 24 * 14);
+  const currentTimestamp = useTestClock() || Date.now();
+
+  const currentDaPlus2weeks = new Date(currentTimestamp);
 
   const cloudPlanInitialData = getCloudPlanInitialValues();
 

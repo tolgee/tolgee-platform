@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.activity.ActivityHandlerInterceptor
+import io.tolgee.component.TestClockHeaderFilter
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.servlet.MultipartConfigElement
@@ -19,11 +20,7 @@ import org.springframework.http.CacheControl
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.unit.DataSize
-import org.springframework.web.servlet.config.annotation.CorsRegistry
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.servlet.config.annotation.*
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 
@@ -55,7 +52,7 @@ class WebConfiguration(
   override fun addCorsMappings(registry: CorsRegistry) {
     registry.addMapping("/**")
       .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-      .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME)
+      .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME, TestClockHeaderFilter.TOLGEE_TEST_CLOCK_HEADER_NAME)
   }
 
   override fun addInterceptors(registry: InterceptorRegistry) {
