@@ -1,3 +1,10 @@
+## [3.93.2](https://github.com/tolgee/tolgee-platform/compare/v3.93.1...v3.93.2) (2025-01-15)
+
+
+### Bug Fixes
+
+* save code references before key metas to workaround hibernate bug ([#2837](https://github.com/tolgee/tolgee-platform/issues/2837)) ([af8b1b1](https://github.com/tolgee/tolgee-platform/commit/af8b1b1b995bc0bc3d6aebf1bd2ea46a42dde2a9)), closes [tolgee-cli#97](https://github.com/tolgee-cli/issues/97)
+
 ## [3.93.1](https://github.com/tolgee/tolgee-platform/compare/v3.93.0...v3.93.1) (2025-01-14)
 
 
