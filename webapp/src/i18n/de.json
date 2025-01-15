@@ -555,6 +555,7 @@
   "developer_menu_content_delivery": "Inhaltsbereitstellung",
   "developer_menu_storage": "Inhaltsspeicher",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "Sie können dies sehen, weil Sie sich im Entwicklungsmodus befinden und die Testuhr verwenden. Dies wird in der Produktion nicht sichtbar sein.",
   "disabled_languages_none": "Keine",
   "disable-user-confirmation-message": "Möchten Sie den/die Benutzer:in {name} wirklich deaktivieren?",
   "edit_api_key_title": "API-Schlüssel bearbeiten",
@@ -1481,6 +1482,8 @@
   "token-regenerate-message": "Das aktuelle Token wird ersetzt. Sie werden es nicht mehr benutzen können.",
   "tools_panel_hint": "Hinweis",
   "too_many_requests": "Zu viele Anfragen. Bitte versuchen Sie es später erneut.",
+  "topbar-trial-chip": "Testversion",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Sie haben einen Tag, bevor Ihre Testversion endet. Klicken Sie, um mehr zu erfahren.} other {Sie haben {daysLeft} Tage, bevor Ihre Testversion endet. Klicken Sie, um mehr zu erfahren.}}",
   "tranfer_project_dialog_warning": "Damit wird das Projekt auf einen anderen Eigentümer übertragen.",
   "transfer_option_organization": "Organisation",
   "transfer_project_apply_button": "Übertragung",
@@ -1587,6 +1590,7 @@
   "translations_no_translations_integrate": "Leitfaden zur Integration",
   "translation_spending_limit_exceeded": "Ausgabenlimit überschritten",
   "translations_results_count": "{count, plural, one {1 Schlüssel} other {# Schlüssel}}",
+  "translations_screenshots_add_tooltip": "Screenshot hinzufügen",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Löschen",
@@ -1635,6 +1639,8 @@
   "translation_tools_translation_memory": "Übersetzungsspeicher",
   "translation_visual_disabled": "<deaktiviert>",
   "translation_visual_disabled_hint": "Die Übersetzung in diese Sprache ist deaktiviert, überprüfen Sie die erweiterten Schlüsseleinstellungen",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Willkommen! Wir haben Ihnen einen erweiterten Testplan zugewiesen. Genießen Sie die Nutzung seiner Funktionen noch {daysLeft} Tag.} other {Willkommen! Wir haben Ihnen einen erweiterten Testplan zugewiesen. Genießen Sie die Nutzung seiner Funktionen noch {daysLeft} Tage.}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Nur noch ein Tag, bis Ihre Testversion endet. <link>Mein Abonnement behalten</link>} other {Nur noch {daysLeft} Tage, bis Ihre Testversion endet. <link>Mein Abonnement behalten</link>}}",
   "unexpected_error_message": "Unerwarteter Fehler: {code}",
   "unexpected_error_occurred": "Unerwarteter Fehler aufgetreten",
   "unexpected_error_while_executing_webhook": "Unerwarteter Fehler beim Ausführen der Webhook",

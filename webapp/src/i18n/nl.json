@@ -554,6 +554,7 @@
   "developer_menu_content_delivery": "Inhoudslevering",
   "developer_menu_storage": "Inhoudopslag",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "U kunt dit zien, omdat u in de ontwikkelingsmodus bent en een testklok gebruikt. Dit zal niet zichtbaar zijn in de productie.",
   "disabled_languages_none": "Geen",
   "disable-user-confirmation-message": "Weet u zeker dat u gebruiker {name} wilt uitschakelen?",
   "edit_api_key_title": "Bewerk Project API-sleutel",
@@ -1478,6 +1479,8 @@
   "token-regenerate-message": "Het huidige token wordt vervangen. U kunt het niet meer gebruiken.",
   "tools_panel_hint": "Tip",
   "too_many_requests": "Te veel verzoeken. Probeer het later opnieuw.",
+  "topbar-trial-chip": "Proefversie",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {U heeft één dag voordat uw proefperiode eindigt. Klik om meer te weten te komen.} other {U heeft {daysLeft} dagen voordat uw proefperiode eindigt. Klik om meer te weten te komen.}}",
   "tranfer_project_dialog_warning": "Dit zal het project overdragen aan een andere eigenaar.",
   "transfer_option_organization": "organisatie",
   "transfer_project_apply_button": "Overdragen",
@@ -1584,6 +1587,7 @@
   "translations_no_translations_integrate": "Integratieplan",
   "translation_spending_limit_exceeded": "Limiet voor uitgaven overschreden",
   "translations_results_count": "{count, plural, one {1 sleutel} other {# sleutels}}",
+  "translations_screenshots_add_tooltip": "Schermafbeelding toevoegen",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Verwijderen",
@@ -1632,6 +1636,8 @@
   "translation_tools_translation_memory": "Vertaalgeheugen",
   "translation_visual_disabled": "<uitgeschakeld>",
   "translation_visual_disabled_hint": "Vertaling naar deze taal is uitgeschakeld, controleer de geavanceerde sleutelinstellingen",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Welkom! We hebben u een geavanceerd proefabonnement toegewezen. Geniet nog {daysLeft} dag van de functies.} other {Welkom! We hebben u een geavanceerd proefabonnement toegewezen. Geniet nog {daysLeft} dagen van de functies.}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Nog maar één dag voordat uw proefperiode eindigt. <link>Behoud mijn abonnement</link>} other {Nog maar {daysLeft} dagen voordat uw proefperiode eindigt. <link>Behoud mijn abonnement</link>}}",
   "unexpected_error_message": "Onverwachte fout: {code}",
   "unexpected_error_occurred": "Onverwachte fout opgetreden",
   "unexpected_error_while_executing_webhook": "Onverwachte fout bij het uitvoeren van webhook",

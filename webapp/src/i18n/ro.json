@@ -556,6 +556,7 @@
   "developer_menu_content_delivery": "Livrare conținut",
   "developer_menu_storage": "Stocare conținut",
   "developer_menu_webhooks": "Webhook-uri",
+  "development-test-clock-topbar-info-tooltip": "Puteți vedea acest lucru, deoarece sunteți în modul de dezvoltare și utilizați ceasul de testare. Acest lucru nu va fi vizibil în producție.",
   "disabled_languages_none": "Nimic",
   "disable-user-confirmation-message": "Sigur doriți să dezactivați utilizatorul {name}?",
   "edit_api_key_title": "Editează cheia API a proiectului",
@@ -1486,6 +1487,8 @@
   "tools_panel_hint": "Sugestie",
   "too_many_requests": "Prea multe cereri. Vă rugăm să încercați din nou mai târziu.",
   "too_many_requests_retry_after": "Prea multe cereri. Vă rugăm să încercați din nou în {retryAfterSeconds, time, ::mmss}.",
+  "topbar-trial-chip": "Perioadă de încercare",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Mai aveți o zi înainte de încheierea perioadei de încercare. Faceți clic pentru a afla mai multe.} other {Mai aveți {daysLeft} zile înainte de încheierea perioadei de încercare. Faceți clic pentru a afla mai multe.} }",
   "tranfer_project_dialog_warning": "Aceasta va transfera proiectul către un alt proprietar.",
   "transfer_option_organization": "organizație",
   "transfer_project_apply_button": "Transferă",
@@ -1592,6 +1595,7 @@
   "translations_no_translations_integrate": "Ghid de integrare",
   "translation_spending_limit_exceeded": "Limita de cheltuieli a fost depășită",
   "translations_results_count": "{count, plural, one {1 cheie} few {# chei} other {# de chei}}",
+  "translations_screenshots_add_tooltip": "Adăugați captură de ecran",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Ștergeți",
@@ -1640,6 +1644,8 @@
   "translation_tools_translation_memory": "Memorie de traducere",
   "translation_visual_disabled": "<dezactivat>",
   "translation_visual_disabled_hint": "Traducerea în această limbă este dezactivată, verificați setările avansate ale cheii",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Bun venit! V-am atribuit un plan de încercare avansat. Bucurați-vă de utilizarea funcțiilor sale pentru încă {daysLeft} zi.} few {Bun venit! V-am atribuit un plan de încercare avansat. Bucurați-vă de utilizarea funcțiilor sale pentru încă {daysLeft} zile.} other {Bun venit! V-am atribuit un plan de încercare avansat. Bucurați-vă de utilizarea funcțiilor sale pentru încă {daysLeft} de zile.}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Doar o zi înainte de încheierea perioadei de încercare. <link>Păstrează-mi abonamentul</link>} other {Doar {daysLeft} zile înainte de încheierea perioadei de încercare. <link>Păstrează-mi abonamentul</link>} }",
   "unexpected_error_message": "Eroare neașteptată: {code}",
   "unexpected_error_occurred": "A apărut o eroare neașteptată",
   "unexpected_error_while_executing_webhook": "Eroare neașteptată în timpul executării webhook-ului",

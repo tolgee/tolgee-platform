@@ -556,6 +556,7 @@
   "developer_menu_content_delivery": "Indholdsdistribution",
   "developer_menu_storage": "Indholdsopbevaring",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "Du kan se dette, fordi du er i udviklingstilstand og bruger testur. Dette vil ikke være synligt i produktionen.",
   "disabled_languages_none": "Ingen",
   "disable-user-confirmation-message": "Vil du virkelig deaktivere brugeren {name}?",
   "edit_api_key_title": "Rediger projekt API-nøgle",
@@ -1486,6 +1487,8 @@
   "tools_panel_hint": "Tip",
   "too_many_requests": "For mange forespørgsler. Prøv igen senere.",
   "too_many_requests_retry_after": "For mange forespørgsler. Prøv igen om {retryAfterSeconds, time, ::mmss}.",
+  "topbar-trial-chip": "Prøveversion",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Du har én dag før din prøveperiode slutter. Klik for at lære mere.} other {Du har {daysLeft} dage før din prøveperiode slutter. Klik for at lære mere.}}",
   "tranfer_project_dialog_warning": "Dette vil overføre projektet til en anden ejer.",
   "transfer_option_organization": "organisation",
   "transfer_project_apply_button": "Overfør",
@@ -1592,6 +1595,7 @@
   "translations_no_translations_integrate": "Integrationsvejledning",
   "translation_spending_limit_exceeded": "Grænse for forbrug overskredet",
   "translations_results_count": "{count, plural, one {1 nøgle} other {# nøgler}}",
+  "translations_screenshots_add_tooltip": "Tilføj skærmbillede",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Slet",
@@ -1640,6 +1644,8 @@
   "translation_tools_translation_memory": "Oversættelseshukommelse",
   "translation_visual_disabled": "<deaktiveret>",
   "translation_visual_disabled_hint": "Oversættelse til dette sprog er deaktiveret, tjek avancerede nøgleindstillinger",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Velkommen! Vi har tildelt dig en avanceret prøveplan. Nyd at bruge dens funktioner i {daysLeft} flere dag.} other {Velkommen! Vi har tildelt dig en avanceret prøveplan. Nyd at bruge dens funktioner i {daysLeft} flere dage.}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Kun én dag før din prøveperiode slutter. <link>Behold mit abonnement</link>} other {Kun {daysLeft} dage før din prøveperiode slutter. <link>Behold mit abonnement</link>}}",
   "unexpected_error_message": "Uventet fejl: {code}",
   "unexpected_error_occurred": "Der opstod en uventet fejl",
   "unexpected_error_while_executing_webhook": "Uventet fejl opstod under udførelse af webhook",

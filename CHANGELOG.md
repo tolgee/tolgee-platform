@@ -1,3 +1,10 @@
+# [3.94.0](https://github.com/tolgee/tolgee-platform/compare/v3.93.3...v3.94.0) (2025-01-15)
+
+
+### Features
+
+* xlsx import and export ([#2829](https://github.com/tolgee/tolgee-platform/issues/2829)) ([f8cddb6](https://github.com/tolgee/tolgee-platform/commit/f8cddb61261459abc40e5ff404c4558db07de260)), closes [#2555](https://github.com/tolgee/tolgee-platform/issues/2555)
+
 ## [3.93.3](https://github.com/tolgee/tolgee-platform/compare/v3.93.2...v3.93.3) (2025-01-15)
 
 

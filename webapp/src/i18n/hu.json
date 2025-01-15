@@ -552,6 +552,7 @@
   "developer_menu_content_delivery": "Tartalom szállítás",
   "developer_menu_storage": "Tartalomtároló",
   "developer_menu_webhooks": "Webhookok",
+  "development-test-clock-topbar-info-tooltip": "Ezt azért látod, mert fejlesztési módban vagy és tesztórát használsz. Ez nem lesz látható a produkciós környezetben.",
   "disabled_languages_none": "Nincs",
   "disable-user-confirmation-message": "Valóban letiltani szeretné a(z) {name} felhasználót?",
   "edit_api_key_title": "Projekt API-kulcs szerkesztése",
@@ -1476,6 +1477,8 @@
   "token-regenerate-message": "Az aktuális token helyettesítve lesz. Többé nem lesz használható.",
   "tools_panel_hint": "Tipp",
   "too_many_requests": "Túl sok kérés. Kérjük, próbálja meg később újra.",
+  "topbar-trial-chip": "Próba",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Már csak egy nap van hátra a próbaidőszakból. Kattintson ide a további információkért.} other {Már csak {daysLeft} nap van hátra a próbaidőszakból. Kattintson ide a további információkért.}}",
   "tranfer_project_dialog_warning": "Ez át fogja adni a projektet egy másik tulajdonosnak.",
   "transfer_option_organization": "szervezet",
   "transfer_project_apply_button": "Átvitel",
@@ -1582,6 +1585,7 @@
   "translations_no_translations_integrate": "Integrációs útmutató",
   "translation_spending_limit_exceeded": "Költségkeret túllépve",
   "translations_results_count": "{count, plural, one {1 kulcs} other {# kulcs}}",
+  "translations_screenshots_add_tooltip": "Képernyőkép hozzáadása",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Törlés",
@@ -1630,6 +1634,8 @@
   "translation_tools_translation_memory": "Fordítási memória",
   "translation_visual_disabled": "<letiltva>",
   "translation_visual_disabled_hint": "Ezen nyelvre történő fordítás letiltva, ellenőrizze az előrehaladott kulcsbeállításokat",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, other {Üdvözöljük! Hozzárendeltünk egy haladó próba csomagot. Élvezze a funkcióit még {daysLeft} napig.} }",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Már csak egy nap van hátra a próbaidőszakból. <link>Előfizetésem megtartása</link>} other {Már csak {daysLeft} nap van hátra a próbaidőszakból. <link>Előfizetésem megtartása</link>}}",
   "unexpected_error_message": "Váratlan hiba: {code}",
   "unexpected_error_occurred": "Váratlan hiba történt",
   "unexpected_error_while_executing_webhook": "Váratlan hiba történt a webhook végrehajtása közben",

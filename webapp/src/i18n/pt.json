@@ -552,6 +552,7 @@
   "developer_menu_content_delivery": "Entrega de conteúdo",
   "developer_menu_storage": "Armazenamento de Conteúdo",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "Você pode ver isso, porque está no modo de desenvolvimento e está usando o relógio de teste. Isso não será visível na produção.",
   "disabled_languages_none": "Nenhum",
   "disable-user-confirmation-message": "Você realmente deseja desativar o usuário {name}?",
   "edit_api_key_title": "Editar chave API do projeto",
@@ -1475,6 +1476,8 @@
   "token-regenerate-message": "O token atual será substituído. Você não poderá mais usá-lo.",
   "tools_panel_hint": "Dica",
   "too_many_requests": "Muitas solicitações. Por favor, tente novamente mais tarde.",
+  "topbar-trial-chip": "Teste",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Falta um dia para o término do seu período de teste. Clique para saber mais.} other {Faltam {daysLeft} dias para o término do seu período de teste. Clique para saber mais.}}",
   "tranfer_project_dialog_warning": "Isto irá transferir o projeto para outro proprietário.",
   "transfer_option_organization": "organização",
   "transfer_project_apply_button": "Transferir",
@@ -1579,6 +1582,7 @@
   "translations_no_translations_integrate": "Guia de integração",
   "translation_spending_limit_exceeded": "Limite de gastos excedido",
   "translations_results_count": "{count, plural, one {# chave} other {# chaves}}",
+  "translations_screenshots_add_tooltip": "Adicionar captura de tela",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Excluir",
@@ -1627,6 +1631,8 @@
   "translation_tools_translation_memory": "Memória de tradução",
   "translation_visual_disabled": "<desativado>",
   "translation_visual_disabled_hint": "A tradução para este idioma está desativada, verifique as configurações avançadas da chave",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Bem-vindo! Atribuímos a você um plano de teste avançado. Aproveite seus recursos por mais {daysLeft} dia.} other {Bem-vindo! Atribuímos a você um plano de teste avançado. Aproveite seus recursos por mais {daysLeft} dias.}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Falta apenas um dia para o término do seu período de teste. <link>Manter minha assinatura</link>} other {Faltam apenas {daysLeft} dias para o término do seu período de teste. <link>Manter minha assinatura</link>}}",
   "unexpected_error_message": "Erro inesperado: {code}",
   "unexpected_error_occurred": "Ocorreu um erro inesperado",
   "unexpected_error_while_executing_webhook": "Erro inesperado ao executar webhook",

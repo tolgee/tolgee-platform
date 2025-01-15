@@ -556,6 +556,7 @@
   "developer_menu_content_delivery": "Content Delivery",
   "developer_menu_storage": "Content Storage",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "You can see this, because you're in development mode and you're using test clock. This won't be visible on the production.",
   "disabled_languages_none": "None",
   "disable-user-confirmation-message": "Do you really want to disable user {name}?",
   "edit_api_key_title": "Edit Project API key",
@@ -1497,6 +1498,8 @@
   "tools_panel_hint": "Hint",
   "too_many_requests": "Too many requests. Please try again later.",
   "too_many_requests_retry_after": "Too many requests. Please try again in {retryAfterSeconds, time, ::mmss}.",
+  "topbar-trial-chip": "Trial",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {You have one day before your trial ends. Click to learn more.} other {You have {daysLeft} days before your trial ends. Click to learn more.}}",
   "tranfer_project_dialog_warning": "This will transfer the project to another owner.",
   "transfer_option_organization": "organization",
   "transfer_project_apply_button": "Transfer",
@@ -1603,6 +1606,7 @@
   "translations_no_translations_integrate": "Integration guide",
   "translation_spending_limit_exceeded": "Spending limit exceeded",
   "translations_results_count": "{count, plural, one {1 key} other {# keys}}",
+  "translations_screenshots_add_tooltip": "Add screenshot",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Delete",
@@ -1651,6 +1655,8 @@
   "translation_tools_translation_memory": "Translation memory",
   "translation_visual_disabled": "<disabled>",
   "translation_visual_disabled_hint": "Translation to this language is disabled, check advanced key settings",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Welcome! We have assigned you an advanced trial plan. Enjoy using its features for {daysLeft} more day.} other {Welcome! We have assigned you an advanced trial plan. Enjoy using its features for {daysLeft} more days.}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Just one day before your trial ends. <link>Keep my subscription</link>} other {Just {daysLeft} days before your trial ends. <link>Keep my subscription</link>}}",
   "unexpected_error_message": "Unexpected error: {code}",
   "unexpected_error_occurred": "Unexpected error occurred",
   "unexpected_error_while_executing_webhook": "Unexpected error while executing webhook",

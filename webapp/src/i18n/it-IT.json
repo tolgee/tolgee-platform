@@ -524,6 +524,7 @@
   "developer_menu_content_delivery": "Consegna dei contenuti",
   "developer_menu_storage": "Archiviazione del contenuto",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "Puoi vedere questo, perché sei in modalità di sviluppo e stai usando l'orologio di test. Questo non sarà visibile in produzione.",
   "disabled_languages_none": "Nessuno",
   "disable-user-confirmation-message": "Vuoi davvero disabilitare l'utente {name}?",
   "edit_api_key_title": "Modifica chiave API del progetto",
@@ -1406,6 +1407,8 @@
   "token-regenerate-message": "Il token attuale verrà sostituito. Non sarà più possibile utilizzarlo.",
   "tools_panel_hint": "Suggerimento",
   "too_many_requests": "Troppe richieste. Per favore riprova più tardi.",
+  "topbar-trial-chip": "Prova",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Hai un giorno prima che termini la tua prova. Clicca per saperne di più.} other {Hai {daysLeft} giorni prima che termini la tua prova. Clicca per saperne di più.}}",
   "tranfer_project_dialog_warning": "Questo trasferirà il progetto a un altro proprietario.",
   "transfer_option_organization": "organizzazione",
   "transfer_project_apply_button": "Trasferisci",
@@ -1503,6 +1506,7 @@
   "translations_no_translations_integrate": "Guida all'integrazione",
   "translation_spending_limit_exceeded": "Limite di spesa superato",
   "translations_results_count": "{count, plural, one {1 chiave} other {# chiavi} }",
+  "translations_screenshots_add_tooltip": "Aggiungi screenshot",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Elimina",
@@ -1547,6 +1551,8 @@
   "translation_tools_tasks": "Attività",
   "translation_tools_translation_memory": "Memoria di traduzione",
   "translation_visual_disabled": "<disabilitato>",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Benvenuto! Ti abbiamo assegnato un piano di prova avanzato. Goditi le sue funzionalità per un altro giorno.} other {Benvenuto! Ti abbiamo assegnato un piano di prova avanzato. Goditi le sue funzionalità per altri {daysLeft} giorni.} }",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Solo un giorno prima che termini la tua prova. <link>Mantieni il mio abbonamento</link>} other {Solo {daysLeft} giorni prima che termini la tua prova. <link>Mantieni il mio abbonamento</link>}}",
   "unexpected_error_occurred": "Si è verificato un errore imprevisto",
   "unexpected_error_while_executing_webhook": "Errore imprevisto durante l'esecuzione del webhook",
   "unexpected_error_while_publishing_to_content_storage": "Errore imprevisto durante la pubblicazione nello storage dei contenuti",

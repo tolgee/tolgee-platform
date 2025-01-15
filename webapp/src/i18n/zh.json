@@ -552,6 +552,7 @@
   "developer_menu_content_delivery": "内容分发",
   "developer_menu_storage": "内容存储",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "您可以看到这个，因为您处于开发模式并且正在使用测试时钟。这在生产环境中将不可见。",
   "disabled_languages_none": "无",
   "disable-user-confirmation-message": "您确定要停用用户 {name} 吗？",
   "edit_api_key_title": "编辑项目 API 密钥",
@@ -1475,6 +1476,8 @@
   "token-regenerate-message": "当前令牌将被替换。您将无法再使用它。",
   "tools_panel_hint": "提示",
   "too_many_requests": "请求过多。请稍后再试。",
+  "topbar-trial-chip": "试用",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {您还有一天的试用期。点击了解更多。} other {您还有 {daysLeft} 天的试用期。点击了解更多。}}",
   "tranfer_project_dialog_warning": "此操作将把项目转移给另一个所有者。",
   "transfer_option_organization": "团队",
   "transfer_project_apply_button": "转移",
@@ -1581,6 +1584,7 @@
   "translations_no_translations_integrate": "集成指南",
   "translation_spending_limit_exceeded": "已超出消费限额",
   "translations_results_count": "{count, plural, one {1 个词条} other {# 个词条}}",
+  "translations_screenshots_add_tooltip": "添加屏幕截图",
   "translations": {
     "screenshots": {
       "delete_tooltip": "删除",
@@ -1629,6 +1633,8 @@
   "translation_tools_translation_memory": "翻译记忆",
   "translation_visual_disabled": "<已禁用>",
   "translation_visual_disabled_hint": "此语言的翻译已禁用，请检查高级键设置",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, other {欢迎！我们已为您分配了高级试用计划。请享受其功能 {daysLeft} 天。} }",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {仅剩一天，您的试用即将结束。<link>保持我的订阅</link>} other {仅剩 {daysLeft} 天，您的试用即将结束。<link>保持我的订阅</link>}}",
   "unexpected_error_message": "意外错误：{code}",
   "unexpected_error_occurred": "出现意外错误",
   "unexpected_error_while_executing_webhook": "执行 Webhook 时出现意外错误",

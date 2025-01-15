@@ -555,6 +555,7 @@
   "developer_menu_content_delivery": "Doručování obsahu",
   "developer_menu_storage": "Úložiště obsahu",
   "developer_menu_webhooks": "Webhooky",
+  "development-test-clock-topbar-info-tooltip": "Toto vidíte, protože jste v režimu vývoje a používáte testovací hodiny. Toto nebude viditelné v produkci.",
   "disabled_languages_none": "Žádný",
   "disable-user-confirmation-message": "Skutečně chcete deaktivovat uživatele {name}?",
   "edit_api_key_title": "Upravit API klíč projektu",
@@ -1485,6 +1486,8 @@
   "tools_panel_hint": "Nápověda",
   "too_many_requests": "Příliš mnoho požadavků. Zkuste to prosím později.",
   "too_many_requests_retry_after": "Příliš mnoho požadavků. Zkuste to prosím za {retryAfterSeconds, time, ::mmss}.",
+  "topbar-trial-chip": "Zkušební verze",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Máte jeden den před vypršením vaší zkušební verze. Klikněte pro více informací.} few {Máte {daysLeft} dny před vypršením vaší zkušební verze. Klikněte pro více informací.} other {Máte {daysLeft} dní před vypršením vaší zkušební verze. Klikněte pro více informací.} }",
   "tranfer_project_dialog_warning": "Tímto převedete projekt na jiného vlastníka.",
   "transfer_option_organization": "organizace",
   "transfer_project_apply_button": "Převést",
@@ -1591,6 +1594,7 @@
   "translations_no_translations_integrate": "Průvodce integrací",
   "translation_spending_limit_exceeded": "Výdajový limit překročen",
   "translations_results_count": "{count, plural, one {1 klíč} few {# klíče} other {# klíčů}}",
+  "translations_screenshots_add_tooltip": "Přidat screenshot",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Smazat",
@@ -1639,6 +1643,8 @@
   "translation_tools_translation_memory": "Překladová paměť",
   "translation_visual_disabled": "<deaktivováno>",
   "translation_visual_disabled_hint": "Překlad do této jazykové verze je deaktivován, zkontrolujte pokročilá nastavení klíče",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Vítejte! Přiřadili jsme vám pokročilý zkušební plán. Užijte si jeho funkce ještě {daysLeft} den.} few {Vítejte! Přiřadili jsme vám pokročilý zkušební plán. Užijte si jeho funkce ještě {daysLeft} dny.} other {Vítejte! Přiřadili jsme vám pokročilý zkušební plán. Užijte si jeho funkce ještě {daysLeft} dní.} }",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Jeden den před vypršením vaší zkušební verze. <link>Udržet mé předplatné</link>} few {Jen {daysLeft} dny před vypršením vaší zkušební verze. <link>Udržet mé předplatné</link>} other {Jen {daysLeft} dní před vypršením vaší zkušební verze. <link>Udržet mé předplatné</link>} }",
   "unexpected_error_message": "Neočekávaná chyba: {code}",
   "unexpected_error_occurred": "Vyskytla se neznámá chyba",
   "unexpected_error_while_executing_webhook": "Neočekávaná chyba při provádění webhooku",

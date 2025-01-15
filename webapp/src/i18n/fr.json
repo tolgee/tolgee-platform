@@ -554,6 +554,7 @@
   "developer_menu_content_delivery": "Diffusion de contenu",
   "developer_menu_storage": "Stockage de contenu",
   "developer_menu_webhooks": "Webhooks",
+  "development-test-clock-topbar-info-tooltip": "Vous pouvez voir cela, car vous êtes en mode développement et vous utilisez une horloge de test. Cela ne sera pas visible en production.",
   "disabled_languages_none": "Aucun",
   "disable-user-confirmation-message": "Voulez-vous vraiment désactiver l'utilisateur {name}?",
   "edit_api_key_title": "Ajuster la clé API",
@@ -1480,6 +1481,8 @@
   "token-regenerate-message": "Le jeton actuel sera remplacé. Vous ne pourrez plus l'utiliser.",
   "tools_panel_hint": "Indice",
   "too_many_requests": "Trop de demandes. Veuillez réessayer plus tard.",
+  "topbar-trial-chip": "Essai",
+  "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Il vous reste un jour avant la fin de votre essai. Cliquez pour en savoir plus.} other {Il vous reste {daysLeft} jours avant la fin de votre essai. Cliquez pour en savoir plus.}}",
   "tranfer_project_dialog_warning": "Cela transférera le projet à un autre propriétaire.",
   "transfer_option_organization": "organisation",
   "transfer_project_apply_button": "Transférer",
@@ -1586,6 +1589,7 @@
   "translations_no_translations_integrate": "Guide d'intégration",
   "translation_spending_limit_exceeded": "Limite de dépenses dépassée",
   "translations_results_count": "{count, plural, one {# clé} other {# clés}}",
+  "translations_screenshots_add_tooltip": "Ajouter une capture d'écran",
   "translations": {
     "screenshots": {
       "delete_tooltip": "Supprimer",
@@ -1634,6 +1638,8 @@
   "translation_tools_translation_memory": "Mémoire de traduction",
   "translation_visual_disabled": "<désactivé>",
   "translation_visual_disabled_hint": "La traduction vers cette langue est désactivée, vérifiez les paramètres avancés de la clé",
+  "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Bienvenue ! Nous vous avons attribué un plan d'essai avancé. Profitez de ses fonctionnalités pendant encore {daysLeft} jour.} other {Bienvenue ! Nous vous avons attribué un plan d'essai avancé. Profitez de ses fonctionnalités pendant encore {daysLeft} jours.} }",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Il ne reste qu'un jour avant la fin de votre essai. <link>Maintenir mon abonnement</link>} other {Il ne reste que {daysLeft} jours avant la fin de votre essai. <link>Maintenir mon abonnement</link>}}",
   "unexpected_error_message": "Erreur inattendue : {code}",
   "unexpected_error_occurred": "Une erreur inattendue s'est produite",
   "unexpected_error_while_executing_webhook": "Erreur inattendue lors de l'exécution du webhook",
