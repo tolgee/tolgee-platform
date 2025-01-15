@@ -263,6 +263,7 @@ class BatchJobTestUtil(
         port,
         jwtService.emitToken(testData.user.id),
         testData.projectBuilder.self.id,
+        testData.user.id,
       )
     websocketHelper.listenForBatchJobProgress()
   }
