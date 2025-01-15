@@ -202,7 +202,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `notifies user on change of his notification`() {
+  fun `notifies user on change of his notifications`() {
     currentUserWebsocket.listenForNotificationsChanged()
     anotherUserWebsocket.listenForNotificationsChanged()
 
