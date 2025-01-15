@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Notification
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
@@ -14,10 +15,7 @@ import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.server.LocalServerPort
 
@@ -217,11 +215,9 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
         "translations" to mapOf("en" to "haha"),
       ),
     ).andIsOk
-    Thread.sleep(1000)
-    notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()
 
-    // but authorized user received the message
-    helper.receivedMessages.assert.isNotEmpty
+    assertPermittedUserReceivedMessage()
+    notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()
   }
 
   @Test
@@ -237,11 +233,13 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       )
     notPermittedSubscriptionHelper.listenForNotificationsChanged()
     saveNotificationForCurrentUser()
-    Thread.sleep(1000)
-    notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()
 
-    // but authorized user received the message
-    helper.receivedMessages.assert.isNotEmpty
+    assertPermittedUserReceivedMessage()
+    notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()
+  }
+
+  private fun assertPermittedUserReceivedMessage() {
+    waitFor { helper.receivedMessages.isNotEmpty() }
   }
 
   private fun saveNotificationForCurrentUser() {
