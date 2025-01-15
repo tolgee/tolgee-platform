@@ -35,15 +35,6 @@ class NotificationService(
     websocketEventPublisher(
       "/users/${event.userId}/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}",
       WebsocketEvent(
-        actor =
-          ActorInfo(
-            type = ActorType.USER,
-            data = null,
-          ),
-        data = null,
-        sourceActivity = null,
-        activityId = null,
-        dataCollapsed = false,
         timestamp = currentDateProvider.date.time,
       ),
     )
