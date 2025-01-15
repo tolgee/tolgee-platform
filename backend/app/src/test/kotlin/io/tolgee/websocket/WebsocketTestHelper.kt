@@ -18,7 +18,7 @@ import java.lang.reflect.Type
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 
-class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: Long) : Logging {
+class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: Long, val userId: Long) : Logging {
   private var sessionHandler: MySessionHandler? = null
   lateinit var receivedMessages: LinkedBlockingDeque<String>
 
@@ -28,6 +28,10 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
 
   fun listenForBatchJobProgress() {
     listen("/projects/$projectId/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}")
+  }
+
+  fun listenForNotificationsChanged() {
+    listen("/users/$userId/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}")
   }
 
   private val webSocketStompClient by lazy {
@@ -105,9 +109,19 @@ class WebsocketTestHelper(val port: Int?, val jwtToken: String, val projectId: L
       stompHeaders: StompHeaders,
       o: Any?,
     ) {
-      logger.info("Handle Frame with payload: {}", (o as? ByteArray)?.decodeToString())
+      logger.info(
+        "Handle Frame with stompHeaders: '{}' and payload: '{}'",
+        stompHeaders,
+        (o as? ByteArray)?.decodeToString(),
+      )
+
+      if (o !is ByteArray) {
+        logger.info("Payload '{}' is not a ByteArray, not adding into received messages.", o)
+        return
+      }
+
       try {
-        receivedMessages.add((o as ByteArray).decodeToString())
+        receivedMessages.add(o.decodeToString())
       } catch (e: InterruptedException) {
         throw RuntimeException(e)
       }
