@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, IconButton, styled, Tooltip } from '@mui/material';
+import { Box, IconButton, styled, SxProps, Tooltip } from '@mui/material';
 import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
@@ -11,40 +11,31 @@ import {
   ScreenshotWithLabels,
 } from 'tg.component/ScreenshotWithLabels';
 
-export interface ScreenshotThumbnailProps {
-  onClick: () => void;
-  screenshot: ScreenshotProps;
-  onDelete: () => void;
-}
-
 const StyledScreenshotWithLabels = styled(ScreenshotWithLabels)`
   width: 100%;
   height: 100%;
   object-fit: contain;
   z-index: 1;
-  transition: transform 0.1s, filter 0.5s;
-
-  &:hover {
-    transform: scale(1.1);
-  }
 `;
 
 const StyledScreenshotBox = styled(Box)`
   position: relative;
+  align-items: center;
   width: 100px;
   height: 100px;
-  align-items: center;
   justify-content: center;
   display: flex;
-  margin: 1px;
   cursor: pointer;
-  overflow: visible;
 `;
 
 const StyledScreenshotOverflowWrapper = styled(Box)`
   overflow: hidden;
   width: 100%;
   height: 100%;
+  background: ${({ theme }) => theme.palette.tokens.text._states.selected};
+  border-radius: 3px;
+  border-radius: 4px;
+  border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
 `;
 
 const StyledDeleteIconButton = styled(IconButton)`
@@ -76,9 +67,16 @@ const StyledDeleteIcon = styled(XClose)`
   height: 20px;
 `;
 
-export const ScreenshotThumbnail: FunctionComponent<
-  ScreenshotThumbnailProps
-> = (props) => {
+type Props = {
+  onClick: () => void;
+  screenshot: ScreenshotProps;
+  onDelete: () => void;
+  sx?: SxProps;
+  objectFit: 'contain' | 'cover';
+  highlightFilled?: boolean;
+};
+
+export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
   const [hover, setHover] = useState(false);
   const { satisfiesPermission } = useProjectPermissions();
   const canDeleteScreenshots = satisfiesPermission('screenshots.delete');
@@ -102,6 +100,7 @@ export const ScreenshotThumbnail: FunctionComponent<
   return (
     <>
       <StyledScreenshotBox
+        sx={props.sx}
         onMouseOver={onMouseOver}
         onMouseOut={onMouseOut}
         data-cy="screenshot-thumbnail"
@@ -124,7 +123,11 @@ export const ScreenshotThumbnail: FunctionComponent<
           key={props.screenshot.highlightedKeyId}
           onClick={props.onClick}
         >
-          <StyledScreenshotWithLabels screenshot={props.screenshot} />
+          <StyledScreenshotWithLabels
+            screenshot={props.screenshot}
+            objectFit={props.objectFit}
+            highlightFilled={props.highlightFilled}
+          />
         </StyledScreenshotOverflowWrapper>
       </StyledScreenshotBox>
     </>

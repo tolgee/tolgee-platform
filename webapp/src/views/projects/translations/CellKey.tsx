@@ -1,6 +1,5 @@
 import clsx from 'clsx';
 import React, { useRef, useState } from 'react';
-import { useDebounce } from 'use-debounce';
 import { useTranslate } from '@tolgee/react';
 import { Checkbox, styled, Tooltip, Box } from '@mui/material';
 import { Zap } from '@untitled-ui/icons-react';
@@ -11,7 +10,6 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 import { wrapIf } from 'tg.fixtures/wrapIf';
 
 import { Tags } from './Tags/Tags';
-import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import {
   CELL_CLICKABLE,
   CELL_PLAIN,
@@ -27,7 +25,10 @@ import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
 import { KeyEditModal } from './KeyEdit/KeyEditModal';
 import { useKeyCell } from './useKeyCell';
-import { Screenshots } from './ScreenshotsNew/Screenshots';
+import { ALLOWED_UPLOAD_TYPES, Screenshots } from './Screenshots/Screenshots';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { ScreenshotDropzone } from './Screenshots/ScreenshotDropzone';
+import { useScreenshotUpload } from './Screenshots/useScreenshotUpload';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -101,6 +102,21 @@ const StyledTags = styled('div')`
   min-height: 28px;
 `;
 
+const StyledDropzone = styled('div')`
+  display: grid;
+  grid-row: 2 / -1;
+  grid-column: 1 / -1;
+  position: relative;
+  background-color: ${({ theme }) => theme.palette.success.light};
+  backdrop-filter: blur(5px);
+  opacity: 0.9;
+`;
+
+const StyledDropzoneContent = styled('div')`
+  padding: 10px;
+  border: 2px dashed ${({ theme }) => theme.palette.success.dark};
+`;
+
 const StyledScreenshots = styled('div')`
   grid-area: screenshots;
   position: relative;
@@ -128,6 +144,7 @@ type Props = {
   simple?: boolean;
   className?: string;
   onSaveSuccess?: (value: string) => void;
+  oneScreenshotBig?: boolean;
   editInDialog?: boolean;
 };
 
@@ -137,14 +154,19 @@ export const CellKey: React.FC<Props> = ({
   editEnabled,
   active,
   simple,
+  oneScreenshotBig,
   className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
-  const [screenshotsOpen, setScreenshotsOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const { toggleSelect, groupToggleSelect, addTag } = useTranslationsActions();
   const { t } = useTranslate();
+  const { onFileSelected, validateAndUpload, openFiles } = useScreenshotUpload({
+    fileRef,
+    keyId: data.keyId,
+  });
 
-  const screenshotEl = useRef<HTMLButtonElement | null>(null);
+  const userIsDragging = useGlobalContext((c) => c.userIsDragging);
 
   const isSelected = useTranslationsSelector((c) =>
     c.selection.includes(data.keyId)
@@ -152,9 +174,6 @@ export const CellKey: React.FC<Props> = ({
   const somethingSelected = useTranslationsSelector((c) =>
     Boolean(c.selection.length)
   );
-
-  // prevent blinking, when closing popup
-  const [screenshotsOpenDebounced] = useDebounce(screenshotsOpen, 100);
 
   const handleToggleSelect = (e: React.PointerEvent) => {
     const shiftPressed = e.nativeEvent.shiftKey;
@@ -227,7 +246,11 @@ export const CellKey: React.FC<Props> = ({
           )}
           {data.screenshots && (
             <StyledScreenshots>
-              <Screenshots screenshots={data.screenshots} keyId={data.keyId} />
+              <Screenshots
+                screenshots={data.screenshots}
+                keyId={data.keyId}
+                oneBig={oneScreenshotBig}
+              />
             </StyledScreenshots>
           )}
           {!simple && (
@@ -271,33 +294,34 @@ export const CellKey: React.FC<Props> = ({
 
         <div className="controlsSmall">
           {!tagEdit ? (
-            active || screenshotsOpen || screenshotsOpenDebounced ? (
+            active ? (
               <ControlsKey
                 onEdit={() => handleOpen()}
-                showScreenshotsAddition={!simple}
+                onAddScreenshot={openFiles}
                 editEnabled={editEnabled}
-                keyId={data.keyId}
               />
             ) : (
               // hide as many components as possible in order to be performant
-              <ControlsKey
-                editEnabled={editEnabled}
-                keyId={data.keyId}
-                showScreenshotsAddition={false}
-              />
+              <ControlsKey editEnabled={editEnabled} />
             )
           ) : null}
         </div>
-      </StyledContainer>
-      {screenshotsOpen && (
-        <ScreenshotsPopover
-          anchorEl={screenshotEl.current!}
-          keyId={data.keyId}
-          onClose={() => {
-            setScreenshotsOpen(false);
-          }}
+        {userIsDragging && (
+          <StyledDropzone>
+            <ScreenshotDropzone validateAndUpload={validateAndUpload}>
+              <StyledDropzoneContent />
+            </ScreenshotDropzone>
+          </StyledDropzone>
+        )}
+        <input
+          type="file"
+          style={{ display: 'none' }}
+          ref={fileRef}
+          onChange={onFileSelected}
+          multiple
+          accept={ALLOWED_UPLOAD_TYPES.join(',')}
         />
-      )}
+      </StyledContainer>
       {isEditing && (
         <KeyEditModal
           data={data}

@@ -19,6 +19,7 @@ type Props = {
   screenshot: ScreenshotProps;
   showTooltips?: boolean;
   objectFit?: 'contain' | 'cover';
+  highlightFilled?: boolean;
 };
 
 export const ScreenshotWithLabels: React.FC<Props> = ({
@@ -26,6 +27,7 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
   showTooltips,
   objectFit = 'contain',
   className,
+  highlightFilled,
 }) => {
   const imageRefs = screenshot.keyReferences?.filter((ref) => ref.position);
   const theme = useTheme();
@@ -63,7 +65,11 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
               height={key.position.height + STROKE_WIDTH}
               x={key.position.x - STROKE_WIDTH / 2}
               y={key.position.y - STROKE_WIDTH / 2}
-              fill="transparent"
+              fill={
+                highlightFilled && key.keyId === screenshot.highlightedKeyId
+                  ? theme.palette.marker.primary
+                  : 'transparent'
+              }
               stroke={
                 key.keyId === screenshot.highlightedKeyId
                   ? theme.palette.marker.primary

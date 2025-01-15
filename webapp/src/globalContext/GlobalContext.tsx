@@ -13,6 +13,7 @@ import { useConfirmationDialogService } from './useConfirmationDialogService';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useMessageService } from './useMessageService';
 import { GlobalErrorView } from 'tg.component/common/GlobalErrorView';
+import { useUserDraggingService } from './useUserDraggingService';
 
 export const [GlobalContext, useGlobalActions, useGlobalContext] =
   createProvider(() => {
@@ -20,6 +21,7 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
     const initialData = useInitialDataService();
     const auth = useAuthService(initialData);
     const quickStart = useQuickStartGuideService(initialData);
+    const { userIsDragging } = useUserDraggingService();
 
     const wsClient = useWebsocketService(
       auth.state.jwtToken,
@@ -70,6 +72,7 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
       quickStartGuide: quickStart.state,
       confirmationDialog: confirmationDialog.state,
       wsClient,
+      userIsDragging,
     };
 
     return [contextData, actions];

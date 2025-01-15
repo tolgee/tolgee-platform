@@ -1,9 +1,6 @@
-import { ReactNode, RefObject, SyntheticEvent, useRef } from 'react';
+import { ReactNode, RefObject, SyntheticEvent } from 'react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import {
-  ALLOWED_UPLOAD_TYPES,
-  MAX_FILE_COUNT,
-} from '../Screenshots/ScreenshotGallery';
+import { ALLOWED_UPLOAD_TYPES, MAX_FILE_COUNT } from './Screenshots';
 import { T } from '@tolgee/react';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
@@ -12,11 +9,10 @@ import { messageService } from 'tg.service/MessageService';
 
 type Props = {
   keyId: number;
-  handlerRef: RefObject<() => void>;
+  fileRef: RefObject<HTMLInputElement>;
 };
 
-export const ScreenshotUploadInput = ({ keyId, handlerRef }: Props) => {
-  const fileRef = useRef<HTMLInputElement>(null);
+export const useScreenshotUpload = ({ keyId, fileRef }: Props) => {
   const { updateScreenshots } = useTranslationsActions();
   const project = useProject();
   const config = useConfig();
@@ -127,19 +123,13 @@ export const ScreenshotUploadInput = ({ keyId, handlerRef }: Props) => {
     }
   };
 
-  // @ts-ignore
-  handlerRef.current = () => {
+  function openFiles() {
     fileRef.current?.dispatchEvent(new MouseEvent('click'));
-  };
+  }
 
-  return (
-    <input
-      type="file"
-      style={{ display: 'none' }}
-      ref={fileRef}
-      onChange={(e) => onFileSelected(e)}
-      multiple
-      accept={ALLOWED_UPLOAD_TYPES.join(',')}
-    />
-  );
+  return {
+    openFiles,
+    validateAndUpload,
+    onFileSelected,
+  };
 };
