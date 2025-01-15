@@ -1,4 +1,9 @@
-import { default as React, FunctionComponent, useState } from 'react';
+import {
+  default as React,
+  FunctionComponent,
+  useEffect,
+  useState,
+} from 'react';
 import {
   Badge,
   IconButton,
@@ -12,6 +17,8 @@ import { useHistory } from 'react-router-dom';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useUser } from 'tg.globalContext/helpers';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -46,12 +53,24 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
 
   const history = useHistory();
 
-  const notifications = useApiQuery({
+  const client = useGlobalContext((c) => c.wsClient.client);
+  const user = useUser();
+
+  const notificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
     query: { size: 10000 },
-  }).data;
+  });
 
+  useEffect(() => {
+    if (client && user) {
+      return client.subscribe(`/users/${user.id}/notifications-changed`, () =>
+        notificationsLoadable.refetch({ cancelRefetch: true })
+      );
+    }
+  }, [user, client]);
+
+  const notifications = notificationsLoadable.data;
   const notificationsData = notifications?._embedded?.notificationModelList;
 
   return (
