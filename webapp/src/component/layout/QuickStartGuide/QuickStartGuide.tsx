@@ -3,10 +3,7 @@ import { T } from '@tolgee/react';
 import { useMemo } from 'react';
 import { ChevronUp } from '@untitled-ui/icons-react';
 
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { RocketFilled } from 'tg.component/CustomIcons';
 import { BottomLinks } from './BottomLinks';
 import { items } from './quickStartConfig';
@@ -53,10 +50,13 @@ const StyledArrow = styled(Box)`
   transition: opacity 0.2s ease-in-out;
 `;
 
-export const QuickStartGuide = () => {
+type Props = {
+  onClose: () => void;
+};
+
+export const QuickStartGuide = ({ onClose }: Props) => {
   const projectId = useGlobalContext((c) => c.quickStartGuide.lastProjectId);
   const completed = useGlobalContext((c) => c.quickStartGuide.completed);
-  const { setQuickStartOpen } = useGlobalActions();
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
   const allCompleted = useMemo(
     () => items.every((i) => completed.includes(i.step)),
@@ -71,7 +71,7 @@ export const QuickStartGuide = () => {
           <RocketFilled width={20} height={20} />
           <T keyName="guide_title" />
         </Box>
-        <IconButton onClick={() => setQuickStartOpen(false)}>
+        <IconButton onClick={() => onClose()}>
           <ChevronUp />
         </IconButton>
       </StyledHeader>

@@ -5,6 +5,7 @@ import {
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { useDebounce } from 'use-debounce';
+import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
 
 const StyledPanel = styled(Box)`
   position: fixed;
@@ -24,12 +25,9 @@ const StyledPanel = styled(Box)`
   }
 `;
 
-type Props = {
-  children: React.ReactNode;
-};
-
-export const RightSidePanel = ({ children }: Props) => {
+export const RightSidePanel = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
@@ -37,16 +35,29 @@ export const RightSidePanel = ({ children }: Props) => {
     (c) => c.layout.rightPanelFloating
   );
   const shouldFloat = useGlobalContext((c) => c.layout.rightPanelShouldFloat);
-  const { setQuickStartFloatingOpen } = useGlobalActions();
+  const { setQuickStartFloatingOpen, setQuickStartOpen } = useGlobalActions();
 
   const open = rightPanelWidth || rightPanelFloating;
 
   const [openedDebounced] = useDebounce(open, 100);
 
-  const handleClickAway =
-    openedDebounced && shouldFloat
-      ? () => setQuickStartFloatingOpen(false)
-      : () => {};
+  const handleClickAway = () => {
+    if (openedDebounced && shouldFloat) {
+      setQuickStartFloatingOpen(false);
+    }
+  };
+
+  function handleClose() {
+    if (rightPanelFloating) {
+      setQuickStartFloatingOpen(false);
+    } else {
+      setQuickStartOpen(false);
+    }
+  }
+
+  if (!quickStartEnabled) {
+    return null;
+  }
 
   return (
     <ClickAwayListener onClickAway={handleClickAway}>
@@ -62,7 +73,7 @@ export const RightSidePanel = ({ children }: Props) => {
         }}
         ref={containerRef}
       >
-        {children}
+        <QuickStartGuide onClose={handleClose} />
       </StyledPanel>
     </ClickAwayListener>
   );
