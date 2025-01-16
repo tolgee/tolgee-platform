@@ -291,8 +291,13 @@ export const tolgeePalette = {
       pricingActive: '#00af9a26',
       pricing: '#1f2d400d',
     },
-    divider: '#1f2d401f',
     _components: {
+      task: {
+        state: {
+          review: '#00b9624d',
+          translate: '#1f2d4014',
+        },
+      },
       alert: {
         success: {
           background: tolgeeColors['green']['50'],
@@ -319,6 +324,9 @@ export const tolgeePalette = {
       },
       backdrop: {
         fill: '#1f2d4080',
+      },
+      dropzone: {
+        active: '#e8fcf8f0',
       },
       breadcrumbs: {
         collapseFill: tolgeeColors['grey']['50'],
@@ -399,6 +407,7 @@ export const tolgeePalette = {
         fill: '#627082e5',
       },
     },
+    divider: '#1f2d401f',
     _native: {
       'scrollbar-bg': tolgeeColors['grey']['200'],
     },
@@ -582,8 +591,13 @@ export const tolgeePalette = {
       pricingActive: '#00af9a33',
       pricing: '#1f2d400d',
     },
-    divider: '#ffffff1f',
     _components: {
+      task: {
+        state: {
+          review: '#33d5894d',
+          translate: '#ffffff1f',
+        },
+      },
       alert: {
         success: {
           background: tolgeeColors['green']['900'],
@@ -610,6 +624,9 @@ export const tolgeePalette = {
       },
       backdrop: {
         fill: '#101926b2',
+      },
+      dropzone: {
+        active: '#234b56f0',
       },
       breadcrumbs: {
         collapseFill: tolgeeColors['grey']['600'],
@@ -690,6 +707,7 @@ export const tolgeePalette = {
         fill: '#627082e5',
       },
     },
+    divider: '#ffffff1f',
     _native: {
       'scrollbar-bg': tolgeeColors['grey']['700'],
     },

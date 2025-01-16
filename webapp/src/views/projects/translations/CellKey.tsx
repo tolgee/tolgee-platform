@@ -107,14 +107,7 @@ const StyledDropzone = styled('div')`
   grid-row: 2 / -1;
   grid-column: 1 / -1;
   position: relative;
-  background-color: ${({ theme }) => theme.palette.success.light};
-  backdrop-filter: blur(5px);
-  opacity: 0.9;
-`;
-
-const StyledDropzoneContent = styled('div')`
-  padding: 10px;
-  border: 2px dashed ${({ theme }) => theme.palette.success.dark};
+  padding: 0px 12px 12px 0px;
 `;
 
 const StyledScreenshots = styled('div')`
@@ -315,9 +308,7 @@ export const CellKey: React.FC<Props> = ({
         </div>
         {userIsDragging && (
           <StyledDropzone>
-            <ScreenshotDropzone validateAndUpload={validateAndUpload}>
-              <StyledDropzoneContent />
-            </ScreenshotDropzone>
+            <ScreenshotDropzone validateAndUpload={validateAndUpload} />
           </StyledDropzone>
         )}
         <input
