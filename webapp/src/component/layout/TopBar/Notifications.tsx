@@ -50,7 +50,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const notificationsData = notifications?._embedded?.notificationModelList;
 
   const markSeenMutation = useApiMutation({
-    url: '/v2/notifications/mark-seen',
+    url: '/v2/notifications-mark-seen',
     method: 'put',
   });
 
