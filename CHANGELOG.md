@@ -1,3 +1,10 @@
+## [3.94.1](https://github.com/tolgee/tolgee-platform/compare/v3.94.0...v3.94.1) (2025-01-16)
+
+
+### Bug Fixes
+
+* workaround hibernate bug when saving code references during single step import ([#2852](https://github.com/tolgee/tolgee-platform/issues/2852)) ([f3bd672](https://github.com/tolgee/tolgee-platform/commit/f3bd6722728b029cff87c6b567b2166e2545b613))
+
 # [3.94.0](https://github.com/tolgee/tolgee-platform/compare/v3.93.3...v3.94.0) (2025-01-15)
 
 
