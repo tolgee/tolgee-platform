@@ -162,13 +162,29 @@ class StoredDataImporter(
   }
 
   private fun saveKeyMetaData(keyEntitiesToSave: Collection<Key>) {
-    keyEntitiesToSave.flatMap {
-      it.keyMeta?.comments ?: emptyList()
-    }.also { keyMetaService.saveAllComments(it) }
-    keyEntitiesToSave.flatMap {
-      it.keyMeta?.codeReferences ?: emptyList()
-    }.also { keyMetaService.saveAllCodeReferences(it) }
+    // hibernate bug workaround:
+    // saving key metas will cause them to be recreated by hibernate with empty values
+    // we have to save references to comments and codeReferences before saving key metas
+    val comments =
+      keyEntitiesToSave.flatMap {
+        it.keyMeta?.comments ?: emptyList()
+      }
+    val codeReferences =
+      keyEntitiesToSave.flatMap {
+        it.keyMeta?.codeReferences ?: emptyList()
+      }
     keyMetaService.saveAll(keyMetasToSave)
+    keyMetaService.saveAllComments(comments)
+    keyMetaService.saveAllCodeReferences(codeReferences)
+
+    // set links to comments and code references to point to correct (previous)
+    // instances instead of the new empty ones
+    comments.groupBy { it.keyMeta }.forEach { (keyMeta, comments) ->
+      keyMeta.comments = comments.toMutableList()
+    }
+    codeReferences.groupBy { it.keyMeta }.forEach { (keyMeta, codeReferences) ->
+      keyMeta.codeReferences = codeReferences.toMutableList()
+    }
   }
 
   private fun saveTranslations() {
