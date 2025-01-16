@@ -25,9 +25,9 @@ const StyledDropZoneValidation = styled(Box)`
   align-items: center;
 
   &.invalid {
-    border: 1px solid ${red[200]};
+    border-color: ${red[200]};
     background-color: ${red[50]};
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(40px);
   }
 `;
 
