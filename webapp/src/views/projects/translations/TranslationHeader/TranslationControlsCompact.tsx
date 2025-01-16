@@ -61,6 +61,7 @@ const StyledSearchSpaced = styled('div')`
   grid-template-columns: 1fr auto;
   gap: ${({ theme }) => theme.spacing(0.5)};
   position: relative;
+  grid-column: 1 / -1;
 `;
 
 const StyledSearch = styled(HeaderSearchField)`
