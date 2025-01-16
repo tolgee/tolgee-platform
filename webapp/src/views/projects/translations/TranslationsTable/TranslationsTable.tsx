@@ -140,9 +140,10 @@ const StyledScrollArrow = styled('div')`
 
 type Props = {
   toolsPanelOpen: boolean;
+  width: number;
 };
 
-export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
+export const TranslationsTable = ({ toolsPanelOpen, width }: Props) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
@@ -181,10 +182,9 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
     resizeColumn,
     addResizer,
   } = useColumns({
-    tableRef,
+    width,
     initialRatios: columns.map(() => 1),
     minSize: 350,
-    deps: [toolsPanelOpen],
   });
 
   const handleFetchMore = useCallback(() => {

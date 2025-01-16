@@ -138,7 +138,8 @@ const StyledBolt = styled(Zap)`
 
 type Props = {
   data: KeyWithTranslationsModel;
-  width?: string | number;
+  widthPercent?: string | number;
+  width?: number;
   editEnabled: boolean;
   active: boolean;
   simple?: boolean;
@@ -150,6 +151,7 @@ type Props = {
 
 export const CellKey: React.FC<Props> = ({
   data,
+  widthPercent,
   width,
   editEnabled,
   active,
@@ -206,7 +208,7 @@ export const CellKey: React.FC<Props> = ({
           },
           className
         )}
-        style={{ width }}
+        style={{ width: widthPercent }}
         onClick={editEnabled ? () => handleOpen() : undefined}
         data-cy="translations-table-cell"
         tabIndex={0}
@@ -233,7 +235,11 @@ export const CellKey: React.FC<Props> = ({
               </Tooltip>
             )}
           <StyledKey>
-            <LimitedHeightText width={width} maxLines={3} wrap="break-all">
+            <LimitedHeightText
+              width={widthPercent}
+              maxLines={3}
+              wrap="break-all"
+            >
               {data.keyName}
             </LimitedHeightText>
           </StyledKey>
@@ -250,6 +256,7 @@ export const CellKey: React.FC<Props> = ({
                 screenshots={data.screenshots}
                 keyId={data.keyId}
                 oneBig={oneScreenshotBig}
+                width={width ? width - 38 : undefined}
               />
             </StyledScreenshots>
           )}

@@ -64,18 +64,18 @@ const StyledTolgeeLink = styled(Link)`
 type Props = {
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
-  hideQuickStart?: boolean;
 };
 
 export const TopBar: React.FC<Props> = ({
   isAdminAccess = false,
   isDebuggingCustomerAccount = false,
-  hideQuickStart = false,
 }) => {
   const config = useConfig();
 
   const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);
   const topBannerSize = useGlobalContext((c) => c.layout.topBannerHeight);
+  const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
+
   const user = useUser();
 
   const theme = useTheme();
@@ -121,7 +121,7 @@ export const TopBar: React.FC<Props> = ({
             debuggingCustomerAccount={isDebuggingCustomerAccount}
           />
         </Box>
-        {!hideQuickStart && <QuickStartTopBarButton />}
+        {quickStartEnabled && <QuickStartTopBarButton />}
         {!user && <LanguageMenu />}
         {user && <UserMenu />}
       </StyledToolbar>

@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { Box, styled, SxProps } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
-import { useResizeObserver } from 'usehooks-ts';
 
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import { ScreenshotDetail } from './ScreenshotDetail';
@@ -40,21 +39,19 @@ type Props = {
   screenshots: ScreenshotModel[];
   keyId: number;
   oneBig?: boolean;
+  width?: number;
   sx?: SxProps;
 };
 
-export const Screenshots = ({ screenshots, keyId, oneBig, sx }: Props) => {
+export const Screenshots = ({
+  screenshots,
+  keyId,
+  oneBig,
+  width,
+  sx,
+}: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState(0);
-
-  useResizeObserver({
-    ref: containerRef,
-    onResize(size) {
-      if (size.width) {
-        setSize(Math.floor(size.width / 50) * 50);
-      }
-    },
-  });
+  const size = width && Math.floor(width / 50) * 50;
 
   const project = useProject();
   let boundedSize: number | undefined = undefined;

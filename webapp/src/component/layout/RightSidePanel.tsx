@@ -1,12 +1,10 @@
 import { Box, ClickAwayListener, styled } from '@mui/material';
-import clsx from 'clsx';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
 import { useDebounce } from 'use-debounce';
-import { useResizeObserver } from 'usehooks-ts';
 
 const StyledPanel = styled(Box)`
   position: fixed;
@@ -28,46 +26,27 @@ const StyledPanel = styled(Box)`
 
 type Props = {
   children: React.ReactNode;
-  onClose: () => void;
-  floating: boolean;
-  open: boolean;
 };
 
-export const RightSidePanel = ({
-  children,
-  floating,
-  onClose,
-  open,
-}: Props) => {
-  const { setRightPanelWidth } = useGlobalActions();
-
+export const RightSidePanel = ({ children }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
+  const rightPanelFloating = useGlobalContext(
+    (c) => c.layout.rightPanelFloating
+  );
+  const shouldFloat = useGlobalContext((c) => c.layout.rightPanelShouldFloat);
+  const { setQuickStartFloatingOpen } = useGlobalActions();
 
-  useResizeObserver({
-    ref: containerRef,
-    onResize({ width = 0 }) {
-      if (!floating && open) {
-        setRightPanelWidth(width);
-      } else {
-        setRightPanelWidth(0);
-      }
-    },
-  });
-  useEffect(() => {
-    if (!floating && open) {
-      setRightPanelWidth(containerRef.current?.offsetWidth || 0);
-    } else {
-      setRightPanelWidth(0);
-    }
-    return () => setRightPanelWidth(0);
-  }, [floating, open]);
+  const open = rightPanelWidth || rightPanelFloating;
 
   const [openedDebounced] = useDebounce(open, 100);
 
   const handleClickAway =
-    openedDebounced && floating ? () => onClose() : () => {};
+    openedDebounced && shouldFloat
+      ? () => setQuickStartFloatingOpen(false)
+      : () => {};
 
   return (
     <ClickAwayListener onClickAway={handleClickAway}>
@@ -76,11 +55,11 @@ export const RightSidePanel = ({
           top: topBannerHeight,
           transform: `translate(0px, ${topBarHeight}px)`,
           paddingBottom: topBarHeight + 'px',
+          width: rightPanelWidth || 400,
         }}
         style={{
           right: open ? '0%' : '-105%',
         }}
-        className={clsx({ floating })}
         ref={containerRef}
       >
         {children}

@@ -28,6 +28,7 @@ import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { Prefilter } from './prefilters/Prefilter';
 import { TranslationsTaskDetail } from 'tg.ee';
 import { TaskAllDonePlaceholder } from 'tg.ee';
+import { MENU_WIDTH } from '../projectMenu/SideMenu';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -35,13 +36,23 @@ const StyledContainer = styled('div')`
 `;
 
 export const Translations = () => {
-  const { setQuickStartOpen, quickStartForceFloating } = useGlobalActions();
+  const { setQuickStartOpen, setRightPanelFloatingForced } = useGlobalActions();
   const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
   const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
+
+  const mainContentWidth = useGlobalContext(
+    (c) =>
+      c.layout.bodyWidth -
+      c.layout.rightPanelWidth -
+      // project menu
+      MENU_WIDTH -
+      // padding
+      24 * 2
+  );
 
   const isLoading = useTranslationsSelector((c) => c.isLoading);
   const isFetching = useTranslationsSelector((c) => c.isFetching);
@@ -87,10 +98,10 @@ export const Translations = () => {
   // hide quick start panel
   useEffect(() => {
     if (sidePanelOpen && quickStartEnabled) {
-      quickStartForceFloating(true);
+      setRightPanelFloatingForced(true);
       setQuickStartOpen(true);
       return () => {
-        quickStartForceFloating(false);
+        setRightPanelFloatingForced(false);
       };
     }
   }, [sidePanelOpen, quickStartEnabled]);
@@ -163,9 +174,17 @@ export const Translations = () => {
         {translationsEmpty ? (
           renderPlaceholder()
         ) : view === 'TABLE' ? (
-          <TranslationsTable key="table" toolsPanelOpen={toolsPanelOpen} />
+          <TranslationsTable
+            key="table"
+            toolsPanelOpen={toolsPanelOpen}
+            width={mainContentWidth}
+          />
         ) : (
-          <TranslationsList key="list" toolsPanelOpen={toolsPanelOpen} />
+          <TranslationsList
+            key="list"
+            toolsPanelOpen={toolsPanelOpen}
+            width={mainContentWidth}
+          />
         )}
         {toolsPanelOpen && <FloatingToolsPanel />}
       </StyledContainer>

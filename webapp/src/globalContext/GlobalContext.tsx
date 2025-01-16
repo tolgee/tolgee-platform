@@ -20,24 +20,24 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
     const [globalError, setGlobalError] = useState<GlobalError>();
     const initialData = useInitialDataService();
     const auth = useAuthService(initialData);
-    const quickStart = useQuickStartGuideService(initialData);
+    const isEmailVerified =
+      initialData.state?.userInfo?.emailAwaitingVerification === null ||
+      !initialData.state?.serverConfiguration.needsEmailVerification;
+    const quickStart = useQuickStartGuideService(initialData, isEmailVerified);
     const { userIsDragging } = useUserDraggingService();
 
     const wsClient = useWebsocketService(
       auth.state.jwtToken,
       auth.state.allowPrivate
     );
-    const isVerified =
-      initialData.state?.userInfo?.emailAwaitingVerification === null ||
-      !initialData.state?.serverConfiguration.needsEmailVerification;
     const organizationUsage = useOrganizationUsageService({
       organization: initialData.state?.preferredOrganization,
       enabled:
         Boolean(initialData.state?.serverConfiguration?.billing.enabled) &&
-        isVerified,
+        isEmailVerified,
     });
 
-    const layout = useLayoutService();
+    const layout = useLayoutService({ quickStart });
     const confirmationDialog = useConfirmationDialogService();
 
     const messages = useMessageService();
@@ -73,6 +73,7 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
       confirmationDialog: confirmationDialog.state,
       wsClient,
       userIsDragging,
+      isEmailVerified,
     };
 
     return [contextData, actions];
