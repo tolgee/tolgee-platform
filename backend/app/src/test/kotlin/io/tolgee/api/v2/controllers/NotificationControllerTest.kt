@@ -45,7 +45,7 @@ class NotificationControllerTest : AuthorizedControllerTest() {
     loginAsUser(testData.user.username)
 
     performAuthPut(
-      "/v2/notifications/mark-seen",
+      "/v2/notifications-mark-seen",
       listOf(currentUserNotification1.id, currentUserNotification2.id, differentUserNotification.id),
     ).andIsOk
 

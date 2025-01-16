@@ -11,7 +11,10 @@ class NotificationPagedModel(
   val unseenCount: Int,
 ) : PagedModel<NotificationModel>(content, metadata, links) {
   companion object {
-    fun of(original: PagedModel<NotificationModel>, unseenCount: Int): NotificationPagedModel {
+    fun of(
+      original: PagedModel<NotificationModel>,
+      unseenCount: Int,
+    ): NotificationPagedModel {
       return NotificationPagedModel(original.content, original.metadata, original.links, unseenCount)
     }
   }
