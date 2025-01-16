@@ -529,6 +529,7 @@ declare namespace DataCy {
         "storage-list-item" |
         "storage-subtitle" |
         "subscriptions-trial-alert" |
+        "subscriptions-trial-alert-reaching-the-limit" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "task-date-picker" |
@@ -575,6 +576,7 @@ declare namespace DataCy {
         "top-banner" |
         "top-banner-content" |
         "top-banner-dismiss-button" |
+        "topbar-trial-chip" |
         "transfer-project-apply-button" |
         "translation-agency-item" |
         "translation-create-description-input" |

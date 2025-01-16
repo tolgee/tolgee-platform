@@ -2,6 +2,7 @@ import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useRouteMatch } from 'react-router-dom';
 import { useTestClock } from 'tg.service/useTestClock';
+import { Theme, useMediaQuery } from '@mui/material';
 
 export const useTrialInfo = () => {
   const { preferredOrganization } = usePreferredOrganization();
@@ -14,15 +15,18 @@ export const useTrialInfo = () => {
 
   const testClock = useTestClock();
 
+  const isSmallScreen = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.down('md')
+  );
+
   const activeCloudSubscription =
     preferredOrganization?.activeCloudSubscription;
   const trialEnd = activeCloudSubscription?.trialEnd;
   const hasPaymentMethod = activeCloudSubscription?.hasPaymentMethod;
+  const cancelAtPeriodEnd = activeCloudSubscription?.cancelAtPeriodEnd;
 
   const shouldShowChip =
     trialEnd && activeCloudSubscription?.status == 'TRIALING';
-  const shouldShowAnnouncement =
-    shouldShowChip && !isCurrentSubscriptionPage && !hasPaymentMethod;
 
   function getDaysLeft() {
     if (!trialEnd) {
@@ -35,8 +39,17 @@ export const useTrialInfo = () => {
     return Math.floor(msToTrialEnd / (1000 * 60 * 60 * 24));
   }
 
+  const daysLeft = getDaysLeft();
+
+  const shouldShowAnnouncement =
+    shouldShowChip &&
+    !isCurrentSubscriptionPage &&
+    (!hasPaymentMethod || cancelAtPeriodEnd) &&
+    !isSmallScreen &&
+    daysLeft < 7;
+
   return {
-    daysLeft: getDaysLeft(),
+    daysLeft,
     subscriptionsLink,
     shouldShowAnnouncement,
     shouldShowChip,
