@@ -6,7 +6,15 @@ export const TopBarAnnouncementWithIcon: FC<{
   icon: ReactNode;
 }> = ({ icon, children }) => {
   return (
-    <Box display="flex" sx={{ fontSize: '15px' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        fontSize: '15px',
+        textAlign: 'left',
+        mx: 4,
+        alignItems: 'center',
+      }}
+    >
       <Box mr={'12px'} display="flex">
         {icon}
       </Box>
