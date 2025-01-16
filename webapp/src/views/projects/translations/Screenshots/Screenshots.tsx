@@ -4,7 +4,6 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import { ScreenshotDetail } from './ScreenshotDetail';
-import { ScreenshotProps } from 'tg.component/ScreenshotWithLabels';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
