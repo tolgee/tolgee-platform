@@ -20,19 +20,21 @@ export const useUserDraggingService = () => {
       }, 200);
     };
 
-    const root = document.getElementById('root')!;
-
-    root.addEventListener('dragenter', dragStartHandler, true);
-    root.addEventListener('dragover', dragStartHandler, true);
-    root.addEventListener('dragleave', dragEndHandler, true);
-    root.addEventListener('drop', dragEndHandler, true);
+    document.body.addEventListener('dragenter', dragStartHandler, true);
+    document.body.addEventListener('dragover', dragStartHandler, true);
+    document.body.addEventListener('dragleave', dragEndHandler, true);
+    document.body.addEventListener('drop', dragEndHandler, true);
+    document.body.addEventListener('click', dragEndHandler, true);
+    document.addEventListener('visibilitychange', dragEndHandler);
     return () => {
-      root.removeEventListener('dragenter', dragStartHandler, {
+      document.body.removeEventListener('dragenter', dragStartHandler, {
         capture: true,
       });
-      root.removeEventListener('dragover', dragStartHandler, true);
-      root.removeEventListener('dragleave', dragEndHandler, true);
-      root.removeEventListener('drop', dragEndHandler, true);
+      document.body.removeEventListener('dragover', dragStartHandler, true);
+      document.body.removeEventListener('dragleave', dragEndHandler, true);
+      document.body.removeEventListener('drop', dragEndHandler, true);
+      document.body.removeEventListener('click', dragEndHandler, true);
+      document.removeEventListener('visibilitychange', dragEndHandler);
       clearTimeout(timeout);
     };
   }, []);
