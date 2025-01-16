@@ -103,7 +103,7 @@ When running E2e Tests from Idea on Mac, you encounter fails due to command not 
 
 Apparentrly this happens because IDEA starts the gradle daemon with wrong path.
 
-The only workaround I currently found is killing the gradle daemon and running IDEA from terminal
+The only **workaround** I currently found is killing the gradle daemon and running IDEA from terminal
 
 ```bash
 pkill -f '.*GradleDaemon.*'
@@ -111,3 +111,6 @@ open -a 'IntelliJ IDEA Ultimate'
 ```
 
 This way, IDEA is started with correct environment from zsh or bash and so the Gradle Daemon is started correctly.
+
+If you don't like this solution (I don't like it too), you can start looking for better solution.
+This thread is a good starting point: https://discuss.gradle.org/t/exec-execute-in-gradle-doesnt-use-path/25598/3
