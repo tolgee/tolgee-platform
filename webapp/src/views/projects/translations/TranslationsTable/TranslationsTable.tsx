@@ -143,12 +143,12 @@ type Props = {
 };
 
 export const TranslationsTable = ({ width }: Props) => {
+  const mainContentWidth = useTranslationsSelector(
+    (c) => c.layout.mainContentWidth
+  );
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
-  const sidePanelWidth = useTranslationsSelector(
-    (c) => c.layout.sidePanelWidth
-  );
 
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -232,7 +232,7 @@ export const TranslationsTable = ({ width }: Props) => {
       const right = window.innerWidth - position?.right;
       setTablePosition({ left, right });
     }
-  }, [tableRef.current, fullWidth, sidePanelWidth]);
+  }, [tableRef.current, mainContentWidth]);
   const hasMinimalHeight = useMediaQuery('(min-height: 400px)');
 
   return (
