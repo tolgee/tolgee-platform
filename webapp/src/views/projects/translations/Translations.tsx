@@ -46,8 +46,12 @@ export const Translations = () => {
   const isFetching = useTranslationsSelector((c) => c.isFetching);
   const view = useTranslationsSelector((v) => v.view);
   const translations = useTranslationsSelector((c) => c.translations);
-  const sidePanelWidth = useTranslationsSelector((c) => c.sidePanelWidth);
-  const mainContentWidth = useTranslationsSelector((c) => c.mainContentWidth);
+  const sidePanelWidth = useTranslationsSelector(
+    (c) => c.layout.sidePanelWidth
+  );
+  const mainContentWidth = useTranslationsSelector(
+    (c) => c.layout.mainContentWidth
+  );
 
   const filtersOrSearchApplied = useTranslationsSelector((c) =>
     Boolean(Object.values(c.filters).filter(Boolean).length || c.urlSearch)

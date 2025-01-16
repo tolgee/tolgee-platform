@@ -36,8 +36,7 @@ import { useWebsocketService } from './services/useWebsocketService';
 import { PrefilterType } from '../prefilters/usePrefilter';
 import { useTaskService } from './services/useTaskService';
 import { usePositionService } from './services/usePositionService';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
+import { useLayoutService } from './services/useLayoutService';
 
 type Props = {
   projectId: number;
@@ -57,20 +56,7 @@ export const [
 ] = createProvider((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
-  const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
-  const isSmall = bodyWidth < 800;
-  const sidePanelWidth =
-    sidePanelOpen && !isSmall
-      ? Math.min(Math.max(0.24 * bodyWidth, 300), 500)
-      : 0;
-  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
-  const mainContentWidth =
-    bodyWidth -
-    MENU_WIDTH -
-    rightPanelWidth -
-    sidePanelWidth -
-    // main content padding
-    2 * 24;
+  const layout = useLayoutService({ sidePanelOpen });
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
@@ -317,8 +303,7 @@ export const [
     elementsRef: viewRefs.elementsRef,
     reactList: viewRefs.reactList,
     prefilter: props.prefilter,
-    sidePanelWidth,
-    mainContentWidth,
+    layout,
   };
 
   return [state, actions];
