@@ -165,12 +165,14 @@ class StoredDataImporter(
     // hibernate bug workaround:
     // saving key metas will cause them to be recreated by hibernate with empty values
     // we have to save references to comments and codeReferences before saving key metas
-    val comments = keyEntitiesToSave.flatMap {
-      it.keyMeta?.comments ?: emptyList()
-    }
-    val codeReferences = keyEntitiesToSave.flatMap {
-      it.keyMeta?.codeReferences ?: emptyList()
-    }
+    val comments =
+      keyEntitiesToSave.flatMap {
+        it.keyMeta?.comments ?: emptyList()
+      }
+    val codeReferences =
+      keyEntitiesToSave.flatMap {
+        it.keyMeta?.codeReferences ?: emptyList()
+      }
     keyMetaService.saveAll(keyMetasToSave)
     keyMetaService.saveAllComments(comments)
     keyMetaService.saveAllCodeReferences(codeReferences)
