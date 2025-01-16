@@ -64,7 +64,7 @@ export const Screenshots = ({
   const { updateScreenshots } = useTranslationsActions();
 
   const oneOnly = screenshots.length === 1 && boundedSize && oneBig;
-  const [detailData, setDetailData] = useState<ScreenshotProps>();
+  const [detailData, setDetailData] = useState<number>();
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}',
@@ -94,10 +94,21 @@ export const Screenshots = ({
     100
   );
 
+  const screenshotsMapped = screenshots.map((sc) => {
+    return {
+      id: sc.id,
+      src: sc.fileUrl,
+      width: sc.width,
+      height: sc.height,
+      highlightedKeyId: keyId,
+      keyReferences: sc.keyReferences,
+    };
+  });
+
   return (
     <StyledContainer {...{ sx }} onClick={stopAndPrevent()} ref={containerRef}>
       <StyledScrollWrapper>
-        {screenshots.map((sc) => {
+        {screenshots.map((sc, index) => {
           let width =
             oneOnly && boundedSize ? Math.min(boundedSize, sc.width!) : 100;
           let height =
@@ -113,6 +124,7 @@ export const Screenshots = ({
           const isLarge = height > 100 || width > 100;
 
           const screenshot = {
+            id: sc.id,
             src: isLarge ? sc.fileUrl : sc.thumbnailUrl,
             width: sc.width,
             height: sc.height,
@@ -127,7 +139,7 @@ export const Screenshots = ({
               objectFit={oneOnly ? 'cover' : 'contain'}
               scaleHighlight={sc.width! / width}
               onClick={() => {
-                setDetailData({ ...screenshot, src: sc.fileUrl });
+                setDetailData(index);
               }}
               onDelete={() => {
                 handleDelete(sc.id);
@@ -140,12 +152,11 @@ export const Screenshots = ({
           );
         })}
       </StyledScrollWrapper>
-      {Boolean(detailData) && (
+      {detailData !== undefined && (
         <ScreenshotDetail
-          open={Boolean(detailData)}
-          screenshot={detailData}
+          screenshots={screenshotsMapped}
+          initialIndex={detailData}
           onClose={() => setDetailData(undefined)}
-          highlightedKeyId={keyId}
         />
       )}
     </StyledContainer>

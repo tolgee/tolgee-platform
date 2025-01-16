@@ -1,4 +1,5 @@
 import { Tooltip, useTheme } from '@mui/material';
+import { CSSProperties } from 'react';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -7,6 +8,7 @@ type KeyInScreenshotModel = components['schemas']['KeyInScreenshotModel'];
 const STROKE_WIDTH = 4;
 
 export type ScreenshotProps = {
+  id: number;
   src: string;
   width: number | undefined;
   height: number | undefined;
@@ -15,41 +17,35 @@ export type ScreenshotProps = {
 };
 
 type Props = {
-  className?: string;
   screenshot: ScreenshotProps;
   showTooltips?: boolean;
   objectFit?: 'contain' | 'cover';
   scaleHighlight?: number;
   showSecondaryHighlights?: boolean;
+  className?: string;
+  style?: CSSProperties;
 };
 
 export const ScreenshotWithLabels: React.FC<Props> = ({
   screenshot,
   showTooltips,
   objectFit = 'contain',
-  className,
   scaleHighlight = 1,
   showSecondaryHighlights = false,
+  className,
+  style,
 }) => {
   const strokeWidth = STROKE_WIDTH * scaleHighlight;
-  const imageRefs = screenshot.keyReferences?.filter((ref) => ref.position);
   const theme = useTheme();
 
-  return !imageRefs?.length ? (
-    <img
-      src={screenshot.src}
-      className={className}
-      style={{ maxWidth: '100%', width: screenshot.width, objectFit }}
-      data-cy="screenshot-image"
-      alt="Screenshot"
-    />
-  ) : (
+  return (
     <svg
       viewBox={`0 0 ${screenshot.width} ${screenshot.height}`}
       className={className}
       style={{
         width: screenshot.width,
         maxWidth: '100%',
+        ...style,
       }}
       preserveAspectRatio={objectFit === 'cover' ? 'xMinYMin slice' : ''}
       data-cy="screenshot-image"
