@@ -56,25 +56,14 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       },
     ) {
       assertThatJson(it.poll()).apply {
-        node("actor") {
-          node("data") {
-            node("username").isEqualTo("test_username")
+        node("actor.data.username").isEqualTo("test_username")
+        node("data.keys[0]") {
+          node("id").isValidId
+          node("modifications.name") {
+            node("old").isEqualTo("key")
+            node("new").isEqualTo("name edited")
           }
-        }
-        node("data") {
-          node("keys") {
-            isArray
-            node("[0]") {
-              node("id").isValidId
-              node("modifications") {
-                node("name") {
-                  node("old").isEqualTo("key")
-                  node("new").isEqualTo("name edited")
-                }
-              }
-              node("changeType").isEqualTo("MOD")
-            }
-          }
+          node("changeType").isEqualTo("MOD")
         }
         node("sourceActivity").isEqualTo("KEY_NAME_EDIT")
         node("dataCollapsed").isEqualTo(false)
@@ -91,20 +80,13 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       },
     ) {
       assertThatJson(it.poll()).apply {
-        node("data") {
-          node("keys") {
-            isArray
-            node("[0]") {
-              node("id").isValidId
-              node("modifications") {
-                node("name") {
-                  node("old").isEqualTo("key")
-                  node("new").isEqualTo(null)
-                }
-              }
-              node("changeType").isEqualTo("DEL")
-            }
+        node("data.keys[0]") {
+          node("id").isValidId
+          node("modifications.name") {
+            node("old").isEqualTo("key")
+            node("new").isEqualTo(null)
           }
+          node("changeType").isEqualTo("DEL")
         }
       }
     }
@@ -119,20 +101,13 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       },
     ) {
       assertThatJson(it.poll()).apply {
-        node("data") {
-          node("keys") {
-            isArray
-            node("[0]") {
-              node("id").isValidId
-              node("modifications") {
-                node("name") {
-                  node("old").isEqualTo(null)
-                  node("new").isEqualTo("new key")
-                }
-              }
-              node("changeType").isEqualTo("ADD")
-            }
+        node("data.keys[0]") {
+          node("id").isValidId
+          node("modifications.name") {
+            node("old").isEqualTo(null)
+            node("new").isEqualTo("new key")
           }
+          node("changeType").isEqualTo("ADD")
         }
       }
     }
@@ -153,32 +128,17 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       },
     ) {
       assertThatJson(it.poll()).apply {
-        node("data") {
-          node("translations") {
-            isArray
-            node("[0]") {
-              node("id").isValidId
-              node("modifications") {
-                node("text") {
-                  node("old").isEqualTo("translation")
-                  node("new").isEqualTo("haha")
-                }
-              }
-              node("relations") {
-                node("key") {
-                  node("data") {
-                    node("name").isEqualTo("key")
-                  }
-                }
-                node("language") {
-                  node("data") {
-                    node("name").isEqualTo("English")
-                  }
-                }
-              }
-              node("changeType").isEqualTo("MOD")
-            }
+        node("data.translations[0]") {
+          node("id").isValidId
+          node("modifications.text") {
+            node("old").isEqualTo("translation")
+            node("new").isEqualTo("haha")
           }
+          node("relations") {
+            node("key.data.name").isEqualTo("key")
+            node("language.data.name").isEqualTo("English")
+          }
+          node("changeType").isEqualTo("MOD")
         }
       }
     }
