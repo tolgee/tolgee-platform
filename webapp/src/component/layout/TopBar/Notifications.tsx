@@ -19,6 +19,7 @@ import { Bell01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
+import { components } from 'tg.service/apiSchema.generated';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -40,26 +41,27 @@ const ListItemHeader = styled(ListItem)`
 `;
 
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
+  const history = useHistory();
+  const user = useUser();
+  const client = useGlobalContext((c) => c.wsClient.client);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [notifications, setNotifications] = useState<
+    components['schemas']['NotificationModel'][]
+  >([]);
+  const [unseenCount, setUnseenCount] = useState(0);
+
   const unseenNotificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
     query: { size: 1, filterSeen: false },
   });
 
-  const [unseenCount, setUnseenCount] = useState(0);
-
-  useEffect(() => {
-    setUnseenCount(unseenNotificationsLoadable.data?.page?.totalElements || 0);
-  }, [unseenNotificationsLoadable.data]);
-
   const notificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
     query: { size: 10000 },
   });
-
-  const notifications = notificationsLoadable.data;
-  const notificationsData = notifications?._embedded?.notificationModelList;
 
   const markSeenMutation = useApiMutation({
     url: '/v2/notifications-mark-seen',
@@ -73,9 +75,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
       content: {
         'application/json': {
           notificationIds:
-            notificationsData != undefined
-              ? notificationsData.map((it) => it.id)
-              : [],
+            notifications != undefined ? notifications.map((it) => it.id) : [],
         },
       },
     });
@@ -85,19 +85,27 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     setAnchorEl(null);
   };
 
-  const [anchorEl, setAnchorEl] = useState(null);
+  useEffect(() => {
+    setUnseenCount(unseenNotificationsLoadable.data?.page?.totalElements || 0);
+  }, [unseenNotificationsLoadable.data]);
 
-  const history = useHistory();
-
-  const client = useGlobalContext((c) => c.wsClient.client);
-  const user = useUser();
+  useEffect(() => {
+    setNotifications(
+      notificationsLoadable.data?._embedded?.notificationModelList || []
+    );
+  }, [notificationsLoadable.data]);
 
   useEffect(() => {
     if (client && user) {
-      return client.subscribe(`/users/${user.id}/notifications-changed`, () => {
-        notificationsLoadable.refetch({ cancelRefetch: true });
-        unseenNotificationsLoadable.refetch({ cancelRefetch: true });
-      });
+      return client.subscribe(
+        `/users/${user.id}/notifications-changed`,
+        (e) => {
+          const newNotification = e.data.newNotification;
+          if (newNotification != undefined)
+            setNotifications((prevState) => [newNotification, ...prevState]);
+          setUnseenCount(() => e.data.currentlyUnseenCount);
+        }
+      );
     }
   }, [user, client]);
 
@@ -149,12 +157,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           <ListItemHeader divider>
             <T keyName="notifications-header" />
           </ListItemHeader>
-          {notificationsData?.map((notification, i) => {
+          {notifications?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
             return (
               <ListItemButton
                 key={notification.id}
-                divider={i !== notificationsData.length - 1}
+                divider={i !== notifications.length - 1}
                 href={destinationUrl}
                 onClick={(event) => {
                   event.preventDefault();
@@ -170,7 +178,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               </ListItemButton>
             );
           })}
-          {notifications?.page?.totalElements === 0 && (
+          {notifications?.length === 0 && (
             <ListItem data-cy="notifications-empty-message">
               <T keyName="notifications-empty" />
             </ListItem>
