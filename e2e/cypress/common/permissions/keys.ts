@@ -36,10 +36,6 @@ export function testKeys(info: ProjectInfo) {
 
   if (scopes.includes('screenshots.view')) {
     cy.gcy('translations-table-cell').first().focus();
-    cy.gcy('translations-cell-screenshots-button')
-      .first()
-      .should('exist')
-      .click();
     cy.gcy('screenshot-thumbnail').should('be.visible');
     if (scopes.includes('screenshots.delete')) {
       cy.gcy('screenshot-thumbnail').trigger('mouseover');
@@ -49,11 +45,10 @@ export function testKeys(info: ProjectInfo) {
       cy.gcy('screenshot-thumbnail').should('not.exist');
     }
     if (scopes.includes('screenshots.upload')) {
-      cy.gcy('add-box').should('be.visible');
+      cy.gcy('translations-cell-screenshots-button').first().should('exist');
+    } else {
+      cy.gcy('translations-cell-screenshots-button').should('not.exist');
     }
-    // close popup
-    cy.waitForDom();
-    dismissMenu();
   }
 
   if (
