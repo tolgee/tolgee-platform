@@ -6,7 +6,6 @@ import { TopBanner } from './TopBanner/TopBanner';
 import { TopSpacer } from './TopSpacer';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { RightSidePanel } from './RightSidePanel';
-import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
 
 const StyledMain = styled(Box)`
   display: grid;
@@ -51,7 +50,6 @@ export const DashboardPage: FunctionComponent<Props> = ({
   );
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
-  const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
 
   return (
     <>
@@ -79,11 +77,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {quickStartEnabled && !hideQuickStart && (
-          <RightSidePanel>
-            <QuickStartGuide />
-          </RightSidePanel>
-        )}
+        {!hideQuickStart && <RightSidePanel />}
       </Box>
     </>
   );
