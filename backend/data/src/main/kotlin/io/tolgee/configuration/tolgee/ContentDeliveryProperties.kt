@@ -16,8 +16,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class ContentDeliveryProperties {
   @DocProperty(
     description =
-      "The root path where the content is accessible by the public. If this property is not null, " +
-        "content delivery will be enabled on your server.",
+      "The prefix URL where the content is accessible from the public. If this property is not null, " +
+        "content delivery will be enabled on your server." +
+        "\n\n" +
+        "For example, if you set this property to `https://cdn.example.com/`",
   )
   var publicUrlPrefix: String? = null
 
