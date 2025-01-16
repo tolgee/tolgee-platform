@@ -14,10 +14,6 @@ export const TrialChip: FC = () => {
 
   const { t } = useTranslate();
 
-  if (!shouldShowChip) {
-    return null;
-  }
-
   const Wrapper = useMemo(() => {
     return function Wrapper({ children }) {
       if (isCurrentSubscriptionPage) {
@@ -32,6 +28,10 @@ export const TrialChip: FC = () => {
     };
   }, [isCurrentSubscriptionPage]);
 
+  if (!shouldShowChip) {
+    return null;
+  }
+
   return (
     <Box
       sx={{
@@ -43,6 +43,7 @@ export const TrialChip: FC = () => {
     >
       <Wrapper>
         <Chip
+          data-cy="topbar-trial-chip"
           sx={(theme) => ({
             flexGrow: 0,
             textTransform: 'uppercase',

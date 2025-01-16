@@ -1138,7 +1138,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -1156,7 +1155,15 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation"
+        | "cannot_cancel_trial_without_payment_method"
+        | "cannot_update_without_modification";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -1231,14 +1238,6 @@ export interface components {
       /** @description The user's permission type. This field is null if uses granular permissions */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1249,10 +1248,13 @@ export interface components {
        */
       stateChangeLanguageIds?: number[];
       /**
-       * @description List of languages user can view. If null, all languages view is permitted.
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
        * @example 200001,200004
        */
-      viewLanguageIds?: number[];
+      permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
        * @example KEYS_EDIT,TRANSLATIONS_VIEW
@@ -1287,6 +1289,11 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
       )[];
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
     };
     LanguageModel: {
       /** Format: int64 */
@@ -1953,8 +1960,8 @@ export interface components {
       secretKey?: string;
       endpoint: string;
       signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
+      contentStorageType?: "S3" | "AZURE";
     };
     AzureContentStorageConfigModel: {
       containerName?: string;
@@ -2235,10 +2242,10 @@ export interface components {
       createNewKeys: boolean;
     };
     ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
     };
@@ -2400,14 +2407,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
     };
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
@@ -2510,6 +2517,7 @@ export interface components {
         | "PAST_DUE"
         | "UNPAID"
         | "ERROR"
+        | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
       nonCommerical: boolean;
       /** Format: date-time */
@@ -2567,17 +2575,17 @@ export interface components {
       key: string;
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
       /** Format: int64 */
-      projectId: number;
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
+      projectId: number;
       username?: string;
+      description: string;
+      projectName: string;
+      userFullName?: string;
     };
     SuperTokenRequest: {
       /** @description Has to be provided when TOTP enabled */
@@ -2713,6 +2721,7 @@ export interface components {
         | "PAST_DUE"
         | "UNPAID"
         | "ERROR"
+        | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
       licenseKey?: string;
       estimatedCosts?: number;
@@ -3176,7 +3185,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -3194,7 +3202,15 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation"
+        | "cannot_cancel_trial_without_payment_method"
+        | "cannot_update_without_modification";
       params?: { [key: string]: unknown }[];
     };
     UntagKeysRequest: {
@@ -3227,7 +3243,8 @@ export interface components {
         | "TAG_KEYS"
         | "UNTAG_KEYS"
         | "SET_KEYS_NAMESPACE"
-        | "AUTOMATION";
+        | "AUTOMATION"
+        | "BILLING_TRIAL_EXPIRATION_NOTICE";
       /**
        * Format: int32
        * @description Total items, that have been processed so far
@@ -3877,25 +3894,43 @@ export interface components {
         | "ORDER_TRANSLATION"
       )[];
       quickStart?: components["schemas"]["QuickStartModel"];
+      activeCloudSubscription?: components["schemas"]["PublicCloudSubscriptionModel"];
       /** @example Beautiful organization */
       name: string;
       /** Format: int64 */
       id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
+      avatar?: components["schemas"]["Avatar"];
+      /** @example btforg */
+      slug: string;
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
       /**
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
       currentUserRole?: "MEMBER" | "OWNER";
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
+      basePermissions: components["schemas"]["PermissionModel"];
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
+    };
+    /** @example Current active subscription info */
+    PublicCloudSubscriptionModel: {
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      /** Format: int64 */
+      trialEnd?: number;
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      trialRenew: boolean;
+      cancelAtPeriodEnd: boolean;
+      hasPaymentMethod: boolean;
     };
     PublicConfigurationDTO: {
       machineTranslationServices: components["schemas"]["MtServicesDTO"];
@@ -4070,20 +4105,20 @@ export interface components {
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       translation?: string;
       namespace?: string;
       description?: string;
+      baseTranslation?: string;
     };
     KeySearchSearchResultModel: {
       view?: components["schemas"]["KeySearchResultView"];
       name: string;
       /** Format: int64 */
       id: number;
-      baseTranslation?: string;
       translation?: string;
       namespace?: string;
       description?: string;
+      baseTranslation?: string;
     };
     PagedModelKeySearchSearchResultModel: {
       _embedded?: {
@@ -4685,14 +4720,14 @@ export interface components {
       /** Format: int64 */
       id: number;
       /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
       lastUsedAt?: number;
-      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
       /** Format: int64 */
       createdAt: number;
       /** Format: int64 */
       updatedAt: number;
+      description: string;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
@@ -4811,17 +4846,17 @@ export interface components {
       permittedLanguageIds?: number[];
       /** Format: int64 */
       id: number;
-      userFullName?: string;
-      projectName: string;
       scopes: string[];
       /** Format: int64 */
-      projectId: number;
+      lastUsedAt?: number;
       /** Format: int64 */
       expiresAt?: number;
       /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
+      projectId: number;
       username?: string;
+      description: string;
+      projectName: string;
+      userFullName?: string;
     };
     PagedModelUserAccountModel: {
       _embedded?: {
