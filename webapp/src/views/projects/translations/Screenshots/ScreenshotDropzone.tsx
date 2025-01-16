@@ -1,13 +1,12 @@
 import clsx from 'clsx';
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { Box, styled } from '@mui/material';
-import { green, red } from '@mui/material/colors';
-import { XCircle } from '@untitled-ui/icons-react';
+import { red } from '@mui/material/colors';
+import { UploadCloud01, XCircle } from '@untitled-ui/icons-react';
 
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
-import { Dropzone } from 'tg.component/CustomIcons';
 import { MAX_FILE_COUNT } from './Screenshots';
 
 export interface ScreenshotDropzoneProps {
@@ -16,9 +15,14 @@ export interface ScreenshotDropzoneProps {
 
 const StyledDropZoneValidation = styled(Box)`
   pointer-events: none;
-  &.valid {
-    opacity: 1;
-  }
+  background-color: ${({ theme }) =>
+    theme.palette.tokens._components.dropzone.active};
+  border-radius: 4px;
+  border: 1px dashed ${({ theme }) => theme.palette.secondary.main};
+  backdrop-filter: blur(40px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   &.invalid {
     border: 1px solid ${red[200]};
@@ -27,22 +31,26 @@ const StyledDropZoneValidation = styled(Box)`
   }
 `;
 
-const StyledValidIcon = styled(Dropzone)`
-  filter: drop-shadow(1px 1px 0px ${green[200]})
-    drop-shadow(-1px 1px 0px ${green[200]})
-    drop-shadow(1px -1px 0px ${green[200]})
-    drop-shadow(-1px -1px 0px ${green[200]});
-  width: 100px;
-  height: 100px;
-  color: ${({ theme }) => theme.palette.common.white};
+const StyledIconWrapper = styled('div')`
+  display: flex;
+  width: 64px;
+  height: 64px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ theme }) => theme.palette.tokens.background.onDefault};
+  border-radius: 50%;
+`;
+
+const StyledValidIcon = styled(UploadCloud01)`
+  width: 32px;
+  height: 32px;
+  color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 const StyledInvalidIcon = styled(XCircle)`
-  filter: drop-shadow(1px 1px 0px ${red[200]})
-    drop-shadow(-1px 1px 0px ${red[200]}) drop-shadow(1px -1px 0px ${red[200]})
-    drop-shadow(-1px -1px 0px ${red[200]});
-  width: 100px;
-  height: 100px;
+  width: 32px;
+  height: 32px;
   color: ${({ theme }) => theme.palette.common.white};
 `;
 
@@ -119,15 +127,22 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
           width="100%"
           height="100%"
           className={clsx({
-            valid: dragOver === 'valid',
             invalid: dragOver === 'invalid',
           })}
           display="flex"
           alignItems="center"
           justifyContent="center"
         >
-          {dragOver === 'valid' && <StyledValidIcon />}
-          {dragOver === 'invalid' && <StyledInvalidIcon />}
+          {dragOver === 'valid' && (
+            <StyledIconWrapper>
+              <StyledValidIcon />
+            </StyledIconWrapper>
+          )}
+          {dragOver === 'invalid' && (
+            <StyledIconWrapper>
+              <StyledInvalidIcon />
+            </StyledIconWrapper>
+          )}
         </StyledDropZoneValidation>
         {props.children}
       </Box>
