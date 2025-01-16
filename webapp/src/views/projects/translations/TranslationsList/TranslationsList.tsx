@@ -29,7 +29,6 @@ const StyledContainer = styled('div')`
 `;
 
 type Props = {
-  toolsPanelOpen: boolean;
   width: number;
 };
 
