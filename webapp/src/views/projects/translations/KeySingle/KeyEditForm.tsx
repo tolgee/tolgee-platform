@@ -20,7 +20,10 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { FloatingToolsPanel } from '../ToolsPanel/FloatingToolsPanel';
 
 const StyledContainer = styled('div')`
@@ -64,6 +67,7 @@ const StyledActions = styled('div')`
 `;
 
 export const KeyEditForm: React.FC = () => {
+  const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
@@ -257,7 +261,9 @@ export const KeyEditForm: React.FC = () => {
       </StyledContainer>
       {toolsPanelOpen && (
         <Box ml="-1px" mt="25px">
-          <FloatingToolsPanel />
+          <FloatingToolsPanel
+            width={Math.min(Math.max(bodyWidth * 0.24, 300), 500)}
+          />
         </Box>
       )}
     </Box>
