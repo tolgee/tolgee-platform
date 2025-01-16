@@ -19,6 +19,7 @@ import { Bell01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
+import { components } from 'tg.service/apiSchema.generated';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -46,8 +47,17 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     query: { size: 10000 },
   });
 
-  const notifications = notificationsLoadable.data;
-  const notificationsData = notifications?._embedded?.notificationModelList;
+  const [notifications, setNotifications] =
+    useState<components['schemas']['NotificationModel'][]>(null);
+
+  const [unseenCount, setUnseenCount] = useState(0);
+
+  useEffect(() => {
+    const notificationsLoaded = notificationsLoadable.data;
+    if (notificationsLoaded === undefined) return;
+    setNotifications(notificationsLoaded._embedded.notificationModelList);
+    setUnseenCount(notificationsLoaded.unseenCount);
+  }, [notificationsLoadable.data]);
 
   const markSeenMutation = useApiMutation({
     url: '/v2/notifications-mark-seen',
@@ -60,9 +70,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     markSeenMutation.mutate({
       content: {
         'application/json':
-          notificationsData != undefined
-            ? notificationsData.map((it) => it.id)
-            : [],
+          notifications != undefined ? notifications.map((it) => it.id) : [],
       },
     });
   };
@@ -74,14 +82,19 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const history = useHistory();
-
   const client = useGlobalContext((c) => c.wsClient.client);
   const user = useUser();
 
   useEffect(() => {
     if (client && user) {
-      return client.subscribe(`/users/${user.id}/notifications-changed`, () =>
-        notificationsLoadable.refetch({ cancelRefetch: true })
+      return client.subscribe(
+        `/users/${user.id}/notifications-changed`,
+        (e) => {
+          const newNotification = e.data.newNotification;
+          if (newNotification != undefined)
+            setNotifications((prevState) => [newNotification, ...prevState]);
+          setUnseenCount((prevState) => e.data.currentlyUnseenCount);
+        }
       );
     }
   }, [user, client]);
@@ -97,7 +110,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         size="large"
       >
         <Badge
-          badgeContent={notifications?.unseenCount}
+          badgeContent={unseenCount}
           color="secondary"
           data-cy="notifications-count"
         >
@@ -131,12 +144,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           <ListItemHeader divider>
             <T keyName="notifications-header" />
           </ListItemHeader>
-          {notificationsData?.map((notification, i) => {
+          {notifications?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
             return (
               <ListItemButton
                 key={notification.id}
-                divider={i !== notificationsData.length - 1}
+                divider={i !== notifications.length - 1}
                 href={destinationUrl}
                 onClick={(event) => {
                   event.preventDefault();
@@ -151,7 +164,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               </ListItemButton>
             );
           })}
-          {notifications?.page?.totalElements === 0 && (
+          {notifications?.length === 0 && (
             <ListItem>
               <T keyName="notifications-empty" />
             </ListItem>
