@@ -16,6 +16,18 @@ const StyledContainer = styled('div')`
   max-width: 85vw;
   position: relative;
 
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    border-radius: 4px;
+    border: 1px solid ${({ theme }) => theme.palette.tokens.border.primary};
+    pointer-events: none;
+  }
+
   & .arrow {
     position: absolute;
     top: calc(50% - 17px);
