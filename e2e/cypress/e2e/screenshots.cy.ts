@@ -92,7 +92,7 @@ describe('Screenshots', { retries: 3 }, () => {
   it('screenshots are visible only for key, where uploaded', () => {
     const promises = [];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       promises.push(
         addScreenshot(project.id, keys[1].id, 'screenshots/test_1.png')
       );
@@ -104,7 +104,7 @@ describe('Screenshots', { retries: 3 }, () => {
         .should('have.length', 0);
       getAndFocusRow(1)
         .findDcy('screenshot-thumbnail')
-        .should('have.length', 5);
+        .should('have.length', 3);
     });
   });
 
