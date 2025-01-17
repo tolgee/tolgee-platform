@@ -72,8 +72,8 @@ describe('Screenshots', () => {
     getAndFocusRow(0)
       .findDcy('cell-key-screenshot-file-input')
       .attachFile('screenshots/test_1.png', { subjectType: 'input' })
-      .attachFile('screenshots/test_1.png', { subjectType: 'input' })
-      .attachFile('screenshots/test_1.png', { subjectType: 'input' });
+      .attachFile('screenshots/test_2.png', { subjectType: 'input' })
+      .attachFile('screenshots/test_3.png', { subjectType: 'input' });
     getAndFocusRow(0).findDcy('screenshot-thumbnail').should('have.length', 3);
   });
 
@@ -94,7 +94,7 @@ describe('Screenshots', () => {
 
     for (let i = 0; i < 3; i++) {
       promises.push(
-        addScreenshot(project.id, keys[1].id, 'screenshots/test_1.png')
+        addScreenshot(project.id, keys[1].id, `screenshots/test_${i + 1}.png`)
       );
     }
 
@@ -112,7 +112,7 @@ describe('Screenshots', () => {
     const promises = [];
     for (let i = 0; i < 3; i++) {
       promises.push(
-        addScreenshot(project.id, keys[0].id, 'screenshots/test_1.png')
+        addScreenshot(project.id, keys[0].id, `screenshots/test_${i + 1}.png`)
       );
     }
     Cypress.Promise.all(promises).then(() => {
