@@ -9,6 +9,7 @@ import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
 import { assertMessage, dismissMenu, gcyAdvanced } from './shared';
 import { selectNamespace } from './namespace';
+import { buildXpath } from './XpathBuilder';
 import Chainable = Cypress.Chainable;
 
 export function getCellCancelButton() {
@@ -25,10 +26,6 @@ export function getCellInsertBaseButton() {
 
 export const getCell = (value: string) => {
   return cy.gcy('translations-table-cell').contains(value);
-};
-
-export const getTranslationCell = (key: string, language: string) => {
-  return gcyAdvanced({ value: 'translations-table-cell', key, language });
 };
 
 export const getPluralEditor = (variant: string) => {
@@ -140,11 +137,7 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
 
   if (newValue !== undefined) {
     // select all, delete and type new text
-    cy.gcy('global-editor')
-      .first()
-      .find('[contenteditable]')
-      .clear()
-      .type(newValue);
+    getTranslationEditor().clear().type(newValue);
 
     if (save) {
       getCellSaveButton().click();
@@ -152,6 +145,44 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
     waitForGlobalLoading();
   }
 };
+
+export function getTranslationEditor() {
+  return buildXpath()
+    .descendant()
+    .withDataCy('global-editor')
+    .descendant()
+    .withAttribute('contenteditable')
+    .getElement();
+}
+
+export function getTranslationCell(key: string, languageTag: string) {
+  return buildXpath()
+    .descendant()
+    .withDataCy('translations-key-name')
+    .descendantOrSelf()
+    .hasText(key)
+    .closestAncestor()
+    .withDataCy('translations-row')
+    .descendant()
+    .attributeEquals('data-cy-language', languageTag)
+    .getElement();
+}
+
+export function editTranslation({
+  key,
+  languageTag,
+  newValue,
+}: {
+  key: string;
+  languageTag: string;
+  newValue: string;
+}) {
+  const translationCell = getTranslationCell(key, languageTag);
+
+  translationCell.click();
+  getTranslationEditor().clear().type(newValue);
+  getCellSaveButton().click();
+}
 
 export function confirmDiscard() {
   cy.gcy('global-confirmation-confirm').contains('Discard').click();

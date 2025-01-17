@@ -67,8 +67,8 @@ class BatchJobService(
   @Transactional
   fun startJob(
     request: Any,
-    project: Project,
-    author: UserAccount?,
+    project: Project? = null,
+    author: UserAccount? = null,
     type: BatchJobType,
     isHidden: Boolean = false,
     debounceDuration: Duration? = null,
@@ -79,7 +79,7 @@ class BatchJobService(
 
     val params =
       BatchOperationParams(
-        projectId = project.id,
+        projectId = project?.id,
         type = type,
         request = request,
         target = target,
@@ -100,7 +100,7 @@ class BatchJobService(
         this.author = author
         this.target = target
         this.totalItems = target.size
-        this.chunkSize = processor.getChunkSize(projectId = project.id, request = request)
+        this.chunkSize = processor.getChunkSize(projectId = project?.id, request = request)
         this.jobCharacter = processor.getJobCharacter()
         this.maxPerJobConcurrency = processor.getMaxPerJobConcurrency()
         this.type = type
@@ -118,7 +118,7 @@ class BatchJobService(
 
     entityManager.flushAndClear()
 
-    val executions = storeExecutions(chunked, job)
+    val executions = storeExecutions(chunked = chunked, job = job, executeAfter = processor.getExecuteAfter(request))
 
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
@@ -128,12 +128,14 @@ class BatchJobService(
   private fun storeExecutions(
     chunked: List<List<Any>>,
     job: BatchJob,
+    executeAfter: Date?,
   ): List<BatchJobChunkExecution> {
     val executions =
       List(chunked.size) { chunkNumber ->
         BatchJobChunkExecution().apply {
           batchJob = job
           this.chunkNumber = chunkNumber
+          this.executeAfter = executeAfter
         }
       }
 
@@ -149,8 +151,8 @@ class BatchJobService(
     jdbcTemplate.batchUpdate(
       """
         insert into tolgee_batch_job_chunk_execution 
-        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets) 
-        values (?, ?, ?, ?, ?, ?, ?)
+        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets, execute_after) 
+        values (?, ?, ?, ?, ?, ?, ?, ?)
         """,
       executions,
       100,
@@ -170,6 +172,7 @@ class BatchJobService(
           value = objectMapper.writeValueAsString(execution.successTargets)
         },
       )
+      ps.setTimestamp(8, execution.executeAfter?.time?.let { Timestamp(it) })
     }
   }
 

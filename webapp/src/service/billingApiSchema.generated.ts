@@ -10,6 +10,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/refresh-subscriptions": {
     put: operations["refreshSelfHostedEeSubscriptions"];
   };
+  "/v2/organizations/{organizationId}/billing/restore-cancelled-subscription": {
+    /** When subscription is scheduled to cancel on the period end, it can be restored. */
+    put: operations["keepSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     put: operations["refresh"];
   };
@@ -19,6 +23,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/cancel-subscription": {
     /** When applied, current subscription will be cancelled at the period end. */
     put: operations["cancelSubscription"];
+  };
+  "/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan": {
+    /** Assigns a private free plan or trial plan to an organization. */
+    put: operations["assignCloudPlan"];
   };
   "/v2/administration/billing/translation-agency/{agencyId}": {
     get: operations["get_1"];
@@ -129,6 +137,9 @@ export interface paths {
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations"];
+  };
+  "/v2/administration/billing/organizations": {
+    get: operations["getOrganizations"];
   };
   "/v2/administration/billing/features": {
     get: operations["getAllFeatures"];
@@ -376,7 +387,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -392,7 +402,13 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
-        | "cannot_set_sso_provider_missing_fields";
+        | "cannot_set_sso_provider_missing_fields"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -472,6 +488,7 @@ export interface components {
         | "PAST_DUE"
         | "UNPAID"
         | "ERROR"
+        | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
       licenseKey?: string;
       estimatedCosts?: number;
@@ -521,6 +538,18 @@ export interface components {
       estimatedCosts?: number;
       /** Format: int64 */
       createdAt: number;
+      /** Format: int64 */
+      trialEnd?: number;
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      trialRenew: boolean;
+      hasPaymentMethod: boolean;
     };
     UpdateSubscriptionPrepareRequest: {
       /**
@@ -544,6 +573,65 @@ export interface components {
       prorationDate: number;
       endingBalance: number;
     };
+    AssignPlanRequest: {
+      /** Format: int64 */
+      trialEnd?: number;
+      /** Format: int64 */
+      planId?: number;
+      customPlan?: components["schemas"]["CloudPlanRequest"];
+    };
+    CloudPlanRequest: {
+      name: string;
+      free: boolean;
+      nonCommercial: boolean;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+      )[];
+      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      prices: components["schemas"]["PlanPricesRequest"];
+      includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      public: boolean;
+      stripeProductId: string;
+      /** Format: date-time */
+      notAvailableBefore?: string;
+      /** Format: date-time */
+      availableUntil?: string;
+      /** Format: date-time */
+      usableUntil?: string;
+      forOrganizationIds: number[];
+    };
+    PlanIncludedUsageRequest: {
+      /** Format: int64 */
+      seats: number;
+      /** Format: int64 */
+      translations: number;
+      /** Format: int64 */
+      mtCredits: number;
+    };
+    PlanPricesRequest: {
+      perSeat: number;
+      perThousandTranslations?: number;
+      perThousandMtCredits?: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
+    };
     UpdateTranslationAgencyRequest: {
       name: string;
       description: string;
@@ -566,21 +654,6 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       email?: string;
       emailBcc: string[];
-    };
-    PlanIncludedUsageRequest: {
-      /** Format: int64 */
-      seats: number;
-      /** Format: int64 */
-      translations: number;
-      /** Format: int64 */
-      mtCredits: number;
-    };
-    PlanPricesRequest: {
-      perSeat: number;
-      perThousandTranslations?: number;
-      perThousandMtCredits?: number;
-      subscriptionMonthly: number;
-      subscriptionYearly: number;
     };
     SelfHostedEePlanRequest: {
       name: string;
@@ -651,45 +724,7 @@ export interface components {
       stripeProductId: string;
       forOrganizationIds: number[];
     };
-    CloudPlanRequest: {
-      name: string;
-      free: boolean;
-      nonCommercial: boolean;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "WEBHOOKS"
-        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
-        | "AI_PROMPT_CUSTOMIZATION"
-        | "SLACK_INTEGRATION"
-        | "TASKS"
-        | "SSO"
-        | "ORDER_TRANSLATION"
-      )[];
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
-      prices: components["schemas"]["PlanPricesRequest"];
-      includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
-      public: boolean;
-      stripeProductId: string;
-      /** Format: date-time */
-      notAvailableBefore?: string;
-      /** Format: date-time */
-      availableUntil?: string;
-      /** Format: date-time */
-      usableUntil?: string;
-      forOrganizationIds: number[];
-      autoAssignOrganizationIds: number[];
-    };
-    CloudPlanAdministrationModel: {
+    AdministrationCloudPlanModel: {
       /** Format: int64 */
       id: number;
       name: string;
@@ -721,6 +756,12 @@ export interface components {
       public: boolean;
       stripeProductId: string;
       forOrganizationIds: number[];
+      /**
+       * Format: int64
+       * @description Only single organization is using this plan or can see this plan. This is the organization id.When provided, we are sure that no other organization is currently using or have been invoiced with this plan.
+       */
+      exclusiveForOrganizationId?: number;
+      canEditPrices: boolean;
       nonCommercial: boolean;
     };
     CreateTaskRequest: {
@@ -1002,9 +1043,47 @@ export interface components {
       basePermissions: components["schemas"]["PermissionModel"];
       avatar?: components["schemas"]["Avatar"];
     };
-    CollectionModelCloudPlanAdministrationModel: {
+    AdministrationCloudSubscriptionModel: {
+      /** Format: int64 */
+      organizationId: number;
+      plan: components["schemas"]["AdministrationCloudPlanModel"];
+      /** Format: int64 */
+      currentPeriodStart?: number;
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      cancelAtPeriodEnd: boolean;
+      estimatedCosts?: number;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      trialEnd?: number;
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      stripeSubscriptionId?: string;
+      trialRenew: boolean;
+      hasPaymentMethod: boolean;
+    };
+    OrganizationWithSubscriptionsModel: {
+      organization: components["schemas"]["SimpleOrganizationModel"];
+      cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
+      selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionModel"][];
+    };
+    PagedModelOrganizationWithSubscriptionsModel: {
       _embedded?: {
-        plans?: components["schemas"]["CloudPlanAdministrationModel"][];
+        organizations?: components["schemas"]["OrganizationWithSubscriptionsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    CollectionModelAdministrationCloudPlanModel: {
+      _embedded?: {
+        plans?: components["schemas"]["AdministrationCloudPlanModel"][];
       };
     };
   };
@@ -1072,6 +1151,50 @@ export interface operations {
           "application/json": components["schemas"]["CollectionModelSelfHostedEeSubscriptionModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** When subscription is scheduled to cancel on the period end, it can be restored. */
+  keepSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -1246,6 +1369,55 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Assigns a private free plan or trial plan to an organization. */
+  assignCloudPlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignPlanRequest"];
       };
     };
   };
@@ -1637,7 +1809,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -1684,7 +1856,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -2314,11 +2486,23 @@ export interface operations {
     };
   };
   getPlans_2: {
+    parameters: {
+      query: {
+        /**
+         * Can be
+         * - private free, visible for organization
+         * - or paid (Assignable as trial)
+         */
+        filterAssignableToOrganization?: number;
+        filterPlanIds?: number[];
+        filterPublic?: boolean;
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CollectionModelCloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["CollectionModelAdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -2360,7 +2544,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CloudPlanAdministrationModel"];
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
         };
       };
       /** Bad Request */
@@ -3276,6 +3460,61 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getOrganizations: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+        withCloudPlanId?: number;
+        hasSelfHostedSubscription?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelOrganizationWithSubscriptionsModel"];
         };
       };
       /** Bad Request */

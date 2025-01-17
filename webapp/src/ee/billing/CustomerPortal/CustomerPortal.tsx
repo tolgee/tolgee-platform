@@ -1,14 +1,12 @@
 import { Box, Button, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-
-import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
-import { useOrganization } from 'tg.views/organizations/useOrganization';
 import {
   StyledBillingSection,
   StyledBillingSectionHeader,
   StyledBillingSectionTitle,
 } from '../BillingSection';
 import StripeLogoSvg from 'tg.svgs/stripeLogo.svg?react';
+import { useGoToStripeCustomerPortal } from '../Subscriptions/cloud/useGoToStripeCustomerPortal';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -23,17 +21,7 @@ const StyledStripeLogo = styled(StripeLogoSvg)`
 
 export const CustomerPortal = () => {
   const { t } = useTranslate();
-  const organization = useOrganization();
-
-  const getCustomerPortalSession = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/customer-portal',
-    method: 'get',
-    options: {
-      onSuccess: (data) => {
-        window.location.href = data.url;
-      },
-    },
-  });
+  const goToCustomerPortal = useGoToStripeCustomerPortal();
 
   return (
     <StyledBillingSection gridArea="customerPortal">
@@ -47,13 +35,7 @@ export const CustomerPortal = () => {
             size="small"
             color="primary"
             variant="contained"
-            onClick={() =>
-              getCustomerPortalSession.mutate({
-                path: {
-                  organizationId: organization!.id,
-                },
-              })
-            }
+            onClick={goToCustomerPortal}
           >
             {t('billing_customer_portal_button')}
           </Button>

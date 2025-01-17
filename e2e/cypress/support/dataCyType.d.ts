@@ -12,12 +12,16 @@ declare namespace DataCy {
         "activity-detail-dialog" |
         "add-box" |
         "administration-access-message" |
+        "administration-assign-trial-assign-button" |
+        "administration-assign-trial-button" |
+        "administration-billing-edit-custom-plan-button" |
+        "administration-billing-exclusive-plan-chip" |
+        "administration-billing-trial-badge" |
         "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-mt-credits" |
         "administration-cloud-plan-field-included-translations" |
         "administration-cloud-plan-field-name" |
-        "administration-cloud-plan-field-non-commercial" |
         "administration-cloud-plan-field-price-monthly" |
         "administration-cloud-plan-field-price-per-thousand-mt-credits" |
         "administration-cloud-plan-field-price-per-thousand-translations" |
@@ -26,14 +30,16 @@ declare namespace DataCy {
         "administration-cloud-plan-field-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
-        "administration-cloud-plan-organization-assign-switch" |
         "administration-cloud-plan-submit-button" |
         "administration-cloud-plans-item" |
         "administration-cloud-plans-item-delete" |
         "administration-cloud-plans-item-edit" |
         "administration-cloud-plans-item-public-badge" |
+        "administration-create-custom-plan-button" |
+        "administration-customize-plan-switch" |
         "administration-debug-customer-account-message" |
         "administration-debug-customer-exit-button" |
+        "administration-edit-current-plan-button" |
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-cancel-button" |
@@ -63,6 +69,12 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-plan-field-non-commercial" |
+        "administration-plan-selector" |
+        "administration-subscriptions-cloud-plan-name" |
+        "administration-subscriptions-custom-plans-item" |
+        "administration-subscriptions-plan-popover" |
+        "administration-trial-end-date-field" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
         "administration-user-disable-user" |
@@ -128,8 +140,11 @@ declare namespace DataCy {
         "billing-plan-subtitle" |
         "billing-progress-label-item" |
         "billing-self-hosted-ee-plan-subscribe-button" |
+        "billing-subscription-auto-renews-alert-cancel-button" |
+        "billing-subscription-trial-alert-keep-button" |
         "billing-subscriptions-cloud-button" |
         "billing-subscriptions-self-hosted-ee-button" |
+        "billing-trial-setup-payment-method-button" |
         "billing-upgrade-preview-confirm-button" |
         "billing-usage-table" |
         "billing_period_annual" |
@@ -511,6 +526,9 @@ declare namespace DataCy {
         "storage-item-edit" |
         "storage-list-item" |
         "storage-subtitle" |
+        "subscribe-cancels-trial-plan-tooltip" |
+        "subscriptions-trial-alert" |
+        "subscriptions-trial-alert-reaching-the-limit" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "task-date-picker" |
@@ -557,6 +575,8 @@ declare namespace DataCy {
         "top-banner" |
         "top-banner-content" |
         "top-banner-dismiss-button" |
+        "topbar-trial-announcement" |
+        "topbar-trial-chip" |
         "transfer-project-apply-button" |
         "translation-agency-item" |
         "translation-create-description-input" |
@@ -600,6 +620,7 @@ declare namespace DataCy {
         "translations-key-count" |
         "translations-key-edit-description-field" |
         "translations-key-edit-key-field" |
+        "translations-key-name" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |
         "translations-namespace-banner" |
