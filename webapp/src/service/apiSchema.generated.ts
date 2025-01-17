@@ -4,270 +4,174 @@
  */
 
 export interface paths {
-  "/v2/user": {
-    /** Returns information about currently authenticated user. */
-    get: operations["getInfo_2"];
-    /** Updates current user's profile information. */
-    put: operations["updateUser"];
-    post: operations["updateUserOld"];
-    delete: operations["delete"];
+  "/api/project/{projectId}/export/jsonZip": {
+    /** Exports data as ZIP of jsons */
+    get: operations["doExportJsonZip"];
   };
-  "/v2/user/password": {
-    /** Updates current user's password. Invalidates all previous sessions upon success. */
-    put: operations["updateUserPassword"];
+  "/api/public/authorize_oauth/sso/authentication-url": {
+    post: operations["getAuthenticationUrl"];
   };
-  "/v2/user/mfa/totp": {
-    /** Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
-    put: operations["enableMfa"];
-    /** Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
-    delete: operations["disableMfa"];
+  "/api/public/authorize_oauth/{serviceType}": {
+    /** Authenticates user using third party oAuth service */
+    get: operations["authenticateUser_1"];
   };
-  "/v2/user/mfa/recovery": {
-    /** Regenerates multi-factor authentication recovery codes */
-    put: operations["regenerateRecoveryCodes"];
+  "/api/public/configuration": {
+    get: operations["getPublicConfiguration"];
   };
-  "/v2/user/avatar": {
-    put: operations["uploadAvatar"];
-    delete: operations["removeAvatar"];
+  "/api/public/generatetoken": {
+    post: operations["authenticateUser"];
   };
-  "/v2/user-preferences/set-preferred-organization/{organizationId}": {
-    put: operations["setPreferredOrganization"];
+  "/api/public/invitation_info/{code}": {
+    get: operations["invitationInfo"];
   };
-  "/v2/user-preferences/set-language/{languageTag}": {
-    put: operations["setLanguage"];
+  "/api/public/reset_password_request": {
+    post: operations["resetPasswordRequest"];
   };
-  "/v2/quick-start/steps/{step}/complete": {
-    /** Marks guide step as completed */
-    put: operations["completeGuideStep"];
+  "/api/public/reset_password_set": {
+    /** Checks the password reset code from e-mail */
+    post: operations["resetPasswordSet"];
   };
-  "/v2/quick-start/set-open/{open}": {
-    /** Sets open state of the quick start guide */
-    put: operations["setOpenState"];
+  "/api/public/reset_password_validate/{email}/{code}": {
+    get: operations["resetPasswordValidate"];
   };
-  "/v2/quick-start/set-finished/{finished}": {
-    /** Sets finished state of the quick start guide */
-    put: operations["setFinishedState"];
+  "/api/public/sign_up": {
+    /** When E-mail verification is enabled, null is returned. Otherwise JWT token is provided. */
+    post: operations["signUp"];
   };
-  "/v2/projects/{projectId}": {
-    get: operations["get_4"];
-    put: operations["editProject"];
-    delete: operations["deleteProject"];
+  "/api/public/validate_email": {
+    post: operations["validateEmail"];
   };
-  "/v2/projects/{projectId}/webhook-configs/{id}": {
-    get: operations["get_5"];
-    put: operations["update"];
-    delete: operations["delete_1"];
+  "/api/public/verify_email/{userId}/{code}": {
+    /** It checks whether the code from email is valid */
+    get: operations["verifyEmail"];
   };
-  "/v2/projects/{projectId}/users/{userId}/set-permissions": {
-    /** Set user's granular (scope-based) direct project permission */
-    put: operations["setUsersPermissions"];
+  "/v2/administration/organizations": {
+    get: operations["getOrganizations"];
   };
-  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
-    put: operations["setUsersPermissions_1"];
+  "/v2/administration/users": {
+    get: operations["getUsers"];
   };
-  "/v2/projects/{projectId}/users/{userId}/set-by-organization": {
-    /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
-    put: operations["setOrganizationBase"];
+  "/v2/administration/users/{userId}": {
+    delete: operations["deleteUser"];
   };
-  "/v2/projects/{projectId}/users/{userId}/revoke-access": {
-    put: operations["revokePermission"];
+  "/v2/administration/users/{userId}/disable": {
+    /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
+    put: operations["disableUser"];
   };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/reopen": {
-    put: operations["reopenTask"];
+  "/v2/administration/users/{userId}/enable": {
+    /** Enables previously disabled user. */
+    put: operations["enableUser"];
   };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/keys/{keyId}": {
-    /** Mark key as done, which updates task progress. */
-    put: operations["updateTaskKey"];
+  "/v2/administration/users/{userId}/generate-token": {
+    /** Generates a JWT token for the user with provided ID. This is useful, when need to debug of the user's account. Or when an operation is required to be executed on behalf of the user. */
+    get: operations["generateUserToken"];
   };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/keys": {
-    get: operations["getTaskKeys"];
-    put: operations["updateTaskKeys"];
+  "/v2/administration/users/{userId}/set-role/{role}": {
+    /** Set's the global role on the Tolgee Platform server. */
+    put: operations["setRole"];
   };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/finish": {
-    put: operations["finishTask"];
+  "/v2/announcement": {
+    /** Returns the latest announcement for the currently authenticated user */
+    get: operations["getLatest"];
   };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/close": {
-    put: operations["closeTask"];
+  "/v2/announcement/dismiss": {
+    /** Dismisses the latest announcement for the currently authenticated user */
+    post: operations["dismiss"];
   };
-  "/v2/projects/{projectId}/tasks/{taskNumber}": {
-    get: operations["getTask"];
-    put: operations["updateTask"];
+  "/v2/api-keys": {
+    get: operations["allByUser"];
+    /** Creates new API key with provided scopes */
+    post: operations["create_13"];
   };
-  "/v2/projects/{projectId}/per-language-auto-translation-settings": {
-    get: operations["getPerLanguageAutoTranslationSettings"];
-    put: operations["setPerLanguageAutoTranslationSettings"];
+  "/v2/api-keys/availableScopes": {
+    get: operations["getScopes"];
   };
-  "/v2/projects/{projectId}/namespaces/{id}": {
-    put: operations["update_1"];
+  "/v2/api-keys/current": {
+    /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
+    get: operations["getCurrent_1"];
   };
-  "/v2/projects/{projectId}/machine-translation-service-settings": {
-    get: operations["getMachineTranslationSettings"];
-    put: operations["setMachineTranslationSettings"];
+  "/v2/api-keys/{apiKeyId}": {
+    put: operations["update_9"];
+    delete: operations["delete_13"];
   };
-  "/v2/projects/{projectId}/keys/{id}/disabled-languages": {
-    /** Returns languages, in which key is disabled */
-    get: operations["getDisabledLanguages"];
-    /** Sets languages, in which key is disabled */
-    put: operations["setDisabledLanguages"];
+  "/v2/api-keys/{apiKeyId}/regenerate": {
+    put: operations["regenerate_1"];
   };
-  "/v2/projects/{projectId}/keys/{id}/complex-update": {
-    /** Edits key name, translations, tags, screenshots, and other data */
-    put: operations["complexEdit"];
+  "/v2/api-keys/{keyId}": {
+    /** Returns specific API key info */
+    get: operations["get_21"];
   };
-  "/v2/projects/{projectId}/keys/{id}": {
-    get: operations["get_6"];
-    put: operations["edit"];
+  "/v2/ee-license/info": {
+    get: operations["getInfo_5"];
   };
-  "/v2/projects/{projectId}/invite": {
-    put: operations["inviteUser"];
+  "/v2/ee-license/prepare-set-license-key": {
+    /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
+    post: operations["prepareSetLicenseKey"];
   };
-  "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
-    get: operations["get_8"];
-    put: operations["update_3"];
-    delete: operations["delete_6"];
+  "/v2/ee-license/refresh": {
+    /** This will refresh the subscription information from the license server and update the subscription info. */
+    put: operations["refreshSubscription"];
   };
-  "/v2/projects/{projectId}/content-delivery-configs/{id}": {
-    get: operations["get_9"];
-    put: operations["update_4"];
-    /** Immediately publishes content to the configured Content Delivery */
-    post: operations["post"];
-    delete: operations["delete_7"];
+  "/v2/ee-license/release-license-key": {
+    /** This will remove the licence key from the instance. */
+    put: operations["release"];
   };
-  "/v2/projects/{projectId}/auto-translation-settings": {
-    /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
-    get: operations["getAutoTranslationSettings"];
-    /** Sets default auto-translation settings for project (deprecated: use per language config with null language id) */
-    put: operations["setAutoTranslationSettings"];
+  "/v2/ee-license/set-license-key": {
+    put: operations["setLicenseKey"];
   };
-  "/v2/projects/{projectId}/tag-complex": {
-    put: operations["executeComplexTagOperation"];
+  "/v2/image-upload": {
+    post: operations["upload"];
   };
-  "/v2/projects/{projectId}/keys/{keyId}/tags": {
-    /** Tags a key with tag. If tag with provided name doesn't exist, it is created */
-    put: operations["tagKey"];
+  "/v2/image-upload/{ids}": {
+    delete: operations["delete_12"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
-    /** Resolves translation conflict. The old translation will be overridden. */
-    put: operations["resolveTranslationSetOverride"];
+  "/v2/invitations/{code}/accept": {
+    get: operations["acceptInvitation"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
-    /** Resolves translation conflict. The old translation will be kept. */
-    put: operations["resolveTranslationSetKeepExisting"];
+  "/v2/invitations/{invitationId}": {
+    delete: operations["deleteInvitation"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override": {
-    /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
-    put: operations["resolveTranslationSetOverride_2"];
+  "/v2/organizations": {
+    /** Returns all organizations, which is current user allowed to view */
+    get: operations["getAll_10"];
+    post: operations["create_12"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
-    /** Resolves all translation conflicts for provided language. The old translations will be kept. */
-    put: operations["resolveTranslationSetKeepExisting_2"];
+  "/v2/organizations/{id}": {
+    get: operations["get_20"];
+    put: operations["update_8"];
+    /** Deletes organization and all its data including projects */
+    delete: operations["delete_11"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
-    /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
-    put: operations["selectExistingLanguage"];
+  "/v2/organizations/{id}/avatar": {
+    put: operations["uploadAvatar_2"];
+    delete: operations["removeAvatar_2"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing": {
-    /** Resets existing language paired with language to import. */
-    put: operations["resetExistingLanguage"];
+  "/v2/organizations/{id}/invite": {
+    /** Generates invitation link for organization, so users can join organization. The invitation can also be sent to an e-mail address. */
+    put: operations["inviteUser_1"];
   };
-  "/v2/projects/{projectId}/import/result/files/{fileId}/select-namespace": {
-    /** Sets namespace for file to import. */
-    put: operations["selectNamespace"];
+  "/v2/organizations/{id}/leave": {
+    /** Remove current user from organization */
+    put: operations["leaveOrganization"];
   };
-  "/v2/projects/{projectId}/import/apply-streaming": {
-    /** Imports the data prepared in previous step. Streams current status. */
-    put: operations["applyImportStreaming"];
+  "/v2/organizations/{id}/projects": {
+    /** Returns all organization projects the user has access to */
+    get: operations["getAllProjects_1"];
   };
-  "/v2/projects/{projectId}/import/apply": {
-    /** Imports the data prepared in previous step */
-    put: operations["applyImport"];
+  "/v2/organizations/{id}/users": {
+    /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
+    get: operations["getAllUsers_1"];
   };
-  "/v2/projects/{projectId}/import-settings": {
-    /** Returns import settings for the authenticated user and the project. */
-    get: operations["get_10"];
-    /** Stores import settings for the authenticated user and the project. */
-    put: operations["store"];
+  "/v2/organizations/{organizationId}/invitations": {
+    get: operations["getInvitations"];
   };
-  "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
-    /** Stops batch operation if possible. */
-    put: operations["cancel"];
+  "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
+    /** Returns machine translation credit balance for organization */
+    get: operations["getOrganizationCredits"];
   };
-  "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
-    put: operations["setTranslationState"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}/set-state/{state}": {
-    put: operations["setState"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_14"];
-    put: operations["update_5"];
-    delete: operations["delete_8"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
-    /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
-    put: operations["setOutdated"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
-    /** Removes "auto translated" indication */
-    put: operations["dismissAutoTranslatedState"];
-  };
-  "/v2/projects/{projectId}/translations": {
-    get: operations["getTranslations"];
-    /** Sets translations for existing key */
-    put: operations["setTranslations"];
-    /** Sets translations for existing key or creates new key and sets the translations to it. */
-    post: operations["createOrUpdateTranslations"];
-  };
-  "/v2/projects/{projectId}/transfer-to-organization/{organizationId}": {
-    /** Transfers project's ownership to organization */
-    put: operations["transferProjectToOrganization"];
-  };
-  "/v2/projects/{projectId}/leave": {
-    put: operations["leaveProject"];
-  };
-  "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_16"];
-    put: operations["editLanguage"];
-    delete: operations["deleteLanguage_2"];
-  };
-  "/v2/projects/{projectId}/languages/{languageId}/ai-prompt-customization": {
-    put: operations["setLanguagePromptCustomization"];
-  };
-  "/v2/projects/{projectId}/keys/{keyId}/auto-translate": {
-    /**
-     * Uses enabled auto-translation methods.
-     * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
-     *
-     * This will replace the the existing translation with the result obtained from specified source!
-     */
-    put: operations["autoTranslate"];
-  };
-  "/v2/projects/{projectId}/avatar": {
-    put: operations["uploadAvatar_1"];
-    delete: operations["removeAvatar_1"];
-  };
-  "/v2/projects/{projectId}/ai-prompt-customization": {
-    get: operations["getPromptProjectCustomization"];
-    put: operations["setPromptProjectCustomization"];
-  };
-  "/v2/pats/{id}": {
-    get: operations["get_18"];
-    /** Updates Personal Access Token */
-    put: operations["update_7"];
-    /** Deletes Personal Access Token */
-    delete: operations["delete_10"];
-  };
-  "/v2/pats/{id}/regenerate": {
-    /** Regenerates Personal Access Token. It generates new token value and updates its time of expiration. */
-    put: operations["regenerate"];
-  };
-  "/v2/organizations/{organizationId}/users/{userId}/set-role": {
-    /** Sets user role in organization. Owner or Member. */
-    put: operations["setUserRole"];
-  };
-  "/v2/organizations/{organizationId}/sso": {
-    get: operations["findProvider"];
-    put: operations["setProvider"];
+  "/v2/organizations/{organizationId}/projects-with-stats": {
+    /** Returns all projects (including statistics) where current user has any permission (except none) */
+    get: operations["getAllWithStatistics_2"];
   };
   "/v2/organizations/{organizationId}/set-base-permissions": {
     /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
@@ -277,265 +181,6 @@ export interface paths {
     /** Sets default (level-based) permission for organization */
     put: operations["setBasePermissions_1"];
   };
-  "/v2/organizations/{id}": {
-    get: operations["get_20"];
-    put: operations["update_8"];
-    /** Deletes organization and all its data including projects */
-    delete: operations["delete_11"];
-  };
-  "/v2/organizations/{id}/leave": {
-    /** Remove current user from organization */
-    put: operations["leaveOrganization"];
-  };
-  "/v2/organizations/{id}/invite": {
-    /** Generates invitation link for organization, so users can join organization. The invitation can also be sent to an e-mail address. */
-    put: operations["inviteUser_1"];
-  };
-  "/v2/organizations/{id}/avatar": {
-    put: operations["uploadAvatar_2"];
-    delete: operations["removeAvatar_2"];
-  };
-  "/v2/ee-license/set-license-key": {
-    put: operations["setLicenseKey"];
-  };
-  "/v2/ee-license/release-license-key": {
-    /** This will remove the licence key from the instance. */
-    put: operations["release"];
-  };
-  "/v2/ee-license/refresh": {
-    /** This will refresh the subscription information from the license server and update the subscription info. */
-    put: operations["refreshSubscription"];
-  };
-  "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_9"];
-    delete: operations["delete_13"];
-  };
-  "/v2/api-keys/{apiKeyId}/regenerate": {
-    put: operations["regenerate_1"];
-  };
-  "/v2/administration/users/{userId}/enable": {
-    /** Enables previously disabled user. */
-    put: operations["enableUser"];
-  };
-  "/v2/administration/users/{userId}/disable": {
-    /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
-    put: operations["disableUser"];
-  };
-  "/v2/administration/users/{userId}/set-role/{role}": {
-    /** Set's the global role on the Tolgee Platform server. */
-    put: operations["setRole"];
-  };
-  "/v2/user/send-email-verification": {
-    /** Resends email verification email to currently authenticated user. */
-    post: operations["sendEmailVerification"];
-  };
-  "/v2/user/generate-super-token": {
-    /** Generates new JWT token permitted to sensitive operations */
-    post: operations["getSuperToken"];
-  };
-  "/v2/slug/generate-project": {
-    post: operations["generateProjectSlug"];
-  };
-  "/v2/slug/generate-organization": {
-    post: operations["generateOrganizationSlug"];
-  };
-  "/v2/slack/user-login": {
-    /** Pairs user account with slack account. */
-    post: operations["userLogin"];
-  };
-  "/v2/public/translator/translate": {
-    post: operations["translate"];
-  };
-  "/v2/public/telemetry/report": {
-    post: operations["report"];
-  };
-  "/v2/public/slack": {
-    post: operations["slackCommand"];
-  };
-  "/v2/public/slack/on-event": {
-    /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
-    post: operations["onInteractivityEvent"];
-  };
-  "/v2/public/slack/on-bot-event": {
-    /**
-     * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
-     *
-     * Heads up! The events have to be configured via Slack App configuration in Event Subscription section.
-     */
-    post: operations["fetchBotEvent"];
-  };
-  "/v2/public/licensing/subscription": {
-    post: operations["getMySubscription"];
-  };
-  "/v2/public/licensing/set-key": {
-    post: operations["onLicenceSetKey"];
-  };
-  "/v2/public/licensing/report-usage": {
-    post: operations["reportUsage"];
-  };
-  "/v2/public/licensing/report-error": {
-    post: operations["reportError"];
-  };
-  "/v2/public/licensing/release-key": {
-    post: operations["releaseKey"];
-  };
-  "/v2/public/licensing/prepare-set-key": {
-    post: operations["prepareSetLicenseKey"];
-  };
-  "/v2/public/business-events/report": {
-    post: operations["report_1"];
-  };
-  "/v2/public/business-events/identify": {
-    post: operations["identify"];
-  };
-  "/v2/projects": {
-    /** Returns all projects where current user has any permission */
-    get: operations["getAll"];
-    /** Creates a new project with languages and initial settings. */
-    post: operations["createProject"];
-  };
-  "/v2/projects/{projectId}/webhook-configs": {
-    get: operations["list"];
-    post: operations["create"];
-  };
-  "/v2/projects/{projectId}/webhook-configs/{id}/test": {
-    /** Sends a test request to the webhook */
-    post: operations["test"];
-  };
-  "/v2/projects/{projectId}/tasks/create-multiple-tasks": {
-    post: operations["createTasks"];
-  };
-  "/v2/projects/{projectId}/tasks/calculate-scope": {
-    post: operations["calculateScope"];
-  };
-  "/v2/projects/{projectId}/tasks": {
-    get: operations["getTasks_1"];
-    post: operations["createTask"];
-  };
-  "/v2/projects/{projectId}/keys/info": {
-    /** Returns information about keys. (KeyData, Screenshots, Translation in specified language)If key is not found, it's not included in the response. */
-    post: operations["getInfo"];
-  };
-  "/v2/projects/{projectId}/keys/import-resolvable": {
-    /** Import's new keys with translations. Translations can be updated, when specified. */
-    post: operations["importKeys"];
-  };
-  "/v2/projects/{projectId}/keys/import": {
-    /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
-    post: operations["importKeys_2"];
-  };
-  "/v2/projects/{projectId}/keys/create": {
-    post: operations["create_1"];
-  };
-  "/v2/projects/{projectId}/keys": {
-    get: operations["getAll_1"];
-    post: operations["create_2"];
-    /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
-    delete: operations["delete_4"];
-  };
-  "/v2/projects/{projectId}/content-storages": {
-    get: operations["list_1"];
-    post: operations["create_5"];
-  };
-  "/v2/projects/{projectId}/content-storages/{id}/test": {
-    /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
-    post: operations["testExisting"];
-  };
-  "/v2/projects/{projectId}/content-storages/test": {
-    post: operations["test_1"];
-  };
-  "/v2/projects/{projectId}/content-delivery-configs": {
-    get: operations["list_2"];
-    post: operations["create_6"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/untag-keys": {
-    post: operations["untagKeys"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/tag-keys": {
-    post: operations["tagKeys"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/set-translation-state": {
-    post: operations["setTranslationState_2"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/set-keys-namespace": {
-    post: operations["setKeysNamespace"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm": {
-    /** Pre-translate provided keys to provided languages by TM. */
-    post: operations["translate_1"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/machine-translate": {
-    /** Translate provided keys to provided languages through primary MT provider. */
-    post: operations["machineTranslation"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/delete-keys": {
-    post: operations["deleteKeys"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/copy-translations": {
-    /** Copy translation values from one language to other languages. */
-    post: operations["copyTranslations"];
-  };
-  "/v2/projects/{projectId}/start-batch-job/clear-translations": {
-    /** Clear translation values for provided keys in selected languages. */
-    post: operations["clearTranslations"];
-  };
-  "/v2/projects/{projectId}/single-step-import": {
-    /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
-    post: operations["doImport"];
-  };
-  "/v2/projects/{projectId}/import": {
-    /** Prepares provided files to import. */
-    post: operations["addFiles"];
-    /** Deletes prepared import data. */
-    delete: operations["cancelImport"];
-  };
-  "/v2/projects/{projectId}/export": {
-    get: operations["exportData"];
-    /** Exports data (post). Useful when exceeding allowed URL size. */
-    post: operations["exportPost"];
-  };
-  "/v2/projects/{projectId}/big-meta": {
-    /** Stores a bigMeta for a project */
-    post: operations["store_2"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/comments": {
-    /** Returns translation comments of translation */
-    get: operations["getAll_5"];
-    post: operations["create_7"];
-  };
-  "/v2/projects/{projectId}/translations/create-comment": {
-    /** Creates a translation comment. Empty translation is stored, when not exists. */
-    post: operations["create_9"];
-  };
-  "/v2/projects/{projectId}/suggest/translation-memory": {
-    /** Suggests machine translations from translation memory. The result is always sorted by similarity, so sorting is not supported. */
-    post: operations["suggestTranslationMemory"];
-  };
-  "/v2/projects/{projectId}/suggest/machine-translations-streaming": {
-    /** Suggests machine translations from enabled services. The results are streamed to the output in ndjson format. If an error occurs when for any service provider used, the error information is returned as a part of the result item, while the response has 200 status code. */
-    post: operations["suggestMachineTranslationsStreaming"];
-  };
-  "/v2/projects/{projectId}/suggest/machine-translations": {
-    /** Suggests machine translations from enabled services */
-    post: operations["suggestMachineTranslations"];
-  };
-  "/v2/projects/{projectId}/languages": {
-    get: operations["getAll_7"];
-    post: operations["createLanguage"];
-  };
-  "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
-    get: operations["getKeyScreenshots_1"];
-    post: operations["uploadScreenshot_1"];
-  };
-  "/v2/pats": {
-    get: operations["getAll_9"];
-    post: operations["create_11"];
-  };
-  "/v2/organizations": {
-    /** Returns all organizations, which is current user allowed to view */
-    get: operations["getAll_10"];
-    post: operations["create_12"];
-  };
   "/v2/organizations/{organizationId}/slack/connect": {
     /**
      * This endpoint allows the owner of an organization to connect a Slack workspace to their organization.
@@ -543,244 +188,31 @@ export interface paths {
      */
     post: operations["connectWorkspace"];
   };
-  "/v2/image-upload": {
-    post: operations["upload"];
+  "/v2/organizations/{organizationId}/slack/get-connect-url": {
+    /** Returns URL to which user should be redirected to connect Slack workspace */
+    get: operations["connectToSlack"];
   };
-  "/v2/ee-license/prepare-set-license-key": {
-    /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-    post: operations["prepareSetLicenseKey_1"];
+  "/v2/organizations/{organizationId}/slack/workspaces": {
+    /** Returns a list of workspaces connected to the organization */
+    get: operations["getConnectedWorkspaces"];
   };
-  "/v2/api-keys": {
-    get: operations["allByUser"];
-    /** Creates new API key with provided scopes */
-    post: operations["create_13"];
+  "/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}": {
+    /** Disconnects a workspace from the organization */
+    delete: operations["disconnectWorkspace"];
   };
-  "/v2/announcement/dismiss": {
-    /** Dismisses the latest announcement for the currently authenticated user */
-    post: operations["dismiss"];
+  "/v2/organizations/{organizationId}/sso": {
+    get: operations["findProvider"];
+    put: operations["setProvider"];
   };
-  "/api/public/validate_email": {
-    post: operations["validateEmail"];
+  "/v2/organizations/{organizationId}/usage": {
+    get: operations["getUsage"];
   };
-  "/api/public/sign_up": {
-    /** When E-mail verification is enabled, null is returned. Otherwise JWT token is provided. */
-    post: operations["signUp"];
+  "/v2/organizations/{organizationId}/users/{userId}": {
+    delete: operations["removeUser"];
   };
-  "/api/public/reset_password_set": {
-    /** Checks the password reset code from e-mail */
-    post: operations["resetPasswordSet"];
-  };
-  "/api/public/reset_password_request": {
-    post: operations["resetPasswordRequest"];
-  };
-  "/api/public/generatetoken": {
-    post: operations["authenticateUser"];
-  };
-  "/api/public/authorize_oauth/sso/authentication-url": {
-    post: operations["getAuthenticationUrl"];
-  };
-  "/v2/user/single-owned-organizations": {
-    /** Returns all organizations owned only by current user */
-    get: operations["getAllSingleOwnedOrganizations"];
-  };
-  "/v2/user-tasks": {
-    get: operations["getTasks"];
-  };
-  "/v2/user-preferences": {
-    get: operations["get"];
-  };
-  "/v2/slug/validate-project/{slug}": {
-    get: operations["validateProjectSlug"];
-  };
-  "/v2/slug/validate-organization/{slug}": {
-    get: operations["validateOrganizationSlug"];
-  };
-  "/v2/slack/user-login-info": {
-    /**
-     * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
-     *
-     * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
-     *
-     * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
-     */
-    get: operations["getInfo_3"];
-  };
-  "/v2/public/scope-info/roles": {
-    get: operations["getRoles"];
-  };
-  "/v2/public/scope-info/hierarchy": {
-    get: operations["getHierarchy"];
-  };
-  "/v2/public/machine-translation-providers": {
-    /** Get machine translation providers */
-    get: operations["getInfo_4"];
-  };
-  "/v2/public/initial-data": {
-    /** Returns initial data required by the UI to load */
-    get: operations["get_1"];
-  };
-  "/v2/public/export-info/formats": {
-    get: operations["get_2"];
-  };
-  "/v2/public/configuration-properties": {
-    /** Return server configuration properties documentation */
-    get: operations["get_3"];
-  };
-  "/v2/projects/{projectId}/users": {
-    /** Returns all project users, who have permission to access project */
-    get: operations["getAllUsers"];
-  };
-  "/v2/projects/{projectId}/used-namespaces": {
-    /** Returns all used project namespaces. Response contains default (null) namespace if used. */
-    get: operations["getUsedNamespaces"];
-  };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/xlsx-report": {
-    /** Detailed statistics about the task results */
-    get: operations["getXlsxReport"];
-  };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/per-user-report": {
-    /** Detailed statistics for every assignee */
-    get: operations["getPerUserReport"];
-  };
-  "/v2/projects/{projectId}/tasks/{taskNumber}/blocking-tasks": {
-    /** If the tasks is blocked by other tasks, it returns numbers of these tasks. */
-    get: operations["getBlockingTasks"];
-  };
-  "/v2/projects/{projectId}/tasks/possible-assignees": {
-    get: operations["getPossibleAssignees"];
-  };
-  "/v2/projects/{projectId}/namespaces": {
-    get: operations["getAllNamespaces"];
-  };
-  "/v2/projects/{projectId}/namespace-by-name/{name}": {
-    /** Returns information about a namespace by its name */
-    get: operations["getByName"];
-  };
-  "/v2/projects/{projectId}/machine-translation-language-info": {
-    /** Get enabled services and configured formality for each language */
-    get: operations["getMachineTranslationLanguageInfo"];
-  };
-  "/v2/projects/{projectId}/keys/search": {
-    /**
-     * This endpoint helps you to find desired key by keyName, base translation or translation in specified language.
-     *
-     * Sort is ignored for this request.
-     */
-    get: operations["searchForKey"];
-  };
-  "/v2/projects/{projectId}/all-keys": {
-    get: operations["getAllKeys"];
-  };
-  "/v2/projects/{projectId}/all-keys-with-disabled-languages": {
-    /**
-     * Returns all project key with any disabled language.
-     *
-     * If key has no disabled language, it is not returned.
-     */
-    get: operations["getDisabledLanguages_2"];
-  };
-  "/v2/projects/{projectId}/activity/revisions/{revisionId}/modified-entities": {
-    get: operations["getModifiedEntitiesByRevision"];
-  };
-  "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
-    get: operations["getSingleRevision"];
-  };
-  "/v2/projects/{projectId}/activity": {
-    get: operations["getActivity"];
-  };
-  "/v2/projects/{projectId}/tags": {
-    get: operations["getAll_3"];
-  };
-  "/v2/projects/{projectId}/my-batch-jobs": {
-    /** List all batch operations started by current user */
-    get: operations["myList"];
-  };
-  "/v2/projects/{projectId}/machine-translation-credit-balance": {
-    /** Returns machine translation credit balance for specified project */
-    get: operations["getProjectCredits"];
-  };
-  "/v2/projects/{projectId}/keys/{id}/big-meta": {
-    get: operations["getBigMeta"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
-    /** Returns translations prepared to import. */
-    get: operations["getImportTranslations"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}": {
-    /** Returns language prepared to import. */
-    get: operations["getImportLanguage"];
-    /** Deletes language prepared to import. */
-    delete: operations["deleteLanguage"];
-  };
-  "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
-    /** Returns issues for uploaded file. */
-    get: operations["getImportFileIssues"];
-  };
-  "/v2/projects/{projectId}/import/result": {
-    /** Returns the result of preparation. */
-    get: operations["getImportResult"];
-  };
-  "/v2/projects/{projectId}/import/all-namespaces": {
-    /** Returns all existing and imported namespaces */
-    get: operations["getAllNamespaces_2"];
-  };
-  "/v2/projects/{projectId}/current-batch-jobs": {
-    /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
-    get: operations["currentJobs"];
-  };
-  "/v2/projects/{projectId}/batch-jobs/{id}": {
-    get: operations["get_12"];
-  };
-  "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_3"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/history": {
-    /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
-    get: operations["getTranslationHistory"];
-  };
-  "/v2/projects/{projectId}/translations/{languages}": {
-    /** Returns all translations for specified languages */
-    get: operations["getAllTranslations"];
-  };
-  "/v2/projects/{projectId}/translations/select-all": {
-    /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
-    get: operations["selectKeys"];
-  };
-  "/v2/projects/{projectId}/keys/select": {
-    /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
-    get: operations["selectKeys_2"];
-  };
-  "/v2/projects/{projectId}/transfer-options": {
-    /** Returns organizations to which project can be transferred */
-    get: operations["getTransferOptions"];
-  };
-  "/v2/projects/{projectId}/stats/daily-activity": {
-    get: operations["getProjectDailyActivity"];
-  };
-  "/v2/projects/{projectId}/stats": {
-    get: operations["getProjectStats"];
-  };
-  "/v2/projects/{projectId}/language-ai-prompt-customizations": {
-    get: operations["getLanguagePromptCustomizations"];
-  };
-  "/v2/projects/{projectId}/invitations": {
-    get: operations["getProjectInvitations"];
-  };
-  "/v2/projects/{projectId}/api-keys": {
-    /** Returns all API keys for specified project */
-    get: operations["allByProject"];
-  };
-  "/v2/projects/with-stats": {
-    /** Returns all projects (including statistics) where current user has any permission */
-    get: operations["getAllWithStatistics"];
-  };
-  "/v2/preferred-organization": {
-    /** Returns preferred organization. If server allows users to create organization, preferred organization is automatically created if user doesn't have access to any organization. */
-    get: operations["getPreferred"];
-  };
-  "/v2/pats/current": {
-    /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
-    get: operations["getCurrent"];
+  "/v2/organizations/{organizationId}/users/{userId}/set-role": {
+    /** Sets user role in organization. Owner or Member. */
+    put: operations["setUserRole"];
   };
   "/v2/organizations/{slug}": {
     get: operations["get_19"];
@@ -793,118 +225,1496 @@ export interface paths {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
     get: operations["getAllWithStatistics_1"];
   };
-  "/v2/organizations/{organizationId}/invitations": {
-    get: operations["getInvitations"];
+  "/v2/pats": {
+    get: operations["getAll_9"];
+    post: operations["create_11"];
   };
-  "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
-    /** Returns machine translation credit balance for organization */
-    get: operations["getOrganizationCredits"];
+  "/v2/pats/current": {
+    /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
+    get: operations["getCurrent"];
   };
-  "/v2/organizations/{organizationId}/usage": {
-    get: operations["getUsage"];
+  "/v2/pats/{id}": {
+    get: operations["get_18"];
+    /** Updates Personal Access Token */
+    put: operations["update_7"];
+    /** Deletes Personal Access Token */
+    delete: operations["delete_10"];
   };
-  "/v2/organizations/{organizationId}/slack/workspaces": {
-    /** Returns a list of workspaces connected to the organization */
-    get: operations["getConnectedWorkspaces"];
+  "/v2/pats/{id}/regenerate": {
+    /** Regenerates Personal Access Token. It generates new token value and updates its time of expiration. */
+    put: operations["regenerate"];
   };
-  "/v2/organizations/{organizationId}/slack/get-connect-url": {
-    /** Returns URL to which user should be redirected to connect Slack workspace */
-    get: operations["connectToSlack"];
+  "/v2/preferred-organization": {
+    /** Returns preferred organization. If server allows users to create organization, preferred organization is automatically created if user doesn't have access to any organization. */
+    get: operations["getPreferred"];
   };
-  "/v2/organizations/{organizationId}/projects-with-stats": {
-    /** Returns all projects (including statistics) where current user has any permission (except none) */
-    get: operations["getAllWithStatistics_2"];
+  "/v2/projects": {
+    /** Returns all projects where current user has any permission */
+    get: operations["getAll"];
+    /** Creates a new project with languages and initial settings. */
+    post: operations["createProject"];
   };
-  "/v2/organizations/{id}/users": {
-    /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
-    get: operations["getAllUsers_1"];
+  "/v2/projects/with-stats": {
+    /** Returns all projects (including statistics) where current user has any permission */
+    get: operations["getAllWithStatistics"];
   };
-  "/v2/organizations/{id}/projects": {
-    /** Returns all organization projects the user has access to */
-    get: operations["getAllProjects_1"];
+  "/v2/projects/{projectId}": {
+    get: operations["get_4"];
+    put: operations["editProject"];
+    delete: operations["deleteProject"];
   };
-  "/v2/invitations/{code}/accept": {
-    get: operations["acceptInvitation"];
+  "/v2/projects/{projectId}/activity": {
+    get: operations["getActivity"];
   };
-  "/v2/ee-license/info": {
-    get: operations["getInfo_5"];
+  "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
+    get: operations["getSingleRevision"];
   };
-  "/v2/api-keys/{keyId}": {
-    /** Returns specific API key info */
-    get: operations["get_21"];
+  "/v2/projects/{projectId}/activity/revisions/{revisionId}/modified-entities": {
+    get: operations["getModifiedEntitiesByRevision"];
   };
-  "/v2/api-keys/current": {
-    /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
-    get: operations["getCurrent_1"];
+  "/v2/projects/{projectId}/ai-prompt-customization": {
+    get: operations["getPromptProjectCustomization"];
+    put: operations["setPromptProjectCustomization"];
   };
-  "/v2/api-keys/availableScopes": {
-    get: operations["getScopes"];
+  "/v2/projects/{projectId}/all-keys": {
+    get: operations["getAllKeys"];
   };
-  "/v2/announcement": {
-    /** Returns the latest announcement for the currently authenticated user */
-    get: operations["getLatest"];
+  "/v2/projects/{projectId}/all-keys-with-disabled-languages": {
+    /**
+     * Returns all project key with any disabled language.
+     *
+     * If key has no disabled language, it is not returned.
+     */
+    get: operations["getDisabledLanguages_2"];
   };
-  "/v2/administration/users": {
-    get: operations["getUsers"];
+  "/v2/projects/{projectId}/api-keys": {
+    /** Returns all API keys for specified project */
+    get: operations["allByProject"];
   };
-  "/v2/administration/users/{userId}/generate-token": {
-    /** Generates a JWT token for the user with provided ID. This is useful, when need to debug of the user's account. Or when an operation is required to be executed on behalf of the user. */
-    get: operations["generateUserToken"];
+  "/v2/projects/{projectId}/auto-translation-settings": {
+    /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
+    get: operations["getAutoTranslationSettings"];
+    /** Sets default auto-translation settings for project (deprecated: use per language config with null language id) */
+    put: operations["setAutoTranslationSettings"];
   };
-  "/v2/administration/organizations": {
-    get: operations["getOrganizations"];
+  "/v2/projects/{projectId}/avatar": {
+    put: operations["uploadAvatar_1"];
+    delete: operations["removeAvatar_1"];
   };
-  "/api/public/verify_email/{userId}/{code}": {
-    /** It checks whether the code from email is valid */
-    get: operations["verifyEmail"];
+  "/v2/projects/{projectId}/batch-jobs": {
+    get: operations["list_3"];
   };
-  "/api/public/reset_password_validate/{email}/{code}": {
-    get: operations["resetPasswordValidate"];
+  "/v2/projects/{projectId}/batch-jobs/{id}": {
+    get: operations["get_12"];
   };
-  "/api/public/invitation_info/{code}": {
-    get: operations["invitationInfo"];
+  "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
+    /** Stops batch operation if possible. */
+    put: operations["cancel"];
   };
-  "/api/public/configuration": {
-    get: operations["getPublicConfiguration"];
+  "/v2/projects/{projectId}/big-meta": {
+    /** Stores a bigMeta for a project */
+    post: operations["store_2"];
   };
-  "/api/public/authorize_oauth/{serviceType}": {
-    /** Authenticates user using third party oAuth service */
-    get: operations["authenticateUser_1"];
+  "/v2/projects/{projectId}/content-delivery-configs": {
+    get: operations["list_2"];
+    post: operations["create_6"];
   };
-  "/api/project/{projectId}/export/jsonZip": {
-    /** Exports data as ZIP of jsons */
-    get: operations["doExportJsonZip"];
+  "/v2/projects/{projectId}/content-delivery-configs/{id}": {
+    get: operations["get_9"];
+    put: operations["update_4"];
+    /** Immediately publishes content to the configured Content Delivery */
+    post: operations["post"];
+    delete: operations["delete_7"];
+  };
+  "/v2/projects/{projectId}/content-storages": {
+    get: operations["list_1"];
+    post: operations["create_5"];
+  };
+  "/v2/projects/{projectId}/content-storages/test": {
+    post: operations["test_1"];
+  };
+  "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
+    get: operations["get_8"];
+    put: operations["update_3"];
+    delete: operations["delete_6"];
+  };
+  "/v2/projects/{projectId}/content-storages/{id}/test": {
+    /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
+    post: operations["testExisting"];
+  };
+  "/v2/projects/{projectId}/current-batch-jobs": {
+    /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
+    get: operations["currentJobs"];
+  };
+  "/v2/projects/{projectId}/export": {
+    get: operations["exportData"];
+    /** Exports data (post). Useful when exceeding allowed URL size. */
+    post: operations["exportPost"];
+  };
+  "/v2/projects/{projectId}/import": {
+    /** Prepares provided files to import. */
+    post: operations["addFiles"];
+    /** Deletes prepared import data. */
+    delete: operations["cancelImport"];
+  };
+  "/v2/projects/{projectId}/import-settings": {
+    /** Returns import settings for the authenticated user and the project. */
+    get: operations["get_10"];
+    /** Stores import settings for the authenticated user and the project. */
+    put: operations["store"];
+  };
+  "/v2/projects/{projectId}/import/all-namespaces": {
+    /** Returns all existing and imported namespaces */
+    get: operations["getAllNamespaces_2"];
+  };
+  "/v2/projects/{projectId}/import/apply": {
+    /** Imports the data prepared in previous step */
+    put: operations["applyImport"];
+  };
+  "/v2/projects/{projectId}/import/apply-streaming": {
+    /** Imports the data prepared in previous step. Streams current status. */
+    put: operations["applyImportStreaming"];
+  };
+  "/v2/projects/{projectId}/import/result": {
+    /** Returns the result of preparation. */
+    get: operations["getImportResult"];
+  };
+  "/v2/projects/{projectId}/import/result/files/{fileId}/select-namespace": {
+    /** Sets namespace for file to import. */
+    put: operations["selectNamespace"];
+  };
+  "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
+    /** Returns issues for uploaded file. */
+    get: operations["getImportFileIssues"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing": {
+    /** Resets existing language paired with language to import. */
+    put: operations["resetExistingLanguage"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
+    /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
+    put: operations["selectExistingLanguage"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}": {
+    /** Returns language prepared to import. */
+    get: operations["getImportLanguage"];
+    /** Deletes language prepared to import. */
+    delete: operations["deleteLanguage"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
+    /** Resolves all translation conflicts for provided language. The old translations will be kept. */
+    put: operations["resolveTranslationSetKeepExisting_2"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override": {
+    /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
+    put: operations["resolveTranslationSetOverride_2"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
+    /** Returns translations prepared to import. */
+    get: operations["getImportTranslations"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
+    /** Resolves translation conflict. The old translation will be kept. */
+    put: operations["resolveTranslationSetKeepExisting"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
+    /** Resolves translation conflict. The old translation will be overridden. */
+    put: operations["resolveTranslationSetOverride"];
+  };
+  "/v2/projects/{projectId}/invitations": {
+    get: operations["getProjectInvitations"];
+  };
+  "/v2/projects/{projectId}/invite": {
+    put: operations["inviteUser"];
+  };
+  "/v2/projects/{projectId}/keys": {
+    get: operations["getAll_1"];
+    post: operations["create_2"];
+    /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
+    delete: operations["delete_4"];
+  };
+  "/v2/projects/{projectId}/keys/create": {
+    post: operations["create_1"];
+  };
+  "/v2/projects/{projectId}/keys/import": {
+    /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
+    post: operations["importKeys_2"];
+  };
+  "/v2/projects/{projectId}/keys/import-resolvable": {
+    /** Import's new keys with translations. Translations can be updated, when specified. */
+    post: operations["importKeys"];
+  };
+  "/v2/projects/{projectId}/keys/info": {
+    /** Returns information about keys. (KeyData, Screenshots, Translation in specified language)If key is not found, it's not included in the response. */
+    post: operations["getInfo"];
+  };
+  "/v2/projects/{projectId}/keys/search": {
+    /**
+     * This endpoint helps you to find desired key by keyName, base translation or translation in specified language.
+     *
+     * Sort is ignored for this request.
+     */
+    get: operations["searchForKey"];
+  };
+  "/v2/projects/{projectId}/keys/select": {
+    /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+    get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
     delete: operations["delete_2"];
+  };
+  "/v2/projects/{projectId}/keys/{id}": {
+    get: operations["get_6"];
+    put: operations["edit"];
+  };
+  "/v2/projects/{projectId}/keys/{id}/big-meta": {
+    get: operations["getBigMeta"];
+  };
+  "/v2/projects/{projectId}/keys/{id}/complex-update": {
+    /** Edits key name, translations, tags, screenshots, and other data */
+    put: operations["complexEdit"];
+  };
+  "/v2/projects/{projectId}/keys/{id}/disabled-languages": {
+    /** Returns languages, in which key is disabled */
+    get: operations["getDisabledLanguages"];
+    /** Sets languages, in which key is disabled */
+    put: operations["setDisabledLanguages"];
+  };
+  "/v2/projects/{projectId}/keys/{keyId}/auto-translate": {
+    /**
+     * Uses enabled auto-translation methods.
+     * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
+     *
+     * This will replace the the existing translation with the result obtained from specified source!
+     */
+    put: operations["autoTranslate"];
+  };
+  "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
+    get: operations["getKeyScreenshots_1"];
+    post: operations["uploadScreenshot_1"];
+  };
+  "/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}": {
+    delete: operations["deleteScreenshots_1"];
+  };
+  "/v2/projects/{projectId}/keys/{keyId}/tags": {
+    /** Tags a key with tag. If tag with provided name doesn't exist, it is created */
+    put: operations["tagKey"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}": {
     /** Removes tag with provided id from key with provided id */
     delete: operations["removeTag"];
   };
-  "/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}": {
-    delete: operations["deleteScreenshots_1"];
+  "/v2/projects/{projectId}/language-ai-prompt-customizations": {
+    get: operations["getLanguagePromptCustomizations"];
   };
-  "/v2/organizations/{organizationId}/users/{userId}": {
-    delete: operations["removeUser"];
+  "/v2/projects/{projectId}/languages": {
+    get: operations["getAll_7"];
+    post: operations["createLanguage"];
   };
-  "/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}": {
-    /** Disconnects a workspace from the organization */
-    delete: operations["disconnectWorkspace"];
+  "/v2/projects/{projectId}/languages/{languageId}": {
+    get: operations["get_16"];
+    put: operations["editLanguage"];
+    delete: operations["deleteLanguage_2"];
   };
-  "/v2/invitations/{invitationId}": {
-    delete: operations["deleteInvitation"];
+  "/v2/projects/{projectId}/languages/{languageId}/ai-prompt-customization": {
+    put: operations["setLanguagePromptCustomization"];
   };
-  "/v2/image-upload/{ids}": {
-    delete: operations["delete_12"];
+  "/v2/projects/{projectId}/leave": {
+    put: operations["leaveProject"];
   };
-  "/v2/administration/users/{userId}": {
-    delete: operations["deleteUser"];
+  "/v2/projects/{projectId}/machine-translation-credit-balance": {
+    /** Returns machine translation credit balance for specified project */
+    get: operations["getProjectCredits"];
+  };
+  "/v2/projects/{projectId}/machine-translation-language-info": {
+    /** Get enabled services and configured formality for each language */
+    get: operations["getMachineTranslationLanguageInfo"];
+  };
+  "/v2/projects/{projectId}/machine-translation-service-settings": {
+    get: operations["getMachineTranslationSettings"];
+    put: operations["setMachineTranslationSettings"];
+  };
+  "/v2/projects/{projectId}/my-batch-jobs": {
+    /** List all batch operations started by current user */
+    get: operations["myList"];
+  };
+  "/v2/projects/{projectId}/namespace-by-name/{name}": {
+    /** Returns information about a namespace by its name */
+    get: operations["getByName"];
+  };
+  "/v2/projects/{projectId}/namespaces": {
+    get: operations["getAllNamespaces"];
+  };
+  "/v2/projects/{projectId}/namespaces/{id}": {
+    put: operations["update_1"];
+  };
+  "/v2/projects/{projectId}/per-language-auto-translation-settings": {
+    get: operations["getPerLanguageAutoTranslationSettings"];
+    put: operations["setPerLanguageAutoTranslationSettings"];
+  };
+  "/v2/projects/{projectId}/single-step-import": {
+    /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
+    post: operations["doImport"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/clear-translations": {
+    /** Clear translation values for provided keys in selected languages. */
+    post: operations["clearTranslations"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/copy-translations": {
+    /** Copy translation values from one language to other languages. */
+    post: operations["copyTranslations"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/delete-keys": {
+    post: operations["deleteKeys"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/machine-translate": {
+    /** Translate provided keys to provided languages through primary MT provider. */
+    post: operations["machineTranslation"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm": {
+    /** Pre-translate provided keys to provided languages by TM. */
+    post: operations["translate"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/set-keys-namespace": {
+    post: operations["setKeysNamespace"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/set-translation-state": {
+    post: operations["setTranslationState_2"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/tag-keys": {
+    post: operations["tagKeys"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/untag-keys": {
+    post: operations["untagKeys"];
+  };
+  "/v2/projects/{projectId}/stats": {
+    get: operations["getProjectStats"];
+  };
+  "/v2/projects/{projectId}/stats/daily-activity": {
+    get: operations["getProjectDailyActivity"];
+  };
+  "/v2/projects/{projectId}/suggest/machine-translations": {
+    /** Suggests machine translations from enabled services */
+    post: operations["suggestMachineTranslations"];
+  };
+  "/v2/projects/{projectId}/suggest/machine-translations-streaming": {
+    /** Suggests machine translations from enabled services. The results are streamed to the output in ndjson format. If an error occurs when for any service provider used, the error information is returned as a part of the result item, while the response has 200 status code. */
+    post: operations["suggestMachineTranslationsStreaming"];
+  };
+  "/v2/projects/{projectId}/suggest/translation-memory": {
+    /** Suggests machine translations from translation memory. The result is always sorted by similarity, so sorting is not supported. */
+    post: operations["suggestTranslationMemory"];
+  };
+  "/v2/projects/{projectId}/tag-complex": {
+    put: operations["executeComplexTagOperation"];
+  };
+  "/v2/projects/{projectId}/tags": {
+    get: operations["getAll_3"];
+  };
+  "/v2/projects/{projectId}/tasks": {
+    get: operations["getTasks_1"];
+    post: operations["createTask"];
+  };
+  "/v2/projects/{projectId}/tasks/calculate-scope": {
+    post: operations["calculateScope"];
+  };
+  "/v2/projects/{projectId}/tasks/create-multiple-tasks": {
+    post: operations["createTasks"];
+  };
+  "/v2/projects/{projectId}/tasks/possible-assignees": {
+    get: operations["getPossibleAssignees"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}": {
+    get: operations["getTask"];
+    put: operations["updateTask"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/blocking-tasks": {
+    /** If the tasks is blocked by other tasks, it returns numbers of these tasks. */
+    get: operations["getBlockingTasks"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/close": {
+    put: operations["closeTask"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/finish": {
+    put: operations["finishTask"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/keys": {
+    get: operations["getTaskKeys"];
+    put: operations["updateTaskKeys"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/keys/{keyId}": {
+    /** Mark key as done, which updates task progress. */
+    put: operations["updateTaskKey"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/per-user-report": {
+    /** Detailed statistics for every assignee */
+    get: operations["getPerUserReport"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/reopen": {
+    put: operations["reopenTask"];
+  };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/xlsx-report": {
+    /** Detailed statistics about the task results */
+    get: operations["getXlsxReport"];
+  };
+  "/v2/projects/{projectId}/transfer-options": {
+    /** Returns organizations to which project can be transferred */
+    get: operations["getTransferOptions"];
+  };
+  "/v2/projects/{projectId}/transfer-to-organization/{organizationId}": {
+    /** Transfers project's ownership to organization */
+    put: operations["transferProjectToOrganization"];
+  };
+  "/v2/projects/{projectId}/translations": {
+    get: operations["getTranslations"];
+    /** Sets translations for existing key */
+    put: operations["setTranslations"];
+    /** Sets translations for existing key or creates new key and sets the translations to it. */
+    post: operations["createOrUpdateTranslations"];
+  };
+  "/v2/projects/{projectId}/translations/create-comment": {
+    /** Creates a translation comment. Empty translation is stored, when not exists. */
+    post: operations["create_9"];
+  };
+  "/v2/projects/{projectId}/translations/select-all": {
+    /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+    get: operations["selectKeys"];
+  };
+  "/v2/projects/{projectId}/translations/{languages}": {
+    /** Returns all translations for specified languages */
+    get: operations["getAllTranslations"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/comments": {
+    /** Returns translation comments of translation */
+    get: operations["getAll_5"];
+    post: operations["create_7"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
+    get: operations["get_14"];
+    put: operations["update_5"];
+    delete: operations["delete_8"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}/set-state/{state}": {
+    put: operations["setState"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
+    /** Removes "auto translated" indication */
+    put: operations["dismissAutoTranslatedState"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/history": {
+    /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
+    get: operations["getTranslationHistory"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
+    /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
+    put: operations["setOutdated"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
+    put: operations["setTranslationState"];
+  };
+  "/v2/projects/{projectId}/used-namespaces": {
+    /** Returns all used project namespaces. Response contains default (null) namespace if used. */
+    get: operations["getUsedNamespaces"];
+  };
+  "/v2/projects/{projectId}/users": {
+    /** Returns all project users, who have permission to access project */
+    get: operations["getAllUsers"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/revoke-access": {
+    put: operations["revokePermission"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/set-by-organization": {
+    /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
+    put: operations["setOrganizationBase"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/set-permissions": {
+    /** Set user's granular (scope-based) direct project permission */
+    put: operations["setUsersPermissions"];
+  };
+  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+    put: operations["setUsersPermissions_1"];
+  };
+  "/v2/projects/{projectId}/webhook-configs": {
+    get: operations["list"];
+    post: operations["create"];
+  };
+  "/v2/projects/{projectId}/webhook-configs/{id}": {
+    get: operations["get_5"];
+    put: operations["update"];
+    delete: operations["delete_1"];
+  };
+  "/v2/projects/{projectId}/webhook-configs/{id}/test": {
+    /** Sends a test request to the webhook */
+    post: operations["test"];
+  };
+  "/v2/public/business-events/identify": {
+    post: operations["identify"];
+  };
+  "/v2/public/business-events/report": {
+    post: operations["report"];
+  };
+  "/v2/public/configuration-properties": {
+    /** Return server configuration properties documentation */
+    get: operations["get_3"];
+  };
+  "/v2/public/export-info/formats": {
+    get: operations["get_2"];
+  };
+  "/v2/public/initial-data": {
+    /** Returns initial data required by the UI to load */
+    get: operations["get_1"];
+  };
+  "/v2/public/machine-translation-providers": {
+    /** Get machine translation providers */
+    get: operations["getInfo_4"];
+  };
+  "/v2/public/scope-info/hierarchy": {
+    get: operations["getHierarchy"];
+  };
+  "/v2/public/scope-info/roles": {
+    get: operations["getRoles"];
+  };
+  "/v2/public/slack": {
+    post: operations["slackCommand"];
+  };
+  "/v2/public/slack/on-bot-event": {
+    /**
+     * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
+     *
+     * Heads up! The events have to be configured via Slack App configuration in Event Subscription section.
+     */
+    post: operations["fetchBotEvent"];
+  };
+  "/v2/public/slack/on-event": {
+    /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
+    post: operations["onInteractivityEvent"];
+  };
+  "/v2/quick-start/set-finished/{finished}": {
+    /** Sets finished state of the quick start guide */
+    put: operations["setFinishedState"];
+  };
+  "/v2/quick-start/set-open/{open}": {
+    /** Sets open state of the quick start guide */
+    put: operations["setOpenState"];
+  };
+  "/v2/quick-start/steps/{step}/complete": {
+    /** Marks guide step as completed */
+    put: operations["completeGuideStep"];
+  };
+  "/v2/slack/user-login": {
+    /** Pairs user account with slack account. */
+    post: operations["userLogin"];
+  };
+  "/v2/slack/user-login-info": {
+    /**
+     * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
+     *
+     * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
+     *
+     * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
+     */
+    get: operations["getInfo_3"];
+  };
+  "/v2/slug/generate-organization": {
+    post: operations["generateOrganizationSlug"];
+  };
+  "/v2/slug/generate-project": {
+    post: operations["generateProjectSlug"];
+  };
+  "/v2/slug/validate-organization/{slug}": {
+    get: operations["validateOrganizationSlug"];
+  };
+  "/v2/slug/validate-project/{slug}": {
+    get: operations["validateProjectSlug"];
+  };
+  "/v2/user": {
+    /** Returns information about currently authenticated user. */
+    get: operations["getInfo_2"];
+    /** Updates current user's profile information. */
+    put: operations["updateUser"];
+    post: operations["updateUserOld"];
+    delete: operations["delete"];
+  };
+  "/v2/user-preferences": {
+    get: operations["get"];
+  };
+  "/v2/user-preferences/set-language/{languageTag}": {
+    put: operations["setLanguage"];
+  };
+  "/v2/user-preferences/set-preferred-organization/{organizationId}": {
+    put: operations["setPreferredOrganization"];
+  };
+  "/v2/user-tasks": {
+    get: operations["getTasks"];
+  };
+  "/v2/user/avatar": {
+    put: operations["uploadAvatar"];
+    delete: operations["removeAvatar"];
+  };
+  "/v2/user/generate-super-token": {
+    /** Generates new JWT token permitted to sensitive operations */
+    post: operations["getSuperToken"];
+  };
+  "/v2/user/mfa/recovery": {
+    /** Regenerates multi-factor authentication recovery codes */
+    put: operations["regenerateRecoveryCodes"];
+  };
+  "/v2/user/mfa/totp": {
+    /** Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
+    put: operations["enableMfa"];
+    /** Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
+    delete: operations["disableMfa"];
+  };
+  "/v2/user/password": {
+    /** Updates current user's password. Invalidates all previous sessions upon success. */
+    put: operations["updateUserPassword"];
+  };
+  "/v2/user/send-email-verification": {
+    /** Resends email verification email to currently authenticated user. */
+    post: operations["sendEmailVerification"];
+  };
+  "/v2/user/single-owned-organizations": {
+    /** Returns all organizations owned only by current user */
+    get: operations["getAllSingleOwnedOrganizations"];
   };
 }
 
 export interface components {
   schemas: {
+    AnnouncementDto: {
+      type:
+        | "FEATURE_BATCH_OPERATIONS"
+        | "FEATURE_MT_FORMALITY"
+        | "FEATURE_CONTENT_DELIVERY_AND_WEBHOOKS"
+        | "NEW_PRICING"
+        | "FEATURE_AI_CUSTOMIZATION"
+        | "FEATURE_VISUAL_EDITOR"
+        | "FEATURE_CLI_2"
+        | "FEATURE_TASKS";
+    };
+    ApiKeyModel: {
+      /** @description Description */
+      description: string;
+      /**
+       * Format: int64
+       * @description Timestamp of API key expiraion
+       */
+      expiresAt?: number;
+      /**
+       * Format: int64
+       * @description ID of the API key
+       */
+      id: number;
+      /**
+       * Format: int64
+       * @description Timestamp of API key last usage
+       */
+      lastUsedAt?: number;
+      /**
+       * Format: int64
+       * @description Api key's project ID
+       */
+      projectId: number;
+      /** @description Api key's project name */
+      projectName: string;
+      /**
+       * @description Api key's permission scopes
+       * @example screenshots.upload,screenshots.delete,translations.edit,screenshots.view,translations.view,keys.edit
+       */
+      scopes: string[];
+      /** @description Full name of user owner */
+      userFullName?: string;
+      /** @description Username of user owner */
+      username?: string;
+    };
+    ApiKeyWithLanguagesModel: {
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /**
+       * @deprecated
+       * @description Languages for which user has translate permission.
+       */
+      permittedLanguageIds?: number[];
+      /** Format: int64 */
+      projectId: number;
+      projectName: string;
+      scopes: string[];
+      userFullName?: string;
+      username?: string;
+    };
+    AuthMethodsDTO: {
+      github: components["schemas"]["OAuthPublicConfigDTO"];
+      google: components["schemas"]["OAuthPublicConfigDTO"];
+      oauth2: components["schemas"]["OAuthPublicExtendsConfigDTO"];
+      ssoGlobal: components["schemas"]["SsoGlobalPublicConfigDTO"];
+      ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
+    };
+    AutoTranslationConfigModel: {
+      /**
+       * @description If true, import will trigger batch operation to translate the new new keys.
+       * It includes also the data imported via CLI, Figma, or other integrations using batch key import.
+       */
+      enableForImport: boolean;
+      /** Format: int64 */
+      languageId?: number;
+      /** @description If true, new keys will be automatically translated via batch operationusing primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
+      usingMachineTranslation: boolean;
+      /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
+      usingTranslationMemory: boolean;
+    };
+    AutoTranslationSettingsDto: {
+      /**
+       * @description If true, import will trigger batch operation to translate the new new keys.
+       * It includes also the data imported via CLI, Figma, or other integrations using batch key import.
+       */
+      enableForImport: boolean;
+      /** Format: int64 */
+      languageId?: number;
+      /** @description If true, new keys will be automatically translated via batch operationusing primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
+      usingMachineTranslation: boolean;
+      /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
+      usingTranslationMemory: boolean;
+    };
+    Avatar: {
+      large: string;
+      thumbnail: string;
+    };
+    AverageProportionalUsageItemModel: {
+      total: number;
+      unusedQuantity: number;
+      usedQuantity: number;
+      usedQuantityOverPlan: number;
+    };
+    AzureContentStorageConfigDto: {
+      connectionString?: string;
+      containerName: string;
+    };
+    AzureContentStorageConfigModel: {
+      containerName?: string;
+    };
+    BatchJobModel: {
+      /**
+       * Format: int64
+       * @description The activity revision id, that stores the activity details of the job
+       */
+      activityRevisionId?: number;
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /**
+       * Format: int64
+       * @description The time when the job created
+       */
+      createdAt: number;
+      /** @description If the job failed, this is the error message */
+      errorMessage?: string;
+      /**
+       * Format: int64
+       * @description Batch job id
+       */
+      id: number;
+      /**
+       * Format: int32
+       * @description Total items, that have been processed so far
+       */
+      progress: number;
+      /** @description Status of the batch job */
+      status:
+        | "PENDING"
+        | "RUNNING"
+        | "SUCCESS"
+        | "FAILED"
+        | "CANCELLED"
+        | "DEBOUNCED";
+      /**
+       * Format: int32
+       * @description Total items
+       */
+      totalItems: number;
+      /** @description Type of the batch job */
+      type:
+        | "PRE_TRANSLATE_BT_TM"
+        | "MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "DELETE_KEYS"
+        | "SET_TRANSLATIONS_STATE"
+        | "CLEAR_TRANSLATIONS"
+        | "COPY_TRANSLATIONS"
+        | "TAG_KEYS"
+        | "UNTAG_KEYS"
+        | "SET_KEYS_NAMESPACE"
+        | "AUTOMATION";
+      /**
+       * Format: int64
+       * @description The time when the job was last updated (status change)
+       */
+      updatedAt: number;
+    };
+    BigMetaDto: {
+      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
+    };
+    BusinessEventReportRequest: {
+      anonymousUserId?: string;
+      data?: { [key: string]: { [key: string]: unknown } };
+      eventName: string;
+      /** Format: int64 */
+      organizationId?: number;
+      /** Format: int64 */
+      projectId?: number;
+    };
+    CalculateScopeRequest: {
+      keys: number[];
+      /** Format: int64 */
+      languageId: number;
+      type: "TRANSLATE" | "REVIEW";
+    };
+    ClearTranslationsRequest: {
+      keyIds: number[];
+      languageIds: number[];
+    };
+    CollectionModelAutoTranslationConfigModel: {
+      _embedded?: {
+        configs?: components["schemas"]["AutoTranslationConfigModel"][];
+      };
+    };
+    CollectionModelBatchJobModel: {
+      _embedded?: {
+        batchJobs?: components["schemas"]["BatchJobModel"][];
+      };
+    };
+    CollectionModelExportFormatModel: {
+      _embedded?: {
+        exportFormats?: components["schemas"]["ExportFormatModel"][];
+      };
+    };
+    CollectionModelImportNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["ImportNamespaceModel"][];
+      };
+    };
+    CollectionModelKeyDisabledLanguagesModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyDisabledLanguagesModel"][];
+      };
+    };
+    CollectionModelKeyModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyModel"][];
+      };
+    };
+    CollectionModelKeyWithBaseTranslationModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithBaseTranslationModel"][];
+      };
+    };
+    CollectionModelKeyWithDataModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithDataModel"][];
+      };
+    };
+    CollectionModelLanguageAiPromptCustomizationModel: {
+      _embedded?: {
+        promptCustomizations?: components["schemas"]["LanguageAiPromptCustomizationModel"][];
+      };
+    };
+    CollectionModelLanguageConfigItemModel: {
+      _embedded?: {
+        languageConfigs?: components["schemas"]["LanguageConfigItemModel"][];
+      };
+    };
+    CollectionModelLanguageInfoModel: {
+      _embedded?: {
+        languageInfos?: components["schemas"]["LanguageInfoModel"][];
+      };
+    };
+    CollectionModelLanguageModel: {
+      _embedded?: {
+        languages?: components["schemas"]["LanguageModel"][];
+      };
+    };
+    CollectionModelOrganizationInvitationModel: {
+      _embedded?: {
+        organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
+      };
+    };
+    CollectionModelProjectInvitationModel: {
+      _embedded?: {
+        invitations?: components["schemas"]["ProjectInvitationModel"][];
+      };
+    };
+    CollectionModelProjectTransferOptionModel: {
+      _embedded?: {
+        transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
+      };
+    };
+    CollectionModelScreenshotModel: {
+      _embedded?: {
+        screenshots?: components["schemas"]["ScreenshotModel"][];
+      };
+    };
+    CollectionModelSimpleOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["SimpleOrganizationModel"][];
+      };
+    };
+    CollectionModelUsedNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["UsedNamespaceModel"][];
+      };
+    };
+    CollectionModelWorkspaceModel: {
+      _embedded?: {
+        workspaces?: components["schemas"]["WorkspaceModel"][];
+      };
+    };
+    ComplexEditKeyDto: {
+      /** @description Custom values of the key. If not provided, custom values won't be modified */
+      custom?: { [key: string]: { [key: string]: unknown } };
+      /** @description Description of the key. It's also used as a context for Tolgee AI translator */
+      description?: string;
+      /** @description If key is pluralized. If it will be reflected in the editor. If null, value won't be modified. */
+      isPlural?: boolean;
+      /** @description Name of the key */
+      name: string;
+      namespace?: string;
+      /** @description The argument name for the plural. If null, value won't be modified. If isPlural is false, this value will be ignored. */
+      pluralArgName?: string;
+      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
+      /** @description IDs of screenshots to delete */
+      screenshotIdsToDelete?: number[];
+      /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
+      screenshotUploadedImageIds?: number[];
+      screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
+      /** @description Translation states to update, if not provided states won't be modified */
+      states?: { [key: string]: "TRANSLATED" | "REVIEWED" };
+      /** @description Tags of the key. If not provided tags won't be modified */
+      tags?: string[];
+      /** @description Translations to update */
+      translations?: { [key: string]: string };
+      /** @description If true, it will fail with 400 (with code plural_forms_data_loss) if plural is disabled and there are plural forms, which would be lost by the action. You can get rid of this warning by setting this value to false. */
+      warnOnDataLoss?: boolean;
+    };
+    ComplexTagKeysRequest: {
+      /** @description Include keys filtered by the provided key information */
+      filterKeys?: components["schemas"]["KeyId"][];
+      /** @description Exclude keys filtered by the provided key information */
+      filterKeysNot?: components["schemas"]["KeyId"][];
+      /** @description Include keys filtered by the provided tag information. This filter supports wildcards. For example, `draft-*` will match all tags starting with `draft-`. */
+      filterTag?: string[];
+      /** @description Exclude keys filtered by the provided tag information. This filter supports wildcards. For example, `draft-*` will match all tags starting with `draft-`. */
+      filterTagNot?: string[];
+      /** @description Specified tags will be added to filtered keys */
+      tagFiltered?: string[];
+      /** @description Specified tags will be added to keys not filtered by any of the specified filters. */
+      tagOther?: string[];
+      /** @description Specified tags will be removed from filtered keys. It supports wildcards. For example, `draft-*` will remove all tags starting with `draft-`. */
+      untagFiltered?: string[];
+      /** @description Specified tags will be removed from keys not filtered by any of the specified filters. It supports wildcards. For example, `draft-*` will remove all tags starting with `draft-`. */
+      untagOther?: string[];
+    };
+    ComputedPermissionModel: {
+      origin:
+        | "ORGANIZATION_BASE"
+        | "DIRECT"
+        | "ORGANIZATION_OWNER"
+        | "NONE"
+        | "SERVER_ADMIN";
+      permissionModel?: components["schemas"]["PermissionModel"];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
+      )[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /** @description The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+    };
+    ConnectToSlackDto: {
+      code: string;
+    };
+    ConnectToSlackUrlModel: {
+      url: string;
+    };
+    ContentDeliveryConfigModel: {
+      autoPublish: boolean;
+      /**
+       * @description This is a template that defines the structure of the resulting .zip file content.
+       *
+       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+       *
+       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+       * the English translations of the `home` namespace will be stored in `home/en.json`.
+       *
+       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+       *
+       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+       * but in Android format. (e.g., en-rUS)
+       */
+      fileStructureTemplate?: string;
+      /** @description Filter key IDs to be contained in export */
+      filterKeyId?: number[];
+      /** @description Filter key IDs not to be contained in export */
+      filterKeyIdNot?: number[];
+      /** @description Filter keys with prefix */
+      filterKeyPrefix?: string;
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
+      filterNamespace?: string[];
+      /** @description Filter translations with state. By default, all states except untranslated is exported. */
+      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
+      /**
+       * @description Filter keys tagged by.
+       *
+       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+       */
+      filterTag?: string;
+      /** @description Filter keys tagged by one of provided tags */
+      filterTagIn?: string[];
+      /** @description Filter keys not tagged by one of provided tags */
+      filterTagNotIn?: string[];
+      /** @description Format to export to */
+      format:
+        | "JSON"
+        | "JSON_TOLGEE"
+        | "XLIFF"
+        | "PO"
+        | "APPLE_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "COMPOSE_XML"
+        | "FLUTTER_ARB"
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV"
+        | "RESX_ICU"
+        | "XLSX";
+      /** Format: int64 */
+      id: number;
+      /**
+       * @description Languages to be contained in export.
+       *
+       * If null, all languages are exported
+       * @example en
+       */
+      languages?: string[];
+      /** Format: int64 */
+      lastPublished?: number;
+      lastPublishedFiles: string[];
+      /**
+       * @description Message format to be used for export.
+       *
+       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+       *
+       * This property is honored only for generic formats like JSON or YAML.
+       * For specific formats like `YAML_RUBY` it's ignored.
+       */
+      messageFormat?:
+        | "C_SPRINTF"
+        | "PHP_SPRINTF"
+        | "JAVA_STRING_FORMAT"
+        | "APPLE_SPRINTF"
+        | "RUBY_SPRINTF"
+        | "I18NEXT"
+        | "ICU";
+      name: string;
+      pruneBeforePublish: boolean;
+      publicUrl?: string;
+      slug: string;
+      storage?: components["schemas"]["ContentStorageModel"];
+      /**
+       * @description Delimiter to structure file content.
+       *
+       * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
+       *
+       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+       * specific formats like `YAML_RUBY` don't honor this parameter.
+       */
+      structureDelimiter?: string;
+      /**
+       * @description If true, for structured formats (like JSON) arrays are supported.
+       *
+       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
+       */
+      supportArrays: boolean;
+    };
+    ContentDeliveryConfigRequest: {
+      /** @description If true, data are published to the content delivery automatically after each change. */
+      autoPublish: boolean;
+      /**
+       * Format: int64
+       * @description Id of custom storage to use for content delivery. If null, default server storage is used. Tolgee Cloud provides default Content Storage.
+       */
+      contentStorageId?: number;
+      /**
+       * @description This is a template that defines the structure of the resulting .zip file content.
+       *
+       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+       *
+       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+       * the English translations of the `home` namespace will be stored in `home/en.json`.
+       *
+       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+       *
+       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+       * but in Android format. (e.g., en-rUS)
+       */
+      fileStructureTemplate?: string;
+      /** @description Filter key IDs to be contained in export */
+      filterKeyId?: number[];
+      /** @description Filter key IDs not to be contained in export */
+      filterKeyIdNot?: number[];
+      /** @description Filter keys with prefix */
+      filterKeyPrefix?: string;
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
+      filterNamespace?: string[];
+      /** @description Filter translations with state. By default, all states except untranslated is exported. */
+      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
+      /**
+       * @description Filter keys tagged by.
+       *
+       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+       */
+      filterTag?: string;
+      /** @description Filter keys tagged by one of provided tags */
+      filterTagIn?: string[];
+      /** @description Filter keys not tagged by one of provided tags */
+      filterTagNotIn?: string[];
+      /** @description Format to export to */
+      format:
+        | "JSON"
+        | "JSON_TOLGEE"
+        | "XLIFF"
+        | "PO"
+        | "APPLE_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "COMPOSE_XML"
+        | "FLUTTER_ARB"
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV"
+        | "RESX_ICU"
+        | "XLSX";
+      /**
+       * @description Languages to be contained in export.
+       *
+       * If null, all languages are exported
+       * @example en
+       */
+      languages?: string[];
+      /**
+       * @description Message format to be used for export.
+       *
+       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+       *
+       * This property is honored only for generic formats like JSON or YAML.
+       * For specific formats like `YAML_RUBY` it's ignored.
+       */
+      messageFormat?:
+        | "C_SPRINTF"
+        | "PHP_SPRINTF"
+        | "JAVA_STRING_FORMAT"
+        | "APPLE_SPRINTF"
+        | "RUBY_SPRINTF"
+        | "I18NEXT"
+        | "ICU";
+      name: string;
+      /**
+       * @description Whether the data in the CDN should be pruned before publishing new data.
+       *
+       * In some cases, you might want to keep the data in the storage and only replace the files created by following publish operation.
+       */
+      pruneBeforePublish: boolean;
+      /**
+       * @description Tolgee uses a custom slug as a directory name for content storage and public content delivery URL. It is only applicable for custom storage. This field needs to be kept null for Tolgee Cloud content storage or global server storage on self-hosted instances.
+       *
+       * Slag has to match following regular expression: `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
+       *
+       * If null is provided for update operation, slug will be assigned with generated value.
+       */
+      slug?: string;
+      /**
+       * @description Delimiter to structure file content.
+       *
+       * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
+       *
+       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+       * specific formats like `YAML_RUBY` don't honor this parameter.
+       */
+      structureDelimiter?: string;
+      /**
+       * @description If true, for structured formats (like JSON) arrays are supported.
+       *
+       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
+       */
+      supportArrays: boolean;
+    };
+    ContentStorageModel: {
+      azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfigModel"];
+      /** Format: int64 */
+      id: number;
+      name: string;
+      publicUrlPrefix?: string;
+      s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigModel"];
+    };
+    ContentStorageRequest: {
+      azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfigDto"];
+      name: string;
+      publicUrlPrefix?: string;
+      s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigDto"];
+    };
+    CopyTranslationRequest: {
+      keyIds: number[];
+      /** Format: int64 */
+      sourceLanguageId: number;
+      targetLanguageIds: number[];
+    };
+    CreateApiKeyDto: {
+      /** @description Description of the project API key */
+      description?: string;
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null key never expires.
+       * @example 1661172869000
+       */
+      expiresAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      scopes: string[];
+    };
+    CreateKeyDto: {
+      /**
+       * @description Description of the key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
+      /** @description If key is pluralized. If it will be reflected in the editor */
+      isPlural: boolean;
+      /** @description Name of the key */
+      name: string;
+      namespace?: string;
+      /** @description The argument name for the plural. If null, value will be guessed from the values provided in translations. */
+      pluralArgName?: string;
+      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
+      /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
+      screenshotUploadedImageIds?: number[];
+      screenshots?: components["schemas"]["KeyScreenshotDto"][];
+      /** @description Translation states to update, if not provided states won't be modified */
+      states?: { [key: string]: "TRANSLATED" | "REVIEWED" };
+      tags?: string[];
+      translations?: { [key: string]: string };
+    };
+    CreateMultipleTasksRequest: {
+      tasks: components["schemas"]["CreateTaskRequest"][];
+    };
+    CreatePatDto: {
+      /** @description Description of the PAT */
+      description: string;
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null, token never expires.
+       * @example 1661172869000
+       */
+      expiresAt?: number;
+    };
+    CreateProjectRequest: {
+      /** @description Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
+      baseLanguageTag?: string;
+      /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
+      languages: components["schemas"]["LanguageRequest"][];
+      name: string;
+      /**
+       * Format: int64
+       * @description Organization to create the project in
+       */
+      organizationId: number;
+      /** @description Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
+      slug?: string;
+    };
+    CreateProviderRequest: {
+      authorizationUri: string;
+      clientId: string;
+      clientSecret: string;
+      domain: string;
+      enabled: boolean;
+      tokenUri: string;
+    };
+    CreateTaskRequest: {
+      assignees: number[];
+      description: string;
+      /**
+       * Format: int64
+       * @description Due to date in epoch format (milliseconds).
+       * @example 1661172869000
+       */
+      dueDate?: number;
+      keys: number[];
+      /**
+       * Format: int64
+       * @description Id of language, this task is attached to.
+       * @example 1
+       */
+      languageId: number;
+      name: string;
+      type: "TRANSLATE" | "REVIEW";
+    };
+    CreditBalanceModel: {
+      /** Format: int64 */
+      bucketSize: number;
+      /** Format: int64 */
+      creditBalance: number;
+      /** Format: int64 */
+      extraCreditBalance: number;
+    };
+    DeleteKeysDto: {
+      /** @description IDs of keys to delete */
+      ids: number[];
+    };
+    DeleteKeysRequest: {
+      keyIds: number[];
+    };
+    DocItem: {
+      description?: string;
+      displayName?: string;
+      name: string;
+    };
+    DomainRequest: {
+      domain: string;
+      state: string;
+    };
+    EditKeyDto: {
+      /**
+       * @description Description of the key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
+      name: string;
+      namespace?: string;
+    };
+    EditProjectRequest: {
+      /** Format: int64 */
+      baseLanguageId?: number;
+      /** Format: int64 */
+      defaultNamespaceId?: number;
+      description?: string;
+      /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
+      name: string;
+      slug?: string;
+      useNamespaces: boolean;
+    };
+    EeSubscriptionModel: {
+      cancelAtPeriodEnd: boolean;
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      /** Format: int64 */
+      currentUserCount: number;
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+      )[];
+      /** Format: date-time */
+      lastValidCheck?: string;
+      licenseKey: string;
+      name: string;
+      nonCommerical: boolean;
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+    };
+    EntityDescriptionWithRelations: {
+      data: { [key: string]: { [key: string]: unknown } };
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+    };
+    ErrorResponseBody: {
+      code: string;
+      params?: { [key: string]: unknown }[];
+    };
     ErrorResponseTyped: {
       code:
         | "unauthenticated"
@@ -1159,849 +1969,74 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled";
       params?: { [key: string]: unknown }[];
     };
-    ErrorResponseBody: {
-      code: string;
-      params?: { [key: string]: unknown }[];
-    };
-    UserUpdateRequestDto: {
-      name: string;
-      email: string;
-      currentPassword?: string;
-      /** @description Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
-      callbackUrl?: string;
-    };
-    Avatar: {
-      large: string;
-      thumbnail: string;
-    };
-    PrivateUserAccountModel: {
+    ExistenceEntityDescription: {
+      data: { [key: string]: { [key: string]: unknown } };
+      entityClass: string;
       /** Format: int64 */
-      id: number;
-      username: string;
-      name?: string;
-      emailAwaitingVerification?: string;
-      mfaEnabled: boolean;
-      avatar?: components["schemas"]["Avatar"];
-      accountType: "LOCAL" | "MANAGED" | "THIRD_PARTY";
-      globalServerRole: "USER" | "ADMIN";
-      deletable: boolean;
-      needsSuperJwtToken: boolean;
-    };
-    UserUpdatePasswordRequestDto: {
-      currentPassword: string;
-      password: string;
-    };
-    JwtAuthenticationResponse: {
-      accessToken?: string;
-      tokenType?: string;
-    };
-    UserTotpEnableRequestDto: {
-      totpKey: string;
-      otp: string;
-      password: string;
-    };
-    UserMfaRecoveryRequestDto: {
-      password: string;
-    };
-    QuickStartModel: {
-      finished: boolean;
-      completedSteps: string[];
-      open: boolean;
-    };
-    EditProjectRequest: {
-      name: string;
-      slug?: string;
-      /** Format: int64 */
-      baseLanguageId?: number;
-      useNamespaces: boolean;
-      /** Format: int64 */
-      defaultNamespaceId?: number;
-      description?: string;
-      /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
-      icuPlaceholders: boolean;
-    };
-    ComputedPermissionModel: {
-      permissionModel?: components["schemas"]["PermissionModel"];
-      origin:
-        | "ORGANIZATION_BASE"
-        | "DIRECT"
-        | "ORGANIZATION_OWNER"
-        | "NONE"
-        | "SERVER_ADMIN";
-      /** @description The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
-       */
-      scopes: (
-        | "translations.view"
-        | "translations.edit"
-        | "keys.edit"
-        | "screenshots.upload"
-        | "screenshots.delete"
-        | "screenshots.view"
-        | "activity.view"
-        | "languages.edit"
-        | "admin"
-        | "project.edit"
-        | "members.view"
-        | "members.edit"
-        | "translation-comments.add"
-        | "translation-comments.edit"
-        | "translation-comments.set-state"
-        | "translations.state-edit"
-        | "keys.view"
-        | "keys.delete"
-        | "keys.create"
-        | "batch-jobs.view"
-        | "batch-jobs.cancel"
-        | "translations.batch-by-tm"
-        | "translations.batch-machine"
-        | "content-delivery.manage"
-        | "content-delivery.publish"
-        | "webhooks.manage"
-        | "tasks.view"
-        | "tasks.edit"
-      )[];
-    };
-    LanguageModel: {
-      /** Format: int64 */
-      id: number;
-      /**
-       * @description Language name in english
-       * @example Czech
-       */
-      name: string;
-      /**
-       * @description Language tag according to BCP 47 definition
-       * @example cs-CZ
-       */
-      tag: string;
-      /**
-       * @description Language name in this language
-       * @example čeština
-       */
-      originalName?: string;
-      /**
-       * @description Language flag emoji as UTF-8 emoji
-       * @example 🇨🇿
-       */
-      flagEmoji?: string;
-      /** @description Whether is base language of project */
-      base: boolean;
-    };
-    NamespaceModel: {
-      /**
-       * Format: int64
-       * @description The id of namespace
-       * @example 10000048
-       */
-      id: number;
-      /** @example homepage */
-      name: string;
-    };
-    /**
-     * @description Current user's direct permission
-     * @example MANAGE
-     */
-    PermissionModel: {
-      /**
-       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
-       */
-      scopes: (
-        | "translations.view"
-        | "translations.edit"
-        | "keys.edit"
-        | "screenshots.upload"
-        | "screenshots.delete"
-        | "screenshots.view"
-        | "activity.view"
-        | "languages.edit"
-        | "admin"
-        | "project.edit"
-        | "members.view"
-        | "members.edit"
-        | "translation-comments.add"
-        | "translation-comments.edit"
-        | "translation-comments.set-state"
-        | "translations.state-edit"
-        | "keys.view"
-        | "keys.delete"
-        | "keys.create"
-        | "batch-jobs.view"
-        | "batch-jobs.cancel"
-        | "translations.batch-by-tm"
-        | "translations.batch-machine"
-        | "content-delivery.manage"
-        | "content-delivery.publish"
-        | "webhooks.manage"
-        | "tasks.view"
-        | "tasks.edit"
-      )[];
-      /** @description The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
-       *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-    };
-    ProjectModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      description?: string;
-      slug?: string;
-      avatar?: components["schemas"]["Avatar"];
-      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
-      baseLanguage?: components["schemas"]["LanguageModel"];
-      useNamespaces: boolean;
-      defaultNamespace?: components["schemas"]["NamespaceModel"];
-      organizationRole?: "MEMBER" | "OWNER";
-      directPermission?: components["schemas"]["PermissionModel"];
-      computedPermission: components["schemas"]["ComputedPermissionModel"];
-      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
-      icuPlaceholders: boolean;
-    };
-    SimpleOrganizationModel: {
-      /** Format: int64 */
-      id: number;
-      /** @example Beautiful organization */
-      name: string;
-      /** @example btforg */
-      slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      basePermissions: components["schemas"]["PermissionModel"];
-      avatar?: components["schemas"]["Avatar"];
-    };
-    WebhookConfigRequest: {
-      url: string;
-    };
-    WebhookConfigModel: {
-      /** Format: int64 */
-      id: number;
-      url: string;
-      webhookSecret: string;
-      /**
-       * Format: int64
-       * @description Date of the first failed webhook request. If the last webhook request is successful, this value is set to null.
-       */
-      firstFailed?: number;
-      /**
-       * Format: int64
-       * @description Date of the last webhook request.
-       */
-      lastExecuted?: number;
-    };
-    SimpleUserAccountModel: {
-      /** Format: int64 */
-      id: number;
-      username: string;
-      name?: string;
-      avatar?: components["schemas"]["Avatar"];
-      deleted: boolean;
-    };
-    TaskModel: {
-      /** Format: int64 */
-      number: number;
-      name: string;
-      description: string;
-      type: "TRANSLATE" | "REVIEW";
-      language: components["schemas"]["LanguageModel"];
-      /** Format: int64 */
-      dueDate?: number;
-      assignees: components["schemas"]["SimpleUserAccountModel"][];
-      /** Format: int64 */
-      totalItems: number;
-      /** Format: int64 */
-      doneItems: number;
-      /** Format: int64 */
-      baseWordCount: number;
-      /** Format: int64 */
-      baseCharacterCount: number;
-      author?: components["schemas"]["SimpleUserAccountModel"];
-      /** Format: int64 */
-      createdAt?: number;
-      /** Format: int64 */
-      closedAt?: number;
-      state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
-      agency?: components["schemas"]["TranslationAgencySimpleModel"];
-    };
-    TranslationAgencySimpleModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      url?: string;
-      avatar?: components["schemas"]["Avatar"];
-    };
-    UpdateTaskKeyRequest: {
-      done: boolean;
-    };
-    UpdateTaskKeyResponse: {
-      /** @description Task key is marked as done */
-      done: boolean;
-      /** @description Task progress is 100% */
-      taskFinished: boolean;
-    };
-    UpdateTaskKeysRequest: {
-      /** @description Keys to add to task */
-      addKeys?: number[];
-      /** @description Keys to remove from task */
-      removeKeys?: number[];
-    };
-    UpdateTaskRequest: {
-      name: string;
-      description: string;
-      /**
-       * Format: int64
-       * @description Due to date in epoch format (milliseconds).
-       * @example 1661172869000
-       */
-      dueDate?: number;
-      assignees: number[];
-    };
-    AutoTranslationSettingsDto: {
-      /** Format: int64 */
-      languageId?: number;
-      /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
-      usingTranslationMemory: boolean;
-      /** @description If true, new keys will be automatically translated via batch operationusing primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
-      usingMachineTranslation: boolean;
-      /**
-       * @description If true, import will trigger batch operation to translate the new new keys.
-       * It includes also the data imported via CLI, Figma, or other integrations using batch key import.
-       */
-      enableForImport: boolean;
-    };
-    AutoTranslationConfigModel: {
-      /** Format: int64 */
-      languageId?: number;
-      /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
-      usingTranslationMemory: boolean;
-      /** @description If true, new keys will be automatically translated via batch operationusing primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
-      usingMachineTranslation: boolean;
-      /**
-       * @description If true, import will trigger batch operation to translate the new new keys.
-       * It includes also the data imported via CLI, Figma, or other integrations using batch key import.
-       */
-      enableForImport: boolean;
-    };
-    CollectionModelAutoTranslationConfigModel: {
-      _embedded?: {
-        configs?: components["schemas"]["AutoTranslationConfigModel"][];
+      entityId: number;
+      exists?: boolean;
+      relations: {
+        [key: string]: components["schemas"]["EntityDescriptionWithRelations"];
       };
     };
-    UpdateNamespaceDto: {
-      name: string;
+    ExportFormatModel: {
+      defaultFileStructureTemplate: string;
+      extension: string;
+      format:
+        | "JSON"
+        | "JSON_TOLGEE"
+        | "XLIFF"
+        | "PO"
+        | "APPLE_STRINGS_STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "ANDROID_XML"
+        | "COMPOSE_XML"
+        | "FLUTTER_ARB"
+        | "PROPERTIES"
+        | "YAML_RUBY"
+        | "YAML"
+        | "JSON_I18NEXT"
+        | "CSV"
+        | "RESX_ICU"
+        | "XLSX";
+      mediaType: string;
     };
-    MachineTranslationLanguagePropsDto: {
+    ExportParams: {
       /**
-       * Format: int64
-       * @description The language to apply those rules. If null, then this settings are default.
-       */
-      targetLanguageId?: number;
-      /**
-       * @deprecated
-       * @description This service will be used for automated translation
-       */
-      primaryService?:
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE";
-      primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
-      /**
-       * @deprecated
-       * @description List of enabled services (deprecated: use enabledServicesInfo)
-       */
-      enabledServices?: (
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE"
-      )[];
-      /** @description Info about enabled services */
-      enabledServicesInfo?: components["schemas"]["MtServiceInfo"][];
-    };
-    /** @description Info about enabled services */
-    MtServiceInfo: {
-      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
-      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-    };
-    SetMachineTranslationSettingsDto: {
-      settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
-    };
-    CollectionModelLanguageConfigItemModel: {
-      _embedded?: {
-        languageConfigs?: components["schemas"]["LanguageConfigItemModel"][];
-      };
-    };
-    LanguageConfigItemModel: {
-      /**
-       * Format: int64
-       * @description When null, its a default configuration applied to not configured languages
-       */
-      targetLanguageId?: number;
-      /** @description When null, its a default configuration applied to not configured languages */
-      targetLanguageTag?: string;
-      /** @description When null, its a default configuration applied to not configured languages */
-      targetLanguageName?: string;
-      /**
-       * @deprecated
-       * @description Service used for automated translating (deprecated: use primaryServiceInfo)
-       */
-      primaryService?:
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE";
-      primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
-      /**
-       * @deprecated
-       * @description Services to be used for suggesting (deprecated: use enabledServicesInfo)
-       */
-      enabledServices: (
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE"
-      )[];
-      /** @description Info about enabled services */
-      enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
-    };
-    SetDisabledLanguagesRequest: {
-      languageIds: number[];
-    };
-    CollectionModelLanguageModel: {
-      _embedded?: {
-        languages?: components["schemas"]["LanguageModel"][];
-      };
-    };
-    ComplexEditKeyDto: {
-      /** @description Name of the key */
-      name: string;
-      namespace?: string;
-      /** @description Translations to update */
-      translations?: { [key: string]: string };
-      /** @description Translation states to update, if not provided states won't be modified */
-      states?: { [key: string]: "TRANSLATED" | "REVIEWED" };
-      /** @description Tags of the key. If not provided tags won't be modified */
-      tags?: string[];
-      /** @description IDs of screenshots to delete */
-      screenshotIdsToDelete?: number[];
-      /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
-      screenshotUploadedImageIds?: number[];
-      screenshotsToAdd?: components["schemas"]["KeyScreenshotDto"][];
-      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
-      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
-      /** @description Description of the key. It's also used as a context for Tolgee AI translator */
-      description?: string;
-      /** @description If key is pluralized. If it will be reflected in the editor. If null, value won't be modified. */
-      isPlural?: boolean;
-      /** @description The argument name for the plural. If null, value won't be modified. If isPlural is false, this value will be ignored. */
-      pluralArgName?: string;
-      /** @description If true, it will fail with 400 (with code plural_forms_data_loss) if plural is disabled and there are plural forms, which would be lost by the action. You can get rid of this warning by setting this value to false. */
-      warnOnDataLoss?: boolean;
-      /** @description Custom values of the key. If not provided, custom values won't be modified */
-      custom?: { [key: string]: { [key: string]: unknown } };
-    };
-    KeyInScreenshotPositionDto: {
-      /** Format: int32 */
-      x: number;
-      /** Format: int32 */
-      y: number;
-      /** Format: int32 */
-      width: number;
-      /** Format: int32 */
-      height: number;
-    };
-    KeyScreenshotDto: {
-      text?: string;
-      /**
-       * Format: int64
-       * @description Ids of screenshot uploaded with /v2/image-upload endpoint
-       */
-      uploadedImageId: number;
-      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
-    };
-    /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
-    RelatedKeyDto: {
-      namespace?: string;
-      keyName: string;
-    };
-    KeyInScreenshotModel: {
-      /** Format: int64 */
-      keyId: number;
-      position?: components["schemas"]["KeyInScreenshotPosition"];
-      keyName: string;
-      keyNamespace?: string;
-      originalText?: string;
-    };
-    KeyInScreenshotPosition: {
-      /** Format: int32 */
-      x: number;
-      /** Format: int32 */
-      y: number;
-      /** Format: int32 */
-      width: number;
-      /** Format: int32 */
-      height: number;
-    };
-    KeyWithDataModel: {
-      /**
-       * Format: int64
-       * @description Id of key record
-       */
-      id: number;
-      /**
-       * @description Name of key
-       * @example this_is_super_key
-       */
-      name: string;
-      /**
-       * @description Namespace of key
-       * @example homepage
-       */
-      namespace?: string;
-      /**
-       * @description Description of key
-       * @example This key is used on homepage. It's a label of sign up button.
-       */
-      description?: string;
-      /**
-       * @description Translations object containing values updated in this request
-       * @example [object Object]
-       */
-      translations: {
-        [key: string]: components["schemas"]["TranslationModel"];
-      };
-      /** @description Tags of key */
-      tags: components["schemas"]["TagModel"][];
-      /** @description Screenshots of the key */
-      screenshots: components["schemas"]["ScreenshotModel"][];
-      /** @description If key is pluralized. If it will be reflected in the editor */
-      isPlural: boolean;
-      /** @description The argument name for the plural */
-      pluralArgName?: string;
-      /** @description Custom values of the key */
-      custom: { [key: string]: { [key: string]: unknown } };
-    };
-    /** @description Screenshots of the key */
-    ScreenshotModel: {
-      /** Format: int64 */
-      id: number;
-      /**
-       * @description File name, which may be downloaded from the screenshot path.
+       * @description This is a template that defines the structure of the resulting .zip file content.
        *
-       * When images are secured. Encrypted timestamp is appended to the filename.
-       */
-      filename: string;
-      /**
-       * @description Thumbnail file name, which may be downloaded from the screenshot path.
+       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
        *
-       * When images are secured. Encrypted timestamp is appended to the filename.
-       */
-      thumbnail: string;
-      fileUrl: string;
-      thumbnailUrl: string;
-      /** Format: date-time */
-      createdAt?: string;
-      keyReferences: components["schemas"]["KeyInScreenshotModel"][];
-      location?: string;
-      /** Format: int32 */
-      width?: number;
-      /** Format: int32 */
-      height?: number;
-    };
-    /** @description Tags of key */
-    TagModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-    };
-    /**
-     * @description Translations object containing values updated in this request
-     * @example [object Object]
-     */
-    TranslationModel: {
-      /**
-       * Format: int64
-       * @description Id of translation record
-       */
-      id: number;
-      /** @description Translation text */
-      text?: string;
-      /** @description State of translation */
-      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
-      /** @description Whether base language translation was changed after this translation was updated */
-      outdated: boolean;
-      /** @description Was translated using Translation Memory or Machine translation service? */
-      auto: boolean;
-      /** @description Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
-    };
-    EditKeyDto: {
-      name: string;
-      namespace?: string;
-      /**
-       * @description Description of the key
-       * @example This key is used on homepage. It's a label of sign up button.
-       */
-      description?: string;
-    };
-    KeyModel: {
-      /**
-       * Format: int64
-       * @description Id of key record
-       */
-      id: number;
-      /**
-       * @description Name of key
-       * @example this_is_super_key
-       */
-      name: string;
-      /**
-       * @description Namespace of key
-       * @example homepage
-       */
-      namespace?: string;
-      /**
-       * @description Description of key
-       * @example This key is used on homepage. It's a label of sign up button.
-       */
-      description?: string;
-      /** @description Custom values of the key */
-      custom?: { [key: string]: { [key: string]: unknown } };
-    };
-    ProjectInviteUserDto: {
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * @description Granted scopes for the invited user
-       * @example translations.view,translations.edit
-       */
-      scopes?: string[];
-      /**
-       * @deprecated
-       * @description Deprecated -> use translate languages
-       */
-      languages?: number[];
-      /**
-       * @deprecated
-       * @description Languages user can translate to
-       */
-      translateLanguages?: number[];
-      /**
-       * @deprecated
-       * @description Languages user can view
-       */
-      viewLanguages?: number[];
-      /**
-       * @deprecated
-       * @description Languages user can change translation state (review)
-       */
-      stateChangeLanguages?: number[];
-      /** @description Email to send invitation to */
-      email?: string;
-      /** @description Name of invited user */
-      name?: string;
-      /**
-       * Format: int64
-       * @description Id of invited agency
-       */
-      agencyId?: number;
-    };
-    PermissionWithAgencyModel: {
-      /**
-       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
-       */
-      scopes: (
-        | "translations.view"
-        | "translations.edit"
-        | "keys.edit"
-        | "screenshots.upload"
-        | "screenshots.delete"
-        | "screenshots.view"
-        | "activity.view"
-        | "languages.edit"
-        | "admin"
-        | "project.edit"
-        | "members.view"
-        | "members.edit"
-        | "translation-comments.add"
-        | "translation-comments.edit"
-        | "translation-comments.set-state"
-        | "translations.state-edit"
-        | "keys.view"
-        | "keys.delete"
-        | "keys.create"
-        | "batch-jobs.view"
-        | "batch-jobs.cancel"
-        | "translations.batch-by-tm"
-        | "translations.batch-machine"
-        | "content-delivery.manage"
-        | "content-delivery.publish"
-        | "webhooks.manage"
-        | "tasks.view"
-        | "tasks.edit"
-      )[];
-      /** @description The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * @deprecated
-       * @description Deprecated (use translateLanguageIds).
+       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+       * the English translations of the `home` namespace will be stored in `home/en.json`.
        *
-       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
-       */
-      permittedLanguageIds?: number[];
-      /**
-       * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
-       */
-      translateLanguageIds?: number[];
-      /**
-       * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
-       */
-      viewLanguageIds?: number[];
-      /**
-       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
-       */
-      stateChangeLanguageIds?: number[];
-      agency?: components["schemas"]["TranslationAgencySimpleModel"];
-    };
-    ProjectInvitationModel: {
-      /** Format: int64 */
-      id: number;
-      code?: string;
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      permittedLanguageIds?: number[];
-      /** Format: date-time */
-      createdAt: string;
-      invitedUserName?: string;
-      invitedUserEmail?: string;
-      permission: components["schemas"]["PermissionWithAgencyModel"];
-      createdBy?: components["schemas"]["SimpleUserAccountModel"];
-    };
-    AzureContentStorageConfigDto: {
-      connectionString?: string;
-      containerName: string;
-    };
-    ContentStorageRequest: {
-      name: string;
-      azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfigDto"];
-      s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigDto"];
-      publicUrlPrefix?: string;
-    };
-    S3ContentStorageConfigDto: {
-      bucketName: string;
-      accessKey?: string;
-      secretKey?: string;
-      endpoint: string;
-      signingRegion: string;
-      contentStorageType?: "S3" | "AZURE";
-      enabled?: boolean;
-    };
-    AzureContentStorageConfigModel: {
-      containerName?: string;
-    };
-    ContentStorageModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      publicUrlPrefix?: string;
-      azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfigModel"];
-      s3ContentStorageConfig?: components["schemas"]["S3ContentStorageConfigModel"];
-    };
-    S3ContentStorageConfigModel: {
-      bucketName: string;
-      endpoint: string;
-      signingRegion: string;
-    };
-    ContentDeliveryConfigRequest: {
-      name: string;
-      /**
-       * Format: int64
-       * @description Id of custom storage to use for content delivery. If null, default server storage is used. Tolgee Cloud provides default Content Storage.
-       */
-      contentStorageId?: number;
-      /** @description If true, data are published to the content delivery automatically after each change. */
-      autoPublish: boolean;
-      /**
-       * @description Tolgee uses a custom slug as a directory name for content storage and public content delivery URL. It is only applicable for custom storage. This field needs to be kept null for Tolgee Cloud content storage or global server storage on self-hosted instances.
+       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
        *
-       * Slag has to match following regular expression: `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
-       *
-       * If null is provided for update operation, slug will be assigned with generated value.
+       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+       * but in Android format. (e.g., en-rUS)
        */
-      slug?: string;
+      fileStructureTemplate?: string;
+      /** @description Filter key IDs to be contained in export */
+      filterKeyId?: number[];
+      /** @description Filter key IDs not to be contained in export */
+      filterKeyIdNot?: number[];
+      /** @description Filter keys with prefix */
+      filterKeyPrefix?: string;
+      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
+      filterNamespace?: string[];
+      /** @description Filter translations with state. By default, all states except untranslated is exported. */
+      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
       /**
-       * @description Whether the data in the CDN should be pruned before publishing new data.
+       * @description Filter keys tagged by.
        *
-       * In some cases, you might want to keep the data in the storage and only replace the files created by following publish operation.
+       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
        */
-      pruneBeforePublish: boolean;
-      /**
-       * @description Languages to be contained in export.
-       *
-       * If null, all languages are exported
-       * @example en
-       */
-      languages?: string[];
+      filterTag?: string;
+      /** @description Filter keys tagged by one of provided tags */
+      filterTagIn?: string[];
+      /** @description Filter keys not tagged by one of provided tags */
+      filterTagNotIn?: string[];
       /** @description Format to export to */
       format:
         | "JSON"
@@ -2021,138 +2056,12 @@ export interface components {
         | "RESX_ICU"
         | "XLSX";
       /**
-       * @description Delimiter to structure file content.
-       *
-       * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
-       *
-       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
-       * specific formats like `YAML_RUBY` don't honor this parameter.
-       */
-      structureDelimiter?: string;
-      /**
-       * @description If true, for structured formats (like JSON) arrays are supported.
-       *
-       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
-       */
-      supportArrays: boolean;
-      /** @description Filter key IDs to be contained in export */
-      filterKeyId?: number[];
-      /** @description Filter key IDs not to be contained in export */
-      filterKeyIdNot?: number[];
-      /**
-       * @description Filter keys tagged by.
-       *
-       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
-       */
-      filterTag?: string;
-      /** @description Filter keys tagged by one of provided tags */
-      filterTagIn?: string[];
-      /** @description Filter keys not tagged by one of provided tags */
-      filterTagNotIn?: string[];
-      /** @description Filter keys with prefix */
-      filterKeyPrefix?: string;
-      /** @description Filter translations with state. By default, all states except untranslated is exported. */
-      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
-      filterNamespace?: string[];
-      /**
-       * @description Message format to be used for export.
-       *
-       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
-       *
-       * This property is honored only for generic formats like JSON or YAML.
-       * For specific formats like `YAML_RUBY` it's ignored.
-       */
-      messageFormat?:
-        | "C_SPRINTF"
-        | "PHP_SPRINTF"
-        | "JAVA_STRING_FORMAT"
-        | "APPLE_SPRINTF"
-        | "RUBY_SPRINTF"
-        | "I18NEXT"
-        | "ICU";
-      /**
-       * @description This is a template that defines the structure of the resulting .zip file content.
-       *
-       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
-       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
-       *
-       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
-       * the English translations of the `home` namespace will be stored in `home/en.json`.
-       *
-       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
-       *
-       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
-       * but in Android format. (e.g., en-rUS)
-       */
-      fileStructureTemplate?: string;
-    };
-    ContentDeliveryConfigModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      slug: string;
-      pruneBeforePublish: boolean;
-      storage?: components["schemas"]["ContentStorageModel"];
-      publicUrl?: string;
-      autoPublish: boolean;
-      /** Format: int64 */
-      lastPublished?: number;
-      lastPublishedFiles: string[];
-      /**
        * @description Languages to be contained in export.
        *
        * If null, all languages are exported
        * @example en
        */
       languages?: string[];
-      /** @description Format to export to */
-      format:
-        | "JSON"
-        | "JSON_TOLGEE"
-        | "XLIFF"
-        | "PO"
-        | "APPLE_STRINGS_STRINGSDICT"
-        | "APPLE_XLIFF"
-        | "ANDROID_XML"
-        | "COMPOSE_XML"
-        | "FLUTTER_ARB"
-        | "PROPERTIES"
-        | "YAML_RUBY"
-        | "YAML"
-        | "JSON_I18NEXT"
-        | "CSV"
-        | "RESX_ICU"
-        | "XLSX";
-      /**
-       * @description Delimiter to structure file content.
-       *
-       * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
-       *
-       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
-       * specific formats like `YAML_RUBY` don't honor this parameter.
-       */
-      structureDelimiter?: string;
-      /** @description Filter key IDs to be contained in export */
-      filterKeyId?: number[];
-      /** @description Filter key IDs not to be contained in export */
-      filterKeyIdNot?: number[];
-      /**
-       * @description Filter keys tagged by.
-       *
-       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
-       */
-      filterTag?: string;
-      /** @description Filter keys tagged by one of provided tags */
-      filterTagIn?: string[];
-      /** @description Filter keys not tagged by one of provided tags */
-      filterTagNotIn?: string[];
-      /** @description Filter keys with prefix */
-      filterKeyPrefix?: string;
-      /** @description Filter translations with state. By default, all states except untranslated is exported. */
-      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
-      filterNamespace?: string[];
       /**
        * @description Message format to be used for export.
        *
@@ -2170,685 +2079,188 @@ export interface components {
         | "I18NEXT"
         | "ICU";
       /**
+       * @description Delimiter to structure file content.
+       *
+       * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
+       *
+       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+       * specific formats like `YAML_RUBY` don't honor this parameter.
+       */
+      structureDelimiter?: string;
+      /**
        * @description If true, for structured formats (like JSON) arrays are supported.
        *
        * e.g. Key hello[0] will be exported as {"hello": ["..."]}
        */
       supportArrays: boolean;
-      /**
-       * @description This is a template that defines the structure of the resulting .zip file content.
-       *
-       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
-       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
-       *
-       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
-       * the English translations of the `home` namespace will be stored in `home/en.json`.
-       *
-       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
-       *
-       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
-       * but in Android format. (e.g., en-rUS)
-       */
-      fileStructureTemplate?: string;
-    };
-    ComplexTagKeysRequest: {
-      /** @description Include keys filtered by the provided key information */
-      filterKeys?: components["schemas"]["KeyId"][];
-      /** @description Exclude keys filtered by the provided key information */
-      filterKeysNot?: components["schemas"]["KeyId"][];
-      /** @description Include keys filtered by the provided tag information. This filter supports wildcards. For example, `draft-*` will match all tags starting with `draft-`. */
-      filterTag?: string[];
-      /** @description Exclude keys filtered by the provided tag information. This filter supports wildcards. For example, `draft-*` will match all tags starting with `draft-`. */
-      filterTagNot?: string[];
-      /** @description Specified tags will be added to filtered keys */
-      tagFiltered?: string[];
-      /** @description Specified tags will be removed from filtered keys. It supports wildcards. For example, `draft-*` will remove all tags starting with `draft-`. */
-      untagFiltered?: string[];
-      /** @description Specified tags will be added to keys not filtered by any of the specified filters. */
-      tagOther?: string[];
-      /** @description Specified tags will be removed from keys not filtered by any of the specified filters. It supports wildcards. For example, `draft-*` will remove all tags starting with `draft-`. */
-      untagOther?: string[];
-    };
-    /** @description Exclude keys filtered by the provided key information */
-    KeyId: {
-      name?: string;
-      namespace?: string;
-      /**
-       * Format: int64
-       * @description If key id is provided, name and namespace are ignored.
-       */
-      id?: number;
-    };
-    TagKeyDto: {
-      name: string;
-    };
-    SetFileNamespaceRequest: {
-      namespace?: string;
-    };
-    StreamingResponseBody: { [key: string]: unknown };
-    ImportSettingsRequest: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
-    };
-    ImportSettingsModel: {
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
-    };
-    TranslationCommentModel: {
-      /**
-       * Format: int64
-       * @description Id of translation comment record
-       */
-      id: number;
-      /** @description Text of comment */
-      text: string;
-      /** @description State of translation */
-      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
-      author: components["schemas"]["SimpleUserAccountModel"];
-      /**
-       * Format: date-time
-       * @description Date when it was created
-       */
-      createdAt: string;
-      /**
-       * Format: date-time
-       * @description Date when it was updated
-       */
-      updatedAt: string;
-    };
-    TranslationCommentDto: {
-      text: string;
-      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
-    };
-    SetTranslationsWithKeyDto: {
-      /**
-       * @description Key name to set translations for
-       * @example what_a_key_to_translate
-       */
-      key: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
-      namespace?: string;
-      /**
-       * @description Object mapping language tag to translation
-       * @example [object Object]
-       */
-      translations: { [key: string]: string };
-      /**
-       * @description List of languages to return translations for.
-       *
-       * If not provided, only modified translation will be provided.
-       *
-       * @example en,de,fr
-       */
-      languagesToReturn?: string[];
-    };
-    SetTranslationsResponseModel: {
-      /**
-       * Format: int64
-       * @description Id of key record
-       */
-      keyId: number;
-      /**
-       * @description Name of key
-       * @example this_is_super_key
-       */
-      keyName: string;
-      /**
-       * @description The namespace of the key
-       * @example homepage
-       */
-      keyNamespace?: string;
-      keyIsPlural: boolean;
-      /**
-       * @description Translations object containing values updated in this request
-       * @example [object Object]
-       */
-      translations: {
-        [key: string]: components["schemas"]["TranslationModel"];
-      };
-    };
-    LanguageRequest: {
-      /**
-       * @description Language name in english
-       * @example Czech
-       */
-      name: string;
-      /**
-       * @description Language name in this language
-       * @example čeština
-       */
-      originalName: string;
-      /**
-       * @description Language tag according to BCP 47 definition
-       * @example cs-CZ
-       */
-      tag: string;
-      /**
-       * @description Language flag emoji as UTF-8 emoji
-       * @example 🇨🇿
-       */
-      flagEmoji?: string;
-    };
-    SetLanguagePromptCustomizationRequest: {
-      /**
-       * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
-       * @example For arabic language, we are super formal. Always use these translations:
-       * Paper -> ورقة
-       * Office -> مكتب
-       */
-      description?: string;
-    };
-    LanguageAiPromptCustomizationModel: {
-      /**
-       * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
-       * @example For arabic language, we are super formal. Always use these translations:
-       * Paper -> ورقة
-       * Office -> مكتب
-       */
-      description?: string;
-      language: components["schemas"]["LanguageModel"];
-    };
-    SetProjectPromptCustomizationRequest: {
-      /**
-       * @description The project description used in the  prompt that helps AI translator to understand the context of your project.
-       * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
-       */
-      description?: string;
-    };
-    ProjectAiPromptCustomizationModel: {
-      /**
-       * @description The project description used in the  prompt that helps AI translator to understand the context of your project.
-       * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
-       */
-      description?: string;
-    };
-    UpdatePatDto: {
-      /** @description New description of the PAT */
-      description: string;
-    };
-    PatModel: {
-      /** Format: int64 */
-      id: number;
-      description: string;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-    };
-    RegeneratePatDto: {
-      /**
-       * Format: int64
-       * @description Expiration date in epoch format (milliseconds). When null key never expires.
-       * @example 1661172869000
-       */
-      expiresAt?: number;
-    };
-    RevealedPatModel: {
-      token: string;
-      /** Format: int64 */
-      id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
-    };
-    SetOrganizationRoleDto: {
-      roleType: "MEMBER" | "OWNER";
-    };
-    CreateProviderRequest: {
-      enabled: boolean;
-      clientId: string;
-      clientSecret: string;
-      authorizationUri: string;
-      tokenUri: string;
-      domain: string;
-    };
-    SsoTenantModel: {
-      enabled: boolean;
-      authorizationUri: string;
-      clientId: string;
-      clientSecret: string;
-      tokenUri: string;
-      domain: string;
-      global: boolean;
-    };
-    OrganizationDto: {
-      /** @example Beautiful organization */
-      name: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      /** @example btforg */
-      slug?: string;
-    };
-    OrganizationModel: {
-      /** Format: int64 */
-      id: number;
-      /** @example Beautiful organization */
-      name: string;
-      /** @example btforg */
-      slug: string;
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-      basePermissions: components["schemas"]["PermissionModel"];
-      /**
-       * @description The role of currently authorized user.
-       *
-       * Can be null when user has direct access to one of the projects owned by the organization.
-       */
-      currentUserRole?: "MEMBER" | "OWNER";
-      avatar?: components["schemas"]["Avatar"];
-    };
-    OrganizationInviteUserDto: {
-      roleType: "MEMBER" | "OWNER";
-      /** @description Name of invited user */
-      name?: string;
-      /** @description Email to send invitation to */
-      email?: string;
-    };
-    OrganizationInvitationModel: {
-      /** Format: int64 */
-      id: number;
-      code: string;
-      type: "MEMBER" | "OWNER";
-      /** Format: date-time */
-      createdAt: string;
-      invitedUserName?: string;
-      invitedUserEmail?: string;
-      createdBy?: components["schemas"]["SimpleUserAccountModel"];
-    };
-    SetLicenseKeyDto: {
-      licenseKey: string;
-    };
-    EeSubscriptionModel: {
-      name: string;
-      licenseKey: string;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "WEBHOOKS"
-        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
-        | "AI_PROMPT_CUSTOMIZATION"
-        | "SLACK_INTEGRATION"
-        | "TASKS"
-        | "SSO"
-        | "ORDER_TRANSLATION"
-      )[];
-      /** Format: int64 */
-      currentPeriodEnd?: number;
-      cancelAtPeriodEnd: boolean;
-      /** Format: int64 */
-      currentUserCount: number;
-      status:
-        | "ACTIVE"
-        | "CANCELED"
-        | "PAST_DUE"
-        | "UNPAID"
-        | "ERROR"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
-      nonCommerical: boolean;
-      /** Format: date-time */
-      lastValidCheck?: string;
-    };
-    V2EditApiKeyDto: {
-      scopes: string[];
-      description?: string;
-    };
-    ApiKeyModel: {
-      /**
-       * Format: int64
-       * @description ID of the API key
-       */
-      id: number;
-      /** @description Description */
-      description: string;
-      /** @description Username of user owner */
-      username?: string;
-      /** @description Full name of user owner */
-      userFullName?: string;
-      /**
-       * Format: int64
-       * @description Api key's project ID
-       */
-      projectId: number;
-      /** @description Api key's project name */
-      projectName: string;
-      /**
-       * Format: int64
-       * @description Timestamp of API key expiraion
-       */
-      expiresAt?: number;
-      /**
-       * Format: int64
-       * @description Timestamp of API key last usage
-       */
-      lastUsedAt?: number;
-      /**
-       * @description Api key's permission scopes
-       * @example screenshots.upload,screenshots.delete,translations.edit,screenshots.view,translations.view,keys.edit
-       */
-      scopes: string[];
-    };
-    RegenerateApiKeyDto: {
-      /**
-       * Format: int64
-       * @description Expiration date in epoch format (milliseconds). When null key never expires.
-       * @example 1661172869000
-       */
-      expiresAt?: number;
-    };
-    RevealedApiKeyModel: {
-      /** @description Resulting user's api key */
-      key: string;
-      /** Format: int64 */
-      id: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
-      /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      username?: string;
-    };
-    SuperTokenRequest: {
-      /** @description Has to be provided when TOTP enabled */
-      otp?: string;
-      /** @description Has to be provided when TOTP not enabled */
-      password?: string;
+      zip: boolean;
     };
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
-    };
-    ExampleItem: {
-      source: string;
-      target: string;
-      key: string;
-      keyNamespace?: string;
-    };
-    Metadata: {
-      examples: components["schemas"]["ExampleItem"][];
-      closeItems: components["schemas"]["ExampleItem"][];
-      keyDescription?: string;
-      projectDescription?: string;
-      languageDescription?: string;
-    };
-    TolgeeTranslateParams: {
-      text: string;
-      keyName?: string;
-      sourceTag: string;
-      targetTag: string;
-      metadata?: components["schemas"]["Metadata"];
-      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-      isBatch: boolean;
-      pluralForms?: { [key: string]: string };
-      pluralFormExamples?: { [key: string]: string };
-    };
-    MtResult: {
-      translated?: string;
-      /** Format: int32 */
-      price: number;
-      contextDescription?: string;
-    };
-    TelemetryReportRequest: {
-      instanceId: string;
-      /** Format: int64 */
-      projectsCount: number;
-      /** Format: int64 */
-      translationsCount: number;
-      /** Format: int64 */
-      languagesCount: number;
-      /** Format: int64 */
-      distinctLanguagesCount: number;
-      /** Format: int64 */
-      usersCount: number;
-    };
-    SlackCommandDto: {
-      token?: string;
-      team_id: string;
-      channel_id: string;
-      command: string;
-      channel_name: string;
-      user_id: string;
-      user_name: string;
-      text: string;
-      trigger_id?: string;
-      team_domain: string;
-    };
-    GetMySubscriptionDto: {
-      licenseKey: string;
-      instanceId: string;
-    };
-    PlanIncludedUsageModel: {
-      /** Format: int64 */
-      seats: number;
-      /** Format: int64 */
-      translationSlots: number;
-      /** Format: int64 */
-      translations: number;
-      /** Format: int64 */
-      mtCredits: number;
-    };
-    PlanPricesModel: {
-      perSeat: number;
-      perThousandTranslations?: number;
-      perThousandMtCredits?: number;
-      subscriptionMonthly: number;
-      subscriptionYearly: number;
-    };
-    SelfHostedEePlanModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      public: boolean;
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "WEBHOOKS"
-        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
-        | "AI_PROMPT_CUSTOMIZATION"
-        | "SLACK_INTEGRATION"
-        | "TASKS"
-        | "SSO"
-        | "ORDER_TRANSLATION"
-      )[];
-      prices: components["schemas"]["PlanPricesModel"];
-      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
-      hasYearlyPrice: boolean;
-      free: boolean;
-      nonCommercial: boolean;
-    };
-    SelfHostedEeSubscriptionModel: {
-      /** Format: int64 */
-      id: number;
-      /** Format: int64 */
-      currentPeriodStart?: number;
-      /** Format: int64 */
-      currentPeriodEnd?: number;
-      currentBillingPeriod: "MONTHLY" | "YEARLY";
-      /** Format: int64 */
-      createdAt: number;
-      plan: components["schemas"]["SelfHostedEePlanModel"];
-      status:
-        | "ACTIVE"
-        | "CANCELED"
-        | "PAST_DUE"
-        | "UNPAID"
-        | "ERROR"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
-      licenseKey?: string;
-      estimatedCosts?: number;
-    };
-    SetLicenseKeyLicensingDto: {
-      licenseKey: string;
-      /** Format: int64 */
-      seats: number;
-      instanceId: string;
-    };
-    ReportUsageDto: {
-      licenseKey: string;
-      /** Format: int64 */
-      seats: number;
-    };
-    ReportErrorDto: {
-      stackTrace: string;
-      licenseKey: string;
-    };
-    ReleaseKeyDto: {
-      licenseKey: string;
-    };
-    PrepareSetLicenseKeyDto: {
-      licenseKey: string;
-      /** Format: int64 */
-      seats: number;
-    };
-    AverageProportionalUsageItemModel: {
-      total: number;
-      unusedQuantity: number;
-      usedQuantity: number;
-      usedQuantityOverPlan: number;
-    };
-    PrepareSetEeLicenceKeyModel: {
-      plan: components["schemas"]["SelfHostedEePlanModel"];
-      usage: components["schemas"]["UsageModel"];
-    };
-    SumUsageItemModel: {
-      total: number;
-      /** Format: int64 */
-      unusedQuantity: number;
-      /** Format: int64 */
-      usedQuantity: number;
-      /** Format: int64 */
-      usedQuantityOverPlan: number;
-    };
-    UsageModel: {
-      subscriptionPrice?: number;
-      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
-      appliedStripeCredits?: number;
-      seats: components["schemas"]["AverageProportionalUsageItemModel"];
-      translations: components["schemas"]["AverageProportionalUsageItemModel"];
-      credits?: components["schemas"]["SumUsageItemModel"];
-      total: number;
-    };
-    BusinessEventReportRequest: {
-      eventName: string;
-      anonymousUserId?: string;
-      /** Format: int64 */
-      organizationId?: number;
-      /** Format: int64 */
-      projectId?: number;
-      data?: { [key: string]: { [key: string]: unknown } };
-    };
-    IdentifyRequest: {
-      anonymousUserId: string;
-    };
-    CreateProjectRequest: {
-      name: string;
-      languages: components["schemas"]["LanguageRequest"][];
-      /** @description Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
-      slug?: string;
-      /**
-       * Format: int64
-       * @description Organization to create the project in
-       */
-      organizationId: number;
-      /** @description Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
-      baseLanguageTag?: string;
-      /** @description Whether to use ICU placeholder visualization in the editor and it's support. */
-      icuPlaceholders: boolean;
-    };
-    WebhookTestResponse: {
-      success: boolean;
-    };
-    CreateMultipleTasksRequest: {
-      tasks: components["schemas"]["CreateTaskRequest"][];
-    };
-    CreateTaskRequest: {
-      name: string;
-      description: string;
-      type: "TRANSLATE" | "REVIEW";
-      /**
-       * Format: int64
-       * @description Due to date in epoch format (milliseconds).
-       * @example 1661172869000
-       */
-      dueDate?: number;
-      /**
-       * Format: int64
-       * @description Id of language, this task is attached to.
-       * @example 1
-       */
-      languageId: number;
-      assignees: number[];
-      keys: number[];
-    };
-    CalculateScopeRequest: {
-      /** Format: int64 */
-      languageId: number;
-      type: "TRANSLATE" | "REVIEW";
-      keys: number[];
-    };
-    KeysScopeView: {
-      /** Format: int64 */
-      keyCount: number;
-      /** Format: int64 */
-      characterCount: number;
-      /** Format: int64 */
-      wordCount: number;
-      /** Format: int64 */
-      keyCountIncludingConflicts: number;
     };
     GetKeysRequestDto: {
       keys: components["schemas"]["KeyDefinitionDto"][];
       /** @description Tags to return language translations in */
       languageTags: string[];
     };
-    KeyDefinitionDto: {
-      name: string;
+    HierarchyItem: {
+      requires: components["schemas"]["HierarchyItem"][];
+      scope:
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit";
+    };
+    IdentifyRequest: {
+      anonymousUserId: string;
+    };
+    ImageUploadInfoDto: {
+      location?: string;
+    };
+    ImportAddFilesResultModel: {
+      errors: components["schemas"]["ErrorResponseBody"][];
+      result?: components["schemas"]["PagedModelImportLanguageModel"];
+      warnings: components["schemas"]["ErrorResponseBody"][];
+    };
+    ImportFileIssueModel: {
+      /** Format: int64 */
+      id: number;
+      params: components["schemas"]["ImportFileIssueParamModel"][];
+      type:
+        | "KEY_IS_NOT_STRING"
+        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
+        | "VALUE_IS_NOT_STRING"
+        | "KEY_IS_EMPTY"
+        | "VALUE_IS_EMPTY"
+        | "PO_MSGCTXT_NOT_SUPPORTED"
+        | "ID_ATTRIBUTE_NOT_PROVIDED"
+        | "TARGET_NOT_PROVIDED"
+        | "TRANSLATION_TOO_LONG"
+        | "KEY_IS_BLANK"
+        | "TRANSLATION_DEFINED_IN_ANOTHER_FILE"
+        | "INVALID_CUSTOM_VALUES"
+        | "DESCRIPTION_TOO_LONG";
+    };
+    ImportFileIssueParamModel: {
+      type:
+        | "KEY_NAME"
+        | "KEY_ID"
+        | "LANGUAGE_ID"
+        | "KEY_INDEX"
+        | "VALUE"
+        | "LINE"
+        | "FILE_NODE_ORIGINAL"
+        | "LANGUAGE_NAME";
+      value?: string;
+    };
+    /** @description Definition of mapping for each file to import. */
+    ImportFileMapping: {
+      /** @description Name of the file to import. This is the name of the file provided in `files` request part or in uploaded archive. */
+      fileName: string;
+      /**
+       * @description Format of the file. If not provided, Tolgee will try to guess the format from the file name or file contents.
+       *
+       * It is recommended to provide these values to prevent any issues with format detection.
+       */
+      format?:
+        | "CSV_ICU"
+        | "CSV_JAVA"
+        | "CSV_PHP"
+        | "CSV_RUBY"
+        | "JSON_I18NEXT"
+        | "JSON_ICU"
+        | "JSON_JAVA"
+        | "JSON_PHP"
+        | "JSON_RUBY"
+        | "JSON_C"
+        | "PO_PHP"
+        | "PO_C"
+        | "PO_JAVA"
+        | "PO_ICU"
+        | "PO_RUBY"
+        | "STRINGS"
+        | "STRINGSDICT"
+        | "APPLE_XLIFF"
+        | "PROPERTIES_ICU"
+        | "PROPERTIES_JAVA"
+        | "PROPERTIES_UNKNOWN"
+        | "ANDROID_XML"
+        | "COMPOSE_XML"
+        | "FLUTTER_ARB"
+        | "YAML_RUBY"
+        | "YAML_JAVA"
+        | "YAML_ICU"
+        | "YAML_PHP"
+        | "YAML_UNKNOWN"
+        | "XLIFF_ICU"
+        | "XLIFF_JAVA"
+        | "XLIFF_PHP"
+        | "XLIFF_RUBY"
+        | "RESX_ICU"
+        | "XLSX_ICU"
+        | "XLSX_JAVA"
+        | "XLSX_PHP"
+        | "XLSX_RUBY";
+      /**
+       * @description The existing language tag in the Tolgee platform to which the imported language should be mapped.
+       *
+       * When null, Tolgee will try to guess the language from the file contents or file name.
+       */
+      languageTag?: string;
+      /** @description Namespace to import the file to. If not provided, the key will be imported without namespace. */
       namespace?: string;
     };
-    CollectionModelKeyWithDataModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyWithDataModel"][];
-      };
+    ImportKeysDto: {
+      keys: components["schemas"]["ImportKeysItemDto"][];
+    };
+    ImportKeysItemDto: {
+      /**
+       * @description Description of key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
+      /**
+       * @description Key name to set translations for
+       * @example what_a_key_to_translate
+       */
+      name: string;
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      /**
+       * @description Tags of the key
+       * @example homepage,user-profile
+       */
+      tags?: string[];
+      /**
+       * @description Object mapping language tag to translation
+       * @example [object Object]
+       */
+      translations: { [key: string]: string };
     };
     ImportKeysResolvableDto: {
       keys: components["schemas"]["ImportKeysResolvableItemDto"][];
@@ -2867,13 +2279,72 @@ export interface components {
         [key: string]: components["schemas"]["ImportTranslationResolvableDto"];
       };
     };
+    ImportLanguageModel: {
+      /** Format: int32 */
+      conflictCount: number;
+      existingLanguageAbbreviation?: string;
+      /** Format: int64 */
+      existingLanguageId?: number;
+      existingLanguageName?: string;
+      existingLanguageTag?: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      importFileId: number;
+      /** Format: int32 */
+      importFileIssueCount: number;
+      importFileName: string;
+      name: string;
+      namespace?: string;
+      /** Format: int32 */
+      resolvedCount: number;
+      /** Format: int32 */
+      totalCount: number;
+    };
+    ImportNamespaceModel: {
+      /**
+       * Format: int64
+       * @description The id of namespace. When null, namespace doesn't exist and will be created by import.
+       * @example 10000048
+       */
+      id?: number;
+      /** @example homepage */
+      name: string;
+    };
+    ImportSettingsModel: {
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
+    };
+    ImportSettingsRequest: {
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
+    };
+    ImportTranslationModel: {
+      /** Format: int64 */
+      conflictId?: number;
+      conflictText?: string;
+      existingKeyIsPlural: boolean;
+      /** Format: int64 */
+      id: number;
+      isPlural: boolean;
+      keyDescription?: string;
+      /** Format: int64 */
+      keyId: number;
+      keyName: string;
+      override: boolean;
+      resolved: boolean;
+      text?: string;
+    };
     /** @description Object mapping language tag to translation */
     ImportTranslationResolvableDto: {
-      /**
-       * @description Translation text
-       * @example Hello! I am a translation!
-       */
-      text: string;
       /**
        * @description Determines, how conflict is resolved.
        *
@@ -2885,6 +2356,62 @@ export interface components {
        * @example OVERRIDE
        */
       resolution: "KEEP" | "OVERRIDE" | "NEW" | "FORCE_OVERRIDE";
+      /**
+       * @description Translation text
+       * @example Hello! I am a translation!
+       */
+      text: string;
+    };
+    InitialDataModel: {
+      announcement?: components["schemas"]["AnnouncementDto"];
+      eeSubscription?: components["schemas"]["EeSubscriptionModel"];
+      languageTag?: string;
+      preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
+      serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
+      userInfo?: components["schemas"]["PrivateUserAccountModel"];
+    };
+    JwtAuthenticationResponse: {
+      accessToken?: string;
+      tokenType?: string;
+    };
+    KeyDefinitionDto: {
+      name: string;
+      namespace?: string;
+    };
+    /** @description Disabled languages */
+    KeyDisabledLanguageModel: {
+      /** Format: int64 */
+      id: number;
+      tag: string;
+    };
+    KeyDisabledLanguagesModel: {
+      /** @description Disabled languages */
+      disabledLanguages: components["schemas"]["KeyDisabledLanguageModel"][];
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+    };
+    /** @description Exclude keys filtered by the provided key information */
+    KeyId: {
+      /**
+       * Format: int64
+       * @description If key id is provided, name and namespace are ignored.
+       */
+      id?: number;
+      name?: string;
+      namespace?: string;
     };
     KeyImportResolvableResultModel: {
       /** @description List of keys */
@@ -2892,58 +2419,1649 @@ export interface components {
       /** @description Map uploadedImageId to screenshot */
       screenshots: { [key: string]: components["schemas"]["ScreenshotModel"] };
     };
-    ImportKeysDto: {
-      keys: components["schemas"]["ImportKeysItemDto"][];
+    KeyInScreenshotModel: {
+      /** Format: int64 */
+      keyId: number;
+      keyName: string;
+      keyNamespace?: string;
+      originalText?: string;
+      position?: components["schemas"]["KeyInScreenshotPosition"];
     };
-    ImportKeysItemDto: {
-      /**
-       * @description Key name to set translations for
-       * @example what_a_key_to_translate
-       */
-      name: string;
-      /** @description The namespace of the key. (When empty or null default namespace will be used) */
-      namespace?: string;
+    KeyInScreenshotPosition: {
+      /** Format: int32 */
+      height: number;
+      /** Format: int32 */
+      width: number;
+      /** Format: int32 */
+      x: number;
+      /** Format: int32 */
+      y: number;
+    };
+    KeyInScreenshotPositionDto: {
+      /** Format: int32 */
+      height: number;
+      /** Format: int32 */
+      width: number;
+      /** Format: int32 */
+      x: number;
+      /** Format: int32 */
+      y: number;
+    };
+    KeyModel: {
+      /** @description Custom values of the key */
+      custom?: { [key: string]: { [key: string]: unknown } };
       /**
        * @description Description of key
        * @example This key is used on homepage. It's a label of sign up button.
        */
       description?: string;
       /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+    };
+    KeyScreenshotDto: {
+      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
+      text?: string;
+      /**
+       * Format: int64
+       * @description Ids of screenshot uploaded with /v2/image-upload endpoint
+       */
+      uploadedImageId: number;
+    };
+    KeySearchResultView: {
+      baseTranslation?: string;
+      description?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      namespace?: string;
+      translation?: string;
+    };
+    KeySearchSearchResultModel: {
+      baseTranslation?: string;
+      description?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      namespace?: string;
+      translation?: string;
+      view?: components["schemas"]["KeySearchResultView"];
+    };
+    /** @description Tasks related to this key */
+    KeyTaskViewModel: {
+      done: boolean;
+      /** Format: int64 */
+      languageId: number;
+      languageTag: string;
+      /** Format: int64 */
+      number: number;
+      type: "TRANSLATE" | "REVIEW";
+      userAssigned: boolean;
+    };
+    KeyWithBaseTranslationModel: {
+      /**
+       * @description Base translation
+       * @example This is translation
+       */
+      baseTranslation?: string;
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+    };
+    KeyWithDataModel: {
+      /** @description Custom values of the key */
+      custom: { [key: string]: { [key: string]: unknown } };
+      /**
+       * @description Description of key
+       * @example This key is used on homepage. It's a label of sign up button.
+       */
+      description?: string;
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /** @description If key is pluralized. If it will be reflected in the editor */
+      isPlural: boolean;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+      /** @description The argument name for the plural */
+      pluralArgName?: string;
+      /** @description Screenshots of the key */
+      screenshots: components["schemas"]["ScreenshotModel"][];
+      /** @description Tags of key */
+      tags: components["schemas"]["TagModel"][];
+      /**
+       * @description Translations object containing values updated in this request
+       * @example [object Object]
+       */
+      translations: {
+        [key: string]: components["schemas"]["TranslationModel"];
+      };
+    };
+    KeyWithTranslationsModel: {
+      /** @description There is a context available for this key */
+      contextPresent: boolean;
+      /**
+       * @description The namespace of the key
+       * @example homepage
+       */
+      keyDescription?: string;
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      keyId: number;
+      /**
+       * @description Is this key a plural?
+       * @example true
+       */
+      keyIsPlural: boolean;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      keyName: string;
+      /**
+       * @description The namespace of the key
+       * @example homepage
+       */
+      keyNamespace?: string;
+      /**
+       * Format: int64
+       * @description The namespace id of the key
+       * @example 100000282
+       */
+      keyNamespaceId?: number;
+      /**
+       * @description The placeholder name for plural parameter
+       * @example value
+       */
+      keyPluralArgName?: string;
+      /** @description Tags of key */
+      keyTags: components["schemas"]["TagModel"][];
+      /**
+       * Format: int64
+       * @description Count of screenshots provided for the key
+       * @example 1
+       */
+      screenshotCount: number;
+      /** @description Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
+      screenshots?: components["schemas"]["ScreenshotModel"][];
+      /** @description Tasks related to this key */
+      tasks?: components["schemas"]["KeyTaskViewModel"][];
+      /**
+       * @description Translations object
+       * @example
+       *     {
+       *       "en": {
+       *         "id": 100000003,
+       *         "text": "This is super translation!"
+       *         "state": "TRANSLATED",
+       *         "commentCount": 1
+       *       }
+       *     }
+       */
+      translations: {
+        [key: string]: components["schemas"]["TranslationViewModel"];
+      };
+    };
+    KeysScopeView: {
+      /** Format: int64 */
+      characterCount: number;
+      /** Format: int64 */
+      keyCount: number;
+      /** Format: int64 */
+      keyCountIncludingConflicts: number;
+      /** Format: int64 */
+      wordCount: number;
+    };
+    KeysWithTranslationsPageModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithTranslationsModel"][];
+      };
+      /**
+       * @description Cursor to get next data
+       * @example eyJrZXlJZCI6eyJkaXJlY3Rpb24iOiJBU0MiLCJ2YWx1ZSI6IjEwMDAwMDAxMjAifX0=
+       */
+      nextCursor?: string;
+      page?: components["schemas"]["PageMetadata"];
+      /** @description Provided languages data */
+      selectedLanguages: components["schemas"]["LanguageModel"][];
+    };
+    LanguageAiPromptCustomizationModel: {
+      /**
+       * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
+       * @example For arabic language, we are super formal. Always use these translations:
+       * Paper -> ورقة
+       * Office -> مكتب
+       */
+      description?: string;
+      language: components["schemas"]["LanguageModel"];
+    };
+    LanguageConfigItemModel: {
+      /**
+       * @deprecated
+       * @description Services to be used for suggesting (deprecated: use enabledServicesInfo)
+       */
+      enabledServices: (
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE"
+      )[];
+      /** @description Info about enabled services */
+      enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
+      /**
+       * @deprecated
+       * @description Service used for automated translating (deprecated: use primaryServiceInfo)
+       */
+      primaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE";
+      primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
+      /**
+       * Format: int64
+       * @description When null, its a default configuration applied to not configured languages
+       */
+      targetLanguageId?: number;
+      /** @description When null, its a default configuration applied to not configured languages */
+      targetLanguageName?: string;
+      /** @description When null, its a default configuration applied to not configured languages */
+      targetLanguageTag?: string;
+    };
+    LanguageInfoModel: {
+      /** Format: int64 */
+      languageId?: number;
+      languageTag?: string;
+      supportedServices: components["schemas"]["MtSupportedService"][];
+    };
+    /**
+     * @description Maps the languages from imported files to languages existing in the Tolgee platform.
+     *
+     * Use this field only when your files contain multiple languages (e.g., XLIFF files).
+     *
+     * Otherwise, use the `languageTag` property of `fileMappings`.
+     *
+     * Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` element. Using this field you can map source and target values to languages stored in the Tolgee Platform.
+     */
+    LanguageMapping: {
+      /**
+       * @description The language from the imported file.
+       *
+       * For xliff files, this is the `source-language` or the `target-language` attribute value of `file` element.
+       * @example en-US
+       */
+      importLanguage: string;
+      /**
+       * @description The tag of language existing in the Tolgee platform to which the imported language should be mapped.
+       * @example en-US
+       */
+      platformLanguageTag: string;
+    };
+    LanguageModel: {
+      /** @description Whether is base language of project */
+      base: boolean;
+      /**
+       * @description Language flag emoji as UTF-8 emoji
+       * @example 🇨🇿
+       */
+      flagEmoji?: string;
+      /** Format: int64 */
+      id: number;
+      /**
+       * @description Language name in english
+       * @example Czech
+       */
+      name: string;
+      /**
+       * @description Language name in this language
+       * @example čeština
+       */
+      originalName?: string;
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
+      tag: string;
+    };
+    LanguageRequest: {
+      /**
+       * @description Language flag emoji as UTF-8 emoji
+       * @example 🇨🇿
+       */
+      flagEmoji?: string;
+      /**
+       * @description Language name in english
+       * @example Czech
+       */
+      name: string;
+      /**
+       * @description Language name in this language
+       * @example čeština
+       */
+      originalName: string;
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
+      tag: string;
+    };
+    LanguageStatsModel: {
+      languageFlagEmoji?: string;
+      /** Format: int64 */
+      languageId?: number;
+      languageName?: string;
+      languageOriginalName?: string;
+      languageTag?: string;
+      /** Format: int64 */
+      reviewedKeyCount: number;
+      /** Format: double */
+      reviewedPercentage: number;
+      /** Format: int64 */
+      reviewedWordCount: number;
+      /** Format: int64 */
+      translatedKeyCount: number;
+      /** Format: double */
+      translatedPercentage: number;
+      /** Format: int64 */
+      translatedWordCount: number;
+      /** Format: int64 */
+      untranslatedKeyCount: number;
+      /** Format: double */
+      untranslatedPercentage: number;
+      /** Format: int64 */
+      untranslatedWordCount: number;
+    };
+    LoginRequest: {
+      otp?: string;
+      password: string;
+      username: string;
+    };
+    MachineTranslationLanguagePropsDto: {
+      /**
+       * @deprecated
+       * @description List of enabled services (deprecated: use enabledServicesInfo)
+       */
+      enabledServices?: (
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE"
+      )[];
+      /** @description Info about enabled services */
+      enabledServicesInfo?: components["schemas"]["MtServiceInfo"][];
+      /**
+       * @deprecated
+       * @description This service will be used for automated translation
+       */
+      primaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE";
+      primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
+      /**
+       * Format: int64
+       * @description The language to apply those rules. If null, then this settings are default.
+       */
+      targetLanguageId?: number;
+    };
+    MachineTranslationProviderModel: {
+      /**
+       * @description BCP 47 tags of languages supported by the translation service. When null, all possible languages are supported.
+       *
+       * Please note that Tolgee tries to fall back to a higher subtag if the subtag is not supported.
+       *
+       * E.g., if `pt-BR` is not supported. Tolgee fallbacks to `pt`.
+       */
+      supportedLanguages?: string[];
+    };
+    MachineTranslationRequest: {
+      keyIds: number[];
+      targetLanguageIds: number[];
+    };
+    ModifiedEntityModel: {
+      description?: { [key: string]: { [key: string]: unknown } };
+      entityClass: string;
+      /** Format: int64 */
+      entityId: number;
+      exists?: boolean;
+      modifications?: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+      relations?: {
+        [key: string]: components["schemas"]["ExistenceEntityDescription"];
+      };
+    };
+    MtServiceDTO: {
+      defaultEnabledForProject: boolean;
+      enabled: boolean;
+    };
+    /** @description Info about enabled services */
+    MtServiceInfo: {
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+    };
+    MtServicesDTO: {
+      defaultPrimaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "TOLGEE";
+      services: { [key: string]: components["schemas"]["MtServiceDTO"] };
+    };
+    MtSupportedService: {
+      formalitySupported: boolean;
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+    };
+    NamespaceModel: {
+      /**
+       * Format: int64
+       * @description The id of namespace
+       * @example 10000048
+       */
+      id: number;
+      /** @example homepage */
+      name: string;
+    };
+    OAuthPublicConfigDTO: {
+      clientId?: string;
+      enabled: boolean;
+    };
+    OAuthPublicExtendsConfigDTO: {
+      authorizationUrl?: string;
+      clientId?: string;
+      enabled: boolean;
+      scopes?: string[];
+    };
+    OrganizationDto: {
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      /** @example Beautiful organization */
+      name: string;
+      /** @example btforg */
+      slug?: string;
+    };
+    OrganizationInvitationModel: {
+      code: string;
+      /** Format: date-time */
+      createdAt: string;
+      createdBy?: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      id: number;
+      invitedUserEmail?: string;
+      invitedUserName?: string;
+      type: "MEMBER" | "OWNER";
+    };
+    OrganizationInviteUserDto: {
+      /** @description Email to send invitation to */
+      email?: string;
+      /** @description Name of invited user */
+      name?: string;
+      roleType: "MEMBER" | "OWNER";
+    };
+    OrganizationModel: {
+      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
+      /**
+       * @description The role of currently authorized user.
+       *
+       * Can be null when user has direct access to one of the projects owned by the organization.
+       */
+      currentUserRole?: "MEMBER" | "OWNER";
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      /** Format: int64 */
+      id: number;
+      /** @example Beautiful organization */
+      name: string;
+      /** @example btforg */
+      slug: string;
+    };
+    PageMetadata: {
+      /** Format: int64 */
+      number?: number;
+      /** Format: int64 */
+      size?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int64 */
+      totalPages?: number;
+    };
+    Pageable: {
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      size?: number;
+      sort?: string[];
+    };
+    PagedModelApiKeyModel: {
+      _embedded?: {
+        apiKeys?: components["schemas"]["ApiKeyModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelBatchJobModel: {
+      _embedded?: {
+        batchJobs?: components["schemas"]["BatchJobModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelContentDeliveryConfigModel: {
+      _embedded?: {
+        contentDeliveryConfigs?: components["schemas"]["ContentDeliveryConfigModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelContentStorageModel: {
+      _embedded?: {
+        contentStorages?: components["schemas"]["ContentStorageModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelImportFileIssueModel: {
+      _embedded?: {
+        importFileIssues?: components["schemas"]["ImportFileIssueModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelImportLanguageModel: {
+      _embedded?: {
+        languages?: components["schemas"]["ImportLanguageModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelImportTranslationModel: {
+      _embedded?: {
+        translations?: components["schemas"]["ImportTranslationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelKeyModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelKeySearchSearchResultModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeySearchSearchResultModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelLanguageModel: {
+      _embedded?: {
+        languages?: components["schemas"]["LanguageModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelModifiedEntityModel: {
+      _embedded?: {
+        modifiedEntities?: components["schemas"]["ModifiedEntityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelNamespaceModel: {
+      _embedded?: {
+        namespaces?: components["schemas"]["NamespaceModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["OrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelPatModel: {
+      _embedded?: {
+        pats?: components["schemas"]["PatModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelProjectActivityModel: {
+      _embedded?: {
+        activities?: components["schemas"]["ProjectActivityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelProjectModel: {
+      _embedded?: {
+        projects?: components["schemas"]["ProjectModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelProjectWithStatsModel: {
+      _embedded?: {
+        projects?: components["schemas"]["ProjectWithStatsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelSimpleUserAccountModel: {
+      _embedded?: {
+        users?: components["schemas"]["SimpleUserAccountModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTagModel: {
+      _embedded?: {
+        tags?: components["schemas"]["TagModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTaskModel: {
+      _embedded?: {
+        tasks?: components["schemas"]["TaskModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTaskWithProjectModel: {
+      _embedded?: {
+        tasks?: components["schemas"]["TaskWithProjectModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationCommentModel: {
+      _embedded?: {
+        translationComments?: components["schemas"]["TranslationCommentModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationHistoryModel: {
+      _embedded?: {
+        revisions?: components["schemas"]["TranslationHistoryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationMemoryItemModel: {
+      _embedded?: {
+        translationMemoryItems?: components["schemas"]["TranslationMemoryItemModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelUserAccountInProjectModel: {
+      _embedded?: {
+        users?: components["schemas"]["UserAccountInProjectModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelUserAccountModel: {
+      _embedded?: {
+        users?: components["schemas"]["UserAccountModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelUserAccountWithOrganizationRoleModel: {
+      _embedded?: {
+        usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelWebhookConfigModel: {
+      _embedded?: {
+        webhookConfigs?: components["schemas"]["WebhookConfigModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PatModel: {
+      /** Format: int64 */
+      createdAt: number;
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      updatedAt: number;
+    };
+    PatWithUserModel: {
+      /** Format: int64 */
+      createdAt: number;
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      updatedAt: number;
+      user: components["schemas"]["SimpleUserAccountModel"];
+    };
+    /**
+     * @description Current user's direct permission
+     * @example MANAGE
+     */
+    PermissionModel: {
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
+      )[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /** @description The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+    };
+    PermissionWithAgencyModel: {
+      agency?: components["schemas"]["TranslationAgencySimpleModel"];
+      /**
+       * @deprecated
+       * @description Deprecated (use translateLanguageIds).
+       *
+       * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
+       * @example 200001,200004
+       */
+      permittedLanguageIds?: number[];
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
+      )[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /** @description The user's permission type. This field is null if uses granular permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
+    };
+    PlanIncludedUsageModel: {
+      /** Format: int64 */
+      mtCredits: number;
+      /** Format: int64 */
+      seats: number;
+      /** Format: int64 */
+      translationSlots: number;
+      /** Format: int64 */
+      translations: number;
+    };
+    PlanPricesModel: {
+      perSeat: number;
+      perThousandMtCredits?: number;
+      perThousandTranslations?: number;
+      subscriptionMonthly: number;
+      subscriptionYearly: number;
+    };
+    PlausibleDto: {
+      domain?: string;
+      scriptUrl: string;
+      url: string;
+    };
+    PreTranslationByTmRequest: {
+      keyIds: number[];
+      targetLanguageIds: number[];
+    };
+    PrepareSetEeLicenceKeyModel: {
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      usage: components["schemas"]["UsageModel"];
+    };
+    PrivateOrganizationModel: {
+      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
+      /**
+       * @description The role of currently authorized user.
+       *
+       * Can be null when user has direct access to one of the projects owned by the organization.
+       */
+      currentUserRole?: "MEMBER" | "OWNER";
+      /** @example This is a beautiful organization full of beautiful and clever people */
+      description?: string;
+      /** @example Features organization has enabled */
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+      )[];
+      /** Format: int64 */
+      id: number;
+      /** @example Beautiful organization */
+      name: string;
+      organizationModel?: components["schemas"]["OrganizationModel"];
+      quickStart?: components["schemas"]["QuickStartModel"];
+      /** @example btforg */
+      slug: string;
+    };
+    PrivateUserAccountModel: {
+      accountType: "LOCAL" | "MANAGED" | "THIRD_PARTY";
+      avatar?: components["schemas"]["Avatar"];
+      deletable: boolean;
+      emailAwaitingVerification?: string;
+      globalServerRole: "USER" | "ADMIN";
+      /** Format: int64 */
+      id: number;
+      mfaEnabled: boolean;
+      name?: string;
+      needsSuperJwtToken: boolean;
+      username: string;
+    };
+    ProjectActivityAuthorModel: {
+      avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
+      /** Format: int64 */
+      id: number;
+      name?: string;
+      username?: string;
+    };
+    ProjectActivityModel: {
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      counts?: { [key: string]: number };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      params?: { [key: string]: unknown };
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE"
+        | "COMPLEX_TAG_OPERATION"
+        | "TASKS_CREATE"
+        | "TASK_CREATE"
+        | "TASK_UPDATE"
+        | "TASK_KEYS_UPDATE"
+        | "TASK_FINISH"
+        | "TASK_CLOSE"
+        | "TASK_REOPEN"
+        | "TASK_KEY_UPDATE"
+        | "ORDER_TRANSLATION";
+    };
+    ProjectAiPromptCustomizationModel: {
+      /**
+       * @description The project description used in the  prompt that helps AI translator to understand the context of your project.
+       * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
+       */
+      description?: string;
+    };
+    ProjectInvitationModel: {
+      code?: string;
+      /** Format: date-time */
+      createdAt: string;
+      createdBy?: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      id: number;
+      invitedUserEmail?: string;
+      invitedUserName?: string;
+      permission: components["schemas"]["PermissionWithAgencyModel"];
+      permittedLanguageIds?: number[];
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+    };
+    ProjectInviteUserDto: {
+      /**
+       * Format: int64
+       * @description Id of invited agency
+       */
+      agencyId?: number;
+      /** @description Email to send invitation to */
+      email?: string;
+      /**
+       * @deprecated
+       * @description Deprecated -> use translate languages
+       */
+      languages?: number[];
+      /** @description Name of invited user */
+      name?: string;
+      /**
+       * @description Granted scopes for the invited user
+       * @example translations.view,translations.edit
+       */
+      scopes?: string[];
+      /**
+       * @deprecated
+       * @description Languages user can change translation state (review)
+       */
+      stateChangeLanguages?: number[];
+      /**
+       * @deprecated
+       * @description Languages user can translate to
+       */
+      translateLanguages?: number[];
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * @deprecated
+       * @description Languages user can view
+       */
+      viewLanguages?: number[];
+    };
+    ProjectModel: {
+      avatar?: components["schemas"]["Avatar"];
+      baseLanguage?: components["schemas"]["LanguageModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
+      defaultNamespace?: components["schemas"]["NamespaceModel"];
+      description?: string;
+      directPermission?: components["schemas"]["PermissionModel"];
+      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
+      organizationRole?: "MEMBER" | "OWNER";
+      slug?: string;
+      useNamespaces: boolean;
+    };
+    ProjectStatistics: {
+      /** Format: int64 */
+      keyCount: number;
+      /** Format: int64 */
+      languageCount: number;
+      /** Format: int64 */
+      projectId: number;
+      translationStatePercentages: { [key: string]: number };
+    };
+    ProjectStatsModel: {
+      /** Format: int64 */
+      baseWordsCount: number;
+      /** Format: int64 */
+      keyCount: number;
+      /** Format: int32 */
+      languageCount: number;
+      languageStats: components["schemas"]["LanguageStatsModel"][];
+      /** Format: int64 */
+      membersCount: number;
+      /** Format: int64 */
+      projectId: number;
+      /** Format: double */
+      reviewedPercentage: number;
+      /** Format: int64 */
+      tagCount: number;
+      /** Format: int64 */
+      taskCount: number;
+      /** Format: double */
+      translatedPercentage: number;
+    };
+    ProjectTransferOptionModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      slug: string;
+    };
+    ProjectWithStatsModel: {
+      avatar?: components["schemas"]["Avatar"];
+      baseLanguage?: components["schemas"]["LanguageModel"];
+      computedPermission: components["schemas"]["ComputedPermissionModel"];
+      description?: string;
+      directPermission?: components["schemas"]["PermissionModel"];
+      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
+      icuPlaceholders: boolean;
+      /** Format: int64 */
+      id: number;
+      languages: components["schemas"]["LanguageModel"][];
+      name: string;
+      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
+      organizationRole?: "MEMBER" | "OWNER";
+      slug?: string;
+      stats: components["schemas"]["ProjectStatistics"];
+    };
+    PropertyModification: {
+      new?: { [key: string]: unknown };
+      old?: { [key: string]: unknown };
+    };
+    PublicBillingConfigurationDTO: {
+      enabled: boolean;
+    };
+    PublicConfigurationDTO: {
+      allowRegistrations: boolean;
+      appName: string;
+      authMethods?: components["schemas"]["AuthMethodsDTO"];
+      authentication: boolean;
+      billing: components["schemas"]["PublicBillingConfigurationDTO"];
+      capterraTracker?: string;
+      chatwootToken?: string;
+      clientSentryDsn?: string;
+      contentDeliveryConfigured: boolean;
+      ga4Tag?: string;
+      internalControllerEnabled: boolean;
+      machineTranslationServices: components["schemas"]["MtServicesDTO"];
+      /** Format: int64 */
+      maxTranslationTextLength: number;
+      /** Format: int32 */
+      maxUploadFileSize: number;
+      nativeEnabled: boolean;
+      needsEmailVerification: boolean;
+      passwordResettable: boolean;
+      plausible: components["schemas"]["PlausibleDto"];
+      postHogApiKey?: string;
+      postHogHost?: string;
+      recaptchaSiteKey?: string;
+      screenshotsUrl: string;
+      showVersion: boolean;
+      slack: components["schemas"]["SlackDTO"];
+      userCanCreateOrganizations: boolean;
+      userSourceField: boolean;
+      version: string;
+    };
+    PublicInvitationModel: {
+      code: string;
+      createdBy?: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      id: number;
+      organizationName?: string;
+      projectName?: string;
+    };
+    PublicUsageModel: {
+      /**
+       * Format: int64
+       * @description The maximum amount organization can spend on MT credit usage before they reach the spending limit
+       */
+      availablePayAsYouGoMtCredits: number;
+      /**
+       * Format: int64
+       * @description Current balance of standard credits. Standard credits are refilled every month
+       */
+      creditBalance: number;
+      /**
+       * Format: int64
+       * @description Date when credits will be refilled. (In epoch format)
+       */
+      creditBalanceNextRefillAt: number;
+      /**
+       * Format: int64
+       * @description Date when credits were refilled. (In epoch format)
+       */
+      creditBalanceRefilledAt: number;
+      /**
+       * Format: int64
+       * @description Currently used credits over credits included in plan and extra credits
+       */
+      currentPayAsYouGoMtCredits: number;
+      /**
+       * Format: int64
+       * @description How many translations slots are currently used by organization
+       */
+      currentTranslationSlots: number;
+      /**
+       * Format: int64
+       * @description How many non-empty translations are currently stored by organization
+       */
+      currentTranslations: number;
+      /**
+       * Format: int64
+       * @description Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits
+       */
+      extraCreditBalance: number;
+      /**
+       * Format: int64
+       * @description How many credits are included in your current plan
+       */
+      includedMtCredits: number;
+      /**
+       * Format: int64
+       * @description How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs
+       */
+      includedTranslationSlots: number;
+      /**
+       * Format: int64
+       * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
+       */
+      includedTranslations: number;
+      /** Format: int64 */
+      organizationId: number;
+      /**
+       * Format: int64
+       * @description How many translations can be stored within your organization
+       */
+      translationSlotsLimit: number;
+      /**
+       * Format: int64
+       * @description How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
+       */
+      translationsLimit: number;
+    };
+    QuickStartModel: {
+      completedSteps: string[];
+      finished: boolean;
+      open: boolean;
+    };
+    RegenerateApiKeyDto: {
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null key never expires.
+       * @example 1661172869000
+       */
+      expiresAt?: number;
+    };
+    RegeneratePatDto: {
+      /**
+       * Format: int64
+       * @description Expiration date in epoch format (milliseconds). When null key never expires.
+       * @example 1661172869000
+       */
+      expiresAt?: number;
+    };
+    /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
+    RelatedKeyDto: {
+      keyName: string;
+      namespace?: string;
+    };
+    ResetPassword: {
+      code: string;
+      email: string;
+      password?: string;
+    };
+    ResetPasswordRequest: {
+      callbackUrl: string;
+      email: string;
+    };
+    RevealedApiKeyModel: {
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
+      /** @description Resulting user's api key */
+      key: string;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** Format: int64 */
+      projectId: number;
+      projectName: string;
+      scopes: string[];
+      userFullName?: string;
+      username?: string;
+    };
+    RevealedPatModel: {
+      /** Format: int64 */
+      createdAt: number;
+      description: string;
+      /** Format: int64 */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      token: string;
+      /** Format: int64 */
+      updatedAt: number;
+    };
+    S3ContentStorageConfigDto: {
+      accessKey?: string;
+      bucketName: string;
+      contentStorageType?: "S3" | "AZURE";
+      enabled?: boolean;
+      endpoint: string;
+      secretKey?: string;
+      signingRegion: string;
+    };
+    S3ContentStorageConfigModel: {
+      bucketName: string;
+      endpoint: string;
+      signingRegion: string;
+    };
+    ScreenshotInfoDto: {
+      location?: string;
+      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
+      text?: string;
+    };
+    /** @description Screenshots of the key */
+    ScreenshotModel: {
+      /** Format: date-time */
+      createdAt?: string;
+      fileUrl: string;
+      /**
+       * @description File name, which may be downloaded from the screenshot path.
+       *
+       * When images are secured. Encrypted timestamp is appended to the filename.
+       */
+      filename: string;
+      /** Format: int32 */
+      height?: number;
+      /** Format: int64 */
+      id: number;
+      keyReferences: components["schemas"]["KeyInScreenshotModel"][];
+      location?: string;
+      /**
+       * @description Thumbnail file name, which may be downloaded from the screenshot path.
+       *
+       * When images are secured. Encrypted timestamp is appended to the filename.
+       */
+      thumbnail: string;
+      thumbnailUrl: string;
+      /** Format: int32 */
+      width?: number;
+    };
+    SelectAllResponse: {
+      ids: number[];
+    };
+    SelfHostedEePlanModel: {
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+      )[];
+      free: boolean;
+      hasYearlyPrice: boolean;
+      /** Format: int64 */
+      id: number;
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      name: string;
+      nonCommercial: boolean;
+      prices: components["schemas"]["PlanPricesModel"];
+      public: boolean;
+    };
+    SetDisabledLanguagesRequest: {
+      languageIds: number[];
+    };
+    SetFileNamespaceRequest: {
+      namespace?: string;
+    };
+    SetKeysNamespaceRequest: {
+      keyIds: number[];
+      namespace?: string;
+    };
+    SetLanguagePromptCustomizationRequest: {
+      /**
+       * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
+       * @example For arabic language, we are super formal. Always use these translations:
+       * Paper -> ورقة
+       * Office -> مكتب
+       */
+      description?: string;
+    };
+    SetLicenseKeyDto: {
+      licenseKey: string;
+    };
+    SetMachineTranslationSettingsDto: {
+      settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
+    };
+    SetOrganizationRoleDto: {
+      roleType: "MEMBER" | "OWNER";
+    };
+    SetProjectPromptCustomizationRequest: {
+      /**
+       * @description The project description used in the  prompt that helps AI translator to understand the context of your project.
+       * @example We are Dunder Mifflin, a paper company. We sell paper. This is an project of translations for out paper selling app.
+       */
+      description?: string;
+    };
+    SetTranslationsResponseModel: {
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      keyId: number;
+      keyIsPlural: boolean;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      keyName: string;
+      /**
+       * @description The namespace of the key
+       * @example homepage
+       */
+      keyNamespace?: string;
+      /**
+       * @description Translations object containing values updated in this request
+       * @example [object Object]
+       */
+      translations: {
+        [key: string]: components["schemas"]["TranslationModel"];
+      };
+    };
+    SetTranslationsStateStateRequest: {
+      keyIds: number[];
+      languageIds: number[];
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+    };
+    SetTranslationsWithKeyDto: {
+      /**
+       * @description Key name to set translations for
+       * @example what_a_key_to_translate
+       */
+      key: string;
+      /**
+       * @description List of languages to return translations for.
+       *
+       * If not provided, only modified translation will be provided.
+       *
+       * @example en,de,fr
+       */
+      languagesToReturn?: string[];
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      /**
        * @description Object mapping language tag to translation
        * @example [object Object]
        */
       translations: { [key: string]: string };
-      /**
-       * @description Tags of the key
-       * @example homepage,user-profile
-       */
-      tags?: string[];
     };
-    CreateKeyDto: {
-      /** @description Name of the key */
+    SignUpDto: {
+      callbackUrl?: string;
+      email: string;
+      invitationCode?: string;
       name: string;
-      namespace?: string;
-      translations?: { [key: string]: string };
-      /** @description Translation states to update, if not provided states won't be modified */
-      states?: { [key: string]: "TRANSLATED" | "REVIEWED" };
-      tags?: string[];
-      /** @description Ids of screenshots uploaded with /v2/image-upload endpoint */
-      screenshotUploadedImageIds?: number[];
-      screenshots?: components["schemas"]["KeyScreenshotDto"][];
-      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
-      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
-      /**
-       * @description Description of the key
-       * @example This key is used on homepage. It's a label of sign up button.
-       */
+      organizationName?: string;
+      password: string;
+      recaptchaToken?: string;
+      /** @description Where did the user find us? */
+      userSource?: string;
+    };
+    SimpleOrganizationModel: {
+      avatar?: components["schemas"]["Avatar"];
+      basePermissions: components["schemas"]["PermissionModel"];
+      /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
-      /** @description If key is pluralized. If it will be reflected in the editor */
-      isPlural: boolean;
-      /** @description The argument name for the plural. If null, value will be guessed from the values provided in translations. */
-      pluralArgName?: string;
+      /** Format: int64 */
+      id: number;
+      /** @example Beautiful organization */
+      name: string;
+      /** @example btforg */
+      slug: string;
+    };
+    SimpleProjectModel: {
+      avatar?: components["schemas"]["Avatar"];
+      baseLanguage?: components["schemas"]["LanguageModel"];
+      description?: string;
+      icuPlaceholders: boolean;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      slug?: string;
+    };
+    SimpleUserAccountModel: {
+      avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
+      /** Format: int64 */
+      id: number;
+      name?: string;
+      username: string;
+    };
+    SingleStepImportRequest: {
+      /** @description If true, placeholders from other formats will be converted to ICU when possible */
+      convertPlaceholdersToIcu: boolean;
+      /** @description If false, only updates keys, skipping the creation of new keys */
+      createNewKeys: boolean;
+      /** @description Definition of mapping for each file to import. */
+      fileMappings: components["schemas"]["ImportFileMapping"][];
+      /**
+       * @description Whether to override existing translation data.
+       *
+       * When set to `KEEP`, existing translations will be kept.
+       *
+       * When set to `OVERRIDE`, existing translations will be overwrote.
+       *
+       * When set to `NO_FORCE`, error will be thrown on conflict.
+       */
+      forceMode: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      /**
+       * @description Maps the languages from imported files to languages existing in the Tolgee platform.
+       *
+       * Use this field only when your files contain multiple languages (e.g., XLIFF files).
+       *
+       * Otherwise, use the `languageTag` property of `fileMappings`.
+       *
+       * Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` element. Using this field you can map source and target values to languages stored in the Tolgee Platform.
+       */
+      languageMappings?: components["schemas"]["LanguageMapping"][];
+      /** @description If true, key descriptions will be overridden by the import */
+      overrideKeyDescriptions: boolean;
+      /** @description If yes, keys from project that were not included in import will be deleted. */
+      removeOtherKeys?: boolean;
+      /**
+       * @description When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys.
+       * @example .
+       */
+      structureDelimiter?: string;
+      /** @description Keys created by this import will be tagged with these tags. It add tags only to new keys. The keys that already exist will not be tagged. */
+      tagNewKeys: string[];
+    };
+    SlackCommandDto: {
+      channel_id: string;
+      channel_name: string;
+      command: string;
+      team_domain: string;
+      team_id: string;
+      text: string;
+      token?: string;
+      trigger_id?: string;
+      user_id: string;
+      user_name: string;
+    };
+    SlackDTO: {
+      connected: boolean;
+      enabled: boolean;
+    };
+    SlackUserInfoModel: {
+      slackAvatar: string;
+      slackId: string;
+      slackName?: string;
+      slackRealName?: string;
+      teamName: string;
+    };
+    SsoGlobalPublicConfigDTO: {
+      clientId?: string;
+      customLoginText?: string;
+      customLogoUrl?: string;
+      domain?: string;
+      enabled: boolean;
+    };
+    SsoOrganizationsPublicConfigDTO: {
+      enabled: boolean;
+    };
+    SsoTenantModel: {
+      authorizationUri: string;
+      clientId: string;
+      clientSecret: string;
+      domain: string;
+      enabled: boolean;
+      global: boolean;
+      tokenUri: string;
+    };
+    SsoUrlResponse: {
+      redirectUrl: string;
     };
     StorageTestResult: {
-      success: boolean;
       message?:
         | "unauthenticated"
         | "api_access_forbidden"
@@ -3196,403 +4314,28 @@ export interface components {
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled";
       params?: { [key: string]: unknown }[];
+      success: boolean;
     };
-    UntagKeysRequest: {
-      keyIds: number[];
-      tags: string[];
-    };
-    BatchJobModel: {
-      /**
-       * Format: int64
-       * @description Batch job id
-       */
-      id: number;
-      /** @description Status of the batch job */
-      status:
-        | "PENDING"
-        | "RUNNING"
-        | "SUCCESS"
-        | "FAILED"
-        | "CANCELLED"
-        | "DEBOUNCED";
-      /** @description Type of the batch job */
-      type:
-        | "PRE_TRANSLATE_BT_TM"
-        | "MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "DELETE_KEYS"
-        | "SET_TRANSLATIONS_STATE"
-        | "CLEAR_TRANSLATIONS"
-        | "COPY_TRANSLATIONS"
-        | "TAG_KEYS"
-        | "UNTAG_KEYS"
-        | "SET_KEYS_NAMESPACE"
-        | "AUTOMATION";
-      /**
-       * Format: int32
-       * @description Total items, that have been processed so far
-       */
-      progress: number;
-      /**
-       * Format: int32
-       * @description Total items
-       */
-      totalItems: number;
-      author?: components["schemas"]["SimpleUserAccountModel"];
-      /**
-       * Format: int64
-       * @description The time when the job created
-       */
-      createdAt: number;
-      /**
-       * Format: int64
-       * @description The time when the job was last updated (status change)
-       */
-      updatedAt: number;
-      /**
-       * Format: int64
-       * @description The activity revision id, that stores the activity details of the job
-       */
-      activityRevisionId?: number;
-      /** @description If the job failed, this is the error message */
-      errorMessage?: string;
-    };
-    TagKeysRequest: {
-      keyIds: number[];
-      tags: string[];
-    };
-    SetTranslationsStateStateRequest: {
-      keyIds: number[];
-      languageIds: number[];
-      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
-    };
-    SetKeysNamespaceRequest: {
-      keyIds: number[];
-      namespace?: string;
-    };
-    PreTranslationByTmRequest: {
-      keyIds: number[];
-      targetLanguageIds: number[];
-    };
-    MachineTranslationRequest: {
-      keyIds: number[];
-      targetLanguageIds: number[];
-    };
-    DeleteKeysRequest: {
-      keyIds: number[];
-    };
-    CopyTranslationRequest: {
-      keyIds: number[];
-      /** Format: int64 */
-      sourceLanguageId: number;
-      targetLanguageIds: number[];
-    };
-    ClearTranslationsRequest: {
-      keyIds: number[];
-      languageIds: number[];
-    };
-    /** @description Definition of mapping for each file to import. */
-    ImportFileMapping: {
-      /** @description Name of the file to import. This is the name of the file provided in `files` request part or in uploaded archive. */
-      fileName: string;
-      /** @description Namespace to import the file to. If not provided, the key will be imported without namespace. */
-      namespace?: string;
-      /**
-       * @description Format of the file. If not provided, Tolgee will try to guess the format from the file name or file contents.
-       *
-       * It is recommended to provide these values to prevent any issues with format detection.
-       */
-      format?:
-        | "CSV_ICU"
-        | "CSV_JAVA"
-        | "CSV_PHP"
-        | "CSV_RUBY"
-        | "JSON_I18NEXT"
-        | "JSON_ICU"
-        | "JSON_JAVA"
-        | "JSON_PHP"
-        | "JSON_RUBY"
-        | "JSON_C"
-        | "PO_PHP"
-        | "PO_C"
-        | "PO_JAVA"
-        | "PO_ICU"
-        | "PO_RUBY"
-        | "STRINGS"
-        | "STRINGSDICT"
-        | "APPLE_XLIFF"
-        | "PROPERTIES_ICU"
-        | "PROPERTIES_JAVA"
-        | "PROPERTIES_UNKNOWN"
-        | "ANDROID_XML"
-        | "COMPOSE_XML"
-        | "FLUTTER_ARB"
-        | "YAML_RUBY"
-        | "YAML_JAVA"
-        | "YAML_ICU"
-        | "YAML_PHP"
-        | "YAML_UNKNOWN"
-        | "XLIFF_ICU"
-        | "XLIFF_JAVA"
-        | "XLIFF_PHP"
-        | "XLIFF_RUBY"
-        | "RESX_ICU"
-        | "XLSX_ICU"
-        | "XLSX_JAVA"
-        | "XLSX_PHP"
-        | "XLSX_RUBY";
-      /**
-       * @description The existing language tag in the Tolgee platform to which the imported language should be mapped.
-       *
-       * When null, Tolgee will try to guess the language from the file contents or file name.
-       */
-      languageTag?: string;
-    };
-    /**
-     * @description Maps the languages from imported files to languages existing in the Tolgee platform.
-     *
-     * Use this field only when your files contain multiple languages (e.g., XLIFF files).
-     *
-     * Otherwise, use the `languageTag` property of `fileMappings`.
-     *
-     * Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` element. Using this field you can map source and target values to languages stored in the Tolgee Platform.
-     */
-    LanguageMapping: {
-      /**
-       * @description The language from the imported file.
-       *
-       * For xliff files, this is the `source-language` or the `target-language` attribute value of `file` element.
-       * @example en-US
-       */
-      importLanguage: string;
-      /**
-       * @description The tag of language existing in the Tolgee platform to which the imported language should be mapped.
-       * @example en-US
-       */
-      platformLanguageTag: string;
-    };
-    SingleStepImportRequest: {
-      /**
-       * @description When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys.
-       * @example .
-       */
-      structureDelimiter?: string;
-      /**
-       * @description Whether to override existing translation data.
-       *
-       * When set to `KEEP`, existing translations will be kept.
-       *
-       * When set to `OVERRIDE`, existing translations will be overwrote.
-       *
-       * When set to `NO_FORCE`, error will be thrown on conflict.
-       */
-      forceMode: "OVERRIDE" | "KEEP" | "NO_FORCE";
-      /**
-       * @description Maps the languages from imported files to languages existing in the Tolgee platform.
-       *
-       * Use this field only when your files contain multiple languages (e.g., XLIFF files).
-       *
-       * Otherwise, use the `languageTag` property of `fileMappings`.
-       *
-       * Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` element. Using this field you can map source and target values to languages stored in the Tolgee Platform.
-       */
-      languageMappings?: components["schemas"]["LanguageMapping"][];
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
-      /** @description Definition of mapping for each file to import. */
-      fileMappings: components["schemas"]["ImportFileMapping"][];
-      /** @description Keys created by this import will be tagged with these tags. It add tags only to new keys. The keys that already exist will not be tagged. */
-      tagNewKeys: string[];
-      /** @description If yes, keys from project that were not included in import will be deleted. */
-      removeOtherKeys?: boolean;
-    };
-    ImportAddFilesResultModel: {
-      errors: components["schemas"]["ErrorResponseBody"][];
-      warnings: components["schemas"]["ErrorResponseBody"][];
-      result?: components["schemas"]["PagedModelImportLanguageModel"];
-    };
-    ImportLanguageModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      /** Format: int64 */
-      existingLanguageId?: number;
-      existingLanguageTag?: string;
-      existingLanguageAbbreviation?: string;
-      existingLanguageName?: string;
-      importFileName: string;
-      /** Format: int64 */
-      importFileId: number;
-      /** Format: int32 */
-      importFileIssueCount: number;
-      namespace?: string;
-      /** Format: int32 */
-      totalCount: number;
-      /** Format: int32 */
-      conflictCount: number;
-      /** Format: int32 */
-      resolvedCount: number;
-    };
-    PageMetadata: {
-      /** Format: int64 */
-      size?: number;
-      /** Format: int64 */
-      totalElements?: number;
-      /** Format: int64 */
-      totalPages?: number;
-      /** Format: int64 */
-      number?: number;
-    };
-    PagedModelImportLanguageModel: {
-      _embedded?: {
-        languages?: components["schemas"]["ImportLanguageModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    ExportParams: {
-      /**
-       * @description Languages to be contained in export.
-       *
-       * If null, all languages are exported
-       * @example en
-       */
-      languages?: string[];
-      /** @description Format to export to */
-      format:
-        | "JSON"
-        | "JSON_TOLGEE"
-        | "XLIFF"
-        | "PO"
-        | "APPLE_STRINGS_STRINGSDICT"
-        | "APPLE_XLIFF"
-        | "ANDROID_XML"
-        | "COMPOSE_XML"
-        | "FLUTTER_ARB"
-        | "PROPERTIES"
-        | "YAML_RUBY"
-        | "YAML"
-        | "JSON_I18NEXT"
-        | "CSV"
-        | "RESX_ICU"
-        | "XLSX";
-      /**
-       * @description Delimiter to structure file content.
-       *
-       * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
-       *
-       * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
-       * specific formats like `YAML_RUBY` don't honor this parameter.
-       */
-      structureDelimiter?: string;
-      /** @description Filter key IDs to be contained in export */
-      filterKeyId?: number[];
-      /** @description Filter key IDs not to be contained in export */
-      filterKeyIdNot?: number[];
-      /**
-       * @description Filter keys tagged by.
-       *
-       * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
-       */
-      filterTag?: string;
-      /** @description Filter keys tagged by one of provided tags */
-      filterTagIn?: string[];
-      /** @description Filter keys not tagged by one of provided tags */
-      filterTagNotIn?: string[];
-      /** @description Filter keys with prefix */
-      filterKeyPrefix?: string;
-      /** @description Filter translations with state. By default, all states except untranslated is exported. */
-      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED")[];
-      /** @description Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
-      filterNamespace?: string[];
-      zip: boolean;
-      /**
-       * @description Message format to be used for export.
-       *
-       * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
-       *
-       * This property is honored only for generic formats like JSON or YAML.
-       * For specific formats like `YAML_RUBY` it's ignored.
-       */
-      messageFormat?:
-        | "C_SPRINTF"
-        | "PHP_SPRINTF"
-        | "JAVA_STRING_FORMAT"
-        | "APPLE_SPRINTF"
-        | "RUBY_SPRINTF"
-        | "I18NEXT"
-        | "ICU";
-      /**
-       * @description This is a template that defines the structure of the resulting .zip file content.
-       *
-       * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
-       * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
-       *
-       * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
-       * the English translations of the `home` namespace will be stored in `home/en.json`.
-       *
-       * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
-       *
-       * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
-       * but in Android format. (e.g., en-rUS)
-       */
-      fileStructureTemplate?: string;
-      /**
-       * @description If true, for structured formats (like JSON) arrays are supported.
-       *
-       * e.g. Key hello[0] will be exported as {"hello": ["..."]}
-       */
-      supportArrays: boolean;
-    };
-    BigMetaDto: {
-      /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
-      relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
-    };
-    TranslationCommentWithLangKeyDto: {
-      /** Format: int64 */
-      keyId: number;
-      /** Format: int64 */
-      languageId: number;
-      text: string;
-      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
-    };
-    TranslationWithCommentModel: {
-      translation: components["schemas"]["TranslationModel"];
-      comment: components["schemas"]["TranslationCommentModel"];
-    };
+    StreamingResponseBody: { [key: string]: unknown };
     SuggestRequestDto: {
+      /** @description Text value of base translation. Useful, when base translation is not stored yet. */
+      baseText?: string;
+      /** @description Whether base text is plural. This value is ignored if baseText is null. */
+      isPlural?: boolean;
       /**
        * Format: int64
        * @description Key Id to get results for. Use when key is stored already.
        */
       keyId?: number;
-      /** Format: int64 */
-      targetLanguageId: number;
-      /** @description Text value of base translation. Useful, when base translation is not stored yet. */
-      baseText?: string;
-      /** @description Whether base text is plural. This value is ignored if baseText is null. */
-      isPlural?: boolean;
+      plural?: boolean;
       /** @description List of services to use. If null, then all enabled services are used. */
       services?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE")[];
-      plural?: boolean;
-    };
-    PagedModelTranslationMemoryItemModel: {
-      _embedded?: {
-        translationMemoryItems?: components["schemas"]["TranslationMemoryItemModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    TranslationMemoryItemModel: {
-      targetText: string;
-      baseText: string;
-      keyName: string;
-      /** Format: float */
-      similarity: number;
+      /** Format: int64 */
+      targetLanguageId: number;
     };
     SuggestResultModel: {
+      /** @description If true, the base translation was empty and no translation was provided. */
+      baseBlank: boolean;
       /**
        * @deprecated
        * @description String translations provided by enabled services. (deprecated, use `result` instead)
@@ -3608,906 +4351,190 @@ export interface components {
        * @example [object Object]
        */
       result?: { [key: string]: components["schemas"]["TranslationItemModel"] };
-      /** @description If true, the base translation was empty and no translation was provided. */
-      baseBlank: boolean;
+    };
+    SumUsageItemModel: {
+      total: number;
+      /** Format: int64 */
+      unusedQuantity: number;
+      /** Format: int64 */
+      usedQuantity: number;
+      /** Format: int64 */
+      usedQuantityOverPlan: number;
+    };
+    SuperTokenRequest: {
+      /** @description Has to be provided when TOTP enabled */
+      otp?: string;
+      /** @description Has to be provided when TOTP not enabled */
+      password?: string;
+    };
+    TagKeyDto: {
+      name: string;
+    };
+    TagKeysRequest: {
+      keyIds: number[];
+      tags: string[];
+    };
+    /** @description Tags of key */
+    TagModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+    };
+    TaskKeysResponse: {
+      keys: number[];
+    };
+    TaskModel: {
+      agency?: components["schemas"]["TranslationAgencySimpleModel"];
+      assignees: components["schemas"]["SimpleUserAccountModel"][];
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      baseCharacterCount: number;
+      /** Format: int64 */
+      baseWordCount: number;
+      /** Format: int64 */
+      closedAt?: number;
+      /** Format: int64 */
+      createdAt?: number;
+      description: string;
+      /** Format: int64 */
+      doneItems: number;
+      /** Format: int64 */
+      dueDate?: number;
+      language: components["schemas"]["LanguageModel"];
+      name: string;
+      /** Format: int64 */
+      number: number;
+      state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
+      /** Format: int64 */
+      totalItems: number;
+      type: "TRANSLATE" | "REVIEW";
+    };
+    TaskPerUserReportModel: {
+      /** Format: int64 */
+      baseCharacterCount: number;
+      /** Format: int64 */
+      baseWordCount: number;
+      /** Format: int64 */
+      doneItems: number;
+      user: components["schemas"]["SimpleUserAccountModel"];
+    };
+    TaskWithProjectModel: {
+      agency?: components["schemas"]["TranslationAgencySimpleModel"];
+      assignees: components["schemas"]["SimpleUserAccountModel"][];
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      baseCharacterCount: number;
+      /** Format: int64 */
+      baseWordCount: number;
+      /** Format: int64 */
+      closedAt?: number;
+      /** Format: int64 */
+      createdAt?: number;
+      description: string;
+      /** Format: int64 */
+      doneItems: number;
+      /** Format: int64 */
+      dueDate?: number;
+      language: components["schemas"]["LanguageModel"];
+      name: string;
+      /** Format: int64 */
+      number: number;
+      project: components["schemas"]["SimpleProjectModel"];
+      state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
+      /** Format: int64 */
+      totalItems: number;
+      type: "TRANSLATE" | "REVIEW";
+    };
+    TextNode: { [key: string]: unknown };
+    TranslationAgencySimpleModel: {
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      id: number;
+      name: string;
+      url?: string;
+    };
+    TranslationCommentDto: {
+      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+      text: string;
+    };
+    TranslationCommentModel: {
+      author: components["schemas"]["SimpleUserAccountModel"];
+      /**
+       * Format: date-time
+       * @description Date when it was created
+       */
+      createdAt: string;
+      /**
+       * Format: int64
+       * @description Id of translation comment record
+       */
+      id: number;
+      /** @description State of translation */
+      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+      /** @description Text of comment */
+      text: string;
+      /**
+       * Format: date-time
+       * @description Date when it was updated
+       */
+      updatedAt: string;
+    };
+    TranslationCommentWithLangKeyDto: {
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      languageId: number;
+      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+      text: string;
+    };
+    TranslationHistoryModel: {
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /** @description Modified fields */
+      modifications?: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+      revisionType: "ADD" | "MOD" | "DEL";
+      /**
+       * Format: int64
+       * @description Unix timestamp of the revision
+       */
+      timestamp: number;
     };
     /**
      * @description Results provided by enabled services.
      * @example [object Object]
      */
     TranslationItemModel: {
-      output: string;
       contextDescription?: string;
+      output: string;
     };
-    ScreenshotInfoDto: {
-      text?: string;
-      positions?: components["schemas"]["KeyInScreenshotPositionDto"][];
-      location?: string;
-    };
-    CreatePatDto: {
-      /** @description Description of the PAT */
-      description: string;
-      /**
-       * Format: int64
-       * @description Expiration date in epoch format (milliseconds). When null, token never expires.
-       * @example 1661172869000
-       */
-      expiresAt?: number;
-    };
-    ConnectToSlackDto: {
-      code: string;
-    };
-    ImageUploadInfoDto: {
-      location?: string;
-    };
-    UploadedImageModel: {
-      /** Format: int64 */
-      id: number;
-      filename: string;
-      fileUrl: string;
-      requestFilename: string;
-      /** Format: date-time */
-      createdAt: string;
-      location?: string;
-    };
-    CreateApiKeyDto: {
-      /** Format: int64 */
-      projectId: number;
-      scopes: string[];
-      /** @description Description of the project API key */
-      description?: string;
-      /**
-       * Format: int64
-       * @description Expiration date in epoch format (milliseconds). When null key never expires.
-       * @example 1661172869000
-       */
-      expiresAt?: number;
-    };
-    TextNode: { [key: string]: unknown };
-    SignUpDto: {
-      name: string;
-      email: string;
-      organizationName?: string;
-      password: string;
-      invitationCode?: string;
-      callbackUrl?: string;
-      /** @description Where did the user find us? */
-      userSource?: string;
-      recaptchaToken?: string;
-    };
-    ResetPassword: {
-      email: string;
-      code: string;
-      password?: string;
-    };
-    ResetPasswordRequest: {
-      callbackUrl: string;
-      email: string;
-    };
-    LoginRequest: {
-      username: string;
-      password: string;
-      otp?: string;
-    };
-    DomainRequest: {
-      domain: string;
-      state: string;
-    };
-    SsoUrlResponse: {
-      redirectUrl: string;
-    };
-    CollectionModelSimpleOrganizationModel: {
-      _embedded?: {
-        organizations?: components["schemas"]["SimpleOrganizationModel"][];
-      };
-    };
-    PagedModelTaskWithProjectModel: {
-      _embedded?: {
-        tasks?: components["schemas"]["TaskWithProjectModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    SimpleProjectModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      description?: string;
-      slug?: string;
-      avatar?: components["schemas"]["Avatar"];
-      baseLanguage?: components["schemas"]["LanguageModel"];
-      icuPlaceholders: boolean;
-    };
-    TaskWithProjectModel: {
-      /** Format: int64 */
-      number: number;
-      name: string;
-      description: string;
-      type: "TRANSLATE" | "REVIEW";
-      language: components["schemas"]["LanguageModel"];
-      /** Format: int64 */
-      dueDate?: number;
-      assignees: components["schemas"]["SimpleUserAccountModel"][];
-      /** Format: int64 */
-      totalItems: number;
-      /** Format: int64 */
-      doneItems: number;
-      /** Format: int64 */
-      baseWordCount: number;
-      /** Format: int64 */
-      baseCharacterCount: number;
-      author?: components["schemas"]["SimpleUserAccountModel"];
-      /** Format: int64 */
-      createdAt?: number;
-      /** Format: int64 */
-      closedAt?: number;
-      state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
-      project: components["schemas"]["SimpleProjectModel"];
-      agency?: components["schemas"]["TranslationAgencySimpleModel"];
-    };
-    UserPreferencesModel: {
-      language?: string;
-      /** Format: int64 */
-      preferredOrganizationId?: number;
-    };
-    SlackUserInfoModel: {
-      teamName: string;
-      slackName?: string;
-      slackId: string;
-      slackRealName?: string;
-      slackAvatar: string;
-    };
-    HierarchyItem: {
-      scope:
-        | "translations.view"
-        | "translations.edit"
-        | "keys.edit"
-        | "screenshots.upload"
-        | "screenshots.delete"
-        | "screenshots.view"
-        | "activity.view"
-        | "languages.edit"
-        | "admin"
-        | "project.edit"
-        | "members.view"
-        | "members.edit"
-        | "translation-comments.add"
-        | "translation-comments.edit"
-        | "translation-comments.set-state"
-        | "translations.state-edit"
-        | "keys.view"
-        | "keys.delete"
-        | "keys.create"
-        | "batch-jobs.view"
-        | "batch-jobs.cancel"
-        | "translations.batch-by-tm"
-        | "translations.batch-machine"
-        | "content-delivery.manage"
-        | "content-delivery.publish"
-        | "webhooks.manage"
-        | "tasks.view"
-        | "tasks.edit";
-      requires: components["schemas"]["HierarchyItem"][];
-    };
-    MachineTranslationProviderModel: {
-      /**
-       * @description BCP 47 tags of languages supported by the translation service. When null, all possible languages are supported.
-       *
-       * Please note that Tolgee tries to fall back to a higher subtag if the subtag is not supported.
-       *
-       * E.g., if `pt-BR` is not supported. Tolgee fallbacks to `pt`.
-       */
-      supportedLanguages?: string[];
-    };
-    AnnouncementDto: {
-      type:
-        | "FEATURE_BATCH_OPERATIONS"
-        | "FEATURE_MT_FORMALITY"
-        | "FEATURE_CONTENT_DELIVERY_AND_WEBHOOKS"
-        | "NEW_PRICING"
-        | "FEATURE_AI_CUSTOMIZATION"
-        | "FEATURE_VISUAL_EDITOR"
-        | "FEATURE_CLI_2"
-        | "FEATURE_TASKS";
-    };
-    AuthMethodsDTO: {
-      github: components["schemas"]["OAuthPublicConfigDTO"];
-      google: components["schemas"]["OAuthPublicConfigDTO"];
-      oauth2: components["schemas"]["OAuthPublicExtendsConfigDTO"];
-      ssoGlobal: components["schemas"]["SsoGlobalPublicConfigDTO"];
-      ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
-    };
-    InitialDataModel: {
-      serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
-      userInfo?: components["schemas"]["PrivateUserAccountModel"];
-      preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
-      languageTag?: string;
-      eeSubscription?: components["schemas"]["EeSubscriptionModel"];
-      announcement?: components["schemas"]["AnnouncementDto"];
-    };
-    MtServiceDTO: {
-      enabled: boolean;
-      defaultEnabledForProject: boolean;
-    };
-    MtServicesDTO: {
-      defaultPrimaryService?:
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE";
-      services: { [key: string]: components["schemas"]["MtServiceDTO"] };
-    };
-    OAuthPublicConfigDTO: {
-      clientId?: string;
-      enabled: boolean;
-    };
-    OAuthPublicExtendsConfigDTO: {
-      clientId?: string;
-      authorizationUrl?: string;
-      scopes?: string[];
-      enabled: boolean;
-    };
-    PlausibleDto: {
-      domain?: string;
-      url: string;
-      scriptUrl: string;
-    };
-    PrivateOrganizationModel: {
-      organizationModel?: components["schemas"]["OrganizationModel"];
-      /** @example Features organization has enabled */
-      enabledFeatures: (
-        | "GRANULAR_PERMISSIONS"
-        | "PRIORITIZED_FEATURE_REQUESTS"
-        | "PREMIUM_SUPPORT"
-        | "DEDICATED_SLACK_CHANNEL"
-        | "ASSISTED_UPDATES"
-        | "DEPLOYMENT_ASSISTANCE"
-        | "BACKUP_CONFIGURATION"
-        | "TEAM_TRAINING"
-        | "ACCOUNT_MANAGER"
-        | "STANDARD_SUPPORT"
-        | "PROJECT_LEVEL_CONTENT_STORAGES"
-        | "WEBHOOKS"
-        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
-        | "AI_PROMPT_CUSTOMIZATION"
-        | "SLACK_INTEGRATION"
-        | "TASKS"
-        | "SSO"
-        | "ORDER_TRANSLATION"
-      )[];
-      quickStart?: components["schemas"]["QuickStartModel"];
-      /** @example Beautiful organization */
-      name: string;
-      /** Format: int64 */
-      id: number;
-      basePermissions: components["schemas"]["PermissionModel"];
-      /**
-       * @description The role of currently authorized user.
-       *
-       * Can be null when user has direct access to one of the projects owned by the organization.
-       */
-      currentUserRole?: "MEMBER" | "OWNER";
-      /** @example btforg */
-      slug: string;
-      avatar?: components["schemas"]["Avatar"];
-      /** @example This is a beautiful organization full of beautiful and clever people */
-      description?: string;
-    };
-    PublicBillingConfigurationDTO: {
-      enabled: boolean;
-    };
-    PublicConfigurationDTO: {
-      machineTranslationServices: components["schemas"]["MtServicesDTO"];
-      billing: components["schemas"]["PublicBillingConfigurationDTO"];
-      version: string;
-      authentication: boolean;
-      authMethods?: components["schemas"]["AuthMethodsDTO"];
-      nativeEnabled: boolean;
-      passwordResettable: boolean;
-      allowRegistrations: boolean;
-      screenshotsUrl: string;
-      /** Format: int32 */
-      maxUploadFileSize: number;
-      clientSentryDsn?: string;
-      needsEmailVerification: boolean;
-      userCanCreateOrganizations: boolean;
-      appName: string;
-      showVersion: boolean;
-      internalControllerEnabled: boolean;
-      /** Format: int64 */
-      maxTranslationTextLength: number;
-      recaptchaSiteKey?: string;
-      chatwootToken?: string;
-      capterraTracker?: string;
-      ga4Tag?: string;
-      postHogApiKey?: string;
-      postHogHost?: string;
-      contentDeliveryConfigured: boolean;
-      userSourceField: boolean;
-      plausible: components["schemas"]["PlausibleDto"];
-      slack: components["schemas"]["SlackDTO"];
-    };
-    SlackDTO: {
-      enabled: boolean;
-      connected: boolean;
-    };
-    SsoGlobalPublicConfigDTO: {
-      enabled: boolean;
-      clientId?: string;
-      domain?: string;
-      customLogoUrl?: string;
-      customLoginText?: string;
-    };
-    SsoOrganizationsPublicConfigDTO: {
-      enabled: boolean;
-    };
-    CollectionModelExportFormatModel: {
-      _embedded?: {
-        exportFormats?: components["schemas"]["ExportFormatModel"][];
-      };
-    };
-    ExportFormatModel: {
-      format:
-        | "JSON"
-        | "JSON_TOLGEE"
-        | "XLIFF"
-        | "PO"
-        | "APPLE_STRINGS_STRINGSDICT"
-        | "APPLE_XLIFF"
-        | "ANDROID_XML"
-        | "COMPOSE_XML"
-        | "FLUTTER_ARB"
-        | "PROPERTIES"
-        | "YAML_RUBY"
-        | "YAML"
-        | "JSON_I18NEXT"
-        | "CSV"
-        | "RESX_ICU"
-        | "XLSX";
-      extension: string;
-      mediaType: string;
-      defaultFileStructureTemplate: string;
-    };
-    DocItem: {
-      name: string;
-      displayName?: string;
-      description?: string;
-    };
-    PagedModelProjectModel: {
-      _embedded?: {
-        projects?: components["schemas"]["ProjectModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelWebhookConfigModel: {
-      _embedded?: {
-        webhookConfigs?: components["schemas"]["WebhookConfigModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelUserAccountInProjectModel: {
-      _embedded?: {
-        users?: components["schemas"]["UserAccountInProjectModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    UserAccountInProjectModel: {
-      /** Format: int64 */
-      id: number;
-      username: string;
-      name?: string;
-      avatar?: components["schemas"]["Avatar"];
-      organizationRole?: "MEMBER" | "OWNER";
-      organizationBasePermission: components["schemas"]["PermissionModel"];
-      directPermission?: components["schemas"]["PermissionWithAgencyModel"];
-      computedPermission: components["schemas"]["ComputedPermissionModel"];
-    };
-    CollectionModelUsedNamespaceModel: {
-      _embedded?: {
-        namespaces?: components["schemas"]["UsedNamespaceModel"][];
-      };
-    };
-    UsedNamespaceModel: {
-      /**
-       * Format: int64
-       * @description The id of namespace. Null for default namespace.
-       * @example 10000048
-       */
-      id?: number;
-      /**
-       * @description Name of namespace. Null if default.
-       * @example homepage
-       */
-      name?: string;
-    };
-    TaskPerUserReportModel: {
-      user: components["schemas"]["SimpleUserAccountModel"];
-      /** Format: int64 */
-      doneItems: number;
-      /** Format: int64 */
-      baseCharacterCount: number;
-      /** Format: int64 */
-      baseWordCount: number;
-    };
-    TaskKeysResponse: {
-      keys: number[];
-    };
-    PagedModelSimpleUserAccountModel: {
-      _embedded?: {
-        users?: components["schemas"]["SimpleUserAccountModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelTaskModel: {
-      _embedded?: {
-        tasks?: components["schemas"]["TaskModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelNamespaceModel: {
-      _embedded?: {
-        namespaces?: components["schemas"]["NamespaceModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    CollectionModelLanguageInfoModel: {
-      _embedded?: {
-        languageInfos?: components["schemas"]["LanguageInfoModel"][];
-      };
-    };
-    LanguageInfoModel: {
-      /** Format: int64 */
-      languageId?: number;
-      languageTag?: string;
-      supportedServices: components["schemas"]["MtSupportedService"][];
-    };
-    MtSupportedService: {
-      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
-      formalitySupported: boolean;
-    };
-    KeySearchResultView: {
-      name: string;
-      /** Format: int64 */
-      id: number;
-      baseTranslation?: string;
-      translation?: string;
-      namespace?: string;
-      description?: string;
-    };
-    KeySearchSearchResultModel: {
-      view?: components["schemas"]["KeySearchResultView"];
-      name: string;
-      /** Format: int64 */
-      id: number;
-      baseTranslation?: string;
-      translation?: string;
-      namespace?: string;
-      description?: string;
-    };
-    PagedModelKeySearchSearchResultModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeySearchSearchResultModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelKeyModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelContentStorageModel: {
-      _embedded?: {
-        contentStorages?: components["schemas"]["ContentStorageModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelContentDeliveryConfigModel: {
-      _embedded?: {
-        contentDeliveryConfigs?: components["schemas"]["ContentDeliveryConfigModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    CollectionModelKeyModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyModel"][];
-      };
-    };
-    CollectionModelKeyDisabledLanguagesModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyDisabledLanguagesModel"][];
-      };
-    };
-    /** @description Disabled languages */
-    KeyDisabledLanguageModel: {
-      /** Format: int64 */
-      id: number;
-      tag: string;
-    };
-    KeyDisabledLanguagesModel: {
-      /**
-       * Format: int64
-       * @description Id of key record
-       */
-      id: number;
-      /**
-       * @description Name of key
-       * @example this_is_super_key
-       */
-      name: string;
-      /**
-       * @description Namespace of key
-       * @example homepage
-       */
-      namespace?: string;
-      /** @description Disabled languages */
-      disabledLanguages: components["schemas"]["KeyDisabledLanguageModel"][];
-    };
-    EntityDescriptionWithRelations: {
-      entityClass: string;
-      /** Format: int64 */
-      entityId: number;
-      data: { [key: string]: { [key: string]: unknown } };
-    };
-    ExistenceEntityDescription: {
-      entityClass: string;
-      /** Format: int64 */
-      entityId: number;
-      data: { [key: string]: { [key: string]: unknown } };
-      relations: {
-        [key: string]: components["schemas"]["EntityDescriptionWithRelations"];
-      };
-      exists?: boolean;
-    };
-    ModifiedEntityModel: {
-      entityClass: string;
-      /** Format: int64 */
-      entityId: number;
-      description?: { [key: string]: { [key: string]: unknown } };
-      modifications?: {
-        [key: string]: components["schemas"]["PropertyModification"];
-      };
-      relations?: {
-        [key: string]: components["schemas"]["ExistenceEntityDescription"];
-      };
-      exists?: boolean;
-    };
-    PagedModelModifiedEntityModel: {
-      _embedded?: {
-        modifiedEntities?: components["schemas"]["ModifiedEntityModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PropertyModification: {
-      old?: { [key: string]: unknown };
-      new?: { [key: string]: unknown };
-    };
-    ProjectActivityAuthorModel: {
-      /** Format: int64 */
-      id: number;
-      username?: string;
-      name?: string;
-      avatar?: components["schemas"]["Avatar"];
-      deleted: boolean;
-    };
-    ProjectActivityModel: {
-      /** Format: int64 */
-      revisionId: number;
-      /** Format: int64 */
-      timestamp: number;
-      type:
-        | "UNKNOWN"
-        | "SET_TRANSLATION_STATE"
-        | "SET_TRANSLATIONS"
-        | "DISMISS_AUTO_TRANSLATED_STATE"
-        | "SET_OUTDATED_FLAG"
-        | "TRANSLATION_COMMENT_ADD"
-        | "TRANSLATION_COMMENT_DELETE"
-        | "TRANSLATION_COMMENT_EDIT"
-        | "TRANSLATION_COMMENT_SET_STATE"
-        | "SCREENSHOT_DELETE"
-        | "SCREENSHOT_ADD"
-        | "KEY_TAGS_EDIT"
-        | "KEY_NAME_EDIT"
-        | "KEY_DELETE"
-        | "CREATE_KEY"
-        | "COMPLEX_EDIT"
-        | "IMPORT"
-        | "CREATE_LANGUAGE"
-        | "EDIT_LANGUAGE"
-        | "DELETE_LANGUAGE"
-        | "HARD_DELETE_LANGUAGE"
-        | "CREATE_PROJECT"
-        | "EDIT_PROJECT"
-        | "NAMESPACE_EDIT"
-        | "BATCH_PRE_TRANSLATE_BY_TM"
-        | "BATCH_MACHINE_TRANSLATE"
-        | "AUTO_TRANSLATE"
-        | "BATCH_CLEAR_TRANSLATIONS"
-        | "BATCH_COPY_TRANSLATIONS"
-        | "BATCH_SET_TRANSLATION_STATE"
-        | "BATCH_TAG_KEYS"
-        | "BATCH_UNTAG_KEYS"
-        | "BATCH_SET_KEYS_NAMESPACE"
-        | "AUTOMATION"
-        | "CONTENT_DELIVERY_CONFIG_CREATE"
-        | "CONTENT_DELIVERY_CONFIG_UPDATE"
-        | "CONTENT_DELIVERY_CONFIG_DELETE"
-        | "CONTENT_STORAGE_CREATE"
-        | "CONTENT_STORAGE_UPDATE"
-        | "CONTENT_STORAGE_DELETE"
-        | "WEBHOOK_CONFIG_CREATE"
-        | "WEBHOOK_CONFIG_UPDATE"
-        | "WEBHOOK_CONFIG_DELETE"
-        | "COMPLEX_TAG_OPERATION"
-        | "TASKS_CREATE"
-        | "TASK_CREATE"
-        | "TASK_UPDATE"
-        | "TASK_KEYS_UPDATE"
-        | "TASK_FINISH"
-        | "TASK_CLOSE"
-        | "TASK_REOPEN"
-        | "TASK_KEY_UPDATE"
-        | "ORDER_TRANSLATION";
-      author?: components["schemas"]["ProjectActivityAuthorModel"];
-      modifiedEntities?: {
-        [key: string]: components["schemas"]["ModifiedEntityModel"][];
-      };
-      meta?: { [key: string]: { [key: string]: unknown } };
-      counts?: { [key: string]: number };
-      params?: { [key: string]: unknown };
-    };
-    PagedModelProjectActivityModel: {
-      _embedded?: {
-        activities?: components["schemas"]["ProjectActivityModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelTagModel: {
-      _embedded?: {
-        tags?: components["schemas"]["TagModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelBatchJobModel: {
-      _embedded?: {
-        batchJobs?: components["schemas"]["BatchJobModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    CreditBalanceModel: {
-      /** Format: int64 */
-      creditBalance: number;
-      /** Format: int64 */
-      bucketSize: number;
-      /** Format: int64 */
-      extraCreditBalance: number;
-    };
-    CollectionModelKeyWithBaseTranslationModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyWithBaseTranslationModel"][];
-      };
-    };
-    KeyWithBaseTranslationModel: {
-      /**
-       * Format: int64
-       * @description Id of key record
-       */
-      id: number;
-      /**
-       * @description Name of key
-       * @example this_is_super_key
-       */
-      name: string;
-      /**
-       * @description Namespace of key
-       * @example homepage
-       */
-      namespace?: string;
-      /**
-       * @description Base translation
-       * @example This is translation
-       */
-      baseTranslation?: string;
-    };
-    ImportTranslationModel: {
-      /** Format: int64 */
-      id: number;
-      text?: string;
+    TranslationMemoryItemModel: {
+      baseText: string;
       keyName: string;
-      /** Format: int64 */
-      keyId: number;
-      keyDescription?: string;
-      /** Format: int64 */
-      conflictId?: number;
-      conflictText?: string;
-      override: boolean;
-      resolved: boolean;
-      isPlural: boolean;
-      existingKeyIsPlural: boolean;
+      /** Format: float */
+      similarity: number;
+      targetText: string;
     };
-    PagedModelImportTranslationModel: {
-      _embedded?: {
-        translations?: components["schemas"]["ImportTranslationModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    ImportFileIssueModel: {
-      /** Format: int64 */
+    /**
+     * @description Translations object containing values updated in this request
+     * @example [object Object]
+     */
+    TranslationModel: {
+      /** @description Was translated using Translation Memory or Machine translation service? */
+      auto: boolean;
+      /**
+       * Format: int64
+       * @description Id of translation record
+       */
       id: number;
-      type:
-        | "KEY_IS_NOT_STRING"
-        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
-        | "VALUE_IS_NOT_STRING"
-        | "KEY_IS_EMPTY"
-        | "VALUE_IS_EMPTY"
-        | "PO_MSGCTXT_NOT_SUPPORTED"
-        | "ID_ATTRIBUTE_NOT_PROVIDED"
-        | "TARGET_NOT_PROVIDED"
-        | "TRANSLATION_TOO_LONG"
-        | "KEY_IS_BLANK"
-        | "TRANSLATION_DEFINED_IN_ANOTHER_FILE"
-        | "INVALID_CUSTOM_VALUES"
-        | "DESCRIPTION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamModel"][];
-    };
-    ImportFileIssueParamModel: {
-      type:
-        | "KEY_NAME"
-        | "KEY_ID"
-        | "LANGUAGE_ID"
-        | "KEY_INDEX"
-        | "VALUE"
-        | "LINE"
-        | "FILE_NODE_ORIGINAL"
-        | "LANGUAGE_NAME";
-      value?: string;
-    };
-    PagedModelImportFileIssueModel: {
-      _embedded?: {
-        importFileIssues?: components["schemas"]["ImportFileIssueModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    CollectionModelImportNamespaceModel: {
-      _embedded?: {
-        namespaces?: components["schemas"]["ImportNamespaceModel"][];
-      };
-    };
-    ImportNamespaceModel: {
-      /**
-       * Format: int64
-       * @description The id of namespace. When null, namespace doesn't exist and will be created by import.
-       * @example 10000048
-       */
-      id?: number;
-      /** @example homepage */
-      name: string;
-    };
-    CollectionModelBatchJobModel: {
-      _embedded?: {
-        batchJobs?: components["schemas"]["BatchJobModel"][];
-      };
-    };
-    PagedModelTranslationCommentModel: {
-      _embedded?: {
-        translationComments?: components["schemas"]["TranslationCommentModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelTranslationHistoryModel: {
-      _embedded?: {
-        revisions?: components["schemas"]["TranslationHistoryModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    TranslationHistoryModel: {
-      /** @description Modified fields */
-      modifications?: {
-        [key: string]: components["schemas"]["PropertyModification"];
-      };
-      /**
-       * Format: int64
-       * @description Unix timestamp of the revision
-       */
-      timestamp: number;
-      author?: components["schemas"]["SimpleUserAccountModel"];
-      revisionType: "ADD" | "MOD" | "DEL";
-    };
-    SelectAllResponse: {
-      ids: number[];
-    };
-    /** @description Tasks related to this key */
-    KeyTaskViewModel: {
-      /** Format: int64 */
-      number: number;
-      /** Format: int64 */
-      languageId: number;
-      languageTag: string;
-      done: boolean;
-      userAssigned: boolean;
-      type: "TRANSLATE" | "REVIEW";
-    };
-    KeyWithTranslationsModel: {
-      /**
-       * Format: int64
-       * @description Id of key record
-       */
-      keyId: number;
-      /**
-       * @description Name of key
-       * @example this_is_super_key
-       */
-      keyName: string;
-      /**
-       * @description Is this key a plural?
-       * @example true
-       */
-      keyIsPlural: boolean;
-      /**
-       * @description The placeholder name for plural parameter
-       * @example value
-       */
-      keyPluralArgName?: string;
-      /**
-       * Format: int64
-       * @description The namespace id of the key
-       * @example 100000282
-       */
-      keyNamespaceId?: number;
-      /**
-       * @description The namespace of the key
-       * @example homepage
-       */
-      keyNamespace?: string;
-      /**
-       * @description The namespace of the key
-       * @example homepage
-       */
-      keyDescription?: string;
-      /** @description Tags of key */
-      keyTags: components["schemas"]["TagModel"][];
-      /**
-       * Format: int64
-       * @description Count of screenshots provided for the key
-       * @example 1
-       */
-      screenshotCount: number;
-      /** @description Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
-      screenshots?: components["schemas"]["ScreenshotModel"][];
-      /** @description There is a context available for this key */
-      contextPresent: boolean;
-      /**
-       * @description Translations object
-       * @example
-       *     {
-       *       "en": {
-       *         "id": 100000003,
-       *         "text": "This is super translation!"
-       *         "state": "TRANSLATED",
-       *         "commentCount": 1
-       *       }
-       *     }
-       */
-      translations: {
-        [key: string]: components["schemas"]["TranslationViewModel"];
-      };
-      /** @description Tasks related to this key */
-      tasks?: components["schemas"]["KeyTaskViewModel"][];
-    };
-    KeysWithTranslationsPageModel: {
-      _embedded?: {
-        keys?: components["schemas"]["KeyWithTranslationsModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-      /** @description Provided languages data */
-      selectedLanguages: components["schemas"]["LanguageModel"][];
-      /**
-       * @description Cursor to get next data
-       * @example eyJrZXlJZCI6eyJkaXJlY3Rpb24iOiJBU0MiLCJ2YWx1ZSI6IjEwMDAwMDAxMjAifX0=
-       */
-      nextCursor?: string;
+      /** @description Which machine translation service was used to auto translate this */
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      /** @description Whether base language translation was changed after this translation was updated */
+      outdated: boolean;
+      /** @description State of translation */
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+      /** @description Translation text */
+      text?: string;
     };
     /**
      * @description Translations object
@@ -4522,350 +4549,213 @@ export interface components {
      *     }
      */
     TranslationViewModel: {
-      /**
-       * Format: int64
-       * @description Id of translation record
-       */
-      id: number;
-      /** @description Translation text */
-      text?: string;
-      /** @description State of translation */
-      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
-      /** @description Whether base language translation was changed after this translation was updated */
-      outdated: boolean;
       /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
-      /** @description Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
       /**
        * Format: int64
        * @description Count of translation comments
        */
       commentCount: number;
+      /** @description Was translation memory used to translate this? */
+      fromTranslationMemory: boolean;
+      /**
+       * Format: int64
+       * @description Id of translation record
+       */
+      id: number;
+      /** @description Which machine translation service was used to auto translate this */
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      /** @description Whether base language translation was changed after this translation was updated */
+      outdated: boolean;
+      /** @description State of translation */
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+      /** @description Translation text */
+      text?: string;
       /**
        * Format: int64
        * @description Count of unresolved translation comments
        */
       unresolvedCommentCount: number;
-      /** @description Was translation memory used to translate this? */
-      fromTranslationMemory: boolean;
     };
-    CollectionModelProjectTransferOptionModel: {
-      _embedded?: {
-        transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
-      };
+    TranslationWithCommentModel: {
+      comment: components["schemas"]["TranslationCommentModel"];
+      translation: components["schemas"]["TranslationModel"];
     };
-    ProjectTransferOptionModel: {
+    UntagKeysRequest: {
+      keyIds: number[];
+      tags: string[];
+    };
+    UpdateNamespaceDto: {
       name: string;
-      slug: string;
+    };
+    UpdatePatDto: {
+      /** @description New description of the PAT */
+      description: string;
+    };
+    UpdateTaskKeyRequest: {
+      done: boolean;
+    };
+    UpdateTaskKeyResponse: {
+      /** @description Task key is marked as done */
+      done: boolean;
+      /** @description Task progress is 100% */
+      taskFinished: boolean;
+    };
+    UpdateTaskKeysRequest: {
+      /** @description Keys to add to task */
+      addKeys?: number[];
+      /** @description Keys to remove from task */
+      removeKeys?: number[];
+    };
+    UpdateTaskRequest: {
+      assignees: number[];
+      description: string;
+      /**
+       * Format: int64
+       * @description Due to date in epoch format (milliseconds).
+       * @example 1661172869000
+       */
+      dueDate?: number;
+      name: string;
+    };
+    UploadedImageModel: {
+      /** Format: date-time */
+      createdAt: string;
+      fileUrl: string;
+      filename: string;
       /** Format: int64 */
       id: number;
+      location?: string;
+      requestFilename: string;
     };
-    LanguageStatsModel: {
-      /** Format: int64 */
-      languageId?: number;
-      languageTag?: string;
-      languageName?: string;
-      languageOriginalName?: string;
-      languageFlagEmoji?: string;
-      /** Format: int64 */
-      translatedKeyCount: number;
-      /** Format: int64 */
-      translatedWordCount: number;
-      /** Format: double */
-      translatedPercentage: number;
-      /** Format: int64 */
-      reviewedKeyCount: number;
-      /** Format: int64 */
-      reviewedWordCount: number;
-      /** Format: double */
-      reviewedPercentage: number;
-      /** Format: int64 */
-      untranslatedKeyCount: number;
-      /** Format: int64 */
-      untranslatedWordCount: number;
-      /** Format: double */
-      untranslatedPercentage: number;
+    UsageModel: {
+      /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
+      appliedStripeCredits?: number;
+      credits?: components["schemas"]["SumUsageItemModel"];
+      seats: components["schemas"]["AverageProportionalUsageItemModel"];
+      subscriptionPrice?: number;
+      total: number;
+      translations: components["schemas"]["AverageProportionalUsageItemModel"];
     };
-    ProjectStatsModel: {
-      /** Format: int64 */
-      projectId: number;
-      /** Format: int32 */
-      languageCount: number;
-      /** Format: int64 */
-      keyCount: number;
-      /** Format: int64 */
-      taskCount: number;
-      /** Format: int64 */
-      baseWordsCount: number;
-      /** Format: double */
-      translatedPercentage: number;
-      /** Format: double */
-      reviewedPercentage: number;
-      /** Format: int64 */
-      membersCount: number;
-      /** Format: int64 */
-      tagCount: number;
-      languageStats: components["schemas"]["LanguageStatsModel"][];
+    UsedNamespaceModel: {
+      /**
+       * Format: int64
+       * @description The id of namespace. Null for default namespace.
+       * @example 10000048
+       */
+      id?: number;
+      /**
+       * @description Name of namespace. Null if default.
+       * @example homepage
+       */
+      name?: string;
     };
-    PagedModelLanguageModel: {
-      _embedded?: {
-        languages?: components["schemas"]["LanguageModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    CollectionModelLanguageAiPromptCustomizationModel: {
-      _embedded?: {
-        promptCustomizations?: components["schemas"]["LanguageAiPromptCustomizationModel"][];
-      };
-    };
-    CollectionModelProjectInvitationModel: {
-      _embedded?: {
-        invitations?: components["schemas"]["ProjectInvitationModel"][];
-      };
-    };
-    Pageable: {
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      sort?: string[];
-    };
-    PagedModelApiKeyModel: {
-      _embedded?: {
-        apiKeys?: components["schemas"]["ApiKeyModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelProjectWithStatsModel: {
-      _embedded?: {
-        projects?: components["schemas"]["ProjectWithStatsModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    ProjectStatistics: {
-      /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
-      keyCount: number;
-      /** Format: int64 */
-      languageCount: number;
-      translationStatePercentages: { [key: string]: number };
-    };
-    ProjectWithStatsModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      description?: string;
-      slug?: string;
+    UserAccountInProjectModel: {
       avatar?: components["schemas"]["Avatar"];
-      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
-      baseLanguage?: components["schemas"]["LanguageModel"];
-      organizationRole?: "MEMBER" | "OWNER";
-      directPermission?: components["schemas"]["PermissionModel"];
       computedPermission: components["schemas"]["ComputedPermissionModel"];
-      stats: components["schemas"]["ProjectStatistics"];
-      languages: components["schemas"]["LanguageModel"][];
-      /** @description Whether to disable ICU placeholder visualization in the editor and it's support. */
-      icuPlaceholders: boolean;
-    };
-    CollectionModelScreenshotModel: {
-      _embedded?: {
-        screenshots?: components["schemas"]["ScreenshotModel"][];
-      };
-    };
-    PagedModelPatModel: {
-      _embedded?: {
-        pats?: components["schemas"]["PatModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PatWithUserModel: {
-      user: components["schemas"]["SimpleUserAccountModel"];
+      directPermission?: components["schemas"]["PermissionWithAgencyModel"];
       /** Format: int64 */
       id: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      /** Format: int64 */
-      createdAt: number;
-      /** Format: int64 */
-      updatedAt: number;
-    };
-    PagedModelOrganizationModel: {
-      _embedded?: {
-        organizations?: components["schemas"]["OrganizationModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    CollectionModelOrganizationInvitationModel: {
-      _embedded?: {
-        organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
-      };
-    };
-    PublicUsageModel: {
-      /** Format: int64 */
-      organizationId: number;
-      /**
-       * Format: int64
-       * @description Current balance of standard credits. Standard credits are refilled every month
-       */
-      creditBalance: number;
-      /**
-       * Format: int64
-       * @description How many credits are included in your current plan
-       */
-      includedMtCredits: number;
-      /**
-       * Format: int64
-       * @description Date when credits were refilled. (In epoch format)
-       */
-      creditBalanceRefilledAt: number;
-      /**
-       * Format: int64
-       * @description Date when credits will be refilled. (In epoch format)
-       */
-      creditBalanceNextRefillAt: number;
-      /**
-       * Format: int64
-       * @description Currently used credits over credits included in plan and extra credits
-       */
-      currentPayAsYouGoMtCredits: number;
-      /**
-       * Format: int64
-       * @description The maximum amount organization can spend on MT credit usage before they reach the spending limit
-       */
-      availablePayAsYouGoMtCredits: number;
-      /**
-       * Format: int64
-       * @description Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits
-       */
-      extraCreditBalance: number;
-      /**
-       * Format: int64
-       * @description How many translations can be stored within your organization
-       */
-      translationSlotsLimit: number;
-      /**
-       * Format: int64
-       * @description How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs
-       */
-      includedTranslationSlots: number;
-      /**
-       * Format: int64
-       * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
-       */
-      includedTranslations: number;
-      /**
-       * Format: int64
-       * @description How many translations slots are currently used by organization
-       */
-      currentTranslationSlots: number;
-      /**
-       * Format: int64
-       * @description How many non-empty translations are currently stored by organization
-       */
-      currentTranslations: number;
-      /**
-       * Format: int64
-       * @description How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
-       */
-      translationsLimit: number;
-    };
-    CollectionModelWorkspaceModel: {
-      _embedded?: {
-        workspaces?: components["schemas"]["WorkspaceModel"][];
-      };
-    };
-    WorkspaceModel: {
-      /** Format: int64 */
-      id: number;
-      slackTeamName: string;
-      slackTeamId: string;
-    };
-    ConnectToSlackUrlModel: {
-      url: string;
-    };
-    PagedModelUserAccountWithOrganizationRoleModel: {
-      _embedded?: {
-        usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    UserAccountWithOrganizationRoleModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      username: string;
+      name?: string;
+      organizationBasePermission: components["schemas"]["PermissionModel"];
       organizationRole?: "MEMBER" | "OWNER";
-      projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
-      avatar?: components["schemas"]["Avatar"];
-    };
-    ApiKeyWithLanguagesModel: {
-      /**
-       * @deprecated
-       * @description Languages for which user has translate permission.
-       */
-      permittedLanguageIds?: number[];
-      /** Format: int64 */
-      id: number;
-      userFullName?: string;
-      projectName: string;
-      scopes: string[];
-      /** Format: int64 */
-      projectId: number;
-      /** Format: int64 */
-      expiresAt?: number;
-      /** Format: int64 */
-      lastUsedAt?: number;
-      description: string;
-      username?: string;
-    };
-    PagedModelUserAccountModel: {
-      _embedded?: {
-        users?: components["schemas"]["UserAccountModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
+      username: string;
     };
     UserAccountModel: {
-      /** Format: int64 */
-      id: number;
-      username: string;
-      name?: string;
-      emailAwaitingVerification?: string;
       avatar?: components["schemas"]["Avatar"];
-      globalServerRole: "USER" | "ADMIN";
       deleted: boolean;
       disabled: boolean;
-    };
-    PublicInvitationModel: {
+      emailAwaitingVerification?: string;
+      globalServerRole: "USER" | "ADMIN";
       /** Format: int64 */
       id: number;
-      code: string;
-      createdBy?: components["schemas"]["SimpleUserAccountModel"];
-      projectName?: string;
-      organizationName?: string;
+      name?: string;
+      username: string;
+    };
+    UserAccountWithOrganizationRoleModel: {
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      id: number;
+      name: string;
+      organizationRole?: "MEMBER" | "OWNER";
+      projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
+      username: string;
+    };
+    UserMfaRecoveryRequestDto: {
+      password: string;
+    };
+    UserPreferencesModel: {
+      language?: string;
+      /** Format: int64 */
+      preferredOrganizationId?: number;
     };
     UserTotpDisableRequestDto: {
       password: string;
     };
-    DeleteKeysDto: {
-      /** @description IDs of keys to delete */
-      ids: number[];
+    UserTotpEnableRequestDto: {
+      otp: string;
+      password: string;
+      totpKey: string;
+    };
+    UserUpdatePasswordRequestDto: {
+      currentPassword: string;
+      password: string;
+    };
+    UserUpdateRequestDto: {
+      /** @description Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
+      callbackUrl?: string;
+      currentPassword?: string;
+      email: string;
+      name: string;
+    };
+    V2EditApiKeyDto: {
+      description?: string;
+      scopes: string[];
+    };
+    WebhookConfigModel: {
+      /**
+       * Format: int64
+       * @description Date of the first failed webhook request. If the last webhook request is successful, this value is set to null.
+       */
+      firstFailed?: number;
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description Date of the last webhook request.
+       */
+      lastExecuted?: number;
+      url: string;
+      webhookSecret: string;
+    };
+    WebhookConfigRequest: {
+      url: string;
+    };
+    WebhookTestResponse: {
+      success: boolean;
+    };
+    WorkspaceModel: {
+      /** Format: int64 */
+      id: number;
+      slackTeamId: string;
+      slackTeamName: string;
     };
   };
 }
 
 export interface operations {
-  /** Returns information about currently authenticated user. */
-  getInfo_2: {
+  /** Exports data as ZIP of jsons */
+  doExportJsonZip: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PrivateUserAccountModel"];
+          "application/zip": components["schemas"]["StreamingResponseBody"];
         };
       };
       /** Bad Request */
@@ -4902,60 +4792,12 @@ export interface operations {
       };
     };
   };
-  /** Updates current user's profile information. */
-  updateUser: {
+  getAuthenticationUrl: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PrivateUserAccountModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserUpdateRequestDto"];
-      };
-    };
-  };
-  updateUserOld: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["SsoUrlResponse"];
         };
       };
       /** Bad Request */
@@ -4993,11 +4835,294 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UserUpdateRequestDto"];
+        "application/json": components["schemas"]["DomainRequest"];
       };
     };
   };
-  delete: {
+  /** Authenticates user using third party oAuth service */
+  authenticateUser_1: {
+    parameters: {
+      path: {
+        serviceType: string;
+      };
+      query: {
+        code?: string;
+        redirect_uri?: string;
+        invitationCode?: string;
+        domain?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getPublicConfiguration: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublicConfigurationDTO"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  authenticateUser: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginRequest"];
+      };
+    };
+  };
+  invitationInfo: {
+    parameters: {
+      path: {
+        code: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublicInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  resetPasswordRequest: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetPasswordRequest"];
+      };
+    };
+  };
+  /** Checks the password reset code from e-mail */
+  resetPasswordSet: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetPassword"];
+      };
+    };
+  };
+  resetPasswordValidate: {
+    parameters: {
+      path: {
+        code: string;
+        email: string;
+      };
+    };
     responses: {
       /** OK */
       200: unknown;
@@ -5035,8 +5160,8 @@ export interface operations {
       };
     };
   };
-  /** Updates current user's password. Invalidates all previous sessions upon success. */
-  updateUserPassword: {
+  /** When E-mail verification is enabled, null is returned. Otherwise JWT token is provided. */
+  signUp: {
     responses: {
       /** OK */
       200: {
@@ -5079,12 +5204,65 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UserUpdatePasswordRequestDto"];
+        "application/json": components["schemas"]["SignUpDto"];
       };
     };
   };
-  /** Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
-  enableMfa: {
+  validateEmail: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TextNode"];
+      };
+    };
+  };
+  /** It checks whether the code from email is valid */
+  verifyEmail: {
+    parameters: {
+      path: {
+        userId: number;
+        code: string;
+      };
+    };
     responses: {
       /** OK */
       200: {
@@ -5125,19 +5303,474 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserTotpEnableRequestDto"];
+  };
+  getOrganizations: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
       };
     };
-  };
-  /** Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
-  disableMfa: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": components["schemas"]["PagedModelOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getUsers: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelUserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  deleteUser: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
+  disableUser: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Enables previously disabled user. */
+  enableUser: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Generates a JWT token for the user with provided ID. This is useful, when need to debug of the user's account. Or when an operation is required to be executed on behalf of the user. */
+  generateUserToken: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Set's the global role on the Tolgee Platform server. */
+  setRole: {
+    parameters: {
+      path: {
+        userId: number;
+        role: "USER" | "ADMIN";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns the latest announcement for the currently authenticated user */
+  getLatest: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AnnouncementDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Dismisses the latest announcement for the currently authenticated user */
+  dismiss: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  allByUser: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        filterProjectId?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Creates new API key with provided scopes */
+  create_13: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["RevealedApiKeyModel"];
         };
       };
       /** Bad Request */
@@ -5175,17 +5808,106 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UserTotpDisableRequestDto"];
+        "application/json": components["schemas"]["CreateApiKeyDto"];
       };
     };
   };
-  /** Regenerates multi-factor authentication recovery codes */
-  regenerateRecoveryCodes: {
+  getScopes: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": string[];
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
+  getCurrent_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiKeyWithLanguagesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_9: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiKeyModel"];
         };
       };
       /** Bad Request */
@@ -5223,16 +5945,808 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UserMfaRecoveryRequestDto"];
+        "application/json": components["schemas"]["V2EditApiKeyDto"];
       };
     };
   };
-  uploadAvatar: {
+  delete_13: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  regenerate_1: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["RevealedApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegenerateApiKeyDto"];
+      };
+    };
+  };
+  /** Returns specific API key info */
+  get_21: {
+    parameters: {
+      path: {
+        keyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getInfo_5: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["EeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
+  prepareSetLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
+  /** This will refresh the subscription information from the license server and update the subscription info. */
+  refreshSubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["EeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** This will remove the licence key from the instance. */
+  release: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["EeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyDto"];
+      };
+    };
+  };
+  upload: {
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["UploadedImageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          image: string;
+          info?: components["schemas"]["ImageUploadInfoDto"];
+        };
+      };
+    };
+  };
+  delete_12: {
+    parameters: {
+      path: {
+        ids: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  acceptInvitation: {
+    parameters: {
+      path: {
+        code: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  deleteInvitation: {
+    parameters: {
+      path: {
+        invitationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all organizations, which is current user allowed to view */
+  getAll_10: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        filterCurrentUserOwner?: boolean;
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  create_12: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  get_20: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_8: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  /** Deletes organization and all its data including projects */
+  delete_11: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  uploadAvatar_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
@@ -5277,12 +6791,17 @@ export interface operations {
       };
     };
   };
-  removeAvatar: {
+  removeAvatar_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PrivateUserAccountModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
         };
       };
       /** Bad Request */
@@ -5319,7 +6838,473 @@ export interface operations {
       };
     };
   };
-  setPreferredOrganization: {
+  /** Generates invitation link for organization, so users can join organization. The invitation can also be sent to an e-mail address. */
+  inviteUser_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationInviteUserDto"];
+      };
+    };
+  };
+  /** Remove current user from organization */
+  leaveOrganization: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all organization projects the user has access to */
+  getAllProjects_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
+  getAllUsers_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getInvitations: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns machine translation credit balance for organization */
+  getOrganizationCredits: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all projects (including statistics) where current user has any permission (except none) */
+  getAllWithStatistics_2: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
+  setBasePermissions: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Granted scopes to all projects for all organization users without direct project permissions set. */
+        scopes: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets default (level-based) permission for organization */
+  setBasePermissions_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /**
+   * This endpoint allows the owner of an organization to connect a Slack workspace to their organization.
+   * Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.
+   */
+  connectWorkspace: {
     parameters: {
       path: {
         organizationId: number;
@@ -5361,11 +7346,114 @@ export interface operations {
         };
       };
     };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConnectToSlackDto"];
+      };
+    };
   };
-  setLanguage: {
+  /** Returns URL to which user should be redirected to connect Slack workspace */
+  connectToSlack: {
     parameters: {
       path: {
-        languageTag: string;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConnectToSlackUrlModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns a list of workspaces connected to the organization */
+  getConnectedWorkspaces: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelWorkspaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disconnects a workspace from the organization */
+  disconnectWorkspace: {
+    parameters: {
+      path: {
+        workspaceId: number;
+        organizationId: number;
       };
     };
     responses: {
@@ -5405,18 +7493,17 @@ export interface operations {
       };
     };
   };
-  /** Marks guide step as completed */
-  completeGuideStep: {
+  findProvider: {
     parameters: {
       path: {
-        step: string;
+        organizationId: number;
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["QuickStartModel"];
+          "application/json": components["schemas"]["SsoTenantModel"];
         };
       };
       /** Bad Request */
@@ -5453,18 +7540,69 @@ export interface operations {
       };
     };
   };
-  /** Sets open state of the quick start guide */
-  setOpenState: {
+  setProvider: {
     parameters: {
       path: {
-        open: boolean;
+        organizationId: number;
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["QuickStartModel"];
+          "application/json": components["schemas"]["SsoTenantModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProviderRequest"];
+      };
+    };
+  };
+  getUsage: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublicUsageModel"];
         };
       };
       /** Bad Request */
@@ -5501,18 +7639,767 @@ export interface operations {
       };
     };
   };
-  /** Sets finished state of the quick start guide */
-  setFinishedState: {
+  removeUser: {
     parameters: {
       path: {
-        finished: boolean;
+        organizationId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets user role in organization. Owner or Member. */
+  setUserRole: {
+    parameters: {
+      path: {
+        organizationId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetOrganizationRoleDto"];
+      };
+    };
+  };
+  get_19: {
+    parameters: {
+      path: {
+        slug: string;
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["QuickStartModel"];
+          "application/json": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all organization projects the user has access to */
+  getAllProjects: {
+    parameters: {
+      path: {
+        slug: string;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all projects (including statistics) where current user has any permission (except none) */
+  getAllWithStatistics_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAll_9: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  create_11: {
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["RevealedPatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePatDto"];
+      };
+    };
+  };
+  /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
+  getCurrent: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PatWithUserModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  get_18: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Updates Personal Access Token */
+  update_7: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePatDto"];
+      };
+    };
+  };
+  /** Deletes Personal Access Token */
+  delete_10: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Regenerates Personal Access Token. It generates new token value and updates its time of expiration. */
+  regenerate: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["RevealedPatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegeneratePatDto"];
+      };
+    };
+  };
+  /** Returns preferred organization. If server allows users to create organization, preferred organization is automatically created if user doesn't have access to any organization. */
+  getPreferred: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrivateOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all projects where current user has any permission */
+  getAll: {
+    parameters: {
+      query: {
+        /** Filter projects by id */
+        filterId?: number[];
+        /** Filter projects without id */
+        filterNotId?: number[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Creates a new project with languages and initial settings. */
+  createProject: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProjectRequest"];
+      };
+    };
+  };
+  /** Returns all projects (including statistics) where current user has any permission */
+  getAllWithStatistics: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -5691,170 +8578,27 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  getActivity: {
     parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["WebhookConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  update: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["WebhookConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["WebhookConfigRequest"];
-      };
-    };
-  };
-  delete_1: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Set user's granular (scope-based) direct project permission */
-  setUsersPermissions: {
-    parameters: {
-      path: {
-        userId: number;
-        projectId: number;
-      };
       query: {
-        /** Granted scopes */
-        scopes?: string[];
-        languages?: number[];
-        translateLanguages?: number[];
-        viewLanguages?: number[];
-        stateChangeLanguages?: number[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
       };
     };
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectActivityModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -5889,24 +8633,673 @@ export interface operations {
       };
     };
   };
-  setUsersPermissions_1: {
+  getSingleRevision: {
     parameters: {
       path: {
-        userId: number;
-        permissionType:
-          | "NONE"
-          | "VIEW"
-          | "TRANSLATE"
-          | "REVIEW"
-          | "EDIT"
-          | "MANAGE";
+        revisionId: number;
         projectId: number;
       };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getModifiedEntitiesByRevision: {
+    parameters: {
       query: {
-        languages?: number[];
-        translateLanguages?: number[];
-        viewLanguages?: number[];
-        stateChangeLanguages?: number[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filters results by specific entity class */
+        filterEntityClass?: string[];
+      };
+      path: {
+        revisionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelModifiedEntityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getPromptProjectCustomization: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setPromptProjectCustomization: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetProjectPromptCustomizationRequest"];
+      };
+    };
+  };
+  getAllKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /**
+   * Returns all project key with any disabled language.
+   *
+   * If key has no disabled language, it is not returned.
+   */
+  getDisabledLanguages_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelKeyDisabledLanguagesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all API keys for specified project */
+  allByProject: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
+  getAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTranslationConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets default auto-translation settings for project (deprecated: use per language config with null language id) */
+  setAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTranslationConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutoTranslationSettingsDto"];
+      };
+    };
+  };
+  uploadAvatar_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          avatar: string;
+        };
+      };
+    };
+  };
+  removeAvatar_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  list_3: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelBatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  get_12: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Stops batch operation if possible. */
+  cancel: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
       };
     };
     responses: {
@@ -5946,250 +9339,10 @@ export interface operations {
       };
     };
   };
-  /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
-  setOrganizationBase: {
+  /** Stores a bigMeta for a project */
+  store_2: {
     parameters: {
       path: {
-        userId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  revokePermission: {
-    parameters: {
-      path: {
-        projectId: number;
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  reopenTask: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TaskModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Mark key as done, which updates task progress. */
-  updateTaskKey: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        keyId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["UpdateTaskKeyResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateTaskKeyRequest"];
-      };
-    };
-  };
-  getTaskKeys: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TaskKeysResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  updateTaskKeys: {
-    parameters: {
-      path: {
-        taskNumber: number;
         projectId: number;
       };
     };
@@ -6231,14 +9384,21 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateTaskKeysRequest"];
+        "application/json": components["schemas"]["BigMetaDto"];
       };
     };
   };
-  finishTask: {
+  list_2: {
     parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
       path: {
-        taskNumber: number;
         projectId: number;
       };
     };
@@ -6246,7 +9406,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TaskModel"];
+          "application/json": components["schemas"]["PagedModelContentDeliveryConfigModel"];
         };
       };
       /** Bad Request */
@@ -6283,10 +9443,9 @@ export interface operations {
       };
     };
   };
-  closeTask: {
+  create_6: {
     parameters: {
       path: {
-        taskNumber: number;
         projectId: number;
       };
     };
@@ -6294,103 +9453,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TaskModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getTask: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TaskModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  updateTask: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TaskModel"];
+          "application/json": components["schemas"]["ContentDeliveryConfigModel"];
         };
       };
       /** Bad Request */
@@ -6428,713 +9491,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateTaskRequest"];
-      };
-    };
-  };
-  getPerLanguageAutoTranslationSettings: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  setPerLanguageAutoTranslationSettings: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AutoTranslationSettingsDto"][];
-      };
-    };
-  };
-  update_1: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["NamespaceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateNamespaceDto"];
-      };
-    };
-  };
-  getMachineTranslationSettings: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelLanguageConfigItemModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  setMachineTranslationSettings: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelLanguageConfigItemModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetMachineTranslationSettingsDto"];
-      };
-    };
-  };
-  /** Returns languages, in which key is disabled */
-  getDisabledLanguages: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelLanguageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Sets languages, in which key is disabled */
-  setDisabledLanguages: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelLanguageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetDisabledLanguagesRequest"];
-      };
-    };
-  };
-  /** Edits key name, translations, tags, screenshots, and other data */
-  complexEdit: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["KeyWithDataModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ComplexEditKeyDto"];
-      };
-    };
-  };
-  get_6: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["KeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  edit: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["KeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EditKeyDto"];
-      };
-    };
-  };
-  inviteUser: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ProjectInviteUserDto"];
-      };
-    };
-  };
-  get_8: {
-    parameters: {
-      path: {
-        contentStorageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ContentStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  update_3: {
-    parameters: {
-      path: {
-        contentStorageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ContentStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ContentStorageRequest"];
-      };
-    };
-  };
-  delete_6: {
-    parameters: {
-      path: {
-        contentStorageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
+        "application/json": components["schemas"]["ContentDeliveryConfigRequest"];
       };
     };
   };
@@ -7328,538 +9685,15 @@ export interface operations {
       };
     };
   };
-  /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
-  getAutoTranslationSettings: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AutoTranslationConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Sets default auto-translation settings for project (deprecated: use per language config with null language id) */
-  setAutoTranslationSettings: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AutoTranslationConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AutoTranslationSettingsDto"];
-      };
-    };
-  };
-  executeComplexTagOperation: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ComplexTagKeysRequest"];
-      };
-    };
-  };
-  /** Tags a key with tag. If tag with provided name doesn't exist, it is created */
-  tagKey: {
-    parameters: {
-      path: {
-        keyId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TagModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TagKeyDto"];
-      };
-    };
-  };
-  /** Resolves translation conflict. The old translation will be overridden. */
-  resolveTranslationSetOverride: {
-    parameters: {
-      path: {
-        languageId: number;
-        translationId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Resolves translation conflict. The old translation will be kept. */
-  resolveTranslationSetKeepExisting: {
-    parameters: {
-      path: {
-        languageId: number;
-        translationId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
-  resolveTranslationSetOverride_2: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Resolves all translation conflicts for provided language. The old translations will be kept. */
-  resolveTranslationSetKeepExisting_2: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
-  selectExistingLanguage: {
-    parameters: {
-      path: {
-        importLanguageId: number;
-        existingLanguageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Resets existing language paired with language to import. */
-  resetExistingLanguage: {
-    parameters: {
-      path: {
-        importLanguageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Sets namespace for file to import. */
-  selectNamespace: {
-    parameters: {
-      path: {
-        fileId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetFileNamespaceRequest"];
-      };
-    };
-  };
-  /** Imports the data prepared in previous step. Streams current status. */
-  applyImportStreaming: {
+  list_1: {
     parameters: {
       query: {
-        /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
       path: {
         projectId: number;
@@ -7869,7 +9703,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
+          "application/json": components["schemas"]["PagedModelContentStorageModel"];
         };
       };
       /** Bad Request */
@@ -7906,13 +9740,622 @@ export interface operations {
       };
     };
   };
-  /** Imports the data prepared in previous step */
-  applyImport: {
+  create_5: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ContentStorageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContentStorageRequest"];
+      };
+    };
+  };
+  test_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StorageTestResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContentStorageRequest"];
+      };
+    };
+  };
+  get_8: {
+    parameters: {
+      path: {
+        contentStorageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ContentStorageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_3: {
+    parameters: {
+      path: {
+        contentStorageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ContentStorageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContentStorageRequest"];
+      };
+    };
+  };
+  delete_6: {
+    parameters: {
+      path: {
+        contentStorageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
+  testExisting: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StorageTestResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContentStorageRequest"];
+      };
+    };
+  };
+  /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
+  currentJobs: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelBatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  exportData: {
     parameters: {
       query: {
-        /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        /**
+         * Languages to be contained in export.
+         *
+         * If null, all languages are exported
+         */
+        languages?: string[];
+        /** Format to export to */
+        format?:
+          | "JSON"
+          | "JSON_TOLGEE"
+          | "XLIFF"
+          | "PO"
+          | "APPLE_STRINGS_STRINGSDICT"
+          | "APPLE_XLIFF"
+          | "ANDROID_XML"
+          | "COMPOSE_XML"
+          | "FLUTTER_ARB"
+          | "PROPERTIES"
+          | "YAML_RUBY"
+          | "YAML"
+          | "JSON_I18NEXT"
+          | "CSV"
+          | "RESX_ICU"
+          | "XLSX";
+        /**
+         * Delimiter to structure file content.
+         *
+         * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
+         *
+         * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
+         * specific formats like `YAML_RUBY` don't honor this parameter.
+         */
+        structureDelimiter?: string;
+        /** Filter key IDs to be contained in export */
+        filterKeyId?: number[];
+        /** Filter key IDs not to be contained in export */
+        filterKeyIdNot?: number[];
+        /**
+         * Filter keys tagged by.
+         *
+         * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+         */
+        filterTag?: string;
+        /** Filter keys tagged by one of provided tags */
+        filterTagIn?: string[];
+        /** Filter keys not tagged by one of provided tags */
+        filterTagNotIn?: string[];
+        /** Filter keys with prefix */
+        filterKeyPrefix?: string;
+        /** Filter translations with state. By default, all states except untranslated is exported. */
+        filterState?: (
+          | "UNTRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "DISABLED"
+        )[];
+        /** Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
+        filterNamespace?: string[];
+        /**
+         * If false, it doesn't return zip of files, but it returns single file.
+         *
+         * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
+         */
+        zip?: boolean;
+        /**
+         * Message format to be used for export.
+         *
+         * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
+         *
+         * This property is honored only for generic formats like JSON or YAML.
+         * For specific formats like `YAML_RUBY` it's ignored.
+         */
+        messageFormat?:
+          | "C_SPRINTF"
+          | "PHP_SPRINTF"
+          | "JAVA_STRING_FORMAT"
+          | "APPLE_SPRINTF"
+          | "RUBY_SPRINTF"
+          | "I18NEXT"
+          | "ICU";
+        /**
+         * This is a template that defines the structure of the resulting .zip file content.
+         *
+         * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
+         * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
+         *
+         * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
+         * the English translations of the `home` namespace will be stored in `home/en.json`.
+         *
+         * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
+         *
+         * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
+         * but in Android format. (e.g., en-rUS)
+         */
+        fileStructureTemplate?: string;
+        /**
+         * If true, for structured formats (like JSON) arrays are supported.
+         *
+         * e.g. Key hello[0] will be exported as {"hello": ["..."]}
+         */
+        supportArrays?: boolean;
       };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Exports data (post). Useful when exceeding allowed URL size. */
+  exportPost: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExportParams"];
+      };
+    };
+  };
+  /** Prepares provided files to import. */
+  addFiles: {
+    parameters: {
+      query: {
+        /** When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys. */
+        structureDelimiter?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ImportAddFilesResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[];
+        };
+      };
+    };
+  };
+  /** Deletes prepared import data. */
+  cancelImport: {
+    parameters: {
       path: {
         projectId: number;
       };
@@ -8055,11 +10498,62 @@ export interface operations {
       };
     };
   };
-  /** Stops batch operation if possible. */
-  cancel: {
+  /** Returns all existing and imported namespaces */
+  getAllNamespaces_2: {
     parameters: {
       path: {
-        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelImportNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Imports the data prepared in previous step */
+  applyImport: {
+    parameters: {
+      query: {
+        /** Whether override or keep all translations with unresolved conflicts */
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      };
+      path: {
         projectId: number;
       };
     };
@@ -8100,11 +10594,14 @@ export interface operations {
       };
     };
   };
-  setTranslationState: {
+  /** Imports the data prepared in previous step. Streams current status. */
+  applyImportStreaming: {
     parameters: {
+      query: {
+        /** Whether override or keep all translations with unresolved conflicts */
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      };
       path: {
-        translationId: number;
-        state: "TRANSLATED" | "REVIEWED";
         projectId: number;
       };
     };
@@ -8112,7 +10609,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TranslationModel"];
+          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
         };
       };
       /** Bad Request */
@@ -8149,12 +10646,18 @@ export interface operations {
       };
     };
   };
-  setState: {
+  /** Returns the result of preparation. */
+  getImportResult: {
     parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
       path: {
-        translationId: number;
-        commentId: number;
-        state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
         projectId: number;
       };
     };
@@ -8162,7 +10665,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TranslationCommentModel"];
+          "application/json": components["schemas"]["PagedModelImportLanguageModel"];
         };
       };
       /** Bad Request */
@@ -8199,19 +10702,77 @@ export interface operations {
       };
     };
   };
-  get_14: {
+  /** Sets namespace for file to import. */
+  selectNamespace: {
     parameters: {
       path: {
-        translationId: number;
-        commentId: number;
+        fileId: number;
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetFileNamespaceRequest"];
+      };
+    };
+  };
+  /** Returns issues for uploaded file. */
+  getImportFileIssues: {
+    parameters: {
+      path: {
+        importFileId: number;
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TranslationCommentModel"];
+          "application/json": components["schemas"]["PagedModelImportFileIssueModel"];
         };
       };
       /** Bad Request */
@@ -8248,11 +10809,102 @@ export interface operations {
       };
     };
   };
-  update_5: {
+  /** Resets existing language paired with language to import. */
+  resetExistingLanguage: {
     parameters: {
       path: {
-        commentId: number;
-        translationId: number;
+        importLanguageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets existing language to pair with language to import. Data will be imported to selected existing language when applied. */
+  selectExistingLanguage: {
+    parameters: {
+      path: {
+        importLanguageId: number;
+        existingLanguageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns language prepared to import. */
+  getImportLanguage: {
+    parameters: {
+      path: {
+        languageId: number;
         projectId: number;
       };
     };
@@ -8260,7 +10912,391 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TranslationCommentModel"];
+          "application/json": components["schemas"]["ImportLanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Deletes language prepared to import. */
+  deleteLanguage: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Resolves all translation conflicts for provided language. The old translations will be kept. */
+  resolveTranslationSetKeepExisting_2: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Resolves all translation conflicts for provided language. The old translations will be overridden. */
+  resolveTranslationSetOverride_2: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns translations prepared to import. */
+  getImportTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+        languageId: number;
+      };
+      query: {
+        /** Whether only translations, which are in conflict with existing translations should be returned */
+        onlyConflicts?: boolean;
+        /** Whether only translations with unresolved conflictswith existing translations should be returned */
+        onlyUnresolved?: boolean;
+        /** String to search in translation text or key */
+        search?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelImportTranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Resolves translation conflict. The old translation will be kept. */
+  resolveTranslationSetKeepExisting: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Resolves translation conflict. The old translation will be overridden. */
+  resolveTranslationSetOverride: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getProjectInvitations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  inviteUser: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectInvitationModel"];
         };
       };
       /** Bad Request */
@@ -8298,15 +11334,545 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["TranslationCommentDto"];
+        "application/json": components["schemas"]["ProjectInviteUserDto"];
       };
     };
   };
-  delete_8: {
+  getAll_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  create_2: {
     parameters: {
       path: {
-        translationId: number;
-        commentId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["KeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKeyDto"];
+      };
+    };
+  };
+  /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
+  delete_4: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteKeysDto"];
+      };
+    };
+  };
+  create_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["KeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKeyDto"];
+      };
+    };
+  };
+  /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
+  importKeys_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportKeysDto"];
+      };
+    };
+  };
+  /** Import's new keys with translations. Translations can be updated, when specified. */
+  importKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["KeyImportResolvableResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImportKeysResolvableDto"];
+      };
+    };
+  };
+  /** Returns information about keys. (KeyData, Screenshots, Translation in specified language)If key is not found, it's not included in the response. */
+  getInfo: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelKeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetKeysRequestDto"];
+      };
+    };
+  };
+  /**
+   * This endpoint helps you to find desired key by keyName, base translation or translation in specified language.
+   *
+   * Sort is ignored for this request.
+   */
+  searchForKey: {
+    parameters: {
+      query: {
+        /** Search query */
+        search: string;
+        /** Language to search in */
+        languageTag?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelKeySearchSearchResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+  selectKeys_2: {
+    parameters: {
+      query: {
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
+        filterKeyName?: string[];
+        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
+        filterKeyId?: number[];
+        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /**
+         * Filter namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Selects only keys, where translation in provided langs is in outdated state */
+        filterOutdatedLanguage?: string[];
+        /** Selects only keys, where translation in provided langs is not in outdated state */
+        filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
+        /** Select only keys which are in specified task */
+        filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelectAllResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  delete_2: {
+    parameters: {
+      path: {
+        ids: number[];
         projectId: number;
       };
     };
@@ -8347,12 +11913,10 @@ export interface operations {
       };
     };
   };
-  /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
-  setOutdated: {
+  get_6: {
     parameters: {
       path: {
-        translationId: number;
-        state: boolean;
+        id: number;
         projectId: number;
       };
     };
@@ -8360,7 +11924,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TranslationModel"];
+          "application/json": components["schemas"]["KeyModel"];
         };
       };
       /** Bad Request */
@@ -8397,11 +11961,10 @@ export interface operations {
       };
     };
   };
-  /** Removes "auto translated" indication */
-  dismissAutoTranslatedState: {
+  edit: {
     parameters: {
       path: {
-        translationId: number;
+        id: number;
         projectId: number;
       };
     };
@@ -8409,9 +11972,3290 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TranslationModel"];
+          "application/json": components["schemas"]["KeyModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EditKeyDto"];
+      };
+    };
+  };
+  getBigMeta: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelKeyWithBaseTranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Edits key name, translations, tags, screenshots, and other data */
+  complexEdit: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["KeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplexEditKeyDto"];
+      };
+    };
+  };
+  /** Returns languages, in which key is disabled */
+  getDisabledLanguages: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets languages, in which key is disabled */
+  setDisabledLanguages: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetDisabledLanguagesRequest"];
+      };
+    };
+  };
+  /**
+   * Uses enabled auto-translation methods.
+   * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
+   *
+   * This will replace the the existing translation with the result obtained from specified source!
+   */
+  autoTranslate: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+      query: {
+        /**
+         * Tags of languages to auto-translate.
+         * When no languages provided, it translates only untranslated languages.
+         */
+        languages?: string[];
+        useMachineTranslation?: boolean;
+        useTranslationMemory?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getKeyScreenshots_1: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelScreenshotModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  uploadScreenshot_1: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["ScreenshotModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          screenshot: string;
+          info?: components["schemas"]["ScreenshotInfoDto"];
+        };
+      };
+    };
+  };
+  deleteScreenshots_1: {
+    parameters: {
+      path: {
+        ids: number[];
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Tags a key with tag. If tag with provided name doesn't exist, it is created */
+  tagKey: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TagModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TagKeyDto"];
+      };
+    };
+  };
+  /** Removes tag with provided id from key with provided id */
+  removeTag: {
+    parameters: {
+      path: {
+        keyId: number;
+        tagId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getLanguagePromptCustomizations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLanguageAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAll_7: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filter languages by id */
+        filterId?: number[];
+        /** Filter languages without id */
+        filterNotId?: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelLanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createLanguage: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LanguageRequest"];
+      };
+    };
+  };
+  get_16: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  editLanguage: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LanguageRequest"];
+      };
+    };
+  };
+  deleteLanguage_2: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setLanguagePromptCustomization: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LanguageAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLanguagePromptCustomizationRequest"];
+      };
+    };
+  };
+  leaveProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns machine translation credit balance for specified project */
+  getProjectCredits: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Get enabled services and configured formality for each language */
+  getMachineTranslationLanguageInfo: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLanguageInfoModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getMachineTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setMachineTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetMachineTranslationSettingsDto"];
+      };
+    };
+  };
+  /** List all batch operations started by current user */
+  myList: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelBatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns information about a namespace by its name */
+  getByName: {
+    parameters: {
+      path: {
+        name: string;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAllNamespaces: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelNamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_1: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NamespaceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateNamespaceDto"];
+      };
+    };
+  };
+  getPerLanguageAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setPerLanguageAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAutoTranslationConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutoTranslationSettingsDto"][];
+      };
+    };
+  };
+  /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
+  doImport: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[];
+          params: components["schemas"]["SingleStepImportRequest"];
+        };
+      };
+    };
+  };
+  /** Clear translation values for provided keys in selected languages. */
+  clearTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ClearTranslationsRequest"];
+      };
+    };
+  };
+  /** Copy translation values from one language to other languages. */
+  copyTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CopyTranslationRequest"];
+      };
+    };
+  };
+  deleteKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteKeysRequest"];
+      };
+    };
+  };
+  /** Translate provided keys to provided languages through primary MT provider. */
+  machineTranslation: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MachineTranslationRequest"];
+      };
+    };
+  };
+  /** Pre-translate provided keys to provided languages by TM. */
+  translate: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PreTranslationByTmRequest"];
+      };
+    };
+  };
+  setKeysNamespace: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetKeysNamespaceRequest"];
+      };
+    };
+  };
+  setTranslationState_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsStateStateRequest"];
+      };
+    };
+  };
+  tagKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TagKeysRequest"];
+      };
+    };
+  };
+  untagKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UntagKeysRequest"];
+      };
+    };
+  };
+  getProjectStats: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getProjectDailyActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Suggests machine translations from enabled services */
+  suggestMachineTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SuggestResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
+  /** Suggests machine translations from enabled services. The results are streamed to the output in ndjson format. If an error occurs when for any service provider used, the error information is returned as a part of the result item, while the response has 200 status code. */
+  suggestMachineTranslationsStreaming: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
+  /** Suggests machine translations from translation memory. The result is always sorted by similarity, so sorting is not supported. */
+  suggestTranslationMemory: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationMemoryItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
+  executeComplexTagOperation: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplexTagKeysRequest"];
+      };
+    };
+  };
+  getAll_3: {
+    parameters: {
+      query: {
+        search?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTagModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getTasks_1: {
+    parameters: {
+      query: {
+        /** Filter tasks by state */
+        filterState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
+        /** Filter tasks without state */
+        filterNotState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
+        /** Filter tasks by assignee */
+        filterAssignee?: number[];
+        /** Filter tasks by type */
+        filterType?: ("TRANSLATE" | "REVIEW")[];
+        /** Filter tasks by id */
+        filterId?: number[];
+        /** Filter tasks without id */
+        filterNotId?: number[];
+        /** Filter tasks by project */
+        filterProject?: number[];
+        /** Filter tasks without project */
+        filterNotProject?: number[];
+        /** Filter tasks by language */
+        filterLanguage?: number[];
+        /** Filter tasks by key */
+        filterKey?: number[];
+        /** Filter tasks by agency */
+        filterAgency?: number[];
+        /** Exclude "done" tasks which are older than specified timestamp */
+        filterDoneMinClosedAt?: number;
+        /** Exclude tasks which were closed before specified timestamp */
+        filterNotClosedBefore?: number;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTaskModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createTask: {
+    parameters: {
+      query: {
+        filterState?: (
+          | "UNTRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "DISABLED"
+        )[];
+        filterOutdated?: boolean;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTaskRequest"];
+      };
+    };
+  };
+  calculateScope: {
+    parameters: {
+      query: {
+        filterState?: (
+          | "UNTRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "DISABLED"
+        )[];
+        filterOutdated?: boolean;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["KeysScopeView"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CalculateScopeRequest"];
+      };
+    };
+  };
+  createTasks: {
+    parameters: {
+      query: {
+        filterState?: (
+          | "UNTRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "DISABLED"
+        )[];
+        filterOutdated?: boolean;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMultipleTasksRequest"];
+      };
+    };
+  };
+  getPossibleAssignees: {
+    parameters: {
+      query: {
+        /** Filter users by id */
+        filterId?: number[];
+        /** Filter only users that have at least following scopes */
+        filterMinimalScope?: string;
+        /** Filter only users that can view language */
+        filterViewLanguageId?: number;
+        /** Filter only users that can edit language */
+        filterEditLanguageId?: number;
+        /** Filter only users that can edit state of language */
+        filterStateLanguageId?: number;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelSimpleUserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getTask: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updateTask: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTaskRequest"];
+      };
+    };
+  };
+  /** If the tasks is blocked by other tasks, it returns numbers of these tasks. */
+  getBlockingTasks: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": number[];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  closeTask: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  finishTask: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getTaskKeys: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskKeysResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updateTaskKeys: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTaskKeysRequest"];
+      };
+    };
+  };
+  /** Mark key as done, which updates task progress. */
+  updateTaskKey: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UpdateTaskKeyResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTaskKeyRequest"];
+      };
+    };
+  };
+  /** Detailed statistics for every assignee */
+  getPerUserReport: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskPerUserReportModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  reopenTask: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Detailed statistics about the task results */
+  getXlsxReport: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns organizations to which project can be transferred */
+  getTransferOptions: {
+    parameters: {
+      query: {
+        search?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectTransferOptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Transfers project's ownership to organization */
+  transferProjectToOrganization: {
+    parameters: {
+      path: {
+        projectId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -8663,3263 +15507,8 @@ export interface operations {
       };
     };
   };
-  /** Transfers project's ownership to organization */
-  transferProjectToOrganization: {
-    parameters: {
-      path: {
-        projectId: number;
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  leaveProject: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  get_16: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["LanguageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  editLanguage: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["LanguageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LanguageRequest"];
-      };
-    };
-  };
-  deleteLanguage_2: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  setLanguagePromptCustomization: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["LanguageAiPromptCustomizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetLanguagePromptCustomizationRequest"];
-      };
-    };
-  };
-  /**
-   * Uses enabled auto-translation methods.
-   * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
-   *
-   * This will replace the the existing translation with the result obtained from specified source!
-   */
-  autoTranslate: {
-    parameters: {
-      path: {
-        keyId: number;
-        projectId: number;
-      };
-      query: {
-        /**
-         * Tags of languages to auto-translate.
-         * When no languages provided, it translates only untranslated languages.
-         */
-        languages?: string[];
-        useMachineTranslation?: boolean;
-        useTranslationMemory?: boolean;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  uploadAvatar_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          avatar: string;
-        };
-      };
-    };
-  };
-  removeAvatar_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getPromptProjectCustomization: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectAiPromptCustomizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  setPromptProjectCustomization: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectAiPromptCustomizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetProjectPromptCustomizationRequest"];
-      };
-    };
-  };
-  get_18: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PatModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Updates Personal Access Token */
-  update_7: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PatModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdatePatDto"];
-      };
-    };
-  };
-  /** Deletes Personal Access Token */
-  delete_10: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Regenerates Personal Access Token. It generates new token value and updates its time of expiration. */
-  regenerate: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["RevealedPatModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RegeneratePatDto"];
-      };
-    };
-  };
-  /** Sets user role in organization. Owner or Member. */
-  setUserRole: {
-    parameters: {
-      path: {
-        organizationId: number;
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetOrganizationRoleDto"];
-      };
-    };
-  };
-  findProvider: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SsoTenantModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  setProvider: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SsoTenantModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateProviderRequest"];
-      };
-    };
-  };
-  /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
-  setBasePermissions: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-      query: {
-        /** Granted scopes to all projects for all organization users without direct project permissions set. */
-        scopes: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Sets default (level-based) permission for organization */
-  setBasePermissions_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-        permissionType:
-          | "NONE"
-          | "VIEW"
-          | "TRANSLATE"
-          | "REVIEW"
-          | "EDIT"
-          | "MANAGE";
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  get_20: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  update_8: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
-  /** Deletes organization and all its data including projects */
-  delete_11: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Remove current user from organization */
-  leaveOrganization: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Generates invitation link for organization, so users can join organization. The invitation can also be sent to an e-mail address. */
-  inviteUser_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OrganizationInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationInviteUserDto"];
-      };
-    };
-  };
-  uploadAvatar_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          avatar: string;
-        };
-      };
-    };
-  };
-  removeAvatar_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  setLicenseKey: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["EeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetLicenseKeyDto"];
-      };
-    };
-  };
-  /** This will remove the licence key from the instance. */
-  release: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** This will refresh the subscription information from the license server and update the subscription info. */
-  refreshSubscription: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["EeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  update_9: {
-    parameters: {
-      path: {
-        apiKeyId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ApiKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["V2EditApiKeyDto"];
-      };
-    };
-  };
-  delete_13: {
-    parameters: {
-      path: {
-        apiKeyId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  regenerate_1: {
-    parameters: {
-      path: {
-        apiKeyId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["RevealedApiKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RegenerateApiKeyDto"];
-      };
-    };
-  };
-  /** Enables previously disabled user. */
-  enableUser: {
-    parameters: {
-      path: {
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Disables user account. User will not be able to log in, but their user data will be preserved, so you can enable the user later using the `enable` endpoint. */
-  disableUser: {
-    parameters: {
-      path: {
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Set's the global role on the Tolgee Platform server. */
-  setRole: {
-    parameters: {
-      path: {
-        userId: number;
-        role: "USER" | "ADMIN";
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Resends email verification email to currently authenticated user. */
-  sendEmailVerification: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Generates new JWT token permitted to sensitive operations */
-  getSuperToken: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["JwtAuthenticationResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SuperTokenRequest"];
-      };
-    };
-  };
-  generateProjectSlug: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  generateOrganizationSlug: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  /** Pairs user account with slack account. */
-  userLogin: {
-    parameters: {
-      query: {
-        /** The encrypted data about the desired connection between Slack account and Tolgee account */
-        data: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  translate: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["MtResult"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TolgeeTranslateParams"];
-      };
-    };
-  };
-  report: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TelemetryReportRequest"];
-      };
-    };
-  };
-  slackCommand: {
-    parameters: {
-      header: {
-        "X-Slack-Signature": string;
-        "X-Slack-Request-Timestamp": string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          payload?: components["schemas"]["SlackCommandDto"];
-          body?: string;
-        };
-      };
-    };
-  };
-  /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
-  onInteractivityEvent: {
-    parameters: {
-      header: {
-        "X-Slack-Signature": string;
-        "X-Slack-Request-Timestamp": string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": string;
-      };
-    };
-  };
-  /**
-   * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
-   *
-   * Heads up! The events have to be configured via Slack App configuration in Event Subscription section.
-   */
-  fetchBotEvent: {
-    parameters: {
-      header: {
-        "X-Slack-Signature": string;
-        "X-Slack-Request-Timestamp": string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": { [key: string]: unknown };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": string;
-      };
-    };
-  };
-  getMySubscription: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GetMySubscriptionDto"];
-      };
-    };
-  };
-  onLicenceSetKey: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
-      };
-    };
-  };
-  reportUsage: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReportUsageDto"];
-      };
-    };
-  };
-  reportError: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReportErrorDto"];
-      };
-    };
-  };
-  releaseKey: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReleaseKeyDto"];
-      };
-    };
-  };
-  prepareSetLicenseKey: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
-      };
-    };
-  };
-  report_1: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BusinessEventReportRequest"];
-      };
-    };
-  };
-  identify: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["IdentifyRequest"];
-      };
-    };
-  };
-  /** Returns all projects where current user has any permission */
-  getAll: {
-    parameters: {
-      query: {
-        /** Filter projects by id */
-        filterId?: number[];
-        /** Filter projects without id */
-        filterNotId?: number[];
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Creates a new project with languages and initial settings. */
-  createProject: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateProjectRequest"];
-      };
-    };
-  };
-  list: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelWebhookConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  create: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["WebhookConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["WebhookConfigRequest"];
-      };
-    };
-  };
-  /** Sends a test request to the webhook */
-  test: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["WebhookTestResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  createTasks: {
-    parameters: {
-      query: {
-        filterState?: (
-          | "UNTRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "DISABLED"
-        )[];
-        filterOutdated?: boolean;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateMultipleTasksRequest"];
-      };
-    };
-  };
-  calculateScope: {
-    parameters: {
-      query: {
-        filterState?: (
-          | "UNTRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "DISABLED"
-        )[];
-        filterOutdated?: boolean;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["KeysScopeView"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CalculateScopeRequest"];
-      };
-    };
-  };
-  getTasks_1: {
-    parameters: {
-      query: {
-        /** Filter tasks by state */
-        filterState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
-        /** Filter tasks without state */
-        filterNotState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
-        /** Filter tasks by assignee */
-        filterAssignee?: number[];
-        /** Filter tasks by type */
-        filterType?: ("TRANSLATE" | "REVIEW")[];
-        /** Filter tasks by id */
-        filterId?: number[];
-        /** Filter tasks without id */
-        filterNotId?: number[];
-        /** Filter tasks by project */
-        filterProject?: number[];
-        /** Filter tasks without project */
-        filterNotProject?: number[];
-        /** Filter tasks by language */
-        filterLanguage?: number[];
-        /** Filter tasks by key */
-        filterKey?: number[];
-        /** Filter tasks by agency */
-        filterAgency?: number[];
-        /** Exclude "done" tasks which are older than specified timestamp */
-        filterDoneMinClosedAt?: number;
-        /** Exclude tasks which were closed before specified timestamp */
-        filterNotClosedBefore?: number;
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelTaskModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  createTask: {
-    parameters: {
-      query: {
-        filterState?: (
-          | "UNTRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "DISABLED"
-        )[];
-        filterOutdated?: boolean;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TaskModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateTaskRequest"];
-      };
-    };
-  };
-  /** Returns information about keys. (KeyData, Screenshots, Translation in specified language)If key is not found, it's not included in the response. */
-  getInfo: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelKeyWithDataModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GetKeysRequestDto"];
-      };
-    };
-  };
-  /** Import's new keys with translations. Translations can be updated, when specified. */
-  importKeys: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["KeyImportResolvableResultModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ImportKeysResolvableDto"];
-      };
-    };
-  };
-  /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
-  importKeys_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ImportKeysDto"];
-      };
-    };
-  };
-  create_1: {
+  /** Creates a translation comment. Empty translation is stored, when not exists. */
+  create_9: {
     parameters: {
       path: {
         projectId: number;
@@ -11929,7 +15518,7 @@ export interface operations {
       /** Created */
       201: {
         content: {
-          "*/*": components["schemas"]["KeyWithDataModel"];
+          "*/*": components["schemas"]["TranslationWithCommentModel"];
         };
       };
       /** Bad Request */
@@ -11967,1217 +15556,68 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateKeyDto"];
+        "application/json": components["schemas"]["TranslationCommentWithLangKeyDto"];
       };
     };
   };
-  getAll_1: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  create_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** Created */
-      201: {
-        content: {
-          "*/*": components["schemas"]["KeyWithDataModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateKeyDto"];
-      };
-    };
-  };
-  /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
-  delete_4: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DeleteKeysDto"];
-      };
-    };
-  };
-  list_1: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelContentStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  create_5: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ContentStorageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ContentStorageRequest"];
-      };
-    };
-  };
-  /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
-  testExisting: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["StorageTestResult"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ContentStorageRequest"];
-      };
-    };
-  };
-  test_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["StorageTestResult"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ContentStorageRequest"];
-      };
-    };
-  };
-  list_2: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelContentDeliveryConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  create_6: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ContentDeliveryConfigModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ContentDeliveryConfigRequest"];
-      };
-    };
-  };
-  untagKeys: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UntagKeysRequest"];
-      };
-    };
-  };
-  tagKeys: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TagKeysRequest"];
-      };
-    };
-  };
-  setTranslationState_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetTranslationsStateStateRequest"];
-      };
-    };
-  };
-  setKeysNamespace: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetKeysNamespaceRequest"];
-      };
-    };
-  };
-  /** Pre-translate provided keys to provided languages by TM. */
-  translate_1: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PreTranslationByTmRequest"];
-      };
-    };
-  };
-  /** Translate provided keys to provided languages through primary MT provider. */
-  machineTranslation: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MachineTranslationRequest"];
-      };
-    };
-  };
-  deleteKeys: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DeleteKeysRequest"];
-      };
-    };
-  };
-  /** Copy translation values from one language to other languages. */
-  copyTranslations: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CopyTranslationRequest"];
-      };
-    };
-  };
-  /** Clear translation values for provided keys in selected languages. */
-  clearTranslations: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ClearTranslationsRequest"];
-      };
-    };
-  };
-  /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
-  doImport: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          files: string[];
-          params: components["schemas"]["SingleStepImportRequest"];
-        };
-      };
-    };
-  };
-  /** Prepares provided files to import. */
-  addFiles: {
-    parameters: {
-      query: {
-        /** When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys. */
-        structureDelimiter?: string;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ImportAddFilesResultModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          files: string[];
-        };
-      };
-    };
-  };
-  /** Deletes prepared import data. */
-  cancelImport: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  exportData: {
+  /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
+  selectKeys: {
     parameters: {
       query: {
         /**
-         * Languages to be contained in export.
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
          *
-         * If null, all languages are exported
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
          */
         languages?: string[];
-        /** Format to export to */
-        format?:
-          | "JSON"
-          | "JSON_TOLGEE"
-          | "XLIFF"
-          | "PO"
-          | "APPLE_STRINGS_STRINGSDICT"
-          | "APPLE_XLIFF"
-          | "ANDROID_XML"
-          | "COMPOSE_XML"
-          | "FLUTTER_ARB"
-          | "PROPERTIES"
-          | "YAML_RUBY"
-          | "YAML"
-          | "JSON_I18NEXT"
-          | "CSV"
-          | "RESX_ICU"
-          | "XLSX";
-        /**
-         * Delimiter to structure file content.
-         *
-         * e.g. For key "home.header.title" would result in {"home": {"header": "title": {"Hello"}}} structure.
-         *
-         * When null, resulting file won't be structured. Works only for generic structured formats (e.g. JSON, YAML),
-         * specific formats like `YAML_RUBY` don't honor this parameter.
-         */
-        structureDelimiter?: string;
-        /** Filter key IDs to be contained in export */
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
+        filterKeyName?: string[];
+        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
         filterKeyId?: number[];
-        /** Filter key IDs not to be contained in export */
-        filterKeyIdNot?: number[];
+        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
         /**
-         * Filter keys tagged by.
+         * Filter namespaces.
          *
-         * This filter works the same as `filterTagIn` but in this cases it accepts single tag only.
+         * To filter default namespace, set to empty string.
          */
-        filterTag?: string;
-        /** Filter keys tagged by one of provided tags */
-        filterTagIn?: string[];
-        /** Filter keys not tagged by one of provided tags */
-        filterTagNotIn?: string[];
-        /** Filter keys with prefix */
-        filterKeyPrefix?: string;
-        /** Filter translations with state. By default, all states except untranslated is exported. */
-        filterState?: (
-          | "UNTRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "DISABLED"
-        )[];
-        /** Filter translations with namespace. By default, all namespaces everything are exported. To export default namespace, use empty string. */
         filterNamespace?: string[];
-        /**
-         * If false, it doesn't return zip of files, but it returns single file.
-         *
-         * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
-         */
-        zip?: boolean;
-        /**
-         * Message format to be used for export.
-         *
-         * e.g. PHP_PO: Hello %s, ICU: Hello {name}.
-         *
-         * This property is honored only for generic formats like JSON or YAML.
-         * For specific formats like `YAML_RUBY` it's ignored.
-         */
-        messageFormat?:
-          | "C_SPRINTF"
-          | "PHP_SPRINTF"
-          | "JAVA_STRING_FORMAT"
-          | "APPLE_SPRINTF"
-          | "RUBY_SPRINTF"
-          | "I18NEXT"
-          | "ICU";
-        /**
-         * This is a template that defines the structure of the resulting .zip file content.
-         *
-         * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
-         * {androidLanguageTag}, {snakeLanguageTag}, {extension}.
-         *
-         * For example, when exporting to JSON with the template `{namespace}/{languageTag}.{extension}`,
-         * the English translations of the `home` namespace will be stored in `home/en.json`.
-         *
-         * The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake case. (e.g., en_US).
-         *
-         * The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}`
-         * but in Android format. (e.g., en-rUS)
-         */
-        fileStructureTemplate?: string;
-        /**
-         * If true, for structured formats (like JSON) arrays are supported.
-         *
-         * e.g. Key hello[0] will be exported as {"hello": ["..."]}
-         */
-        supportArrays?: boolean;
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Selects only keys, where translation in provided langs is in outdated state */
+        filterOutdatedLanguage?: string[];
+        /** Selects only keys, where translation in provided langs is not in outdated state */
+        filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
+        /** Select only keys which are in specified task */
+        filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
       };
       path: {
         projectId: number;
@@ -13187,7 +15627,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/json": components["schemas"]["SelectAllResponse"];
         };
       };
       /** Bad Request */
@@ -13224,18 +15664,38 @@ export interface operations {
       };
     };
   };
-  /** Exports data (post). Useful when exceeding allowed URL size. */
-  exportPost: {
+  /** Returns all translations for specified languages */
+  getAllTranslations: {
     parameters: {
       path: {
+        /** Comma-separated language tags to return translations in. Languages you are not permitted to see will be silently dropped and not returned. */
+        languages: string[];
         projectId: number;
+      };
+      query: {
+        /** Namespace to return */
+        ns?: string;
+        /**
+         * Delimiter to structure response content.
+         *
+         * e.g. For key "home.header.title" would result in {"home": {"header": {"title": "Hello"}}} structure.
+         *
+         * When null, resulting file will be a flat key-value object.
+         */
+        structureDelimiter?: string;
+        /**
+         * Enables filtering of returned keys by their tags.
+         * Only keys with at least one provided tag will be returned.
+         * Optional, filtering is not applied if not specified.
+         */
+        filterTag?: string[];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/json": string;
         };
       };
       /** Bad Request */
@@ -13269,60 +15729,6 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ExportParams"];
-      };
-    };
-  };
-  /** Stores a bigMeta for a project */
-  store_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BigMetaDto"];
       };
     };
   };
@@ -13436,18 +15842,68 @@ export interface operations {
       };
     };
   };
-  /** Creates a translation comment. Empty translation is stored, when not exists. */
-  create_9: {
+  get_14: {
     parameters: {
       path: {
+        translationId: number;
+        commentId: number;
         projectId: number;
       };
     };
     responses: {
-      /** Created */
-      201: {
+      /** OK */
+      200: {
         content: {
-          "*/*": components["schemas"]["TranslationWithCommentModel"];
+          "application/json": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_5: {
+    parameters: {
+      path: {
+        commentId: number;
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationCommentModel"];
         };
       };
       /** Bad Request */
@@ -13485,13 +15941,161 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["TranslationCommentWithLangKeyDto"];
+        "application/json": components["schemas"]["TranslationCommentDto"];
       };
     };
   };
-  /** Suggests machine translations from translation memory. The result is always sorted by similarity, so sorting is not supported. */
-  suggestTranslationMemory: {
+  delete_8: {
     parameters: {
+      path: {
+        translationId: number;
+        commentId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setState: {
+    parameters: {
+      path: {
+        translationId: number;
+        commentId: number;
+        state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Removes "auto translated" indication */
+  dismissAutoTranslatedState: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
+  getTranslationHistory: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
       query: {
         /** Zero-based page index (0..N) */
         page?: number;
@@ -13500,15 +16104,12 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
-      path: {
-        projectId: number;
-      };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelTranslationMemoryItemModel"];
+          "application/json": components["schemas"]["PagedModelTranslationHistoryModel"];
         };
       };
       /** Bad Request */
@@ -13544,14 +16145,108 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SuggestRequestDto"];
+  };
+  /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
+  setOutdated: {
+    parameters: {
+      path: {
+        translationId: number;
+        state: boolean;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
-  /** Suggests machine translations from enabled services. The results are streamed to the output in ndjson format. If an error occurs when for any service provider used, the error information is returned as a part of the result item, while the response has 200 status code. */
-  suggestMachineTranslationsStreaming: {
+  setTranslationState: {
+    parameters: {
+      path: {
+        translationId: number;
+        state: "TRANSLATED" | "REVIEWED";
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all used project namespaces. Response contains default (null) namespace if used. */
+  getUsedNamespaces: {
     parameters: {
       path: {
         projectId: number;
@@ -13561,7 +16256,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
+          "application/json": components["schemas"]["CollectionModelUsedNamespaceModel"];
         };
       };
       /** Bad Request */
@@ -13597,66 +16292,9 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SuggestRequestDto"];
-      };
-    };
   };
-  /** Suggests machine translations from enabled services */
-  suggestMachineTranslations: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SuggestResultModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SuggestRequestDto"];
-      };
-    };
-  };
-  getAll_7: {
+  /** Returns all project users, who have permission to access project */
+  getAllUsers: {
     parameters: {
       path: {
         projectId: number;
@@ -13668,17 +16306,20 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        /** Filter languages by id */
+        search?: string;
+        /** Filter users by id */
         filterId?: number[];
-        /** Filter languages without id */
+        /** Filter users without id */
         filterNotId?: number[];
+        /** Filter users from agency */
+        filterAgency?: number[];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelLanguageModel"];
+          "application/json": components["schemas"]["PagedModelUserAccountInProjectModel"];
         };
       };
       /** Bad Request */
@@ -13715,19 +16356,61 @@ export interface operations {
       };
     };
   };
-  createLanguage: {
+  revokePermission: {
     parameters: {
       path: {
+        projectId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
+  setOrganizationBase: {
+    parameters: {
+      path: {
+        userId: number;
         projectId: number;
       };
     };
     responses: {
       /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["LanguageModel"];
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -13761,26 +16444,26 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LanguageRequest"];
-      };
-    };
   };
-  getKeyScreenshots_1: {
+  /** Set user's granular (scope-based) direct project permission */
+  setUsersPermissions: {
     parameters: {
       path: {
-        keyId: number;
+        userId: number;
         projectId: number;
+      };
+      query: {
+        /** Granted scopes */
+        scopes?: string[];
+        languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
       };
     };
     responses: {
       /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelScreenshotModel"];
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -13815,20 +16498,29 @@ export interface operations {
       };
     };
   };
-  uploadScreenshot_1: {
+  setUsersPermissions_1: {
     parameters: {
       path: {
-        keyId: number;
+        userId: number;
+        permissionType:
+          | "NONE"
+          | "VIEW"
+          | "TRANSLATE"
+          | "REVIEW"
+          | "EDIT"
+          | "MANAGE";
         projectId: number;
+      };
+      query: {
+        languages?: number[];
+        translateLanguages?: number[];
+        viewLanguages?: number[];
+        stateChangeLanguages?: number[];
       };
     };
     responses: {
-      /** Created */
-      201: {
-        content: {
-          "*/*": components["schemas"]["ScreenshotModel"];
-        };
-      };
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -13862,17 +16554,8 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          screenshot: string;
-          info?: components["schemas"]["ScreenshotInfoDto"];
-        };
-      };
-    };
   };
-  getAll_9: {
+  list: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -13882,12 +16565,15 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
+      path: {
+        projectId: number;
+      };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelPatModel"];
+          "application/json": components["schemas"]["PagedModelWebhookConfigModel"];
         };
       };
       /** Bad Request */
@@ -13924,12 +16610,17 @@ export interface operations {
       };
     };
   };
-  create_11: {
+  create: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
     responses: {
-      /** Created */
-      201: {
+      /** OK */
+      200: {
         content: {
-          "*/*": components["schemas"]["RevealedPatModel"];
+          "application/json": components["schemas"]["WebhookConfigModel"];
         };
       };
       /** Bad Request */
@@ -13967,21 +16658,468 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreatePatDto"];
+        "application/json": components["schemas"]["WebhookConfigRequest"];
       };
     };
   };
-  /** Returns all organizations, which is current user allowed to view */
-  getAll_10: {
+  get_5: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["WebhookConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["WebhookConfigModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WebhookConfigRequest"];
+      };
+    };
+  };
+  delete_1: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sends a test request to the webhook */
+  test: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["WebhookTestResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  identify: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IdentifyRequest"];
+      };
+    };
+  };
+  report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BusinessEventReportRequest"];
+      };
+    };
+  };
+  /** Return server configuration properties documentation */
+  get_3: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["DocItem"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  get_2: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelExportFormatModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns initial data required by the UI to load */
+  get_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["InitialDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Get machine translation providers */
+  getInfo_4: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": {
+            [
+              key: string
+            ]: components["schemas"]["MachineTranslationProviderModel"];
+          };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getHierarchy: {
     parameters: {
       query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        filterCurrentUserOwner?: boolean;
         search?: string;
       };
     };
@@ -13989,7 +17127,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelOrganizationModel"];
+          "application/json": components["schemas"]["HierarchyItem"];
         };
       };
       /** Bad Request */
@@ -14026,12 +17164,91 @@ export interface operations {
       };
     };
   };
-  create_12: {
+  getRoles: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OrganizationModel"];
+          "application/json": {
+            [key: string]: (
+              | "translations.view"
+              | "translations.edit"
+              | "keys.edit"
+              | "screenshots.upload"
+              | "screenshots.delete"
+              | "screenshots.view"
+              | "activity.view"
+              | "languages.edit"
+              | "admin"
+              | "project.edit"
+              | "members.view"
+              | "members.edit"
+              | "translation-comments.add"
+              | "translation-comments.edit"
+              | "translation-comments.set-state"
+              | "translations.state-edit"
+              | "keys.view"
+              | "keys.delete"
+              | "keys.create"
+              | "batch-jobs.view"
+              | "batch-jobs.cancel"
+              | "translations.batch-by-tm"
+              | "translations.batch-machine"
+              | "content-delivery.manage"
+              | "content-delivery.publish"
+              | "webhooks.manage"
+              | "tasks.view"
+              | "tasks.edit"
+            )[];
+          };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  slackCommand: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
         };
       };
       /** Bad Request */
@@ -14069,120 +17286,133 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationDto"];
+        "application/json": {
+          payload?: components["schemas"]["SlackCommandDto"];
+          body?: string;
+        };
       };
     };
   };
   /**
-   * This endpoint allows the owner of an organization to connect a Slack workspace to their organization.
-   * Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.
+   * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
+   *
+   * Heads up! The events have to be configured via Slack App configuration in Event Subscription section.
    */
-  connectWorkspace: {
+  fetchBotEvent: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: unknown };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": string;
+      };
+    };
+  };
+  /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
+  onInteractivityEvent: {
+    parameters: {
+      header: {
+        "X-Slack-Signature": string;
+        "X-Slack-Request-Timestamp": string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": string;
+      };
+    };
+  };
+  /** Sets finished state of the quick start guide */
+  setFinishedState: {
     parameters: {
       path: {
-        organizationId: number;
+        finished: boolean;
       };
     };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ConnectToSlackDto"];
-      };
-    };
-  };
-  upload: {
-    responses: {
-      /** Created */
-      201: {
-        content: {
-          "*/*": components["schemas"]["UploadedImageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          image: string;
-          info?: components["schemas"]["ImageUploadInfoDto"];
-        };
-      };
-    };
-  };
-  /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-  prepareSetLicenseKey_1: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+          "application/json": components["schemas"]["QuickStartModel"];
         };
       };
       /** Bad Request */
@@ -14218,110 +17448,111 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetLicenseKeyDto"];
+  };
+  /** Sets open state of the quick start guide */
+  setOpenState: {
+    parameters: {
+      path: {
+        open: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QuickStartModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
-  allByUser: {
+  /** Marks guide step as completed */
+  completeGuideStep: {
+    parameters: {
+      path: {
+        step: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QuickStartModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Pairs user account with slack account. */
+  userLogin: {
     parameters: {
       query: {
-        pageable: components["schemas"]["Pageable"];
-        filterProjectId?: number;
+        /** The encrypted data about the desired connection between Slack account and Tolgee account */
+        data: string;
       };
     };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelApiKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Creates new API key with provided scopes */
-  create_13: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["RevealedApiKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateApiKeyDto"];
-      };
-    };
-  };
-  /** Dismisses the latest announcement for the currently authenticated user */
-  dismiss: {
     responses: {
       /** OK */
       200: unknown;
@@ -14359,7 +17590,161 @@ export interface operations {
       };
     };
   };
-  validateEmail: {
+  /**
+   * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
+   *
+   * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
+   *
+   * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
+   */
+  getInfo_3: {
+    parameters: {
+      query: {
+        /** The encrypted data */
+        data: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SlackUserInfoModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  generateOrganizationSlug: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  generateProjectSlug: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  validateOrganizationSlug: {
+    parameters: {
+      path: {
+        slug: string;
+      };
+    };
     responses: {
       /** OK */
       200: {
@@ -14400,19 +17785,104 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TextNode"];
+  };
+  validateProjectSlug: {
+    parameters: {
+      path: {
+        slug: string;
       };
     };
-  };
-  /** When E-mail verification is enabled, null is returned. Otherwise JWT token is provided. */
-  signUp: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+          "application/json": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns information about currently authenticated user. */
+  getInfo_2: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Updates current user's profile information. */
+  updateUser: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -14450,12 +17920,58 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SignUpDto"];
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
       };
     };
   };
-  /** Checks the password reset code from e-mail */
-  resetPasswordSet: {
+  updateUserOld: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
+      };
+    };
+  };
+  delete: {
     responses: {
       /** OK */
       200: unknown;
@@ -14492,13 +18008,55 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ResetPassword"];
+  };
+  get: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UserPreferencesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
-  resetPasswordRequest: {
+  setLanguage: {
+    parameters: {
+      path: {
+        languageTag: string;
+      };
+    };
     responses: {
       /** OK */
       200: unknown;
@@ -14535,115 +18093,16 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ResetPasswordRequest"];
+  };
+  setPreferredOrganization: {
+    parameters: {
+      path: {
+        organizationId: number;
       };
     };
-  };
-  authenticateUser: {
     responses: {
       /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["JwtAuthenticationResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LoginRequest"];
-      };
-    };
-  };
-  getAuthenticationUrl: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SsoUrlResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DomainRequest"];
-      };
-    };
-  };
-  /** Returns all organizations owned only by current user */
-  getAllSingleOwnedOrganizations: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelSimpleOrganizationModel"];
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -14757,12 +18216,12 @@ export interface operations {
       };
     };
   };
-  get: {
+  uploadAvatar: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["UserPreferencesModel"];
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -14798,3640 +18257,21 @@ export interface operations {
         };
       };
     };
-  };
-  validateProjectSlug: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  validateOrganizationSlug: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /**
-   * Returns information about the connection between Slack account and Tolgee account which user is performing. The flow is the following.
-   *
-   * 1. User executes slash command in Slack and gets link with encrypted Slack user ID, workspace ID and the Channel ID (to send success response to)
-   *
-   * 2. User gets opens the link and the Tolgee Platform frontend and it uses this endpoint to get the data info about the future connection
-   */
-  getInfo_3: {
-    parameters: {
-      query: {
-        /** The encrypted data */
-        data: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SlackUserInfoModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getRoles: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: (
-              | "translations.view"
-              | "translations.edit"
-              | "keys.edit"
-              | "screenshots.upload"
-              | "screenshots.delete"
-              | "screenshots.view"
-              | "activity.view"
-              | "languages.edit"
-              | "admin"
-              | "project.edit"
-              | "members.view"
-              | "members.edit"
-              | "translation-comments.add"
-              | "translation-comments.edit"
-              | "translation-comments.set-state"
-              | "translations.state-edit"
-              | "keys.view"
-              | "keys.delete"
-              | "keys.create"
-              | "batch-jobs.view"
-              | "batch-jobs.cancel"
-              | "translations.batch-by-tm"
-              | "translations.batch-machine"
-              | "content-delivery.manage"
-              | "content-delivery.publish"
-              | "webhooks.manage"
-              | "tasks.view"
-              | "tasks.edit"
-            )[];
-          };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getHierarchy: {
-    parameters: {
-      query: {
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["HierarchyItem"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Get machine translation providers */
-  getInfo_4: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": {
-            [
-              key: string
-            ]: components["schemas"]["MachineTranslationProviderModel"];
-          };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns initial data required by the UI to load */
-  get_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["InitialDataModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  get_2: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelExportFormatModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Return server configuration properties documentation */
-  get_3: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["DocItem"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all project users, who have permission to access project */
-  getAllUsers: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-        /** Filter users by id */
-        filterId?: number[];
-        /** Filter users without id */
-        filterNotId?: number[];
-        /** Filter users from agency */
-        filterAgency?: number[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelUserAccountInProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all used project namespaces. Response contains default (null) namespace if used. */
-  getUsedNamespaces: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelUsedNamespaceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Detailed statistics about the task results */
-  getXlsxReport: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Detailed statistics for every assignee */
-  getPerUserReport: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TaskPerUserReportModel"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** If the tasks is blocked by other tasks, it returns numbers of these tasks. */
-  getBlockingTasks: {
-    parameters: {
-      path: {
-        taskNumber: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": number[];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getPossibleAssignees: {
-    parameters: {
-      query: {
-        /** Filter users by id */
-        filterId?: number[];
-        /** Filter only users that have at least following scopes */
-        filterMinimalScope?: string;
-        /** Filter only users that can view language */
-        filterViewLanguageId?: number;
-        /** Filter only users that can edit language */
-        filterEditLanguageId?: number;
-        /** Filter only users that can edit state of language */
-        filterStateLanguageId?: number;
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelSimpleUserAccountModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getAllNamespaces: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelNamespaceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns information about a namespace by its name */
-  getByName: {
-    parameters: {
-      path: {
-        name: string;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["NamespaceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Get enabled services and configured formality for each language */
-  getMachineTranslationLanguageInfo: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelLanguageInfoModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /**
-   * This endpoint helps you to find desired key by keyName, base translation or translation in specified language.
-   *
-   * Sort is ignored for this request.
-   */
-  searchForKey: {
-    parameters: {
-      query: {
-        /** Search query */
-        search: string;
-        /** Language to search in */
-        languageTag?: string;
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelKeySearchSearchResultModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getAllKeys: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /**
-   * Returns all project key with any disabled language.
-   *
-   * If key has no disabled language, it is not returned.
-   */
-  getDisabledLanguages_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelKeyDisabledLanguagesModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getModifiedEntitiesByRevision: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        /** Filters results by specific entity class */
-        filterEntityClass?: string[];
-      };
-      path: {
-        revisionId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelModifiedEntityModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getSingleRevision: {
-    parameters: {
-      path: {
-        revisionId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectActivityModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getActivity: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectActivityModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getAll_3: {
-    parameters: {
-      query: {
-        search?: string;
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelTagModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** List all batch operations started by current user */
-  myList: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelBatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns machine translation credit balance for specified project */
-  getProjectCredits: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CreditBalanceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getBigMeta: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelKeyWithBaseTranslationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns translations prepared to import. */
-  getImportTranslations: {
-    parameters: {
-      path: {
-        projectId: number;
-        languageId: number;
-      };
-      query: {
-        /** Whether only translations, which are in conflict with existing translations should be returned */
-        onlyConflicts?: boolean;
-        /** Whether only translations with unresolved conflictswith existing translations should be returned */
-        onlyUnresolved?: boolean;
-        /** String to search in translation text or key */
-        search?: string;
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelImportTranslationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns language prepared to import. */
-  getImportLanguage: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ImportLanguageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Deletes language prepared to import. */
-  deleteLanguage: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns issues for uploaded file. */
-  getImportFileIssues: {
-    parameters: {
-      path: {
-        importFileId: number;
-        projectId: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelImportFileIssueModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns the result of preparation. */
-  getImportResult: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelImportLanguageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all existing and imported namespaces */
-  getAllNamespaces_2: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelImportNamespaceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all running and pending batch operations. Completed batch operations are returned only if they are not older than 1 hour. If user doesn't have permission to view all batch operations, only their operations are returned. */
-  currentJobs: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelBatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  get_12: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  list_3: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelBatchJobModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
-  getTranslationHistory: {
-    parameters: {
-      path: {
-        translationId: number;
-        projectId: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelTranslationHistoryModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all translations for specified languages */
-  getAllTranslations: {
-    parameters: {
-      path: {
-        /** Comma-separated language tags to return translations in. Languages you are not permitted to see will be silently dropped and not returned. */
-        languages: string[];
-        projectId: number;
-      };
-      query: {
-        /** Namespace to return */
-        ns?: string;
-        /**
-         * Delimiter to structure response content.
-         *
-         * e.g. For key "home.header.title" would result in {"home": {"header": {"title": "Hello"}}} structure.
-         *
-         * When null, resulting file will be a flat key-value object.
-         */
-        structureDelimiter?: string;
-        /**
-         * Enables filtering of returned keys by their tags.
-         * Only keys with at least one provided tag will be returned.
-         * Optional, filtering is not applied if not specified.
-         */
-        filterTag?: string[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
-  selectKeys: {
-    parameters: {
-      query: {
-        /**
-         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
-         *
-         * When used with multiple states for same language it is applied with logical OR.
-         *
-         * When used with multiple languages, it is applied with logical AND.
-         */
-        filterState?: string[];
-        /**
-         * Languages to be contained in response.
-         *
-         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
-         */
-        languages?: string[];
-        /** String to search in key name or translation text */
-        search?: string;
-        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
-        filterKeyName?: string[];
-        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
-        filterKeyId?: number[];
-        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
-        filterUntranslatedAny?: boolean;
-        /** Selects only keys, where translation is provided in any language */
-        filterTranslatedAny?: boolean;
-        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
-        filterUntranslatedInLang?: string;
-        /** Selects only keys, where translation is provided in specified language */
-        filterTranslatedInLang?: string;
-        /** Selects only keys with screenshots */
-        filterHasScreenshot?: boolean;
-        /** Selects only keys without screenshots */
-        filterHasNoScreenshot?: boolean;
-        /**
-         * Filter namespaces.
-         *
-         * To filter default namespace, set to empty string.
-         */
-        filterNamespace?: string[];
-        /** Selects only keys with provided tag */
-        filterTag?: string[];
-        /** Selects only keys, where translation in provided langs is in outdated state */
-        filterOutdatedLanguage?: string[];
-        /** Selects only keys, where translation in provided langs is not in outdated state */
-        filterNotOutdatedLanguage?: string[];
-        /** Selects only key affected by activity with specidfied revision ID */
-        filterRevisionId?: number[];
-        /** Select only keys which were not successfully translated by batch job with provided id */
-        filterFailedKeysOfJob?: number;
-        /** Select only keys which are in specified task */
-        filterTaskNumber?: number[];
-        /** Filter task keys which are `not done` */
-        filterTaskKeysNotDone?: boolean;
-        /** Filter task keys which are `done` */
-        filterTaskKeysDone?: boolean;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SelectAllResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
-  selectKeys_2: {
-    parameters: {
-      query: {
-        /**
-         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
-         *
-         * When used with multiple states for same language it is applied with logical OR.
-         *
-         * When used with multiple languages, it is applied with logical AND.
-         */
-        filterState?: string[];
-        /**
-         * Languages to be contained in response.
-         *
-         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
-         */
-        languages?: string[];
-        /** String to search in key name or translation text */
-        search?: string;
-        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
-        filterKeyName?: string[];
-        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
-        filterKeyId?: number[];
-        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
-        filterUntranslatedAny?: boolean;
-        /** Selects only keys, where translation is provided in any language */
-        filterTranslatedAny?: boolean;
-        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
-        filterUntranslatedInLang?: string;
-        /** Selects only keys, where translation is provided in specified language */
-        filterTranslatedInLang?: string;
-        /** Selects only keys with screenshots */
-        filterHasScreenshot?: boolean;
-        /** Selects only keys without screenshots */
-        filterHasNoScreenshot?: boolean;
-        /**
-         * Filter namespaces.
-         *
-         * To filter default namespace, set to empty string.
-         */
-        filterNamespace?: string[];
-        /** Selects only keys with provided tag */
-        filterTag?: string[];
-        /** Selects only keys, where translation in provided langs is in outdated state */
-        filterOutdatedLanguage?: string[];
-        /** Selects only keys, where translation in provided langs is not in outdated state */
-        filterNotOutdatedLanguage?: string[];
-        /** Selects only key affected by activity with specidfied revision ID */
-        filterRevisionId?: number[];
-        /** Select only keys which were not successfully translated by batch job with provided id */
-        filterFailedKeysOfJob?: number;
-        /** Select only keys which are in specified task */
-        filterTaskNumber?: number[];
-        /** Filter task keys which are `not done` */
-        filterTaskKeysNotDone?: boolean;
-        /** Filter task keys which are `done` */
-        filterTaskKeysDone?: boolean;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SelectAllResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns organizations to which project can be transferred */
-  getTransferOptions: {
-    parameters: {
-      query: {
-        search?: string;
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelProjectTransferOptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getProjectDailyActivity: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": { [key: string]: number };
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getProjectStats: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ProjectStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getLanguagePromptCustomizations: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelLanguageAiPromptCustomizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getProjectInvitations: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelProjectInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all API keys for specified project */
-  allByProject: {
-    parameters: {
-      query: {
-        pageable: components["schemas"]["Pageable"];
-      };
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelApiKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all projects (including statistics) where current user has any permission */
-  getAllWithStatistics: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns preferred organization. If server allows users to create organization, preferred organization is automatically created if user doesn't have access to any organization. */
-  getPreferred: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PrivateOrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
-  getCurrent: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PatWithUserModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  get_19: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["OrganizationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all organization projects the user has access to */
-  getAllProjects: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all projects (including statistics) where current user has any permission (except none) */
-  getAllWithStatistics_1: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getInvitations: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelOrganizationInvitationModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns machine translation credit balance for organization */
-  getOrganizationCredits: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CreditBalanceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getUsage: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PublicUsageModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns a list of workspaces connected to the organization */
-  getConnectedWorkspaces: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelWorkspaceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns URL to which user should be redirected to connect Slack workspace */
-  connectToSlack: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ConnectToSlackUrlModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all projects (including statistics) where current user has any permission (except none) */
-  getAllWithStatistics_2: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectWithStatsModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
-  getAllUsers_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns all organization projects the user has access to */
-  getAllProjects_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  acceptInvitation: {
-    parameters: {
-      path: {
-        code: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getInfo_5: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["EeSubscriptionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns specific API key info */
-  get_21: {
-    parameters: {
-      path: {
-        keyId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ApiKeyModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
-  getCurrent_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ApiKeyWithLanguagesModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getScopes: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Returns the latest announcement for the currently authenticated user */
-  getLatest: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AnnouncementDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getUsers: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelUserAccountModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Generates a JWT token for the user with provided ID. This is useful, when need to debug of the user's account. Or when an operation is required to be executed on behalf of the user. */
-  generateUserToken: {
-    parameters: {
-      path: {
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          avatar: string;
         };
       };
     };
   };
-  getOrganizations: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        search?: string;
-      };
-    };
+  removeAvatar: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelOrganizationModel"];
+          "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
       /** Bad Request */
@@ -18468,14 +18308,8 @@ export interface operations {
       };
     };
   };
-  /** It checks whether the code from email is valid */
-  verifyEmail: {
-    parameters: {
-      path: {
-        userId: number;
-        code: string;
-      };
-    };
+  /** Generates new JWT token permitted to sensitive operations */
+  getSuperToken: {
     responses: {
       /** OK */
       200: {
@@ -18516,62 +18350,19 @@ export interface operations {
         };
       };
     };
-  };
-  resetPasswordValidate: {
-    parameters: {
-      path: {
-        code: string;
-        email: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuperTokenRequest"];
       };
     };
   };
-  invitationInfo: {
-    parameters: {
-      path: {
-        code: string;
-      };
-    };
+  /** Regenerates multi-factor authentication recovery codes */
+  regenerateRecoveryCodes: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PublicInvitationModel"];
+          "application/json": string[];
         };
       };
       /** Bad Request */
@@ -18607,62 +18398,14 @@ export interface operations {
         };
       };
     };
-  };
-  getPublicConfiguration: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PublicConfigurationDTO"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserMfaRecoveryRequestDto"];
       };
     };
   };
-  /** Authenticates user using third party oAuth service */
-  authenticateUser_1: {
-    parameters: {
-      path: {
-        serviceType: string;
-      };
-      query: {
-        code?: string;
-        redirect_uri?: string;
-        invitationCode?: string;
-        domain?: string;
-      };
-    };
+  /** Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
+  enableMfa: {
     responses: {
       /** OK */
       200: {
@@ -18703,19 +18446,19 @@ export interface operations {
         };
       };
     };
-  };
-  /** Exports data as ZIP of jsons */
-  doExportJsonZip: {
-    parameters: {
-      path: {
-        projectId: number;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserTotpEnableRequestDto"];
       };
     };
+  };
+  /** Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success. */
+  disableMfa: {
     responses: {
       /** OK */
       200: {
         content: {
-          "application/zip": components["schemas"]["StreamingResponseBody"];
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
@@ -18751,14 +18494,62 @@ export interface operations {
         };
       };
     };
-  };
-  delete_2: {
-    parameters: {
-      path: {
-        ids: number[];
-        projectId: number;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserTotpDisableRequestDto"];
       };
     };
+  };
+  /** Updates current user's password. Invalidates all previous sessions upon success. */
+  updateUserPassword: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdatePasswordRequestDto"];
+      };
+    };
+  };
+  /** Resends email verification email to currently authenticated user. */
+  sendEmailVerification: {
     responses: {
       /** OK */
       200: unknown;
@@ -18796,281 +18587,15 @@ export interface operations {
       };
     };
   };
-  /** Removes tag with provided id from key with provided id */
-  removeTag: {
-    parameters: {
-      path: {
-        keyId: number;
-        tagId: number;
-        projectId: number;
-      };
-    };
+  /** Returns all organizations owned only by current user */
+  getAllSingleOwnedOrganizations: {
     responses: {
       /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
+      200: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": components["schemas"]["CollectionModelSimpleOrganizationModel"];
         };
       };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  deleteScreenshots_1: {
-    parameters: {
-      path: {
-        ids: number[];
-        keyId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  removeUser: {
-    parameters: {
-      path: {
-        organizationId: number;
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  /** Disconnects a workspace from the organization */
-  disconnectWorkspace: {
-    parameters: {
-      path: {
-        workspaceId: number;
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  deleteInvitation: {
-    parameters: {
-      path: {
-        invitationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  delete_12: {
-    parameters: {
-      path: {
-        ids: number[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  deleteUser: {
-    parameters: {
-      path: {
-        userId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
       /** Bad Request */
       400: {
         content: {
