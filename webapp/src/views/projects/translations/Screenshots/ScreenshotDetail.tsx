@@ -15,11 +15,31 @@ const StyledContainer = styled('div')`
   max-height: 80vh;
   max-width: 85vw;
   position: relative;
-`;
 
-const StyledArrowButton = styled(IconButton)`
-  position: fixed;
-  top: calc(50% - 24px);
+  & .arrow {
+    position: absolute;
+    top: calc(50% - 17px);
+    backdrop-filter: blur(0.1px);
+    color: white;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      bottom: 0px;
+      right: 0px;
+      background: black;
+      z-index: -1;
+      border-radius: 50%;
+      opacity: 0.2;
+    }
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &:hover .arrow {
+    opacity: 1;
+  }
 `;
 
 interface ScreenshotDetailProps {
@@ -65,13 +85,14 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
     <Dialog onClose={onClose} open maxWidth="xl" onKeyDown={handleKeyPress}>
       <StyledContainer>
         {multiple && (
-          <StyledArrowButton
-            size="large"
-            style={{ left: 20 }}
+          <IconButton
+            className="arrow"
+            size="small"
+            style={{ left: 8 }}
             onClick={moveLeft}
           >
             <ChevronLeft />
-          </StyledArrowButton>
+          </IconButton>
         )}
         {screenshot && (
           <ScreenshotWithLabels
@@ -85,13 +106,14 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
           />
         )}
         {multiple && (
-          <StyledArrowButton
-            size="large"
-            style={{ right: 20 }}
+          <IconButton
+            className="arrow"
+            size="small"
+            style={{ right: 8 }}
             onClick={moveRight}
           >
             <ChevronRight />
-          </StyledArrowButton>
+          </IconButton>
         )}
       </StyledContainer>
     </Dialog>
