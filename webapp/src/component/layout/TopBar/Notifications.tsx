@@ -41,23 +41,19 @@ const ListItemHeader = styled(ListItem)`
 `;
 
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
+  const history = useHistory();
+  const client = useGlobalContext((c) => c.wsClient.client);
+  const user = useUser();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [notifications, setNotifications] = useState<components['schemas']['NotificationModel'][]>([]);
+  const [unseenCount, setUnseenCount] = useState(0);
+
   const notificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
     query: { size: 10000 },
   });
-
-  const [notifications, setNotifications] =
-    useState<components['schemas']['NotificationModel'][]>(null);
-
-  const [unseenCount, setUnseenCount] = useState(0);
-
-  useEffect(() => {
-    const notificationsLoaded = notificationsLoadable.data;
-    if (notificationsLoaded === undefined) return;
-    setNotifications(notificationsLoaded._embedded.notificationModelList);
-    setUnseenCount(notificationsLoaded.unseenCount);
-  }, [notificationsLoadable.data]);
 
   const markSeenMutation = useApiMutation({
     url: '/v2/notifications-mark-seen',
@@ -79,11 +75,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     setAnchorEl(null);
   };
 
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const history = useHistory();
-  const client = useGlobalContext((c) => c.wsClient.client);
-  const user = useUser();
+  useEffect(() => {
+    const notificationsLoaded = notificationsLoadable.data;
+    if (notificationsLoaded === undefined) return;
+    setNotifications(notificationsLoaded._embedded.notificationModelList);
+    setUnseenCount(notificationsLoaded.unseenCount);
+  }, [notificationsLoadable.data]);
 
   useEffect(() => {
     if (client && user) {
