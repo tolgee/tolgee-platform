@@ -138,6 +138,7 @@ describe('project tasks', () => {
     dismissMenu();
     cy.waitForDom();
     cy.gcy('translations-state-filter-clear').click();
+    waitForGlobalLoading();
 
     checkTaskPreview({
       language: 'Czech',
@@ -160,7 +161,9 @@ describe('project tasks', () => {
     cy.gcy('create-task-field-languages').click();
     cy.gcy('create-task-field-languages-item').contains('Czech').click();
     dismissMenu();
+    cy.waitForDom();
     cy.gcy('translations-state-filter-clear').click();
+    waitForGlobalLoading();
 
     checkTaskPreview({
       language: 'Czech',
