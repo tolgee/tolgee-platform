@@ -88,5 +88,7 @@ class DeeplTranslationProvider(
       "tr",
       "uk",
       "zh",
+      "zh-hans",
+      "zh-hant",
     )
 }
