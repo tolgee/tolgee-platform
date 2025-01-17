@@ -1,3 +1,10 @@
+## [3.94.2](https://github.com/tolgee/tolgee-platform/compare/v3.94.1...v3.94.2) (2025-01-17)
+
+
+### Bug Fixes
+
+* Add chinese dialects for deepl ([#2853](https://github.com/tolgee/tolgee-platform/issues/2853)) ([f26d092](https://github.com/tolgee/tolgee-platform/commit/f26d092fa6395e86d24173edac4c46c9a50982c3))
+
 ## [3.94.1](https://github.com/tolgee/tolgee-platform/compare/v3.94.0...v3.94.1) (2025-01-16)
 
 
