@@ -9,6 +9,7 @@ import { HOST } from '../common/constants';
 import 'cypress-file-upload';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
+import { waitForGlobalLoading } from '../common/loading';
 
 describe('Screenshots', () => {
   let project: ProjectDTO = null;
@@ -99,6 +100,7 @@ describe('Screenshots', () => {
     }
 
     Cypress.Promise.all(promises).then(() => {
+      cy.reload();
       getAndFocusRow(0)
         .findDcy('screenshot-thumbnail')
         .should('have.length', 0);
@@ -115,7 +117,9 @@ describe('Screenshots', () => {
         addScreenshot(project.id, keys[0].id, `screenshots/test_${i + 1}.png`)
       );
     }
+
     Cypress.Promise.all(promises).then(() => {
+      cy.reload();
       for (let i = 0; i < 3; i++) {
         getAndFocusRow(0)
           .findDcy('screenshot-thumbnail')
