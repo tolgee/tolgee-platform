@@ -76,20 +76,26 @@ const StyledContainer = styled(Box)`
   & .arrowRight {
     position: absolute;
     top: calc(50% - 4px);
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     display: grid;
     align-content: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4);
     opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
   }
 
   &:hover .arrowLeft,
   &:hover .arrowRight {
+    opacity: 0.9;
+  }
+
+  .arrowLeft:hover,
+  .arrowRight:hover {
     opacity: 1;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 
   & .arrowLeft {
@@ -258,12 +264,12 @@ export const Screenshots = ({
       </StyledScrollWrapper>
       {scrollLeft && (
         <Box className="arrowLeft" onClick={handleScrollLeft} role="button">
-          <ChevronLeft width={18} height={18} />
+          <ChevronLeft width={20} height={20} />
         </Box>
       )}
       {scrollRight && (
         <Box className="arrowRight" onClick={handleScrollRight} role="button">
-          <ChevronRight width={18} height={18} />
+          <ChevronRight width={20} height={20} />
         </Box>
       )}
       {detailData !== undefined && (
