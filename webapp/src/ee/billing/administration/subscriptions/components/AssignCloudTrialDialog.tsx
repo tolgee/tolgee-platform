@@ -42,7 +42,10 @@ export const AssignCloudTrialDialog: FC<{
 
   const [customize, setCustomize] = React.useState(false);
 
-  function handleSave(value: ValuesType) {
+  const handleSave = (
+    value: ValuesType,
+    { resetForm }: { resetForm: () => void }
+  ) => {
     assignMutation.mutate(
       {
         path: { organizationId },
@@ -59,17 +62,20 @@ export const AssignCloudTrialDialog: FC<{
       {
         onSuccess() {
           handleClose();
+          resetForm();
           messaging.success(
             <T keyName="administration-subscription-plan-assigned-success-message" />
           );
         },
       }
     );
-  }
+  };
 
   const currentTimestamp = useTestClock() || Date.now();
 
-  const currentDaPlus2weeks = new Date(currentTimestamp);
+  const currentDaPlus2weeks = new Date(
+    currentTimestamp + 14 * 24 * 60 * 60 * 1000
+  );
 
   const cloudPlanInitialData = getCloudPlanInitialValues();
 
@@ -79,7 +85,7 @@ export const AssignCloudTrialDialog: FC<{
   ) {
     formikProps.setFieldValue('customPlan', {
       ...getCloudPlanInitialValues(planData),
-      name: planData.name + ' (trial)',
+      name: 'Customized ' + planData.name,
     });
   }
 
