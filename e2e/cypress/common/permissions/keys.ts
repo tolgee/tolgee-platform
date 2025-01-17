@@ -1,7 +1,7 @@
 import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
 import { deleteSelected } from '../batchOperations';
 import { waitForGlobalLoading } from '../loading';
-import { confirmStandard, dismissMenu } from '../shared';
+import { confirmStandard } from '../shared';
 import { getCell } from '../state';
 import { createTag } from '../tags';
 import { createTranslation, editCell } from '../translations';
