@@ -46,7 +46,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const user = useUser();
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState<components['schemas']['NotificationModel'][]>([]);
+  const [notifications, setNotifications] = useState<
+    components['schemas']['NotificationModel'][]
+  >([]);
   const [unseenCount, setUnseenCount] = useState(0);
 
   const notificationsLoadable = useApiQuery({
@@ -78,7 +80,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   useEffect(() => {
     const notificationsLoaded = notificationsLoadable.data;
     if (notificationsLoaded === undefined) return;
-    setNotifications(notificationsLoaded._embedded.notificationModelList);
+    setNotifications(
+      notificationsLoaded._embedded?.notificationModelList || []
+    );
     setUnseenCount(notificationsLoaded.unseenCount);
   }, [notificationsLoadable.data]);
 
