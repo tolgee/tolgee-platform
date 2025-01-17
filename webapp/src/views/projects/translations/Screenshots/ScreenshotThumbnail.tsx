@@ -30,12 +30,22 @@ const StyledScreenshotBox = styled(Box)`
 
 const StyledScreenshotOverflowWrapper = styled(Box)`
   overflow: hidden;
+  position: relative;
   width: 100%;
   height: 100%;
-  background: ${({ theme }) => theme.palette.tokens.text._states.selected};
-  border-radius: 3px;
   border-radius: 4px;
-  border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
+  background: ${({ theme }) => theme.palette.tokens.text._states.selected};
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    border-radius: 4px;
+    border: 1px solid ${({ theme }) => theme.palette.tokens.border.primary};
+    pointer-events: none;
+  }
 `;
 
 const StyledDeleteIconButton = styled(IconButton)`
