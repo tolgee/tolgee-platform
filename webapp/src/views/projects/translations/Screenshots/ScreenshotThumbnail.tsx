@@ -108,6 +108,7 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
         {canDeleteScreenshots && (
           <Tooltip
             title={<T keyName="translations.screenshots.delete_tooltip" />}
+            disableInteractive
           >
             <StyledDeleteIconButton
               className={clsx({ hover })}

@@ -10,6 +10,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { useScrollStatus } from '../TranslationsTable/useScrollStatus';
 import clsx from 'clsx';
+import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 
 export const MAX_FILE_COUNT = 20;
 export const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
@@ -70,6 +71,34 @@ const StyledContainer = styled(Box)`
       opacity: 1;
     }
   }
+
+  & .arrowLeft,
+  & .arrowRight {
+    position: absolute;
+    top: calc(50% - 4px);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &:hover .arrowLeft,
+  &:hover .arrowRight {
+    opacity: 1;
+  }
+
+  & .arrowLeft {
+    left: 2px;
+  }
+
+  & .arrowRight {
+    right: 2px;
+  }
 `;
 
 const StyledScrollWrapper = styled(Box)`
@@ -80,6 +109,8 @@ const StyledScrollWrapper = styled(Box)`
   grid-auto-flow: column;
   justify-content: start;
   gap: 4px;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
 `;
 
 type Props = {
@@ -157,6 +188,22 @@ export const Screenshots = ({
     screenshots,
   ]);
 
+  function handleScrollLeft() {
+    const element = containerRef.current;
+    if (element) {
+      const scrollLeft = element?.scrollLeft;
+      element?.scroll({ left: scrollLeft - 100, behavior: 'smooth' });
+    }
+  }
+
+  function handleScrollRight() {
+    const element = containerRef.current;
+    if (element) {
+      const scrollLeft = element?.scrollLeft;
+      element?.scroll({ left: scrollLeft + 100, behavior: 'smooth' });
+    }
+  }
+
   return (
     <StyledContainer
       {...{ sx }}
@@ -203,11 +250,22 @@ export const Screenshots = ({
               sx={{
                 width,
                 height,
+                scrollSnapAlign: 'center',
               }}
             />
           );
         })}
       </StyledScrollWrapper>
+      {scrollLeft && (
+        <Box className="arrowLeft" onClick={handleScrollLeft} role="button">
+          <ChevronLeft width={18} height={18} />
+        </Box>
+      )}
+      {scrollRight && (
+        <Box className="arrowRight" onClick={handleScrollRight} role="button">
+          <ChevronRight width={18} height={18} />
+        </Box>
+      )}
       {detailData !== undefined && (
         <ScreenshotDetail
           screenshots={screenshotsMapped}
