@@ -26,6 +26,36 @@ const StyledScreenshotBox = styled(Box)`
   justify-content: center;
   display: flex;
   cursor: pointer;
+
+  & .closeButton {
+    position: absolute;
+    z-index: 2;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background-color: ${({ theme }) =>
+      theme.palette.tokens.icon.backgroundDark};
+    color: ${({ theme }) => theme.palette.tokens.icon.onDark};
+    transition: visibility 0.1s linear, opacity 0.1s linear;
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+
+    &:hover {
+      background-color: ${({ theme }) =>
+        theme.palette.tokens.icon.backgroundDarkHover};
+      color: ${({ theme }) => theme.palette.tokens.icon.onDarkHover};
+      visibility: visible;
+    }
+  }
+
+  &:hover .closeButton {
+    pointer-events: all;
+    opacity: 1;
+  }
 `;
 
 const StyledScreenshotOverflowWrapper = styled(Box)`
@@ -48,35 +78,6 @@ const StyledScreenshotOverflowWrapper = styled(Box)`
   }
 `;
 
-const StyledDeleteIconButton = styled(IconButton)`
-  position: absolute;
-  z-index: 2;
-  font-size: 20px;
-  right: -8px;
-  top: -8px;
-  padding: 2px;
-  background-color: rgba(62, 62, 62, 0.9);
-  color: rgba(255, 255, 255, 0.8);
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0.1s linear, opacity 0.1s linear;
-
-  &:hover {
-    background-color: rgba(62, 62, 62, 1);
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  &.hover {
-    opacity: 1;
-    visibility: visible;
-  }
-`;
-
-const StyledDeleteIcon = styled(XClose)`
-  width: 20px;
-  height: 20px;
-`;
-
 type Props = {
   onClick: () => void;
   screenshot: ScreenshotProps;
@@ -87,17 +88,8 @@ type Props = {
 };
 
 export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
-  const [hover, setHover] = useState(false);
   const { satisfiesPermission } = useProjectPermissions();
   const canDeleteScreenshots = satisfiesPermission('screenshots.delete');
-
-  const onMouseOver = () => {
-    setHover(true);
-  };
-
-  const onMouseOut = () => {
-    setHover(false);
-  };
 
   const onDeleteClick = () => {
     confirmation({
@@ -109,25 +101,20 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
 
   return (
     <>
-      <StyledScreenshotBox
-        sx={props.sx}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
-        data-cy="screenshot-thumbnail"
-      >
+      <StyledScreenshotBox sx={props.sx} data-cy="screenshot-thumbnail">
         {canDeleteScreenshots && (
           <Tooltip
             title={<T keyName="translations.screenshots.delete_tooltip" />}
             disableInteractive
           >
-            <StyledDeleteIconButton
-              className={clsx({ hover })}
+            <IconButton
+              className={clsx('closeButton')}
               onClick={onDeleteClick}
               size="large"
               data-cy="screenshot-thumbnail-delete"
             >
-              <StyledDeleteIcon />
-            </StyledDeleteIconButton>
+              <XClose width={20} height={20} />
+            </IconButton>
           </Tooltip>
         )}
         <StyledScreenshotOverflowWrapper
