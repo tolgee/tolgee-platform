@@ -86,7 +86,7 @@ export const ProjectListView = () => {
             [<OrganizationSwitch key={0} />],
             [t('projects_title'), LINKS.PROJECTS.build()],
           ]}
-          navigationRight={Usage}
+          navigationRight={<Usage />}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList
