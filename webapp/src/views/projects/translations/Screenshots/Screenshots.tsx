@@ -48,7 +48,7 @@ const StyledContainer = styled(Box)`
       var(--cell-background),
       transparent
     );
-    left: -1px;
+    left: 0px;
   }
 
   &::after {
@@ -57,7 +57,7 @@ const StyledContainer = styled(Box)`
       var(--cell-background),
       transparent
     );
-    right: -1px;
+    right: 0px;
   }
 
   &.scrollLeft {
@@ -75,7 +75,7 @@ const StyledContainer = styled(Box)`
   & .arrowLeft,
   & .arrowRight {
     position: absolute;
-    top: calc(50% - 4px);
+    top: calc(50% - 6px);
     width: 24px;
     height: 24px;
     border-radius: 50%;
