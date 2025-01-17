@@ -1,4 +1,4 @@
-import { Box, styled } from '@mui/material';
+import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { PrepareUpgradeDialog } from '../../PrepareUpgradeDialog';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -18,9 +18,10 @@ export const StyledContainer = styled(Box)`
 `;
 
 type Props = {
+  activeTrial: boolean;
   hasActivePaidSubscription: boolean;
   active: boolean;
-  ended: boolean;
+  cancelAtPeriodEnd: boolean;
   custom?: boolean;
   planId: number;
   period: BillingPeriodType;
@@ -29,12 +30,13 @@ type Props = {
 
 export const PlanAction = ({
   active,
-  ended,
+  cancelAtPeriodEnd,
   custom,
   hasActivePaidSubscription,
   planId,
   period,
   show,
+  activeTrial,
 }: Props) => {
   const {
     prepareUpgradeMutation,
@@ -51,14 +53,14 @@ export const PlanAction = ({
   const { cancelMutation, doCancel } = useCancelCloudSubscription();
   const { restoreMutation, onRestore } = useRestoreCloudSubscription();
 
-  function getLabelAndAction() {
-    if (active && !ended) {
+  const getLabelAndAction = () => {
+    if (active && !cancelAtPeriodEnd && !activeTrial) {
       return {
         loading: cancelMutation.isLoading,
         onClick: doCancel,
         label: t('billing_plan_cancel'),
       };
-    } else if (active && ended) {
+    } else if (active && cancelAtPeriodEnd && !activeTrial) {
       return {
         loading: restoreMutation.isLoading,
         onClick: onRestore,
@@ -75,26 +77,35 @@ export const PlanAction = ({
         loading: subscribeMutation.isLoading,
         onClick: () => onSubscribe(),
         label: t('billing_plan_subscribe'),
+        tooltip: activeTrial && (
+          <span data-cy="subscribe-cancels-trial-plan-tooltip">
+            {t('billing_plan_subscribe_trial_tooltip')}
+          </span>
+        ),
       };
     }
-  }
+  };
 
-  const { loading, onClick, label } = getLabelAndAction();
+  const { loading, onClick, label, tooltip } = getLabelAndAction();
   const shouldShow = show == undefined || show;
 
   return (
     <StyledContainer>
       {shouldShow && (
-        <LoadingButton
-          data-cy="billing-plan-action-button"
-          variant="contained"
-          color={custom ? 'info' : 'primary'}
-          size="medium"
-          loading={loading}
-          onClick={onClick}
-        >
-          {label}
-        </LoadingButton>
+        <Tooltip title={tooltip}>
+          <span>
+            <LoadingButton
+              data-cy="billing-plan-action-button"
+              variant="contained"
+              color={custom ? 'info' : 'primary'}
+              size="medium"
+              loading={loading}
+              onClick={onClick}
+            >
+              {label}
+            </LoadingButton>
+          </span>
+        </Tooltip>
       )}
       {prepareUpgradeMutation.data && (
         <PrepareUpgradeDialog

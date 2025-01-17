@@ -33,6 +33,7 @@ type Props = {
   action: React.ReactNode;
   custom?: boolean;
   nonCommercial: boolean;
+  activeTrial?: boolean;
 };
 
 export const Plan: FC<Props> = ({
@@ -47,6 +48,7 @@ export const Plan: FC<Props> = ({
   action,
   custom,
   nonCommercial,
+  activeTrial,
 }) => {
   const theme = useTheme();
   const highlightColor = custom
@@ -56,7 +58,12 @@ export const Plan: FC<Props> = ({
 
   return (
     <PlanContainer className={clsx({ active })} data-cy="billing-plan">
-      <PlanActiveBanner active={active} ended={ended} custom={custom} />
+      <PlanActiveBanner
+        active={active}
+        ended={ended}
+        custom={custom}
+        activeTrial={activeTrial}
+      />
       <PlanContent>
         <PlanTitle sx={{ pb: '10px', color: highlightColor }}>
           {plan.name}
