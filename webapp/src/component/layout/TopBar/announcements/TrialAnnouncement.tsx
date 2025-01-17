@@ -15,7 +15,10 @@ export const TrialAnnouncement: React.FC = () => {
   }
 
   return (
-    <TopBarAnnouncementWithIcon icon={<ClockStopwatch />}>
+    <TopBarAnnouncementWithIcon
+      icon={<ClockStopwatch />}
+      data-cy="topbar-trial-announcement"
+    >
       <T
         keyName="trial-end-topbar-announcement-message-urgent"
         params={{

@@ -24,19 +24,23 @@ export const CloudPlanItem: FC<{
   const { filteredFeatures, previousPlanName, plan, custom } = info;
 
   // It would throw an error when cancelling...
-  // A trial without renew does not make sense
+  // Cancelling a trial without renew does not make sense
   const isActiveTrialWithoutRenew =
     active &&
     activeSubscription.status === 'TRIALING' &&
     !activeSubscription.trialRenew;
 
-  const shouldShow = !plan.free && !isActiveTrialWithoutRenew;
+  const shouldShow = !plan.free;
+
+  const isCurrentSubscriptionTrialing =
+    activeSubscription.status === 'TRIALING';
 
   return (
     <Plan
       key={plan.id}
       plan={plan}
       active={active}
+      activeTrial={isCurrentSubscriptionTrialing && active}
       ended={ended}
       onPeriodChange={onPeriodChange}
       period={period}
@@ -49,13 +53,13 @@ export const CloudPlanItem: FC<{
       }
       action={
         <PlanAction
+          activeTrial={isCurrentSubscriptionTrialing && active}
           active={active}
-          ended={ended}
+          cancelAtPeriodEnd={ended}
           custom={custom}
           show={shouldShow}
           hasActivePaidSubscription={
-            !activeSubscription.plan.free &&
-            activeSubscription.status != 'TRIALING'
+            !activeSubscription.plan.free && !isCurrentSubscriptionTrialing
           }
           period={period}
           planId={plan.id}
