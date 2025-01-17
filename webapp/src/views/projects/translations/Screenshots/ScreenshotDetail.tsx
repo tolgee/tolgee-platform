@@ -6,6 +6,7 @@ import {
   ScreenshotWithLabels,
 } from 'tg.component/ScreenshotWithLabels';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -36,6 +37,13 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
   const itemsCount = screenshots.length;
   const screenshot = screenshots[index];
   const multiple = screenshots.length > 1;
+
+  const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
+
+  let scaleMarkers = 1;
+  if (bodyWidth < screenshot.width!) {
+    scaleMarkers = screenshot.width! / bodyWidth;
+  }
 
   function moveLeft() {
     setIndex((itemsCount + index - 1) % itemsCount);
@@ -73,6 +81,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
             showSecondaryHighlights
             objectFit="contain"
             style={{ maxHeight: '100%' }}
+            scaleHighlight={scaleMarkers}
           />
         )}
         {multiple && (
