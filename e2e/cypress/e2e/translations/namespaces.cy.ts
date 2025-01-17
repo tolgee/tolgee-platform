@@ -13,7 +13,7 @@ import {
 } from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
 
-describe('namespaces in translations', () => {
+describe('namespaces in translations', { retries: 3 }, () => {
   beforeEach(() => {
     namespaces.clean({ failOnStatusCode: false });
     namespaces

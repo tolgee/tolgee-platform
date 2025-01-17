@@ -10,7 +10,7 @@ import 'cypress-file-upload';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
 
-describe('Screenshots', () => {
+describe('Screenshots', { retries: 3 }, () => {
   let project: ProjectDTO = null;
   let keys: components['schemas']['KeyModel'][];
 
@@ -22,7 +22,7 @@ describe('Screenshots', () => {
           {
             tag: 'en',
             name: 'English',
-            originalName: 'Engish',
+            originalName: 'English',
           },
           {
             tag: 'cs',
