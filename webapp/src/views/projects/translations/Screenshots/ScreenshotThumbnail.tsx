@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent } from 'react';
 import { Box, IconButton, styled, SxProps, Tooltip } from '@mui/material';
 import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
