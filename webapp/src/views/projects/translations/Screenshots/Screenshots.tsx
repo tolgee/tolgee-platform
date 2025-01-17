@@ -246,7 +246,7 @@ export const Screenshots = ({
               key={sc.id}
               screenshot={screenshot}
               objectFit={oneOnly ? 'cover' : 'contain'}
-              scaleHighlight={sc.width! / width}
+              scaleHighlight={(sc.width! / width - 1) * 0.5 + 1}
               onClick={() => {
                 setDetailData(index);
               }}
