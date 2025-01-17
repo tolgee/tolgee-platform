@@ -68,6 +68,16 @@ describe('Screenshots', () => {
     getAndFocusRow(0).findDcy('screenshot-thumbnail').should('have.length', 1);
   });
 
+  it('dropzone appears on dragover', () => {
+    cy.gcy('translations-row').eq(1).trigger('dragover');
+    cy.gcy('translations-row')
+      .eq(1)
+      .findDcy('cell-key-screenshot-dropzone')
+      .should('be.visible');
+    cy.gcy('translations-row').eq(1).trigger('dragleave');
+    cy.gcy('cell-key-screenshot-dropzone').should('not.exist');
+  });
+
   it('uploads multiple', () => {
     getAndFocusRow(0).findDcy('screenshot-thumbnail').should('have.length', 0);
     getAndFocusRow(0)
