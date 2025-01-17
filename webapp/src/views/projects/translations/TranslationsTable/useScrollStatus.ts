@@ -32,11 +32,6 @@ export const useScrollStatus = (
   }, [ref.current]);
 
   useEffect(() => {
-    addEventListener('resize', recalculateScrollOffsets, { passive: true });
-    return () => removeEventListener('resize', recalculateScrollOffsets);
-  }, [ref.current]);
-
-  useEffect(() => {
     recalculateScrollOffsets();
   }, deps);
 
