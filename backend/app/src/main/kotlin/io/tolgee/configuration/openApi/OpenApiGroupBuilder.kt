@@ -39,7 +39,25 @@ class OpenApiGroupBuilder(
 
     cleanUnusedModels()
 
+    sortOutput()
+
     return@lazy builder.build()
+  }
+
+  private fun sortOutput() {
+    builder.addOpenApiCustomizer { openAPI ->
+      openAPI.paths =
+        Paths().apply {
+          openAPI.paths.toSortedMap().forEach { (key, value) ->
+            addPathItem(key, value)
+            value.parameters?.sortBy { it.name }
+          }
+        }
+      openAPI.components.schemas = openAPI.components.schemas.toSortedMap()
+      openAPI.components.schemas.forEach { (_, value) ->
+        value.properties = value.properties?.toSortedMap()
+      }
+    }
   }
 
   private fun cleanUnusedModels() {
