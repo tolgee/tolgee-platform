@@ -26,6 +26,7 @@ const StyledContainer = styled(Box)`
   overflow: hidden;
   margin: 0px 6px;
   position: relative;
+  --cell-background: ${({ theme }) => theme.palette.background.default};
 
   &::before,
   &::after {
@@ -43,19 +44,19 @@ const StyledContainer = styled(Box)`
   &::before {
     background-image: linear-gradient(
       90deg,
-      ${({ theme }) => theme.palette.tokens.background.default},
+      var(--cell-background),
       transparent
     );
-    left: 0px;
+    left: -1px;
   }
 
   &::after {
     background-image: linear-gradient(
       -90deg,
-      ${({ theme }) => theme.palette.tokens.background.default},
+      var(--cell-background),
       transparent
     );
-    right: 0px;
+    right: -1px;
   }
 
   &.scrollLeft {
