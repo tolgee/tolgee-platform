@@ -29,6 +29,7 @@ import { ALLOWED_UPLOAD_TYPES, Screenshots } from './Screenshots/Screenshots';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { ScreenshotDropzone } from './Screenshots/ScreenshotDropzone';
 import { useScreenshotUpload } from './Screenshots/useScreenshotUpload';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -160,6 +161,8 @@ export const CellKey: React.FC<Props> = ({
     fileRef,
     keyId: data.keyId,
   });
+  const { satisfiesPermission } = useProjectPermissions();
+  const canAddScreenshots = satisfiesPermission('screenshots.upload');
 
   const userIsDragging = useGlobalContext((c) => c.userIsDragging);
 
@@ -297,7 +300,7 @@ export const CellKey: React.FC<Props> = ({
             active ? (
               <ControlsKey
                 onEdit={() => handleOpen()}
-                onAddScreenshot={openFiles}
+                onAddScreenshot={canAddScreenshots ? openFiles : undefined}
                 editEnabled={editEnabled}
               />
             ) : (
@@ -306,19 +309,23 @@ export const CellKey: React.FC<Props> = ({
             )
           ) : null}
         </div>
-        {userIsDragging && (
-          <StyledDropzone>
-            <ScreenshotDropzone validateAndUpload={validateAndUpload} />
-          </StyledDropzone>
+        {canAddScreenshots && (
+          <>
+            {userIsDragging && (
+              <StyledDropzone>
+                <ScreenshotDropzone validateAndUpload={validateAndUpload} />
+              </StyledDropzone>
+            )}
+            <input
+              type="file"
+              style={{ display: 'none' }}
+              ref={fileRef}
+              onChange={onFileSelected}
+              multiple
+              accept={ALLOWED_UPLOAD_TYPES.join(',')}
+            />
+          </>
         )}
-        <input
-          type="file"
-          style={{ display: 'none' }}
-          ref={fileRef}
-          onChange={onFileSelected}
-          multiple
-          accept={ALLOWED_UPLOAD_TYPES.join(',')}
-        />
       </StyledContainer>
       {isEditing && (
         <KeyEditModal
