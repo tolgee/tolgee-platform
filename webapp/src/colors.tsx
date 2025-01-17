@@ -169,7 +169,7 @@ export const colors = {
     globalLoading: '#c9a2b5',
     marker: {
       primary: '#ff0000',
-      secondary: '#ffc0cb',
+      secondary: '#ffc0cb54',
     },
     tooltip: {
       background: '#ffffff',
@@ -294,7 +294,7 @@ export const colors = {
     globalLoading: '#ff6995',
     marker: {
       primary: '#ff0000',
-      secondary: '#ffc0cb',
+      secondary: '#ffc0cb51',
     },
     tooltip: {
       background: '#394556',
