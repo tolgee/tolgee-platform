@@ -47,7 +47,7 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
         maxWidth: '100%',
         ...style,
       }}
-      preserveAspectRatio={objectFit === 'cover' ? 'xMinYMin slice' : ''}
+      preserveAspectRatio={objectFit === 'cover' ? 'xMinYMin slice' : undefined}
       data-cy="screenshot-image"
     >
       <image
