@@ -9,7 +9,6 @@ import { HOST } from '../common/constants';
 import 'cypress-file-upload';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
-import { waitForGlobalLoading } from '../common/loading';
 
 describe('Screenshots', () => {
   let project: ProjectDTO = null;
