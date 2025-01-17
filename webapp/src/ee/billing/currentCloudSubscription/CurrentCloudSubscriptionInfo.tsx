@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Alert, Badge, Box, styled } from '@mui/material';
+import { Badge, Box, styled } from '@mui/material';
 
 import { components as billingComponents } from 'tg.service/billingApiSchema.generated';
 import { components } from 'tg.service/apiSchema.generated';
@@ -17,7 +17,7 @@ import { StringsHint } from 'tg.component/common/StringsHint';
 import { getProgressData } from '../component/utils';
 import { BillingPeriodInfo } from './BillingPeriodInfo';
 import { CloudEstimatedCosts } from './CloudEstimatedCosts';
-import { SubscriptionsTrialAlert } from './SubscriptionsTrialAlert';
+import { SubscriptionsTrialAlert } from './subscriptionsTrialAlert/SubscriptionsTrialAlert';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
