@@ -23,13 +23,6 @@ export const CloudPlanItem: FC<{
 }) => {
   const { filteredFeatures, previousPlanName, plan, custom } = info;
 
-  // It would throw an error when cancelling...
-  // Cancelling a trial without renew does not make sense
-  const isActiveTrialWithoutRenew =
-    active &&
-    activeSubscription.status === 'TRIALING' &&
-    !activeSubscription.trialRenew;
-
   const shouldShow = !plan.free;
 
   const isCurrentSubscriptionTrialing =

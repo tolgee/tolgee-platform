@@ -4,7 +4,6 @@ import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { BillingPeriodType } from '../Price/PeriodSwitch';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 type Props = {
   planId: number;

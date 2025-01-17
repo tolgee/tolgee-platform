@@ -75,5 +75,4 @@ class EmailTestUtil() {
   fun findEmail(to: String): MimeMessage? {
     return messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
   }
-
 }

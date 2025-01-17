@@ -100,8 +100,12 @@ class BatchJobProjectLockingManager(
     toLock: BatchJobDto,
     currentValue: Long?,
   ): Long {
-    val projectId = toLock.projectId
-      ?: throw IllegalStateException("Project id is required. Locking for project should not happen for non-project jobs.")
+    val projectId =
+      toLock.projectId
+        ?: throw IllegalStateException(
+          "Project id is required. " +
+            "Locking for project should not happen for non-project jobs.",
+        )
     // nothing is locked
     if (currentValue == 0L) {
       logger.debug("Locking job ${toLock.id} for project ${toLock.projectId}, nothing is locked")

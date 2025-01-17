@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class PrivateOrganizationModelAssembler(
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val quickStartModelAssembler: QuickStartModelAssembler,
-  private val cloudSubscriptionModelProvider: CloudSubscriptionModelProvider?
+  private val cloudSubscriptionModelProvider: CloudSubscriptionModelProvider?,
 ) {
   fun toModel(
     view: PrivateOrganizationView,
@@ -20,7 +20,7 @@ class PrivateOrganizationModelAssembler(
       organizationModel = organizationModelAssembler.toModel(view.organization),
       enabledFeatures = features,
       quickStart = view.quickStart?.let { quickStartModelAssembler.toModel(it) },
-      activeCloudSubscription = cloudSubscriptionModelProvider?.provide(view.organization.id)
+      activeCloudSubscription = cloudSubscriptionModelProvider?.provide(view.organization.id),
     )
   }
 }

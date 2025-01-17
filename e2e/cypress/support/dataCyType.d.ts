@@ -11,6 +11,7 @@ declare namespace DataCy {
         "activity-detail" |
         "activity-detail-dialog" |
         "add-box" |
+        "administration-access-message" |
         "administration-assign-trial-assign-button" |
         "administration-assign-trial-button" |
         "administration-billing-edit-custom-plan-button" |
@@ -36,6 +37,7 @@ declare namespace DataCy {
         "administration-cloud-plans-item-public-badge" |
         "administration-create-custom-plan-button" |
         "administration-customize-plan-switch" |
+        "administration-debug-customer-account-message" |
         "administration-debug-customer-exit-button" |
         "administration-edit-current-plan-button" |
         "administration-ee-license-key-input" |

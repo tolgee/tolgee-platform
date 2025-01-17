@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { Alert } from '@mui/material';
 import { T } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';

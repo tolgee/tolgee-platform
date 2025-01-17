@@ -19,13 +19,15 @@ export const TrialAnnouncement: React.FC = () => {
       icon={<ClockStopwatch />}
       data-cy="topbar-trial-announcement"
     >
-      <T
-        keyName="trial-end-topbar-announcement-message-urgent"
-        params={{
-          daysLeft: daysLeft,
-          link: <Link component={RouterLink} to={subscriptionsLink} />,
-        }}
-      />
+      <span>
+        <T
+          keyName="trial-end-topbar-announcement-message-urgent"
+          params={{
+            daysLeft: daysLeft,
+            link: <Link component={RouterLink} to={subscriptionsLink} />,
+          }}
+        />
+      </span>
     </TopBarAnnouncementWithIcon>
   );
 };
