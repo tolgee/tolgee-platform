@@ -13,7 +13,6 @@ enum class BatchJobType(
   val maxRetries: Int,
   val processor: KClass<out ChunkProcessor<*, *, *>>,
   val defaultRetryWaitTimeInMs: Int = 2000,
-
   /**
    * Whether run of this job type should be exclusive for a project
    * So only one job can run at a time for a project

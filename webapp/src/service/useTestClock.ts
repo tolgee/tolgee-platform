@@ -7,7 +7,7 @@ interface TestClockState {
 
 export const testClockStore = createStore<TestClockState>((set) => ({
   time: undefined as undefined | number,
-  setTime: (time: number) => set((state) => ({ ...state, time })),
+  setTime: (time: number | undefined) => set((state) => ({ ...state, time })),
 }));
 
 function useTestClockStore<T>(selector?: (state: TestClockState) => T) {

@@ -4,7 +4,7 @@ import { TopBarAnnouncementWithAlertIcon } from './TopBarAnnouncementWithIcon';
 
 export const AdministrationAccessAnnouncement: FC = () => {
   return (
-    <TopBarAnnouncementWithAlertIcon>
+    <TopBarAnnouncementWithAlertIcon data-cy="administration-access-message">
       <T keyName="administration-access-message" />
     </TopBarAnnouncementWithAlertIcon>
   );

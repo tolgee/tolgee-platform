@@ -32,7 +32,7 @@ interface OrganizationRoleRepository : JpaRepository<OrganizationRole, Long> {
     select or.user from OrganizationRole or
     where or.organization = :organization
         and or.type = io.tolgee.model.enums.OrganizationRoleType.OWNER
-    """
+    """,
   )
   fun getOwners(organization: Organization): List<UserAccount>
 }

@@ -28,7 +28,7 @@ class FrontendUrlProvider(
       if (e.message?.contains("No current ServletRequestAttributes") == true) {
         throw IllegalStateException(
           "Trying to find frontend url, but there is no current request. " +
-            "You will have to specify frontend url in application properties."
+            "You will have to specify frontend url in application properties.",
         )
       }
       throw e
