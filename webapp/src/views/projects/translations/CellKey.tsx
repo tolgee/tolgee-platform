@@ -312,11 +312,12 @@ export const CellKey: React.FC<Props> = ({
         {canAddScreenshots && (
           <>
             {userIsDragging && (
-              <StyledDropzone>
+              <StyledDropzone data-cy="cell-key-screenshot-dropzone">
                 <ScreenshotDropzone validateAndUpload={validateAndUpload} />
               </StyledDropzone>
             )}
             <input
+              data-cy="cell-key-screenshot-file-input"
               type="file"
               style={{ display: 'none' }}
               ref={fileRef}
