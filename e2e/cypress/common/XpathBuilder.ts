@@ -21,7 +21,7 @@ export function XPathBuilder(initialXpath = '') {
     return builder;
   }
 
-  function descendantOrSelf(tag: string = '*') {
+  function descendantOrSelf(tag = '*') {
     xpath += `/descendant-or-self::${tag}`;
     return builder;
   }

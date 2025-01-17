@@ -1,8 +1,5 @@
 import { Box, Button, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-
-import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
-import { useOrganization } from 'tg.views/organizations/useOrganization';
 import {
   StyledBillingSection,
   StyledBillingSectionHeader,

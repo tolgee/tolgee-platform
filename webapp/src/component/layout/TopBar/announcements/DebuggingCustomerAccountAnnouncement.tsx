@@ -16,7 +16,7 @@ export const DebuggingCustomerAccountAnnouncement: FC = () => {
   const { exitDebugCustomerAccount } = useGlobalActions();
 
   return (
-    <TopBarAnnouncementWithAlertIcon>
+    <TopBarAnnouncementWithAlertIcon data-cy="administration-debug-customer-account-message">
       <Box>
         <T keyName="administration-debugging-customer-account-message" />
       </Box>

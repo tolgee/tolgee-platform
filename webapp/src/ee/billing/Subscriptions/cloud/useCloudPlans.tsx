@@ -23,7 +23,9 @@ export const useCloudPlans = () => {
   }
 
   const defaultPlan = serverPlans.find((p) => p.free && p.public);
-  const publicPlans = serverPlans.filter((p) => p !== defaultPlan && p.public);
+  const publicPlans = serverPlans.filter(
+    (p) => p !== defaultPlan && p.public
+  ) as PlanType[];
   const customPlans = serverPlans.filter((p) => !p.public);
 
   // add enterprise plan

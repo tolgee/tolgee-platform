@@ -1,4 +1,4 @@
-import { Box, styled, Tooltip } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { SubscriptionCloudPlanPopover } from './SubscriptionCloudPlanPopover';

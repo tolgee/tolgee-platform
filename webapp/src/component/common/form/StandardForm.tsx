@@ -1,8 +1,8 @@
-import { default as React, FC, ReactNode } from 'react';
+import { default as React, ReactNode } from 'react';
 import { Box, Button, SxProps } from '@mui/material';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { T } from '@tolgee/react';
-import { Form, Formik, FormikProps, useField } from 'formik';
+import { Form, Formik, FormikProps } from 'formik';
 import { FormikHelpers, FormikValues } from 'formik/dist/types';
 import { useHistory } from 'react-router-dom';
 import { ObjectSchema } from 'yup';
@@ -10,7 +10,6 @@ import { ObjectSchema } from 'yup';
 import LoadingButton from './LoadingButton';
 import { ResourceErrorComponent } from './ResourceErrorComponent';
 import { ApiError } from 'tg.service/http/ApiError';
-import { DatePicker } from '@mui/x-date-pickers';
 
 export interface LoadableType {
   loading?: boolean;

@@ -8,7 +8,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class TestClockHeaderFilter(
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) : OncePerRequestFilter() {
   companion object {
     const val TOLGEE_TEST_CLOCK_HEADER_NAME = "X-Tolgee-Test-Clock"

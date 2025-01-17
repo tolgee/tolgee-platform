@@ -1,25 +1,13 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { useTranslate } from '@tolgee/react';
-import {
-  Box,
-  Chip,
-  Link,
-  ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
-  styled,
-  Tooltip,
-} from '@mui/material';
+import { styled } from '@mui/material';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { LINKS } from 'tg.constants/links';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import Toolbar from '@mui/material/Toolbar';
-import { AdministrationSubscriptionsCloudPlan } from './components/AdministrationSubscriptionsCloudPlan';
 import { AdministrationSubscriptionsListItem } from './components/AdministrationSubscriptionsListItem';
 
 const StyledWrapper = styled('div')`
