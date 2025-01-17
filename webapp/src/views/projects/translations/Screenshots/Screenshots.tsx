@@ -8,6 +8,8 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsActions } from '../context/TranslationsContext';
+import { useScrollStatus } from '../TranslationsTable/useScrollStatus';
+import clsx from 'clsx';
 
 export const MAX_FILE_COUNT = 20;
 export const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
@@ -22,10 +24,55 @@ const MAX_HEIGHT = 350;
 const StyledContainer = styled(Box)`
   display: grid;
   overflow: hidden;
+  margin: 0px 6px;
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    height: 100%;
+    position: absolute;
+    width: 6px;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 100ms ease-in-out;
+    top: 12px;
+  }
+
+  &::before {
+    background-image: linear-gradient(
+      90deg,
+      ${({ theme }) => theme.palette.tokens.background.default},
+      transparent
+    );
+    left: 0px;
+  }
+
+  &::after {
+    background-image: linear-gradient(
+      -90deg,
+      ${({ theme }) => theme.palette.tokens.background.default},
+      transparent
+    );
+    right: 0px;
+  }
+
+  &.scrollLeft {
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &.scrollRight {
+    &::after {
+      opacity: 1;
+    }
+  }
 `;
 
 const StyledScrollWrapper = styled(Box)`
-  padding: 0px 12px;
+  padding: 0px 6px;
   padding-top: 12px;
   overflow-y: auto;
   display: grid;
@@ -104,9 +151,18 @@ export const Screenshots = ({
     };
   });
 
+  const [scrollLeft, scrollRight] = useScrollStatus(containerRef, [
+    width,
+    screenshots,
+  ]);
+
   return (
-    <StyledContainer {...{ sx }} onClick={stopAndPrevent()} ref={containerRef}>
-      <StyledScrollWrapper>
+    <StyledContainer
+      {...{ sx }}
+      className={clsx({ scrollLeft, scrollRight })}
+      onClick={stopAndPrevent()}
+    >
+      <StyledScrollWrapper ref={containerRef}>
         {screenshots.map((sc, index) => {
           let width =
             oneOnly && boundedSize ? Math.min(boundedSize, sc.width!) : 100;
