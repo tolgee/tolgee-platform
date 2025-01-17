@@ -82,28 +82,32 @@ const StyledContainer = styled(Box)`
     display: grid;
     align-content: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.4);
+    color: ${({ theme }) => theme.palette.tokens.icon.onDark};
+    background-color: ${({ theme }) =>
+      theme.palette.tokens.icon.backgroundDark};
     opacity: 0;
     transition: all 0.2s ease-in-out;
+    z-index: 1;
+  }
+
+  & .arrowLeft {
+    left: 4px;
+  }
+  & .arrowRight {
+    right: 4px;
   }
 
   &:hover .arrowLeft,
   &:hover .arrowRight {
-    opacity: 0.9;
+    opacity: 0.6;
   }
 
-  .arrowLeft:hover,
-  .arrowRight:hover {
-    opacity: 1;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-
-  & .arrowLeft {
-    left: 2px;
-  }
-
-  & .arrowRight {
-    right: 2px;
+  & .arrowLeft:hover,
+  & .arrowRight:hover {
+    opacity: 0.8;
+    color: ${({ theme }) => theme.palette.tokens.icon.onDarkHover};
+    background-color: ${({ theme }) =>
+      theme.palette.tokens.icon.backgroundDarkHover};
   }
 `;
 

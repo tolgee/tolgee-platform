@@ -125,6 +125,10 @@ export const tolgeePalette = {
       menuHover: tolgeeColors['grey']['800'],
       menuSelected: tolgeeColors['pink']['600'],
       menuSelectedBg: '#1f2d400f',
+      onDark: '#ffffffcc',
+      onDarkHover: '#ffffffe5',
+      backgroundDark: '#36455be5',
+      backgroundDarkHover: '#36455b',
     },
     state: {
       untranslated: tolgeeColors['grey']['200'],
@@ -425,6 +429,10 @@ export const tolgeePalette = {
       menuHover: tolgeeColors['grey']['50'],
       menuSelected: tolgeeColors['pink']['400'],
       menuSelectedBg: '#ffffff1f',
+      onDark: '#ffffffcc',
+      onDarkHover: '#ffffffe5',
+      backgroundDark: '#36455be5',
+      backgroundDarkHover: '#36455b',
     },
     state: {
       untranslated: tolgeeColors['grey']['400'],

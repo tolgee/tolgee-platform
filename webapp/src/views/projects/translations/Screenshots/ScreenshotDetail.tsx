@@ -32,7 +32,7 @@ const StyledContainer = styled('div')`
     position: absolute;
     top: calc(50% - 17px);
     backdrop-filter: blur(0.1px);
-    color: white;
+    color: ${({ theme }) => theme.palette.tokens.icon.onDarkHover};
     &::before {
       content: '';
       position: absolute;
@@ -40,10 +40,12 @@ const StyledContainer = styled('div')`
       left: 0px;
       bottom: 0px;
       right: 0px;
-      background: black;
+      background: ${({ theme }) =>
+        theme.palette.tokens.icon.backgroundDarkHover};
       z-index: -1;
       border-radius: 50%;
-      opacity: 0.2;
+      opacity: 0.6;
+      transition: opacity 0.2s ease-in-out;
     }
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
@@ -51,6 +53,10 @@ const StyledContainer = styled('div')`
 
   &:hover .arrow {
     opacity: 1;
+  }
+
+  & .arrow:hover::before {
+    opacity: 0.7;
   }
 `;
 
