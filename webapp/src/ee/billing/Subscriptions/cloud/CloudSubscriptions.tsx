@@ -21,7 +21,7 @@ const StyledShoppingGrid = styled('div')`
   margin: 16px 0px;
 `;
 
-export const PlansCloud = () => {
+export const CloudSubscriptions = () => {
   const organization = useOrganization();
 
   const [period, setPeriod] = useState<BillingPeriodType>();

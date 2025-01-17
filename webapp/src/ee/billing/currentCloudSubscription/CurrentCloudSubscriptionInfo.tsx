@@ -18,6 +18,7 @@ import { getProgressData } from '../component/utils';
 import { BillingPeriodInfo } from './BillingPeriodInfo';
 import { CloudEstimatedCosts } from './CloudEstimatedCosts';
 import { SubscriptionsTrialAlert } from './subscriptionsTrialAlert/SubscriptionsTrialAlert';
+import { TrialInfo } from './TrialInfo';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
@@ -59,6 +60,7 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
       <Badge
         badgeContent={t('subscriptions-actual-plan-trial-badge')}
         color="primary"
+        sx={{ verticalAlign: 'top' }}
       >
         {activeSubscription.plan.name}
       </Badge>
@@ -140,6 +142,7 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
             }
             currentQuantity={usage.extraCreditBalance || 0}
           />
+          <TrialInfo subscription={activeSubscription} />
           <BillingPeriodInfo subscription={activeSubscription} />
         </StyledContent>
       </StyledBillingSection>
