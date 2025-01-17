@@ -10,7 +10,7 @@ import 'cypress-file-upload';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
 
-describe('Screenshots', { retries: 3 }, () => {
+describe('Screenshots', () => {
   let project: ProjectDTO = null;
   let keys: components['schemas']['KeyModel'][];
 
