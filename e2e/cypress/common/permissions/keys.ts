@@ -38,8 +38,7 @@ export function testKeys(info: ProjectInfo) {
     cy.gcy('translations-table-cell').first().focus();
     cy.gcy('screenshot-thumbnail').should('be.visible');
     if (scopes.includes('screenshots.delete')) {
-      cy.gcy('screenshot-thumbnail').trigger('mouseover');
-      cy.gcy('screenshot-thumbnail-delete').click();
+      cy.gcy('screenshot-thumbnail-delete').click({ force: true });
       confirmStandard();
       waitForGlobalLoading();
       cy.gcy('screenshot-thumbnail').should('not.exist');

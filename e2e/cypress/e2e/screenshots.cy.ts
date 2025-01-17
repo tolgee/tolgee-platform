@@ -120,9 +120,8 @@ describe('Screenshots', () => {
         getAndFocusRow(0)
           .findDcy('screenshot-thumbnail')
           .first()
-          .trigger('mouseover')
           .findDcy('screenshot-thumbnail-delete')
-          .click();
+          .click({ force: true });
 
         cy.contains('Confirm').click();
         cy.waitForDom();
