@@ -1373,7 +1373,8 @@ export interface components {
         | "APPLE_SPRINTF"
         | "RUBY_SPRINTF"
         | "I18NEXT"
-        | "ICU";
+        | "ICU"
+        | "PYTHON_SPRINTF";
       name: string;
       pruneBeforePublish: boolean;
       publicUrl?: string;
@@ -1478,7 +1479,8 @@ export interface components {
         | "APPLE_SPRINTF"
         | "RUBY_SPRINTF"
         | "I18NEXT"
-        | "ICU";
+        | "ICU"
+        | "PYTHON_SPRINTF";
       name: string;
       /**
        * @description Whether the data in the CDN should be pruned before publishing new data.
@@ -2077,7 +2079,8 @@ export interface components {
         | "APPLE_SPRINTF"
         | "RUBY_SPRINTF"
         | "I18NEXT"
-        | "ICU";
+        | "ICU"
+        | "PYTHON_SPRINTF";
       /**
        * @description Delimiter to structure file content.
        *
@@ -2203,6 +2206,7 @@ export interface components {
         | "PO_JAVA"
         | "PO_ICU"
         | "PO_RUBY"
+        | "PO_PYTHON"
         | "STRINGS"
         | "STRINGSDICT"
         | "APPLE_XLIFF"
@@ -10173,7 +10177,8 @@ export interface operations {
           | "APPLE_SPRINTF"
           | "RUBY_SPRINTF"
           | "I18NEXT"
-          | "ICU";
+          | "ICU"
+          | "PYTHON_SPRINTF";
         /**
          * This is a template that defines the structure of the resulting .zip file content.
          *

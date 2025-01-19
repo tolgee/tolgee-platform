@@ -5,6 +5,7 @@ import io.tolgee.formats.paramConvertors.out.IcuToCPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToI18nextPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToJavaPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToPhpPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.out.IcuToPythonPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
 
 @Suppress("unused") // it's exposed to the API
@@ -16,5 +17,5 @@ enum class ExportMessageFormat(val paramConvertorFactory: () -> FromIcuPlacehold
   RUBY_SPRINTF(paramConvertorFactory = { IcuToRubyPlaceholderConvertor() }),
   I18NEXT(paramConvertorFactory = { IcuToI18nextPlaceholderConvertor() }),
   ICU(paramConvertorFactory = { IcuToIcuPlaceholderConvertor() }),
-//  PYTHON_SPRINTF,
+  PYTHON_SPRINTF(paramConvertorFactory = { IcuToPythonPlaceholderConvertor() }),
 }
