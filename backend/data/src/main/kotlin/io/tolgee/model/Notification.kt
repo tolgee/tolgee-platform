@@ -24,5 +24,5 @@ class Notification : StandardAuditModel() {
   var linkedTask: Task? = null
 
   @ColumnDefault("false")
-  var beenSeen: Boolean = false
+  var seen: Boolean = false
 }

@@ -34,7 +34,7 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     SELECT COUNT(n)
      FROM Notification n
      WHERE n.user.id = :userId
-        AND n.beenSeen = false
+        AND n.seen = false
     """,
   )
   fun getUnseenCountByUserId(userId: Long): Int
@@ -42,10 +42,10 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
   @Query(
     """
     UPDATE Notification n
-    SET n.beenSeen = true
+    SET n.seen = true
     WHERE n.user.id = :userId
         AND n.id IN :notificationIds 
-        AND n.beenSeen = false
+        AND n.seen = false
     """,
   )
   @Modifying

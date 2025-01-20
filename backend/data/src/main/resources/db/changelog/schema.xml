@@ -4088,7 +4088,7 @@
     </changeSet>
     <changeSet author="stanov (generated)" id="1736840066933-1">
         <addColumn tableName="notification">
-            <column defaultValueBoolean="false" name="been_seen" type="BOOLEAN">
+            <column defaultValueBoolean="false" name="seen" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

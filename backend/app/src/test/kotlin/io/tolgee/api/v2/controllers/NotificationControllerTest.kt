@@ -51,8 +51,8 @@ class NotificationControllerTest : AuthorizedControllerTest() {
 
     val notifications = notificationRepository.findAll()
 
-    assertThat(notifications.find { it.id == currentUserNotification1.id }?.beenSeen).isTrue()
-    assertThat(notifications.find { it.id == currentUserNotification2.id }?.beenSeen).isTrue()
-    assertThat(notifications.find { it.id == differentUserNotification.id }?.beenSeen).isFalse()
+    assertThat(notifications.find { it.id == currentUserNotification1.id }?.seen).isTrue()
+    assertThat(notifications.find { it.id == currentUserNotification2.id }?.seen).isTrue()
+    assertThat(notifications.find { it.id == differentUserNotification.id }?.seen).isFalse()
   }
 }
