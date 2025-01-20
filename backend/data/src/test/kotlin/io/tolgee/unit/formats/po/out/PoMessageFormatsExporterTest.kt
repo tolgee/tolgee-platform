@@ -37,7 +37,7 @@ class PoMessageFormatsExporterTest {
 
   @Test
   fun python() {
-    val exporter = getExporter(ExportMessageFormat.PYTHON_SPRINTF)
+    val exporter = getExporter(ExportMessageFormat.PYTHON_PERCENT)
     val data = getExported(exporter)
     data.assertFile(
       "cs.po",

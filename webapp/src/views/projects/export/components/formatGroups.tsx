@@ -92,7 +92,7 @@ export const formatGroups: FormatGroup[] = [
           'JAVA_STRING_FORMAT',
           'ICU',
           'RUBY_SPRINTF',
-          'PYTHON_SPRINTF',
+          'PYTHON_PERCENT',
         ],
       },
       {

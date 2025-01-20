@@ -1374,7 +1374,7 @@ export interface components {
         | "RUBY_SPRINTF"
         | "I18NEXT"
         | "ICU"
-        | "PYTHON_SPRINTF";
+        | "PYTHON_PERCENT";
       name: string;
       pruneBeforePublish: boolean;
       publicUrl?: string;
@@ -1480,7 +1480,7 @@ export interface components {
         | "RUBY_SPRINTF"
         | "I18NEXT"
         | "ICU"
-        | "PYTHON_SPRINTF";
+        | "PYTHON_PERCENT";
       name: string;
       /**
        * @description Whether the data in the CDN should be pruned before publishing new data.
@@ -2080,7 +2080,7 @@ export interface components {
         | "RUBY_SPRINTF"
         | "I18NEXT"
         | "ICU"
-        | "PYTHON_SPRINTF";
+        | "PYTHON_PERCENT";
       /**
        * @description Delimiter to structure file content.
        *
@@ -10178,7 +10178,7 @@ export interface operations {
           | "RUBY_SPRINTF"
           | "I18NEXT"
           | "ICU"
-          | "PYTHON_SPRINTF";
+          | "PYTHON_PERCENT";
         /**
          * This is a template that defines the structure of the resulting .zip file content.
          *

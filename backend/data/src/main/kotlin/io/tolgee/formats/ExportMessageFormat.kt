@@ -17,5 +17,5 @@ enum class ExportMessageFormat(val paramConvertorFactory: () -> FromIcuPlacehold
   RUBY_SPRINTF(paramConvertorFactory = { IcuToRubyPlaceholderConvertor() }),
   I18NEXT(paramConvertorFactory = { IcuToI18nextPlaceholderConvertor() }),
   ICU(paramConvertorFactory = { IcuToIcuPlaceholderConvertor() }),
-  PYTHON_SPRINTF(paramConvertorFactory = { IcuToPythonPlaceholderConvertor() }),
+  PYTHON_PERCENT(paramConvertorFactory = { IcuToPythonPlaceholderConvertor() }),
 }

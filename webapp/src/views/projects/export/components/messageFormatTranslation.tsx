@@ -12,5 +12,5 @@ export const messageFormatTranslation: Record<MessageFormat, ReactNode> = {
   I18NEXT: <T keyName="export_form_message_format_i18next" />,
   ICU: <T keyName="export_form_message_format_icu" />,
   APPLE_SPRINTF: <T keyName="export_form_message_format_apple-sprintf" />,
-  PYTHON_SPRINTF: <T keyName="export_form_message_format_python-sprintf" />,
+  PYTHON_PERCENT: <T keyName="export_form_message_format_python-percent" />,
 };

@@ -170,7 +170,7 @@ export const testExportFormats = (
       'C Sprintf',
       'Ruby Sprintf',
       'Java String.format',
-      'Python Sprintf',
+      'Python Percent',
     ],
     {
       format: 'Gettext (.po)',
@@ -310,7 +310,7 @@ const messageFormatParamMap = {
   'C Sprintf': 'C_SPRINTF' as MessageFormat,
   'Java String.format': 'JAVA_STRING_FORMAT' as MessageFormat,
   'Ruby Sprintf': 'RUBY_SPRINTF' as MessageFormat,
-  'Python Sprintf': 'PYTHON_SPRINTF' as MessageFormat,
+  'Python Percent': 'PYTHON_PERCENT' as MessageFormat,
 };
 
 type MessageFormat = components['schemas']['ExportParams']['messageFormat'];
