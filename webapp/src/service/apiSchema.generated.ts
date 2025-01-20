@@ -134,6 +134,9 @@ export interface paths {
   "/v2/notifications": {
     get: operations["getNotifications"];
   };
+  "/v2/notifications-mark-seen": {
+    put: operations["markNotificationsAsSeen"];
+  };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
@@ -2918,6 +2921,14 @@ export interface components {
       linkedTask?: components["schemas"]["TaskModel"];
       project?: components["schemas"]["SimpleProjectModel"];
     };
+    NotificationPagedModel: {
+      _embedded?: {
+        notificationModelList?: components["schemas"]["NotificationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+      /** Format: int32 */
+      unseenCount: number;
+    };
     OAuthPublicConfigDTO: {
       clientId?: string;
       enabled: boolean;
@@ -3058,12 +3069,6 @@ export interface components {
     PagedModelNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["NamespaceModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelNotificationModel: {
-      _embedded?: {
-        notificationModelList?: components["schemas"]["NotificationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -6521,7 +6526,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelNotificationModel"];
+          "application/json": components["schemas"]["NotificationPagedModel"];
         };
       };
       /** Bad Request */
@@ -6555,6 +6560,49 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  markNotificationsAsSeen: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
       };
     };
   };
