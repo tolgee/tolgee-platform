@@ -6,7 +6,7 @@ class PythonToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   override val pluralArgName: String = "0"
 
   override val regex: Regex
-    get() = PYTHON_PARAM_REGEX
+    get() = PYTHON_PLACEHOLDER_REGEX
 
   private val baseToIcuPlaceholderConvertor = BaseToIcuPlaceholderConvertor()
 
@@ -18,12 +18,25 @@ class PythonToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   }
 
   companion object {
-    val PYTHON_PARAM_REGEX =
+    val PYTHON_PLACEHOLDER_REGEX =
       """
       (?x)(
       %
       (?:\((?<argname>[\w-]+)\))?
       (?<flags>[-+\s0\#]+)?
+      (?<width>[\d*]+)?
+      (?:\.(?<precision>\d+))?
+      (?<length>[hlL])?
+      (?<specifier>[diouxXeEfFgGcrs%])
+      )
+      """.trimIndent().toRegex()
+
+    val PYTHON_DETECTION_REGEX =
+      """
+      (?x)(
+      (^|\W+)%
+      (?:\((?<argname>[\w-]+)\))?
+      (?<flags>[-+0\#]+)?
       (?<width>[\d*]+)?
       (?:\.(?<precision>\d+))?
       (?<length>[hlL])?

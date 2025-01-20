@@ -5,6 +5,7 @@ import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor.Companion.JAVA_DETECTION_REGEX
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PythonToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
 class PoFormatDetector() {
@@ -47,13 +48,13 @@ class PoFormatDetector() {
               0.7,
             ),
           ),
-//        ImportFormat.PO_PYTHON to
-//          arrayOf(
-//            FormatDetectionUtil.regexFactor(
-//              PHP_PLACEHOLDER_REGEX,
-//              1.05,
-//            ),
-//          ),
+        ImportFormat.PO_PYTHON to
+          arrayOf(
+            FormatDetectionUtil.regexFactor(
+              PythonToIcuPlaceholderConvertor.PYTHON_DETECTION_REGEX,
+              1.0,
+            ),
+          ),
       )
   }
 
@@ -63,6 +64,7 @@ class PoFormatDetector() {
       "c-format" -> return ImportFormat.PO_C
       "java-format" -> return ImportFormat.PO_JAVA
       "icu-format" -> return ImportFormat.PO_ICU
+      "python-format" -> return ImportFormat.PO_PYTHON
       else -> null
     }
   }

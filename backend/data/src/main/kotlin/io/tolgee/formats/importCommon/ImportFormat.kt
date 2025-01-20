@@ -5,6 +5,7 @@ import io.tolgee.formats.paramConvertors.`in`.CToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.I18nextToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
+import io.tolgee.formats.paramConvertors.`in`.PythonToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 import io.tolgee.formats.po.`in`.PoToIcuMessageConvertor
 
@@ -106,7 +107,10 @@ enum class ImportFormat(
     ImportFileFormat.PO,
     messageConvertorOrNull = PoToIcuMessageConvertor { RubyToIcuPlaceholderConvertor() },
   ),
-//  PO_PYTHON(messageConvertorOrNull = BasePoToIcuMessageConvertor { PythonToIcuPlaceholderConvertor() }),
+  PO_PYTHON(
+    ImportFileFormat.PO,
+    messageConvertorOrNull = PoToIcuMessageConvertor { PythonToIcuPlaceholderConvertor() },
+  ),
 
   STRINGS(
     ImportFileFormat.STRINGS,
