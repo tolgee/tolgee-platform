@@ -164,7 +164,14 @@ export const testExportFormats = (
   });
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format', 'Python Sprintf'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Sprintf',
+    ],
     {
       format: 'Gettext (.po)',
       expectedParams: {
