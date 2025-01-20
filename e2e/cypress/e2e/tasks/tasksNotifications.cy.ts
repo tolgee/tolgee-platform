@@ -23,7 +23,7 @@ describe('tasks notifications', () => {
     waitForGlobalLoading();
   });
 
-  it('sends email to assignee of newly created task', () => {
+  it('sends email to assignee of newly created task and creates notification', () => {
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-name').type('New review task');
     cy.gcy('create-task-field-languages').click();
@@ -33,11 +33,18 @@ describe('tasks notifications', () => {
     cy.gcy('assignee-search-select-popover')
       .contains('Organization member')
       .click();
+    cy.gcy('assignee-search-select-popover')
+      .contains('Tasks test user')
+      .click();
     dismissMenu();
 
     cy.gcy('create-task-submit').click();
 
     assertMessage('1 task created');
+
+    cy.gcy('notifications-count')
+      .find('.MuiBadge-badge')
+      .should('have.text', '1');
 
     getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
@@ -47,6 +54,11 @@ describe('tasks notifications', () => {
       .should('be.visible')
       .findDcy('task-label-name')
       .should('contain', 'New review task');
+    dismissMenu();
+    cy.gcy('notifications-button').click();
+    cy.gcy('notifications-list').contains('New review task').click();
+
+    cy.url().should('include', '/translations?task=');
   });
 
   it('sends email to new assignee', () => {
