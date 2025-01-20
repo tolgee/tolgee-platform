@@ -12,6 +12,7 @@ services:
       - tolgee.frontend-url=http://localhost:8201
   fakesmtp:
     image: reachfive/fake-smtp-server:0.8.1
+    restart: unless-stopped
     ports:
       - "21025:1025"
       - "21080:1080"
