@@ -119,8 +119,6 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         </Badge>
       </StyledIconButton>
       <StyledMenu
-        id="notifications-list"
-        data-cy="notifications-list"
         keepMounted
         open={!!anchorEl}
         anchorEl={anchorEl}
@@ -141,7 +139,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           },
         }}
       >
-        <List>
+        <List id="notifications-list" data-cy="notifications-list">
           <ListItemHeader divider>
             <T keyName="notifications-header" />
           </ListItemHeader>
@@ -157,6 +155,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                   handleClose();
                   history.push(destinationUrl);
                 }}
+                data-cy="notifications-list-item"
               >
                 <T
                   keyName="notifications-task-assigned"
@@ -166,7 +165,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
             );
           })}
           {notifications?.length === 0 && (
-            <ListItem>
+            <ListItem data-cy="notifications-empty-message">
               <T keyName="notifications-empty" />
             </ListItem>
           )}
