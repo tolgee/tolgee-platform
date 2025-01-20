@@ -6,6 +6,7 @@ import {
 } from 'react';
 import {
   Badge,
+  Box,
   IconButton,
   List,
   ListItem,
@@ -20,6 +21,9 @@ import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { locales } from '../../../locales';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -40,9 +44,32 @@ const ListItemHeader = styled(ListItem)`
   font-weight: bold;
 `;
 
+const NotificationItem = styled(ListItemButton)`
+  display: grid;
+  column-gap: 10px;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto;
+  grid-template-areas: 'notification-text notification-time';
+`;
+
+const NotificationItemTime = styled(Box)`
+  font-size: 13px;
+  grid-area: notification-time;
+  text-align: right;
+  color: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[400]
+      : theme.palette.emphasis[600]};
+`;
+
+const NotificationItemText = styled(Box)`
+  grid-area: notification-text;
+`;
+
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const history = useHistory();
   const user = useUser();
+  const language = useCurrentLanguage();
   const client = useGlobalContext((c) => c.wsClient.client);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -176,10 +203,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           </ListItemHeader>
           {notifications?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
+            const createdAt = notification.createdAt;
             return (
-              <ListItemButton
+              <NotificationItem
                 key={notification.id}
                 divider={i !== notifications.length - 1}
+                //@ts-ignore
                 href={destinationUrl}
                 onClick={(event) => {
                   event.preventDefault();
@@ -188,11 +217,20 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                 }}
                 data-cy="notifications-list-item"
               >
-                <T
-                  keyName="notifications-task-assigned"
-                  params={{ taskName: notification.linkedTask?.name }}
-                />
-              </ListItemButton>
+                <NotificationItemText>
+                  <T
+                    keyName="notifications-task-assigned"
+                    params={{ taskName: notification.linkedTask?.name }}
+                  />
+                </NotificationItemText>
+                <NotificationItemTime>
+                  {createdAt &&
+                    formatDistanceToNowStrict(new Date(createdAt), {
+                      addSuffix: true,
+                      locale: locales[language].dateFnsLocale,
+                    })}
+                </NotificationItemTime>
+              </NotificationItem>
             );
           })}
           {!notifications?.length && (
