@@ -2,31 +2,23 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.repository.NotificationRepository
 import io.tolgee.testing.AuthorizedControllerTest
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class NotificationControllerTest : AuthorizedControllerTest() {
+  @Autowired
+  lateinit var notificationRepository: NotificationRepository
+
   @Test
   fun `gets notifications from newest`() {
     val testData = NotificationsTestData()
 
-    (101L..103).forEach { i ->
-      executeInNewTransaction {
-        val task =
-          testData.projectBuilder.addTask {
-            this.name = "Notification task $i"
-            this.language = testData.englishLanguage
-            this.author = testData.originatingUser.self
-            this.number = i
-          }
-
-        testData.userAccountBuilder.addNotification {
-          this.user = testData.user
-          this.project = testData.project
-          this.linkedTask = task.self
-          this.originatingUser = testData.originatingUser.self
-        }
-      }
+    (101L..103).forEach { taskNumber ->
+      testData.generateNotificationWithTask(taskNumber)
     }
 
     testDataService.saveTestData(testData.root)
@@ -37,5 +29,30 @@ class NotificationControllerTest : AuthorizedControllerTest() {
       node("_embedded.notificationModelList[1].linkedTask.name").isEqualTo("Notification task 102")
       node("_embedded.notificationModelList[2].linkedTask.name").isEqualTo("Notification task 101")
     }
+  }
+
+  @Test
+  fun `marks notifications as seen`() {
+    val testData = NotificationsTestData()
+    val currentUserNotification1 = testData.generateNotificationWithTask()
+    val currentUserNotification2 = testData.generateNotificationWithTask()
+    val differentUserNotification =
+      testData.generateNotificationWithTask().apply {
+        user = testData.root.addUserAccountWithoutOrganization { username = "Different User" }.self
+      }
+
+    testDataService.saveTestData(testData.root)
+    loginAsUser(testData.user.username)
+
+    performAuthPut(
+      "/v2/notifications-mark-seen",
+      listOf(currentUserNotification1.id, currentUserNotification2.id, differentUserNotification.id),
+    ).andIsOk
+
+    val notifications = notificationRepository.findAll()
+
+    assertThat(notifications.find { it.id == currentUserNotification1.id }?.beenSeen).isTrue()
+    assertThat(notifications.find { it.id == currentUserNotification2.id }?.beenSeen).isTrue()
+    assertThat(notifications.find { it.id == differentUserNotification.id }?.beenSeen).isFalse()
   }
 }

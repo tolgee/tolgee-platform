@@ -25,15 +25,34 @@ class NotificationService(
     return notificationRepository.fetchNotificationsByUserId(userId, pageable)
   }
 
+  fun getCountOfUnseenNotifications(userId: Long): Int {
+    return notificationRepository.getUnseenCountByUserId(userId)
+  }
+
   fun save(notification: Notification) {
     notificationRepository.save(notification)
     applicationEventPublisher.publishEvent(OnNotificationsChangedForUser(notification.user.id))
   }
 
+  fun markNotificationsAsSeen(
+    notificationIds: List<Long>,
+    userId: Long,
+  ) {
+    val modifiedCount = notificationRepository.markNotificationsAsSeen(notificationIds, userId)
+
+    if (modifiedCount > 0) {
+      sendWebsocketEvent(userId)
+    }
+  }
+
   @TransactionalEventListener
   fun onNotificationSaved(event: OnNotificationsChangedForUser) {
+    sendWebsocketEvent(event.userId)
+  }
+
+  private fun sendWebsocketEvent(userId: Long) {
     websocketEventPublisher(
-      "/users/${event.userId}/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}",
+      "/users/$userId/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}",
       WebsocketEvent(
         timestamp = currentDateProvider.date.time,
       ),
