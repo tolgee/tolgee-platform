@@ -2916,6 +2916,8 @@ export interface components {
       name: string;
     };
     NotificationModel: {
+      /** Format: date-time */
+      createdAt?: string;
       /** Format: int64 */
       id: number;
       linkedTask?: components["schemas"]["TaskModel"];
