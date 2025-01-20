@@ -9,6 +9,8 @@ import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import { BaseViewAddButton } from './BaseViewAddButton';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
+export const BASE_VIEW_PADDING = 24;
+
 const widthMap = {
   wide: 1200,
   normal: 900,
@@ -19,6 +21,11 @@ const StyledContainer = styled(Box)`
   display: grid;
   width: 100%;
   max-width: 100%;
+`;
+
+const StyledPaddingWrapper = styled(Box)`
+  display: grid;
+  padding: 16px ${BASE_VIEW_PADDING}px;
 `;
 
 const StyledContainerInner = styled(Box)`
@@ -154,13 +161,8 @@ export const BaseView = (props: BaseViewProps) => {
             </StyledContainerInner>
           </SecondaryBar>
         )}
-        <Box
-          pl={3}
-          pr={3}
-          pt={2}
-          pb={2}
+        <StyledPaddingWrapper
           {...props.wrapperProps}
-          display="grid"
           gridRow={props.stretch ? 4 : undefined}
         >
           <StyledContainerInner style={{ maxWidth }}>
@@ -177,7 +179,7 @@ export const BaseView = (props: BaseViewProps) => {
               </Box>
             ) : null}
           </StyledContainerInner>
-        </Box>
+        </StyledPaddingWrapper>
       </Box>
     </StyledContainer>
   );

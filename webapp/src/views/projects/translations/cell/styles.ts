@@ -45,6 +45,8 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
   ${combine('&', CELL_CLICKABLE)} {
     cursor: pointer;
     &:hover {
+      --cell-background: ${({ position, theme }) =>
+        getCellGradientBackground(position, theme.palette.cell.hover)};
       background: ${({ position, theme }) =>
         getCellGradientBackground(position, theme.palette.cell.hover)};
       transition: background 0.1s ease-in;
@@ -94,6 +96,7 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
   }
 
   ${combine('&', CELL_SELECTED)} {
+    --cell-background: ${({ theme }) => theme.palette.cell.selected};
     background: ${({ theme }) => theme.palette.cell.selected} !important;
   }
 

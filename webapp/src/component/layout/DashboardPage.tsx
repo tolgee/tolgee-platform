@@ -4,13 +4,8 @@ import { Box, styled } from '@mui/material';
 import { TopBar } from './TopBar/TopBar';
 import { TopBanner } from './TopBanner/TopBanner';
 import { TopSpacer } from './TopSpacer';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { RightSidePanel } from './RightSidePanel';
-import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
-import { useIsEmailVerified } from 'tg.globalContext/helpers';
 
 const StyledMain = styled(Box)`
   display: grid;
@@ -48,27 +43,13 @@ export const DashboardPage: FunctionComponent<Props> = ({
   children,
   isAdminAccess = false,
   fixedContent,
-  hideQuickStart = false,
+  hideQuickStart,
 }) => {
   const isDebuggingCustomerAccount = useGlobalContext(
     (c) => Boolean(c.auth.jwtToken) && Boolean(c.auth.adminToken)
   );
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
-
-  const isEmailVerified = useIsEmailVerified();
-  const quickStartHiden = !isEmailVerified || hideQuickStart;
-
-  const { setQuickStartOpen } = useGlobalActions();
-  const quickStartEnabled = useGlobalContext(
-    (c) => c.quickStartGuide.enabled && c.initialData.userInfo
-  );
-  const quickStartOpen = useGlobalContext((c) =>
-    Boolean(c.quickStartGuide.open)
-  );
-  const quickStartFloating = useGlobalContext(
-    (c) => c.quickStartGuide.floating
-  );
 
   return (
     <>
@@ -85,7 +66,6 @@ export const DashboardPage: FunctionComponent<Props> = ({
         <TopBar
           isAdminAccess={isAdminAccess}
           isDebuggingCustomerAccount={isDebuggingCustomerAccount}
-          hideQuickStart={quickStartHiden}
         />
         <TopSpacer />
         <StyledHorizontal>
@@ -97,17 +77,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {!quickStartHiden &&
-          quickStartEnabled &&
-          (quickStartOpen || quickStartFloating) && (
-            <RightSidePanel
-              open={quickStartOpen}
-              onClose={() => setQuickStartOpen(false)}
-              floating={quickStartFloating}
-            >
-              <QuickStartGuide />
-            </RightSidePanel>
-          )}
+        {!hideQuickStart && <RightSidePanel />}
       </Box>
     </>
   );

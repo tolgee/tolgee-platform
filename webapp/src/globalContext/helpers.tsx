@@ -13,11 +13,7 @@ export const useConfig = () =>
 export const useUser = () => useGlobalContext((c) => c.initialData.userInfo);
 
 export const useIsEmailVerified = () =>
-  useGlobalContext(
-    (c) =>
-      c.initialData.userInfo?.emailAwaitingVerification === null ||
-      !c.initialData.serverConfiguration.needsEmailVerification
-  );
+  useGlobalContext((c) => c.isEmailVerified);
 
 export const useEmailAwaitingVerification = () =>
   useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification);

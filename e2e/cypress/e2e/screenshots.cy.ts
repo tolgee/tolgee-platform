@@ -7,11 +7,11 @@ import {
 } from '../common/apiCalls/common';
 import { HOST } from '../common/constants';
 import 'cypress-file-upload';
-import { getPopover } from '../common/shared';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
+import { waitForGlobalLoading } from '../common/loading';
 
-describe('Screenshots', { retries: 5 }, () => {
+describe('Screenshots', () => {
   let project: ProjectDTO = null;
   let keys: components['schemas']['KeyModel'][];
 
@@ -23,7 +23,7 @@ describe('Screenshots', { retries: 5 }, () => {
           {
             tag: 'en',
             name: 'English',
-            originalName: 'Engish',
+            originalName: 'English',
           },
           {
             tag: 'cs',
@@ -57,140 +57,98 @@ describe('Screenshots', { retries: 5 }, () => {
     });
   });
 
-  it('opens popup', () => {
-    getCameraButton(1).click();
-    cy.contains('No screenshots have been added yet.');
-  });
-
-  it('uploads file', () => {
-    getCameraButton(1).click();
-    cy.contains('No screenshots have been added yet.');
-    cy.get('[data-cy=dropzone]').attachFile('screenshots/test_1.png', {
-      subjectType: 'drag-n-drop',
-    });
-
-    cy.gcy('screenshot-image')
-      .should('be.visible')
-      .and(($img) => {
-        expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
-      });
-  });
-
   it('uploads with hidden input', () => {
-    getCameraButton(1).click();
-    cy.contains('No screenshots have been added yet.');
-    cy.xpath("//input[@type='file']").attachFile('screenshots/test_1.png');
-    cy.gcy('screenshot-image')
-      .should('be.visible')
-      .and(($img) => {
-        expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
+    getAndFocusRow(0)
+      .findDcy('cell-key-screenshot-file-input')
+      .attachFile('screenshots/test_1.png', {
+        subjectType: 'input',
       });
+
+    cy.waitForDom();
+    getAndFocusRow(0).findDcy('screenshot-thumbnail').should('have.length', 1);
   });
 
-  it(
-    'uploads multiple',
-    {
-      retries: {
-        runMode: 6,
-      },
-    },
-    () => {
-      getCameraButton(1).click();
-      cy.contains('No screenshots have been added yet.');
-      cy.get('[data-cy=dropzone]')
-        .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
-        .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
-        .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' });
-      cy.gcy('screenshot-image', { timeout: 15000 })
-        .should('be.visible')
-        .and(($img) => {
-          expect($img.length).to.be.equal(3);
-          for (let i = 0; i < $img.length; i++) {
-            expect(
-              ($img[i] as HTMLImageElement).naturalWidth
-            ).to.be.greaterThan(0);
-          }
-        });
-    }
-  );
+  it('dropzone appears on dragover', () => {
+    cy.gcy('translations-row').eq(1).trigger('dragover');
+    cy.gcy('translations-row')
+      .eq(1)
+      .findDcy('cell-key-screenshot-dropzone')
+      .should('be.visible');
+    cy.gcy('translations-row').eq(1).trigger('dragleave');
+    cy.gcy('cell-key-screenshot-dropzone').should('not.exist');
+  });
+
+  it('uploads multiple', () => {
+    getAndFocusRow(0).findDcy('screenshot-thumbnail').should('have.length', 0);
+    getAndFocusRow(0)
+      .findDcy('cell-key-screenshot-file-input')
+      .attachFile('screenshots/test_1.png', { subjectType: 'input' })
+      .attachFile('screenshots/test_2.png', { subjectType: 'input' })
+      .attachFile('screenshots/test_3.png', { subjectType: 'input' });
+    getAndFocusRow(0).findDcy('screenshot-thumbnail').should('have.length', 3);
+  });
 
   it('images and plus button is visible', () => {
     addScreenshot(project.id, keys[3].id, 'screenshots/test_1.png').then(() => {
-      getCameraButton(4).click();
-      cy.gcy('screenshot-image')
-        .should('be.visible')
-        .and(($img) => {
-          expect($img.length).to.be.equal(1);
-          expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(
-            0
-          );
-        });
-      cy.xpath(
-        "//*[text() = 'Screenshots']/parent::*/parent::*/parent::*//div[contains(@data-cy, 'add-box')]"
-      ).should('be.visible');
+      getAndFocusRow(3)
+        .findDcy('screenshot-thumbnail')
+        .should('have.length', 1)
+        .should('be.visible');
+      getAndFocusRow(3)
+        .findDcy('translations-cell-screenshots-button')
+        .should('be.visible');
     });
   });
 
   it('screenshots are visible only for key, where uploaded', () => {
     const promises = [];
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 3; i++) {
       promises.push(
-        addScreenshot(project.id, keys[1].id, 'screenshots/test_1.png')
+        addScreenshot(project.id, keys[1].id, `screenshots/test_${i + 1}.png`)
       );
     }
 
     Cypress.Promise.all(promises).then(() => {
-      getCameraButton(2).click();
-      cy.gcy('screenshot-image')
-        .should('be.visible')
-        .and(($img) => {
-          expect($img.length).to.be.equal(10);
-        });
-      getPopover().xpath('./div[1]').click({ force: true });
-      getCameraButton(1).click();
-      cy.contains('No screenshots have been added yet.');
+      cy.reload();
+      getAndFocusRow(0)
+        .findDcy('screenshot-thumbnail')
+        .should('have.length', 0);
+      getAndFocusRow(1)
+        .findDcy('screenshot-thumbnail')
+        .should('have.length', 3);
     });
   });
 
   it('deletes screenshot', () => {
     const promises = [];
-
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       promises.push(
-        addScreenshot(project.id, keys[1].id, 'screenshots/test_1.png')
+        addScreenshot(project.id, keys[0].id, `screenshots/test_${i + 1}.png`)
       );
     }
 
     Cypress.Promise.all(promises).then(() => {
-      getCameraButton(2).click();
-
-      for (let i = 5; i >= 1; i--) {
-        cy.gcy('screenshot-image')
-          .should('be.visible')
-          .and(($img) => {
-            expect($img.length).to.be.equal(i);
-          });
-        cy.gcy('screenshot-image')
+      cy.reload();
+      for (let i = 0; i < 3; i++) {
+        getAndFocusRow(0)
+          .findDcy('screenshot-thumbnail')
           .first()
-          .trigger('mouseover')
-          .xpath(
-            "./ancestor::div[contains(@data-cy, 'screenshot-thumbnail')]/button"
-          )
-          .click();
+          .findDcy('screenshot-thumbnail-delete')
+          .click({ force: true });
+
         cy.contains('Confirm').click();
-        if (i > 1) {
-          cy.gcy('screenshot-image')
-            .should('be.visible')
-            .and(($img) => {
-              expect($img.length).to.be.equal(i - 1);
-            });
-        }
+        waitForGlobalLoading();
+        cy.waitForDom();
+        getAndFocusRow(0)
+          .findDcy('screenshot-thumbnail')
+          .should('have.length', 2 - i);
       }
 
       cy.reload();
-      getCameraButton(2).click();
-      cy.contains('No screenshots have been added yet.');
+      getAndFocusRow(0)
+        .findDcy('screenshot-thumbnail')
+        .should('have.length', 0);
     });
   });
 
@@ -205,11 +163,9 @@ describe('Screenshots', { retries: 5 }, () => {
   };
 });
 
-const getCameraButton = (nth: number) => {
-  // focus row checkbox, to make sure, row buttons are in place
+const getAndFocusRow = (nth: number) => {
   cy.waitForDom();
-  cy.xpath(`(//*[@data-cy='translations-row'])[${nth}]//input`).focus();
-  return cy.xpath(
-    `(//*[@data-cy='translations-row'])[${nth}]//*[@data-cy='translations-cell-screenshots-button']`
-  );
+  cy.gcy('translations-row').eq(nth).find('input').first().focus();
+  cy.waitForDom();
+  return cy.gcy('translations-row').eq(nth);
 };

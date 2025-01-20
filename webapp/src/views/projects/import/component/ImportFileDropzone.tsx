@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { Box, styled } from '@mui/material';
-import { green, red } from '@mui/material/colors';
-import { XCircle } from '@untitled-ui/icons-react';
+import { red } from '@mui/material/colors';
+import { UploadCloud01, XCircle } from '@untitled-ui/icons-react';
 import React, { FunctionComponent, useState } from 'react';
 
 import {
@@ -11,7 +11,6 @@ import {
 } from 'tg.fixtures/FileUploadFixtures';
 
 import { MAX_FILE_COUNT } from './ImportFileInput';
-import { Dropzone } from 'tg.component/CustomIcons';
 
 export interface ScreenshotDropzoneProps {
   onNewFiles: (files: FilesType) => void;
@@ -23,48 +22,43 @@ const StyledWrapper = styled(Box)`
   opacity: 0;
   transition: opacity 0.2s;
   background-color: ${({ theme }) =>
-    theme.palette.tokens.background['paper-1']};
-
-  &:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    border-radius: 4px;
-    height: 100%;
-  }
+    theme.palette.tokens._components.dropzone.active};
+  border-radius: 4px;
+  border: 1px dashed ${({ theme }) => theme.palette.secondary.main};
 
   &.valid,
   &.invalid {
     opacity: 1;
   }
 
-  &.valid:before,
-  &.invalid:before {
-    backdrop-filter: blur(5px);
-    opacity: 0.3;
-  }
-
-  &.valid:before {
-    background-color: ${green[200]};
-  }
-
-  &.invalid:before {
-    background-color: ${red[200]};
+  &.invalid {
+    border-color: ${red[200]};
+    background-color: ${red[50]};
+    backdrop-filter: blur(40px);
   }
 `;
 
-const StyledValidIcon = styled(Dropzone)`
-  width: 100px;
-  height: 100px;
-  color: ${({ theme }) => theme.palette.import.progressDone};
+const StyledIconWrapper = styled('div')`
+  display: flex;
+  width: 64px;
+  height: 64px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ theme }) => theme.palette.tokens.background.onDefault};
+  border-radius: 50%;
+`;
+
+const StyledValidIcon = styled(UploadCloud01)`
+  width: 32px;
+  height: 32px;
+  color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 const StyledInvalidIcon = styled(XCircle)`
-  width: 100px;
-  height: 100px;
-  fill: ${({ theme }) => theme.palette.error.main};
+  width: 32px;
+  height: 32px;
+  color: ${({ theme }) => theme.palette.common.white};
 `;
 
 export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
@@ -141,8 +135,16 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
           alignItems="center"
           justifyContent="center"
         >
-          {dragOver === 'valid' && <StyledValidIcon />}
-          {dragOver === 'invalid' && <StyledInvalidIcon />}
+          {dragOver === 'valid' && (
+            <StyledIconWrapper>
+              <StyledValidIcon />
+            </StyledIconWrapper>
+          )}
+          {dragOver === 'invalid' && (
+            <StyledIconWrapper>
+              <StyledInvalidIcon />
+            </StyledIconWrapper>
+          )}
         </StyledWrapper>
         {props.children}
       </Box>

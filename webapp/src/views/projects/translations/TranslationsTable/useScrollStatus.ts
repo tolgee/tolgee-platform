@@ -24,15 +24,12 @@ export const useScrollStatus = (
   });
 
   useEffect(() => {
-    ref.current?.addEventListener('scroll', recalculateScrollOffsets);
+    ref.current?.addEventListener('scroll', recalculateScrollOffsets, {
+      passive: true,
+    });
     return () =>
       ref.current?.removeEventListener('scroll', recalculateScrollOffsets);
-  }, [ref]);
-
-  useEffect(() => {
-    addEventListener('resize', recalculateScrollOffsets);
-    return () => removeEventListener('resize', recalculateScrollOffsets);
-  }, [ref]);
+  }, [ref.current]);
 
   useEffect(() => {
     recalculateScrollOffsets();
