@@ -24,16 +24,20 @@ class ScreenshotModelAssembler(
   ) {
   override fun toModel(entity: Screenshot): ScreenshotModel {
     val filenameWithSignature = getFilenameWithSignature(entity.filename)
+    val middleSizedFilenameWithSignature = getFilenameWithSignature(entity.middleSizedFilename)
     val thumbnailFilenameWithSignature = getFilenameWithSignature(entity.thumbnailFilename)
 
     val fileUrl = getFileUrl(filenameWithSignature)
+    val middleSizedUrl = getFileUrl(middleSizedFilenameWithSignature)
     val thumbnailUrl = getFileUrl(thumbnailFilenameWithSignature)
 
     return ScreenshotModel(
       id = entity.id,
       filename = filenameWithSignature,
+      middleSized = middleSizedFilenameWithSignature,
       thumbnail = thumbnailFilenameWithSignature,
       fileUrl = fileUrl,
+      middleSizedUrl = middleSizedUrl,
       thumbnailUrl = thumbnailUrl,
       createdAt = entity.createdAt,
       keyReferences =
@@ -60,6 +64,7 @@ class ScreenshotModelAssembler(
       height = entity.height,
     )
       .add(Link.of(fileUrl, "file"))
+      .add(Link.of(middleSizedUrl, "middle_sized"))
       .add(Link.of(thumbnailUrl, "thumbnail"))
   }
 

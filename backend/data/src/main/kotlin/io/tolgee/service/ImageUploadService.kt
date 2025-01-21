@@ -63,9 +63,11 @@ class ImageUploadService(
 
     save(uploadedImageEntity)
     val processedImage = imageConverter.getImage()
-    val processedThumbnail = imageConverter.getThumbnail()
+    val processedMiddleSized = imageConverter.getThumbnail(600)
+    val processedThumbnail = imageConverter.getThumbnail(200)
 
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
+    fileStorage.storeFile(uploadedImageEntity.filePath, processedMiddleSized.toByteArray())
     fileStorage.storeFile(uploadedImageEntity.thumbnailFilePath, processedThumbnail.toByteArray())
 
     return uploadedImageEntity
