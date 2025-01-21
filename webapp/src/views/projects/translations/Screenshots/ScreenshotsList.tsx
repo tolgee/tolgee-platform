@@ -9,7 +9,7 @@ type ScreenshotModel = components['schemas']['ScreenshotModel'];
 const MAX_SIZE = 350;
 const MIN_SIZE = 100;
 
-const MAX_HEIGHT = 350;
+const MAX_HEIGHT = 150;
 
 type Props = {
   screenshots: ScreenshotModel[];
