@@ -1,11 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.builders.KeyBuilder
-import io.tolgee.development.testDataBuilder.builders.LanguageBuilder
-import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
-import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
-import io.tolgee.development.testDataBuilder.builders.TaskBuilder
-import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.development.testDataBuilder.builders.*
 import io.tolgee.model.Language
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -172,7 +167,7 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
           author = projectUser.self
         }
 
-      keysInTask.forEach { it ->
+      keysInTask.forEach {
         addTaskKey {
           task = reviewTask.self
           key = it.self
