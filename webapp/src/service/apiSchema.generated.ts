@@ -6518,7 +6518,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        unseenOnly?: boolean;
+        filterSeen?: boolean;
       };
     };
     responses: {

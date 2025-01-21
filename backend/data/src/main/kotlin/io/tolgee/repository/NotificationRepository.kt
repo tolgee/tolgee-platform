@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.model.Notification
 import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
@@ -21,14 +22,17 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      LEFT JOIN FETCH n.originatingUser
      LEFT JOIN FETCH n.linkedTask
      WHERE u.id = :userId
-        AND (:unseenOnly = FALSE OR NOT n.seen)
+        AND (
+                :#{#filters.filterSeen} is null
+                OR :#{#filters.filterSeen} = n.seen
+            )
      ORDER BY n.id DESC
     """,
   )
   fun fetchNotificationsByUserId(
     userId: Long,
     pageable: Pageable,
-    unseenOnly: Boolean,
+    filters: NotificationFilters,
   ): Page<Notification>
 
   @Query(

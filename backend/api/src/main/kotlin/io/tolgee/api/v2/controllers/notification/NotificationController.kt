@@ -40,7 +40,12 @@ class NotificationController(
     @ParameterObject pageable: Pageable,
     @ParameterObject filters: NotificationFilters = NotificationFilters(),
   ): PagedModel<NotificationModel> {
-    val notifications = notificationService.getNotifications(authenticationFacade.authenticatedUser.id, pageable, filters.unseenOnly)
+    val notifications =
+      notificationService.getNotifications(
+        authenticationFacade.authenticatedUser.id,
+        pageable,
+        filters,
+      )
     return pagedResourcesAssembler.toModel(
       notifications,
       NotificationModelAssembler(enhancers, notifications),

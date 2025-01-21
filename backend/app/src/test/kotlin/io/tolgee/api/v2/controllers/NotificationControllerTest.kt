@@ -25,7 +25,7 @@ class NotificationControllerTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.user.username)
 
-    performAuthGet("/v2/notifications?unseenOnly=true").andAssertThatJson {
+    performAuthGet("/v2/notifications?filterSeen=false").andAssertThatJson {
       node("_embedded.notificationModelList").isArray.hasSize(4)
       node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task 103")
       node("_embedded.notificationModelList[1].linkedTask.name").isEqualTo("Notification task 102")

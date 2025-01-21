@@ -43,7 +43,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const unseenNotificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
-    query: { size: 0, unseenOnly: true },
+    query: { size: 1, filterSeen: false },
   });
 
   const [unseenCount, setUnseenCount] = useState(0);

@@ -1,6 +1,7 @@
 package io.tolgee.service.notification
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.model.Notification
 import io.tolgee.repository.NotificationRepository
@@ -23,10 +24,8 @@ class NotificationService(
   fun getNotifications(
     userId: Long,
     pageable: Pageable,
-    unseenOnly: Boolean,
-  ): Page<Notification> {
-    return notificationRepository.fetchNotificationsByUserId(userId, pageable, unseenOnly)
-  }
+    filters: NotificationFilters,
+  ): Page<Notification> = notificationRepository.fetchNotificationsByUserId(userId, pageable, filters)
 
   fun save(notification: Notification) {
     notificationRepository.save(notification)
