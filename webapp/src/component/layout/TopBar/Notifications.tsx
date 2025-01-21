@@ -55,7 +55,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const notificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
-    query: { size: 10000 },
+    query: { size: 10000, sort: ['id,DESC'] },
   });
 
   const notifications = notificationsLoadable.data;

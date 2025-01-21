@@ -26,7 +26,6 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
                 :#{#filters.filterSeen} is null
                 OR :#{#filters.filterSeen} = n.seen
             )
-     ORDER BY n.id DESC
     """,
   )
   fun fetchNotificationsByUserId(
