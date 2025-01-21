@@ -49,7 +49,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const [notifications, setNotifications] = useState<
     components['schemas']['NotificationModel'][] | undefined
   >(undefined);
-  const [unseenCount, setUnseenCount] = useState(0);
+  const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
 
   const unseenNotificationsLoadable = useApiQuery({
     url: '/v2/notifications',
@@ -82,10 +82,15 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   };
 
   useEffect(() => {
-    setUnseenCount(unseenNotificationsLoadable.data?.page?.totalElements || 0);
+    if (unseenCount !== undefined) return;
+    setUnseenCount(
+      (prevState) =>
+        unseenNotificationsLoadable.data?.page?.totalElements || prevState
+    );
   }, [unseenNotificationsLoadable.data]);
 
   useEffect(() => {
+    if (notifications !== undefined) return;
     setNotifications(
       notificationsLoadable.data?._embedded?.notificationModelList
     );
@@ -108,13 +113,14 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
       return client.subscribe(
         `/users/${user.id}/notifications-changed`,
         (e) => {
+          setUnseenCount(e.data.currentlyUnseenCount);
           const newNotification = e.data.newNotification;
-          if (newNotification != undefined)
-            setNotifications((prevState) => [
-              newNotification,
-              ...(prevState || []),
-            ]);
-          setUnseenCount(() => e.data.currentlyUnseenCount);
+          if (newNotification)
+            setNotifications((prevState) =>
+              prevState ? [newNotification, ...prevState] : prevState
+            );
+          unseenNotificationsLoadable.remove();
+          notificationsLoadable.remove();
         }
       );
     }
