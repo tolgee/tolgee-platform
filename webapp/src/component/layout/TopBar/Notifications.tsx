@@ -47,8 +47,8 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifications, setNotifications] = useState<
-    components['schemas']['NotificationModel'][]
-  >([]);
+    components['schemas']['NotificationModel'][] | undefined
+  >(undefined);
   const [unseenCount, setUnseenCount] = useState(0);
 
   const unseenNotificationsLoadable = useApiQuery({
@@ -61,6 +61,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     url: '/v2/notifications',
     method: 'get',
     query: { size: 10000 },
+    options: { enabled: false },
   });
 
   const markSeenMutation = useApiMutation({
@@ -69,16 +70,11 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   });
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (!notifications) {
+      notificationsLoadable.refetch();
+    }
     // @ts-ignore
     setAnchorEl(event.currentTarget);
-    markSeenMutation.mutate({
-      content: {
-        'application/json': {
-          notificationIds:
-            notifications != undefined ? notifications.map((it) => it.id) : [],
-        },
-      },
-    });
   };
 
   const handleClose = () => {
@@ -91,9 +87,21 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
 
   useEffect(() => {
     setNotifications(
-      notificationsLoadable.data?._embedded?.notificationModelList || []
+      notificationsLoadable.data?._embedded?.notificationModelList
     );
   }, [notificationsLoadable.data]);
+
+  useEffect(() => {
+    if (!anchorEl || !notifications) return;
+
+    markSeenMutation.mutate({
+      content: {
+        'application/json': {
+          notificationIds: notifications.map((it) => it.id),
+        },
+      },
+    });
+  }, [notifications, anchorEl]);
 
   useEffect(() => {
     if (client && user) {
@@ -102,7 +110,10 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         (e) => {
           const newNotification = e.data.newNotification;
           if (newNotification != undefined)
-            setNotifications((prevState) => [newNotification, ...prevState]);
+            setNotifications((prevState) => [
+              newNotification,
+              ...(prevState || []),
+            ]);
           setUnseenCount(() => e.data.currentlyUnseenCount);
         }
       );
@@ -178,7 +189,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               </ListItemButton>
             );
           })}
-          {notifications?.length === 0 && (
+          {!notifications?.length && (
             <ListItem data-cy="notifications-empty-message">
               <T keyName="notifications-empty" />
             </ListItem>
