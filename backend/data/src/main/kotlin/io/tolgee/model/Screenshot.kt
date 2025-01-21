@@ -35,10 +35,10 @@ class Screenshot : StandardAuditModel() {
       return "$pathWithSlash$hash.$extension"
     }
 
-  val middleSizedFilename: String
+  val middleSizedFilename: String?
     get() {
       if (!hasMiddleSized) {
-        return filename
+        return null
       }
       return "$pathWithSlash${hash}_middle_sized.$extension"
     }

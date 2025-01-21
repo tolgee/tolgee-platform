@@ -8,6 +8,7 @@ class ScreenshotBuilder(
   projectBuilder: ProjectBuilder,
 ) : EntityDataBuilder<Screenshot, ScreenshotBuilder> {
   var thumbnail: ByteArrayOutputStream? = null
+  var middleSized: ByteArrayOutputStream? = null
   var image: ByteArrayOutputStream? = null
 
   override var self: Screenshot = Screenshot()

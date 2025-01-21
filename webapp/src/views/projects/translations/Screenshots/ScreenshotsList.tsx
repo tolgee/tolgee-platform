@@ -6,7 +6,7 @@ import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 
 type ScreenshotModel = components['schemas']['ScreenshotModel'];
 
-const MAX_SIZE = 350;
+const MAX_SIZE = 300;
 const MIN_SIZE = 100;
 
 const MAX_HEIGHT = 150;
@@ -87,7 +87,7 @@ export const ScreenshotsList = ({
 
         const screenshot = {
           id: sc.id,
-          src: isLarge ? sc.fileUrl : sc.thumbnailUrl,
+          src: isLarge ? sc.middleSizedUrl ?? sc.fileUrl : sc.thumbnailUrl,
           width: sc.width,
           height: sc.height,
           highlightedKeyId: keyId,

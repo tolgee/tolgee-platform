@@ -227,6 +227,7 @@ class ScreenshotService(
     thumbnail: ByteArray?,
   ) {
     thumbnail?.let { fileStorage.storeFile(screenshot.getThumbnailPath(), it) }
+    middleSized?.let { fileStorage.storeFile(screenshot.getMiddleSizedPath(), it)}
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
@@ -349,6 +350,10 @@ class ScreenshotService(
 
   private fun Screenshot.getFilePath(): String {
     return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.filename}"
+  }
+
+  private fun Screenshot.getMiddleSizedPath(): String {
+    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.middleSizedFilename}"
   }
 
   private fun Screenshot.getThumbnailPath(): String {
