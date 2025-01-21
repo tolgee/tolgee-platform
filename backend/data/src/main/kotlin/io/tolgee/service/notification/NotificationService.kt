@@ -4,7 +4,9 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.model.Notification
 import io.tolgee.repository.NotificationRepository
-import io.tolgee.websocket.*
+import io.tolgee.websocket.WebsocketEvent
+import io.tolgee.websocket.WebsocketEventPublisher
+import io.tolgee.websocket.WebsocketEventType
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -21,12 +23,9 @@ class NotificationService(
   fun getNotifications(
     userId: Long,
     pageable: Pageable,
+    unseenOnly: Boolean,
   ): Page<Notification> {
-    return notificationRepository.fetchNotificationsByUserId(userId, pageable)
-  }
-
-  fun getCountOfUnseenNotifications(userId: Long): Int {
-    return notificationRepository.getUnseenCountByUserId(userId)
+    return notificationRepository.fetchNotificationsByUserId(userId, pageable, unseenOnly)
   }
 
   fun save(notification: Notification) {

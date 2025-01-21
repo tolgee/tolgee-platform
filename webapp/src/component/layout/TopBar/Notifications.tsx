@@ -40,6 +40,18 @@ const ListItemHeader = styled(ListItem)`
 `;
 
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
+  const unseenNotificationsLoadable = useApiQuery({
+    url: '/v2/notifications',
+    method: 'get',
+    query: { size: 0, unseenOnly: true },
+  });
+
+  const [unseenCount, setUnseenCount] = useState(0);
+
+  useEffect(() => {
+    setUnseenCount(unseenNotificationsLoadable.data?.page?.totalElements || 0);
+  }, [unseenNotificationsLoadable.data]);
+
   const notificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
@@ -80,9 +92,10 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
 
   useEffect(() => {
     if (client && user) {
-      return client.subscribe(`/users/${user.id}/notifications-changed`, () =>
-        notificationsLoadable.refetch({ cancelRefetch: true })
-      );
+      return client.subscribe(`/users/${user.id}/notifications-changed`, () => {
+        notificationsLoadable.refetch({ cancelRefetch: true });
+        unseenNotificationsLoadable.refetch({ cancelRefetch: true });
+      });
     }
   }, [user, client]);
 
@@ -97,7 +110,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         size="large"
       >
         <Badge
-          badgeContent={notifications?.unseenCount}
+          badgeContent={unseenCount}
           color="secondary"
           data-cy="notifications-count"
         >

@@ -20,14 +20,21 @@ class NotificationControllerTest : AuthorizedControllerTest() {
     (101L..103).forEach { taskNumber ->
       testData.generateNotificationWithTask(taskNumber)
     }
+    testData.generateNotificationWithTask(104).seen = true
 
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.user.username)
 
-    performAuthGet("/v2/notifications").andAssertThatJson {
+    performAuthGet("/v2/notifications?unseenOnly=true").andAssertThatJson {
+      node("_embedded.notificationModelList").isArray.hasSize(4)
       node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task 103")
       node("_embedded.notificationModelList[1].linkedTask.name").isEqualTo("Notification task 102")
       node("_embedded.notificationModelList[2].linkedTask.name").isEqualTo("Notification task 101")
+    }
+
+    performAuthGet("/v2/notifications").andAssertThatJson {
+      node("_embedded.notificationModelList").isArray.hasSize(5)
+      node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task 104")
     }
   }
 

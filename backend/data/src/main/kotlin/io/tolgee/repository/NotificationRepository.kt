@@ -21,23 +21,15 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      LEFT JOIN FETCH n.originatingUser
      LEFT JOIN FETCH n.linkedTask
      WHERE u.id = :userId
+        AND (:unseenOnly = FALSE OR NOT n.seen)
      ORDER BY n.id DESC
     """,
   )
   fun fetchNotificationsByUserId(
     userId: Long,
     pageable: Pageable,
+    unseenOnly: Boolean,
   ): Page<Notification>
-
-  @Query(
-    """
-    SELECT COUNT(n)
-     FROM Notification n
-     WHERE n.user.id = :userId
-        AND n.seen = false
-    """,
-  )
-  fun getUnseenCountByUserId(userId: Long): Int
 
   @Query(
     """

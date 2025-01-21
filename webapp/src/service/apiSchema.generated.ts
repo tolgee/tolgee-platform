@@ -2921,14 +2921,6 @@ export interface components {
       linkedTask?: components["schemas"]["TaskModel"];
       project?: components["schemas"]["SimpleProjectModel"];
     };
-    NotificationPagedModel: {
-      _embedded?: {
-        notificationModelList?: components["schemas"]["NotificationModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-      /** Format: int32 */
-      unseenCount: number;
-    };
     OAuthPublicConfigDTO: {
       clientId?: string;
       enabled: boolean;
@@ -3069,6 +3061,12 @@ export interface components {
     PagedModelNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["NamespaceModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelNotificationModel: {
+      _embedded?: {
+        notificationModelList?: components["schemas"]["NotificationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -6520,13 +6518,14 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        unseenOnly?: boolean;
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["NotificationPagedModel"];
+          "application/json": components["schemas"]["PagedModelNotificationModel"];
         };
       };
       /** Bad Request */
