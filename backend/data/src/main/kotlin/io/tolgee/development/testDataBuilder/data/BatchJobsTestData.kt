@@ -1,6 +1,8 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 
 class BatchJobsTestData : BaseTestData() {
@@ -16,7 +18,21 @@ class BatchJobsTestData : BaseTestData() {
   }
 
   fun addTranslationOperationData(keyCount: Int = 100): List<Key> {
-    this.projectBuilder.addKey {
+    addAKey()
+    return (1..keyCount).map {
+      this.projectBuilder.addKey {
+        name = "key$it"
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "en"
+        }
+      }.self
+    }
+  }
+
+  private fun addAKey(): KeyBuilder {
+    return this.projectBuilder.addKey {
       name = "a-key"
     }.build {
       addTranslation {
@@ -32,16 +48,14 @@ class BatchJobsTestData : BaseTestData() {
         text = "de"
       }
     }
-    return (1..keyCount).map {
-      this.projectBuilder.addKey {
-        name = "key$it"
-      }.build {
-        addTranslation {
-          language = englishLanguage
-          text = "en"
-        }
-      }.self
+  }
+
+  fun addKeyWithTranslationsReviewed(): Key {
+    val aKey = addAKey()
+    aKey.translations.forEach {
+      it.self.state = TranslationState.REVIEWED
     }
+    return aKey.self
   }
 
   fun addStateChangeData(keyCount: Int = 100): List<Key> {

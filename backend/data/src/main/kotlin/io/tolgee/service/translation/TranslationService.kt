@@ -186,6 +186,15 @@ class TranslationService(
     translation: Translation,
     text: String?,
   ): Translation {
+    setTextNoSave(translation, text)
+
+    return save(translation)
+  }
+
+  fun setTextNoSave(
+    translation: Translation,
+    text: String?,
+  ) {
     val hasTextChanged = translation.text != text
 
     if (hasTextChanged) {
@@ -203,8 +212,6 @@ class TranslationService(
         text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
         else -> translation.state
       }
-
-    return save(translation)
   }
 
   fun save(translation: Translation): Translation {
