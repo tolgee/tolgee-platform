@@ -41,10 +41,10 @@ class NotificationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `marks notifications as seen`() {
     val testData = NotificationsTestData()
-    val currentUserNotification1 = testData.generateNotificationWithTask()
-    val currentUserNotification2 = testData.generateNotificationWithTask()
+    val currentUserNotification1 = testData.generateNotificationWithTask(101)
+    val currentUserNotification2 = testData.generateNotificationWithTask(102)
     val differentUserNotification =
-      testData.generateNotificationWithTask().apply {
+      testData.generateNotificationWithTask(103).apply {
         user = testData.root.addUserAccountWithoutOrganization { username = "Different User" }.self
       }
 

@@ -28,7 +28,6 @@ class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
   fun addUserAccountWithoutOrganization(ft: UserAccount.() -> Unit): UserAccountBuilder {
     val builder = UserAccountBuilder(this)
     data.userAccounts.add(builder)
-    builder.self.name = "Test User without organization " + System.currentTimeMillis()
     ft(builder.self)
     return builder
   }

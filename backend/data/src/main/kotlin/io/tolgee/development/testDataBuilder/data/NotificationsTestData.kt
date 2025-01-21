@@ -3,18 +3,16 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.model.Notification
 
 class NotificationsTestData : BaseTestData() {
-  private var nextTaskId = 100000L
-
   val originatingUser =
     root.addUserAccount {
       name = "originating user"
-      username = "originatingUser"
+      username = "notificationsOriginatingUser"
     }
 
-  val notification = generateNotificationWithTask()
+  val notification = generateNotificationWithTask(100)
   val task = notification.linkedTask
 
-  fun generateNotificationWithTask(taskNumber: Long = nextTaskId++): Notification {
+  fun generateNotificationWithTask(taskNumber: Long): Notification {
     val task =
       projectBuilder.addTask {
         this.name = "Notification task $taskNumber"
