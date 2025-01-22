@@ -146,6 +146,9 @@ export interface paths {
   "/v2/notifications": {
     get: operations["getNotifications"];
   };
+  "/v2/notifications-mark-seen": {
+    put: operations["markNotificationsAsSeen"];
+  };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
@@ -2971,6 +2974,13 @@ export interface components {
       id: number;
       linkedTask?: components["schemas"]["TaskModel"];
       project?: components["schemas"]["SimpleProjectModel"];
+    };
+    NotificationsMarkSeenRequest: {
+      /**
+       * @description Notification IDs to be marked as seen
+       * @example 1,2,3
+       */
+      notificationIds: number[];
     };
     OAuthPublicConfigDTO: {
       clientId?: string;
@@ -6768,6 +6778,16 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        /**
+         * Filter by the `seen` parameter.
+         *
+         * no value = request everything
+         *
+         * true = only seen
+         *
+         * false = only unseen
+         */
+        filterSeen?: boolean;
       };
     };
     responses: {
@@ -6808,6 +6828,49 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  markNotificationsAsSeen: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
       };
     };
   };
