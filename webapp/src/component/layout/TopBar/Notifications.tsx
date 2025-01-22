@@ -24,6 +24,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { locales } from '../../../locales';
 import { formatDistanceToNowStrict } from 'date-fns';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -47,9 +48,13 @@ const ListItemHeader = styled(ListItem)`
 const NotificationItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 30px 1fr 120px;
   grid-template-rows: auto;
-  grid-template-areas: 'notification-text notification-time';
+  grid-template-areas: 'notification-avatar notification-text notification-time';
+`;
+
+const NotificationAvatar = styled(Box)`
+  grid-area: notification-avatar;
 `;
 
 const NotificationItemTime = styled(Box)`
@@ -204,6 +209,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           {notifications?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
             const createdAt = notification.createdAt;
+            const originatingUser = notification.linkedTask?.author;
             return (
               <NotificationItem
                 key={notification.id}
@@ -217,6 +223,19 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                 }}
                 data-cy="notifications-list-item"
               >
+                <NotificationAvatar>
+                  {originatingUser && (
+                    <AvatarImg
+                      owner={{
+                        name: originatingUser.name,
+                        avatar: originatingUser.avatar,
+                        type: 'USER',
+                        id: originatingUser.id || 0,
+                      }}
+                      size={30}
+                    />
+                  )}
+                </NotificationAvatar>
                 <NotificationItemText>
                   <T
                     keyName="notifications-task-assigned"
