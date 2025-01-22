@@ -941,7 +941,7 @@
   "no_screenshots_yet": "暂无屏幕截图。",
   "notifications-empty": "您没有通知。",
   "notifications-header": "通知",
-  "notifications-task-assigned": "已分配给您一个任务: {taskName}",
+  "notifications-task-assigned": "分配给您 {taskName}",
   "operation_not_permitted": "您的权限不足以执行此操作。",
   "operation_not_permitted_error": "您的权限不足以执行此操作。",
   "order_translation_choose_translation_agency_title": "选择翻译机构",

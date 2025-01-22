@@ -945,7 +945,7 @@
   "no_screenshots_yet": "Zatím nebyly přidány žádné snímky obrazovky.",
   "notifications-empty": "Nemáte žádné notifikace.",
   "notifications-header": "Notifikace",
-  "notifications-task-assigned": "Byl vám přiřazen úkol: {taskName}",
+  "notifications-task-assigned": "přiřazeno vám {taskName}",
   "operation_not_permitted": "Nemáte dostatečná oprávnění pro tuto operaci.",
   "operation_not_permitted_error": "Nemáte dostatečná oprávnění pro tuto operaci.",
   "order_translation_choose_translation_agency_title": "Vyberte překladatelskou agenturu",

@@ -945,7 +945,7 @@
   "no_screenshots_yet": "Es wurden noch keine Screenshots hinzugefügt.",
   "notifications-empty": "Sie haben keine Benachrichtigungen.",
   "notifications-header": "Benachrichtigungen",
-  "notifications-task-assigned": "Ihnen wurde eine Aufgabe zugewiesen: {taskName}",
+  "notifications-task-assigned": "Ihnen zugewiesen {taskName}",
   "operation_not_permitted": "Ihre Berechtigungen sind für diesen Vorgang nicht ausreichend.",
   "operation_not_permitted_error": "Ihre Berechtigungen sind für diesen Vorgang nicht ausreichend.",
   "order_translation_choose_translation_agency_title": "Übersetzungsagentur auswählen",

@@ -943,7 +943,7 @@
   "no_screenshots_yet": "Er zijn nog geen schermafbeeldingen toegevoegd.",
   "notifications-empty": "U heeft geen meldingen.",
   "notifications-header": "Meldingen",
-  "notifications-task-assigned": "Er is een taak aan u toegewezen: {taskName}",
+  "notifications-task-assigned": "toegewezen aan u {taskName}",
   "operation_not_permitted": "Uw rechten zijn niet voldoende voor deze bewerking.",
   "operation_not_permitted_error": "Uw rechten zijn niet voldoende voor deze bewerking.",
   "order_translation_choose_translation_agency_title": "Kies vertaalbureau",

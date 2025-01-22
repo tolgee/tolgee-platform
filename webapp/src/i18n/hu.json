@@ -941,7 +941,7 @@
   "no_screenshots_yet": "Még nincsenek képernyőmentések hozzáadva.",
   "notifications-empty": "Nincsenek értesítéseid.",
   "notifications-header": "Értesítések",
-  "notifications-task-assigned": "Egy feladatot rendeltek Önhöz: {taskName}",
+  "notifications-task-assigned": "Önhöz rendelve {taskName}",
   "operation_not_permitted": "Nincs megfelelő jogosultsága a művelethez.",
   "operation_not_permitted_error": "Nincs megfelelő jogosultsága a művelethez.",
   "order_translation_choose_translation_agency_title": "Fordítóiroda kiválasztása",

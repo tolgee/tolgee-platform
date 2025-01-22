@@ -900,7 +900,7 @@
   "no_screenshots_yet": "Non sono ancora stati aggiunti screenshot.",
   "notifications-empty": "Non hai notifiche.",
   "notifications-header": "Notifiche",
-  "notifications-task-assigned": "Ti è stato assegnato un compito: {taskName}",
+  "notifications-task-assigned": "assegnato a te {taskName}",
   "operation_not_permitted": "Le tue autorizzazioni non sono sufficienti per questa operazione.",
   "operation_not_permitted_error": "Le tue autorizzazioni non sono sufficienti per questa operazione.",
   "order_translation_choose_translation_agency_title": "Scegli agenzia di traduzione",

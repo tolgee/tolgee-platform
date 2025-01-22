@@ -1,3 +1,10 @@
+# [3.96.0](https://github.com/tolgee/tolgee-platform/compare/v3.95.0...v3.96.0) (2025-01-22)
+
+
+### Features
+
+* new screenshots view ([#2846](https://github.com/tolgee/tolgee-platform/issues/2846)) ([661ee7e](https://github.com/tolgee/tolgee-platform/commit/661ee7e6fb8565dfc475bdcf6920fd50b6be5f45))
+
 # [3.95.0](https://github.com/tolgee/tolgee-platform/compare/v3.94.2...v3.95.0) (2025-01-22)
 
 

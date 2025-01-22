@@ -946,7 +946,7 @@
   "no_screenshots_yet": "Ingen skærmbilleder er blevet tilføjet endnu.",
   "notifications-empty": "Du har ingen meddelelser.",
   "notifications-header": "Meddelelser",
-  "notifications-task-assigned": "En opgave er blevet tildelt dig: {taskName}",
+  "notifications-task-assigned": "tildelt til dig {taskName}",
   "operation_not_permitted": "Dine tilladelser er ikke tilstrækkelige til denne handling.",
   "operation_not_permitted_error": "Dine tilladelser er ikke tilstrækkelige til denne handling.",
   "order_translation_choose_translation_agency_title": "Vælg oversættelsesbureau",

@@ -941,7 +941,7 @@
   "no_screenshots_yet": "Ingen skjermbilder er lagt til ennå.",
   "notifications-empty": "Du har ingen varsler.",
   "notifications-header": "Varsler",
-  "notifications-task-assigned": "En oppgave har blitt tildelt deg: {taskName}",
+  "notifications-task-assigned": "tildelt til deg {taskName}",
   "operation_not_permitted": "Dine tillatelser er ikke tilstrekkelige for denne operasjonen.",
   "operation_not_permitted_error": "Dine tillatelser er ikke tilstrekkelige for denne operasjonen.",
   "order_translation_choose_translation_agency_title": "Velg oversettelsesbyrå",

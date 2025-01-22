@@ -944,7 +944,7 @@
   "no_screenshots_yet": "Aucune capture d'écran n'a encore été ajoutée.",
   "notifications-empty": "Vous n'avez aucune notification.",
   "notifications-header": "Notifications",
-  "notifications-task-assigned": "Une tâche vous a été assignée : {taskName}",
+  "notifications-task-assigned": "assigné à vous {taskName}",
   "operation_not_permitted": "Vos autorisations ne sont pas suffisantes pour cette opération.",
   "operation_not_permitted_error": "Vos autorisations ne sont pas suffisantes pour cette opération.",
   "order_translation_choose_translation_agency_title": "Choisir une agence de traduction",

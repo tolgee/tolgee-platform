@@ -946,7 +946,7 @@
   "no_screenshots_yet": "Nu au fost adăugate încă capturi de ecran.",
   "notifications-empty": "Nu aveți notificări.",
   "notifications-header": "Notificări",
-  "notifications-task-assigned": "O sarcină ți-a fost atribuită: {taskName}",
+  "notifications-task-assigned": "atribuit dumneavoastră {taskName}",
   "operation_not_permitted": "Permisiunile tale nu sunt suficiente pentru această operațiune.",
   "operation_not_permitted_error": "Permisiunile tale nu sunt suficiente pentru această operațiune.",
   "order_translation_choose_translation_agency_title": "Alegeți agenția de traduceri",
