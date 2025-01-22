@@ -15,7 +15,10 @@ import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.server.LocalServerPort
 
@@ -162,16 +165,44 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `notifies user on change of his notifications`() {
+  fun `notifies user on a new notification`() {
+    currentUserWebsocket.listenForNotificationsChanged()
+    anotherUserWebsocket.listenForNotificationsChanged()
+    var newNotification: Notification? = null
+
+    currentUserWebsocket.assertNotified(
+      {
+        newNotification = saveNotificationForCurrentUser()
+      },
+    ) {
+      assertThatJson(it.poll()).apply {
+        node("data.currentlyUnseenCount").isEqualTo(1)
+        node("data.newNotification.id").isEqualTo(newNotification!!.id)
+        node("timestamp").isNotNull
+      }
+    }
+
+    anotherUserWebsocket.receivedMessages.assert.isEmpty()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `notifies user on notifications marked as seen`() {
+    val newNotification = saveNotificationForCurrentUser()
+
     currentUserWebsocket.listenForNotificationsChanged()
     anotherUserWebsocket.listenForNotificationsChanged()
 
     currentUserWebsocket.assertNotified(
       {
-        saveNotificationForCurrentUser()
+        executeInNewTransaction {
+          notificationService.markNotificationsAsSeen(listOf(newNotification.id), testData.user.id)
+        }
       },
     ) {
       assertThatJson(it.poll()).apply {
+        node("data.currentlyUnseenCount").isEqualTo(0)
+        node("data.newNotification").isNull()
         node("timestamp").isNotNull
       }
     }
@@ -223,10 +254,10 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     waitFor { currentUserWebsocket.receivedMessages.isNotEmpty() }
   }
 
-  private fun saveNotificationForCurrentUser() {
-    executeInNewTransaction {
-      notificationService.save(Notification().apply { user = testData.user })
-    }
+  private fun saveNotificationForCurrentUser(): Notification {
+    val notification = Notification().apply { user = testData.user }
+    notificationService.save(notification)
+    return notification
   }
 
   private fun prepareTestData() {

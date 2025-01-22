@@ -2,7 +2,6 @@ package io.tolgee.repository
 
 import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.model.Notification
-import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -44,7 +43,6 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     """,
   )
   @Modifying
-  @Transactional
   fun markNotificationsAsSeen(
     notificationIds: List<Long>,
     userId: Long,
