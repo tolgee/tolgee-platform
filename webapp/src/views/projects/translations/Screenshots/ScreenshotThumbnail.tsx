@@ -10,6 +10,7 @@ import {
   ScreenshotProps,
   ScreenshotWithLabels,
 } from 'tg.component/ScreenshotWithLabels';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
 const StyledScreenshotWithLabels = styled(ScreenshotWithLabels)`
   width: 100%;
@@ -52,7 +53,8 @@ const StyledScreenshotBox = styled(Box)`
     }
   }
 
-  &:hover .closeButton {
+  &:hover .closeButton,
+  &:focus-within .closeButton {
     pointer-events: all;
     opacity: 1;
   }
@@ -120,6 +122,7 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
         <StyledScreenshotOverflowWrapper
           key={props.screenshot.highlightedKeyId}
           onClick={props.onClick}
+          onMouseDown={stopAndPrevent()}
         >
           <StyledScreenshotWithLabels
             screenshot={props.screenshot}
