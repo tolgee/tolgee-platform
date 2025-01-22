@@ -104,6 +104,7 @@ const StyledContainer = styled(Box)`
 `;
 
 const StyledScrollWrapper = styled(Box)`
+  align-self: start;
   padding: 0px 6px;
   padding-top: 12px;
   overflow-y: auto;
@@ -178,12 +179,20 @@ export const Screenshots = ({
         />
       </StyledScrollWrapper>
       {scrollLeft && (
-        <Box className="arrowLeft" onClick={handleScrollLeft} role="button">
+        <Box
+          className="arrowLeft"
+          onClick={stopAndPrevent(handleScrollLeft)}
+          role="button"
+        >
           <ChevronLeft width={20} height={20} />
         </Box>
       )}
       {scrollRight && (
-        <Box className="arrowRight" onClick={handleScrollRight} role="button">
+        <Box
+          className="arrowRight"
+          onClick={stopAndPrevent(handleScrollRight)}
+          role="button"
+        >
           <ChevronRight width={20} height={20} />
         </Box>
       )}

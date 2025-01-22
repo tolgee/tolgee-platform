@@ -67,7 +67,7 @@ class ImageUploadService(
     val processedThumbnail = imageConverter.getThumbnail(200)
 
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
-    fileStorage.storeFile(uploadedImageEntity.filePath, processedMiddleSized.toByteArray())
+    fileStorage.storeFile(uploadedImageEntity.middleSizedFilePath, processedMiddleSized.toByteArray())
     fileStorage.storeFile(uploadedImageEntity.thumbnailFilePath, processedThumbnail.toByteArray())
 
     return uploadedImageEntity
@@ -115,6 +115,9 @@ class ImageUploadService(
 
   val UploadedImage.filePath
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.filenameWithExtension
+  val UploadedImage.middleSizedFilePath
+    get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.middleSizedWithExtension
   val UploadedImage.thumbnailFilePath
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.thumbnailFilenameWithExtension
+
 }

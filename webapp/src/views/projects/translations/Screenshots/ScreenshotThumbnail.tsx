@@ -103,7 +103,12 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
 
   return (
     <>
-      <StyledScreenshotBox sx={props.sx} data-cy="screenshot-thumbnail">
+      <StyledScreenshotBox
+        sx={props.sx}
+        data-cy="screenshot-thumbnail"
+        onMouseDown={stopAndPrevent()}
+        onClick={stopAndPrevent()}
+      >
         {canDeleteScreenshots && (
           <Tooltip
             title={<T keyName="translations.screenshots.delete_tooltip" />}
@@ -122,7 +127,6 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
         <StyledScreenshotOverflowWrapper
           key={props.screenshot.highlightedKeyId}
           onClick={props.onClick}
-          onMouseDown={stopAndPrevent()}
         >
           <StyledScreenshotWithLabels
             screenshot={props.screenshot}

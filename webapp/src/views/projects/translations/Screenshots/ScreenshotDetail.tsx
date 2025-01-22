@@ -7,6 +7,7 @@ import {
 } from 'tg.component/ScreenshotWithLabels';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -100,7 +101,13 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
   };
 
   return (
-    <Dialog onClose={onClose} open maxWidth="xl" onKeyDown={handleKeyPress}>
+    <Dialog
+      onClose={onClose}
+      open
+      maxWidth="xl"
+      onKeyDown={handleKeyPress}
+      onClick={stopAndPrevent()}
+    >
       <StyledContainer>
         {multiple && (
           <IconButton
