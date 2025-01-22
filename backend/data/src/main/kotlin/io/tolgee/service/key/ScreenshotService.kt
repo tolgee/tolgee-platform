@@ -227,7 +227,7 @@ class ScreenshotService(
     thumbnail: ByteArray?,
   ) {
     thumbnail?.let { fileStorage.storeFile(screenshot.getThumbnailPath(), it) }
-    middleSized?.let { fileStorage.storeFile(screenshot.getMiddleSizedPath(), it)}
+    middleSized?.let { fileStorage.storeFile(screenshot.getMiddleSizedPath(), it) }
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 

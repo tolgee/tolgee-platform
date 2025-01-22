@@ -150,12 +150,15 @@ class DemoProjectCreator(
   }
 
   private fun saveScreenshot(): Screenshot {
-    val image =  applicationContext.getResource("classpath:demoProject/screenshot.png").inputStream
-      .use { it.readAllBytes() }
-    val middleSized = applicationContext.getResource("classpath:demoProject/screenshot-middle-sized.png").inputStream
-      .use { it.readAllBytes() }
-    val thumbnail = applicationContext.getResource("classpath:demoProject/screenshot-thumbnail.png").inputStream
-      .use { screenshotThumbnail -> screenshotThumbnail.readAllBytes() }
+    val image =
+      applicationContext.getResource("classpath:demoProject/screenshot.png").inputStream
+        .use { it.readAllBytes() }
+    val middleSized =
+      applicationContext.getResource("classpath:demoProject/screenshot-middle-sized.png").inputStream
+        .use { it.readAllBytes() }
+    val thumbnail =
+      applicationContext.getResource("classpath:demoProject/screenshot-thumbnail.png").inputStream
+        .use { screenshotThumbnail -> screenshotThumbnail.readAllBytes() }
 
     return screenshotService.saveScreenshot(
       image,
@@ -164,7 +167,6 @@ class DemoProjectCreator(
       null,
       Dimension(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT),
     )
-
   }
 
   val keys: MutableMap<String, Key> = mutableMapOf()

@@ -3809,6 +3809,8 @@ export interface components {
       id: number;
       keyReferences: components["schemas"]["KeyInScreenshotModel"][];
       location?: string;
+      middleSized?: string;
+      middleSizedUrl?: string;
       /**
        * @description Thumbnail file name, which may be downloaded from the screenshot path.
        *
