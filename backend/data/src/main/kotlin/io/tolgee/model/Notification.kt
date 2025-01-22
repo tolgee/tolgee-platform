@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import io.tolgee.model.task.Task
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(
@@ -21,4 +22,7 @@ class Notification : StandardAuditModel() {
 
   @ManyToOne(fetch = FetchType.LAZY)
   var linkedTask: Task? = null
+
+  @ColumnDefault("false")
+  var seen: Boolean = false
 }

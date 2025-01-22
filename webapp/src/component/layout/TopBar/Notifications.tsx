@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import { useHistory } from 'react-router-dom';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
@@ -40,9 +40,45 @@ const ListItemHeader = styled(ListItem)`
 `;
 
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
+  const unseenNotificationsLoadable = useApiQuery({
+    url: '/v2/notifications',
+    method: 'get',
+    query: { size: 1, filterSeen: false },
+  });
+
+  const [unseenCount, setUnseenCount] = useState(0);
+
+  useEffect(() => {
+    setUnseenCount(unseenNotificationsLoadable.data?.page?.totalElements || 0);
+  }, [unseenNotificationsLoadable.data]);
+
+  const notificationsLoadable = useApiQuery({
+    url: '/v2/notifications',
+    method: 'get',
+    query: { size: 10000 },
+  });
+
+  const notifications = notificationsLoadable.data;
+  const notificationsData = notifications?._embedded?.notificationModelList;
+
+  const markSeenMutation = useApiMutation({
+    url: '/v2/notifications-mark-seen',
+    method: 'put',
+  });
+
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
     setAnchorEl(event.currentTarget);
+    markSeenMutation.mutate({
+      content: {
+        'application/json': {
+          notificationIds:
+            notificationsData != undefined
+              ? notificationsData.map((it) => it.id)
+              : [],
+        },
+      },
+    });
   };
 
   const handleClose = () => {
@@ -56,22 +92,14 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const client = useGlobalContext((c) => c.wsClient.client);
   const user = useUser();
 
-  const notificationsLoadable = useApiQuery({
-    url: '/v2/notifications',
-    method: 'get',
-    query: { size: 10000 },
-  });
-
   useEffect(() => {
     if (client && user) {
-      return client.subscribe(`/users/${user.id}/notifications-changed`, () =>
-        notificationsLoadable.refetch({ cancelRefetch: true })
-      );
+      return client.subscribe(`/users/${user.id}/notifications-changed`, () => {
+        notificationsLoadable.refetch({ cancelRefetch: true });
+        unseenNotificationsLoadable.refetch({ cancelRefetch: true });
+      });
     }
   }, [user, client]);
-
-  const notifications = notificationsLoadable.data;
-  const notificationsData = notifications?._embedded?.notificationModelList;
 
   return (
     <>
@@ -84,9 +112,14 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         size="large"
       >
         <Badge
-          badgeContent={notifications?.page?.totalElements}
+          badgeContent={unseenCount}
           color="secondary"
-          data-cy="notifications-count"
+          slotProps={{
+            badge: {
+              //@ts-ignore
+              'data-cy': 'notifications-count',
+            },
+          }}
         >
           <Bell01 />
         </Badge>
