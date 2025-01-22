@@ -1,5 +1,4 @@
-import { CompatClient, Stomp } from '@stomp/stompjs';
-// @ts-ignore
+import { CompatClient, Stomp } from '@stomp/stompjs'; // @ts-ignore
 import SockJS from 'sockjs-client/dist/sockjs';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -159,6 +158,11 @@ export type BatchJobProgress = WebsocketEvent<{
   errorMessage: string | undefined;
 }>;
 
+export type NotificationsChanged = WebsocketEvent<{
+  currentlyUnseenCount: number;
+  newNotification?: components['schemas']['NotificationModel'];
+}>;
+
 export type EntityModification<T> = T extends keyof schemas
   ? {
       id: number;
@@ -222,4 +226,6 @@ export type Data<T> = T extends `/projects/${number}/translation-data-modified`
   ? TranslationsModifiedData
   : T extends `/projects/${number}/batch-job-progress`
   ? BatchJobProgress
+  : T extends `/users/${number}/notifications-changed`
+  ? NotificationsChanged
   : never;

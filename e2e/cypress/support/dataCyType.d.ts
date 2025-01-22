@@ -361,7 +361,9 @@ declare namespace DataCy {
         "navigation-item" |
         "notifications-button" |
         "notifications-count" |
+        "notifications-empty-message" |
         "notifications-list" |
+        "notifications-list-item" |
         "notistack-snackbar" |
         "order-translation-confirmation" |
         "order-translation-confirmation-ok" |
