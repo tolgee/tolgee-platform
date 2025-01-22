@@ -1,16 +1,8 @@
 import { FC } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { useDateFormatter } from 'tg.hooks/useLocale';
-import { Box, styled } from '@mui/material';
+import { Box } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
-
-const StyledPositive = styled('span')`
-  color: ${({ theme }) => theme.palette.secondary.main};
-`;
-
-const StyledNegative = styled('span')`
-  color: ${({ theme }) => theme.palette.error.main};
-`;
 
 export const TrialInfo: FC<{
   subscription: components['schemas']['CloudSubscriptionModel'];
