@@ -32,6 +32,7 @@ export const useKeyCell = ({ keyData, cellRef }: Props) => {
 
   const isEditingRow = Boolean(cursor?.keyId === keyId);
   const isEditing = Boolean(isEditingRow && cursor?.language === undefined);
+  const isEditingTranslation = Boolean(isEditingRow && cursor?.language);
 
   useEffect(() => {
     registerElement({ keyId, language: undefined, ref: cellRef.current! });
@@ -65,6 +66,7 @@ export const useKeyCell = ({ keyData, cellRef }: Props) => {
     editVal: isEditing ? cursor : undefined,
     isEditing,
     isEditingRow,
+    isEditingTranslation,
     autofocus: true,
     keyData,
   };

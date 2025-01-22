@@ -188,10 +188,11 @@ export const CellKey: React.FC<Props> = ({
 
   const [tagEdit, setTagEdit] = useState(false);
 
-  const { isEditing, handleOpen, handleClose, editVal } = useKeyCell({
-    keyData: data,
-    cellRef,
-  });
+  const { isEditing, handleOpen, handleClose, editVal, isEditingTranslation } =
+    useKeyCell({
+      keyData: data,
+      cellRef,
+    });
 
   return (
     <>
@@ -251,7 +252,7 @@ export const CellKey: React.FC<Props> = ({
               <Screenshots
                 screenshots={data.screenshots}
                 keyId={data.keyId}
-                oneBig={oneScreenshotBig}
+                oneBig={oneScreenshotBig && isEditingTranslation}
                 width={width ? width - 38 : undefined}
               />
             </StyledScreenshots>
