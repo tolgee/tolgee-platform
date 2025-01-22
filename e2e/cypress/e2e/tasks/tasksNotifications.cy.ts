@@ -6,6 +6,11 @@ import { tasks } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage, dismissMenu } from '../../common/shared';
 import { getTaskPreview, visitTasks } from '../../common/tasks';
+import {
+  assertNotificationListIsEmpty,
+  assertUnseenNotificationsCount,
+  getNotifications,
+} from '../../common/notifications';
 
 describe('tasks notifications', () => {
   beforeEach(() => {
@@ -24,6 +29,9 @@ describe('tasks notifications', () => {
   });
 
   it('sends email to assignee of newly created task and creates notification', () => {
+    assertUnseenNotificationsCount(0);
+    assertNotificationListIsEmpty();
+
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-name').type('New review task');
     cy.gcy('create-task-field-languages').click();
@@ -41,8 +49,7 @@ describe('tasks notifications', () => {
     cy.gcy('create-task-submit').click();
 
     assertMessage('1 task created');
-
-    cy.gcy('notifications-count').should('have.text', '1');
+    assertUnseenNotificationsCount(1);
 
     getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
@@ -53,10 +60,15 @@ describe('tasks notifications', () => {
       .findDcy('task-label-name')
       .should('contain', 'New review task');
     dismissMenu();
-    cy.gcy('notifications-button').click();
 
-    cy.gcy('notifications-count').should('not.be.visible');
-    cy.gcy('notifications-list').contains('New review task').click();
+    getNotifications()
+      .should('have.length', 1)
+      .first()
+      .should(
+        'include.text',
+        'A task has been assigned to you: New review task'
+      )
+      .click();
 
     cy.url().should('include', '/translations?task=');
   });
