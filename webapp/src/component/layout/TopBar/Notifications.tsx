@@ -50,7 +50,9 @@ const NotificationItem = styled(ListItemButton)`
   column-gap: 10px;
   grid-template-columns: 30px 1fr 120px;
   grid-template-rows: auto;
-  grid-template-areas: 'notification-avatar notification-text notification-time';
+  grid-template-areas:
+    'notification-avatar notification-text notification-time'
+    'notification-avatar notification-text notification-project';
 `;
 
 const NotificationAvatar = styled(Box)`
@@ -65,6 +67,10 @@ const NotificationItemTime = styled(Box)`
     theme.palette.mode === 'light'
       ? theme.palette.emphasis[400]
       : theme.palette.emphasis[600]};
+`;
+
+const NotificationItemProject = styled(NotificationItemTime)`
+  grid-area: notification-project;
 `;
 
 const NotificationItemText = styled(Box)`
@@ -210,6 +216,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
             const createdAt = notification.createdAt;
             const originatingUser = notification.linkedTask?.author;
+            const project = notification.project;
             return (
               <NotificationItem
                 key={notification.id}
@@ -249,6 +256,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                       locale: locales[language].dateFnsLocale,
                     })}
                 </NotificationItemTime>
+                <NotificationItemProject>
+                  {project && project.name}
+                </NotificationItemProject>
               </NotificationItem>
             );
           })}
