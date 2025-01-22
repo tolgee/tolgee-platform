@@ -617,6 +617,8 @@
   "export_form_message_format_icu": "ICU",
   "export_form_message_format_java-string-format": "Java String.format",
   "export_form_message_format_php-sprintf": "PHP Sprintf",
+  "export_form_message_format_python-percent": "Procent Python",
+  "export_form_message_format_python-sprintf": "Python Sprintf",
   "export_form_message_format_ruby-sprintf": "Ruby Sprintf",
   "export_translations_auto_publish_hint": "Exportul va fi efectuat automat după ce se modifică sau se adaugă o traducere. Deoarece livrarea conținutului este puternic cache-uită, modificările pot dura până la 15 minute să fie vizibile.",
   "export_translations_auto_publish_label": "Publică automat",

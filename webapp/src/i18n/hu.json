@@ -612,6 +612,8 @@
   "export_form_message_format_icu": "ICU",
   "export_form_message_format_java-string-format": "Java String.format",
   "export_form_message_format_php-sprintf": "PHP Sprintf",
+  "export_form_message_format_python-percent": "Python százalék",
+  "export_form_message_format_python-sprintf": "Python Sprintf",
   "export_form_message_format_ruby-sprintf": "Ruby Sprintf",
   "export_translations_auto_publish_hint": "Az exportálás automatikusan megtörténik minden fordítás módosítása vagy hozzáadása után. Mivel a tartalom szállítása erősen gyorsítótárazott, akár 15 percig is eltarthat, amíg a változások érvénybe lépnek.",
   "export_translations_auto_publish_label": "Automatikus közzététel",

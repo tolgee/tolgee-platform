@@ -1,3 +1,10 @@
+# [3.95.0](https://github.com/tolgee/tolgee-platform/compare/v3.94.2...v3.95.0) (2025-01-22)
+
+
+### Features
+
+* re-enable and update python message format ([#2855](https://github.com/tolgee/tolgee-platform/issues/2855)) ([b322ece](https://github.com/tolgee/tolgee-platform/commit/b322ecebb6ef2699eeb726af0eba0e3b97fc37ce))
+
 ## [3.94.2](https://github.com/tolgee/tolgee-platform/compare/v3.94.1...v3.94.2) (2025-01-17)
 
 

@@ -619,6 +619,8 @@
   "export_form_message_format_icu": "ICU",
   "export_form_message_format_java-string-format": "Java String.format",
   "export_form_message_format_php-sprintf": "PHP Sprintf",
+  "export_form_message_format_python-percent": "Python Percent",
+  "export_form_message_format_python-sprintf": "Python Sprintf",
   "export_form_message_format_ruby-sprintf": "Ruby Sprintf",
   "export_translations_auto_publish_hint": "Export will be performed automatically after any translation is changed or added. As the content delivery is heavily cached, it can take up to 15 minutes for the changes to take place.",
   "export_translations_auto_publish_label": "Publish automatically",
