@@ -60,11 +60,13 @@ class ScreenshotService(
 
     val converter = ImageConverter(screenshotImage.inputStream)
     val image = converter.getImage()
-    val thumbnail = converter.getThumbnail()
+    val middleSized = converter.getThumbnail(600)
+    val thumbnail = converter.getThumbnail(200)
 
     val screenshot =
       saveScreenshot(
         image.toByteArray(),
+        middleSized.toByteArray(),
         thumbnail.toByteArray(),
         info?.location,
         converter.targetDimension,
@@ -179,12 +181,17 @@ class ScreenshotService(
         .readFile(
           UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.filenameWithExtension,
         )
+    val middleSized =
+      fileStorage
+        .readFile(
+          UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.middleSizedWithExtension,
+        )
     val thumbnail =
       fileStorage
         .readFile(
           UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + image.thumbnailFilenameWithExtension,
         )
-    val screenshot = saveScreenshot(img, thumbnail, image.location, Dimension(image.width, image.height))
+    val screenshot = saveScreenshot(img, middleSized, thumbnail, image.location, Dimension(image.width, image.height))
     imageUploadService.delete(image)
     return CreateScreenshotResult(
       screenshot = screenshot,
@@ -198,6 +205,7 @@ class ScreenshotService(
    */
   fun saveScreenshot(
     image: ByteArray,
+    middleSized: ByteArray,
     thumbnail: ByteArray,
     location: String?,
     dimension: Dimension,
@@ -208,16 +216,18 @@ class ScreenshotService(
     screenshot.width = dimension.width
     screenshot.height = dimension.height
     screenshotRepository.save(screenshot)
-    storeFiles(screenshot, image, thumbnail)
+    storeFiles(screenshot, image, middleSized, thumbnail)
     return screenshot
   }
 
   fun storeFiles(
     screenshot: Screenshot,
     image: ByteArray?,
+    middleSized: ByteArray?,
     thumbnail: ByteArray?,
   ) {
     thumbnail?.let { fileStorage.storeFile(screenshot.getThumbnailPath(), it) }
+    middleSized?.let { fileStorage.storeFile(screenshot.getMiddleSizedPath(), it) }
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
@@ -340,6 +350,10 @@ class ScreenshotService(
 
   private fun Screenshot.getFilePath(): String {
     return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.filename}"
+  }
+
+  private fun Screenshot.getMiddleSizedPath(): String {
+    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.middleSizedFilename}"
   }
 
   private fun Screenshot.getThumbnailPath(): String {

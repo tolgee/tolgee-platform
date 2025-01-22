@@ -5,8 +5,6 @@ const StyledItem = styled(Box)`
   justify-content: space-between;
 `;
 
-const StyledItemContent = styled(Typography)``;
-
 type Props = {
   name: React.ReactNode;
   formula: React.ReactNode;
@@ -15,15 +13,16 @@ type Props = {
 export const Shortcut = ({ name, formula }: Props) => {
   return (
     <StyledItem>
-      <StyledItemContent
+      <Typography
+        component={Box}
         variant="body2"
         data-cy="translations-shortcuts-command"
       >
         {name}
-      </StyledItemContent>
-      <StyledItemContent variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+      </Typography>
+      <Typography component={Box} variant="body2" sx={{ whiteSpace: 'nowrap' }}>
         {formula}
-      </StyledItemContent>
+      </Typography>
     </StyledItem>
   );
 };

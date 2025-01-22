@@ -7,6 +7,7 @@ const StyledEditorWrapper = styled('div')`
   cursor: text;
   background: ${({ theme }) => theme.palette.input.background};
   padding: 1px;
+  display: grid;
 
   &:hover {
     border: 1px solid ${({ theme }) => theme.palette.emphasis[900]};

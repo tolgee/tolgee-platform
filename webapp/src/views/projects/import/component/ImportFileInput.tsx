@@ -148,8 +148,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     return { ...result, valid };
   };
 
-  /*
-                @ts-ignore */
+  /* @ts-ignore */
   return (
     <ImportFileDropzone
       onNewFiles={onNewFiles}

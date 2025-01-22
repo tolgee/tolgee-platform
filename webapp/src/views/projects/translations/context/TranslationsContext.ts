@@ -36,6 +36,7 @@ import { useWebsocketService } from './services/useWebsocketService';
 import { PrefilterType } from '../prefilters/usePrefilter';
 import { useTaskService } from './services/useTaskService';
 import { usePositionService } from './services/usePositionService';
+import { useLayoutService } from './services/useLayoutService';
 
 type Props = {
   projectId: number;
@@ -55,6 +56,7 @@ export const [
 ] = createProvider((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
+  const layout = useLayoutService({ sidePanelOpen });
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
@@ -213,8 +215,8 @@ export const [
       translationService.updateQuery({});
       return handleTranslationsReset();
     },
-    updateScreenshotCount(count: ChangeScreenshotNum) {
-      return translationService.updateScreenshotCount(count);
+    updateScreenshots(data: ChangeScreenshotNum) {
+      return translationService.updateScreenshots(data);
     },
     changeView(view: ViewMode) {
       return setView(view);
@@ -300,8 +302,8 @@ export const [
     view: view as ViewMode,
     elementsRef: viewRefs.elementsRef,
     reactList: viewRefs.reactList,
-    sidePanelOpen,
     prefilter: props.prefilter,
+    layout,
   };
 
   return [state, actions];

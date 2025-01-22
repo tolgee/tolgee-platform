@@ -29,10 +29,10 @@ const StyledContainer = styled('div')`
 `;
 
 type Props = {
-  toolsPanelOpen: boolean;
+  width: number;
 };
 
-export const TranslationsList = ({ toolsPanelOpen }: Props) => {
+export const TranslationsList = ({ width }: Props) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
@@ -51,9 +51,8 @@ export const TranslationsList = ({ toolsPanelOpen }: Props) => {
     resizeColumn,
     addResizer,
   } = useColumns({
-    tableRef,
+    width,
     initialRatios: [1, 3],
-    deps: [toolsPanelOpen],
   });
 
   const handleFetchMore = useCallback(() => {
@@ -143,7 +142,8 @@ export const TranslationsList = ({ toolsPanelOpen }: Props) => {
                 bannerAfter={Boolean(nsBannerAfter)}
                 data={row}
                 languages={languagesRow}
-                columnSizes={columnSizesPercent}
+                columnSizesPercent={columnSizesPercent}
+                columnSizes={columnSizes}
                 onResize={startResize}
               />
             </div>

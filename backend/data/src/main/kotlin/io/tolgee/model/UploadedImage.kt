@@ -34,6 +34,9 @@ class UploadedImage(
   val filenameWithExtension
     get() = "$filename.$extension"
 
+  val middleSizedWithExtension
+    get() = "${filename}_middle_sized.$extension"
+
   val thumbnailFilenameWithExtension
     get() = "${filename}_thumbnail.$extension"
 

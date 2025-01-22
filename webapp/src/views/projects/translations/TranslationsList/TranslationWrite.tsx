@@ -20,6 +20,7 @@ import { useTranslate } from '@tolgee/react';
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
     'language    controls-t '
     'editor      editor     '
@@ -33,6 +34,7 @@ const StyledContainer = styled('div')`
   .editor {
     padding: 0px 12px 12px 16px;
     grid-area: editor;
+    display: grid;
   }
 
   .controls-t {

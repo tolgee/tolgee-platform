@@ -19,20 +19,29 @@ const StyledButton = styled(Button)`
 export const QuickStartTopBarButton = () => {
   const guideEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const guideOpen = useGlobalContext((c) => c.quickStartGuide.open);
+  const guideFloatingOpen = useGlobalContext(
+    (c) => c.quickStartGuide.floatingOpen
+  );
+  const rightPanelShouldFloat = useGlobalContext(
+    (c) => c.layout.rightPanelShouldFloat
+  );
   const completedSteps = useGlobalContext(
     (c) => c.quickStartGuide.completed.length
   );
   const allSteps = items.length;
-  const { setQuickStartOpen } = useGlobalActions();
+  const { setQuickStartOpen, setQuickStartFloatingOpen } = useGlobalActions();
+
+  const handleClick = () => {
+    rightPanelShouldFloat
+      ? setQuickStartFloatingOpen(!guideFloatingOpen)
+      : setQuickStartOpen(!guideOpen);
+  };
 
   return (
     <>
       {guideEnabled && (
         <StyledContainer>
-          <StyledButton
-            onClick={() => setQuickStartOpen(!guideOpen)}
-            color="inherit"
-          >
+          <StyledButton onClick={handleClick} color="inherit">
             <Box display="flex" gap={1} alignItems="center">
               <RocketFilled width={20} height={20} />
               <QuickStartProgress percent={completedSteps / allSteps} />

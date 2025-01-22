@@ -1,6 +1,5 @@
 import clsx from 'clsx';
 import React, { useRef, useState } from 'react';
-import { useDebounce } from 'use-debounce';
 import { useTranslate } from '@tolgee/react';
 import { Checkbox, styled, Tooltip, Box } from '@mui/material';
 import { Zap } from '@untitled-ui/icons-react';
@@ -11,7 +10,6 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 import { wrapIf } from 'tg.fixtures/wrapIf';
 
 import { Tags } from './Tags/Tags';
-import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import {
   CELL_CLICKABLE,
   CELL_PLAIN,
@@ -27,6 +25,11 @@ import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
 import { KeyEditModal } from './KeyEdit/KeyEditModal';
 import { useKeyCell } from './useKeyCell';
+import { ALLOWED_UPLOAD_TYPES, Screenshots } from './Screenshots/Screenshots';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { ScreenshotDropzone } from './Screenshots/ScreenshotDropzone';
+import { useScreenshotUpload } from './Screenshots/useScreenshotUpload';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -34,13 +37,14 @@ type KeyWithTranslationsModel =
 const StyledContainer = styled(StyledCell)`
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto auto auto 1fr auto;
   grid-template-areas:
-    'checkbox key          '
-    '.        description  '
-    '.        tags         '
-    'editor   editor       '
-    'controls controls     ';
+    'checkbox  key          '
+    '.         description  '
+    '.         screenshots  '
+    '.         tags         '
+    'editor    editor       '
+    'controls  controls     ';
 
   & .controls {
     grid-area: controls;
@@ -99,6 +103,23 @@ const StyledTags = styled('div')`
   min-height: 28px;
 `;
 
+const StyledDropzone = styled('div')`
+  display: grid;
+  grid-row: 2 / -1;
+  grid-column: 1 / -1;
+  position: relative;
+  padding: 0px 12px 12px 0px;
+  z-index: 2;
+`;
+
+const StyledScreenshots = styled('div')`
+  grid-area: screenshots;
+  position: relative;
+  overflow: hidden;
+  margin-top: -12px;
+  padding-bottom: 8px;
+`;
+
 const StyledContextButton = styled(Box)`
   position: absolute;
   bottom: 12px;
@@ -112,29 +133,39 @@ const StyledBolt = styled(Zap)`
 
 type Props = {
   data: KeyWithTranslationsModel;
-  width?: string | number;
+  widthPercent?: string | number;
+  width?: number;
   editEnabled: boolean;
   active: boolean;
   simple?: boolean;
   className?: string;
   onSaveSuccess?: (value: string) => void;
+  oneScreenshotBig?: boolean;
   editInDialog?: boolean;
 };
 
 export const CellKey: React.FC<Props> = ({
   data,
+  widthPercent,
   width,
   editEnabled,
   active,
   simple,
+  oneScreenshotBig,
   className,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
-  const [screenshotsOpen, setScreenshotsOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const { toggleSelect, groupToggleSelect, addTag } = useTranslationsActions();
   const { t } = useTranslate();
+  const { onFileSelected, validateAndUpload, openFiles } = useScreenshotUpload({
+    fileRef,
+    keyId: data.keyId,
+  });
+  const { satisfiesPermission } = useProjectPermissions();
+  const canAddScreenshots = satisfiesPermission('screenshots.upload');
 
-  const screenshotEl = useRef<HTMLButtonElement | null>(null);
+  const userIsDragging = useGlobalContext((c) => c.userIsDragging);
 
   const isSelected = useTranslationsSelector((c) =>
     c.selection.includes(data.keyId)
@@ -142,9 +173,6 @@ export const CellKey: React.FC<Props> = ({
   const somethingSelected = useTranslationsSelector((c) =>
     Boolean(c.selection.length)
   );
-
-  // prevent blinking, when closing popup
-  const [screenshotsOpenDebounced] = useDebounce(screenshotsOpen, 100);
 
   const handleToggleSelect = (e: React.PointerEvent) => {
     const shiftPressed = e.nativeEvent.shiftKey;
@@ -161,10 +189,11 @@ export const CellKey: React.FC<Props> = ({
 
   const [tagEdit, setTagEdit] = useState(false);
 
-  const { isEditing, handleOpen, handleClose, editVal } = useKeyCell({
-    keyData: data,
-    cellRef,
-  });
+  const { isEditing, handleOpen, handleClose, editVal, isEditingTranslation } =
+    useKeyCell({
+      keyData: data,
+      cellRef,
+    });
 
   return (
     <>
@@ -177,7 +206,7 @@ export const CellKey: React.FC<Props> = ({
           },
           className
         )}
-        style={{ width }}
+        style={{ width: widthPercent }}
         onClick={editEnabled ? () => handleOpen() : undefined}
         data-cy="translations-table-cell"
         tabIndex={0}
@@ -204,7 +233,11 @@ export const CellKey: React.FC<Props> = ({
               </Tooltip>
             )}
           <StyledKey>
-            <LimitedHeightText width={width} maxLines={3} wrap="break-all">
+            <LimitedHeightText
+              width={widthPercent}
+              maxLines={3}
+              wrap="break-all"
+            >
               {data.keyName}
             </LimitedHeightText>
           </StyledKey>
@@ -214,6 +247,16 @@ export const CellKey: React.FC<Props> = ({
                 {data.keyDescription}
               </LimitedHeightText>
             </StyledDescription>
+          )}
+          {data.screenshots && (
+            <StyledScreenshots>
+              <Screenshots
+                screenshots={data.screenshots}
+                keyId={data.keyId}
+                oneBig={oneScreenshotBig && isEditingTranslation}
+                width={width ? width - 38 : undefined}
+              />
+            </StyledScreenshots>
           )}
           {!simple && (
             <>
@@ -241,6 +284,7 @@ export const CellKey: React.FC<Props> = ({
               </StyledTags>
             </>
           )}
+
           {data.contextPresent && (
             <Tooltip title={t('key-context-present-hint')}>
               <StyledContextButton
@@ -255,42 +299,37 @@ export const CellKey: React.FC<Props> = ({
 
         <div className="controlsSmall">
           {!tagEdit ? (
-            active || screenshotsOpen || screenshotsOpenDebounced ? (
+            active ? (
               <ControlsKey
                 onEdit={() => handleOpen()}
-                onScreenshots={
-                  simple ? undefined : () => setScreenshotsOpen(true)
-                }
-                screenshotRef={screenshotEl}
-                screenshotsPresent={data.screenshotCount > 0}
-                screenshotsOpen={screenshotsOpen || screenshotsOpenDebounced}
+                onAddScreenshot={canAddScreenshots ? openFiles : undefined}
                 editEnabled={editEnabled}
               />
             ) : (
               // hide as many components as possible in order to be performant
-              <ControlsKey
-                onScreenshots={
-                  data.screenshotCount > 0
-                    ? () => setScreenshotsOpen(true)
-                    : undefined
-                }
-                screenshotRef={screenshotEl}
-                screenshotsPresent={data.screenshotCount > 0}
-                editEnabled={editEnabled}
-              />
+              <ControlsKey editEnabled={editEnabled} />
             )
           ) : null}
         </div>
+        {canAddScreenshots && (
+          <>
+            {userIsDragging && (
+              <StyledDropzone data-cy="cell-key-screenshot-dropzone">
+                <ScreenshotDropzone validateAndUpload={validateAndUpload} />
+              </StyledDropzone>
+            )}
+            <input
+              data-cy="cell-key-screenshot-file-input"
+              type="file"
+              style={{ display: 'none' }}
+              ref={fileRef}
+              onChange={onFileSelected}
+              multiple
+              accept={ALLOWED_UPLOAD_TYPES.join(',')}
+            />
+          </>
+        )}
       </StyledContainer>
-      {screenshotsOpen && (
-        <ScreenshotsPopover
-          anchorEl={screenshotEl.current!}
-          keyId={data.keyId}
-          onClose={() => {
-            setScreenshotsOpen(false);
-          }}
-        />
-      )}
       {isEditing && (
         <KeyEditModal
           data={data}

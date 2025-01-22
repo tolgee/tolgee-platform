@@ -139,14 +139,16 @@ const StyledScrollArrow = styled('div')`
 `;
 
 type Props = {
-  toolsPanelOpen: boolean;
+  width: number;
 };
 
-export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
+export const TranslationsTable = ({ width }: Props) => {
+  const mainContentWidth = useTranslationsSelector(
+    (c) => c.layout.mainContentWidth
+  );
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
-  const sidePanelOpen = useTranslationsSelector((c) => c.sidePanelOpen);
 
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -181,10 +183,9 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
     resizeColumn,
     addResizer,
   } = useColumns({
-    tableRef,
+    width,
     initialRatios: columns.map(() => 1),
     minSize: 350,
-    deps: [toolsPanelOpen],
   });
 
   const handleFetchMore = useCallback(() => {
@@ -231,7 +232,7 @@ export const TranslationsTable = ({ toolsPanelOpen }: Props) => {
       const right = window.innerWidth - position?.right;
       setTablePosition({ left, right });
     }
-  }, [tableRef.current, fullWidth, sidePanelOpen]);
+  }, [tableRef.current, mainContentWidth]);
   const hasMinimalHeight = useMediaQuery('(min-height: 400px)');
 
   return (

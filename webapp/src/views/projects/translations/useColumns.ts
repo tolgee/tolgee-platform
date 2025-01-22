@@ -1,25 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { resizeColumn, useResize } from './useResize';
-
-type PassedRefType = React.RefObject<HTMLElement | undefined>;
+import { resizeColumn } from './useResize';
 
 type Props = {
-  tableRef: PassedRefType;
+  width: number;
   initialRatios: number[];
   minSize?: number;
-  deps?: React.DependencyList;
 };
 
-export const useColumns = ({
-  tableRef,
-  initialRatios,
-  minSize,
-  deps = [],
-}: Props) => {
+export const useColumns = ({ initialRatios, minSize, width }: Props) => {
   const [columnSizes, setColumnSizes] = useState<number[]>(initialRatios);
   const resizersCallbacksRef = useRef<(() => void)[]>([]);
-
-  const { width } = useResize(tableRef, deps);
 
   const columnSizesPercent = useMemo(() => {
     const columnsSum = columnSizes?.reduce((a, b) => a + b, 0) || 0;

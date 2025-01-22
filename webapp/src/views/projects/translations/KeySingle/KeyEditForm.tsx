@@ -12,7 +12,6 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { CellTranslation } from '../TranslationsList/CellTranslation';
@@ -21,7 +20,10 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { FloatingToolsPanel } from '../ToolsPanel/FloatingToolsPanel';
 
 const StyledContainer = styled('div')`
@@ -50,13 +52,6 @@ const StyledField = styled('div')`
   border-style: solid;
 `;
 
-const StyledGalleryField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.divider1};
-  border-width: 1px;
-  border-style: solid;
-  padding: 2px;
-`;
-
 const StyledLanguageField = styled('div')`
   border-color: ${({ theme }) => theme.palette.divider1};
   border-width: 1px 1px 1px 0px;
@@ -72,11 +67,11 @@ const StyledActions = styled('div')`
 `;
 
 export const KeyEditForm: React.FC = () => {
+  const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
   const { satisfiesPermission } = useProjectPermissions();
-  const canViewScreenshots = satisfiesPermission('screenshots.view');
   const editEnabled = satisfiesPermission('keys.edit');
 
   const keyData = useTranslationsSelector((c) => c.translations)?.[0];
@@ -251,17 +246,6 @@ export const KeyEditForm: React.FC = () => {
           </Box>
         </div>
 
-        {canViewScreenshots && (
-          <div>
-            <FieldLabel>
-              <T keyName="translation_single_label_screenshots" />
-            </FieldLabel>
-            <StyledGalleryField>
-              <ScreenshotGallery keyId={keyData!.keyId} />
-            </StyledGalleryField>
-          </div>
-        )}
-
         <StyledActions>
           {editEnabled && (
             <Button
@@ -277,7 +261,9 @@ export const KeyEditForm: React.FC = () => {
       </StyledContainer>
       {toolsPanelOpen && (
         <Box ml="-1px" mt="25px">
-          <FloatingToolsPanel />
+          <FloatingToolsPanel
+            width={Math.min(Math.max(bodyWidth * 0.24, 300), 500)}
+          />
         </Box>
       )}
     </Box>

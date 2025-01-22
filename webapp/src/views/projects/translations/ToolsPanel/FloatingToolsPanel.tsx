@@ -11,8 +11,6 @@ const StyledContainer = styled('div')`
   position: relative;
   position: sticky;
   box-sizing: border-box;
-  width: 24vw;
-  min-width: 300px;
   height: 800px;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-bottom: 0px;
@@ -23,7 +21,11 @@ const StyledContainer = styled('div')`
   overflow-x: hidden;
 `;
 
-export const FloatingToolsPanel = () => {
+type Props = {
+  width: number;
+};
+
+export const FloatingToolsPanel = ({ width }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
@@ -69,6 +71,7 @@ export const FloatingToolsPanel = () => {
           topBarHeight +
           floatingBannerHeight
         )}px + 100vh)`,
+        width,
       }}
       ref={containerRef}
     >

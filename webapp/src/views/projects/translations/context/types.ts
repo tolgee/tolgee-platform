@@ -11,6 +11,8 @@ type TranslationsQueryType =
 export type DeletableKeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'] & { deleted?: boolean };
 
+type ScreenshotModel = components['schemas']['ScreenshotModel'];
+
 export interface CellPosition {
   keyId: number;
   language: string | undefined;
@@ -80,7 +82,7 @@ export type SetTaskTranslationState = {
 
 export type ChangeScreenshotNum = {
   keyId: number;
-  screenshotCount: number | undefined;
+  screenshots: ValueUpdate<ScreenshotModel[]>;
 };
 
 export type Direction = 'DOWN';
@@ -107,7 +109,14 @@ export type Edit = CellPosition & {
 
 export type EditMode = 'general' | 'advanced' | 'context' | 'comments';
 
+export type ValueUpdate<Data, Update = Data> =
+  | Update
+  | ((data: Data) => Update);
+
 export type KeyUpdateData = {
   keyId: number;
-  value: Partial<DeletableKeyWithTranslationsModelType>;
+  value: ValueUpdate<
+    DeletableKeyWithTranslationsModelType,
+    Partial<DeletableKeyWithTranslationsModelType>
+  >;
 };

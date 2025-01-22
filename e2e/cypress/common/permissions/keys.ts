@@ -1,7 +1,7 @@
 import { satisfiesLanguageAccess } from '../../../../webapp/src/fixtures/permissions';
 import { deleteSelected } from '../batchOperations';
 import { waitForGlobalLoading } from '../loading';
-import { confirmStandard, dismissMenu } from '../shared';
+import { confirmStandard } from '../shared';
 import { getCell } from '../state';
 import { createTag } from '../tags';
 import { createTranslation, editCell } from '../translations';
@@ -36,24 +36,18 @@ export function testKeys(info: ProjectInfo) {
 
   if (scopes.includes('screenshots.view')) {
     cy.gcy('translations-table-cell').first().focus();
-    cy.gcy('translations-cell-screenshots-button')
-      .first()
-      .should('exist')
-      .click();
     cy.gcy('screenshot-thumbnail').should('be.visible');
     if (scopes.includes('screenshots.delete')) {
-      cy.gcy('screenshot-thumbnail').trigger('mouseover');
-      cy.gcy('screenshot-thumbnail-delete').click();
+      cy.gcy('screenshot-thumbnail-delete').click({ force: true });
       confirmStandard();
       waitForGlobalLoading();
       cy.gcy('screenshot-thumbnail').should('not.exist');
     }
     if (scopes.includes('screenshots.upload')) {
-      cy.gcy('add-box').should('be.visible');
+      cy.gcy('translations-cell-screenshots-button').first().should('exist');
+    } else {
+      cy.gcy('translations-cell-screenshots-button').should('not.exist');
     }
-    // close popup
-    cy.waitForDom();
-    dismissMenu();
   }
 
   if (
