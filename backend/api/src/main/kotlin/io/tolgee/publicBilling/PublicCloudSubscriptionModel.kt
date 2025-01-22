@@ -8,6 +8,4 @@ interface PublicCloudSubscriptionModel {
   val cancelAtPeriodEnd: Boolean
   val trialEnd: Long?
   val status: SubscriptionStatus
-  val trialRenew: Boolean
-  val hasPaymentMethod: Boolean
 }
