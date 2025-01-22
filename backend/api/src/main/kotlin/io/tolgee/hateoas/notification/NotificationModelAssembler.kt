@@ -1,6 +1,6 @@
 package io.tolgee.hateoas.notification
 
-import io.tolgee.api.v2.controllers.NotificationController
+import io.tolgee.api.v2.controllers.notification.NotificationController
 import io.tolgee.model.Notification
 import org.springframework.data.domain.Page
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
