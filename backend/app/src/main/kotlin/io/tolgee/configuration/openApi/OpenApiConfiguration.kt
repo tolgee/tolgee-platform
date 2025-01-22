@@ -230,12 +230,13 @@ class OpenApiConfiguration {
     private const val BILLING_LICENSING = "/v2/**/licensing/**"
     private const val BILLING_TELEMETRY = "/v2/**/telemetry/**"
     private const val BILLING_TRANSLATOR = "/v2/**/translator/**"
-    private val BILLING = arrayOf(
-      BILLING_MAIN,
-      BILLING_LICENSING,
-      BILLING_TELEMETRY,
-      BILLING_TRANSLATOR,
-    )
+    private val BILLING =
+      arrayOf(
+        BILLING_MAIN,
+        BILLING_LICENSING,
+        BILLING_TELEMETRY,
+        BILLING_TRANSLATOR,
+      )
     private val PATH_WITH_PROJECT_ID_REGEX = "^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex()
   }
 }
