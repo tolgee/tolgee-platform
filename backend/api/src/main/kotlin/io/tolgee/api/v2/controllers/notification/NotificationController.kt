@@ -1,7 +1,8 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.notification
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.hateoas.notification.NotificationEnhancer
 import io.tolgee.hateoas.notification.NotificationModel
 import io.tolgee.hateoas.notification.NotificationModelAssembler
@@ -11,7 +12,9 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.notification.NotificationService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,9 +39,21 @@ class NotificationController(
   @Operation(summary = "Gets notifications of the currently logged in user, newest is first.")
   @AllowApiAccess
   fun getNotifications(
-    @ParameterObject pageable: Pageable,
+    @ParameterObject
+    @SortDefault(sort = ["id"], direction = Sort.Direction.DESC)
+    pageable: Pageable,
+    @ParameterObject
+    filters: NotificationFilters = NotificationFilters(),
   ): PagedModel<NotificationModel> {
-    val notifications = notificationService.getNotifications(authenticationFacade.authenticatedUser.id, pageable)
-    return pagedResourcesAssembler.toModel(notifications, NotificationModelAssembler(enhancers, notifications))
+    val notifications =
+      notificationService.getNotifications(
+        authenticationFacade.authenticatedUser.id,
+        pageable,
+        filters,
+      )
+    return pagedResourcesAssembler.toModel(
+      notifications,
+      NotificationModelAssembler(enhancers, notifications),
+    )
   }
 }
