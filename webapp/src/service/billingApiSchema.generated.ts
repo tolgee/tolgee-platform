@@ -12,7 +12,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/billing/restore-cancelled-subscription": {
     /** When subscription is scheduled to cancel on the period end, it can be restored. */
-    put: operations["keepSubscription"];
+    put: operations["restoreSubscription"];
   };
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     put: operations["refresh"];
@@ -403,12 +403,16 @@ export interface components {
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
+        | "namespaces_cannot_be_disabled_when_namespace_exists"
+        | "namespace_cannot_be_used_when_feature_is_disabled"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
         | "custom_plans_has_to_be_private"
         | "cannot_create_free_plan_with_prices"
-        | "subscription_not_scheduled_for_cancellation";
+        | "subscription_not_scheduled_for_cancellation"
+        | "cannot_cancel_trial"
+        | "cannot_update_without_modification";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -548,8 +552,6 @@ export interface components {
         | "ERROR"
         | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
-      trialRenew: boolean;
-      hasPaymentMethod: boolean;
     };
     UpdateSubscriptionPrepareRequest: {
       /**
@@ -1067,8 +1069,6 @@ export interface components {
         | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
       stripeSubscriptionId?: string;
-      trialRenew: boolean;
-      hasPaymentMethod: boolean;
     };
     OrganizationWithSubscriptionsModel: {
       organization: components["schemas"]["SimpleOrganizationModel"];
@@ -1186,7 +1186,7 @@ export interface operations {
     };
   };
   /** When subscription is scheduled to cancel on the period end, it can be restored. */
-  keepSubscription: {
+  restoreSubscription: {
     parameters: {
       path: {
         organizationId: number;

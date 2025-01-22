@@ -22,8 +22,6 @@ export const useTrialInfo = () => {
   const activeCloudSubscription =
     preferredOrganization?.activeCloudSubscription;
   const trialEnd = activeCloudSubscription?.trialEnd;
-  const hasPaymentMethod = activeCloudSubscription?.hasPaymentMethod;
-  const cancelAtPeriodEnd = activeCloudSubscription?.cancelAtPeriodEnd;
 
   const shouldShowChip =
     trialEnd && activeCloudSubscription?.status == 'TRIALING';
@@ -44,7 +42,6 @@ export const useTrialInfo = () => {
   const shouldShowAnnouncement =
     shouldShowChip &&
     !isCurrentSubscriptionPage &&
-    (!hasPaymentMethod || cancelAtPeriodEnd) &&
     !isSmallScreen &&
     daysLeft < 7;
 

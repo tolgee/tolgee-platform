@@ -29,14 +29,7 @@ export const TrialInfo: FC<{
         {formatDate(subscription.trialEnd, {
           dateStyle: 'long',
           timeStyle: 'short',
-        })}{' '}
-        (
-        {!subscription.cancelAtPeriodEnd && subscription.hasPaymentMethod ? (
-          <StyledPositive>{t('billing_trial_renews')}</StyledPositive>
-        ) : (
-          <StyledNegative>{t('billing_trial_will_cancel')}</StyledNegative>
-        )}
-        )
+        })}
       </Box>
     </>
   );
