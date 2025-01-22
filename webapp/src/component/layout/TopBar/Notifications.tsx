@@ -55,7 +55,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const notificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
-    query: { size: 10000, sort: ['id,DESC'] },
+    query: { size: 10000 },
   });
 
   const notifications = notificationsLoadable.data;
@@ -71,10 +71,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     setAnchorEl(event.currentTarget);
     markSeenMutation.mutate({
       content: {
-        'application/json':
-          notificationsData != undefined
-            ? notificationsData.map((it) => it.id)
-            : [],
+        'application/json': {
+          notificationIds:
+            notificationsData != undefined
+              ? notificationsData.map((it) => it.id)
+              : [],
+        },
       },
     });
   };
@@ -112,7 +114,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         <Badge
           badgeContent={unseenCount}
           color="secondary"
-          data-cy="notifications-count"
+          slotProps={{
+            badge: {
+              //@ts-ignore
+              'data-cy': 'notifications-count',
+            },
+          }}
         >
           <Bell01 />
         </Badge>

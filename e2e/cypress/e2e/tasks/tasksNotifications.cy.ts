@@ -42,9 +42,7 @@ describe('tasks notifications', () => {
 
     assertMessage('1 task created');
 
-    cy.gcy('notifications-count')
-      .find('.MuiBadge-badge')
-      .should('have.text', '1');
+    cy.gcy('notifications-count').should('have.text', '1');
 
     getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
@@ -57,9 +55,7 @@ describe('tasks notifications', () => {
     dismissMenu();
     cy.gcy('notifications-button').click();
 
-    cy.gcy('notifications-count')
-      .find('.MuiBadge-badge')
-      .should('not.be.visible');
+    cy.gcy('notifications-count').should('not.be.visible');
     cy.gcy('notifications-list').contains('New review task').click();
 
     cy.url().should('include', '/translations?task=');

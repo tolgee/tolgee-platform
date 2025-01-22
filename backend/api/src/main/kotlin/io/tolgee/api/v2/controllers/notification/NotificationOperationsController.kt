@@ -2,9 +2,11 @@ package io.tolgee.api.v2.controllers.notification
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.request.notification.NotificationsMarkSeenRequest
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.notification.NotificationService
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.*
     "/v2/",
   ],
 )
-@Tag(name = "Notification Operations", description = "Operations with notifications")
+@Tag(name = "Notifications", description = "Manipulates notifications")
 class NotificationOperationsController(
   private val notificationService: NotificationService,
   private val authenticationFacade: AuthenticationFacade,
@@ -23,8 +25,8 @@ class NotificationOperationsController(
   @Operation(summary = "Marks notifications of the currently logged in user with given IDs as seen.")
   @AllowApiAccess
   fun markNotificationsAsSeen(
-    @RequestBody notificationIds: List<Long>,
+    @RequestBody @Valid request: NotificationsMarkSeenRequest,
   ) {
-    notificationService.markNotificationsAsSeen(notificationIds, authenticationFacade.authenticatedUser.id)
+    notificationService.markNotificationsAsSeen(request.notificationIds, authenticationFacade.authenticatedUser.id)
   }
 }

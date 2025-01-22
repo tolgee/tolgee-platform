@@ -12,7 +12,9 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.notification.NotificationService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,8 +39,11 @@ class NotificationController(
   @Operation(summary = "Gets notifications of the currently logged in user, newest is first.")
   @AllowApiAccess
   fun getNotifications(
-    @ParameterObject pageable: Pageable,
-    @ParameterObject filters: NotificationFilters = NotificationFilters(),
+    @ParameterObject
+    @SortDefault(sort = ["id"], direction = Sort.Direction.DESC)
+    pageable: Pageable,
+    @ParameterObject
+    filters: NotificationFilters = NotificationFilters(),
   ): PagedModel<NotificationModel> {
     val notifications =
       notificationService.getNotifications(

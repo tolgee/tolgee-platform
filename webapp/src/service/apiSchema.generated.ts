@@ -2921,6 +2921,13 @@ export interface components {
       linkedTask?: components["schemas"]["TaskModel"];
       project?: components["schemas"]["SimpleProjectModel"];
     };
+    NotificationsMarkSeenRequest: {
+      /**
+       * @description Notification IDs to be marked as seen
+       * @example 1,2,3
+       */
+      notificationIds: number[];
+    };
     OAuthPublicConfigDTO: {
       clientId?: string;
       enabled: boolean;
@@ -6518,6 +6525,15 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        /**
+         * Filter by the `seen` parameter.
+         *
+         * no value = request everything
+         *
+         * true = only seen
+         *
+         * false = only unseen
+         */
         filterSeen?: boolean;
       };
     };
@@ -6601,7 +6617,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": number[];
+        "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
       };
     };
   };

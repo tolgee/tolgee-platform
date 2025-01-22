@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
+import io.tolgee.dtos.request.notification.NotificationsMarkSeenRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.repository.NotificationRepository
@@ -25,14 +26,14 @@ class NotificationControllerTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     loginAsUser(testData.user.username)
 
-    performAuthGet("/v2/notifications?sort=id,DESC&filterSeen=false").andAssertThatJson {
+    performAuthGet("/v2/notifications?filterSeen=false").andAssertThatJson {
       node("_embedded.notificationModelList").isArray.hasSize(4)
       node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task 103")
       node("_embedded.notificationModelList[1].linkedTask.name").isEqualTo("Notification task 102")
       node("_embedded.notificationModelList[2].linkedTask.name").isEqualTo("Notification task 101")
     }
 
-    performAuthGet("/v2/notifications?sort=id,DESC").andAssertThatJson {
+    performAuthGet("/v2/notifications").andAssertThatJson {
       node("_embedded.notificationModelList").isArray.hasSize(5)
       node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task 104")
     }
@@ -53,7 +54,14 @@ class NotificationControllerTest : AuthorizedControllerTest() {
 
     performAuthPut(
       "/v2/notifications-mark-seen",
-      listOf(currentUserNotification1.id, currentUserNotification2.id, differentUserNotification.id),
+      NotificationsMarkSeenRequest().apply {
+        notificationIds =
+          listOf(
+            currentUserNotification1.id,
+            currentUserNotification2.id,
+            differentUserNotification.id,
+          )
+      },
     ).andIsOk
 
     val notifications = notificationRepository.findAll()
