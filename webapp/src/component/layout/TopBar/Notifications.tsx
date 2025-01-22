@@ -52,7 +52,8 @@ const NotificationItem = styled(ListItemButton)`
   grid-template-rows: auto;
   grid-template-areas:
     'notification-avatar notification-text notification-time'
-    'notification-avatar notification-text notification-project';
+    'notification-avatar notification-linked-detail notification-project';
+  line-height: 1.3;
 `;
 
 const NotificationAvatar = styled(Box)`
@@ -75,6 +76,24 @@ const NotificationItemProject = styled(NotificationItemTime)`
 
 const NotificationItemText = styled(Box)`
   grid-area: notification-text;
+`;
+
+const NotificationItemLinkedDetail = styled(Box)`
+  grid-area: notification-linked-detail;
+`;
+
+const NotificationItemLinkedDetailItem = styled(Box)`
+  margin-right: 10px;
+  display: inline;
+`;
+
+const NotificationItemLinkedDetailNumber = styled(
+  NotificationItemLinkedDetailItem
+)`
+  color: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[400]
+      : theme.palette.emphasis[600]};
 `;
 
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
@@ -244,11 +263,20 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                   )}
                 </NotificationAvatar>
                 <NotificationItemText>
-                  <T
-                    keyName="notifications-task-assigned"
-                    params={{ taskName: notification.linkedTask?.name }}
-                  />
+                  <b>{notification.linkedTask?.author?.name}</b>&nbsp;
+                  <T keyName="notifications-task-assigned" />
                 </NotificationItemText>
+                <NotificationItemLinkedDetail>
+                  <NotificationItemLinkedDetailItem>
+                    {notification.linkedTask?.language.flagEmoji}
+                  </NotificationItemLinkedDetailItem>
+                  <NotificationItemLinkedDetailItem>
+                    {notification.linkedTask?.name}
+                  </NotificationItemLinkedDetailItem>
+                  <NotificationItemLinkedDetailNumber>
+                    #{notification.linkedTask?.number}
+                  </NotificationItemLinkedDetailNumber>
+                </NotificationItemLinkedDetail>
                 <NotificationItemTime>
                   {createdAt &&
                     formatDistanceToNowStrict(new Date(createdAt), {
