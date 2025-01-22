@@ -34,7 +34,7 @@ class OpenApiConfiguration {
   fun internalV1OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = BILLING_EXCLUSIONS + arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "V1 Internal - for Tolgee Web application",
     )
   }
@@ -43,7 +43,7 @@ class OpenApiConfiguration {
   fun internalV2OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = BILLING_EXCLUSIONS + arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "V2 Internal - for Tolgee Web application",
     )
   }
@@ -52,7 +52,7 @@ class OpenApiConfiguration {
   fun internalAllOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
-      excludedPaths = BILLING_EXCLUSIONS + arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "All Internal - for Tolgee Web application",
     )
   }
@@ -61,7 +61,7 @@ class OpenApiConfiguration {
   fun apiKeyAllOpenApi(): GroupedOpenApi? {
     return pakGroupForPaths(
       paths = arrayOf("/api/**", "/v2/**"),
-      excludedPaths = BILLING_EXCLUSIONS + arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (All)",
     )
   }
@@ -70,7 +70,7 @@ class OpenApiConfiguration {
   fun apiKeyV1OpenApi(): GroupedOpenApi? {
     return pakGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = BILLING_EXCLUSIONS + arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (V1)",
     )
   }
@@ -79,7 +79,7 @@ class OpenApiConfiguration {
   fun apiKeyV2OpenApi(): GroupedOpenApi? {
     return pakGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = BILLING_EXCLUSIONS + arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (V2)",
     )
   }
@@ -88,7 +88,7 @@ class OpenApiConfiguration {
   fun allPublicApi(): GroupedOpenApi? {
     return publicApiGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
-      excludedPaths = arrayOf(API_REPOSITORY_EXCLUDE),
+      excludedPaths = arrayOf(API_REPOSITORY),
       name = "Public API (All)",
     )
   }
@@ -96,7 +96,7 @@ class OpenApiConfiguration {
   @Bean
   fun billingOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
-      paths = arrayOf("/v2/**/billing/**"),
+      paths = BILLING,
       excludedPaths = arrayOf("/v2/public/billing/webhook"),
       name = "V2 Billing",
     )
@@ -225,16 +225,16 @@ class OpenApiConfiguration {
     method.getAnnotation(OpenApiHideFromPublicDocs::class.java)
 
   companion object {
-    private const val API_REPOSITORY_EXCLUDE = "/api/repository/**"
-    private const val BILLING_MAIN_EXCLUSION = "/v2/**/billing/**"
-    private const val BILLING_LICENSING_EXCLUSION = "/v2/**/licensing/**"
-    private const val BILLING_TELEMETRY_EXCLUSION = "/v2/**/telemetry/**"
-    private const val BILLING_TRANSLATOR_EXCLUSION = "/v2/**/translator/**"
-    private val BILLING_EXCLUSIONS = arrayOf(
-      BILLING_MAIN_EXCLUSION,
-      BILLING_LICENSING_EXCLUSION,
-      BILLING_TELEMETRY_EXCLUSION,
-      BILLING_TRANSLATOR_EXCLUSION,
+    private const val API_REPOSITORY = "/api/repository/**"
+    private const val BILLING_MAIN = "/v2/**/billing/**"
+    private const val BILLING_LICENSING = "/v2/**/licensing/**"
+    private const val BILLING_TELEMETRY = "/v2/**/telemetry/**"
+    private const val BILLING_TRANSLATOR = "/v2/**/translator/**"
+    private val BILLING = arrayOf(
+      BILLING_MAIN,
+      BILLING_LICENSING,
+      BILLING_TELEMETRY,
+      BILLING_TRANSLATOR,
     )
     private val PATH_WITH_PROJECT_ID_REGEX = "^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex()
   }
