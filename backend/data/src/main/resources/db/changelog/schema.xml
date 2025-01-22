@@ -4093,4 +4093,11 @@
     <changeSet author="stanov (generated)" id="1736241788882-6">
         <addForeignKeyConstraint baseColumnNames="linked_task_id" baseTableName="notification" constraintName="FKm1auuxar5ovwae9fqjp1eo05k" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1736840066933-1">
+        <addColumn tableName="notification">
+            <column defaultValueBoolean="false" name="seen" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
