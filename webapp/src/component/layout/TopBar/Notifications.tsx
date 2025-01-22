@@ -234,7 +234,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           {notifications?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
             const createdAt = notification.createdAt;
-            const originatingUser = notification.linkedTask?.author;
+            const originatingUser = notification.originatingUser;
             const project = notification.project;
             return (
               <NotificationItem
@@ -263,7 +263,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                   )}
                 </NotificationAvatar>
                 <NotificationItemText>
-                  <b>{notification.linkedTask?.author?.name}</b>&nbsp;
+                  <b>{originatingUser?.name}</b>&nbsp;
                   <T keyName="notifications-task-assigned" />
                 </NotificationItemText>
                 <NotificationItemLinkedDetail>

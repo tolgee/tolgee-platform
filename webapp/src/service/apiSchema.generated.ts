@@ -2925,6 +2925,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       linkedTask?: components["schemas"]["TaskModel"];
+      originatingUser?: components["schemas"]["SimpleUserAccountModel"];
       project?: components["schemas"]["SimpleProjectModel"];
     };
     NotificationsMarkSeenRequest: {
