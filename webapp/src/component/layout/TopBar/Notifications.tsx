@@ -96,6 +96,17 @@ const NotificationItemLinkedDetailNumber = styled(
       : theme.palette.emphasis[600]};
 `;
 
+function getLocalizedMessage(
+  notification: components['schemas']['NotificationModel']
+) {
+  switch (notification.type) {
+    case 'TASK_ASSIGNED':
+      return <T keyName="notifications-task-assigned" />;
+    case 'TASK_COMPLETED':
+      return <T keyName="notifications-task-completed" />;
+  }
+}
+
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const history = useHistory();
   const user = useUser();
@@ -264,7 +275,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                 </NotificationAvatar>
                 <NotificationItemText>
                   <b>{originatingUser?.name}</b>&nbsp;
-                  <T keyName="notifications-task-assigned" />
+                  {getLocalizedMessage(notification)}
                 </NotificationItemText>
                 <NotificationItemLinkedDetail>
                   <NotificationItemLinkedDetailItem>

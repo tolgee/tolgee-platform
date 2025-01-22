@@ -4100,4 +4100,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1737555367630-1">
+        <addColumn tableName="notification">
+            <column defaultValue="TASK_ASSIGNED" name="type" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
