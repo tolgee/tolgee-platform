@@ -119,5 +119,4 @@ class ImageUploadService(
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.middleSizedWithExtension
   val UploadedImage.thumbnailFilePath
     get() = "$UPLOADED_IMAGES_STORAGE_FOLDER_NAME/" + this.thumbnailFilenameWithExtension
-
 }
