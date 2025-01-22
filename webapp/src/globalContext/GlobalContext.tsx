@@ -26,6 +26,7 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
       !initialData.state?.serverConfiguration.needsEmailVerification;
     const quickStart = useQuickStartGuideService(initialData, isEmailVerified);
     const { userIsDragging } = useUserDraggingService();
+    const [unseenNotificationCount, setUnseenNotificationCount] = useState(0);
 
     const wsClient = useWebsocketService(
       auth.state.jwtToken,
@@ -52,6 +53,7 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
       ...layout.actions,
       ...confirmationDialog.actions,
       ...messages.actions,
+      setUnseenNotificationCount,
     };
 
     globalContext.actions = actions;
@@ -75,6 +77,7 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
       wsClient,
       userIsDragging,
       isEmailVerified,
+      unseenNotificationCount,
     };
 
     return [contextData, actions];

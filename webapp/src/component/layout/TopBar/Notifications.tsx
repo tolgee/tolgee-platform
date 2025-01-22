@@ -18,7 +18,10 @@ import { useHistory } from 'react-router-dom';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
@@ -107,6 +110,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     components['schemas']['NotificationModel'][] | undefined
   >(undefined);
   const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
+  const { setUnseenNotificationCount } = useGlobalActions();
 
   const unseenNotificationsLoadable = useApiQuery({
     url: '/v2/notifications',
@@ -144,6 +148,10 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
       (prevState) =>
         unseenNotificationsLoadable.data?.page?.totalElements || prevState
     );
+    setUnseenNotificationCount(
+      (prevState) =>
+        unseenNotificationsLoadable.data?.page?.totalElements || prevState
+    );
   }, [unseenNotificationsLoadable.data]);
 
   useEffect(() => {
@@ -171,6 +179,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         `/users/${user.id}/notifications-changed`,
         (e) => {
           setUnseenCount(e.data.currentlyUnseenCount);
+          setUnseenNotificationCount(e.data.currentlyUnseenCount);
           const newNotification = e.data.newNotification;
           if (newNotification)
             setNotifications((prevState) =>
