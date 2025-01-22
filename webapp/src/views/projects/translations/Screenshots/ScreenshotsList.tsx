@@ -3,6 +3,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
 type ScreenshotModel = components['schemas']['ScreenshotModel'];
 
@@ -100,9 +101,9 @@ export const ScreenshotsList = ({
             screenshot={screenshot}
             objectFit={oneOnly ? 'cover' : 'contain'}
             scaleHighlight={(sc.width! / width - 1) * 0.5 + 1}
-            onClick={() => {
+            onClick={stopAndPrevent(() => {
               setDetail(index);
-            }}
+            })}
             onDelete={() => {
               handleDelete(sc.id);
             }}

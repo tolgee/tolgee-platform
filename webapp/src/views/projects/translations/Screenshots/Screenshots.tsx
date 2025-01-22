@@ -167,11 +167,7 @@ export const Screenshots = ({
   }
 
   return (
-    <StyledContainer
-      {...{ sx }}
-      className={clsx({ scrollLeft, scrollRight })}
-      onClick={stopAndPrevent()}
-    >
+    <StyledContainer {...{ sx }} className={clsx({ scrollLeft, scrollRight })}>
       <StyledScrollWrapper ref={containerRef}>
         <ScreenshotsList
           width={width}
@@ -195,7 +191,7 @@ export const Screenshots = ({
         <ScreenshotDetail
           screenshots={screenshotsMapped}
           initialIndex={detailData}
-          onClose={() => setDetailData(undefined)}
+          onClose={stopAndPrevent(() => setDetailData(undefined))}
         />
       )}
     </StyledContainer>
