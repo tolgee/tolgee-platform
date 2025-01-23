@@ -25,6 +25,7 @@ import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { locales } from '../../../locales';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -146,9 +147,6 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   });
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!notificationsLoadable.data) {
-      notificationsLoadable.refetch();
-    }
     // @ts-ignore
     setAnchorEl(event.currentTarget);
   };
@@ -166,8 +164,15 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   }, [unseenNotificationsLoadable.data]);
 
   useEffect(() => {
+    if (!anchorEl) return;
+
     const data = notificationsLoadable.data;
-    if (!anchorEl || !data) return;
+    if (!data) {
+      if (!notificationsLoadable.isFetching) {
+        notificationsLoadable.refetch();
+      }
+      return;
+    }
 
     const markAsSeenIds = data._embedded?.notificationModelList?.map(
       (it) => it.id
@@ -239,7 +244,8 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         slotProps={{
           paper: {
             style: {
-              maxHeight: 400,
+              maxHeight: 500,
+              minWidth: 400,
             },
           },
         }}
@@ -314,9 +320,14 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               </NotificationItem>
             );
           })}
-          {!notifications?.length && (
+          {notifications?.length === 0 && (
             <ListItem data-cy="notifications-empty-message">
               <T keyName="notifications-empty" />
+            </ListItem>
+          )}
+          {notificationsLoadable.isFetching && (
+            <ListItem>
+              <BoxLoading width="100%" />
             </ListItem>
           )}
         </List>
