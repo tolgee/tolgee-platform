@@ -42,10 +42,16 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
 
   useEffect(() => {
     if (!screenshot.width || !screenshot.height) {
+      let mounted = true;
       const img = new Image();
       img.src = screenshot.src;
       img.onload = () => {
-        setSize({ width: img.naturalWidth, height: img.naturalHeight });
+        if (mounted) {
+          setSize({ width: img.naturalWidth, height: img.naturalHeight });
+        }
+      };
+      return () => {
+        mounted = false;
       };
     }
   }, [screenshot.src]);
