@@ -8,7 +8,7 @@ on:
 jobs:
   backend-build:
     name: Build backend 🏗️
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -66,7 +66,7 @@ jobs:
   backend-test:
     name: BT ‍🔎
     needs: [backend-build]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -158,7 +158,7 @@ jobs:
 
   e2e:
     needs: [frontend-build, backend-build, e2e-install-deps]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: E2E testing ‍🔎
     strategy:
       fail-fast: false
@@ -270,7 +270,7 @@ jobs:
 
   frontend-build:
     name: Build frontend 🏗️
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -312,7 +312,7 @@ jobs:
 
   frontend-code-check:
     name: Frontend static check 🪲
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -362,7 +362,7 @@ jobs:
 
   e2e-code-checks:
     name: E2E Static Check 🪲
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -391,7 +391,7 @@ jobs:
 
   e2e-install-deps:
     name: Install E2E dependencies ⬇️
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -429,7 +429,7 @@ jobs:
 
   backend-code-checks:
     name: Ktlint 🪲
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
@@ -465,7 +465,7 @@ jobs:
       - e2e
       - e2e-code-checks
       - e2e-install-deps
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: always()
     steps:
       - run: |
