@@ -255,7 +255,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e
+          name: e2e_${{ matrix.job_index }}
           path: |
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
