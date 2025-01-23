@@ -6,6 +6,7 @@ import {
 } from 'react';
 import {
   Badge,
+  Box,
   IconButton,
   List,
   ListItem,
@@ -20,6 +21,10 @@ import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
+import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { locales } from '../../../locales';
+import { formatDistanceToNowStrict } from 'date-fns';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -40,9 +45,61 @@ const ListItemHeader = styled(ListItem)`
   font-weight: bold;
 `;
 
+const NotificationItem = styled(ListItemButton)`
+  display: grid;
+  column-gap: 10px;
+  grid-template-columns: 30px 1fr 120px;
+  grid-template-rows: auto;
+  grid-template-areas:
+    'notification-avatar notification-text notification-time'
+    'notification-avatar notification-linked-detail notification-project';
+  line-height: 1.3;
+`;
+
+const NotificationAvatar = styled(Box)`
+  grid-area: notification-avatar;
+`;
+
+const NotificationItemTime = styled(Box)`
+  font-size: 13px;
+  grid-area: notification-time;
+  text-align: right;
+  color: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[400]
+      : theme.palette.emphasis[600]};
+`;
+
+const NotificationItemProject = styled(NotificationItemTime)`
+  grid-area: notification-project;
+`;
+
+const NotificationItemText = styled(Box)`
+  grid-area: notification-text;
+`;
+
+const NotificationItemLinkedDetail = styled(Box)`
+  grid-area: notification-linked-detail;
+`;
+
+const NotificationItemLinkedDetailItem = styled(Box)`
+  margin-right: 10px;
+  display: inline;
+`;
+
+const NotificationItemLinkedDetailNumber = styled(
+  NotificationItemLinkedDetailItem
+)`
+  color: ${({ theme }) =>
+    theme.palette.mode === 'light'
+      ? theme.palette.emphasis[400]
+      : theme.palette.emphasis[600]};
+`;
+
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const history = useHistory();
   const user = useUser();
+  const language = useCurrentLanguage();
   const client = useGlobalContext((c) => c.wsClient.client);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -176,10 +233,14 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
           </ListItemHeader>
           {notifications?.map((notification, i) => {
             const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
+            const createdAt = notification.createdAt;
+            const originatingUser = notification.originatingUser;
+            const project = notification.project;
             return (
-              <ListItemButton
+              <NotificationItem
                 key={notification.id}
                 divider={i !== notifications.length - 1}
+                //@ts-ignore
                 href={destinationUrl}
                 onClick={(event) => {
                   event.preventDefault();
@@ -188,11 +249,45 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                 }}
                 data-cy="notifications-list-item"
               >
-                <T
-                  keyName="notifications-task-assigned"
-                  params={{ taskName: notification.linkedTask?.name }}
-                />
-              </ListItemButton>
+                <NotificationAvatar>
+                  {originatingUser && (
+                    <AvatarImg
+                      owner={{
+                        name: originatingUser.name,
+                        avatar: originatingUser.avatar,
+                        type: 'USER',
+                        id: originatingUser.id || 0,
+                      }}
+                      size={30}
+                    />
+                  )}
+                </NotificationAvatar>
+                <NotificationItemText>
+                  <b>{originatingUser?.name}</b>&nbsp;
+                  <T keyName="notifications-task-assigned" />
+                </NotificationItemText>
+                <NotificationItemLinkedDetail>
+                  <NotificationItemLinkedDetailItem>
+                    {notification.linkedTask?.language.flagEmoji}
+                  </NotificationItemLinkedDetailItem>
+                  <NotificationItemLinkedDetailItem>
+                    {notification.linkedTask?.name}
+                  </NotificationItemLinkedDetailItem>
+                  <NotificationItemLinkedDetailNumber>
+                    #{notification.linkedTask?.number}
+                  </NotificationItemLinkedDetailNumber>
+                </NotificationItemLinkedDetail>
+                <NotificationItemTime>
+                  {createdAt &&
+                    formatDistanceToNowStrict(new Date(createdAt), {
+                      addSuffix: true,
+                      locale: locales[language].dateFnsLocale,
+                    })}
+                </NotificationItemTime>
+                <NotificationItemProject>
+                  {project && project.name}
+                </NotificationItemProject>
+              </NotificationItem>
             );
           })}
           {!notifications?.length && (
