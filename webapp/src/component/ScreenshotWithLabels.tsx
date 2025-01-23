@@ -1,5 +1,5 @@
 import { Tooltip, useTheme } from '@mui/material';
-import { CSSProperties } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -38,12 +38,32 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
   const strokeWidth = STROKE_WIDTH * scaleHighlight;
   const theme = useTheme();
 
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!screenshot.width || !screenshot.height) {
+      let mounted = true;
+      const img = new Image();
+      img.src = screenshot.src;
+      img.onload = () => {
+        if (mounted) {
+          setSize({ width: img.naturalWidth, height: img.naturalHeight });
+        }
+      };
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [screenshot.src]);
+
   return (
     <svg
-      viewBox={`0 0 ${screenshot.width} ${screenshot.height}`}
+      viewBox={`0 0 ${screenshot.width || size.width} ${
+        screenshot.height || size.height
+      }`}
       className={className}
       style={{
-        width: screenshot.width,
+        width: screenshot.width || size.width,
         maxWidth: '100%',
         ...style,
       }}
@@ -52,8 +72,8 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
     >
       <image
         href={screenshot.src}
-        width={screenshot.width}
-        height={screenshot.height}
+        width={screenshot.width || size.width}
+        height={screenshot.height || size.height}
       />
       {screenshot.keyReferences
         ?.filter(

@@ -39,7 +39,12 @@ export const ScreenshotsList = ({
   }
   const { updateScreenshots } = useTranslationsActions();
 
-  const oneOnly = screenshots.length === 1 && boundedSize && oneBig;
+  const oneOnly = Boolean(
+    screenshots.length === 1 &&
+      boundedSize &&
+      oneBig &&
+      screenshots.every((sc) => sc.width && sc.height)
+  );
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}',
