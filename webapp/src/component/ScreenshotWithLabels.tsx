@@ -1,5 +1,5 @@
 import { Tooltip, useTheme } from '@mui/material';
-import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -37,7 +37,6 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
 }) => {
   const strokeWidth = STROKE_WIDTH * scaleHighlight;
   const theme = useTheme();
-  const imgRef = useRef<SVGImageElement>(null);
 
   const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -66,7 +65,6 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
       data-cy="screenshot-image"
     >
       <image
-        ref={imgRef}
         href={screenshot.src}
         width={screenshot.width || size.width}
         height={screenshot.height || size.height}
