@@ -1,3 +1,11 @@
+## [3.96.1](https://github.com/tolgee/tolgee-platform/compare/v3.96.0...v3.96.1) (2025-01-23)
+
+
+### Bug Fixes
+
+* make screenshots without width and height work ([#2863](https://github.com/tolgee/tolgee-platform/issues/2863)) ([f207a0d](https://github.com/tolgee/tolgee-platform/commit/f207a0dc3f834ff1b2c3799f59d68ca4c1b94649))
+* resize observer throwing errors into console ([#2866](https://github.com/tolgee/tolgee-platform/issues/2866)) ([22fe4c6](https://github.com/tolgee/tolgee-platform/commit/22fe4c6ef94c7d7f0c9050d06942f2dedbc9cad4))
+
 # [3.96.0](https://github.com/tolgee/tolgee-platform/compare/v3.95.0...v3.96.0) (2025-01-22)
 
 
