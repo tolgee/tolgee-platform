@@ -64,10 +64,9 @@ describe('tasks notifications', () => {
     getNotifications()
       .should('have.length', 1)
       .first()
-      .should(
-        'include.text',
-        'A task has been assigned to you: New review task'
-      )
+      .should('include.text', 'Tasks test user')
+      .should('include.text', 'New review task')
+      .should('include.text', 'Project with tasks')
       .click();
 
     cy.url().should('include', '/translations?task=');

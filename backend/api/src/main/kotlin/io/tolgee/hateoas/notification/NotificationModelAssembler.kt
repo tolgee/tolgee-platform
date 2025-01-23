@@ -18,6 +18,7 @@ class NotificationModelAssembler(
         notifications.content.associateWith { notification ->
           NotificationModel(
             id = notification.id,
+            createdAt = notification.createdAt,
           )
         }
       enhancers.forEach { enhancer ->
