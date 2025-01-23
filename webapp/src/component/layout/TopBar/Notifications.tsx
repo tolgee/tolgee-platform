@@ -288,16 +288,19 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                     #{notification.linkedTask?.number}
                   </NotificationItemLinkedDetailNumber>
                 </NotificationItemLinkedDetail>
-                <NotificationItemTime>
-                  {createdAt &&
-                    formatDistanceToNowStrict(new Date(createdAt), {
+                {createdAt && (
+                  <NotificationItemTime>
+                    {formatDistanceToNowStrict(new Date(createdAt), {
                       addSuffix: true,
                       locale: locales[language].dateFnsLocale,
                     })}
-                </NotificationItemTime>
-                <NotificationItemProject>
-                  {project && project.name}
-                </NotificationItemProject>
+                  </NotificationItemTime>
+                )}
+                {project && (
+                  <NotificationItemProject>
+                    {project.name}
+                  </NotificationItemProject>
+                )}
               </NotificationItem>
             );
           })}
