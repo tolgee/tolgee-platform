@@ -23,7 +23,7 @@ export const useLayoutService = ({ quickStart }: Props) => {
   useResizeObserver({
     ref: bodyRef,
     onResize(size) {
-      setBodyWidth(size.width!);
+      Promise.resolve(() => setBodyWidth(size.width!));
     },
   });
 
