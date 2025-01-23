@@ -107,6 +107,11 @@ class UserAccountService(
   }
 
   @Transactional
+  fun findAll(ids: List<Long>): List<UserAccountDto> {
+    return userAccountRepository.findAllById(ids).map { UserAccountDto.fromEntity(it) }
+  }
+
+  @Transactional
   fun getDto(id: Long): UserAccountDto {
     return self.findDto(id) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
