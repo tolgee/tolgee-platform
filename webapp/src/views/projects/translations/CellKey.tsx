@@ -109,7 +109,7 @@ const StyledDropzone = styled('div')`
   grid-column: 1 / -1;
   position: relative;
   padding: 0px 12px 12px 0px;
-  z-index: 2;
+  z-index: ${({ theme }) => theme.zIndex.tooltip};
 `;
 
 const StyledScreenshots = styled('div')`
