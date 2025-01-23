@@ -49,7 +49,7 @@ const NotificationItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
   grid-template-columns: 30px 1fr 120px;
-  grid-template-rows: auto;
+  grid-template-rows: 1fr;
   grid-template-areas:
     'notification-avatar notification-text notification-time'
     'notification-avatar notification-linked-detail notification-project';
@@ -104,6 +104,10 @@ function getLocalizedMessage(
       return <T keyName="notifications-task-assigned" />;
     case 'TASK_COMPLETED':
       return <T keyName="notifications-task-completed" />;
+    case 'MFA_ENABLED':
+      return <T keyName="notifications-mfa-enabled" />;
+    case 'MFA_DISABLED':
+      return <T keyName="notifications-mfa-disabled" />;
   }
 }
 
@@ -243,7 +247,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
             <T keyName="notifications-header" />
           </ListItemHeader>
           {notifications?.map((notification, i) => {
-            const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
+            const destinationUrl = notification.type.startsWith('TASK_')
+              ? `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`
+              : '/account/security';
             const createdAt = notification.createdAt;
             const originatingUser = notification.originatingUser;
             const project = notification.project;
@@ -277,17 +283,19 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                   <b>{originatingUser?.name}</b>&nbsp;
                   {getLocalizedMessage(notification)}
                 </NotificationItemText>
-                <NotificationItemLinkedDetail>
-                  <NotificationItemLinkedDetailItem>
-                    {notification.linkedTask?.language.flagEmoji}
-                  </NotificationItemLinkedDetailItem>
-                  <NotificationItemLinkedDetailItem>
-                    {notification.linkedTask?.name}
-                  </NotificationItemLinkedDetailItem>
-                  <NotificationItemLinkedDetailNumber>
-                    #{notification.linkedTask?.number}
-                  </NotificationItemLinkedDetailNumber>
-                </NotificationItemLinkedDetail>
+                {notification.type.startsWith('TASK_') && (
+                  <NotificationItemLinkedDetail>
+                    <NotificationItemLinkedDetailItem>
+                      {notification.linkedTask?.language.flagEmoji}
+                    </NotificationItemLinkedDetailItem>
+                    <NotificationItemLinkedDetailItem>
+                      {notification.linkedTask?.name}
+                    </NotificationItemLinkedDetailItem>
+                    <NotificationItemLinkedDetailNumber>
+                      #{notification.linkedTask?.number}
+                    </NotificationItemLinkedDetailNumber>
+                  </NotificationItemLinkedDetail>
+                )}
                 {createdAt && (
                   <NotificationItemTime>
                     {formatDistanceToNowStrict(new Date(createdAt), {

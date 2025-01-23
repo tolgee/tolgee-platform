@@ -2927,7 +2927,7 @@ export interface components {
       linkedTask?: components["schemas"]["TaskModel"];
       originatingUser?: components["schemas"]["SimpleUserAccountModel"];
       project?: components["schemas"]["SimpleProjectModel"];
-      type: "TASK_ASSIGNED" | "TASK_COMPLETED";
+      type: "TASK_ASSIGNED" | "TASK_COMPLETED" | "MFA_ENABLED" | "MFA_DISABLED";
     };
     NotificationsMarkSeenRequest: {
       /**
