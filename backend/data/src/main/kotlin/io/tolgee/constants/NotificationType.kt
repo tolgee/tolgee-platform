@@ -5,4 +5,5 @@ enum class NotificationType {
   TASK_COMPLETED,
   MFA_ENABLED,
   MFA_DISABLED,
+  PASSWORD_CHANGED,
 }

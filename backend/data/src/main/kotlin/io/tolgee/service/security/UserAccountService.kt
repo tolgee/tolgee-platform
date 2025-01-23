@@ -488,7 +488,15 @@ class UserAccountService(
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notificationService.save(
+      Notification().apply {
+        this.user = userAccount
+        this.type = NotificationType.PASSWORD_CHANGED
+        this.originatingUser = userAccount
+      },
+    )
+    return savedUser
   }
 
   private fun updateUserEmail(

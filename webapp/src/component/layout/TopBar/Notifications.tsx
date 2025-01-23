@@ -108,6 +108,8 @@ function getLocalizedMessage(
       return <T keyName="notifications-mfa-enabled" />;
     case 'MFA_DISABLED':
       return <T keyName="notifications-mfa-disabled" />;
+    case 'PASSWORD_CHANGED':
+      return <T keyName="notifications-password-changed" />;
   }
 }
 
