@@ -36,17 +36,6 @@ describe('namespaces in translations', () => {
   });
 
   it('displays <none>', () => {
-    cy.on('uncaught:exception', (err, runnable) => {
-      // Ignore ResizeObserver - not clear cause, appears only in this test
-      if (
-        err.message.includes(
-          'ResizeObserver loop completed with undelivered notifications'
-        )
-      ) {
-        return false; // Prevent Cypress from failing the test
-      }
-      return true; // Allow other errors to fail the test
-    });
     createTranslation({ key: 'new-key', namespace: 'new-ns' });
     gcy('translations-namespace-banner')
       .contains('new-ns')
