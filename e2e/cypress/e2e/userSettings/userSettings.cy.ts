@@ -13,8 +13,7 @@ describe('User settings', () => {
 
   it('Accesses api keys', () => {
     cy.xpath("//*[@aria-controls='user-menu']").click();
-    cy.wait(50);
-    cy.xpath(getAnyContainingText('Api keys')).click();
+    cy.xpath(getAnyContainingText('Api keys')).should('be.visible').click();
   });
 
   it('Opens user menu from projects', () => {
