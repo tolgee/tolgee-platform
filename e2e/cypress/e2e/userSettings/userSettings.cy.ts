@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-import { getAnyContainingText } from '../../common/xPath';
 import { HOST } from '../../common/constants';
 import { createTestProject, login } from '../../common/apiCalls/common';
 import { gcy, getPopover } from '../../common/shared';
@@ -13,7 +12,7 @@ describe('User settings', () => {
 
   it('Accesses api keys', () => {
     cy.xpath("//*[@aria-controls='user-menu']").click();
-    cy.xpath(getAnyContainingText('Api keys')).should('be.visible').click();
+    cy.get('#user-menu').contains('Project API keys').click();
   });
 
   it('Opens user menu from projects', () => {
