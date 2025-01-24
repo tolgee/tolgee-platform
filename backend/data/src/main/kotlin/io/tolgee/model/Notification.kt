@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.constants.NotificationType
 import io.tolgee.model.task.Task
 import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault
@@ -13,6 +14,10 @@ import org.hibernate.annotations.ColumnDefault
 class Notification : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var user: UserAccount
+
+  @Enumerated(EnumType.STRING)
+  @ColumnDefault("TASK_ASSIGNED")
+  var type: NotificationType = NotificationType.TASK_ASSIGNED
 
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project? = null

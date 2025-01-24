@@ -13,8 +13,9 @@ export const allScopes: Scope[] = [
 ];
 
 export const clickAdd = () => {
-  cy.wait(100);
-  cy.xpath(getAnyContainingAriaLabelAttribute('add')).click();
+  cy.xpath(getAnyContainingAriaLabelAttribute('add'))
+    .should('be.visible')
+    .click();
 };
 
 export const getPopover = () => {
