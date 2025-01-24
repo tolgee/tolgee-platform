@@ -2,19 +2,14 @@ package io.tolgee.ee.service
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
+import io.tolgee.constants.NotificationType
 import io.tolgee.ee.component.TaskReportHelper
-import io.tolgee.ee.data.task.CalculateScopeRequest
-import io.tolgee.ee.data.task.CreateTaskRequest
-import io.tolgee.ee.data.task.TaskFilters
-import io.tolgee.ee.data.task.TranslationScopeFilters
-import io.tolgee.ee.data.task.UpdateTaskKeyRequest
-import io.tolgee.ee.data.task.UpdateTaskKeyResponse
-import io.tolgee.ee.data.task.UpdateTaskKeysRequest
-import io.tolgee.ee.data.task.UpdateTaskRequest
+import io.tolgee.ee.data.task.*
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
+import io.tolgee.model.Notification
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskState
@@ -30,6 +25,7 @@ import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
@@ -69,6 +65,7 @@ class TaskService(
   private val permissionService: PermissionService,
   @Lazy
   private val taskService: TaskService,
+  private val notificationService: NotificationService,
 ) : ITaskService {
   fun getAllPaged(
     projectId: Long,
@@ -247,6 +244,7 @@ class TaskService(
       task.state = state
     }
     taskRepository.saveAndFlush(task)
+    createNotificationIfApplicable(task)
     return getTask(projectId, taskNumber)
   }
 
@@ -557,6 +555,21 @@ class TaskService(
       )
     }
     return null
+  }
+
+  private fun createNotificationIfApplicable(task: Task) {
+    if (task.state != TaskState.DONE) return
+    val author = task.author ?: return
+
+    notificationService.save(
+      Notification().apply {
+        type = NotificationType.TASK_COMPLETED
+        user = author
+        project = task.project
+        originatingUser = authenticationFacade.authenticatedUserEntity
+        linkedTask = task
+      },
+    )
   }
 
   override fun getAgencyTasks(agencyId: Long): List<Task> {

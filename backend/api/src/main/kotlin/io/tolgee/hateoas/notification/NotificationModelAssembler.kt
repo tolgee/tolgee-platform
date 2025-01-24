@@ -18,6 +18,7 @@ class NotificationModelAssembler(
         notifications.content.associateWith { notification ->
           NotificationModel(
             id = notification.id,
+            type = notification.type,
             createdAt = notification.createdAt,
           )
         }
