@@ -138,10 +138,11 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     },
   });
 
+  const query = { size: 10 };
   const notificationsLoadable = useApiInfiniteQuery({
     url: '/v2/notifications',
     method: 'get',
-    query: { size: 5 },
+    query: query,
     options: {
       enabled: false,
       getNextPageParam: (lastPage) => {
@@ -151,7 +152,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         ) {
           return {
             query: {
-              size: 5,
+              ...query,
               page: lastPage.page!.number! + 1,
             },
           };
@@ -267,6 +268,16 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               maxHeight: 500,
               minWidth: 400,
             },
+            onScroll: (event) => {
+              if (
+                notificationsLoadable?.hasNextPage &&
+                !notificationsLoadable.isFetching &&
+                //@ts-ignore
+                event.target.scrollTopMax - event.target.scrollTop < 50
+              ) {
+                notificationsLoadable.fetchNextPage();
+              }
+            },
           },
         }}
       >
@@ -345,19 +356,12 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               <T keyName="notifications-empty" />
             </ListItem>
           )}
-          {notificationsLoadable.isFetching && (
+          {(notificationsLoadable.isFetching ||
+            notificationsLoadable.hasNextPage) && (
             <ListItem>
               <BoxLoading width="100%" />
             </ListItem>
           )}
-          {notificationsLoadable.hasNextPage &&
-            !notificationsLoadable.isFetching && (
-              <ListItemButton
-                onClick={() => notificationsLoadable.fetchNextPage()}
-              >
-                Show more notifications
-              </ListItemButton>
-            )}
         </List>
       </StyledMenu>
     </>
