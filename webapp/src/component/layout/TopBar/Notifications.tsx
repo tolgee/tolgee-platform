@@ -15,7 +15,11 @@ import {
 } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import { useHistory } from 'react-router-dom';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  useApiInfiniteQuery,
+  useApiMutation,
+  useApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
@@ -134,17 +138,38 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     },
   });
 
-  const notificationsLoadable = useApiQuery({
+  const notificationsLoadable = useApiInfiniteQuery({
     url: '/v2/notifications',
     method: 'get',
-    query: { size: 2 },
-    options: { enabled: false },
+    query: { size: 5 },
+    options: {
+      enabled: false,
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            query: {
+              size: 5,
+              page: lastPage.page!.number! + 1,
+            },
+          };
+        } else {
+          return null;
+        }
+      },
+    },
   });
 
   const markSeenMutation = useApiMutation({
     url: '/v2/notifications-mark-seen',
     method: 'put',
   });
+
+  const notifications = notificationsLoadable.data?.pages
+    .flatMap((it) => it?._embedded?.notificationModelList)
+    .filter((it) => it !== undefined);
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
@@ -174,9 +199,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
       return;
     }
 
-    const markAsSeenIds = data._embedded?.notificationModelList?.map(
-      (it) => it.id
-    );
+    const markAsSeenIds = notifications?.map((it) => it.id);
     if (!markAsSeenIds) return;
 
     markSeenMutation.mutate({
@@ -201,14 +224,6 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
       );
     }
   }, [user, client]);
-
-  const notifications =
-    notificationsLoadable.data?._embedded?.notificationModelList;
-  const notificationCount = notificationsLoadable.data?.page?.totalElements;
-  const areThereMoreNotificationsToFetch =
-    notifications !== undefined &&
-    notificationCount !== undefined &&
-    notifications.length < notificationCount;
 
   return (
     <>
@@ -335,11 +350,14 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               <BoxLoading width="100%" />
             </ListItem>
           )}
-          {areThereMoreNotificationsToFetch && (
-            <ListItemButton onClick={() => alert('yay!')}>
-              Show more notifications
-            </ListItemButton>
-          )}
+          {notificationsLoadable.hasNextPage &&
+            !notificationsLoadable.isFetching && (
+              <ListItemButton
+                onClick={() => notificationsLoadable.fetchNextPage()}
+              >
+                Show more notifications
+              </ListItemButton>
+            )}
         </List>
       </StyledMenu>
     </>
