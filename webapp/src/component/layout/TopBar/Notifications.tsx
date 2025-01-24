@@ -49,7 +49,7 @@ const NotificationItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
   grid-template-columns: 30px 1fr 120px;
-  grid-template-rows: auto;
+  grid-template-rows: 1fr;
   grid-template-areas:
     'notification-avatar notification-text notification-time'
     'notification-avatar notification-linked-detail notification-project';
@@ -95,6 +95,23 @@ const NotificationItemLinkedDetailNumber = styled(
       ? theme.palette.emphasis[400]
       : theme.palette.emphasis[600]};
 `;
+
+function getLocalizedMessage(
+  notification: components['schemas']['NotificationModel']
+) {
+  switch (notification.type) {
+    case 'TASK_ASSIGNED':
+      return <T keyName="notifications-task-assigned" />;
+    case 'TASK_COMPLETED':
+      return <T keyName="notifications-task-completed" />;
+    case 'MFA_ENABLED':
+      return <T keyName="notifications-mfa-enabled" />;
+    case 'MFA_DISABLED':
+      return <T keyName="notifications-mfa-disabled" />;
+    case 'PASSWORD_CHANGED':
+      return <T keyName="notifications-password-changed" />;
+  }
+}
 
 export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const history = useHistory();
@@ -232,7 +249,9 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
             <T keyName="notifications-header" />
           </ListItemHeader>
           {notifications?.map((notification, i) => {
-            const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
+            const destinationUrl = notification.type.startsWith('TASK_')
+              ? `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`
+              : '/account/security';
             const createdAt = notification.createdAt;
             const originatingUser = notification.originatingUser;
             const project = notification.project;
@@ -264,29 +283,34 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
                 </NotificationAvatar>
                 <NotificationItemText>
                   <b>{originatingUser?.name}</b>&nbsp;
-                  <T keyName="notifications-task-assigned" />
+                  {getLocalizedMessage(notification)}
                 </NotificationItemText>
-                <NotificationItemLinkedDetail>
-                  <NotificationItemLinkedDetailItem>
-                    {notification.linkedTask?.language.flagEmoji}
-                  </NotificationItemLinkedDetailItem>
-                  <NotificationItemLinkedDetailItem>
-                    {notification.linkedTask?.name}
-                  </NotificationItemLinkedDetailItem>
-                  <NotificationItemLinkedDetailNumber>
-                    #{notification.linkedTask?.number}
-                  </NotificationItemLinkedDetailNumber>
-                </NotificationItemLinkedDetail>
-                <NotificationItemTime>
-                  {createdAt &&
-                    formatDistanceToNowStrict(new Date(createdAt), {
+                {notification.type.startsWith('TASK_') && (
+                  <NotificationItemLinkedDetail>
+                    <NotificationItemLinkedDetailItem>
+                      {notification.linkedTask?.language.flagEmoji}
+                    </NotificationItemLinkedDetailItem>
+                    <NotificationItemLinkedDetailItem>
+                      {notification.linkedTask?.name}
+                    </NotificationItemLinkedDetailItem>
+                    <NotificationItemLinkedDetailNumber>
+                      #{notification.linkedTask?.number}
+                    </NotificationItemLinkedDetailNumber>
+                  </NotificationItemLinkedDetail>
+                )}
+                {createdAt && (
+                  <NotificationItemTime>
+                    {formatDistanceToNowStrict(new Date(createdAt), {
                       addSuffix: true,
                       locale: locales[language].dateFnsLocale,
                     })}
-                </NotificationItemTime>
-                <NotificationItemProject>
-                  {project && project.name}
-                </NotificationItemProject>
+                  </NotificationItemTime>
+                )}
+                {project && (
+                  <NotificationItemProject>
+                    {project.name}
+                  </NotificationItemProject>
+                )}
               </NotificationItem>
             );
           })}
