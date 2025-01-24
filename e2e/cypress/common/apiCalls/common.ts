@@ -254,6 +254,9 @@ export const deleteUserSql = (username: string) => {
       from quick_start
       where user_account_id in (select id from user_account where username = '${username}');
       delete
+      from notification
+      where user_id in (select id from user_account where username = '${username}');
+      delete
       from user_account
       where username = '${username}';
   `;
