@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-import { getAnyContainingText } from '../../common/xPath';
 import { HOST } from '../../common/constants';
 import { createTestProject, login } from '../../common/apiCalls/common';
 import { gcy, getPopover } from '../../common/shared';
@@ -12,8 +11,7 @@ describe('User settings', () => {
   });
 
   it('Accesses api keys', () => {
-    cy.xpath("//*[@aria-controls='user-menu']").click();
-    cy.xpath(getAnyContainingText('Api keys')).should('be.visible').click();
+    clickOnMenuItem('Project API keys');
   });
 
   it('Opens user menu from projects', () => {
@@ -27,14 +25,17 @@ describe('User settings', () => {
   });
 
   it('Accesses user settings', () => {
-    cy.xpath("//*[@aria-controls='user-menu']").click();
-    cy.get('#user-menu').contains('Account settings').click();
+    clickOnMenuItem('Account settings');
   });
 
   it('Accesses personal access tokens', () => {
-    cy.xpath("//*[@aria-controls='user-menu']").click();
-    cy.get('#user-menu').contains('Personal Access Tokens').click();
+    clickOnMenuItem('Personal Access Tokens');
     cy.get('h6').contains('Personal Access Tokens').should('be.visible');
     gcy('global-empty-list').should('be.visible');
   });
+
+  function clickOnMenuItem(itemLabel: string) {
+    cy.xpath("//*[@aria-controls='user-menu']").click();
+    cy.get('#user-menu').contains(itemLabel).click();
+  }
 });
