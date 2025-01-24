@@ -137,7 +137,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const notificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
-    query: { size: 10000 },
+    query: { size: 2 },
     options: { enabled: false },
   });
 
@@ -204,6 +204,11 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
 
   const notifications =
     notificationsLoadable.data?._embedded?.notificationModelList;
+  const notificationCount = notificationsLoadable.data?.page?.totalElements;
+  const areThereMoreNotificationsToFetch =
+    notifications !== undefined &&
+    notificationCount !== undefined &&
+    notifications.length < notificationCount;
 
   return (
     <>
@@ -329,6 +334,11 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
             <ListItem>
               <BoxLoading width="100%" />
             </ListItem>
+          )}
+          {areThereMoreNotificationsToFetch && (
+            <ListItemButton onClick={() => alert('yay!')}>
+              Show more notifications
+            </ListItemButton>
           )}
         </List>
       </StyledMenu>
