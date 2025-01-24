@@ -5,6 +5,7 @@ import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.constants.NotificationType
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
@@ -19,6 +20,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.Notification
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -27,6 +29,7 @@ import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
@@ -72,6 +75,9 @@ class UserAccountService(
   @Autowired
   @Lazy
   lateinit var permissionService: PermissionService
+
+  @Autowired
+  private lateinit var notificationService: NotificationService
 
   private val emailValidator = EmailValidator()
 
@@ -299,7 +305,15 @@ class UserAccountService(
   ): UserAccount {
     userAccount.totpKey = key
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notificationService.save(
+      Notification().apply {
+        this.user = userAccount
+        this.type = NotificationType.MFA_ENABLED
+        this.originatingUser = userAccount
+      },
+    )
+    return savedUser
   }
 
   @Transactional
@@ -309,7 +323,15 @@ class UserAccountService(
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notificationService.save(
+      Notification().apply {
+        this.user = userAccount
+        this.type = NotificationType.MFA_DISABLED
+        this.originatingUser = userAccount
+      },
+    )
+    return savedUser
   }
 
   @Transactional
@@ -466,7 +488,15 @@ class UserAccountService(
     userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notificationService.save(
+      Notification().apply {
+        this.user = userAccount
+        this.type = NotificationType.PASSWORD_CHANGED
+        this.originatingUser = userAccount
+      },
+    )
+    return savedUser
   }
 
   private fun updateUserEmail(
