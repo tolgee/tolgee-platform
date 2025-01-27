@@ -7,7 +7,7 @@ import {
 import { Badge, IconButton, styled } from '@mui/material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
-import { NotificationsPopup } from 'tg.component/layout/TopBar/NotificationsPopup';
+import { NotificationsPopup } from 'tg.component/layout/Notifications/NotificationsPopup';
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 import { PopoverProps } from '@mui/material/Popover';
 

@@ -12,7 +12,7 @@ import { UserMenu } from '../../security/UserMenu/UserMenu';
 import { AdminInfo } from './AdminInfo';
 import { QuickStartTopBarButton } from '../QuickStartGuide/QuickStartTopBarButton';
 import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
-import { NotificationsTopBarButton } from 'tg.component/layout/TopBar/NotificationsTopBarButton';
+import { NotificationsTopBarButton } from 'tg.component/layout/Notifications/NotificationsTopBarButton';
 
 export const TOP_BAR_HEIGHT = 52;
 
