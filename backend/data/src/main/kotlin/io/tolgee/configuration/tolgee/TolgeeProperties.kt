@@ -92,7 +92,11 @@ open class TolgeeProperties(
   @DocProperty(
     description =
       "Public URL where Tolgee is accessible. " +
-        "Used to generate links to Tolgee (e.g. email confirmation link).",
+        "Used to generate links to Tolgee (e.g. email confirmation link)." +
+        "\n\n" +
+        "**Warning:** Not providing this property leads to security issues." +
+        "Providing this property is highly " +
+        "recommended especially if you are managing publicly accessible Tolgee instance. ",
   )
   var frontEndUrl: String? = null,
   var websocket: WebsocketProperties = WebsocketProperties(),

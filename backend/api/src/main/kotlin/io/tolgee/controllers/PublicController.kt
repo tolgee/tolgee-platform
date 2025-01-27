@@ -2,14 +2,9 @@ package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.node.TextNode
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.misc.EmailParams
-import io.tolgee.dtos.request.auth.ResetPassword
-import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.AuthenticationException
@@ -35,7 +30,6 @@ import io.tolgee.service.security.UserCredentialsService
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
@@ -49,12 +43,11 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/public")
-@Tag(name = "Authentication")
+@AuthenticationTag
 class PublicController(
   private val jwtService: JwtService,
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
-  private val tolgeeEmailSender: TolgeeEmailSender,
   private val emailVerificationService: EmailVerificationService,
   private val reCaptchaValidationService: ReCaptchaValidationService,
   private val signUpService: SignUpService,
@@ -82,105 +75,6 @@ class PublicController(
     // two factor passed, so we can generate super token
     val jwt = jwtService.emitToken(userAccount.id, true)
     return JwtAuthenticationResponse(jwt)
-  }
-
-  @Operation(summary = "Request password reset")
-  @PostMapping("/reset_password_request")
-  @OpenApiHideFromPublicDocs
-  @RateLimited(limit = 2, refillDurationInMs = 300000)
-  fun resetPasswordRequest(
-    @RequestBody @Valid
-    request: ResetPasswordRequest,
-  ) {
-    if (!authProperties.nativeEnabled) {
-      throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
-    }
-
-    val userAccount = userAccountService.findActive(request.email!!) ?: return
-
-    if (!emailVerificationService.isVerified(userAccount)) {
-      throw BadRequestException(Message.EMAIL_NOT_VERIFIED)
-    }
-
-    if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
-      val params =
-        EmailParams(
-          to = request.email!!,
-          subject = "Password reset - SSO managed account",
-          text =
-            """
-            Hello! 👋<br/><br/>
-            We received a request to reset the password for your account. However, your account is managed by your organization and uses a single sign-on (SSO) service to log in.<br/><br/>
-            To access your account, please use the "SSO Login" button on the Tolgee login page. No password reset is needed.<br/><br/>
-            If you did not make this request, you may safely ignore this email.<br/><br/>
-            
-            Regards,<br/>
-            Tolgee
-            """.trimIndent(),
-        )
-
-      tolgeeEmailSender.sendEmail(params)
-      return
-    }
-
-    val code = RandomStringUtils.randomAlphabetic(50)
-    userAccountService.setResetPasswordCode(userAccount, code)
-
-    val callbackString = code + "," + request.email
-    val url = request.callbackUrl + "/" + Base64.getEncoder().encodeToString(callbackString.toByteArray())
-    val isInitial = userAccount.accountType == UserAccount.AccountType.THIRD_PARTY
-
-    val params =
-      EmailParams(
-        to = request.email!!,
-        subject = if (isInitial) "Initial password configuration" else "Password reset",
-        text =
-          """
-          Hello! 👋<br/><br/>
-          ${if (isInitial) "To set a password for your account, <b>follow this link</b>:<br/>" else "To reset your password, <b>follow this link</b>:<br/>"}
-          <a href="$url">$url</a><br/><br/>
-          If you have not requested this e-mail, please ignore it.<br/><br/>
-          
-          Regards,<br/>
-          Tolgee
-          """.trimIndent(),
-      )
-
-    tolgeeEmailSender.sendEmail(params)
-  }
-
-  @GetMapping("/reset_password_validate/{email}/{code}")
-  @Operation(summary = "Validate password-resetting key")
-  @OpenApiHideFromPublicDocs
-  fun resetPasswordValidate(
-    @PathVariable("code") code: String,
-    @PathVariable("email") email: String,
-  ) {
-    if (!authProperties.nativeEnabled) {
-      throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
-    }
-    validateEmailCode(code, email)
-  }
-
-  @PostMapping("/reset_password_set")
-  @Operation(summary = "Set a new password", description = "Checks the password reset code from e-mail")
-  @OpenApiHideFromPublicDocs
-  fun resetPasswordSet(
-    @RequestBody @Valid
-    request: ResetPassword,
-  ) {
-    if (!authProperties.nativeEnabled) {
-      throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
-    }
-    val userAccount = validateEmailCode(request.code!!, request.email!!)
-    if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
-      throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
-    }
-    if (userAccount.accountType === UserAccount.AccountType.THIRD_PARTY) {
-      userAccountService.setAccountType(userAccount, UserAccount.AccountType.LOCAL)
-    }
-    userAccountService.setUserPassword(userAccount, request.password)
-    userAccountService.removeResetCode(userAccount)
   }
 
   @PostMapping("/sign_up")
@@ -271,17 +165,5 @@ class PublicController(
         }
       }
     return user
-  }
-
-  private fun validateEmailCode(
-    code: String,
-    email: String,
-  ): UserAccount {
-    val userAccount = userAccountService.findActive(email) ?: throw BadRequestException(Message.BAD_CREDENTIALS)
-    val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
-    if (!resetCodeValid) {
-      throw BadRequestException(Message.BAD_CREDENTIALS)
-    }
-    return userAccount
   }
 }
