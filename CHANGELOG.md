@@ -1,3 +1,10 @@
+## [3.96.3](https://github.com/tolgee/tolgee-platform/compare/v3.96.2...v3.96.3) (2025-01-27)
+
+
+### Bug Fixes
+
+* Reset password callback from frontend URL ([#2872](https://github.com/tolgee/tolgee-platform/issues/2872)) ([1e99ce2](https://github.com/tolgee/tolgee-platform/commit/1e99ce27f08a8a90e24f11a47180cea727763935))
+
 ## [3.96.2](https://github.com/tolgee/tolgee-platform/compare/v3.96.1...v3.96.2) (2025-01-27)
 
 
