@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { useState } from 'react';
 import { Dialog, IconButton, styled } from '@mui/material';
 
@@ -6,16 +7,16 @@ import {
   ScreenshotWithLabels,
 } from 'tg.component/ScreenshotWithLabels';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { useWindowSize } from 'usehooks-ts';
+import { scaleImage, useImagePreload } from 'tg.fixtures/useImagePreload';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
 
 const StyledContainer = styled('div')`
   display: grid;
   align-content: center;
   justify-content: center;
-  max-height: 80vh;
-  max-width: 85vw;
-  position: relative;
+  overflow: hidden;
 
   &::after {
     content: '';
@@ -77,11 +78,20 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
   const screenshot = screenshots[index];
   const multiple = screenshots.length > 1;
 
-  const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
+  const { size, isLoading } = useImagePreload({
+    src: screenshot.src,
+  });
+
+  const viewPort = useWindowSize();
+
+  const scaledSize = scaleImage(size, {
+    width: viewPort.width * 0.8,
+    height: viewPort.height * 0.8,
+  });
 
   let scaleMarkers = 1;
-  if (bodyWidth < screenshot.width!) {
-    scaleMarkers = screenshot.width! / bodyWidth;
+  if (viewPort.width < screenshot.width!) {
+    scaleMarkers = screenshot.width! / viewPort.width;
   }
 
   function moveLeft() {
@@ -104,11 +114,18 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
     <Dialog
       onClose={onClose}
       open
-      maxWidth="xl"
+      maxWidth={false}
       onKeyDown={handleKeyPress}
       onClick={stopAndPrevent()}
+      PaperProps={{ style: { margin: 0 } }}
     >
-      <StyledContainer>
+      <StyledContainer
+        style={{
+          width: Math.max(scaledSize.width, 100),
+          height: Math.max(scaledSize.height, 100),
+        }}
+        className={clsx({ loading: isLoading })}
+      >
         {multiple && (
           <IconButton
             className="arrow"
@@ -119,16 +136,30 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
             <ChevronLeft />
           </IconButton>
         )}
-        {screenshot && (
-          <ScreenshotWithLabels
-            key={screenshot.id}
-            showTooltips
-            screenshot={screenshot}
-            showSecondaryHighlights
-            objectFit="contain"
-            style={{ maxHeight: '100%' }}
-            scaleHighlight={scaleMarkers}
-          />
+        {isLoading ? (
+          <BoxLoading />
+        ) : (
+          <>
+            {screenshot && (
+              <ScreenshotWithLabels
+                key={screenshot.id}
+                showTooltips
+                screenshot={{
+                  ...screenshot,
+                  width: size.width,
+                  height: size.height,
+                }}
+                showSecondaryHighlights
+                style={{
+                  width: scaledSize.width,
+                  height: scaledSize.height,
+                  maxWidth: 'unset',
+                  maxHeight: 'unset',
+                }}
+                scaleHighlight={scaleMarkers}
+              />
+            )}
+          </>
         )}
         {multiple && (
           <IconButton
