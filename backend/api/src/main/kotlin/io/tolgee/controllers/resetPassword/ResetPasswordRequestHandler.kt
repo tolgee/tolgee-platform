@@ -97,8 +97,9 @@ class ResetPasswordRequestHandler(
   private fun getCallbackUrlBase(): String? {
     if (frontEndUrlFromProperties == null) {
       logger.warn(
-        "Frontend URL is not set in properties. Using frontend URL from the request can lead to one-click account takeover" +
-          "attacks. Please set the frontend URL in the properties. (tolgee.front-end-url)" +
+        "Frontend URL is not set in properties. Using frontend URL from the request can lead " +
+          "to one-click account takeover attacks. Please set the frontend URL in the properties. " +
+          "(tolgee.front-end-url)" +
           "\n\n" +
           "For more information about the configuration, consult the documentation: " +
           "https://docs.tolgee.io/platform/self_hosting/configuration",
