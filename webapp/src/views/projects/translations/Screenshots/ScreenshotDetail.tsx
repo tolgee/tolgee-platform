@@ -12,11 +12,14 @@ import { useWindowSize } from 'usehooks-ts';
 import { scaleImage, useImagePreload } from 'tg.fixtures/useImagePreload';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 
+const SCREENSHOT_DETAIL_SIZE = 0.8;
+
 const StyledContainer = styled('div')`
   display: grid;
   align-content: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
 
   &::after {
     content: '';
@@ -77,21 +80,29 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
   const itemsCount = screenshots.length;
   const screenshot = screenshots[index];
   const multiple = screenshots.length > 1;
+  const viewPort = useWindowSize();
+  const maxDialogSize = {
+    width: viewPort.width * SCREENSHOT_DETAIL_SIZE,
+    height: viewPort.width * SCREENSHOT_DETAIL_SIZE,
+  };
 
-  const { size, isLoading } = useImagePreload({
+  const { size: loadedSize, isLoading } = useImagePreload({
     src: screenshot.src,
   });
 
-  const viewPort = useWindowSize();
+  const screenshotSize = {
+    width: screenshot.width || loadedSize.width || 0,
+    height: screenshot.height || loadedSize.height || 0,
+  };
 
-  const scaledSize = scaleImage(size, {
-    width: viewPort.width * 0.8,
-    height: viewPort.height * 0.8,
-  });
+  const scaledSize = scaleImage(screenshotSize, maxDialogSize);
+
+  const width = scaledSize.width || maxDialogSize.width;
+  const height = scaledSize.height || maxDialogSize.height;
 
   let scaleMarkers = 1;
-  if (viewPort.width < screenshot.width!) {
-    scaleMarkers = screenshot.width! / viewPort.width;
+  if (screenshot.width && width < screenshot.width) {
+    scaleMarkers = screenshot.width / width;
   }
 
   function moveLeft() {
@@ -121,8 +132,8 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
     >
       <StyledContainer
         style={{
-          width: Math.max(scaledSize.width, 100),
-          height: Math.max(scaledSize.height, 100),
+          width: width,
+          height: height,
         }}
         className={clsx({ loading: isLoading })}
       >
@@ -146,13 +157,13 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
                 showTooltips
                 screenshot={{
                   ...screenshot,
-                  width: size.width,
-                  height: size.height,
+                  width: screenshotSize.width,
+                  height: screenshotSize.height,
                 }}
                 showSecondaryHighlights
                 style={{
-                  width: scaledSize.width,
-                  height: scaledSize.height,
+                  width,
+                  height,
                   maxWidth: 'unset',
                   maxHeight: 'unset',
                 }}

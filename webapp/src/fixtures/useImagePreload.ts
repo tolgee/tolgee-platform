@@ -25,6 +25,11 @@ export const useImagePreload = ({ src, enabled = true }: Props) => {
           setIsLoading(false);
         }
       };
+      img.onerror = () => {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      };
       return () => {
         mounted = false;
       };
