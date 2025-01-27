@@ -947,6 +947,7 @@
   "notifications-header": "Notificări",
   "notifications-mfa-disabled": "a dezactivat autentificarea multi-factor",
   "notifications-mfa-enabled": "a activat autentificarea multi-factor",
+  "notifications-password-changed": "și-a schimbat parola",
   "notifications-task-assigned": "v-a atribuit la",
   "notifications-task-completed": "sarcină finalizată creată de dumneavoastră",
   "operation_not_permitted": "Permisiunile tale nu sunt suficiente pentru această operațiune.",

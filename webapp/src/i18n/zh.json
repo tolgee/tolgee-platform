@@ -942,6 +942,7 @@
   "notifications-header": "通知",
   "notifications-mfa-disabled": "已禁用多因素身份验证",
   "notifications-mfa-enabled": "已启用多因素身份验证",
+  "notifications-password-changed": "更改了他们的密码",
   "notifications-task-assigned": "分配给您",
   "notifications-task-completed": "您创建的任务已完成",
   "operation_not_permitted": "您的权限不足以执行此操作。",

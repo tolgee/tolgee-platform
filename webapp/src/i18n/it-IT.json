@@ -901,6 +901,7 @@
   "notifications-header": "Notifiche",
   "notifications-mfa-disabled": "autenticazione multifattoriale disabilitata",
   "notifications-mfa-enabled": "autenticazione multifattoriale attivata",
+  "notifications-password-changed": "ha cambiato la password",
   "notifications-task-assigned": "ti ha assegnato a",
   "notifications-task-completed": "attività completata che hai creato",
   "operation_not_permitted": "Le tue autorizzazioni non sono sufficienti per questa operazione.",

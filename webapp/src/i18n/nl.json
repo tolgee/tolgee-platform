@@ -944,6 +944,7 @@
   "notifications-header": "Meldingen",
   "notifications-mfa-disabled": "meervoudige verificatie uitgeschakeld",
   "notifications-mfa-enabled": "meervoudige verificatie ingeschakeld",
+  "notifications-password-changed": "heeft hun wachtwoord gewijzigd",
   "notifications-task-assigned": "heeft u toegewezen aan",
   "notifications-task-completed": "voltooide taak die u hebt aangemaakt",
   "operation_not_permitted": "Uw rechten zijn niet voldoende voor deze bewerking.",

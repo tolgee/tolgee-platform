@@ -942,6 +942,7 @@
   "notifications-header": "Varsler",
   "notifications-mfa-disabled": "deaktivert multifaktorautentisering",
   "notifications-mfa-enabled": "aktivert multifaktorautentisering",
+  "notifications-password-changed": "har endret passordet sitt",
   "notifications-task-assigned": "tildelt deg til",
   "notifications-task-completed": "fullført oppgave du opprettet",
   "operation_not_permitted": "Dine tillatelser er ikke tilstrekkelige for denne operasjonen.",

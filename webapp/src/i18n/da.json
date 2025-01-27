@@ -947,6 +947,7 @@
   "notifications-header": "Meddelelser",
   "notifications-mfa-disabled": "deaktiveret multifaktor-godkendelse",
   "notifications-mfa-enabled": "aktiveret multifaktor-godkendelse",
+  "notifications-password-changed": "ændrede deres adgangskode",
   "notifications-task-assigned": "tildelt dig til",
   "notifications-task-completed": "fuldført opgave du oprettede",
   "operation_not_permitted": "Dine tilladelser er ikke tilstrækkelige til denne handling.",

@@ -942,6 +942,7 @@
   "notifications-header": "Értesítések",
   "notifications-mfa-disabled": "kikapcsolta a többfaktoros hitelesítést",
   "notifications-mfa-enabled": "bekapcsolta a többfaktoros hitelesítést",
+  "notifications-password-changed": "megváltoztatta a jelszavát",
   "notifications-task-assigned": "hozzárendelte Önt",
   "notifications-task-completed": "befejezett feladat, amit létrehozott",
   "operation_not_permitted": "Nincs megfelelő jogosultsága a művelethez.",

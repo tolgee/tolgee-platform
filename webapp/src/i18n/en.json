@@ -951,6 +951,7 @@
   "notifications-header": "Notifications",
   "notifications-mfa-disabled": "disabled multi-factor authentication",
   "notifications-mfa-enabled": "turned on multi-factor authentication",
+  "notifications-password-changed": "changed their password",
   "notifications-task-assigned": "assigned you to",
   "notifications-task-completed": "completed task you created",
   "operation_not_permitted": "Your permissions are not sufficient for this operation.",

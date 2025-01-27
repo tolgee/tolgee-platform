@@ -946,6 +946,7 @@
   "notifications-header": "Notifikace",
   "notifications-mfa-disabled": "vypnul(a) vícefaktorové ověřování",
   "notifications-mfa-enabled": "zapnul(a) vícefaktorové ověřování",
+  "notifications-password-changed": "změnil(a) své heslo",
   "notifications-task-assigned": "vás přiřadil(a) k",
   "notifications-task-completed": "dokončil(a) úkol, který jste vytvořili",
   "operation_not_permitted": "Nemáte dostatečná oprávnění pro tuto operaci.",
