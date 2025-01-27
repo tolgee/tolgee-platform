@@ -2,14 +2,18 @@ package io.tolgee.controllers.resetPassword
 
 import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.DisabledFunctionalityException
+import io.tolgee.fixtures.removeSlashSuffix
 import io.tolgee.model.UserAccount
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.context.ApplicationContext
 import java.util.*
@@ -17,7 +21,7 @@ import java.util.*
 class ResetPasswordRequestHandler(
   private val applicationContext: ApplicationContext,
   private val request: ResetPasswordRequest,
-) {
+) : Logging {
   fun handle() {
     if (!authProperties.nativeEnabled) {
       throw DisabledFunctionalityException(Message.NATIVE_AUTHENTICATION_DISABLED)
@@ -87,23 +91,43 @@ class ResetPasswordRequestHandler(
   private fun saveSecretCodeAndGetCallbackUrl(): String {
     val code = generateCode()
     saveCode(code)
-
-    val callbackString = code + "," + request.email
-    return getCallbackUrlBase() + "/" + Base64.getEncoder().encodeToString(callbackString.toByteArray())
+    return getCallbackUrlBase()?.removeSlashSuffix() + "/" + getEncodedCodeString(code)
   }
 
   private fun getCallbackUrlBase(): String? {
-    return request.callbackUrl
+    if (frontEndUrlFromProperties == null) {
+      logger.warn(
+        "Frontend URL is not set in properties. Using frontend URL from the request can lead to single click " +
+          "attacks. Please set the frontend URL in the properties. (tolgee.front-end-url)" +
+          "\n\n" +
+          "For more information about the configuration, consult the documentation: " +
+          "https://docs.tolgee.io/platform/self_hosting/configuration",
+      )
+      return request.callbackUrl
+    }
+
+    return frontEndUrlFromProperties!!.removeSlashSuffix() + "/reset_password"
   }
 
   private fun saveCode(code: String?) {
     userAccountService.setResetPasswordCode(userAccount!!, code)
   }
 
-  private fun generateCode(): String? = RandomStringUtils.randomAlphabetic(50)
+  private fun generateCode(): String = RandomStringUtils.randomAlphabetic(50)
+
+  private fun getEncodedCodeString(code: String): String {
+    val callbackString = code + "," + request.email
+    return Base64.getEncoder().encodeToString(callbackString.toByteArray())
+  }
+
+  private val frontEndUrlFromProperties by lazy { tolgeeProperties.frontEndUrl }
 
   private val userAccount by lazy {
     userAccountService.findActive(request.email)
+  }
+
+  private val tolgeeProperties by lazy {
+    applicationContext.getBean(TolgeeProperties::class.java)
   }
 
   private val authProperties: AuthenticationProperties by lazy {
