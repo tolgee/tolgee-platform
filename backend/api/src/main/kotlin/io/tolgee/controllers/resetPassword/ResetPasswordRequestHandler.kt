@@ -32,20 +32,13 @@ class ResetPasswordRequestHandler(
       return
     }
 
-    val code = RandomStringUtils.randomAlphabetic(50)
-    userAccountService.setResetPasswordCode(userAccount, code)
-
-    val callbackString = code + "," + request.email
-    val url = request.callbackUrl + "/" + Base64.getEncoder().encodeToString(callbackString.toByteArray())
-    val isInitial = userAccount.accountType == UserAccount.AccountType.THIRD_PARTY
-
-    sendPasswordResetEmail(isInitial, url)
+    val url = saveSecretCodeAndGetCallbackUrl()
+    sendPasswordResetEmail(url)
   }
 
-  private fun sendPasswordResetEmail(
-    isInitial: Boolean,
-    url: String,
-  ) {
+  private fun sendPasswordResetEmail(url: String) {
+    val isInitial = userAccount!!.accountType == UserAccount.AccountType.THIRD_PARTY
+
     val params =
       EmailParams(
         to = request.email,
@@ -90,6 +83,24 @@ class ResetPasswordRequestHandler(
       throw BadRequestException(Message.EMAIL_NOT_VERIFIED)
     }
   }
+
+  private fun saveSecretCodeAndGetCallbackUrl(): String {
+    val code = generateCode()
+    saveCode(code)
+
+    val callbackString = code + "," + request.email
+    return getCallbackUrlBase() + "/" + Base64.getEncoder().encodeToString(callbackString.toByteArray())
+  }
+
+  private fun getCallbackUrlBase(): String? {
+    return request.callbackUrl
+  }
+
+  private fun saveCode(code: String?) {
+    userAccountService.setResetPasswordCode(userAccount!!, code)
+  }
+
+  private fun generateCode(): String? = RandomStringUtils.randomAlphabetic(50)
 
   private val userAccount by lazy {
     userAccountService.findActive(request.email)
