@@ -120,15 +120,17 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const client = useGlobalContext((c) => c.wsClient.client);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState<
-    components['schemas']['NotificationModel'][] | undefined
-  >(undefined);
   const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
 
   const unseenNotificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
     query: { size: 1, filterSeen: false },
+    options: {
+      enabled: unseenCount === undefined,
+      refetchOnMount: false,
+      keepPreviousData: true,
+    },
   });
 
   const notificationsLoadable = useApiQuery({
@@ -144,7 +146,7 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   });
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!notifications) {
+    if (!notificationsLoadable.data) {
       notificationsLoadable.refetch();
     }
     // @ts-ignore
@@ -164,23 +166,22 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   }, [unseenNotificationsLoadable.data]);
 
   useEffect(() => {
-    if (notifications !== undefined) return;
-    setNotifications(
-      notificationsLoadable.data?._embedded?.notificationModelList
-    );
-  }, [notificationsLoadable.data]);
+    const data = notificationsLoadable.data;
+    if (!anchorEl || !data) return;
 
-  useEffect(() => {
-    if (!anchorEl || !notifications) return;
+    const markAsSeenIds = data._embedded?.notificationModelList?.map(
+      (it) => it.id
+    );
+    if (!markAsSeenIds) return;
 
     markSeenMutation.mutate({
       content: {
         'application/json': {
-          notificationIds: notifications.map((it) => it.id),
+          notificationIds: markAsSeenIds,
         },
       },
     });
-  }, [notifications, anchorEl]);
+  }, [notificationsLoadable.data, anchorEl]);
 
   useEffect(() => {
     if (client && user) {
@@ -189,16 +190,15 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         (e) => {
           setUnseenCount(e.data.currentlyUnseenCount);
           const newNotification = e.data.newNotification;
-          if (newNotification)
-            setNotifications((prevState) =>
-              prevState ? [newNotification, ...prevState] : prevState
-            );
+          if (newNotification) notificationsLoadable.remove();
           unseenNotificationsLoadable.remove();
-          notificationsLoadable.remove();
         }
       );
     }
   }, [user, client]);
+
+  const notifications =
+    notificationsLoadable.data?._embedded?.notificationModelList;
 
   return (
     <>
