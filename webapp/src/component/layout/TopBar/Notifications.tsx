@@ -15,7 +15,11 @@ import {
 } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import { useHistory } from 'react-router-dom';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  useApiInfiniteQuery,
+  useApiMutation,
+  useApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
@@ -25,6 +29,7 @@ import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { locales } from '../../../locales';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -120,22 +125,42 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   const client = useGlobalContext((c) => c.wsClient.client);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState<
-    components['schemas']['NotificationModel'][] | undefined
-  >(undefined);
   const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
 
   const unseenNotificationsLoadable = useApiQuery({
     url: '/v2/notifications',
     method: 'get',
     query: { size: 1, filterSeen: false },
+    options: {
+      enabled: unseenCount === undefined,
+      refetchOnMount: false,
+      keepPreviousData: true,
+    },
   });
 
-  const notificationsLoadable = useApiQuery({
+  const query = { size: 10 };
+  const notificationsLoadable = useApiInfiniteQuery({
     url: '/v2/notifications',
     method: 'get',
-    query: { size: 10000 },
-    options: { enabled: false },
+    query: query,
+    options: {
+      enabled: false,
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            query: {
+              ...query,
+              page: lastPage.page!.number! + 1,
+            },
+          };
+        } else {
+          return null;
+        }
+      },
+    },
   });
 
   const markSeenMutation = useApiMutation({
@@ -143,10 +168,11 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
     method: 'put',
   });
 
+  const notifications = notificationsLoadable.data?.pages
+    .flatMap((it) => it?._embedded?.notificationModelList)
+    .filter((it) => it !== undefined);
+
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!notifications) {
-      notificationsLoadable.refetch();
-    }
     // @ts-ignore
     setAnchorEl(event.currentTarget);
   };
@@ -164,23 +190,27 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
   }, [unseenNotificationsLoadable.data]);
 
   useEffect(() => {
-    if (notifications !== undefined) return;
-    setNotifications(
-      notificationsLoadable.data?._embedded?.notificationModelList
-    );
-  }, [notificationsLoadable.data]);
+    if (!anchorEl) return;
 
-  useEffect(() => {
-    if (!anchorEl || !notifications) return;
+    const data = notificationsLoadable.data;
+    if (!data) {
+      if (!notificationsLoadable.isFetching) {
+        notificationsLoadable.refetch();
+      }
+      return;
+    }
+
+    const markAsSeenIds = notifications?.map((it) => it.id);
+    if (!markAsSeenIds) return;
 
     markSeenMutation.mutate({
       content: {
         'application/json': {
-          notificationIds: notifications.map((it) => it.id),
+          notificationIds: markAsSeenIds,
         },
       },
     });
-  }, [notifications, anchorEl]);
+  }, [notificationsLoadable.data, anchorEl]);
 
   useEffect(() => {
     if (client && user) {
@@ -189,12 +219,8 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         (e) => {
           setUnseenCount(e.data.currentlyUnseenCount);
           const newNotification = e.data.newNotification;
-          if (newNotification)
-            setNotifications((prevState) =>
-              prevState ? [newNotification, ...prevState] : prevState
-            );
+          if (newNotification) notificationsLoadable.remove();
           unseenNotificationsLoadable.remove();
-          notificationsLoadable.remove();
         }
       );
     }
@@ -239,7 +265,19 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
         slotProps={{
           paper: {
             style: {
-              maxHeight: 400,
+              maxHeight: 500,
+              minWidth: 400,
+            },
+            onScroll: (event) => {
+              const target = event.target as HTMLDivElement;
+              if (
+                notificationsLoadable?.hasNextPage &&
+                !notificationsLoadable.isFetching &&
+                target.scrollHeight - target.clientHeight - target.scrollTop <
+                  100
+              ) {
+                notificationsLoadable.fetchNextPage();
+              }
             },
           },
         }}
@@ -314,9 +352,15 @@ export const Notifications: FunctionComponent<{ className?: string }> = () => {
               </NotificationItem>
             );
           })}
-          {!notifications?.length && (
+          {notifications?.length === 0 && (
             <ListItem data-cy="notifications-empty-message">
               <T keyName="notifications-empty" />
+            </ListItem>
+          )}
+          {(notificationsLoadable.isFetching ||
+            notificationsLoadable.hasNextPage) && (
+            <ListItem>
+              <BoxLoading width="100%" />
             </ListItem>
           )}
         </List>
