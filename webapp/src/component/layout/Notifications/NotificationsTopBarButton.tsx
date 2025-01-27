@@ -23,9 +23,7 @@ const StyledIconButton = styled(IconButton)`
 export const NotificationsTopBarButton: FunctionComponent<{
   className?: string;
 }> = () => {
-  const [anchorEl, setAnchorEl] = useState<
-    PopoverProps['anchorEl'] | undefined
-  >(undefined);
+  const [anchorEl, setAnchorEl] = useState<PopoverProps['anchorEl']>(null);
   const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
 
   const unseenNotificationsLoadable = useApiQuery({

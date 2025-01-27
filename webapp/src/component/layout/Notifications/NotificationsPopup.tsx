@@ -1,24 +1,20 @@
-import {
-  default as React,
-  FunctionComponent,
-  useEffect,
-  useState,
-} from 'react';
+import { default as React, FunctionComponent, useEffect } from 'react';
 import { List, ListItem, styled } from '@mui/material';
 import Menu from '@mui/material/Menu';
-import { useHistory } from 'react-router-dom';
 import {
   useApiInfiniteQuery,
   useApiMutation,
-  useApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PopoverProps } from '@mui/material/Popover';
-import { NotificationItem } from 'tg.component/layout/Notifications/NotificationItem';
+import { TaskAssignedItem } from 'tg.component/layout/Notifications/TaskAssignedItem';
+import { TaskCompletedItem } from 'tg.component/layout/Notifications/TaskCompletedItem';
+import { MfaEnabledItem } from 'tg.component/layout/Notifications/MfaEnabledItem';
+import { MfaDisabledItem } from 'tg.component/layout/Notifications/MfaDisabledItem';
+import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordChangedItem';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -35,23 +31,8 @@ export const NotificationsPopup: FunctionComponent<{
   onNotificationsChanged: (NotificationsChanged) => void;
   anchorEl: PopoverProps['anchorEl'];
 }> = ({ onClose, onNotificationsChanged, anchorEl }) => {
-  const history = useHistory();
   const user = useUser();
-  const language = useCurrentLanguage();
   const client = useGlobalContext((c) => c.wsClient.client);
-
-  const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
-
-  const unseenNotificationsLoadable = useApiQuery({
-    url: '/v2/notifications',
-    method: 'get',
-    query: { size: 1, filterSeen: false },
-    options: {
-      enabled: unseenCount === undefined,
-      refetchOnMount: false,
-      keepPreviousData: true,
-    },
-  });
 
   const query = { size: 10 };
   const notificationsLoadable = useApiInfiniteQuery({
@@ -88,14 +69,6 @@ export const NotificationsPopup: FunctionComponent<{
     .filter((it) => it !== undefined);
 
   useEffect(() => {
-    if (unseenCount !== undefined) return;
-    setUnseenCount(
-      (prevState) =>
-        unseenNotificationsLoadable.data?.page?.totalElements || prevState
-    );
-  }, [unseenNotificationsLoadable.data]);
-
-  useEffect(() => {
     if (!anchorEl) return;
 
     const data = notificationsLoadable.data;
@@ -123,10 +96,8 @@ export const NotificationsPopup: FunctionComponent<{
       return client.subscribe(
         `/users/${user.id}/notifications-changed`,
         (e) => {
-          setUnseenCount(e.data.currentlyUnseenCount);
           const newNotification = e.data.newNotification;
           if (newNotification) notificationsLoadable.remove();
-          unseenNotificationsLoadable.remove();
           onNotificationsChanged(e);
         }
       );
@@ -170,13 +141,25 @@ export const NotificationsPopup: FunctionComponent<{
         <ListItemHeader divider>
           <T keyName="notifications-header" />
         </ListItemHeader>
-        {notifications?.map((notification, i) => (
-          <NotificationItem
-            notification={notification}
-            key={notification.id}
-            isLast={i === notifications.length - 1}
-          />
-        ))}
+        {notifications?.map((notification, i) => {
+          const props = {
+            notification: notification,
+            key: notification.id,
+            isLast: i === notifications.length - 1,
+          };
+          switch (notification.type) {
+            case 'TASK_ASSIGNED':
+              return <TaskAssignedItem {...props} />;
+            case 'TASK_COMPLETED':
+              return <TaskCompletedItem {...props} />;
+            case 'MFA_ENABLED':
+              return <MfaEnabledItem {...props} />;
+            case 'MFA_DISABLED':
+              return <MfaDisabledItem {...props} />;
+            case 'PASSWORD_CHANGED':
+              return <PasswordChangedItem {...props} />;
+          }
+        })}
         {notifications?.length === 0 && (
           <ListItem data-cy="notifications-empty-message">
             <T keyName="notifications-empty" />
