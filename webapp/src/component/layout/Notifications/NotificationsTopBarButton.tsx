@@ -17,7 +17,7 @@ const StyledIconButton = styled(IconButton)`
 
 export const NotificationsTopBarButton: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<PopoverProps['anchorEl']>(null);
-  const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
+  const [unseenCount, setUnseenCount] = useState<number>();
 
   const unseenNotificationsLoadable = useApiQuery({
     url: '/v2/notifications',
