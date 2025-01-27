@@ -15,7 +15,7 @@ import { TopBarAnnouncements } from './announcements/TopBarAnnouncements';
 import { TopBarTestClockInfo } from './TopBarTestClockInfo';
 import React, { FC } from 'react';
 import { TrialChip } from 'tg.ee';
-import { Notifications } from 'tg.component/layout/TopBar/Notifications';
+import { NotificationsTopBarButton } from 'tg.component/layout/Notifications/NotificationsTopBarButton';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -120,7 +120,7 @@ export const TopBar: FC<Props> = ({ ...announcementProps }) => {
           </Box>
           <TopBarAnnouncements {...announcementProps} />
         </Box>
-        {user && <Notifications />}
+        {user && <NotificationsTopBarButton />}
         <TopBarTestClockInfo />
         {quickStartEnabled && <QuickStartTopBarButton />}
         {!user && <LanguageMenu />}
