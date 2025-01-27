@@ -1,4 +1,4 @@
-import { default as React, FunctionComponent, useEffect } from 'react';
+import { default as React, useEffect } from 'react';
 import { List, ListItem, styled } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import {
@@ -22,11 +22,17 @@ const ListItemHeader = styled(ListItem)`
   font-weight: bold;
 `;
 
-export const NotificationsPopup: FunctionComponent<{
+type NotificationsPopupProps = {
   onClose: () => void;
   onNotificationsChanged: (NotificationsChanged) => void;
   anchorEl: PopoverProps['anchorEl'];
-}> = ({ onClose, onNotificationsChanged, anchorEl }) => {
+};
+
+export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
+  onClose,
+  onNotificationsChanged,
+  anchorEl,
+}) => {
   const user = useUser();
   const client = useGlobalContext((c) => c.wsClient.client);
 

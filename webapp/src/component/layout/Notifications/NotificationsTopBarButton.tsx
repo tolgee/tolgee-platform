@@ -1,9 +1,4 @@
-import {
-  default as React,
-  FunctionComponent,
-  useEffect,
-  useState,
-} from 'react';
+import { default as React, useEffect, useState } from 'react';
 import { Badge, IconButton, styled } from '@mui/material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
@@ -20,9 +15,7 @@ const StyledIconButton = styled(IconButton)`
   }
 `;
 
-export const NotificationsTopBarButton: FunctionComponent<{
-  className?: string;
-}> = () => {
+export const NotificationsTopBarButton: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<PopoverProps['anchorEl']>(null);
   const [unseenCount, setUnseenCount] = useState<number | undefined>(undefined);
 

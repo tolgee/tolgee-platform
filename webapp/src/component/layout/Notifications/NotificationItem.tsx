@@ -1,4 +1,4 @@
-import { default as React, FunctionComponent } from 'react';
+import { default as React } from 'react';
 import {
   Box,
   ListItemButton,
@@ -51,7 +51,7 @@ export type NotificationItemProps = {
   destinationUrl?: string;
 } & ListItemButtonProps;
 
-export const NotificationItem: FunctionComponent<NotificationItemProps> = ({
+export const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   key,
   isLast,
