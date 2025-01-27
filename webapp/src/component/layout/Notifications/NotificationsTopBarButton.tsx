@@ -1,4 +1,4 @@
-import { default as React, useEffect, useState } from 'react';
+import { default as React, useState } from 'react';
 import { Badge, IconButton, styled } from '@mui/material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { Bell01 } from '@untitled-ui/icons-react';
@@ -27,6 +27,12 @@ export const NotificationsTopBarButton: React.FC = () => {
       enabled: unseenCount === undefined,
       refetchOnMount: false,
       keepPreviousData: true,
+      onSuccess(data) {
+        if (unseenCount !== undefined) {
+          return;
+        }
+        setUnseenCount((prevState) => data.page?.totalElements || prevState);
+      },
     },
   });
 
@@ -37,14 +43,6 @@ export const NotificationsTopBarButton: React.FC = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  useEffect(() => {
-    if (unseenCount !== undefined) return;
-    setUnseenCount(
-      (prevState) =>
-        unseenNotificationsLoadable.data?.page?.totalElements || prevState
-    );
-  }, [unseenNotificationsLoadable.data]);
 
   const onNotificationsChanged = function (event: NotificationsChanged) {
     setUnseenCount(event.data.currentlyUnseenCount);
