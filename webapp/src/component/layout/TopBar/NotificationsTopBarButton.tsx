@@ -118,7 +118,9 @@ function getLocalizedMessage(
   }
 }
 
-export const Notifications: FunctionComponent<{ className?: string }> = () => {
+export const NotificationsTopBarButton: FunctionComponent<{
+  className?: string;
+}> = () => {
   const history = useHistory();
   const user = useUser();
   const language = useCurrentLanguage();
