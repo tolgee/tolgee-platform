@@ -10,11 +10,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PopoverProps } from '@mui/material/Popover';
-import { TaskAssignedItem } from 'tg.component/layout/Notifications/TaskAssignedItem';
-import { TaskCompletedItem } from 'tg.component/layout/Notifications/TaskCompletedItem';
-import { MfaEnabledItem } from 'tg.component/layout/Notifications/MfaEnabledItem';
-import { MfaDisabledItem } from 'tg.component/layout/Notifications/MfaDisabledItem';
-import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordChangedItem';
+import { notificationComponents } from 'tg.component/layout/Notifications/NotificationTypeMap';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -142,23 +138,14 @@ export const NotificationsPopup: FunctionComponent<{
           <T keyName="notifications-header" />
         </ListItemHeader>
         {notifications?.map((notification, i) => {
-          const props = {
-            notification: notification,
-            key: notification.id,
-            isLast: i === notifications.length - 1,
-          };
-          switch (notification.type) {
-            case 'TASK_ASSIGNED':
-              return <TaskAssignedItem {...props} />;
-            case 'TASK_COMPLETED':
-              return <TaskCompletedItem {...props} />;
-            case 'MFA_ENABLED':
-              return <MfaEnabledItem {...props} />;
-            case 'MFA_DISABLED':
-              return <MfaDisabledItem {...props} />;
-            case 'PASSWORD_CHANGED':
-              return <PasswordChangedItem {...props} />;
-          }
+          const Component = notificationComponents[notification.type]!;
+          return (
+            <Component
+              notification={notification}
+              key={notification.id}
+              isLast={i === notifications.length - 1}
+            />
+          );
         })}
         {notifications?.length === 0 && (
           <ListItem data-cy="notifications-empty-message">
