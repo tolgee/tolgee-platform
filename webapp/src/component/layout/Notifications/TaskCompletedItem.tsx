@@ -6,10 +6,12 @@ import {
   NotificationItemProps,
 } from 'tg.component/layout/Notifications/NotificationItem';
 import { getTaskUrl } from 'tg.constants/links';
+import { FlagImage } from 'tg.component/languages/FlagImage';
 
 const StyledLinkedDetailItem = styled(Box)`
   margin-right: 10px;
   display: inline;
+  vertical-align: text-bottom;
 `;
 
 const StyledLinkedDetailNumber = styled(StyledLinkedDetailItem)`
@@ -38,7 +40,11 @@ export const TaskCompletedItem: FunctionComponent<TaskCompletedItemProps> = ({
       </Box>
       <Box>
         <StyledLinkedDetailItem>
-          {notification.linkedTask?.language.flagEmoji}
+          <FlagImage
+            flagEmoji={notification.linkedTask!.language.flagEmoji!}
+            height={20}
+            style={{ marginBottom: -5 }}
+          />
         </StyledLinkedDetailItem>
         <StyledLinkedDetailItem>
           {notification.linkedTask?.name}
