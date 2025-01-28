@@ -5,17 +5,15 @@ import {
   NotificationItem,
   NotificationItemProps,
 } from 'tg.component/layout/Notifications/NotificationItem';
+import { getTaskUrl } from 'tg.constants/links';
 
-const LinkedDetailItem = styled(Box)`
+const StyledLinkedDetailItem = styled(Box)`
   margin-right: 10px;
   display: inline;
 `;
 
-const LinkedDetailNumber = styled(LinkedDetailItem)`
-  color: ${({ theme }) =>
-    theme.palette.mode === 'light'
-      ? theme.palette.emphasis[400]
-      : theme.palette.emphasis[600]};
+const StyledLinkedDetailNumber = styled(StyledLinkedDetailItem)`
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 type TaskAssignedItemProps = NotificationItemProps;
@@ -24,7 +22,10 @@ export const TaskAssignedItem: FunctionComponent<TaskAssignedItemProps> = ({
   notification,
   ...props
 }) => {
-  const destinationUrl = `/projects/${notification.project?.id}/task?number=${notification.linkedTask?.number}`;
+  const destinationUrl = getTaskUrl(
+    notification.project!.id,
+    notification.linkedTask!.number
+  );
   return (
     <NotificationItem
       notification={notification}
@@ -36,13 +37,15 @@ export const TaskAssignedItem: FunctionComponent<TaskAssignedItemProps> = ({
         <T keyName="notifications-task-assigned" />
       </Box>
       <Box>
-        <LinkedDetailItem>
+        <StyledLinkedDetailItem>
           {notification.linkedTask?.language.flagEmoji}
-        </LinkedDetailItem>
-        <LinkedDetailItem>{notification.linkedTask?.name}</LinkedDetailItem>
-        <LinkedDetailNumber>
+        </StyledLinkedDetailItem>
+        <StyledLinkedDetailItem>
+          {notification.linkedTask?.name}
+        </StyledLinkedDetailItem>
+        <StyledLinkedDetailNumber>
           #{notification.linkedTask?.number}
-        </LinkedDetailNumber>
+        </StyledLinkedDetailNumber>
       </Box>
     </NotificationItem>
   );

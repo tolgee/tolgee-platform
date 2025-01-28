@@ -4,17 +4,17 @@ import {
   NotificationItem,
   NotificationItemProps,
 } from 'tg.component/layout/Notifications/NotificationItem';
+import { LINKS } from 'tg.constants/links';
 
 type PasswordChangedItemProps = NotificationItemProps;
 
 export const PasswordChangedItem: FunctionComponent<
   PasswordChangedItemProps
 > = ({ notification, ...props }) => {
-  const destinationUrl = '/account/security';
   return (
     <NotificationItem
       notification={notification}
-      destinationUrl={destinationUrl}
+      destinationUrl={LINKS.USER_ACCOUNT_SECURITY.build()}
       {...props}
     >
       <b>{notification.originatingUser?.name}</b>&nbsp;
