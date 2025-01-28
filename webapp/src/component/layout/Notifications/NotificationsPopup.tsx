@@ -111,7 +111,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
   return (
     <StyledMenu
       keepMounted
-      open={!!anchorEl}
+      open={Boolean(anchorEl)}
       anchorEl={anchorEl}
       onClose={onClose}
       anchorOrigin={{
