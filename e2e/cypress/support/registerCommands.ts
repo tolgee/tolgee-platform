@@ -4,9 +4,9 @@ import { addCustomCommand } from 'cy-verify-downloads';
 export const register = () => {
   Cypress.Commands.add(
     'closestDcy',
-    { prevSubject: true },
+    { prevSubject: 'element' },
     (subject, dataCy) => {
-      return subject.closest('[data-cy="' + dataCy + '"]');
+      return cy.wrap(subject).closest(`[data-cy="${dataCy}"]`);
     }
   );
 
@@ -14,23 +14,27 @@ export const register = () => {
     return cy.get('[data-cy="' + dataCy + '"]', options);
   });
 
-  Cypress.Commands.add('findDcy', { prevSubject: true }, (subject, dataCy) => {
-    return subject.find('[data-cy="' + dataCy + '"]');
-  });
+  Cypress.Commands.add(
+    'findDcy',
+    { prevSubject: 'element' },
+    (subject, dataCy) => {
+      return cy.wrap(subject).find(`[data-cy="${dataCy}"]`);
+    }
+  );
 
   Cypress.Commands.add(
     'nextUntilDcy',
-    { prevSubject: true },
+    { prevSubject: 'element' },
     (subject, dataCy) => {
-      return subject.nextUntil('[data-cy="' + dataCy + '"]');
+      return cy.wrap(subject).nextUntil(`[data-cy="${dataCy}"]`);
     }
   );
 
   Cypress.Commands.add(
     'findInputByName',
-    { prevSubject: true },
+    { prevSubject: 'element' },
     (subject, name) => {
-      return subject.find('input[name="' + name + '"]');
+      return cy.wrap(subject).find(`input[name="${name}"]`);
     }
   );
 
