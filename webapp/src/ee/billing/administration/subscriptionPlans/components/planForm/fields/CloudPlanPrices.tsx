@@ -12,14 +12,20 @@ type CloudPlanPricesProps = {
 export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
   const { t } = useTranslate();
 
-  const { setFieldValue, values } = useFormikContext<CloudPlanFormData>();
+  const { setFieldValue, getFieldProps } =
+    useFormikContext<CloudPlanFormData>();
 
+  // Here we store the non-zero prices to be able to restore them when the plan is set back to non-free
   const [nonZeroPrices, setNonZeroPrices] =
     useState<CloudPlanFormData['prices']>();
 
+  const free = getFieldProps(`${parentName}free`).value;
+  const prices = getFieldProps(`${parentName}prices`).value;
+  const type = getFieldProps(`${parentName}type`).value;
+
   function setPriceValuesZero() {
-    setNonZeroPrices(values.prices);
-    const zeroPrices = Object.entries(values.prices).reduce(
+    setNonZeroPrices(prices);
+    const zeroPrices = Object.entries(prices).reduce(
       (acc, [key]) => ({ ...acc, [key]: 0 }),
       {}
     );
@@ -32,14 +38,18 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
   }
 
   useEffect(() => {
-    if (values.free) {
+    if (free) {
       setPriceValuesZero();
       return;
     }
     if (nonZeroPrices) {
       setPriceValuesNonZero();
     }
-  }, [values.free]);
+  }, [free]);
+
+  if (free) {
+    return null;
+  }
 
   return (
     <>
@@ -77,7 +87,7 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
           )}
           type="number"
           fullWidth
-          disabled={values.type !== 'PAY_AS_YOU_GO'}
+          disabled={type !== 'PAY_AS_YOU_GO'}
         />
         <TextField
           name={`${parentName}prices.perThousandMtCredits`}
@@ -88,7 +98,7 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
           )}
           type="number"
           fullWidth
-          disabled={values.type !== 'PAY_AS_YOU_GO'}
+          disabled={type !== 'PAY_AS_YOU_GO'}
         />
       </Box>
     </>
