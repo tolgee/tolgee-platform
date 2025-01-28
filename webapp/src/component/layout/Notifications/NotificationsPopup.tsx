@@ -148,17 +148,13 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       }}
     >
       <List id="notifications-list" data-cy="notifications-list">
-        <StyledListItemHeader divider>
+        <StyledListItemHeader>
           <T keyName="notifications-header" />
         </StyledListItemHeader>
-        {notifications?.map((notification, i) => {
+        {notifications?.map((notification) => {
           const Component = notificationComponents[notification.type]!;
           return (
-            <Component
-              notification={notification}
-              key={notification.id}
-              isLast={i === notifications.length - 1}
-            />
+            <Component notification={notification} key={notification.id} />
           );
         })}
         {notifications?.length === 0 && (

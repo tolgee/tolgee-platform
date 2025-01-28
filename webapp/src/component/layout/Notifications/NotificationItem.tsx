@@ -44,14 +44,12 @@ const StyledProject = styled(StyledTime)`
 
 export type NotificationItemProps = {
   notification: components['schemas']['NotificationModel'];
-  isLast: boolean;
   destinationUrl?: string;
 } & ListItemButtonProps;
 
 export const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   key,
-  isLast,
   destinationUrl,
   children,
 }) => {
@@ -62,7 +60,6 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   return (
     <StyledItem
       key={key}
-      divider={!isLast}
       //@ts-ignore
       component={Link}
       to={destinationUrl}
