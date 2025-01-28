@@ -5,7 +5,7 @@ import {
   ListItemButtonProps,
   styled,
 } from '@mui/material';
-import { useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
 import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { locales } from '../../../locales';
@@ -55,7 +55,6 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   destinationUrl,
   children,
 }) => {
-  const history = useHistory();
   const language = useCurrentLanguage();
   const createdAt = notification.createdAt;
   const originatingUser = notification.originatingUser;
@@ -65,12 +64,8 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       key={key}
       divider={!isLast}
       //@ts-ignore
-      href={destinationUrl}
-      onClick={(event) => {
-        if (!destinationUrl) return;
-        event.preventDefault();
-        history.push(destinationUrl);
-      }}
+      component={Link}
+      to={destinationUrl}
       data-cy="notifications-list-item"
     >
       <StyledAvatar>
