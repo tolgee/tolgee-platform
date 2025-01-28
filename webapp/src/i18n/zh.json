@@ -1644,7 +1644,7 @@
   "translation_visual_disabled": "<已禁用>",
   "translation_visual_disabled_hint": "此语言的翻译已禁用，请检查高级键设置",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, other {欢迎！我们已为您分配了高级试用计划。请享受其功能 {daysLeft} 天。} }",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {您的试用期还有一天。<link>保持我的订阅</link>} other {您的试用期还有 {daysLeft} 天。<link>保持我的订阅</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {您的试用期还有一天。<link>升级</link>} other {您的试用期还有 {daysLeft} 天。<link>升级</link>}}",
   "unexpected_error_message": "意外错误：{code}",
   "unexpected_error_occurred": "出现意外错误",
   "unexpected_error_while_executing_webhook": "执行 Webhook 时出现意外错误",

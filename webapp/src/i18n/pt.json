@@ -1642,7 +1642,7 @@
   "translation_visual_disabled": "<desativado>",
   "translation_visual_disabled_hint": "A tradução para este idioma está desativada, verifique as configurações avançadas da chave",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Bem-vindo! Atribuímos a você um plano de teste avançado. Aproveite seus recursos por mais {daysLeft} dia.} other {Bem-vindo! Atribuímos a você um plano de teste avançado. Aproveite seus recursos por mais {daysLeft} dias.}}",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Falta apenas um dia para o término do seu período de teste. <link>Manter minha assinatura</link>} other {Faltam apenas {daysLeft} dias para o término do seu período de teste. <link>Manter minha assinatura</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Falta apenas um dia para o término do seu período de teste. <link>Atualizar</link>} other {Faltam apenas {daysLeft} dias para o término do seu período de teste. <link>Atualizar</link>}}",
   "unexpected_error_message": "Erro inesperado: {code}",
   "unexpected_error_occurred": "Ocorreu um erro inesperado",
   "unexpected_error_while_executing_webhook": "Erro inesperado ao executar webhook",

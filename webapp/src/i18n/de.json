@@ -1658,7 +1658,7 @@
   "translation_visual_disabled": "<deaktiviert>",
   "translation_visual_disabled_hint": "Die Übersetzung in diese Sprache ist deaktiviert, überprüfen Sie die erweiterten Schlüsseleinstellungen",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Willkommen! Wir haben Ihnen einen erweiterten Testplan zugewiesen. Genießen Sie die Nutzung seiner Funktionen noch {daysLeft} Tag.} other {Willkommen! Wir haben Ihnen einen erweiterten Testplan zugewiesen. Genießen Sie die Nutzung seiner Funktionen noch {daysLeft} Tage.}}",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Nur noch ein Tag, bevor Ihre Testversion endet. <link>Mein Abonnement behalten</link>} other {Nur noch {daysLeft} Tage, bevor Ihre Testversion endet. <link>Mein Abonnement behalten</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Nur noch ein Tag, bevor Ihre Testversion endet. <link>Upgrade</link>} other {Nur noch {daysLeft} Tage, bevor Ihre Testversion endet. <link>Upgrade</link>}}",
   "unexpected_error_message": "Unerwarteter Fehler: {code}",
   "unexpected_error_occurred": "Unerwarteter Fehler aufgetreten",
   "unexpected_error_while_executing_webhook": "Unerwarteter Fehler beim Ausführen der Webhook",

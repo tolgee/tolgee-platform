@@ -1,3 +1,10 @@
+## [3.96.4](https://github.com/tolgee/tolgee-platform/compare/v3.96.3...v3.96.4) (2025-01-28)
+
+
+### Bug Fixes
+
+* situation when screenshot loading fails ([#2876](https://github.com/tolgee/tolgee-platform/issues/2876)) ([5c8f153](https://github.com/tolgee/tolgee-platform/commit/5c8f153e03d3e638fb9ac6db925cf2ed63169608))
+
 ## [3.96.3](https://github.com/tolgee/tolgee-platform/compare/v3.96.2...v3.96.3) (2025-01-27)
 
 

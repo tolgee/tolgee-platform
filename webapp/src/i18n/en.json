@@ -1666,7 +1666,7 @@
   "translation_visual_disabled": "<disabled>",
   "translation_visual_disabled_hint": "Translation to this language is disabled, check advanced key settings",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Welcome! We have assigned you an advanced trial plan. Enjoy using its features for {daysLeft} more day.} other {Welcome! We have assigned you an advanced trial plan. Enjoy using its features for {daysLeft} more days.}}",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Just one day before your trial ends. <link>Keep my subscription</link>} other {Just {daysLeft} days before your trial ends. <link>Keep my subscription</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Just one day before your trial ends. <link>Upgrade</link>} other {Just {daysLeft} days before your trial ends. <link>Upgrade</link>}}",
   "unexpected_error_message": "Unexpected error: {code}",
   "unexpected_error_occurred": "Unexpected error occurred",
   "unexpected_error_while_executing_webhook": "Unexpected error while executing webhook",

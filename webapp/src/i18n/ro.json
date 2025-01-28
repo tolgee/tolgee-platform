@@ -1655,7 +1655,7 @@
   "translation_visual_disabled": "<dezactivat>",
   "translation_visual_disabled_hint": "Traducerea în această limbă este dezactivată, verificați setările avansate ale cheii",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Bun venit! V-am atribuit un plan de încercare avansat. Bucurați-vă de utilizarea funcțiilor sale pentru încă {daysLeft} zi.} few {Bun venit! V-am atribuit un plan de încercare avansat. Bucurați-vă de utilizarea funcțiilor sale pentru încă {daysLeft} zile.} other {Bun venit! V-am atribuit un plan de încercare avansat. Bucurați-vă de utilizarea funcțiilor sale pentru încă {daysLeft} de zile.}}",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Doar o zi înainte de încheierea perioadei de încercare. <link>Păstrați abonamentul meu</link>} other {Doar {daysLeft} zile înainte de încheierea perioadei de încercare. <link>Păstrați abonamentul meu</link>} }",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Doar o zi înainte de încheierea perioadei de încercare. <link>Actualizați</link>} other {Doar {daysLeft} zile înainte de încheierea perioadei de încercare. <link>Actualizați</link>} }",
   "unexpected_error_message": "Eroare neașteptată: {code}",
   "unexpected_error_occurred": "A apărut o eroare neașteptată",
   "unexpected_error_while_executing_webhook": "Eroare neașteptată în timpul executării webhook-ului",

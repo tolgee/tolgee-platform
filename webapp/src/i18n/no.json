@@ -1645,7 +1645,7 @@
   "translation_visual_disabled": "<deaktivert>",
   "translation_visual_disabled_hint": "Oversettelse til dette språket er deaktivert, sjekk avanserte nøkkelinnstillinger",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Velkommen! Vi har tildelt deg en avansert prøveplan. Nyt å bruke funksjonene i {daysLeft} dag til.} other {Velkommen! Vi har tildelt deg en avansert prøveplan. Nyt å bruke funksjonene i {daysLeft} flere dager.}}",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Bare én dag før prøveperioden din avsluttes. <link>Behold abonnementet mitt</link>} other {Bare {daysLeft} dager før prøveperioden din avsluttes. <link>Behold abonnementet mitt</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Bare én dag før prøveperioden din avsluttes. <link>Oppgrader</link>} other {Bare {daysLeft} dager før prøveperioden din avsluttes. <link>Oppgrader</link>}}",
   "unexpected_error_message": "Uventet feil: {code}",
   "unexpected_error_occurred": "Uventet feil oppstod",
   "unexpected_error_while_executing_webhook": "Uventet feil under utførelse av webhook",

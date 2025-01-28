@@ -1654,7 +1654,7 @@
   "translation_visual_disabled": "<deaktivováno>",
   "translation_visual_disabled_hint": "Překlad do této jazykové verze je deaktivován, zkontrolujte pokročilá nastavení klíče",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Vítejte! Přiřadili jsme vám pokročilý zkušební plán. Užijte si jeho funkce ještě {daysLeft} den.} few {Vítejte! Přiřadili jsme vám pokročilý zkušební plán. Užijte si jeho funkce ještě {daysLeft} dny.} other {Vítejte! Přiřadili jsme vám pokročilý zkušební plán. Užijte si jeho funkce ještě {daysLeft} dní.} }",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Jen jeden den před vypršením vaší zkušební verze. <link>Udržet mé předplatné</link>} few {Jen {daysLeft} dny před vypršením vaší zkušební verze. <link>Udržet mé předplatné</link>} other {Jen {daysLeft} dní před vypršením vaší zkušební verze. <link>Udržet mé předplatné</link>} }",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Jen jeden den před vypršením vaší zkušební verze. <link>Upgrade</link>} few {Jen {daysLeft} dny před vypršením vaší zkušební verze. <link>Upgrade</link>} other {Jen {daysLeft} dní před vypršením vaší zkušební verze. <link>Upgrade</link>} }",
   "unexpected_error_message": "Neočekávaná chyba: {code}",
   "unexpected_error_occurred": "Vyskytla se neznámá chyba",
   "unexpected_error_while_executing_webhook": "Neočekávaná chyba při provádění webhooku",

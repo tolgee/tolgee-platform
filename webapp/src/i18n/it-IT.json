@@ -1562,7 +1562,7 @@
   "translation_tools_translation_memory": "Memoria di traduzione",
   "translation_visual_disabled": "<disabilitato>",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Benvenuto! Ti abbiamo assegnato un piano di prova avanzato. Goditi le sue funzionalità per un altro giorno.} other {Benvenuto! Ti abbiamo assegnato un piano di prova avanzato. Goditi le sue funzionalità per altri {daysLeft} giorni.} }",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Solo un giorno prima che termini la tua prova. <link>Mantieni il mio abbonamento</link>} other {Solo {daysLeft} giorni prima che termini la tua prova. <link>Mantieni il mio abbonamento</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Solo un giorno prima che termini la tua prova. <link>Aggiorna</link>} other {Solo {daysLeft} giorni prima che termini la tua prova. <link>Aggiorna</link>}}",
   "unexpected_error_occurred": "Si è verificato un errore imprevisto",
   "unexpected_error_while_executing_webhook": "Errore imprevisto durante l'esecuzione del webhook",
   "unexpected_error_while_publishing_to_content_storage": "Errore imprevisto durante la pubblicazione nello storage dei contenuti",

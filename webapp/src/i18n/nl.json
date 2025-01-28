@@ -1647,7 +1647,7 @@
   "translation_visual_disabled": "<uitgeschakeld>",
   "translation_visual_disabled_hint": "Vertaling naar deze taal is uitgeschakeld, controleer de geavanceerde sleutelinstellingen",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, one {Welkom! We hebben u een geavanceerd proefabonnement toegewezen. Geniet nog {daysLeft} dag van de functies.} other {Welkom! We hebben u een geavanceerd proefabonnement toegewezen. Geniet nog {daysLeft} dagen van de functies.}}",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Nog slechts één dag voordat uw proefperiode eindigt. <link>Behoud mijn abonnement</link>} other {Nog slechts {daysLeft} dagen voordat uw proefperiode eindigt. <link>Behoud mijn abonnement</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Nog slechts één dag voordat uw proefperiode eindigt. <link>Upgrade</link>} other {Nog slechts {daysLeft} dagen voordat uw proefperiode eindigt. <link>Upgrade</link>}}",
   "unexpected_error_message": "Onverwachte fout: {code}",
   "unexpected_error_occurred": "Onverwachte fout opgetreden",
   "unexpected_error_while_executing_webhook": "Onverwachte fout bij het uitvoeren van webhook",

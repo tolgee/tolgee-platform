@@ -1645,7 +1645,7 @@
   "translation_visual_disabled": "<letiltva>",
   "translation_visual_disabled_hint": "Ezen nyelvre történő fordítás letiltva, ellenőrizze az előrehaladott kulcsbeállításokat",
   "trial-end-topbar-announcement-message": "{daysLeft, plural, other {Üdvözöljük! Hozzárendeltünk egy haladó próba csomagot. Élvezze a funkcióit még {daysLeft} napig.} }",
-  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Már csak egy nap van hátra a próbaidőszakból. <link>Előfizetésem megtartása</link>} other {Már csak {daysLeft} nap van hátra a próbaidőszakból. <link>Előfizetésem megtartása</link>}}",
+  "trial-end-topbar-announcement-message-urgent": "{daysLeft, plural, one {Már csak egy nap van hátra a próbaidőszakból. <link>Frissítés</link>} other {Már csak {daysLeft} nap van hátra a próbaidőszakból. <link>Frissítés</link>}}",
   "unexpected_error_message": "Váratlan hiba: {code}",
   "unexpected_error_occurred": "Váratlan hiba történt",
   "unexpected_error_while_executing_webhook": "Váratlan hiba történt a webhook végrehajtása közben",
