@@ -12,7 +12,7 @@ import { locales } from '../../../locales';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
-const Item = styled(ListItemButton)`
+const StyledItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
   grid-template-columns: 30px 1fr 120px;
@@ -23,22 +23,22 @@ const Item = styled(ListItemButton)`
   line-height: 1.3;
 `;
 
-const Detail = styled(Box)`
+const StyledDetail = styled(Box)`
   grid-area: notification-detail;
 `;
 
-const Avatar = styled(Box)`
+const StyledAvatar = styled(Box)`
   grid-area: notification-avatar;
 `;
 
-const Time = styled(Box)`
+const StyledTime = styled(Box)`
   font-size: 13px;
   grid-area: notification-time;
   text-align: right;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-const Project = styled(Time)`
+const StyledProject = styled(StyledTime)`
   grid-area: notification-project;
 `;
 
@@ -61,7 +61,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   const originatingUser = notification.originatingUser;
   const project = notification.project;
   return (
-    <Item
+    <StyledItem
       key={key}
       divider={!isLast}
       //@ts-ignore
@@ -73,7 +73,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       }}
       data-cy="notifications-list-item"
     >
-      <Avatar>
+      <StyledAvatar>
         {originatingUser && (
           <AvatarImg
             owner={{
@@ -85,17 +85,17 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
             size={30}
           />
         )}
-      </Avatar>
-      <Detail>{children}</Detail>
+      </StyledAvatar>
+      <StyledDetail>{children}</StyledDetail>
       {createdAt && (
-        <Time>
+        <StyledTime>
           {formatDistanceToNowStrict(new Date(createdAt), {
             addSuffix: true,
             locale: locales[language].dateFnsLocale,
           })}
-        </Time>
+        </StyledTime>
       )}
-      {project && <Project>{project.name}</Project>}
-    </Item>
+      {project && <StyledProject>{project.name}</StyledProject>}
+    </StyledItem>
   );
 };

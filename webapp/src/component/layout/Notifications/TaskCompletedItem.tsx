@@ -7,12 +7,12 @@ import {
 } from 'tg.component/layout/Notifications/NotificationItem';
 import { getTaskUrl } from 'tg.constants/links';
 
-const LinkedDetailItem = styled(Box)`
+const StyledLinkedDetailItem = styled(Box)`
   margin-right: 10px;
   display: inline;
 `;
 
-const LinkedDetailNumber = styled(LinkedDetailItem)`
+const StyledLinkedDetailNumber = styled(StyledLinkedDetailItem)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -37,13 +37,15 @@ export const TaskCompletedItem: FunctionComponent<TaskCompletedItemProps> = ({
         <T keyName="notifications-task-completed" />
       </Box>
       <Box>
-        <LinkedDetailItem>
+        <StyledLinkedDetailItem>
           {notification.linkedTask?.language.flagEmoji}
-        </LinkedDetailItem>
-        <LinkedDetailItem>{notification.linkedTask?.name}</LinkedDetailItem>
-        <LinkedDetailNumber>
+        </StyledLinkedDetailItem>
+        <StyledLinkedDetailItem>
+          {notification.linkedTask?.name}
+        </StyledLinkedDetailItem>
+        <StyledLinkedDetailNumber>
           #{notification.linkedTask?.number}
-        </LinkedDetailNumber>
+        </StyledLinkedDetailNumber>
       </Box>
     </NotificationItem>
   );

@@ -19,7 +19,7 @@ const StyledMenu = styled(Menu)`
   }
 `;
 
-const ListItemHeader = styled(ListItem)`
+const StyledListItemHeader = styled(ListItem)`
   font-weight: bold;
 `;
 
@@ -142,9 +142,9 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       }}
     >
       <List id="notifications-list" data-cy="notifications-list">
-        <ListItemHeader divider>
+        <StyledListItemHeader divider>
           <T keyName="notifications-header" />
-        </ListItemHeader>
+        </StyledListItemHeader>
         {notifications?.map((notification, i) => {
           const Component = notificationComponents[notification.type]!;
           return (
