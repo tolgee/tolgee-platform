@@ -98,10 +98,11 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
     if (client && user) {
       return client.subscribe(
         `/users/${user.id}/notifications-changed`,
-        (e) => {
-          const newNotification = e.data.newNotification;
-          if (newNotification) notificationsLoadable.remove();
-          onNotificationsChanged(e);
+        (event) => {
+          if (event.data.newNotification) {
+            notificationsLoadable.remove();
+          }
+          onNotificationsChanged(event);
         }
       );
     }
