@@ -49,7 +49,7 @@ const Project = styled(Time)`
 export type NotificationItemProps = {
   notification: components['schemas']['NotificationModel'];
   isLast: boolean;
-  destinationUrl?: Link;
+  destinationUrl?: Link | string;
 } & ListItemButtonProps;
 
 export const NotificationItem: React.FC<NotificationItemProps> = ({
@@ -73,7 +73,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       onClick={(event) => {
         if (!destinationUrl) return;
         event.preventDefault();
-        history.push(destinationUrl);
+        history.push(destinationUrl.toString());
       }}
       data-cy="notifications-list-item"
     >
