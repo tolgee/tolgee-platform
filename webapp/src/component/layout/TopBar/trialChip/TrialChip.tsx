@@ -7,11 +7,11 @@ import { TrialChipTooltip } from './TrialChipTooltip';
 export const TrialChip: FC = () => {
   const { shouldShowChip } = useTrialInfo();
 
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   if (!shouldShowChip) {
     return null;
   }
-
-  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   return (
     <Box

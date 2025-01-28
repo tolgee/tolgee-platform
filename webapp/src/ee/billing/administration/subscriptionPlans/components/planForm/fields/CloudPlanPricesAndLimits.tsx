@@ -14,11 +14,7 @@ export const CloudPlanPricesAndLimits: FC<{
 
   return (
     <Wrapper canEditPrices={canEditPrices}>
-      {!values.free && (
-        <>
-          <CloudPlanPrices parentName={parentName} />
-        </>
-      )}
+      <CloudPlanPrices parentName={parentName} />
       <Typography sx={{ mt: 2 }}>
         {t('administration_cloud_plan_form_limits_title')}
       </Typography>
