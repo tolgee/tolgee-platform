@@ -154,16 +154,6 @@ class SlackExecutor(
     return languages.any { it in subscribedLanguages } && languages.size <= 2
   }
 
-  fun sortSoBaseLanguageFirst(attachments: MutableList<Attachment>): MutableList<Attachment> {
-    val baseLanguageAttachmentIndex = attachments.indexOfFirst { it.blocks[0].toString().contains("(base)") }
-    if (baseLanguageAttachmentIndex != -1) {
-      val baseLanguageAttachment = attachments[baseLanguageAttachmentIndex]
-      attachments.removeAt(baseLanguageAttachmentIndex)
-      attachments.add(0, baseLanguageAttachment)
-    }
-    return attachments
-  }
-
   fun sortAttachments(attachments: MutableList<Attachment>): MutableList<Attachment> {
     fun getLanguageName(attachment: Attachment): String {
       val textBlock = attachment.blocks[0].toString()
@@ -239,20 +229,18 @@ class SlackExecutor(
     token: String,
     dto: SlackUserLoginDto,
   ) {
-    val response =
-      slackClient.methods(token).chatPostEphemeral {
-        it.user(dto.slackUserId)
-        it.channel(dto.slackChannelId)
-          .blocks {
-            section {
-              markdownText(i18n.translate("slack.common.message.success_login"))
-            }
-            context {
-              plainText(i18n.translate("slack.common.context.success_login"))
-            }
+    slackClient.methods(token).chatPostEphemeral {
+      it.user(dto.slackUserId)
+      it.channel(dto.slackChannelId)
+        .blocks {
+          section {
+            markdownText(i18n.translate("slack.common.message.success_login"))
           }
-      }
-    response
+          context {
+            plainText(i18n.translate("slack.common.context.success_login"))
+          }
+        }
+    }
   }
 
   fun sendBlocksMessage(
