@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Billing E2E" type="CompoundRunConfigurationType">
+    <toRun name="Run Dokcer E2E dependencies" type="GradleRunConfiguration" />
+    <toRun name="E2E tests (Billing)" type="js.build_tools.npm" />
+    <toRun name="Frontend for E2E tests" type="js.build_tools.npm" />
+    <toRun name="Backend for E2E Billing" type="SpringBootApplicationConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>
