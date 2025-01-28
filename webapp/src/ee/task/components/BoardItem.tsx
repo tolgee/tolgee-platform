@@ -15,7 +15,7 @@ import { TaskMenu } from './TaskMenu';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { TaskState } from 'tg.component/task/TaskState';
 import { TaskAssignees } from './TaskAssignees';
-import { getTaskUrl } from './utils';
+import { getTaskUrl } from 'tg.constants/links';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -86,7 +86,7 @@ export const BoardItem = ({
     <StyledContainer
       component={Link}
       // @ts-ignore
-      to={getTaskUrl(project, task.number)}
+      to={getTaskUrl(project.id, task.number)}
     >
       <StyledRow>
         <TaskLabel task={task} hideType />

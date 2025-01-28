@@ -5,7 +5,7 @@ import {
   NotificationItem,
   NotificationItemProps,
 } from 'tg.component/layout/Notifications/NotificationItem';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { getTaskUrl } from 'tg.constants/links';
 
 const LinkedDetailItem = styled(Box)`
   margin-right: 10px;
@@ -22,9 +22,10 @@ export const TaskAssignedItem: FunctionComponent<TaskAssignedItemProps> = ({
   notification,
   ...props
 }) => {
-  const destinationUrl = `${LINKS.GO_TO_PROJECT_TASK.build({
-    [PARAMS.PROJECT_ID]: notification.project!.id,
-  })}?number=${notification.linkedTask!.number}`;
+  const destinationUrl = getTaskUrl(
+    notification.project!.id,
+    notification.linkedTask!.number
+  );
   return (
     <NotificationItem
       notification={notification}
