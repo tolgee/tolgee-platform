@@ -83,7 +83,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
   const viewPort = useWindowSize();
   const maxDialogSize = {
     width: viewPort.width * SCREENSHOT_DETAIL_SIZE,
-    height: viewPort.width * SCREENSHOT_DETAIL_SIZE,
+    height: viewPort.height * SCREENSHOT_DETAIL_SIZE,
   };
 
   const { size: loadedSize, isLoading } = useImagePreload({
@@ -132,8 +132,8 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
     >
       <StyledContainer
         style={{
-          width: width,
-          height: height,
+          width,
+          height,
         }}
         className={clsx({ loading: isLoading })}
       >
