@@ -36,10 +36,7 @@ const Time = styled(Box)`
   font-size: 13px;
   grid-area: notification-time;
   text-align: right;
-  color: ${({ theme }) =>
-    theme.palette.mode === 'light'
-      ? theme.palette.emphasis[400]
-      : theme.palette.emphasis[600]};
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const Project = styled(Time)`

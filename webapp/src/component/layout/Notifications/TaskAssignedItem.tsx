@@ -13,10 +13,7 @@ const LinkedDetailItem = styled(Box)`
 `;
 
 const LinkedDetailNumber = styled(LinkedDetailItem)`
-  color: ${({ theme }) =>
-    theme.palette.mode === 'light'
-      ? theme.palette.emphasis[400]
-      : theme.palette.emphasis[600]};
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 type TaskAssignedItemProps = NotificationItemProps;
