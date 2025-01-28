@@ -1,4 +1,4 @@
-import { useConfig } from 'tg.globalContext/helpers';
+import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useEffect, useState } from 'react';
 import { BaseView } from 'tg.component/layout/BaseView';
@@ -9,6 +9,7 @@ export const WebsocketPreview = () => {
   const project = useProject();
   const jwtToken = useGlobalContext((c) => c.auth.jwtToken);
   const client = useGlobalContext((c) => c.wsClient.client);
+  const user = useUser();
 
   useEffect(() => {
     if (client) {
@@ -18,6 +19,15 @@ export const WebsocketPreview = () => {
       );
     }
   }, [config, project, jwtToken, client]);
+
+  useEffect(() => {
+    if (client && user) {
+      return client.subscribe(
+        `/users/${user.id}/notifications-changed`,
+        (data) => addMessage(JSON.stringify(data, undefined, 2))
+      );
+    }
+  }, [config, user, jwtToken, client]);
 
   const [messages, setMessages] = useState([] as string[]);
 
