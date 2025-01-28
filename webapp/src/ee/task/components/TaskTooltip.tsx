@@ -9,7 +9,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { TaskTooltipContent } from './TaskTooltipContent';
 import { TaskDetail } from './TaskDetail';
-import { getTaskUrl } from './utils';
+import { getTaskUrl } from 'tg.constants/links';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -48,7 +48,7 @@ export const TaskTooltip = ({
               <IconButton
                 data-cy="task-tooltip-action-translations"
                 component={Link}
-                to={getTaskUrl(project, task.number)}
+                to={getTaskUrl(project.id, task.number)}
                 size="small"
               >
                 <Translate01 width={20} height={20} />
