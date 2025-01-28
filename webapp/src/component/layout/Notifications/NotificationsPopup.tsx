@@ -13,6 +13,8 @@ import { PopoverProps } from '@mui/material/Popover';
 import { notificationComponents } from 'tg.component/layout/Notifications/NotificationTypeMap';
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 
+const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 100;
+
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
     margin-top: 5px;
@@ -133,7 +135,8 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
             if (
               notificationsLoadable?.hasNextPage &&
               !notificationsLoadable.isFetching &&
-              target.scrollHeight - target.clientHeight - target.scrollTop < 100
+              target.scrollHeight - target.clientHeight - target.scrollTop <
+                FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS
             ) {
               notificationsLoadable.fetchNextPage();
             }
