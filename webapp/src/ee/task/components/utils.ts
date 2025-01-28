@@ -1,6 +1,5 @@
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { LINKS, PARAMS } from 'tg.constants/links';
 
 export type TaskModel = components['schemas']['TaskModel'];
 export type TaskState = TaskModel['state'];
@@ -8,14 +7,6 @@ export type TaskState = TaskModel['state'];
 function toFileName(label: string) {
   return label.replace(/[\s]+/g, '_').toLowerCase();
 }
-
-type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
-
-export const getTaskUrl = (project: SimpleProjectModel, taskNumber: number) => {
-  return `${LINKS.GO_TO_PROJECT_TASK.build({
-    [PARAMS.PROJECT_ID]: project.id,
-  })}?number=${taskNumber}`;
-};
 
 export const useTaskReport = () => {
   const reportMutation = useApiMutation({

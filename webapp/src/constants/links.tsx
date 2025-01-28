@@ -403,3 +403,9 @@ export enum QUERY {
   TRANSLATIONS_TASK_DETAIL = 'taskDetail',
   TASKS_FILTERS_SHOW_ALL = 'showAll',
 }
+
+export const getTaskUrl = (projectId: number, taskNumber: number) => {
+  return `${LINKS.GO_TO_PROJECT_TASK.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  })}?number=${taskNumber}`;
+};
