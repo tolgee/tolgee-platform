@@ -15,7 +15,7 @@ export const MfaEnabledItem: FunctionComponent<MfaEnabledItemProps> = ({
   return (
     <NotificationItem
       notification={notification}
-      destinationUrl={LINKS.USER_ACCOUNT_SECURITY}
+      destinationUrl={LINKS.USER_ACCOUNT_SECURITY.build()}
       {...props}
     >
       <b>{notification.originatingUser?.name}</b>&nbsp;
