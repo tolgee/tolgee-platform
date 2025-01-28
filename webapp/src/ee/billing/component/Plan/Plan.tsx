@@ -16,7 +16,7 @@ import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
 import { isPlanLegacy } from './plansTools';
-import { Box, Chip, Tooltip, useTheme } from '@mui/material';
+import { Box, Chip, Theme, Tooltip, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 type Features = PlanType['enabledFeatures'];
@@ -36,6 +36,9 @@ type Props = {
   activeTrial?: boolean;
 };
 
+export const getHighlightColor = (theme: Theme, custom: boolean) =>
+  custom ? theme.palette.tokens.info.main : theme.palette.tokens.primary.main;
+
 export const Plan: FC<Props> = ({
   plan,
   period,
@@ -50,11 +53,10 @@ export const Plan: FC<Props> = ({
   nonCommercial,
   activeTrial,
 }) => {
-  const theme = useTheme();
-  const highlightColor = custom
-    ? theme.palette.tokens.info.main
-    : theme.palette.tokens.primary.main;
   const { t } = useTranslate();
+  const theme = useTheme();
+
+  const highlightColor = getHighlightColor(theme, !!custom);
 
   return (
     <PlanContainer className={clsx({ active })} data-cy="billing-plan">

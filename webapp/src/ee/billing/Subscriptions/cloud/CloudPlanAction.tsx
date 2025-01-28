@@ -7,7 +7,7 @@ import { usePlan } from '../../component/Plan/usePlan';
 import { useCancelCloudSubscription } from './useCancelCloudSubscription';
 import { useRestoreCloudSubscription } from './useRestoreCloudSubscription';
 
-export const StyledContainer = styled(Box)`
+export const CloudPlanActionContainer = styled(Box)`
   justify-self: center;
   align-self: end;
   gap: 8px;
@@ -90,7 +90,7 @@ export const PlanAction = ({
   const shouldShow = show == undefined || show;
 
   return (
-    <StyledContainer>
+    <CloudPlanActionContainer>
       {shouldShow && (
         <Tooltip title={tooltip}>
           <span>
@@ -115,6 +115,6 @@ export const PlanAction = ({
           }}
         />
       )}
-    </StyledContainer>
+    </CloudPlanActionContainer>
   );
 };

@@ -48,7 +48,6 @@ export function CloudPlanFormBase({ initialData, children, onSubmit }: Props) {
         let prices = values.prices;
         if (values.type !== 'PAY_AS_YOU_GO') {
           prices = {
-            perSeat: values.prices.perSeat,
             subscriptionMonthly: values.prices.subscriptionMonthly,
             subscriptionYearly: values.prices.subscriptionYearly,
           };

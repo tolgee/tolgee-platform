@@ -1,17 +1,17 @@
-import React, { FC } from 'react';
-import { useTrialInfo } from './announcements/useTrialInfo';
-import { Box, Chip, Tooltip } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
-import { Link } from 'react-router-dom';
+import React, { FC, useState } from 'react';
+import { useTrialInfo } from '../announcements/useTrialInfo';
+import { Box, Chip } from '@mui/material';
+import { T } from '@tolgee/react';
+import { TrialChipTooltip } from './TrialChipTooltip';
 
 export const TrialChip: FC = () => {
-  const { shouldShowChip, subscriptionsLink, daysLeft } = useTrialInfo();
-
-  const { t } = useTranslate();
+  const { shouldShowChip } = useTrialInfo();
 
   if (!shouldShowChip) {
     return null;
   }
+
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   return (
     <Box
@@ -22,7 +22,11 @@ export const TrialChip: FC = () => {
         alignItems: 'center',
       }}
     >
-      <Tooltip title={t('topbar-trial-chip-tooltip', { daysLeft })}>
+      <TrialChipTooltip
+        open={tooltipOpen}
+        onOpen={() => setTooltipOpen(true)}
+        onClose={() => setTooltipOpen(false)}
+      >
         <Chip
           data-cy="topbar-trial-chip"
           sx={(theme) => ({
@@ -36,10 +40,9 @@ export const TrialChip: FC = () => {
           })}
           size="small"
           label={<T keyName="topbar-trial-chip" />}
-          component={Link}
-          to={subscriptionsLink}
+          onClick={() => setTooltipOpen(true)}
         />
-      </Tooltip>
+      </TrialChipTooltip>
     </Box>
   );
 };

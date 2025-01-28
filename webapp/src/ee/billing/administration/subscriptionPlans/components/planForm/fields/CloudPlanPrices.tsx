@@ -36,7 +36,9 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
       setPriceValuesZero();
       return;
     }
-    setPriceValuesNonZero();
+    if (nonZeroPrices) {
+      setPriceValuesNonZero();
+    }
   }, [values.free]);
 
   return (

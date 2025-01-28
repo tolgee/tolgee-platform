@@ -1,4 +1,4 @@
-import { Box, styled, SxProps } from '@mui/material';
+import { Box, styled, SxProps, Theme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useFeatures } from 'tg.translationTools/useFeatures';
@@ -16,7 +16,7 @@ const StyledListWrapper = styled(Box)`
 type Props = {
   features: Features;
   topFeature?: React.ReactNode;
-  sx?: SxProps;
+  sx?: SxProps<Theme>;
   className?: string;
 };
 
