@@ -11,6 +11,7 @@ import { useUser } from 'tg.globalContext/helpers';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PopoverProps } from '@mui/material/Popover';
 import { notificationComponents } from 'tg.component/layout/Notifications/NotificationTypeMap';
+import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -24,7 +25,7 @@ const ListItemHeader = styled(ListItem)`
 
 type NotificationsPopupProps = {
   onClose: () => void;
-  onNotificationsChanged: (NotificationsChanged) => void;
+  onNotificationsChanged: (event: NotificationsChanged) => void;
   anchorEl: PopoverProps['anchorEl'];
 };
 
