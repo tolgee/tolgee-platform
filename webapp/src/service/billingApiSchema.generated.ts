@@ -24,6 +24,9 @@ export interface paths {
     /** When applied, current subscription will be cancelled at the period end. */
     put: operations["cancelSubscription"];
   };
+  "/v2/administration/organizations/{organizationId}/billing/update-trial-end-date": {
+    put: operations["updateTrialEndDAte"];
+  };
   "/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan": {
     /** Assigns a private free plan or trial plan to an organization. */
     put: operations["assignCloudPlan"];
@@ -412,7 +415,8 @@ export interface components {
         | "cannot_create_free_plan_with_prices"
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
-        | "cannot_update_without_modification";
+        | "cannot_update_without_modification"
+        | "current_subscription_is_not_trialing";
       params?: { [key: string]: unknown }[];
     };
     ErrorResponseBody: {
@@ -575,6 +579,10 @@ export interface components {
       prorationDate: number;
       endingBalance: number;
     };
+    UpdateTrialEndDateRequest: {
+      /** Format: int64 */
+      trialEnd: number;
+    };
     AssignPlanRequest: {
       /** Format: int64 */
       trialEnd?: number;
@@ -628,7 +636,7 @@ export interface components {
       mtCredits: number;
     };
     PlanPricesRequest: {
-      perSeat: number;
+      perSeat?: number;
       perThousandTranslations?: number;
       perThousandMtCredits?: number;
       subscriptionMonthly: number;
@@ -1369,6 +1377,54 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  updateTrialEndDAte: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTrialEndDateRequest"];
       };
     };
   };

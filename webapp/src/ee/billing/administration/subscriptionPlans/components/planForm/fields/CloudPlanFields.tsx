@@ -156,7 +156,7 @@ export const CloudPlanFields: FC<{
               const values = props.field.value;
 
               const toggleField = () => {
-                let newValues = values;
+                let newValues: string[];
                 if (values.includes(feature)) {
                   newValues = values.filter((val) => val !== feature);
                 } else {
