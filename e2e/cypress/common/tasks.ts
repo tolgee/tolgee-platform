@@ -30,13 +30,13 @@ export function checkTaskPreview({
 }) {
   getTaskPreview(language)
     .findDcy('task-preview-keys')
-    .should('contain', keys)
+    .should('have.text', keys)
     .findDcy('task-preview-alert')
     .should(alert ? 'exist' : 'not.exist');
   getTaskPreview(language)
     .findDcy('task-preview-words')
-    .should('contain', words);
+    .should('have.text', words);
   getTaskPreview(language)
     .findDcy('task-preview-characters')
-    .should('contain', characters);
+    .should('have.text', characters);
 }
