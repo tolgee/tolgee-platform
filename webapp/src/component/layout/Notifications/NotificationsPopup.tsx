@@ -12,6 +12,11 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PopoverProps } from '@mui/material/Popover';
 import { notificationComponents } from 'tg.component/layout/Notifications/NotificationTypeMap';
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
+import { components } from 'tg.service/apiSchema.generated';
+import { InfiniteData } from 'react-query';
+
+type PagedModelNotificationModel =
+  components['schemas']['PagedModelNotificationModel'];
 
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 100;
 
@@ -24,6 +29,14 @@ const StyledMenu = styled(Menu)`
 const StyledListItemHeader = styled(ListItem)`
   font-weight: bold;
 `;
+
+function getNotifications(
+  data: InfiniteData<PagedModelNotificationModel> | undefined
+) {
+  return data?.pages
+    .flatMap((it) => it?._embedded?.notificationModelList)
+    .filter((it) => it !== undefined);
+}
 
 type NotificationsPopupProps = {
   onClose: () => void;
@@ -45,7 +58,10 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
     method: 'get',
     query: query,
     options: {
-      enabled: false,
+      enabled: !!anchorEl,
+      refetchOnMount: false,
+      staleTime: Infinity,
+      cacheTime: Infinity,
       getNextPageParam: (lastPage) => {
         if (
           lastPage.page &&
@@ -61,6 +77,18 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
           return null;
         }
       },
+      onSuccess(data) {
+        const markAsSeenIds = getNotifications(data)?.map((it) => it.id);
+        if (!markAsSeenIds) return;
+
+        markSeenMutation.mutate({
+          content: {
+            'application/json': {
+              notificationIds: markAsSeenIds,
+            },
+          },
+        });
+      },
     },
   });
 
@@ -68,33 +96,6 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
     url: '/v2/notifications-mark-seen',
     method: 'put',
   });
-
-  const notifications = notificationsLoadable.data?.pages
-    .flatMap((it) => it?._embedded?.notificationModelList)
-    .filter((it) => it !== undefined);
-
-  useEffect(() => {
-    if (!anchorEl) return;
-
-    const data = notificationsLoadable.data;
-    if (!data) {
-      if (!notificationsLoadable.isFetching) {
-        notificationsLoadable.refetch();
-      }
-      return;
-    }
-
-    const markAsSeenIds = notifications?.map((it) => it.id);
-    if (!markAsSeenIds) return;
-
-    markSeenMutation.mutate({
-      content: {
-        'application/json': {
-          notificationIds: markAsSeenIds,
-        },
-      },
-    });
-  }, [notificationsLoadable.data, anchorEl]);
 
   useEffect(() => {
     if (client && user) {
@@ -109,6 +110,8 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       );
     }
   }, [user, client]);
+
+  const notifications = getNotifications(notificationsLoadable.data);
 
   return (
     <StyledMenu
