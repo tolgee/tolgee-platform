@@ -24,7 +24,7 @@ const StyledShoppingGrid = styled('div')`
 export const CloudSubscriptions = () => {
   const organization = useOrganization();
 
-  const [period, setPeriod] = useState<BillingPeriodType>();
+  const [period, setPeriod] = useState<BillingPeriodType>('YEARLY');
   const creditBalance = useOrganizationCreditBalance();
 
   const usage = useApiQuery({
@@ -44,10 +44,12 @@ export const CloudSubscriptions = () => {
     options: {
       onSuccess(data) {
         if (!period)
-          if (data.plan && isPlanPeriodDependant(data.plan.prices)) {
+          if (
+            data.plan &&
+            isPlanPeriodDependant(data.plan.prices) &&
+            data.currentBillingPeriod
+          ) {
             setPeriod(data.currentBillingPeriod);
-          } else {
-            setPeriod('YEARLY');
           }
       },
     },
@@ -73,31 +75,28 @@ export const CloudSubscriptions = () => {
 
   return (
     <>
-      {activeSubscription.data &&
-        usage.data &&
-        creditBalance.data &&
-        period && (
-          <>
-            <Box>
-              <CurrentCloudSubscriptionInfo
-                activeSubscription={activeSubscription.data}
-                usage={usage.data}
-              />
-            </Box>
-            <Box display="flex" justifyContent="center">
-              <StyledBillingSectionTitle>
-                <T keyName="organization_cloud_plans_title" />
-              </StyledBillingSectionTitle>
-            </Box>
-            <StyledShoppingGrid>
-              <PlansCloudList
-                activeSubscription={activeSubscription.data}
-                onPeriodChange={(period) => setPeriod(period)}
-                period={period}
-              />
-            </StyledShoppingGrid>
-          </>
-        )}
+      {activeSubscription.data && usage.data && creditBalance.data && (
+        <>
+          <Box>
+            <CurrentCloudSubscriptionInfo
+              activeSubscription={activeSubscription.data}
+              usage={usage.data}
+            />
+          </Box>
+          <Box display="flex" justifyContent="center">
+            <StyledBillingSectionTitle>
+              <T keyName="organization_cloud_plans_title" />
+            </StyledBillingSectionTitle>
+          </Box>
+          <StyledShoppingGrid>
+            <PlansCloudList
+              activeSubscription={activeSubscription.data}
+              onPeriodChange={(period) => setPeriod(period)}
+              period={period}
+            />
+          </StyledShoppingGrid>
+        </>
+      )}
     </>
   );
 };

@@ -142,11 +142,8 @@ declare namespace DataCy {
         "billing-plan-subtitle" |
         "billing-progress-label-item" |
         "billing-self-hosted-ee-plan-subscribe-button" |
-        "billing-subscription-auto-renews-alert-cancel-button" |
-        "billing-subscription-trial-alert-keep-button" |
         "billing-subscriptions-cloud-button" |
         "billing-subscriptions-self-hosted-ee-button" |
-        "billing-trial-setup-payment-method-button" |
         "billing-upgrade-preview-confirm-button" |
         "billing-usage-table" |
         "billing_period_annual" |
