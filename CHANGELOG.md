@@ -1,3 +1,10 @@
+## [3.96.5](https://github.com/tolgee/tolgee-platform/compare/v3.96.4...v3.96.5) (2025-01-28)
+
+
+### Bug Fixes
+
+* incorrect height calculation ([#2878](https://github.com/tolgee/tolgee-platform/issues/2878)) ([2853f63](https://github.com/tolgee/tolgee-platform/commit/2853f6391664e62773a39dbff6caa83ac569a6b2))
+
 ## [3.96.4](https://github.com/tolgee/tolgee-platform/compare/v3.96.3...v3.96.4) (2025-01-28)
 
 
