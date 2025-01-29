@@ -127,22 +127,31 @@ export const visitTranslations = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/translations`);
 };
 
-export const editKeyName = (keyName: string, newName?: string) => {
+export function openKeyEditDialog(keyName: string) {
   getKeyCell(keyName).click();
+  gcy('translations-key-edit-key-field').should('be.visible');
+}
 
-  // wait for editor to appear
-  cy.gcy('global-editor').should('be.visible');
-  cy.contains(keyName).first().should('be.visible');
-  cy.wait(10);
+export function typeNewKeyName(newName: string) {
+  // select all, delete and type new text
+  gcy('translations-key-edit-key-field')
+    .should('be.visible')
+    .find('[contenteditable]')
+    .clear()
+    .type(newName);
+}
+
+export function saveKeyEditDialog() {
+  getCellSaveButton().click();
+  waitForGlobalLoading();
+}
+
+export const editKeyName = (keyName: string, newName?: string) => {
+  openKeyEditDialog(keyName);
 
   if (newName !== undefined) {
-    // select all, delete and type new text
-    gcy('translations-key-edit-key-field')
-      .find('[contenteditable]')
-      .clear()
-      .type(newName);
-    getCellSaveButton().click();
-    waitForGlobalLoading();
+    typeNewKeyName(newName);
+    saveKeyEditDialog();
   }
 };
 
