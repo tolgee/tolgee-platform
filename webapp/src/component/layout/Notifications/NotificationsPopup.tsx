@@ -1,5 +1,5 @@
 import { default as React, useEffect } from 'react';
-import { List, ListItem, styled } from '@mui/material';
+import { List, ListItem, styled, Typography } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import {
   useApiInfiniteQuery,
@@ -24,10 +24,6 @@ const StyledMenu = styled(Menu)`
   .MuiPaper-root {
     margin-top: 5px;
   }
-`;
-
-const StyledListItemHeader = styled(ListItem)`
-  font-weight: bold;
 `;
 
 function getNotifications(
@@ -148,10 +144,12 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       }}
     >
       <List id="notifications-list" data-cy="notifications-list">
-        <StyledListItemHeader>
-          <T keyName="notifications-header" />
-        </StyledListItemHeader>
-        {notifications?.map((notification) => {
+        <ListItem>
+          <Typography variant="h6">
+            <T keyName="notifications-header" />
+          </Typography>
+        </ListItem>
+        {notifications?.map((notification, i) => {
           const Component = notificationComponents[notification.type]!;
           return (
             <Component notification={notification} key={notification.id} />
