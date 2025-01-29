@@ -56,6 +56,13 @@ export type NotificationItemProps = {
   destinationUrl?: string;
 } & ListItemButtonProps;
 
+function postProcessTimeText(input: string) {
+  return input
+    .replaceAll(/\b(\d+?)\b ([Mm])inut.*?\b/g, '$1 $2in')
+    .replaceAll(/\b(\d+?)\b hodin.*?\b/g, '$1 hod')
+    .replaceAll(/\b(\d+?)\b (sekund|second|segund).*?\b/g, '$1 s');
+}
+
 export const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   key,
@@ -91,10 +98,12 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       {createdAt && (
         <StyledTime>
           <StyledRightDetailText variant="body2">
-            {formatDistanceToNowStrict(new Date(createdAt), {
-              addSuffix: true,
-              locale: locales[language].dateFnsLocale,
-            })}
+            {postProcessTimeText(
+              formatDistanceToNowStrict(new Date(createdAt), {
+                addSuffix: true,
+                locale: locales[language].dateFnsLocale,
+              })
+            )}
           </StyledRightDetailText>
         </StyledTime>
       )}
