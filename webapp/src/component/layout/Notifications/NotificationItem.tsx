@@ -15,7 +15,7 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 const StyledItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
-  grid-template-columns: 30px 1fr 120px;
+  grid-template-columns: 32px 1fr 120px;
   grid-template-rows: 1fr;
   grid-template-areas:
     'notification-avatar notification-detail notification-time'
@@ -74,7 +74,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
               type: 'USER',
               id: originatingUser.id || 0,
             }}
-            size={30}
+            size={32}
           />
         )}
       </StyledAvatar>
