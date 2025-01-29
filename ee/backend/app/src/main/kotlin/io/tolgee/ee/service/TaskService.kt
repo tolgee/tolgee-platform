@@ -56,7 +56,6 @@ class TaskService(
   private val securityService: SecurityService,
   private val taskKeyRepository: TaskKeyRepository,
   private val authenticationFacade: AuthenticationFacade,
-  private val assigneeNotificationService: AssigneeNotificationService,
   @Autowired
   private val platformTransactionManager: PlatformTransactionManager,
   private val currentDateProvider: CurrentDateProvider,
@@ -144,7 +143,7 @@ class TaskService(
           val task = taskService.createTaskInTransaction(projectId, dto, filters, agencyId)
           entityManager.flush()
           task.assignees.forEach {
-            assigneeNotificationService.notifyNewAssignee(it, task)
+            notifyNewAssignee(it, task)
           }
           task
         }
@@ -216,7 +215,7 @@ class TaskService(
     val newAssignees = checkAssignees(dto.assignees, projectId)
     newAssignees.forEach {
       if (!task.assignees.contains(it)) {
-        assigneeNotificationService.notifyNewAssignee(it, task)
+        notifyNewAssignee(it, task)
       }
     }
     task.assignees = newAssignees
@@ -580,5 +579,19 @@ class TaskService(
 
   override fun getAgencyTasks(agencyId: Long): List<Task> {
     return taskRepository.getByAgencyId(agencyId)
+  }
+
+  private fun notifyNewAssignee(
+    user: UserAccount,
+    task: Task,
+  ) {
+    notificationService.save(
+      Notification().apply {
+        this.user = user
+        this.linkedTask = task
+        this.project = task.project
+        this.originatingUser = task.author
+      },
+    )
   }
 }
