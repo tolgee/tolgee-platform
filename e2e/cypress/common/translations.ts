@@ -7,7 +7,7 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
-import { assertMessage, dismissMenu, gcyAdvanced } from './shared';
+import { assertMessage, dismissMenu, gcy, gcyAdvanced } from './shared';
 import { selectNamespace } from './namespace';
 import { buildXpath } from './XpathBuilder';
 import Chainable = Cypress.Chainable;
@@ -127,6 +127,25 @@ export const visitTranslations = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/translations`);
 };
 
+export const editKeyName = (keyName: string, newName?: string) => {
+  getKeyCell(keyName).click();
+
+  // wait for editor to appear
+  cy.gcy('global-editor').should('be.visible');
+  cy.contains(keyName).first().should('be.visible');
+  cy.wait(10);
+
+  if (newName !== undefined) {
+    // select all, delete and type new text
+    gcy('translations-key-edit-key-field')
+      .find('[contenteditable]')
+      .clear()
+      .type(newName);
+    getCellSaveButton().click();
+    waitForGlobalLoading();
+  }
+};
+
 export const editCell = (oldValue: string, newValue?: string, save = true) => {
   getCell(oldValue).click();
 
@@ -155,12 +174,20 @@ export function getTranslationEditor() {
     .getElement();
 }
 
-export function getTranslationCell(key: string, languageTag: string) {
+function getKeyCellXpath(key: string) {
   return buildXpath()
     .descendant()
     .withDataCy('translations-key-name')
     .descendantOrSelf()
-    .hasText(key)
+    .hasText(key);
+}
+
+function getKeyCell(key: string) {
+  return getKeyCellXpath(key).getElement();
+}
+
+export function getTranslationCell(key: string, languageTag: string) {
+  return getKeyCellXpath(key)
     .closestAncestor()
     .withDataCy('translations-row')
     .descendant()
