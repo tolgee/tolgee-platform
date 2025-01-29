@@ -123,7 +123,7 @@ jobs:
         id: reportName
         if: always()
         run: |
-          reportName=${{ matrix.command }}
+          reportName=${{ matrix.command.run }}
           echo "reportName=${reportName//\:/_}" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v4
