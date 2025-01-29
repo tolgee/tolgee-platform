@@ -4,6 +4,7 @@ import {
   ListItemButton,
   ListItemButtonProps,
   styled,
+  Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
@@ -25,6 +26,11 @@ const StyledItem = styled(ListItemButton)`
 
 const StyledDetail = styled(Box)`
   grid-area: notification-detail;
+  font-size: 14px;
+
+  b {
+    font-weight: 500;
+  }
 `;
 
 const StyledAvatar = styled(Box)`
@@ -32,9 +38,12 @@ const StyledAvatar = styled(Box)`
 `;
 
 const StyledTime = styled(Box)`
-  font-size: 13px;
   grid-area: notification-time;
   text-align: right;
+`;
+
+const StyledRightDetailText = styled(Typography)`
+  font-size: 12px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -81,13 +90,21 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       <StyledDetail>{children}</StyledDetail>
       {createdAt && (
         <StyledTime>
-          {formatDistanceToNowStrict(new Date(createdAt), {
-            addSuffix: true,
-            locale: locales[language].dateFnsLocale,
-          })}
+          <StyledRightDetailText variant="body2">
+            {formatDistanceToNowStrict(new Date(createdAt), {
+              addSuffix: true,
+              locale: locales[language].dateFnsLocale,
+            })}
+          </StyledRightDetailText>
         </StyledTime>
       )}
-      {project && <StyledProject>{project.name}</StyledProject>}
+      {project && (
+        <StyledProject>
+          <StyledRightDetailText variant="body2">
+            {project.name}
+          </StyledRightDetailText>
+        </StyledProject>
+      )}
     </StyledItem>
   );
 };
