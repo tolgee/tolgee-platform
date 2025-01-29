@@ -6,6 +6,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.response.AuthProviderDto
 import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
@@ -151,6 +152,32 @@ class PublicController(
   ): PublicInvitationModel {
     val invitation = invitationService.getInvitation(code)
     return publicInvitationModelAssembler.toModel(invitation)
+  }
+
+  @PostMapping("/auth_provider/accept_change")
+  @Operation(summary = "Accept change of the third party authentication provider")
+  fun acceptChangeAuthProvider() {
+//    TODO
+  }
+
+  @PostMapping("/auth_provider/reject_change")
+  @Operation(summary = "Reject change of the third party authentication provider")
+  fun rejectChangeAuthProvider() {
+//    TODO
+  }
+
+  @GetMapping("/auth_provider/current")
+  @Operation(summary = "Get current third party authentication provider")
+  fun getCurrentAuthProvider(): AuthProviderDto? {
+//    TODO
+    return null
+  }
+
+  @GetMapping("/auth_provider/changed")
+  @Operation(summary = "Get info about authentication provider which can replace the current one")
+  fun getChangedAuthProvider(): AuthProviderDto? {
+    // TODO
+    return null
   }
 
   private fun getFakeGithubUser(): UserAccount {
