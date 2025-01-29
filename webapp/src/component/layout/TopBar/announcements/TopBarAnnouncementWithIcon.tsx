@@ -26,9 +26,9 @@ export const TopBarAnnouncementWithIcon: FC<
   );
 };
 
-export const TopBarAnnouncementWithAlertIcon: FC = ({ children }) => {
+export const TopBarAnnouncementWithAlertIcon: FC = ({ children, ...props }) => {
   return (
-    <TopBarAnnouncementWithIcon icon={<AlertTriangle />}>
+    <TopBarAnnouncementWithIcon icon={<AlertTriangle />} {...props}>
       {children}
     </TopBarAnnouncementWithIcon>
   );
