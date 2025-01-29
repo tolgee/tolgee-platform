@@ -13,6 +13,7 @@ import { PlansCloudList } from './PlansCloudList';
 import { useLocation } from 'react-router-dom';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
+import { components } from 'tg.service/billingApiSchema.generated';
 
 const StyledShoppingGrid = styled('div')`
   display: grid;
@@ -35,6 +36,20 @@ export const CloudSubscriptions = () => {
     },
   });
 
+  function setInitialPeriod(
+    data: components['schemas']['CloudSubscriptionModel']
+  ) {
+    if (
+      data.plan &&
+      isPlanPeriodDependant(data.plan.prices) &&
+      data.currentBillingPeriod
+    ) {
+      setPeriod(data.currentBillingPeriod);
+      return;
+    }
+    setPeriod('YEARLY');
+  }
+
   const activeSubscription = useBillingApiQuery({
     url: '/v2/organizations/{organizationId}/billing/subscription',
     method: 'get',
@@ -43,14 +58,7 @@ export const CloudSubscriptions = () => {
     },
     options: {
       onSuccess(data) {
-        if (!period)
-          if (
-            data.plan &&
-            isPlanPeriodDependant(data.plan.prices) &&
-            data.currentBillingPeriod
-          ) {
-            setPeriod(data.currentBillingPeriod);
-          }
+        setInitialPeriod(data);
       },
     },
   });
