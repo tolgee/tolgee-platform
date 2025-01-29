@@ -7,19 +7,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.ErrorException
-import io.tolgee.exceptions.ErrorResponseBody
-import io.tolgee.exceptions.ErrorResponseTyped
-import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.*
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
-import org.slf4j.LoggerFactory
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -42,9 +39,7 @@ import java.util.*
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class ExceptionHandlers {
-  private val logger = LoggerFactory.getLogger(this::class.java)
-
+class ExceptionHandlers: Logging {
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
     ex: MethodArgumentNotValidException,
@@ -164,6 +159,7 @@ class ExceptionHandlers {
   )
   @ExceptionHandler(ErrorException::class)
   fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
+    logger.debug("Exception with response status {} caught", ex.httpStatus, ex)
     return ResponseEntity(ex.errorResponseBody, ex.httpStatus)
   }
 
