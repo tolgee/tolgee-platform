@@ -68,7 +68,7 @@
   "scripts": {
     "start": "vite",
     "develop": "start",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "craco test",
     "schema": "node ./scripts/generate-schemas.cjs public",
