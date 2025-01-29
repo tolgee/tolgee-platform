@@ -14,6 +14,7 @@ import { notificationComponents } from 'tg.component/layout/Notifications/Notifi
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 import { components } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
+import { useWindowSize } from 'usehooks-ts';
 
 type PagedModelNotificationModel =
   components['schemas']['PagedModelNotificationModel'];
@@ -111,6 +112,8 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
     }
   }, [user, client]);
 
+  const windowSize = useWindowSize();
+  const maxHeight = Math.min(500, windowSize.height - 100);
   const notifications = getNotifications(notificationsLoadable.data);
 
   return (
@@ -130,7 +133,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       slotProps={{
         paper: {
           style: {
-            maxHeight: 500,
+            maxHeight: maxHeight,
             minWidth: 400,
           },
           onScroll: (event) => {
