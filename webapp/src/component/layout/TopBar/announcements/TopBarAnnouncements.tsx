@@ -2,7 +2,7 @@ import React, { FC, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { AdministrationAccessAnnouncement } from './AdministrationAccessAnnouncement';
 import { DebuggingCustomerAccountAnnouncement } from './DebuggingCustomerAccountAnnouncement';
-import { TrialAnnouncement } from './TrialAnnouncement';
+import { TrialAnnouncement } from 'tg.ee';
 
 type TopBarAnnouncementsProps = {
   isAdminAccess?: boolean;

@@ -39,7 +39,7 @@ import java.util.*
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class ExceptionHandlers: Logging {
+class ExceptionHandlers : Logging {
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
     ex: MethodArgumentNotValidException,

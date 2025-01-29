@@ -11,17 +11,14 @@ import {
   useTheme,
 } from '@mui/material';
 import { T } from '@tolgee/react';
-import { useTrialInfo } from '../announcements/useTrialInfo';
-import {
-  PlanFeaturesBox,
-  PlanTitle,
-} from 'tg.ee.module/billing/component/Plan/PlanStyles';
-import { getHighlightColor } from 'tg.ee.module/billing/component/Plan/Plan';
+import { useTrialInfo } from 'tg.component/layout/TopBar/announcements/useTrialInfo';
+import { PlanFeaturesBox, PlanTitle } from '../Plan/PlanStyles';
+import { getHighlightColor } from '../Plan/Plan';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { IncludedFeatures } from 'tg.ee.module/billing/component/Plan/IncludedFeatures';
-import { IncludedUsage } from 'tg.ee.module/billing/component/Plan/IncludedUsage';
-import { isPlanLegacy } from 'tg.ee.module/billing/component/Plan/plansTools';
+import { IncludedFeatures } from '../Plan/IncludedFeatures';
+import { IncludedUsage } from '../Plan/IncludedUsage';
+import { isPlanLegacy } from '../Plan/plansTools';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Link } from 'react-router-dom';
 

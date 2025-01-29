@@ -1,10 +1,10 @@
 import React from 'react';
-import { TopBarAnnouncementWithIcon } from './TopBarAnnouncementWithIcon';
+import { TopBarAnnouncementWithIcon } from 'tg.component/layout/TopBar/announcements/TopBarAnnouncementWithIcon';
 import { ClockStopwatch } from '@untitled-ui/icons-react';
 import { Link } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { useTrialInfo } from './useTrialInfo';
+import { useTrialInfo } from 'tg.component/layout/TopBar/announcements/useTrialInfo';
 
 export const TrialAnnouncement: React.FC = () => {
   const { subscriptionsLink, shouldShowAnnouncement, daysLeft } =
