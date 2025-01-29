@@ -19,8 +19,6 @@ data class AuthProviderChangeData(
       it.userAccount = this.userAccount
       it.authType = this.authType
       it.authId = this.authId
-      it.ssoRefreshToken = this.ssoRefreshToken
-      it.ssoExpiration = this.ssoExpiration
       it.ssoDomain = this.ssoDomain
       it.ssoRefreshToken = this.ssoRefreshToken
       it.ssoExpiration = this.ssoExpiration

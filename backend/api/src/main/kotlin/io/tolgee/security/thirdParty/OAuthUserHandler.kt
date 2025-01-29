@@ -65,13 +65,13 @@ class OAuthUserHandler(
     val existingUserAccount =
       userAccountService.findActive(userResponse.email)
     if (existingUserAccount != null) {
-      // TODO: ssoDomain
       authProviderChangeService.initiateProviderChange(
         AuthProviderChangeData(
           existingUserAccount,
           accountType,
           thirdPartyAuthType,
           userResponse.sub,
+          ssoDomain = userResponse.tenant?.domain,
           ssoRefreshToken = userResponse.refreshToken,
           ssoExpiration = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType),
         ),
