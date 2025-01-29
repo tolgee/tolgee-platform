@@ -4,6 +4,7 @@ import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.model.Notification
 import io.tolgee.repository.NotificationRepository
+import io.tolgee.util.Logging
 import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Service
 class NotificationService(
   private val notificationRepository: NotificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
-) {
+  private val emailNotificationsService: EmailNotificationsService,
+) : Logging {
   fun getNotifications(
     userId: Long,
     pageable: Pageable,
@@ -33,6 +35,7 @@ class NotificationService(
 
   @Transactional
   fun save(notification: Notification) {
+    emailNotificationsService.sendEmailNotification(notification)
     notificationRepository.save(notification)
     applicationEventPublisher.publishEvent(
       OnNotificationsChangedForUser(
