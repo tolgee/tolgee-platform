@@ -14,7 +14,7 @@ import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
 import { TopBarAnnouncements } from './announcements/TopBarAnnouncements';
 import { TopBarTestClockInfo } from './TopBarTestClockInfo';
 import React, { FC } from 'react';
-import { TrialChip } from './trialChip/TrialChip';
+import { TrialChip } from 'tg.ee';
 
 export const TOP_BAR_HEIGHT = 52;
 

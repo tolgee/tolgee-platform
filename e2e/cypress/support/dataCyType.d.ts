@@ -12,7 +12,6 @@ declare namespace DataCy {
         "activity-compact-detail-button" |
         "activity-detail" |
         "activity-detail-dialog" |
-        "add-box" |
         "administration-access-message" |
         "administration-assign-trial-assign-button" |
         "administration-assign-trial-button" |
@@ -147,6 +146,8 @@ declare namespace DataCy {
         "billing-upgrade-preview-confirm-button" |
         "billing-usage-table" |
         "billing_period_annual" |
+        "cell-key-screenshot-dropzone" |
+        "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
         "comment" |
         "comment-menu" |

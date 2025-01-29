@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { useTrialInfo } from '../announcements/useTrialInfo';
+import { useTrialInfo } from 'tg.component/layout/TopBar/announcements/useTrialInfo';
 import { Box, Chip } from '@mui/material';
 import { T } from '@tolgee/react';
 import { TrialChipTooltip } from './TrialChipTooltip';
