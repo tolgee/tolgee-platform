@@ -26,6 +26,10 @@ const StyledMenu = styled(Menu)`
   }
 `;
 
+const StyledHeader = styled(Typography)`
+  font-size: 16px;
+`;
+
 function getNotifications(
   data: InfiniteData<PagedModelNotificationModel> | undefined
 ) {
@@ -145,9 +149,9 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
     >
       <List id="notifications-list" data-cy="notifications-list">
         <ListItem>
-          <Typography variant="h6">
+          <StyledHeader variant="h6">
             <T keyName="notifications-header" />
-          </Typography>
+          </StyledHeader>
         </ListItem>
         {notifications?.map((notification, i) => {
           const Component = notificationComponents[notification.type]!;
