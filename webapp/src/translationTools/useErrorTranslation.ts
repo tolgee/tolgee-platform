@@ -27,6 +27,8 @@ export function useErrorTranslation() {
         return t('key_exists');
       case 'third_party_auth_error_message':
         return t('third_party_auth_error_message');
+      case 'third_party_switch_initiated':
+        return t('third_party_switch_initiated');
       case 'username_already_exists':
         return t('username_already_exists');
       case 'user_already_has_permissions':
