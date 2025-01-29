@@ -273,7 +273,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: webapp
-          path: webapp/build
+          path: webapp/dist
 
   e2e-install-deps:
     name: Install E2E dependencies ⬇️
