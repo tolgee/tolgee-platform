@@ -558,12 +558,18 @@ class TaskService(
   }
 
   private fun createNotificationIfApplicable(task: Task) {
-    if (task.state != TaskState.DONE) return
+    val notificationType =
+      when (task.state) {
+        TaskState.DONE -> NotificationType.TASK_COMPLETED
+        TaskState.CLOSED -> NotificationType.TASK_CLOSED
+        else -> return
+      }
+
     val author = task.author ?: return
 
     notificationService.save(
       Notification().apply {
-        type = NotificationType.TASK_COMPLETED
+        type = notificationType
         user = author
         project = task.project
         originatingUser = authenticationFacade.authenticatedUserEntity
