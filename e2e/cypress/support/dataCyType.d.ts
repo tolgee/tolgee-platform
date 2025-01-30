@@ -577,8 +577,12 @@ declare namespace DataCy {
         "top-banner" |
         "top-banner-content" |
         "top-banner-dismiss-button" |
+        "topbap-trial-popover-content" |
         "topbar-trial-announcement" |
         "topbar-trial-chip" |
+        "topbar-trial-popover-compare-plans-button" |
+        "topbar-trial-popover-plan-features" |
+        "topbar-trial-popover-trial-plan-chip" |
         "transfer-project-apply-button" |
         "translation-agency-item" |
         "translation-create-description-input" |

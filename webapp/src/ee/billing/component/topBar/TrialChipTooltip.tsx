@@ -97,7 +97,7 @@ export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
       disableTouchListener
       title={
         <>
-          <PlanContent>
+          <PlanContent data-cy="topbap-trial-popover-content">
             <PlanTitle
               sx={{
                 pb: '10px',
@@ -108,6 +108,7 @@ export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
             >
               {plan.name}{' '}
               <TrialChip
+                data-cy={`topbar-trial-popover-trial-plan-chip`}
                 size="small"
                 label={
                   <T keyName="topbar-trial-popover-trial-plan-title-trial-chip" />
@@ -121,6 +122,7 @@ export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
               alignItems="stretch"
               flexGrow={1}
               sx={{ pt: '10px' }}
+              data-cy={`topbar-trial-popover-plan-features`}
             >
               <PlanFeaturesBox sx={{ gap: '18px' }}>
                 <IncludedFeatures
@@ -142,7 +144,7 @@ export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
             </Box>
             <Box sx={{ mt: '32px', alignSelf: 'center' }}>
               <Button
-                data-cy="billing-plan-action-button"
+                data-cy="topbar-trial-popover-compare-plans-button"
                 variant="contained"
                 color={!plan.public ? 'info' : 'primary'}
                 size="medium"
