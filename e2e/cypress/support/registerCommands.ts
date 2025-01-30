@@ -136,7 +136,10 @@ export const register = () => {
   Cypress.Commands.add(
     'chooseDatePicker',
     (selector: string, value: string) => {
-      cy.get(selector).find('input').clear().type(value);
+      cy.get(selector)
+        .find('input')
+        .clear({ force: true })
+        .type(value, { force: true });
     }
   );
 };
