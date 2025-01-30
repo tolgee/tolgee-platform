@@ -7,6 +7,7 @@ import { handleApiError } from './handleApiError';
 import { ApiError } from './ApiError';
 import { errorAction } from './errorAction';
 import { globalContext } from 'tg.globalContext/globalActions';
+import { testClockStore } from '../useTestClock';
 
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
@@ -56,6 +57,7 @@ export class ApiHttpService {
 
         fetch(this.apiUrl + input, init)
           .then(async (r) => {
+            this.handleTestClock(r);
             if (r.status >= 400) {
               const responseData = await ApiHttpService.getResObject(r);
               const resultError = new ApiError('Api error', responseData);
@@ -111,6 +113,19 @@ export class ApiHttpService {
       };
       fetchIt();
     });
+  }
+
+  private handleTestClock(r: Response) {
+    const headerValue = r.headers.get('X-Tolgee-Test-Clock');
+    if (!headerValue) {
+      return undefined;
+    }
+    try {
+      const time = parseInt(headerValue);
+      testClockStore.setState({ time });
+    } catch (e) {
+      return;
+    }
   }
 
   async get<T = any>(

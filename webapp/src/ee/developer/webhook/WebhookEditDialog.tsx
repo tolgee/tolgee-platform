@@ -35,7 +35,6 @@ type Props = {
   data?: WebhookConfigModel;
 };
 
-// TODO: Move Webhooks to EE
 export const WebhookEditDialog = ({ onClose, data }: Props) => {
   const { t } = useTranslate();
   const project = useProject();

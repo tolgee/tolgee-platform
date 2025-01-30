@@ -106,7 +106,7 @@ export interface paths {
   };
   "/v2/ee-license/prepare-set-license-key": {
     /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-    post: operations["prepareSetLicenseKey"];
+    post: operations["prepareSetLicenseKey_1"];
   };
   "/v2/ee-license/refresh": {
     /** This will refresh the subscription information from the license server and update the subscription info. */
@@ -573,7 +573,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm": {
     /** Pre-translate provided keys to provided languages by TM. */
-    post: operations["translate"];
+    post: operations["translate_1"];
   };
   "/v2/projects/{projectId}/start-batch-job/set-keys-namespace": {
     post: operations["setKeysNamespace"];
@@ -751,7 +751,7 @@ export interface paths {
     post: operations["identify"];
   };
   "/v2/public/business-events/report": {
-    post: operations["report"];
+    post: operations["report_1"];
   };
   "/v2/public/configuration-properties": {
     /** Return server configuration properties documentation */
@@ -763,6 +763,24 @@ export interface paths {
   "/v2/public/initial-data": {
     /** Returns initial data required by the UI to load */
     get: operations["get_1"];
+  };
+  "/v2/public/licensing/prepare-set-key": {
+    post: operations["prepareSetLicenseKey"];
+  };
+  "/v2/public/licensing/release-key": {
+    post: operations["releaseKey"];
+  };
+  "/v2/public/licensing/report-error": {
+    post: operations["reportError"];
+  };
+  "/v2/public/licensing/report-usage": {
+    post: operations["reportUsage"];
+  };
+  "/v2/public/licensing/set-key": {
+    post: operations["onLicenceSetKey"];
+  };
+  "/v2/public/licensing/subscription": {
+    post: operations["getMySubscription"];
   };
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
@@ -788,6 +806,12 @@ export interface paths {
   "/v2/public/slack/on-event": {
     /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
     post: operations["onInteractivityEvent"];
+  };
+  "/v2/public/telemetry/report": {
+    post: operations["report"];
+  };
+  "/v2/public/translator/translate": {
+    post: operations["translate"];
   };
   "/v2/quick-start/set-finished/{finished}": {
     /** Sets finished state of the quick start guide */
@@ -1046,7 +1070,8 @@ export interface components {
         | "TAG_KEYS"
         | "UNTAG_KEYS"
         | "SET_KEYS_NAMESPACE"
-        | "AUTOMATION";
+        | "AUTOMATION"
+        | "BILLING_TRIAL_EXPIRATION_NOTICE";
       /**
        * Format: int64
        * @description The time when the job was last updated (status change)
@@ -1705,6 +1730,7 @@ export interface components {
         | "PAST_DUE"
         | "UNPAID"
         | "ERROR"
+        | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
     };
     EntityDescriptionWithRelations: {
@@ -1950,7 +1976,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -1968,8 +1993,23 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation"
+        | "cannot_cancel_trial"
+        | "cannot_update_without_modification"
+        | "current_subscription_is_not_trialing";
       params?: { [key: string]: unknown }[];
+    };
+    ExampleItem: {
+      key: string;
+      keyNamespace?: string;
+      source: string;
+      target: string;
     };
     ExistenceEntityDescription: {
       data: { [key: string]: { [key: string]: unknown } };
@@ -2106,6 +2146,10 @@ export interface components {
       keys: components["schemas"]["KeyDefinitionDto"][];
       /** @description Tags to return language translations in */
       languageTags: string[];
+    };
+    GetMySubscriptionDto: {
+      instanceId: string;
+      licenseKey: string;
     };
     HierarchyItem: {
       requires: components["schemas"]["HierarchyItem"][];
@@ -2867,6 +2911,13 @@ export interface components {
       keyIds: number[];
       targetLanguageIds: number[];
     };
+    Metadata: {
+      closeItems: components["schemas"]["ExampleItem"][];
+      examples: components["schemas"]["ExampleItem"][];
+      keyDescription?: string;
+      languageDescription?: string;
+      projectDescription?: string;
+    };
     ModifiedEntityModel: {
       description?: { [key: string]: { [key: string]: unknown } };
       entityClass: string;
@@ -2879,6 +2930,12 @@ export interface components {
       relations?: {
         [key: string]: components["schemas"]["ExistenceEntityDescription"];
       };
+    };
+    MtResult: {
+      contextDescription?: string;
+      /** Format: int32 */
+      price: number;
+      translated?: string;
     };
     MtServiceDTO: {
       defaultEnabledForProject: boolean;
@@ -3336,7 +3393,13 @@ export interface components {
       plan: components["schemas"]["SelfHostedEePlanModel"];
       usage: components["schemas"]["UsageModel"];
     };
+    PrepareSetLicenseKeyDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
     PrivateOrganizationModel: {
+      activeCloudSubscription?: components["schemas"]["PublicCloudSubscriptionModel"];
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
       /**
@@ -3599,6 +3662,21 @@ export interface components {
     PublicBillingConfigurationDTO: {
       enabled: boolean;
     };
+    /** @example Current active subscription info */
+    PublicCloudSubscriptionModel: {
+      cancelAtPeriodEnd: boolean;
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      /** Format: int64 */
+      trialEnd?: number;
+    };
     PublicConfigurationDTO: {
       allowRegistrations: boolean;
       appName: string;
@@ -3733,6 +3811,18 @@ export interface components {
       keyName: string;
       namespace?: string;
     };
+    ReleaseKeyDto: {
+      licenseKey: string;
+    };
+    ReportErrorDto: {
+      licenseKey: string;
+      stackTrace: string;
+    };
+    ReportUsageDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
     ResetPassword: {
       code: string;
       email: string;
@@ -3855,6 +3945,28 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
     };
+    SelfHostedEeSubscriptionModel: {
+      /** Format: int64 */
+      createdAt: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      /** Format: int64 */
+      currentPeriodStart?: number;
+      estimatedCosts?: number;
+      /** Format: int64 */
+      id: number;
+      licenseKey?: string;
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+    };
     SetDisabledLanguagesRequest: {
       languageIds: number[];
     };
@@ -3876,6 +3988,12 @@ export interface components {
     };
     SetLicenseKeyDto: {
       licenseKey: string;
+    };
+    SetLicenseKeyLicensingDto: {
+      instanceId: string;
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -4300,7 +4418,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -4318,7 +4435,16 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation"
+        | "cannot_cancel_trial"
+        | "cannot_update_without_modification"
+        | "current_subscription_is_not_trialing";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -4451,7 +4577,31 @@ export interface components {
       totalItems: number;
       type: "TRANSLATE" | "REVIEW";
     };
+    TelemetryReportRequest: {
+      /** Format: int64 */
+      distinctLanguagesCount: number;
+      instanceId: string;
+      /** Format: int64 */
+      languagesCount: number;
+      /** Format: int64 */
+      projectsCount: number;
+      /** Format: int64 */
+      translationsCount: number;
+      /** Format: int64 */
+      usersCount: number;
+    };
     TextNode: { [key: string]: unknown };
+    TolgeeTranslateParams: {
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      keyName?: string;
+      metadata?: components["schemas"]["Metadata"];
+      pluralFormExamples?: { [key: string]: string };
+      pluralForms?: { [key: string]: string };
+      sourceTag: string;
+      targetTag: string;
+      text: string;
+    };
     TranslationAgencySimpleModel: {
       avatar?: components["schemas"]["Avatar"];
       /** Format: int64 */
@@ -6141,7 +6291,7 @@ export interface operations {
     };
   };
   /** Get info about the upcoming EE subscription. This will show, how much the subscription will cost when key is applied. */
-  prepareSetLicenseKey: {
+  prepareSetLicenseKey_1: {
     responses: {
       /** OK */
       200: {
@@ -13705,7 +13855,7 @@ export interface operations {
     };
   };
   /** Pre-translate provided keys to provided languages by TM. */
-  translate: {
+  translate_1: {
     parameters: {
       path: {
         projectId: number;
@@ -16906,7 +17056,7 @@ export interface operations {
       };
     };
   };
-  report: {
+  report_1: {
     responses: {
       /** OK */
       200: unknown;
@@ -17074,6 +17224,276 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  prepareSetLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
+      };
+    };
+  };
+  releaseKey: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReleaseKeyDto"];
+      };
+    };
+  };
+  reportError: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportErrorDto"];
+      };
+    };
+  };
+  reportUsage: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportUsageDto"];
+      };
+    };
+  };
+  onLicenceSetKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
+      };
+    };
+  };
+  getMySubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetMySubscriptionDto"];
       };
     };
   };
@@ -17405,6 +17825,96 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": string;
+      };
+    };
+  };
+  report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TelemetryReportRequest"];
+      };
+    };
+  };
+  translate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["MtResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TolgeeTranslateParams"];
       };
     };
   };

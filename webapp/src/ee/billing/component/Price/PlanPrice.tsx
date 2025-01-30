@@ -3,7 +3,7 @@ import { BillingPeriodType, PeriodSwitch } from './PeriodSwitch';
 import { components } from 'tg.service/apiSchema.generated';
 import { PricePrimary } from './PricePrimary';
 import { PayAsYouGoPrices } from './PayAsYouGoPrices';
-import { planIsPeriodDependant } from '../Plan/plansTools';
+import { isPlanPeriodDependant } from '../Plan/plansTools';
 
 type PlanPricesModel = components['schemas']['PlanPricesModel'];
 
@@ -28,7 +28,7 @@ export const PlanPrice: React.FC<Props> = ({
   sx,
   className,
 }) => {
-  const needsPeriodSwitch = planIsPeriodDependant(prices);
+  const needsPeriodSwitch = isPlanPeriodDependant(prices);
 
   return (
     <StyledPrice {...{ sx, className }}>

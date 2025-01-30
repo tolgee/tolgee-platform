@@ -242,7 +242,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                   }
                 />
               }
-              data-cy="administration-cloud-plan-field-non-commercial"
+              data-cy="administration-plan-field-non-commercial"
               label="Non-commercial"
             />
 
