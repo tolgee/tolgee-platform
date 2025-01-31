@@ -5,7 +5,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
-import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.*
@@ -30,7 +29,7 @@ import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDat
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -45,7 +44,7 @@ class TranslationService(
   private val translationRepository: TranslationRepository,
   private val importService: ImportService,
   private val tolgeeProperties: TolgeeProperties,
-  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val applicationContext: ApplicationContext,
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val entityManager: EntityManager,
   private val translationCommentService: TranslationCommentService,
@@ -171,47 +170,43 @@ class TranslationService(
     return translationViewDataProvider.getSelectAllKeys(projectId, languages, params)
   }
 
-  fun setTranslation(
+  @Transactional
+  fun setForKey(
+    key: Key,
+    translations: Map<String, String?>,
+  ): Map<String, Translation> {
+    return SetTranslationTextUtil(applicationContext).setForKey(key, translations)
+  }
+
+  @Transactional
+  fun setForKey(
+    key: Key,
+    translations: Map<Language, String?>,
+    oldTranslations: Map<Language, String?>,
+  ): Map<Language, Translation> {
+    return SetTranslationTextUtil(applicationContext).setForKey(key, translations, oldTranslations)
+  }
+
+  fun setTranslationText(
     key: Key,
     language: Language,
     text: String?,
   ): Translation {
-    val translation = getOrCreate(key, language)
-    setTranslation(translation, text)
-    key.translations.add(translation)
-    return translation
+    return SetTranslationTextUtil(applicationContext).setTranslationText(key, language, text)
   }
 
-  fun setTranslation(
+  fun setTranslationText(
     translation: Translation,
     text: String?,
   ): Translation {
-    setTextNoSave(translation, text)
-
-    return save(translation)
+    return SetTranslationTextUtil(applicationContext).setTranslationText(translation, text)
   }
 
-  fun setTextNoSave(
+  fun setTranslationTextNoSave(
     translation: Translation,
     text: String?,
   ) {
-    val hasTextChanged = translation.text != text
-
-    if (hasTextChanged) {
-      translation.resetFlags()
-    }
-
-    translation.text = text
-
-    val hasText = !text.isNullOrEmpty()
-
-    translation.state =
-      when {
-        translation.isUntranslated && hasText -> TranslationState.TRANSLATED
-        hasTextChanged -> TranslationState.TRANSLATED
-        text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
-        else -> translation.state
-      }
+    return SetTranslationTextUtil(applicationContext).setTranslationTextNoSave(translation, text)
   }
 
   fun save(translation: Translation): Translation {
@@ -222,68 +217,11 @@ class TranslationService(
     return translationRepository.save(translation)
   }
 
-  @Transactional
-  fun setForKey(
-    key: Key,
-    translations: Map<String, String?>,
-  ): Map<String, Translation> {
-    val normalized =
-      validateAndNormalizePlurals(translations, key.isPlural, key.pluralArgName)
-    val languages = languageService.findEntitiesByTags(translations.keys, key.project.id)
-    val oldTranslations =
-      getKeyTranslations(languages, key.project, key).associate {
-        languageByIdFromLanguages(
-          it.language.id,
-          languages,
-        ) to it.text
-      }
-
-    return setForKey(
-      key,
-      normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
-        .toMap(),
-      oldTranslations,
-    ).mapKeys { it.key.tag }
-  }
-
   fun findForKeyByLanguages(
     key: Key,
     languageTags: Collection<String>,
   ): List<Translation> {
     return translationRepository.findForKeyByLanguages(key, languageTags)
-  }
-
-  private fun languageByTagFromLanguages(
-    tag: String,
-    languages: Collection<Language>,
-  ) = languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-
-  private fun languageByIdFromLanguages(
-    id: Long,
-    languages: Set<Language>,
-  ) = languages.find { it.id == id } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-
-  @Transactional
-  fun setForKey(
-    key: Key,
-    translations: Map<Language, String?>,
-    oldTranslations: Map<Language, String?>,
-  ): Map<Language, Translation> {
-    val result =
-      translations.entries.associate { (language, value) ->
-        language to setTranslation(key, language, value)
-      }.mapValues { it.value }
-
-    applicationEventPublisher.publishEvent(
-      OnTranslationsSet(
-        source = this,
-        key = key,
-        oldValues = oldTranslations.map { it.key.tag to it.value }.toMap(),
-        translations = result.values.toList(),
-      ),
-    )
-
-    return result
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -433,11 +371,28 @@ class TranslationService(
     return translationRepository.getForKeys(keyIds, languageTags)
   }
 
-  fun findAllByKeyIdsAndLanguageIds(
-    keyIds: List<Long>,
-    languageIds: List<Long>,
-  ): List<Translation> {
-    return translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    isKeyPlural: Boolean,
+    pluralArgName: String?,
+  ): Map<T, String?> {
+    if (isKeyPlural) {
+      return validateAndNormalizePlurals(texts, pluralArgName)
+    }
+
+    return texts
+  }
+
+  fun <T> validateAndNormalizePlurals(
+    texts: Map<T, String?>,
+    pluralArgName: String?,
+  ): Map<T, String?> {
+    @Suppress("UNCHECKED_CAST")
+    return try {
+      normalizePlurals(texts, pluralArgName)
+    } catch (e: StringIsNotPluralException) {
+      throw BadRequestException(Message.INVALID_PLURAL_FORM, listOf(e.invalidStrings) as List<Serializable?>)
+    }
   }
 
   @Transactional
@@ -567,30 +522,6 @@ class TranslationService(
     val keys = optimizePluralForms(forms.forms).keys
     if (keys.size > 1) {
       throw BadRequestException(Message.PLURAL_FORMS_DATA_LOSS, listOf(text))
-    }
-  }
-
-  fun <T> validateAndNormalizePlurals(
-    texts: Map<T, String?>,
-    isKeyPlural: Boolean,
-    pluralArgName: String?,
-  ): Map<T, String?> {
-    if (isKeyPlural) {
-      return validateAndNormalizePlurals(texts, pluralArgName)
-    }
-
-    return texts
-  }
-
-  fun <T> validateAndNormalizePlurals(
-    texts: Map<T, String?>,
-    pluralArgName: String?,
-  ): Map<T, String?> {
-    @Suppress("UNCHECKED_CAST")
-    return try {
-      normalizePlurals(texts, pluralArgName)
-    } catch (e: StringIsNotPluralException) {
-      throw BadRequestException(Message.INVALID_PLURAL_FORM, listOf(e.invalidStrings) as List<Serializable?>)
     }
   }
 }

@@ -279,7 +279,7 @@ class StoredDataImporter(
       if (language == language.project.baseLanguage && translation.text != this.text) {
         outdatedFlagKeys.add(translation.key.id)
       }
-      translationService.setTextNoSave(translation, text)
+      translationService.setTranslationTextNoSave(translation, text)
       translationsToSave.add(this to translation)
     }
   }
