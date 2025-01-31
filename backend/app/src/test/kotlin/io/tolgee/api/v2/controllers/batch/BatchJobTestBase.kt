@@ -4,6 +4,8 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
 import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -13,7 +15,10 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.ResultActions
 import java.util.function.Consumer
@@ -29,6 +34,7 @@ class BatchJobTestBase {
   lateinit var batchJobService: BatchJobService
 
   @Autowired
+  @SpyBean
   lateinit var machineTranslationProperties: MachineTranslationProperties
 
   @Autowired
@@ -37,6 +43,7 @@ class BatchJobTestBase {
   var fakeBefore: Boolean = false
 
   @Autowired
+  @SpyBean
   private lateinit var internalProperties: InternalProperties
 
   @Autowired
@@ -45,18 +52,22 @@ class BatchJobTestBase {
   fun setup() {
     batchJobOperationQueue.clear()
     testData = BatchJobsTestData()
-    fakeBefore = internalProperties.fakeMtProviders
-    internalProperties.fakeMtProviders = true
-    machineTranslationProperties.google.apiKey = "mock"
-    machineTranslationProperties.google.defaultEnabled = true
-    machineTranslationProperties.google.defaultPrimary = true
-    machineTranslationProperties.aws.defaultEnabled = false
-    machineTranslationProperties.aws.accessKey = "mock"
-    machineTranslationProperties.aws.secretKey = "mock"
-  }
 
-  fun after() {
-    internalProperties.fakeMtProviders = fakeBefore
+    whenever(internalProperties.fakeMtProviders).thenReturn(true)
+
+    val googleMock = mock<GoogleMachineTranslationProperties>()
+    whenever(googleMock.apiKey).thenReturn("mock")
+    whenever(googleMock.defaultEnabled).thenReturn(true)
+    whenever(googleMock.defaultPrimary).thenReturn(true)
+
+    whenever(machineTranslationProperties.google).thenReturn(googleMock)
+
+    val awsMock = mock<AwsMachineTranslationProperties>()
+    whenever(awsMock.defaultEnabled).thenReturn(false)
+    whenever(awsMock.accessKey).thenReturn("mock")
+    whenever(awsMock.secretKey).thenReturn("mock")
+
+    whenever(machineTranslationProperties.aws).thenReturn(awsMock)
   }
 
   fun saveAndPrepare(testClass: ProjectAuthControllerTest) {

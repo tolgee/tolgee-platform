@@ -93,6 +93,7 @@ class SetTranslationTextUtil(
 
     translation.state =
       when {
+        translation.state == TranslationState.DISABLED -> TranslationState.DISABLED
         translation.isUntranslated && hasText -> TranslationState.TRANSLATED
         hasTextChanged -> TranslationState.TRANSLATED
         text.isNullOrEmpty() -> TranslationState.UNTRANSLATED

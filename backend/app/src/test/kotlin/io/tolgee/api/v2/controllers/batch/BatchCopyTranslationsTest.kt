@@ -7,7 +7,6 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,11 +18,6 @@ class BatchCopyTranslationsTest : ProjectAuthControllerTest("/v2/projects/") {
   @BeforeEach
   fun setup() {
     batchJobTestBase.setup()
-  }
-
-  @AfterEach
-  fun after() {
-    batchJobTestBase.after()
   }
 
   val testData
