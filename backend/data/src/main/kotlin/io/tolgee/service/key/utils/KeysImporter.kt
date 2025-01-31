@@ -68,7 +68,7 @@ class KeysImporter(
         val translations = convertedToPlurals ?: keyDto.translations
         translations.entries.forEach { (languageTag, value) ->
           languages[languageTag]?.let { language ->
-            translationService.setTranslation(key, language, value)
+            translationService.setTranslationText(key, language, value)
           }
         }
         existing[safeNamespace to keyDto.name] = key

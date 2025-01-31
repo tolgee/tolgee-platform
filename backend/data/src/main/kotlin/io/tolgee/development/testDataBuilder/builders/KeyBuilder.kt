@@ -32,6 +32,8 @@ class KeyBuilder(
     return addOperation(projectBuilder.data.translations, builder, ft)
   }
 
+  val translations get() = projectBuilder.data.translations.filter { it.self.key === self }
+
   fun addMeta(ft: FT<KeyMeta>): KeyMetaBuilder {
     data.meta = KeyMetaBuilder(keyBuilder = this).apply { ft(this.self) }
     return data.meta!!

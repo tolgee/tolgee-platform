@@ -317,7 +317,7 @@ class KeyComplexEditHelper(
     return !currentTagsContainAllNewTags || !newTagsContainAllCurrentTags
   }
 
-  val requireKeyEditPermission
+  private val requireKeyEditPermission
     get() =
       isKeyNameModified ||
         isNamespaceChanged ||
@@ -333,7 +333,16 @@ class KeyComplexEditHelper(
 
   private fun prepareModifiedStates() {
     modifiedStates =
-      dto.states?.filter { it.value.translationState != existingTranslations[it.key]?.state }
+      dto.states?.filter {
+        // When updating translation, we automatically set it to TRANSLATED state
+        // While executing complex edit, user can prevent this by setting the state to REVIEWED
+        // In that case, we have to add it to modified states too
+        val tryingToKeepReviewState =
+          modifiedTranslations?.get(languageByTag(it.key).id) != null &&
+            it.value.translationState == TranslationState.REVIEWED
+
+        it.value.translationState != existingTranslations[it.key]?.state || tryingToKeepReviewState
+      }
         ?.map { languageByTag(it.key).id to it.value.translationState }?.toMap()
   }
 

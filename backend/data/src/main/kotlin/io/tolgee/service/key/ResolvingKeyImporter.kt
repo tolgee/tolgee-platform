@@ -183,7 +183,7 @@ class ResolvingKeyImporter(
 
   private fun List<TranslationToModify>.save() {
     this.forEach {
-      translationService.setTranslation(it.translation, it.text)
+      translationService.setTranslationText(it.translation, it.text)
       updatedTranslationIds.add(it.translation.id)
     }
   }
