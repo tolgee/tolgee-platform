@@ -27,6 +27,8 @@ class ImportFile(
   var name: String?,
   @field:ManyToOne(optional = false)
   @get:ManyToOne(optional = false)
+  // It cannot be named "import", because with Hibernate 6.6 that fails to build
+  // It is probably some reserved keyword
   @JoinColumn(name = "import_id")
   val importEntity: Import,
 ) : StandardAuditModel() {
