@@ -12,8 +12,8 @@ interface ImportFileRepository : JpaRepository<ImportFile, Long> {
   @Query(
     """
     select f from ImportFile f
-    where f.import.project.id = :projectId 
-    and f.import.author.id = :authorId
+    where f.importEntity.project.id = :projectId 
+    and f.importEntity.author.id = :authorId
     and f.id = :id
   """,
   )
