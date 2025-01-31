@@ -45,12 +45,12 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         from ImportTranslation it
         left join it.conflict itc 
         join it.key ik
-        left join Namespace en on ik.file.namespace = en.name and en.project = ik.file.import.project 
-        left join Key ek on it.key.name = ek.name and ek.project = it.key.file.import.project 
+        left join Namespace en on ik.file.namespace = en.name and en.project = ik.file.importEntity.project 
+        left join Key ek on it.key.name = ek.name and ek.project = it.key.file.importEntity.project 
             and (ek.namespace = en or (ek.namespace is null and en is null))
         left join ik.keyMeta ikm
         left join ek.keyMeta ekm
-        left join ImportSettings is on is.project = ik.file.import.project 
+        left join ImportSettings is on is.project = ik.file.importEntity.project 
         where (itc.id is not null or :onlyConflicts = false)
         and ((itc.id is not null and it.resolvedHash is null) or :onlyUnresolved = false)
         and it.language.id = :languageId
@@ -76,7 +76,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
   @Transactional
   @Query(
     """delete from ImportTranslation it where it.key.id in 
-        (select k.id from ImportKey k join k.file f where f.import = :import)""",
+        (select k.id from ImportKey k join k.file f where f.importEntity = :import)""",
   )
   @Modifying
   fun deleteAllByImport(import: Import)
@@ -97,7 +97,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
       join fetch it.language il
       join il.file if
       where if.needsParamConversion = true
-      and if.import.id = :importId
+      and if.importEntity.id = :importId
       """,
   )
   fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation>
