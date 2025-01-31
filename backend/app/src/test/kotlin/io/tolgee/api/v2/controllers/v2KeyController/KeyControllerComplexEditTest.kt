@@ -171,10 +171,10 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
 
   private fun verifyStates(statesToVerify: Map<String, TranslationState>) {
     executeInNewTransaction {
-      val key = keyService.find(testData.keyWithReferences.id)
+      val key = keyService.get(testData.keyWithReferences.id)
       assertThat(key).isNotNull
       statesToVerify.forEach {
-        val state = key!!.translations.find { translation -> translation.language.tag == it.key }!!.state
+        val state = key.translations.find { translation -> translation.language.tag == it.key }!!.state
         assertThat(state)
           .describedAs("State for ${it.key} is not ${it.value}")
           .isEqualTo(it.value)
