@@ -1,3 +1,10 @@
+# [3.97.0](https://github.com/tolgee/tolgee-platform/compare/v3.96.5...v3.97.0) (2025-02-01)
+
+
+### Features
+
+* Revert "REVIEWED" to "TRANSLATED" when text changes ([#2807](https://github.com/tolgee/tolgee-platform/issues/2807)) ([6e5dc98](https://github.com/tolgee/tolgee-platform/commit/6e5dc98b040c5607d4e9f27935ae0abbc808f31d))
+
 ## [3.96.5](https://github.com/tolgee/tolgee-platform/compare/v3.96.4...v3.96.5) (2025-01-28)
 
 
