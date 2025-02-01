@@ -29,11 +29,12 @@ class BatchJobCancellationManager(
   private val redisTemplate: StringRedisTemplate,
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
-  private val batchJobActionService: BatchJobActionService,
   private val progressManager: ProgressManager,
   private val activityHolder: ActivityHolder,
   private val batchJobService: BatchJobService,
   private val batchJobStatusProvider: BatchJobStatusProvider,
+  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
+  private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
 ) : Logging {
   @Transactional
   fun cancel(id: Long) {
@@ -63,12 +64,12 @@ class BatchJobCancellationManager(
       )
       return
     }
-    batchJobActionService.cancelLocalJob(id)
+    cancelLocalJob(id)
   }
 
   @EventListener(JobCancelEvent::class)
   fun cancelJobListener(event: JobCancelEvent) {
-    batchJobActionService.cancelLocalJob(event.jobId)
+    cancelLocalJob(event.jobId)
   }
 
   fun cancelJob(jobId: Long) {
@@ -184,5 +185,12 @@ class BatchJobCancellationManager(
   private fun incrementCancelledCount() {
     val current = activityHolder.activityRevision.cancelledBatchJobExecutionCount ?: 0
     activityHolder.activityRevision.cancelledBatchJobExecutionCount = current + 1
+  }
+
+  fun cancelLocalJob(jobId: Long) {
+    batchJobChunkExecutionQueue.removeJobExecutions(jobId)
+    concurrentExecutionLauncher.runningJobs.filter { it.value.first.id == jobId }.forEach {
+      it.value.second.cancel()
+    }
   }
 }

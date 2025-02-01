@@ -4,7 +4,6 @@ spring:
       - org.redisson.spring.starter.RedissonAutoConfigurationV2
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   jpa:
-    show-sql: true
     properties:
       hibernate:
         order_by:
@@ -84,14 +83,3 @@ tolgee:
     server: http://localhost:8080
   batch:
     concurrency: 10
-
-logging:
-  level:
-    io.tolgee.billing.api.v2.OrganizationInvoicesController: DEBUG
-    io.tolgee.batch.BatchJobActionService: DEBUG
-    io.tolgee.component.atomicLong.AtomicLongProvider: DEBUG
-    io.tolgee: DEBUG
-    io.tolgee.component.CurrentDateProvider: DEBUG
-    io.tolgee.component.reporting.BusinessEventPublisher: DEBUG
-    io.tolgee.ExceptionHandlers: DEBUG
-    io.tolgee.component.reporting.ReportingService: DEBUG

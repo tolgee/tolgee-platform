@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.batch.ApplicationBatchJobRunner
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -8,13 +9,17 @@ import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class BatchPreTranslateByMtTest : ProjectAuthControllerTest("/v2/projects/") {
+class BatchPreTranslateByTmTest : Logging, ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var batchJobTestBase: BatchJobTestBase
+
+  @Autowired
+  lateinit var applicationBatchJobRunner: ApplicationBatchJobRunner
 
   @BeforeEach
   fun setup() {
@@ -26,7 +31,7 @@ class BatchPreTranslateByMtTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it pre-translates by mt`() {
+  fun `it pre-translates by tm`() {
     val keyCount = 1000
     val keys = testData.addTranslationOperationData(keyCount)
     batchJobTestBase.saveAndPrepare(this)
