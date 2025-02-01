@@ -47,7 +47,7 @@ class BatchJobActionService(
   private val activityHolder: ActivityHolder,
   private val metrics: Metrics,
 ) : Logging {
-  suspend fun handleItem(executionItem: ExecutionQueueItem)  {
+  suspend fun handleItem(executionItem: ExecutionQueueItem) {
     val coroutineContext = coroutineContext
     var retryExecution: BatchJobChunkExecution? = null
     try {

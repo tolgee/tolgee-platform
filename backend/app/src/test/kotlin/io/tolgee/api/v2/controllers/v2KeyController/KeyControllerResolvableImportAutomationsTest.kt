@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
-    private const val TRANSLATED_WITH_GOOGLE_RESPONSE = "changed translated with GOOGLE from en to de"
   }
 
   lateinit var testData: ResolvableImportTestData
@@ -55,7 +54,7 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
 
         Assertions.assertThat(
           translatedText,
-        ).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+        ).isEqualTo("Translated with Google")
       }
     }
   }
