@@ -113,7 +113,7 @@ class DemoProjectCreator(
     translation: String,
   ): Translation {
     val language = languages[languageTag]!!
-    return translationService.setTranslation(getOrCreateKey(keyName), language, translation).also {
+    return translationService.setTranslationText(getOrCreateKey(keyName), language, translation).also {
       it.state = TranslationState.REVIEWED
     }
   }

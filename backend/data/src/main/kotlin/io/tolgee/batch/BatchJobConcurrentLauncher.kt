@@ -10,16 +10,9 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.trace
-import jakarta.annotation.PreDestroy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
 
 @Component
@@ -30,10 +23,10 @@ class BatchJobConcurrentLauncher(
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
   private val batchJobService: BatchJobService,
   private val progressManager: ProgressManager,
+  private val batchJobActionService: BatchJobActionService,
 ) : Logging {
   companion object {
-    val runningInstances: ConcurrentHashMap.KeySetView<BatchJobConcurrentLauncher, Boolean> =
-      ConcurrentHashMap.newKeySet()
+    const val MIN_TIME_BETWEEN_OPERATIONS = 100
   }
 
   /**
@@ -63,18 +56,9 @@ class BatchJobConcurrentLauncher(
       masterRunJob?.join()
     }
     logger.trace("Batch job launcher stopped ${System.identityHashCode(this)}")
-    runningInstances.remove(this)
-  }
-
-  @PreDestroy
-  fun preDestroy() {
-    this.stop()
   }
 
   fun repeatForever(fn: () -> Boolean) {
-    runningInstances.forEach { it.stop() }
-    runningInstances.add(this)
-
     logger.trace("Started batch job action service ${System.identityHashCode(this)}")
     while (run) {
       try {
@@ -98,10 +82,12 @@ class BatchJobConcurrentLauncher(
     if (!batchJobChunkExecutionQueue.isEmpty() && jobsToLaunch > 0 && somethingHandled) {
       return 0
     }
-    return BatchJobActionService.MIN_TIME_BETWEEN_OPERATIONS - (System.currentTimeMillis() - startTime)
+    return MIN_TIME_BETWEEN_OPERATIONS - (System.currentTimeMillis() - startTime)
   }
 
-  fun run(processExecution: (executionItem: ExecutionQueueItem, coroutineContext: CoroutineContext) -> Unit) {
+  fun run() {
+    run = true
+    pause = false
     @Suppress("OPT_IN_USAGE")
     masterRunJob =
       GlobalScope.launch(Dispatchers.IO) {
@@ -124,7 +110,7 @@ class BatchJobConcurrentLauncher(
 
           // when something handled, return true
           items.map { executionItem ->
-            handleItem(executionItem, processExecution)
+            handleItem(executionItem)
           }.any()
         }
       }
@@ -147,10 +133,7 @@ class BatchJobConcurrentLauncher(
   /**
    * Returns true if item was handled
    */
-  private fun CoroutineScope.handleItem(
-    executionItem: ExecutionQueueItem,
-    processExecution: (executionItem: ExecutionQueueItem, coroutineContext: CoroutineContext) -> Unit,
-  ): Boolean {
+  private fun CoroutineScope.handleItem(executionItem: ExecutionQueueItem): Boolean {
     logger.trace("Trying to run execution ${executionItem.chunkExecutionId}")
     if (!executionItem.isTimeToExecute()) {
       logger.trace {
@@ -209,7 +192,7 @@ class BatchJobConcurrentLauncher(
 
     val job =
       launch {
-        processExecution(executionItem, this.coroutineContext)
+        batchJobActionService.handleItem(executionItem)
       }
 
     val batchJobDto = batchJobService.getJobDto(executionItem.jobId)

@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.performSingleStepImport
@@ -63,6 +64,33 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       getTestTranslation().key.keyMeta!!.tags.map { it.name }.assert.contains("new-tag")
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `resets translation state`() {
+    testData.addReviewedTranslation()
+    saveAndPrepare()
+
+    executeInNewTransaction {
+      getGermanTestTranslation().state
+        .assert.isEqualTo(TranslationState.REVIEWED)
+    }
+
+    performImport(
+      projectId = testData.project.id,
+      listOf(Pair("de.json", simpleJson)),
+      params = mapOf("forceMode" to "OVERRIDE"),
+    )
+
+    executeInNewTransaction {
+      getGermanTestTranslation().state
+        .assert.isEqualTo(TranslationState.TRANSLATED)
+    }
+  }
+
+  private fun getGermanTestTranslation() =
+    getTestKeyTranslations()
+      .single { it.language.tag == "de" }
 
   @Test
   @ProjectJWTAuthTestMethod

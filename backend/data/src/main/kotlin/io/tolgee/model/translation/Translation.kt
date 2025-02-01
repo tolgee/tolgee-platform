@@ -86,6 +86,9 @@ class Translation(
   @field:ColumnDefault("false")
   var outdated: Boolean = false
 
+  val isUntranslated: Boolean
+    get() = state == TranslationState.UNTRANSLATED
+
   constructor(text: String? = null, key: Key, language: Language) : this(text) {
     this.key = key
     this.language = language
