@@ -15,6 +15,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslation
 import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.OpenaiMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
@@ -167,6 +168,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties
 
   @Autowired
+  lateinit var openaiMachineTranslationProperties: OpenaiMachineTranslationProperties
+
+  @Autowired
   lateinit var internalProperties: InternalProperties
 
   @Autowired
@@ -256,6 +260,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     tolgeeMachineTranslationProperties.url = "http://localhost:8081"
     tolgeeMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.TOLGEE)
     internalProperties.fakeMtProviders = false
+    openaiMachineTranslationProperties.apiKey = "dummy"
   }
 
   fun <T> executeInNewTransaction(fn: (ts: TransactionStatus) -> T): T {

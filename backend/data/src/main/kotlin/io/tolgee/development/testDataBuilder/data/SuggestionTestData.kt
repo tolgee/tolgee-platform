@@ -172,6 +172,7 @@ class SuggestionTestData : BaseTestData() {
           MtServiceType.AZURE,
           MtServiceType.BAIDU,
           MtServiceType.TOLGEE,
+          MtServiceType.OPENAI,
         )
       this.primaryService = MtServiceType.AWS
     }
@@ -187,6 +188,7 @@ class SuggestionTestData : BaseTestData() {
           MtServiceType.DEEPL,
           MtServiceType.AZURE,
           MtServiceType.BAIDU,
+          MtServiceType.OPENAI,
         )
       this.primaryService = MtServiceType.GOOGLE
     }
