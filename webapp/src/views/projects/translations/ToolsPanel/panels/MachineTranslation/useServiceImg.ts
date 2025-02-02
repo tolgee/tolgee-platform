@@ -19,6 +19,8 @@ export const useServiceImg = () => {
         return contextPresent
           ? `/images/providers/tolgee-logo-${palette.mode}-in-context.svg`
           : `/images/providers/tolgee-logo-${palette.mode}.svg`;
+      case 'OPENAI':
+        return `/images/providers/openai-icon-${palette.mode}.svg`;
       default:
         return undefined;
     }

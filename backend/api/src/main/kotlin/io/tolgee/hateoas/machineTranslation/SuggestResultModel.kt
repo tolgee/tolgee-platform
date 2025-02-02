@@ -30,7 +30,11 @@ class SuggestResultModel(
       "TOLGEE": {
         "output": "This was translated by Tolgee Translator",
         "contextDescription": "This is an example in swagger"
-      } 
+      },
+      "OPENAI": {
+        "output": "This was translated by OpenAI",
+        "contextDescription": null
+      }
     }
   """,
   )
