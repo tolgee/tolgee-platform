@@ -83,3 +83,4 @@ tolgee:
     server: http://localhost:8080
   batch:
     concurrency: 10
+  front-end-url: https://dummy-url.com

@@ -6,12 +6,7 @@ import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.fixtures.EmailTestUtil
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andGetContentAsString
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.*
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
@@ -45,7 +40,6 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
         "This is description",
         "test-org",
       )
-    tolgeeProperties.frontEndUrl = null
     emailTestUtil.initMocks()
   }
 
@@ -172,7 +166,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
-    assertThat(messageContent).contains("http://localhost/")
+    assertThat(messageContent).contains("https://dummy-url.com")
     emailTestUtil.assertEmailTo.isEqualTo(INVITED_EMAIL)
   }
 
