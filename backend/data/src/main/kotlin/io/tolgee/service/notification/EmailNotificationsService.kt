@@ -6,6 +6,7 @@ import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.constants.NotificationType
 import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.model.Notification
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -32,33 +33,43 @@ class EmailNotificationsService(
       NotificationType.TASK_ASSIGNED -> {
         val task =
           notification.linkedTask
-            ?: throw IllegalStateException("Notification of type ${notification.type} must contain linkedTask.")
-        val user = notification.user
+            ?: throw IllegalStateException(
+              "Notification of type ${notification.type} must contain linkedTask.",
+            )
         val taskUrl = getTaskUrl(task.project.id, task.number)
         val myTasksUrl = getMyTasksUrl()
 
-        EmailParams(
-          to = user.username,
-          subject = "New task assignment",
-          text =
-            """
-                Hello! 👋<br/><br/>          
-                You've been assigned to a task:<br/>
-                <a href="$taskUrl">${task.name} #${task.number} (${task.language.name}) - ${
-              getTaskTypeName(task.type)
-            }</a><br/><br/>
-                
-                
-                Check all your tasks <a href="$myTasksUrl">here</a>.<br/><br/>
-                
-                Regards,<br/>
-                Tolgee
-            """.trimIndent(),
-        )
+        val subject = "New task assignment"
+        val text =
+          """
+          You've been assigned to a task:<br/>
+          <a href="$taskUrl">${task.name} #${task.number} (${task.language.name}) - ${getTaskTypeName(task.type)}</a>
+          <br/><br/>
+          Check all your tasks <a href="$myTasksUrl">here</a>.
+          """.trimIndent()
+        composeEmailParams(notification.user, subject, text)
       }
 
       else -> null // TODO add branches for all types, remove else
     }
+
+  private fun composeEmailParams(
+    user: UserAccount,
+    subject: String,
+    text: String,
+  ) = EmailParams(
+    to = user.username,
+    subject = subject,
+    text =
+      """
+      Hello!
+      👋<br/><br/>          
+      $text
+      <br/><br/>
+      Regards,<br/>
+      Tolgee
+      """.trimIndent(),
+  )
 
   private fun getTaskTypeName(type: TaskType): String =
     if (type === TaskType.TRANSLATE) {
