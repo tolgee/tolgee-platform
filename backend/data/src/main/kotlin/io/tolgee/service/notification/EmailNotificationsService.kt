@@ -20,19 +20,20 @@ class EmailNotificationsService(
   fun sendEmailNotification(notification: Notification) {
     val subject = composeEmailSubject(notification)
     val text = composeEmailText(notification)
-    val params = EmailParams(
-      to = notification.user.username,
-      subject = subject,
-      text =
-        """
-          |Hello!👋
-          |<br/><br/>
-          |$text
-          |<br/><br/>
-          |Regards,<br/>
-          |Tolgee
-        """.trimMargin(),
-    )
+    val params =
+      EmailParams(
+        to = notification.user.username,
+        subject = subject,
+        text =
+          """
+            |Hello!👋
+            |<br/><br/>
+            |$text
+            |<br/><br/>
+            |Regards,<br/>
+            |Tolgee
+          """.trimMargin(),
+      )
 
     try {
       tolgeeEmailSender.sendEmail(params)
@@ -42,14 +43,15 @@ class EmailNotificationsService(
     }
   }
 
-  private fun composeEmailSubject(notification: Notification) = when (notification.type) {
-    NotificationType.TASK_ASSIGNED -> "New task assignment"
-    NotificationType.TASK_COMPLETED -> "Task has been completed"
-    NotificationType.TASK_CLOSED -> "Task has been closed"
-    NotificationType.MFA_ENABLED -> "Multi-factor authentication has been enabled for your account"
-    NotificationType.MFA_DISABLED -> "Multi-factor authentication has been enabled for your account"
-    NotificationType.PASSWORD_CHANGED -> "Password has been changed for your account"
-  }
+  private fun composeEmailSubject(notification: Notification) =
+    when (notification.type) {
+      NotificationType.TASK_ASSIGNED -> "New task assignment"
+      NotificationType.TASK_COMPLETED -> "Task has been completed"
+      NotificationType.TASK_CLOSED -> "Task has been closed"
+      NotificationType.MFA_ENABLED -> "Multi-factor authentication has been enabled for your account"
+      NotificationType.MFA_DISABLED -> "Multi-factor authentication has been enabled for your account"
+      NotificationType.PASSWORD_CHANGED -> "Password has been changed for your account"
+    }
 
   private fun composeEmailText(notification: Notification) =
     when (notification.type) {
@@ -59,12 +61,13 @@ class EmailNotificationsService(
             ?: throw IllegalStateException(
               "Notification of type ${notification.type} must contain linkedTask.",
             )
-        val header = when (notification.type) {
-          NotificationType.TASK_ASSIGNED -> "You've been assigned to a task"
-          NotificationType.TASK_COMPLETED -> "Task you've created has been completed"
-          NotificationType.TASK_CLOSED -> "Task you've created has been closed"
-          else -> throw IllegalStateException("Non-task notification detected: ${notification.type}")
-        }
+        val header =
+          when (notification.type) {
+            NotificationType.TASK_ASSIGNED -> "You've been assigned to a task"
+            NotificationType.TASK_COMPLETED -> "Task you've created has been completed"
+            NotificationType.TASK_CLOSED -> "Task you've created has been closed"
+            else -> throw IllegalStateException("Non-task notification detected: ${notification.type}")
+          }
 
         """
           |$header:
