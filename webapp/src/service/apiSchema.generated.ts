@@ -4,6 +4,18 @@
  */
 
 export interface paths {
+  "/api/auth_provider/changed": {
+    get: operations["getChangedAuthProvider"];
+  };
+  "/api/auth_provider/changed/accept": {
+    post: operations["acceptChangeAuthProvider"];
+  };
+  "/api/auth_provider/changed/reject": {
+    post: operations["rejectChangeAuthProvider"];
+  };
+  "/api/auth_provider/current": {
+    get: operations["getCurrentAuthProvider"];
+  };
   "/api/project/{projectId}/export/jsonZip": {
     /** Exports data as ZIP of jsons */
     get: operations["doExportJsonZip"];
@@ -954,6 +966,11 @@ export interface components {
       ssoGlobal: components["schemas"]["SsoGlobalPublicConfigDTO"];
       ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
     };
+    AuthProviderDto: {
+      accountType?: "LOCAL" | "MANAGED" | "THIRD_PARTY";
+      authType?: "GOOGLE" | "GITHUB" | "OAUTH2" | "SSO" | "SSO_GLOBAL";
+      ssoDomain?: string;
+    };
     AutoTranslationConfigModel: {
       /**
        * @description If true, import will trigger batch operation to translate the new new keys.
@@ -1748,6 +1765,7 @@ export interface components {
         | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
+        | "third_party_switch_initiated"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -4098,6 +4116,7 @@ export interface components {
         | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
+        | "third_party_switch_initiated"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -4750,6 +4769,166 @@ export interface components {
 }
 
 export interface operations {
+  getChangedAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  acceptChangeAuthProvider: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  rejectChangeAuthProvider: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getCurrentAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Exports data as ZIP of jsons */
   doExportJsonZip: {
     parameters: {
