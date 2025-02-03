@@ -20,24 +20,22 @@ class EmailNotificationsService(
   fun sendEmailNotification(notification: Notification) {
     val subject = composeEmailSubject(notification)
     val text = composeEmailText(notification)
-    val params = text?.let { // TODO remove nullable
-      EmailParams(
-        to = notification.user.username,
-        subject = subject!!, // TODO remove nullable
-        text =
-          """
-            |Hello!👋
-            |<br/><br/>
-            |$it
-            |<br/><br/>
-            |Regards,<br/>
-            |Tolgee
-          """.trimMargin(),
-      )
-    }
+    val params = EmailParams(
+      to = notification.user.username,
+      subject = subject,
+      text =
+        """
+          |Hello!👋
+          |<br/><br/>
+          |$text
+          |<br/><br/>
+          |Regards,<br/>
+          |Tolgee
+        """.trimMargin(),
+    )
 
     try {
-      params?.let { tolgeeEmailSender.sendEmail(it) } // TODO remove nullable
+      tolgeeEmailSender.sendEmail(params)
     } catch (e: Exception) {
       logger.error(e.message)
       Sentry.captureException(e)
@@ -50,7 +48,7 @@ class EmailNotificationsService(
     NotificationType.TASK_CLOSED -> "Task has been closed"
     NotificationType.MFA_ENABLED -> "Multi-factor authentication has been enabled for your account"
     NotificationType.MFA_DISABLED -> "Multi-factor authentication has been enabled for your account"
-    else -> null // TODO remove else branch
+    NotificationType.PASSWORD_CHANGED -> "Password has been changed for your account"
   }
 
   private fun composeEmailText(notification: Notification) =
@@ -84,8 +82,13 @@ class EmailNotificationsService(
           |Check your security settings <a href="${frontendUrlProvider.url}/account/security"}">here</a>.
         """.trimMargin()
       }
-
-      else -> null // TODO add branches for all types, remove else
+      NotificationType.PASSWORD_CHANGED -> {
+        """
+          |Password has been changed for your account.
+          |<br/><br/>
+          |Check your security settings <a href="${frontendUrlProvider.url}/account/security"}">here</a>.
+        """.trimMargin()
+      }
     }
 
   private fun getTaskLinkHtml(task: Task) =
