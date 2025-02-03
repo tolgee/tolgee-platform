@@ -1,5 +1,5 @@
 import { default as React, useEffect } from 'react';
-import { List, ListItem, styled } from '@mui/material';
+import { List, ListItem, styled, Typography } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import {
   useApiInfiniteQuery,
@@ -14,6 +14,7 @@ import { notificationComponents } from 'tg.component/layout/Notifications/Notifi
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 import { components } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
+import { useWindowSize } from 'usehooks-ts';
 
 type PagedModelNotificationModel =
   components['schemas']['PagedModelNotificationModel'];
@@ -26,8 +27,8 @@ const StyledMenu = styled(Menu)`
   }
 `;
 
-const StyledListItemHeader = styled(ListItem)`
-  font-weight: bold;
+const StyledHeader = styled(Typography)`
+  font-size: 16px;
 `;
 
 function getNotifications(
@@ -111,6 +112,8 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
     }
   }, [user, client]);
 
+  const windowSize = useWindowSize();
+  const maxHeight = Math.min(500, windowSize.height - 100);
   const notifications = getNotifications(notificationsLoadable.data);
 
   return (
@@ -130,7 +133,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       slotProps={{
         paper: {
           style: {
-            maxHeight: 500,
+            maxHeight: maxHeight,
             minWidth: 400,
           },
           onScroll: (event) => {
@@ -148,17 +151,15 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       }}
     >
       <List id="notifications-list" data-cy="notifications-list">
-        <StyledListItemHeader divider>
-          <T keyName="notifications-header" />
-        </StyledListItemHeader>
+        <ListItem>
+          <StyledHeader variant="h6">
+            <T keyName="notifications-header" />
+          </StyledHeader>
+        </ListItem>
         {notifications?.map((notification, i) => {
           const Component = notificationComponents[notification.type]!;
           return (
-            <Component
-              notification={notification}
-              key={notification.id}
-              isLast={i === notifications.length - 1}
-            />
+            <Component notification={notification} key={notification.id} />
           );
         })}
         {notifications?.length === 0 && (
