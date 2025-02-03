@@ -3,12 +3,14 @@ package io.tolgee.security.thirdParty
 import io.tolgee.configuration.tolgee.GoogleAuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
+import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.http.HttpEntity
@@ -26,6 +28,7 @@ class GoogleOAuthDelegate(
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
+  private val authProviderChangeService: AuthProviderChangeService,
 ) : ThirdPartyAuthDelegate {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
@@ -87,7 +90,14 @@ class GoogleOAuthDelegate(
         val userAccount =
           userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!) ?: let {
             userAccountService.findActive(googleEmail)?.let {
-              throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+              authProviderChangeService.initiateProviderChange(
+                AuthProviderChangeData(
+                  it,
+                  UserAccount.AccountType.THIRD_PARTY,
+                  ThirdPartyAuthType.GOOGLE,
+                  userResponse.sub,
+                ),
+              )
             }
 
             val newUserAccount = UserAccount()
