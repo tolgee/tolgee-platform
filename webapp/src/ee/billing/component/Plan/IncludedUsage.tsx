@@ -1,4 +1,4 @@
-import { Box, SxProps } from '@mui/material';
+import { Box, SxProps, Theme } from '@mui/material';
 import { PlanType } from './types';
 import {
   IncludedCreadits,
@@ -11,7 +11,7 @@ type Props = {
   includedUsage: PlanType['includedUsage'];
   isLegacy: boolean;
   highlightColor: string;
-  sx?: SxProps;
+  sx?: SxProps<Theme>;
   className?: string;
 };
 

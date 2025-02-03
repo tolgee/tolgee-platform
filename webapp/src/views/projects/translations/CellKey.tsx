@@ -232,7 +232,7 @@ export const CellKey: React.FC<Props> = ({
                 <div />
               </Tooltip>
             )}
-          <StyledKey>
+          <StyledKey data-cy="translations-key-name">
             <LimitedHeightText
               width={widthPercent}
               maxLines={3}

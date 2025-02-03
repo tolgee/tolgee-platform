@@ -7,7 +7,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { PlansCloud } from './cloud/PlansCloud';
+import { CloudSubscriptions } from './cloud/CloudSubscriptions';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { Box, ButtonGroup } from '@mui/material';
 import { PlansSelfHosted } from './selfHosted/PlansSelfHosted';
@@ -109,7 +109,7 @@ export const OrganizationSubscriptionsView: FunctionComponent = () => {
       </Box>
 
       <PrivateRoute exact path={LINKS.ORGANIZATION_SUBSCRIPTIONS.template}>
-        <PlansCloud />
+        <CloudSubscriptions />
       </PrivateRoute>
       <PrivateRoute
         exact

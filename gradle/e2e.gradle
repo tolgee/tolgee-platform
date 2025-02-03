@@ -1,4 +1,5 @@
 apply from: './gradle/utils.gradle'
+
 import groovy.io.FileType
 
 import java.time.Duration
@@ -123,22 +124,6 @@ task openE2eDev(type: Exec, group: "e2e") {
     environment "CYPRESS_HOST", "http://localhost:8081"
 
     workingDir E2E_DIR
-}
-
-task openBillingE2eDev(type: Exec, group: "e2e") {
-    commandLine npmCommandName, "run", "cy:open"
-
-    environment "CYPRESS_HOST", "http://localhost:8081"
-
-    workingDir BILLING_E2E_DIR
-}
-
-task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {
-    commandLine npmCommandName, "run", "start", "--", "--port", "8081", "--host"
-
-    environment "VITE_APP_API_URL", "http://localhost:8201"
-
-    workingDir WEBAPP_DIR
 }
 
 task runDockerE2e(type: Exec, group: "e2e") {

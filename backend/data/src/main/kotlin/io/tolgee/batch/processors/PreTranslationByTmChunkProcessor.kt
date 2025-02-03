@@ -54,7 +54,7 @@ class PreTranslationByTmChunkProcessor(
 
   override fun getChunkSize(
     request: PreTranslationByTmRequest,
-    projectId: Long,
+    projectId: Long?,
   ): Int {
     return 10
   }

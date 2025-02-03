@@ -1,21 +1,5 @@
 /* eslint-disable no-restricted-imports */
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
-
-export { TaskReference } from '../ee/task/components/TaskReference';
-export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
-export { Usage } from '../ee/billing/component/Usage';
-export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';
-export { PermissionsAdvancedEe } from '../ee/PermissionsAdvanced/PermissionsAdvancedEe';
-export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDetail';
-export { PrefilterTask } from '../ee/task/components/PrefilterTask';
-export { PrefilterTaskHideDoneSwitch as PrefilterTaskShowDoneSwitch } from '../ee/task/components/PrefilterTaskHideDoneSwitch';
-export { TaskAllDonePlaceholder } from '../ee/task/components/TaskAllDonePlaceholder';
-export { OrderTranslationsDialog } from '../ee/orderTranslations/OrderTranslationsDialog';
-export { AgencyLabel } from '../ee/orderTranslations/AgencyLabel';
-export { TaskItem } from '../ee/task/components/TaskItem';
-export { TaskFilterPopover } from '../ee/task/components/taskFilter/TaskFilterPopover';
-export type { TaskFilterType } from '../ee/task/components/taskFilter/TaskFilterPopover';
-
 import React from 'react';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
@@ -65,6 +49,24 @@ import { addAdministrationMenuItems } from '../views/administration/components/B
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import { BillingMenuItemsProps } from './EeModuleType';
+import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
+
+export { TaskReference } from '../ee/task/components/TaskReference';
+export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
+export { Usage } from '../ee/billing/component/Usage';
+export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';
+export { PermissionsAdvancedEe } from '../ee/PermissionsAdvanced/PermissionsAdvancedEe';
+export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDetail';
+export { PrefilterTask } from '../ee/task/components/PrefilterTask';
+export { PrefilterTaskHideDoneSwitch as PrefilterTaskShowDoneSwitch } from '../ee/task/components/PrefilterTaskHideDoneSwitch';
+export { TaskAllDonePlaceholder } from '../ee/task/components/TaskAllDonePlaceholder';
+export { OrderTranslationsDialog } from '../ee/orderTranslations/OrderTranslationsDialog';
+export { AgencyLabel } from '../ee/orderTranslations/AgencyLabel';
+export { TaskItem } from '../ee/task/components/TaskItem';
+export { TaskFilterPopover } from '../ee/task/components/taskFilter/TaskFilterPopover';
+export type { TaskFilterType } from '../ee/task/components/taskFilter/TaskFilterPopover';
+export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
+export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 
 export const billingMenuItems = [
   BillingMenuItem,
@@ -105,6 +107,9 @@ export const routes = {
         path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.template}
       >
         <AdministrationCloudPlansView />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.ADMINISTRATION_BILLING_SUBSCRIPTIONS.template}>
+        <AdministrationSubscriptionsView />
       </PrivateRoute>
       <PrivateRoute
         exact
@@ -343,6 +348,12 @@ export const useAddAdministrationMenuItems = () => {
         link: LINKS.ADMINISTRATION_EE_LICENSE,
         label: t('administration_ee_license'),
         condition: () => true,
+      },
+      {
+        id: 'subscriptions',
+        link: LINKS.ADMINISTRATION_BILLING_SUBSCRIPTIONS,
+        label: t('administration_subscriptions'),
+        condition: () => config.billing.enabled,
       },
       {
         id: 'translation_agencies',

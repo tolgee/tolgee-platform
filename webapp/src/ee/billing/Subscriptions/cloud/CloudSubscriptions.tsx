@@ -8,11 +8,12 @@ import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 import { StyledBillingSectionTitle } from '../../BillingSection';
 import { useOrganizationCreditBalance } from '../../useOrganizationCreditBalance';
-import { CurrentUsage } from '../../CurrentUsage/CurrentUsage';
+import { CurrentCloudSubscriptionInfo } from '../../currentCloudSubscription/CurrentCloudSubscriptionInfo';
 import { PlansCloudList } from './PlansCloudList';
 import { useLocation } from 'react-router-dom';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
-import { planIsPeriodDependant } from '../../component/Plan/plansTools';
+import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
+import { components } from 'tg.service/billingApiSchema.generated';
 
 const StyledShoppingGrid = styled('div')`
   display: grid;
@@ -21,10 +22,10 @@ const StyledShoppingGrid = styled('div')`
   margin: 16px 0px;
 `;
 
-export const PlansCloud = () => {
+export const CloudSubscriptions = () => {
   const organization = useOrganization();
 
-  const [period, setPeriod] = useState<BillingPeriodType>();
+  const [period, setPeriod] = useState<BillingPeriodType>('YEARLY');
   const creditBalance = useOrganizationCreditBalance();
 
   const usage = useApiQuery({
@@ -35,13 +36,19 @@ export const PlansCloud = () => {
     },
   });
 
-  const plansLoadable = useBillingApiQuery({
-    url: `/v2/organizations/{organizationId}/billing/plans`,
-    method: 'get',
-    path: {
-      organizationId: organization!.id,
-    },
-  });
+  function setInitialPeriod(
+    data: components['schemas']['CloudSubscriptionModel']
+  ) {
+    if (
+      data.plan &&
+      isPlanPeriodDependant(data.plan.prices) &&
+      data.currentBillingPeriod
+    ) {
+      setPeriod(data.currentBillingPeriod);
+      return;
+    }
+    setPeriod('YEARLY');
+  }
 
   const activeSubscription = useBillingApiQuery({
     url: '/v2/organizations/{organizationId}/billing/subscription',
@@ -51,12 +58,7 @@ export const PlansCloud = () => {
     },
     options: {
       onSuccess(data) {
-        if (!period)
-          if (data.plan && planIsPeriodDependant(data.plan.prices)) {
-            setPeriod(data.currentBillingPeriod);
-          } else {
-            setPeriod('YEARLY');
-          }
+        setInitialPeriod(data);
       },
     },
   });
@@ -81,33 +83,28 @@ export const PlansCloud = () => {
 
   return (
     <>
-      {plansLoadable.data?._embedded?.plans &&
-        activeSubscription.data &&
-        usage.data &&
-        creditBalance.data &&
-        period && (
-          <>
-            <Box>
-              <CurrentUsage
-                activeSubscription={activeSubscription.data}
-                usage={usage.data}
-              />
-            </Box>
-            <Box display="flex" justifyContent="center">
-              <StyledBillingSectionTitle>
-                <T keyName="organization_cloud_plans_title" />
-              </StyledBillingSectionTitle>
-            </Box>
-            <StyledShoppingGrid>
-              <PlansCloudList
-                plans={plansLoadable.data._embedded.plans}
-                activeSubscription={activeSubscription.data}
-                onPeriodChange={(period) => setPeriod(period)}
-                period={period}
-              />
-            </StyledShoppingGrid>
-          </>
-        )}
+      {activeSubscription.data && usage.data && creditBalance.data && (
+        <>
+          <Box>
+            <CurrentCloudSubscriptionInfo
+              activeSubscription={activeSubscription.data}
+              usage={usage.data}
+            />
+          </Box>
+          <Box display="flex" justifyContent="center">
+            <StyledBillingSectionTitle>
+              <T keyName="organization_cloud_plans_title" />
+            </StyledBillingSectionTitle>
+          </Box>
+          <StyledShoppingGrid>
+            <PlansCloudList
+              activeSubscription={activeSubscription.data}
+              onPeriodChange={(period) => setPeriod(period)}
+              period={period}
+            />
+          </StyledShoppingGrid>
+        </>
+      )}
     </>
   );
 };

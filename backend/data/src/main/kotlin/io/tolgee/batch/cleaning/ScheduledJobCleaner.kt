@@ -55,7 +55,7 @@ class ScheduledJobCleaner(
     val lockedJobIds = lockingManager.getLockedJobIds() + batchJobStateProvider.getCachedJobIds()
     batchJobService.getJobsCompletedBefore(lockedJobIds, currentDateProvider.date.addSeconds(-10))
       .forEach {
-        unlockAndRemoveState(it.project.id, it.id)
+        unlockAndRemoveState(it.project?.id, it.id)
       }
   }
 

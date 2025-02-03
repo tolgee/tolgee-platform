@@ -3,10 +3,9 @@ package io.tolgee.model.translationAgency
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.ModelWithAvatar
+import io.tolgee.model.Permission
 import io.tolgee.model.StandardAuditModel
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
 import java.util.*
@@ -39,6 +38,12 @@ class TranslationAgency : StandardAuditModel(), ModelWithAvatar, EntityWithId {
   var emailBcc: MutableList<String> = mutableListOf()
 
   var deletedAt: Date? = null
+
+  /**
+   * The permissions that are granted to the agency when invited to the project
+   */
+  @OneToMany(mappedBy = "agency", fetch = FetchType.LAZY)
+  var permissions: MutableList<Permission> = mutableListOf()
 
   override var avatarHash: String? = null
 }
