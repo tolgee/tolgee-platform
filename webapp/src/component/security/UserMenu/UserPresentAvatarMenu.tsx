@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Badge, IconButton, MenuItem, Popover, styled } from '@mui/material';
+import { IconButton, MenuItem, Popover, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { UserMenuItems } from './UserMenuItems';
-import { billingMenuItems, useUserTaskCount } from 'tg.ee';
+import { billingMenuItems } from 'tg.ee';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -39,8 +39,6 @@ const StyledDivider = styled('div')`
 `;
 
 export const UserPresentAvatarMenu: React.FC = () => {
-  const taskCount = useUserTaskCount();
-
   const { logout } = useGlobalActions();
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
@@ -93,9 +91,7 @@ export const UserPresentAvatarMenu: React.FC = () => {
         onClick={handleOpen}
         size="large"
       >
-        <Badge badgeContent={taskCount} color="primary" variant="dot">
-          <UserAvatar />
-        </Badge>
+        <UserAvatar />
       </StyledIconButton>
       <StyledPopover
         id="user-menu"
