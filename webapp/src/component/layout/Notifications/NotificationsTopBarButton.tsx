@@ -26,13 +26,8 @@ export const NotificationsTopBarButton: React.FC = () => {
     options: {
       enabled: unseenCount === undefined,
       refetchOnMount: false,
-      keepPreviousData: true,
-      onSuccess(data) {
-        if (unseenCount !== undefined) {
-          return;
-        }
-        setUnseenCount((prevState) => data.page?.totalElements || prevState);
-      },
+      staleTime: Infinity,
+      cacheTime: Infinity,
     },
   });
 
@@ -45,8 +40,8 @@ export const NotificationsTopBarButton: React.FC = () => {
   };
 
   const onNotificationsChanged = function (event: NotificationsChanged) {
-    setUnseenCount(event.data.currentlyUnseenCount);
     unseenNotificationsLoadable.remove();
+    setUnseenCount(event.data.currentlyUnseenCount);
   };
 
   return (
@@ -60,7 +55,9 @@ export const NotificationsTopBarButton: React.FC = () => {
         size="large"
       >
         <Badge
-          badgeContent={unseenCount}
+          badgeContent={
+            unseenNotificationsLoadable.data?.page?.totalElements || unseenCount
+          }
           color="secondary"
           slotProps={{
             badge: {
