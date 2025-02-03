@@ -26,12 +26,12 @@ class EmailNotificationsService(
         subject = subject!!, // TODO remove nullable
         text =
           """
-          |Hello!👋
-          |<br/><br/>
-          |$it
-          |<br/><br/>
-          |Regards,<br/>
-          |Tolgee
+            |Hello!👋
+            |<br/><br/>
+            |$it
+            |<br/><br/>
+            |Regards,<br/>
+            |Tolgee
           """.trimMargin(),
       )
     }
@@ -67,11 +67,11 @@ class EmailNotificationsService(
         }
 
         """
-        |$header:
-        |<br/>
-        |${getTaskLinkHtml(task)}
-        |<br/><br/>
-        |Check all your tasks <a href="${getMyTasksUrl()}">here</a>.
+          |$header:
+          |<br/>
+          |${getTaskLinkHtml(task)}
+          |<br/><br/>
+          |Check all your tasks <a href="${getMyTasksUrl()}">here</a>.
         """.trimMargin()
       }
 
