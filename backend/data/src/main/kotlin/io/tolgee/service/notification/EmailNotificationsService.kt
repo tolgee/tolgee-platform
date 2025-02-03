@@ -26,13 +26,13 @@ class EmailNotificationsService(
         subject = subject!!, // TODO remove nullable
         text =
           """
-        |Hello!👋
-        |<br/><br/>
-        |$it
-        |<br/><br/>
-        |Regards,<br/>
-        |Tolgee
-        """.trimMargin(),
+          |Hello!👋
+          |<br/><br/>
+          |$it
+          |<br/><br/>
+          |Regards,<br/>
+          |Tolgee
+          """.trimMargin(),
       )
     }
 
@@ -46,20 +46,28 @@ class EmailNotificationsService(
 
   private fun composeEmailSubject(notification: Notification) = when (notification.type) {
     NotificationType.TASK_ASSIGNED -> "New task assignment"
+    NotificationType.TASK_COMPLETED -> "Task has been completed"
+    NotificationType.TASK_CLOSED -> "Task has been closed"
     else -> null // TODO remove else branch
   }
 
   private fun composeEmailText(notification: Notification) =
     when (notification.type) {
-      NotificationType.TASK_ASSIGNED -> {
+      NotificationType.TASK_ASSIGNED, NotificationType.TASK_COMPLETED, NotificationType.TASK_CLOSED -> {
         val task =
           notification.linkedTask
             ?: throw IllegalStateException(
               "Notification of type ${notification.type} must contain linkedTask.",
             )
+        val header = when (notification.type) {
+          NotificationType.TASK_ASSIGNED -> "You've been assigned to a task"
+          NotificationType.TASK_COMPLETED -> "Task you've created has been completed"
+          NotificationType.TASK_CLOSED -> "Task you've created has been closed"
+          else -> throw IllegalStateException("Non-task notification detected: ${notification.type}")
+        }
 
         """
-        |You've been assigned to a task:
+        |$header:
         |<br/>
         |${getTaskLinkHtml(task)}
         |<br/><br/>
