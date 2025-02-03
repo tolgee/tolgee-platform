@@ -5,15 +5,21 @@ import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.dtos.response.AuthProviderDto
 import io.tolgee.dtos.response.AuthProviderDto.Companion.asAuthProviderDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.repository.AuthProviderChangeRequestRepository
-import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.TenantService
+import io.tolgee.service.organization.OrganizationRoleService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthProviderChangeService(
   private val authProviderChangeRequestRepository: AuthProviderChangeRequestRepository,
-  private val organizationService: OrganizationService,
+  private val tenantService: TenantService,
+  private val organizationRoleService: OrganizationRoleService,
 ) {
   fun getCurrent(user: UserAccount): AuthProviderDto? {
     return user.asAuthProviderDto()
@@ -23,20 +29,16 @@ class AuthProviderChangeService(
     return user.authProviderChangeRequest?.asAuthProviderDto()
   }
 
-  fun initiateProviderChange(data: AuthProviderChangeData): Nothing {
-    // Note: Is it ok to use Nothing method in this case? Feels like readability might suffer...
-    // Maybe I can return the exception and throw it from caller or something like that.
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun initiateProviderChange(data: AuthProviderChangeData) {
     authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
     authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest())
-    throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
   }
 
   fun acceptProviderChange(userAccount: UserAccount) {
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
-
-    // TODO: provider change request expiration
 
     val req = userAccount.authProviderChangeRequest ?: return
     userAccount.apply {
@@ -45,7 +47,19 @@ class AuthProviderChangeService(
       ssoRefreshToken = req.ssoRefreshToken
       ssoSessionExpiry = req.ssoExpiration
     }
-    req.ssoDomain // TODO: apply tenant changes
+
+    val domain = req.ssoDomain
+    if (domain != null && req.authType == ThirdPartyAuthType.SSO) {
+      val tenant = tenantService.getEnabledConfigByDomain(domain)
+      val organization = tenant.organization
+      if (organization == null) {
+        throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
+      }
+      if (!organizationRoleService.isUserMemberOrOwner(userAccount.id, organization.id)) {
+        organizationRoleService.grantMemberRoleToUser(userAccount, organization)
+      }
+      organizationRoleService.setManaged(userAccount, organization, true)
+    }
     authProviderChangeRequestRepository.delete(req)
   }
 

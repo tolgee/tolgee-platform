@@ -94,6 +94,7 @@ class GithubOAuthDelegate(
                 userResponse.id,
               ),
             )
+            throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
           }
 
           val newUserAccount = UserAccount()

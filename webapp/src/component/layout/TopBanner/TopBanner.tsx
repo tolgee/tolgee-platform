@@ -14,6 +14,7 @@ import { tokenService } from 'tg.service/TokenService';
 import { PendingInvitationBanner } from './PendingInvitationBanner';
 import { useTranslate } from '@tolgee/react';
 import { Announcement } from './Announcement';
+import {PendingAuthProviderChangeBanner} from "tg.component/layout/TopBanner/PendingAuthProviderChangeBanner";
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -60,6 +61,7 @@ export function TopBanner() {
   const { t } = useTranslate();
   const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
   const pendingInvitationCode = useGlobalContext((c) => c.auth.invitationCode);
+  const pendingAuthProviderChange = useGlobalContext((c) => c.auth.authProviderChange);
   const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
   const isAuthenticated = tokenService.getToken() !== undefined;
@@ -103,6 +105,8 @@ export function TopBanner() {
             title={t('verify_email_account_not_verified_title')}
             icon={<Mail01 />}
           />
+        ) : pendingAuthProviderChange ? (
+          <PendingAuthProviderChangeBanner />
         ) : pendingInvitationCode ? (
           <PendingInvitationBanner code={pendingInvitationCode} />
         ) : (

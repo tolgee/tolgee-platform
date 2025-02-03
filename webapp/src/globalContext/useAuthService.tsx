@@ -23,6 +23,7 @@ type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
 
 export const INVITATION_CODE_STORAGE_KEY = 'invitationCode';
+export const AUTH_PROVIDER_CHANGE_USER_STORAGE_KEY = 'authProviderChangeUser';
 
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
@@ -106,6 +107,23 @@ export const useAuthService = (
       initial: undefined,
       key: INVITATION_CODE_STORAGE_KEY,
     });
+  const [
+    authProviderChangeStr,
+    setAuthProviderChangeStr,
+    getAuthProviderChangeStr,
+  ] = useLocalStorageState({
+    initial: undefined,
+    key: AUTH_PROVIDER_CHANGE_USER_STORAGE_KEY,
+  });
+
+  const authProviderChange = authProviderChangeStr === 'true';
+
+  function setAuthProviderChange(value: boolean) {
+    return setAuthProviderChangeStr(value ? 'true' : 'false');
+  }
+  function getAuthProviderChange() {
+    return getAuthProviderChangeStr() === 'true';
+  }
 
   const [allowRegistration, setAllowRegistration] = useState(
     Boolean(invitationCode)
@@ -183,13 +201,23 @@ export const useAuthService = (
     redirectSsoUrlLoadable,
     allowRegistration,
     invitationCode,
+    authProviderChange,
   };
 
   const actions = {
     async login(credentials: LoginRequest) {
-      const response = await loginLoadable.mutateAsync({
-        content: { 'application/json': credentials },
-      });
+      const response = await loginLoadable.mutateAsync(
+        {
+          content: { 'application/json': credentials },
+        },
+        {
+          onError: (error) => {
+            if (error.code === 'third_party_switch_initiated') {
+              setAuthProviderChange(true);
+            }
+          },
+        }
+      );
       response.accessToken;
       await handleAfterLogin(response!);
     },
@@ -209,6 +237,9 @@ export const useAuthService = (
         },
         {
           onError: (error) => {
+            if (error.code === 'third_party_switch_initiated') {
+              setAuthProviderChange(true);
+            }
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
@@ -255,6 +286,9 @@ export const useAuthService = (
     },
     handleAfterLogin,
     redirectAfterLogin() {
+      if (getAuthProviderChange()) {
+        history.replace(LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build());
+      }
       const link = getRedirectUrl(userId);
       history.replace(link);
       securityService.removeAfterLoginLink();
@@ -289,6 +323,9 @@ export const useAuthService = (
       setAdminToken(undefined);
     },
     setInvitationCode,
+    authProviderChange,
+    setAuthProviderChange,
+    getAuthProviderChange,
     redirectTo(url: string) {
       history.replace(LINKS.AFTER_LOGIN.build());
     },

@@ -98,6 +98,7 @@ class GoogleOAuthDelegate(
                   userResponse.sub,
                 ),
               )
+              throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
             }
 
             val newUserAccount = UserAccount()
