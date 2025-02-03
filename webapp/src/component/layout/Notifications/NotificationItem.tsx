@@ -4,6 +4,7 @@ import {
   ListItemButton,
   ListItemButtonProps,
   styled,
+  Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
@@ -15,7 +16,7 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 const StyledItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
-  grid-template-columns: 30px 1fr 120px;
+  grid-template-columns: 32px 1fr 120px;
   grid-template-rows: 1fr;
   grid-template-areas:
     'notification-avatar notification-detail notification-time'
@@ -25,6 +26,11 @@ const StyledItem = styled(ListItemButton)`
 
 const StyledDetail = styled(Box)`
   grid-area: notification-detail;
+  font-size: 14px;
+
+  b {
+    font-weight: 500;
+  }
 `;
 
 const StyledAvatar = styled(Box)`
@@ -32,9 +38,12 @@ const StyledAvatar = styled(Box)`
 `;
 
 const StyledTime = styled(Box)`
-  font-size: 13px;
   grid-area: notification-time;
   text-align: right;
+`;
+
+const StyledRightDetailText = styled(Typography)`
+  font-size: 12px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -44,14 +53,12 @@ const StyledProject = styled(StyledTime)`
 
 export type NotificationItemProps = {
   notification: components['schemas']['NotificationModel'];
-  isLast: boolean;
   destinationUrl?: string;
 } & ListItemButtonProps;
 
 export const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   key,
-  isLast,
   destinationUrl,
   children,
 }) => {
@@ -62,7 +69,6 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   return (
     <StyledItem
       key={key}
-      divider={!isLast}
       //@ts-ignore
       component={Link}
       to={destinationUrl}
@@ -77,20 +83,28 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
               type: 'USER',
               id: originatingUser.id || 0,
             }}
-            size={30}
+            size={32}
           />
         )}
       </StyledAvatar>
       <StyledDetail>{children}</StyledDetail>
       {createdAt && (
         <StyledTime>
-          {formatDistanceToNowStrict(new Date(createdAt), {
-            addSuffix: true,
-            locale: locales[language].dateFnsLocale,
-          })}
+          <StyledRightDetailText variant="body2">
+            {formatDistanceToNowStrict(new Date(createdAt), {
+              addSuffix: true,
+              locale: locales[language].dateFnsLocale,
+            })}
+          </StyledRightDetailText>
         </StyledTime>
       )}
-      {project && <StyledProject>{project.name}</StyledProject>}
+      {project && (
+        <StyledProject>
+          <StyledRightDetailText variant="body2">
+            {project.name}
+          </StyledRightDetailText>
+        </StyledProject>
+      )}
     </StyledItem>
   );
 };
