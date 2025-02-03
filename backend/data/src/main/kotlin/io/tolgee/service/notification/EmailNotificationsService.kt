@@ -48,6 +48,8 @@ class EmailNotificationsService(
     NotificationType.TASK_ASSIGNED -> "New task assignment"
     NotificationType.TASK_COMPLETED -> "Task has been completed"
     NotificationType.TASK_CLOSED -> "Task has been closed"
+    NotificationType.MFA_ENABLED -> "Multi-factor authentication has been enabled for your account"
+    NotificationType.MFA_DISABLED -> "Multi-factor authentication has been enabled for your account"
     else -> null // TODO remove else branch
   }
 
@@ -72,6 +74,14 @@ class EmailNotificationsService(
           |${getTaskLinkHtml(task)}
           |<br/><br/>
           |Check all your tasks <a href="${getMyTasksUrl()}">here</a>.
+        """.trimMargin()
+      }
+      NotificationType.MFA_ENABLED, NotificationType.MFA_DISABLED -> {
+        val enabledDisabled = if (notification.type == NotificationType.MFA_ENABLED) "enabled" else "disabled"
+        """
+          |Multi-factor authentication has been $enabledDisabled for your account.
+          |<br/><br/>
+          |Check your security settings <a href="${frontendUrlProvider.url}/account/security"}">here</a>.
         """.trimMargin()
       }
 
