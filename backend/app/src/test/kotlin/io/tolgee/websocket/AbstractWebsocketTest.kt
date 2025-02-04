@@ -1,6 +1,7 @@
 package io.tolgee.websocket
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.NotificationType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -255,7 +256,11 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   private fun saveNotificationForCurrentUser(): Notification {
-    val notification = Notification().apply { user = testData.user }
+    val notification =
+      Notification().apply {
+        user = testData.user
+        type = NotificationType.PASSWORD_CHANGED
+      }
     notificationService.save(notification)
     return notification
   }
