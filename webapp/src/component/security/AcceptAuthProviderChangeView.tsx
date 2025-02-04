@@ -5,12 +5,16 @@ import { Box, Button, Link, Paper, styled, Typography } from '@mui/material';
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import React from 'react';
 
 export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
 
@@ -44,11 +48,28 @@ const AcceptAuthProviderChangeView: React.FC = () => {
 
   useWindowTitle(t('accept_auth_provider_change_title'));
 
-  const { setAuthProviderChange } = useGlobalActions();
+  const { setAuthProviderChange, redirectAfterLogin, handleAfterLogin } =
+    useGlobalActions();
+  const authProviderChange = useGlobalContext((c) => c.auth.authProviderChange);
 
   const acceptChange = useApiMutation({
     url: '/api/auth_provider/changed/accept',
     method: 'post',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+    },
+  });
+
+  const authProviderCurrentInfo = useApiQuery({
+    url: '/api/auth_provider/current',
+    method: 'get',
+    options: {
+      onError(e) {
+        if (e.code && e.code != 'resource_not_found') {
+          messageService.error(<TranslatedError code={e.code} />);
+        }
+      },
+    },
   });
 
   const authProviderChangeInfo = useApiQuery({
@@ -57,7 +78,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     options: {
       onError(e) {
         setAuthProviderChange(false);
-        history.replace(LINKS.PROJECT.build());
+        history.replace(LINKS.PROJECTS.build());
         if (e.code) {
           messageService.error(<TranslatedError code={e.code} />);
         }
@@ -66,15 +87,19 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   });
 
   function handleAccept() {
-    acceptChange.mutate({
-      onSuccess() {
-        setAuthProviderChange(false);
-        messageService.success(<T keyName="auth_provider_change_accepted" />);
-      },
-      onSettled() {
-        history.replace(LINKS.PROJECTS.build());
-      },
-    });
+    acceptChange.mutate(
+      {},
+      {
+        onSuccess(r) {
+          setAuthProviderChange(false);
+          handleAfterLogin(r);
+          messageService.success(<T keyName="auth_provider_change_accepted" />);
+        },
+        onSettled() {
+          history.replace(LINKS.PROJECTS.build());
+        },
+      }
+    );
   }
 
   function handleDecline() {
@@ -82,7 +107,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     history.push(LINKS.LOGIN.build());
   }
 
-  if (!authProviderChangeInfo.data) {
+  if (!authProviderChangeInfo.data || authProviderCurrentInfo.isLoading) {
     return <FullPageLoading />;
   }
 
@@ -90,14 +115,17 @@ const AcceptAuthProviderChangeView: React.FC = () => {
 
   const accountType = authProviderChangeInfo.data.accountType;
   const authType = authProviderChangeInfo.data.authType;
+  const authTypeOld = authProviderCurrentInfo.data?.authType ?? 'NONE';
   const ssoDomain = authProviderChangeInfo.data.ssoDomain;
   const params = {
+    authType,
+    authTypeOld,
     ssoDomain,
     b: <b />,
   };
 
   if (accountType === 'MANAGED') {
-    if (authType == 'SSO' && ssoDomain) {
+    if ((authType == 'SSO' || authType == 'SSO_GLOBAL') && ssoDomain) {
       infoText = (
         <T
           keyName="accept_auth_provider_change_description_managed_sso"
@@ -116,6 +144,11 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     infoText = (
       <T keyName="accept_auth_provider_change_description" params={params} />
     );
+  }
+
+  if (!authProviderChange) {
+    redirectAfterLogin();
+    return null;
   }
 
   return (

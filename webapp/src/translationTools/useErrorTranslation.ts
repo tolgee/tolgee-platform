@@ -147,6 +147,8 @@ export function useErrorTranslation() {
         return t('sso_domain_not_found_or_disabled');
       case 'native_authentication_disabled':
         return t('native_authentication_disabled');
+      case 'operation_unavailable_for_account_type':
+        return t('operation_unavailable_for_account_type');
       case 'invitation_organization_mismatch':
         return t('invitation_organization_mismatch');
       case 'user_is_managed_by_organization':

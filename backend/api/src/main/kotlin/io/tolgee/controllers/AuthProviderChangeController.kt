@@ -6,8 +6,11 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.AuthProviderChangeService
+import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController
 class AuthProviderChangeController(
   private val authenticationFacade: AuthenticationFacade,
   private val authProviderChangeService: AuthProviderChangeService,
+  private val userAccountService: UserAccountService,
+  private val jwtService: JwtService,
 ) {
   @GetMapping("/current")
   @Operation(summary = "Get current third party authentication provider")
@@ -44,8 +49,13 @@ class AuthProviderChangeController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresSuperAuthentication
   @Transactional
-  fun acceptChangeAuthProvider() {
-    authProviderChangeService.acceptProviderChange(authenticationFacade.authenticatedUserEntity)
+  fun acceptChangeAuthProvider(): JwtAuthenticationResponse {
+    val user = authenticationFacade.authenticatedUserEntity
+    authProviderChangeService.acceptProviderChange(user)
+    userAccountService.invalidateTokens(user)
+    return JwtAuthenticationResponse(
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
+    )
   }
 
   @PostMapping("/changed/reject")

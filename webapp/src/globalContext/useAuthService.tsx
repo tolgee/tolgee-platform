@@ -23,7 +23,7 @@ type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
 
 export const INVITATION_CODE_STORAGE_KEY = 'invitationCode';
-export const AUTH_PROVIDER_CHANGE_USER_STORAGE_KEY = 'authProviderChangeUser';
+export const AUTH_PROVIDER_CHANGE_STORAGE_KEY = 'authProviderChange';
 
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
@@ -107,15 +107,15 @@ export const useAuthService = (
       initial: undefined,
       key: INVITATION_CODE_STORAGE_KEY,
     });
+
   const [
     authProviderChangeStr,
     setAuthProviderChangeStr,
     getAuthProviderChangeStr,
   ] = useLocalStorageState({
-    initial: undefined,
-    key: AUTH_PROVIDER_CHANGE_USER_STORAGE_KEY,
+    initial: 'false',
+    key: AUTH_PROVIDER_CHANGE_STORAGE_KEY,
   });
-
   const authProviderChange = authProviderChangeStr === 'true';
 
   function setAuthProviderChange(value: boolean) {
@@ -243,7 +243,6 @@ export const useAuthService = (
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
-            messageService.error(<TranslatedError code={error.code!} />);
           },
         }
       );
@@ -286,10 +285,9 @@ export const useAuthService = (
     },
     handleAfterLogin,
     redirectAfterLogin() {
-      if (getAuthProviderChange()) {
-        history.replace(LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build());
-      }
-      const link = getRedirectUrl(userId);
+      const link = getAuthProviderChange()
+        ? LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build()
+        : getRedirectUrl(userId);
       history.replace(link);
       securityService.removeAfterLoginLink();
     },
@@ -323,7 +321,6 @@ export const useAuthService = (
       setAdminToken(undefined);
     },
     setInvitationCode,
-    authProviderChange,
     setAuthProviderChange,
     getAuthProviderChange,
     redirectTo(url: string) {

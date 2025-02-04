@@ -1,6 +1,6 @@
 import { T, useTranslate } from '@tolgee/react';
 import { Announcement } from './Announcement';
-import { User01 } from '@untitled-ui/icons-react';
+import { LogIn01 } from '@untitled-ui/icons-react';
 import { Box, styled } from '@mui/material';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
@@ -33,7 +33,7 @@ export const PendingAuthProviderChangeBanner = () => {
           />
         </Box>
       }
-      icon={<User01 />}
+      icon={<LogIn01 />}
       action={
         <StyledDismiss
           role="button"

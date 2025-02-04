@@ -5,6 +5,8 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import jakarta.persistence.Column
 import jakarta.persistence.Convert
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.OneToOne
 import java.util.Date
 
@@ -13,6 +15,9 @@ class AuthProviderChangeRequest : StandardAuditModel() {
   @OneToOne(optional = false)
   var userAccount: UserAccount? = null
 
+  var expirationDate: Date? = null
+
+  @Enumerated(EnumType.STRING)
   var accountType: UserAccount.AccountType? = null
 
   @Convert(converter = ThirdPartyAuthTypeConverter::class)

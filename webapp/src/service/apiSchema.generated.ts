@@ -4814,7 +4814,11 @@ export interface operations {
   acceptChangeAuthProvider: {
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

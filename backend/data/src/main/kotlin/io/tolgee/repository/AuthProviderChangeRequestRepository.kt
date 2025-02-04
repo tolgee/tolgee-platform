@@ -6,7 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface AuthProviderChangeRequestRepository : JpaRepository<AuthProviderChangeRequest, Long> {
-  fun findByUserAccountId(id: Long): AuthProviderChangeRequest
-
-  fun deleteByUserAccountId(id: Long): AuthProviderChangeRequest
+  fun deleteByUserAccountId(id: Long): Int
 }
