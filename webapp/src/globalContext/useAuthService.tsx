@@ -13,7 +13,6 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useInitialDataService } from './useInitialDataService';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 
 type LoginRequest = components['schemas']['LoginRequest'];
