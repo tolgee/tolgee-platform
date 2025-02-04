@@ -12,6 +12,7 @@ import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
 import { locales } from '../../../locales';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
 
 const StyledItem = styled(ListItemButton)`
   display: grid;
@@ -40,6 +41,8 @@ const StyledAvatar = styled(Box)`
 const StyledTime = styled(Box)`
   grid-area: notification-time;
   text-align: right;
+  display: flex;
+  justify-content: flex-end;
 `;
 
 const StyledRightDetailText = styled(Typography)`
@@ -51,21 +54,25 @@ const StyledProject = styled(StyledTime)`
   grid-area: notification-project;
 `;
 
-export type NotificationItemProps = {
+export type NotificationItemProps = NotificationItemInternalProps & {
   notification: components['schemas']['NotificationModel'];
+};
+
+type NotificationItemInternalProps = {
+  notification?: components['schemas']['NotificationModel'];
   destinationUrl?: string;
 } & ListItemButtonProps;
 
-export const NotificationItem: React.FC<NotificationItemProps> = ({
+export const NotificationItem: React.FC<NotificationItemInternalProps> = ({
   notification,
   key,
   destinationUrl,
   children,
 }) => {
   const language = useCurrentLanguage();
-  const createdAt = notification.createdAt;
-  const originatingUser = notification.originatingUser;
-  const project = notification.project;
+  const createdAt = notification?.createdAt;
+  const originatingUser = notification?.originatingUser;
+  const project = notification?.project;
   return (
     <StyledItem
       key={key}
@@ -75,34 +82,63 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       data-cy="notifications-list-item"
     >
       <StyledAvatar>
-        {originatingUser && (
-          <AvatarImg
-            owner={{
-              name: originatingUser.name,
-              avatar: originatingUser.avatar,
-              type: 'USER',
-              id: originatingUser.id || 0,
-            }}
-            size={32}
+        {notification ? (
+          originatingUser && (
+            <AvatarImg
+              owner={{
+                name: originatingUser.name,
+                avatar: originatingUser.avatar,
+                type: 'USER',
+                id: originatingUser.id || 0,
+              }}
+              size={32}
+            />
+          )
+        ) : (
+          <LoadingSkeleton
+            sx={{ height: 32, width: 32 }}
+            variant="circular"
+            animation="wave"
           />
         )}
       </StyledAvatar>
-      <StyledDetail>{children}</StyledDetail>
-      {createdAt && (
+      <StyledDetail>
+        {notification ? (
+          children
+        ) : (
+          <>
+            <LoadingSkeleton sx={{ height: 14, width: 200 }} animation="wave" />
+            <LoadingSkeleton sx={{ height: 14, width: 120 }} animation="wave" />
+          </>
+        )}
+      </StyledDetail>
+      {notification ? (
+        createdAt && (
+          <StyledTime>
+            <StyledRightDetailText variant="body2">
+              {formatDistanceToNowStrict(new Date(createdAt), {
+                addSuffix: true,
+                locale: locales[language].dateFnsLocale,
+              })}
+            </StyledRightDetailText>
+          </StyledTime>
+        )
+      ) : (
         <StyledTime>
-          <StyledRightDetailText variant="body2">
-            {formatDistanceToNowStrict(new Date(createdAt), {
-              addSuffix: true,
-              locale: locales[language].dateFnsLocale,
-            })}
-          </StyledRightDetailText>
+          <LoadingSkeleton sx={{ height: 12, width: 60 }} animation="wave" />
         </StyledTime>
       )}
-      {project && (
+      {notification ? (
+        project && (
+          <StyledProject>
+            <StyledRightDetailText variant="body2">
+              {project.name}
+            </StyledRightDetailText>
+          </StyledProject>
+        )
+      ) : (
         <StyledProject>
-          <StyledRightDetailText variant="body2">
-            {project.name}
-          </StyledRightDetailText>
+          <LoadingSkeleton sx={{ height: 12, width: 80 }} animation="wave" />
         </StyledProject>
       )}
     </StyledItem>

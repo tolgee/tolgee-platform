@@ -8,18 +8,18 @@ import {
 import { T } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
-import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PopoverProps } from '@mui/material/Popover';
 import { notificationComponents } from 'tg.component/layout/Notifications/NotificationTypeMap';
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 import { components } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
 import { useWindowSize } from 'usehooks-ts';
+import { NotificationItem } from 'tg.component/layout/Notifications/NotificationItem';
 
 type PagedModelNotificationModel =
   components['schemas']['PagedModelNotificationModel'];
 
-const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 100;
+const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -167,11 +167,12 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
             <T keyName="notifications-empty" />
           </ListItem>
         )}
-        {(notificationsLoadable.isFetching ||
-          notificationsLoadable.hasNextPage) && (
-          <ListItem>
-            <BoxLoading width="100%" />
-          </ListItem>
+        {[1, 2, 3, 4, 5].map(
+          (i) =>
+            (notificationsLoadable.isFetching ||
+              notificationsLoadable.hasNextPage) && (
+              <NotificationItem key={-i} />
+            )
         )}
       </List>
     </StyledMenu>
