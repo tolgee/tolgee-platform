@@ -4,6 +4,7 @@ import {
   ListItemButton,
   ListItemButtonProps,
   styled,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -13,6 +14,7 @@ import { locales } from '../../../locales';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
+import { useDateFormatter } from 'tg.hooks/useLocale';
 
 const StyledItem = styled(ListItemButton)`
   display: grid;
@@ -73,6 +75,7 @@ export const NotificationItem: React.FC<NotificationItemInternalProps> = ({
   const createdAt = notification?.createdAt;
   const originatingUser = notification?.originatingUser;
   const project = notification?.project;
+  const formatDate = useDateFormatter();
   return (
     <StyledItem
       key={key}
@@ -116,10 +119,19 @@ export const NotificationItem: React.FC<NotificationItemInternalProps> = ({
         createdAt && (
           <StyledTime>
             <StyledRightDetailText variant="body2">
-              {formatDistanceToNowStrict(new Date(createdAt), {
-                addSuffix: true,
-                locale: locales[language].dateFnsLocale,
-              })}
+              <Tooltip
+                title={formatDate(new Date(createdAt), {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
+                })}
+              >
+                <span>
+                  {formatDistanceToNowStrict(new Date(createdAt), {
+                    addSuffix: true,
+                    locale: locales[language].dateFnsLocale,
+                  })}
+                </span>
+              </Tooltip>
             </StyledRightDetailText>
           </StyledTime>
         )
