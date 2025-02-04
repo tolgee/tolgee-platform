@@ -34,13 +34,25 @@ class XcstringsFileProcessor(
     private fun processKey(key: String, value: JsonNode) {
         val localizations = value.get("localizations") ?: return
         
+        val metadata = mutableMapOf<String, Any?>()
+        value.fields().forEach { (fieldName, fieldValue) ->
+            if (fieldName != "localizations") {
+                metadata[fieldName] = when {
+                    fieldValue.isTextual -> fieldValue.asText()
+                    fieldValue.isBoolean -> fieldValue.asBoolean()
+                    fieldValue.isObject -> objectMapper.convertValue(fieldValue, Map::class.java)
+                    else -> fieldValue.toString()
+                }
+            }
+        }
+
         localizations.fields().forEach { (languageTag, localization) ->
             when {
                 localization.has("stringUnit") -> {
-                    processSingleTranslation(key, languageTag, localization)
+                    processSingleTranslation(key, languageTag, localization, metadata)
                 }
                 localization.has("variations") -> {
-                    processPluralTranslation(key, languageTag, localization)
+                    processPluralTranslation(key, languageTag, localization, metadata)
                 }
             }
         }
@@ -49,7 +61,8 @@ class XcstringsFileProcessor(
     private fun processSingleTranslation(
         key: String,
         languageTag: String,
-        localization: JsonNode
+        localization: JsonNode,
+        metadata: Map<String, Any?>
     ) {
         val stringUnit = localization.get("stringUnit")
         val translationValue = stringUnit?.get("value")?.asText()
@@ -59,7 +72,8 @@ class XcstringsFileProcessor(
                 keyName = key,
                 languageName = languageTag,
                 value = translationValue,
-                convertedBy = importFormat
+                convertedBy = importFormat,
+                metadata = metadata
             )
         }
     }
@@ -67,7 +81,8 @@ class XcstringsFileProcessor(
     private fun processPluralTranslation(
         key: String,
         languageTag: String,
-        localization: JsonNode
+        localization: JsonNode,
+        metadata: Map<String, Any?>
     ) {
         val variations = localization.get("variations")?.get("plural") ?: return
         val forms = mutableMapOf<String, String>()
@@ -93,7 +108,8 @@ class XcstringsFileProcessor(
                 value = converted.message,
                 pluralArgName = converted.pluralArgName,
                 rawData = forms,
-                convertedBy = importFormat
+                convertedBy = importFormat,
+                metadata = metadata
             )
         }
     }

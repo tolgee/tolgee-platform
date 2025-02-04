@@ -55,6 +55,7 @@ data class FileProcessorContext(
     replaceNonPlurals: Boolean = false,
     rawData: Any? = null,
     convertedBy: ImportFormat? = null,
+    metadata: Map<String, Any?>? = null
   ) {
     val stringValue = value as? String
 
@@ -86,6 +87,13 @@ data class FileProcessorContext(
         _translations[keyName]!!.removeIf { it.language == language && !it.isPlural }
       }
       _translations[keyName]!!.add(entity)
+
+      val key = getOrCreateKey(keyName)
+      metadata?.let { meta ->
+        meta["comment"]?.takeIf { it is String }?.let {
+          addKeyDescription(keyName, it as String)
+        }
+      }
       return
     }
 
