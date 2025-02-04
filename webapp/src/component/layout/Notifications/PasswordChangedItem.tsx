@@ -17,7 +17,8 @@ export const PasswordChangedItem: FunctionComponent<
       destinationUrl={LINKS.USER_ACCOUNT_SECURITY.build()}
       {...props}
     >
-      <b>{notification.originatingUser?.name}</b>&nbsp;
+      <b>{notification.originatingUser?.name}</b>
+      {'\u205F'}
       <T keyName="notifications-password-changed" />
     </NotificationItem>
   );

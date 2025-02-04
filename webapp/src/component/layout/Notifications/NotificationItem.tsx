@@ -20,7 +20,7 @@ const StyledItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
   grid-template-columns: 32px 1fr 120px;
-  grid-template-rows: 1fr;
+  grid-template-rows: auto auto;
   grid-template-areas:
     'notification-avatar notification-detail notification-time'
     'notification-avatar notification-detail notification-project';
@@ -30,6 +30,8 @@ const StyledItem = styled(ListItemButton)`
 const StyledDetail = styled(Box)`
   grid-area: notification-detail;
   font-size: 14px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 
   b {
     font-weight: 500;

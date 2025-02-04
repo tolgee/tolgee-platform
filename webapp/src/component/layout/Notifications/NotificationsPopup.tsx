@@ -134,7 +134,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
         paper: {
           style: {
             maxHeight: maxHeight,
-            minWidth: 400,
+            width: 500,
           },
           onScroll: (event) => {
             const target = event.target as HTMLDivElement;
