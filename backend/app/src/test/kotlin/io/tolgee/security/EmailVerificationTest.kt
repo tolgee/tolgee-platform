@@ -24,8 +24,11 @@ class EmailVerificationTest : AbstractControllerTest() {
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
 
+  private var defaultFrontendUrl: String? = null
+
   @BeforeEach
   fun setup() {
+    defaultFrontendUrl = tolgeeProperties.frontEndUrl
     resetProperties()
     tolgeeProperties.authentication.needsEmailVerification = true
     emailTestUtil.initMocks()
@@ -38,7 +41,7 @@ class EmailVerificationTest : AbstractControllerTest() {
 
   private fun resetProperties() {
     tolgeeProperties.authentication.needsEmailVerification = false
-    tolgeeProperties.frontEndUrl = "dummy_frontend_url"
+    tolgeeProperties.frontEndUrl = defaultFrontendUrl
     tolgeeProperties.smtp.from = "aaa@aaa.aa"
   }
 
@@ -120,7 +123,7 @@ class EmailVerificationTest : AbstractControllerTest() {
 
     assertThat(emailTestUtil.messageArgumentCaptor.firstValue.subject).isEqualTo("Tolgee e-mail verification")
 
-    assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
+    assertThat(getMessageContent()).contains("https://dummy-url.com/login/verify_email/${user.id}/")
 
     assertThat(userAccountService.findActive(user.id)).isNotNull
   }
@@ -131,7 +134,7 @@ class EmailVerificationTest : AbstractControllerTest() {
     perform()
     val user = userAccountService.findActive(signUpDto.email) ?: throw NotFoundException()
 
-    assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
+    assertThat(getMessageContent()).contains("https://dummy-url.com/login/verify_email/${user.id}/")
 
     assertThat(userAccountService.findActive(user.id)).isNotNull
   }

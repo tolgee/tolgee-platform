@@ -73,7 +73,6 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     Mockito.clearInvocations(mailjetEmailServiceManager)
-    tolgeeProperties.frontEndUrl = "https://aaa"
     tolgeeProperties.smtp.from = "aa@aa.com"
     emailTestUtil.initMocks()
   }
@@ -82,7 +81,6 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   fun cleanUp() {
     sendInBlueProperties.listId = null
     tolgeeProperties.authentication.needsEmailVerification = false
-    tolgeeProperties.frontEndUrl = null
   }
 
   private val testMail = "mail@test.com"
@@ -98,7 +96,6 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   @Test
   fun `adds contact after verification when needs-verification is on`() {
-    tolgeeProperties.frontEndUrl = "https://aaa"
     tolgeeProperties.authentication.needsEmailVerification = true
     val dto = SignUpDto(name = testName, password = "aaaaaaaaaa", email = testMail)
     performPost("/api/public/sign_up", dto)

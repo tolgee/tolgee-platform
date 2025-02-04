@@ -5,12 +5,7 @@ import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTe
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
-import io.tolgee.fixtures.EmailTestUtil
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
@@ -26,11 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.*
 
 @ContextRecreatingTest
-@SpringBootTest(
-  properties = [
-    "tolgee.front-end-url=https://fake.frontend.url",
-  ],
-)
+@SpringBootTest
 class V2UserControllerTest : AuthorizedControllerTest() {
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties

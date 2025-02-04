@@ -8,13 +8,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
-import io.tolgee.fixtures.EmailTestUtil
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andGetContentAsString
-import io.tolgee.fixtures.andHasErrorMessage
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -41,7 +35,6 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @BeforeEach
   @AfterEach
   fun reset() {
-    tolgeeProperties.frontEndUrl = null
     emailTestUtil.initMocks()
   }
 
@@ -56,7 +49,6 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   fun `returns project invitations`() {
     val base = dbPopulator.createBase()
     val project = base.project
-    tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     createTranslateInvitation(project)
     performAuthGet("/v2/projects/${project.id}/invitations").andIsOk.andAssertThatJson {
       node("_embedded.invitations[0]") {
@@ -162,19 +154,18 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
-    assertThat(messageContent).contains("http://localhost/")
+    assertThat(messageContent).contains("https://dummy-url.com")
     emailTestUtil.assertEmailTo.isEqualTo(INVITED_EMAIL)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `uses frontEnd url when possible`() {
-    tolgeeProperties.frontEndUrl = "dummy_fe_url"
     inviteWithUserWithNameAndEmail()
     emailTestUtil.verifyEmailSent()
 
     val messageContent = emailTestUtil.messageContents.single()
-    assertThat(messageContent).contains("dummy_fe_url")
+    assertThat(messageContent).contains("https://dummy-url.com")
   }
 
   @Test

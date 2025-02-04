@@ -42,7 +42,6 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   fun `deletes translate invitation with languages`() {
     val base = dbPopulator.createBase()
     val project = base.project
-    tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     val invitation = createTranslateInvitation(project)
 
     performAuthDelete("/v2/invitations/${invitation.id}").andIsOk
@@ -54,7 +53,6 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   fun `project invitation contains creator info`() {
     val base = dbPopulator.createBase()
     val project = base.project
-    tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     val invitation = createTranslateInvitation(project)
     assertThat(invitation.createdBy?.name).isEqualTo("admin")
   }
@@ -62,7 +60,6 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `organization invitation contains creator info`() {
     val base = dbPopulator.createBase()
-    tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     val invitation = createOrganizationInvitation(base.organization)
     assertThat(invitation.createdBy?.name).isEqualTo("admin")
   }
@@ -70,7 +67,6 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `deletes invitations created by deleted user`() {
     val base = dbPopulator.createBase()
-    tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     val newUser = dbPopulator.createUserIfNotExists("manager")
     permissionService.grantFullAccessToProject(newUser, base.project)
 
