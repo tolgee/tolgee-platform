@@ -6,7 +6,7 @@ enum class ImportFileFormat(val extensions: Array<String>) {
   STRINGS(arrayOf("strings")),
   STRINGSDICT(arrayOf("stringsdict")),
   XLIFF(arrayOf("xliff", "xlf")),
-  // XCSTRINGS(arrayOf("xcstrings")),
+  XCSTRINGS(arrayOf("xcstrings")),
   PROPERTIES(arrayOf("properties")),
   XML(arrayOf("xml")),
   ARB(arrayOf("arb")),
