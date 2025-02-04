@@ -2,15 +2,7 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.eventListeners.LanguageStatsListener
-import io.tolgee.development.testDataBuilder.builders.BatchJobBuilder
-import io.tolgee.development.testDataBuilder.builders.ImportBuilder
-import io.tolgee.development.testDataBuilder.builders.KeyBuilder
-import io.tolgee.development.testDataBuilder.builders.PatBuilder
-import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
-import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
-import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
-import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
-import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
+import io.tolgee.development.testDataBuilder.builders.*
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.service.TenantService
 import io.tolgee.service.automations.AutomationService
@@ -25,6 +17,7 @@ import io.tolgee.service.key.TagService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
@@ -75,6 +68,7 @@ class TestDataService(
   private val userPreferencesService: UserPreferencesService,
   private val languageStatsService: LanguageStatsService,
   private val patService: PatService,
+  private val notificationService: NotificationService,
   private val namespaceService: NamespaceService,
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
@@ -114,6 +108,7 @@ class TestDataService(
 
     executeInNewTransaction(transactionManager) {
       saveProjectData(builder)
+      saveNotifications(builder)
       finalize()
     }
 
@@ -467,6 +462,15 @@ class TestDataService(
     data.forEach {
       entityManager.persist(it.self)
     }
+  }
+
+  private fun saveNotifications(builder: TestDataBuilder) {
+    builder.data.userAccounts
+      .flatMap { it.data.notifications }
+      .sortedBy { it.self.linkedTask?.name }
+      .forEach {
+        notificationService.save(it.self)
+      }
   }
 
   private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {
