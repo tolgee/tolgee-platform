@@ -187,6 +187,12 @@ export const formatGroups: FormatGroup[] = [
         name: <T keyName="export-format-apple-xliff" />,
         format: 'APPLE_XLIFF',
       },
+      {
+        id: 'apple_xcstrings',
+        extension: 'xcstrings',
+        name: <T keyName="export-format-apple-xcstrings" />,
+        format: 'APPLE_XCSTRINGS',
+      },
     ],
   },
   {

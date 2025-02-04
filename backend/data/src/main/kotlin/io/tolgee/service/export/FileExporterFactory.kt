@@ -6,6 +6,7 @@ import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
+import io.tolgee.formats.apple.out.AppleXcstringsExporter
 import io.tolgee.formats.apple.out.AppleXliffExporter
 import io.tolgee.formats.csv.out.CsvFileExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
@@ -97,6 +98,14 @@ class FileExporterFactory(
 
       ExportFormat.APPLE_STRINGS_STRINGSDICT ->
         AppleStringsStringsdictExporter(data, exportParams, projectIcuPlaceholdersSupport)
+
+      ExportFormat.APPLE_XCSTRINGS ->
+        AppleXcstringsExporter(
+          translations = data,
+          exportParams = exportParams,
+          objectMapper = objectMapper,
+          isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
+        )
 
       ExportFormat.FLUTTER_ARB ->
         FlutterArbFileExporter(

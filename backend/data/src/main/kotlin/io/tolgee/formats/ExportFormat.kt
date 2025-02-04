@@ -21,6 +21,11 @@ enum class ExportFormat(
     "application/x-xliff+xml",
     defaultFileStructureTemplate = "{languageTag}.{extension}",
   ),
+  APPLE_XCSTRINGS(
+    "xcstrings",
+    "application/json",
+    defaultFileStructureTemplate = "Localizable.{extension}",
+  ),
   ANDROID_XML(
     "xml",
     "application/xml",

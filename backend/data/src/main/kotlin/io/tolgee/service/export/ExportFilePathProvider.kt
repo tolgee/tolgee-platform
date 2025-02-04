@@ -18,6 +18,14 @@ class ExportFilePathProvider(
     languageTag: String? = null,
     replaceExtension: Boolean = true,
   ): String {
+    // If no template is provided, use a default template for xcstrings
+    if (params.fileStructureTemplate == null) {
+      return when {
+        namespace.isNullOrEmpty() -> "Localizable.xcstrings"
+        else -> "$namespace.xcstrings"
+      }
+    }
+
     val template = validateAndGetTemplate()
     return template
       .replacePlaceholder(ExportFilePathPlaceholder.NAMESPACE, namespace ?: "")

@@ -597,6 +597,8 @@
   "export-format-android-xml": "Android .xml",
   "export-format-apple-strings": "Apple .strings & .stringsdict",
   "export-format-apple-xliff": "Apple .xliff",
+  "export-format-apple-xcstrings": "Apple .xcstrings",
+  "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-compose-xml": "Compose Multiplatform .xml",
   "export-format-csv": "CSV",
   "export-format-flat-json": "Flat JSON",

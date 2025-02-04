@@ -125,6 +125,11 @@ enum class ImportFormat(
     messageConvertorOrNull = appleConvertor,
   ),
 
+  //  APPLE_XCSTRINGS(
+  //    ImportFileFormat.XCSTRINGS,
+  //    messageConvertorOrNull = appleConvertor,
+  //  ),
+
   // properties don't store plurals in map, but it doesn't matter.
   // Since they don't support nesting at all, we cannot have plurals by nesting in them, so the plural extracting
   // code won't be executed

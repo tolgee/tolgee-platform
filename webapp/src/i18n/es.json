@@ -592,6 +592,7 @@
   "export-format-android-xml": "Android .xml",
   "export-format-apple-strings": "Apple .strings y .stringsdict",
   "export-format-apple-xliff": "Apple .xliff",
+  "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-csv": "CSV",
   "export-format-flat-json": "JSON plano",
   "export-format-flat-yaml": "YAML plano",
