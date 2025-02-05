@@ -90,9 +90,7 @@ data class FileProcessorContext(
 
       val key = getOrCreateKey(keyName)
       metadata?.let { meta ->
-        meta["comment"]?.takeIf { it is String }?.let {
-          addKeyDescription(keyName, it as String)
-        }
+        addKeyDescription(keyName, meta["comment"]?.toString())
       }
       return
     }

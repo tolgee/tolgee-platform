@@ -4,6 +4,7 @@ import com.ibm.icu.util.ULocale
 import io.tolgee.constants.Message
 import io.tolgee.dtos.IExportParams
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.formats.ExportFormat
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 
 class ExportFilePathProvider(
@@ -18,14 +19,6 @@ class ExportFilePathProvider(
     languageTag: String? = null,
     replaceExtension: Boolean = true,
   ): String {
-    // If no template is provided, use a default template for xcstrings
-    if (params.fileStructureTemplate == null) {
-      return when {
-        namespace.isNullOrEmpty() -> "Localizable.xcstrings"
-        else -> "$namespace.xcstrings"
-      }
-    }
-
     val template = validateAndGetTemplate()
     return template
       .replacePlaceholder(ExportFilePathPlaceholder.NAMESPACE, namespace ?: "")
@@ -60,19 +53,21 @@ class ExportFilePathProvider(
   }
 
   private fun validateTemplate() {
-    val containsLanguageTag =
-      arrayOf(
-        ExportFilePathPlaceholder.LANGUAGE_TAG,
-        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-      ).any { getTemplate().contains(it.placeholder) }
+    if (params.format !in listOf(ExportFormat.APPLE_XCSTRINGS)) {
+      val containsLanguageTag =
+        arrayOf(
+          ExportFilePathPlaceholder.LANGUAGE_TAG,
+          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
+          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
+        ).any { getTemplate().contains(it.placeholder) }
 
-    if (!containsLanguageTag) {
-      throw getMissingPlaceholderException(
-        ExportFilePathPlaceholder.LANGUAGE_TAG,
-        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-      )
+      if (!containsLanguageTag) {
+        throw getMissingPlaceholderException(
+          ExportFilePathPlaceholder.LANGUAGE_TAG,
+          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
+          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
+        )
+      }
     }
 
     val containsExtension = getTemplate().contains(ExportFilePathPlaceholder.EXTENSION.placeholder)

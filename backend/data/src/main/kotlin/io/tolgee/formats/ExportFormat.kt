@@ -21,11 +21,6 @@ enum class ExportFormat(
     "application/x-xliff+xml",
     defaultFileStructureTemplate = "{languageTag}.{extension}",
   ),
-  APPLE_XCSTRINGS(
-    "xcstrings",
-    "application/json",
-    defaultFileStructureTemplate = "Localizable.{extension}",
-  ),
   ANDROID_XML(
     "xml",
     "application/xml",
@@ -48,4 +43,9 @@ enum class ExportFormat(
   CSV("csv", "text/csv"),
   RESX_ICU("resx", "text/microsoft-resx"),
   XLSX("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+  APPLE_XCSTRINGS(
+    "xcstrings",
+    "application/json",
+    defaultFileStructureTemplate = "Localizable.{extension}",
+  ),
 }
