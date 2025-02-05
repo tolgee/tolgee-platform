@@ -228,7 +228,7 @@ class V2ImportLanguagesController(
 
   private fun checkImportLanguageInProject(languageId: Long): ImportLanguage {
     val language = importService.findLanguage(languageId) ?: throw NotFoundException()
-    val languageProjectId = language.file.import.project.id
+    val languageProjectId = language.file.importEntity.project.id
     if (languageProjectId != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
     }

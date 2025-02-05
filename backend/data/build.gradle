@@ -246,8 +246,8 @@ ktlint {
 
 hibernate {
     enhancement {
-        enableDirtyTracking = false
-        enableAssociationManagement = false
-        enableExtendedEnhancement = false
+//        enableDirtyTracking = true
+//        enableAssociationManagement = false
+//        enableExtendedEnhancement = false
     }
 }

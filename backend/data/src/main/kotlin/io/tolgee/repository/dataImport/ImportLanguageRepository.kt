@@ -49,7 +49,7 @@ LEFT JOIN il.existingLanguage el
         """
   }
 
-  @Query("from ImportLanguage il join il.file if join if.import im where im.id = :importId")
+  @Query("from ImportLanguage il join il.file if join if.importEntity im where im.id = :importId")
   fun findAllByImport(importId: Long): List<ImportLanguage>
 
   @Modifying
@@ -60,7 +60,7 @@ LEFT JOIN il.existingLanguage el
   @Query(
     """
    $VIEW_BASE_QUERY
-        WHERE f.import.id = :importId
+        WHERE f.importEntity.id = :importId
             $VIEW_GROUP_BY
             order by il.id
             """,
@@ -74,7 +74,7 @@ LEFT JOIN il.existingLanguage el
   @Transactional
   @Query(
     """delete from ImportLanguage l where l.file in 
-        (select f from ImportFile f where f.import = :import)""",
+        (select f from ImportFile f where f.importEntity = :import)""",
   )
   fun deleteAllByImport(import: Import)
 
@@ -92,7 +92,7 @@ LEFT JOIN il.existingLanguage el
       select distinct il.existingLanguage.id 
         from ImportLanguage il 
         join il.file if 
-        where if.import.id = :importId 
+        where if.importEntity.id = :importId 
           and il.existingLanguage.id is not null
     """,
   )
