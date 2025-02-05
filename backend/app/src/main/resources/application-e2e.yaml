@@ -4,7 +4,7 @@ spring:
 tolgee:
   billing:
     enabled: false
-  frontend-url: http://localhost:8081
+  frontend-url: http://localhost:8202
   authentication:
     enabled: true
     needs-email-verification: true

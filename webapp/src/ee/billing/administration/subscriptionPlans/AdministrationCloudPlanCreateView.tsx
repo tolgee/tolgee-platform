@@ -1,23 +1,13 @@
 import { Box, Typography } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
+import { useTranslate } from '@tolgee/react';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { CloudPlanForm } from './components/CloudPlanForm';
+import { CreateCloudPlanForm } from './components/planForm/CreateCloudPlanForm';
 
 export const AdministrationCloudPlanCreateView = () => {
-  const messaging = useMessage();
-  const history = useHistory();
   const { t } = useTranslate();
-
-  const createPlanLoadable = useBillingApiMutation({
-    url: '/v2/administration/billing/cloud-plans',
-    method: 'post',
-  });
 
   return (
     <DashboardPage>
@@ -40,55 +30,8 @@ export const AdministrationCloudPlanCreateView = () => {
           <Typography variant="h5">
             {t('administration_cloud_plan_create')}
           </Typography>
-          <CloudPlanForm
-            loading={createPlanLoadable.isLoading}
-            onSubmit={(values) => {
-              createPlanLoadable.mutate(
-                {
-                  content: {
-                    'application/json': {
-                      ...values,
-                      stripeProductId: values.stripeProductId!,
-                      forOrganizationIds: values.public
-                        ? []
-                        : values.forOrganizationIds,
-                    },
-                  },
-                },
-                {
-                  onSuccess() {
-                    messaging.success(
-                      <T keyName="administration_cloud_plan_created_success" />
-                    );
-                    history.push(
-                      LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build()
-                    );
-                  },
-                }
-              );
-            }}
-            initialData={{
-              type: 'PAY_AS_YOU_GO',
-              name: '',
-              stripeProductId: undefined,
-              prices: {
-                perSeat: 0,
-                subscriptionMonthly: 0,
-                subscriptionYearly: 0,
-              },
-              includedUsage: {
-                seats: 0,
-                translations: 0,
-                mtCredits: 0,
-              },
-              enabledFeatures: [],
-              public: true,
-              forOrganizationIds: [],
-              free: false,
-              nonCommercial: false,
-              autoAssignOrganizationIds: [],
-            }}
-          />
+
+          <CreateCloudPlanForm />
         </Box>
       </BaseAdministrationView>
     </DashboardPage>

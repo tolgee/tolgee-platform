@@ -62,13 +62,13 @@
     "uuid": "9.0.0",
     "web-vitals": "^2.1.0",
     "yup": "^0.32.9",
-    "zustand": "4.1.2",
+    "zustand": "^4.5.5",
     "zxcvbn": "^4.4.2"
   },
   "scripts": {
     "start": "vite",
     "develop": "start",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "craco test",
     "schema": "node ./scripts/generate-schemas.cjs public",

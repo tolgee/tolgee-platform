@@ -1,13 +1,13 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="E2E tests" type="js.build_tools.npm">
-    <package-json value="$PROJECT_DIR$/e2e/package.json" />
+    <package-json value="$PROJECT_DIR$/public/e2e/package.json" />
     <command value="run" />
     <scripts>
       <script value="cy:open" />
     </scripts>
     <node-interpreter value="project" />
     <envs>
-      <env name="CYPRESS_HOST" value="http://localhost:8081" />
+      <env name="CYPRESS_HOST" value="http://localhost:8202" />
     </envs>
     <method v="2" />
   </configuration>

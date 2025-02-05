@@ -4,7 +4,7 @@ import { waitForGlobalLoading } from '../loading';
 import { confirmStandard } from '../shared';
 import { getCell } from '../state';
 import { createTag } from '../tags';
-import { createTranslation, editCell } from '../translations';
+import { createTranslation, editKeyName } from '../translations';
 import { getLanguageId, getLanguages, ProjectInfo } from './shared';
 
 export function testKeys(info: ProjectInfo) {
@@ -30,7 +30,7 @@ export function testKeys(info: ProjectInfo) {
   cy.focused().type('{esc}', { force: true });
 
   if (scopes.includes('keys.edit')) {
-    editCell('key-1', 'new-key');
+    editKeyName('key-1', 'new-key');
     createTag('Test tag');
   }
 

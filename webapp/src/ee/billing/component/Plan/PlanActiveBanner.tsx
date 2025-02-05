@@ -38,9 +38,15 @@ type Props = {
   active: boolean;
   ended: boolean;
   custom?: boolean;
+  activeTrial?: boolean;
 };
 
-export const PlanActiveBanner = ({ active, ended, custom }: Props) => {
+export const PlanActiveBanner = ({
+  active,
+  ended,
+  custom,
+  activeTrial,
+}: Props) => {
   const { t } = useTranslate();
 
   if (active) {
@@ -49,6 +55,8 @@ export const PlanActiveBanner = ({ active, ended, custom }: Props) => {
         <span>
           {ended
             ? t('billing_subscription_cancelled')
+            : activeTrial
+            ? t('billing_subscription_active_trial')
             : t('billing_subscription_active')}
         </span>
         {custom && (

@@ -78,9 +78,11 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
     (provider) => [provider, data.result[provider]] as const
   );
   const arrayResults = Object.values(data?.result || {});
+
   const outOfCredit =
-    arrayResults.every((i) => i?.errorMessage === 'OUT_OF_CREDITS') &&
-    Boolean(arrayResults.length);
+    arrayResults.every(
+      (i) => i?.errorMessage?.toLowerCase() === 'out_of_credits'
+    ) && Boolean(arrayResults.length);
   const contextPresent = keyData.contextPresent;
 
   useEffect(() => {
