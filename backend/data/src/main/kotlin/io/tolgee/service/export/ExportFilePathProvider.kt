@@ -4,7 +4,6 @@ import com.ibm.icu.util.ULocale
 import io.tolgee.constants.Message
 import io.tolgee.dtos.IExportParams
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.formats.ExportFormat
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 
 class ExportFilePathProvider(
@@ -53,7 +52,7 @@ class ExportFilePathProvider(
   }
 
   private fun validateTemplate() {
-    if (params.format !in listOf(ExportFormat.APPLE_XCSTRINGS)) {
+    if (!params.format.multiLanguage) {
       val containsLanguageTag =
         arrayOf(
           ExportFilePathPlaceholder.LANGUAGE_TAG,

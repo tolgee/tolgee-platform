@@ -127,10 +127,11 @@ enum class ImportFormat(
 
   XCSTRINGS(
     fileFormat = ImportFileFormat.XCSTRINGS,
-    messageConvertorOrNull = GenericMapPluralImportRawDataConvertor(
-      optimizePlurals = true,
-      canContainIcu = false
-    ) { AppleToIcuPlaceholderConvertor() }
+    messageConvertorOrNull =
+      GenericMapPluralImportRawDataConvertor(
+        optimizePlurals = true,
+        canContainIcu = false,
+      ) { AppleToIcuPlaceholderConvertor() },
   ),
 
   // properties don't store plurals in map, but it doesn't matter.

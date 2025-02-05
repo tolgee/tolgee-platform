@@ -9,113 +9,105 @@ import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
 class XcstringsFileProcessor(
-    override val context: FileProcessorContext,
-    private val objectMapper: ObjectMapper,
+  override val context: FileProcessorContext,
+  private val objectMapper: ObjectMapper,
 ) : ImportFileProcessor() {
+  override fun process() {
+    try {
+      val root = objectMapper.readTree(context.file.data.inputStream())
+      val strings =
+        root.get("strings") ?: throw ImportCannotParseFileException(
+          context.file.name,
+          "Missing 'strings' object in xcstrings file",
+        )
 
-    override fun process() {
-        try {
-            val root = objectMapper.readTree(context.file.data.inputStream())
-            val strings = root.get("strings") ?: throw ImportCannotParseFileException(
-                context.file.name,
-                "Missing 'strings' object in xcstrings file"
-            )
+      strings.fields().forEach { (key, value) ->
+        processKey(key, value)
+      }
 
-            strings.fields().forEach { (key, value) ->
-                processKey(key, value)
-            }
+      context.namespace = guessNamespaceFromPath(context.file.name)
+    } catch (e: Exception) {
+      throw ImportCannotParseFileException(context.file.name, e.message)
+    }
+  }
 
-            context.namespace = guessNamespaceFromPath(context.file.name)
-        } catch (e: Exception) {
-            throw ImportCannotParseFileException(context.file.name, e.message)
-        }
+  private fun processKey(
+    key: String,
+    value: JsonNode,
+  ) {
+    val localizations = value.get("localizations") ?: return
+
+    value.get("comment")?.asText()?.let { comment ->
+      context.addKeyDescription(key, comment)
     }
 
-    private fun processKey(key: String, value: JsonNode) {
-        val localizations = value.get("localizations") ?: return
-        
-        val metadata = mutableMapOf<String, Any?>()
-        value.fields().forEach { (fieldName, fieldValue) ->
-            if (fieldName != "localizations") {
-                metadata[fieldName] = when {
-                    fieldValue.isTextual -> fieldValue.asText()
-                    fieldValue.isBoolean -> fieldValue.asBoolean()
-                    fieldValue.isObject -> objectMapper.convertValue(fieldValue, Map::class.java)
-                    else -> fieldValue.toString()
-                }
-            }
+    localizations.fields().forEach { (languageTag, localization) ->
+      when {
+        localization.has("stringUnit") -> {
+          processSingleTranslation(key, languageTag, localization)
         }
+        localization.has("variations") -> {
+          processPluralTranslation(key, languageTag, localization)
+        }
+      }
+    }
+  }
 
-        localizations.fields().forEach { (languageTag, localization) ->
-            when {
-                localization.has("stringUnit") -> {
-                    processSingleTranslation(key, languageTag, localization, metadata)
-                }
-                localization.has("variations") -> {
-                    processPluralTranslation(key, languageTag, localization, metadata)
-                }
-            }
-        }
+  private fun processSingleTranslation(
+    key: String,
+    languageTag: String,
+    localization: JsonNode,
+  ) {
+    val stringUnit = localization.get("stringUnit")
+    val translationValue = stringUnit?.get("value")?.asText()
+
+    if (translationValue != null) {
+      context.addTranslation(
+        keyName = key,
+        languageName = languageTag,
+        value = translationValue,
+        convertedBy = importFormat,
+      )
+    }
+  }
+
+  private fun processPluralTranslation(
+    key: String,
+    languageTag: String,
+    localization: JsonNode,
+  ) {
+    val variations = localization.get("variations")?.get("plural") ?: return
+    val forms = mutableMapOf<String, String>()
+
+    variations.fields().forEach { (form, content) ->
+      val value = content.get("stringUnit")?.get("value")?.asText()
+      if (value != null) {
+        forms[form] = value
+      }
     }
 
-    private fun processSingleTranslation(
-        key: String,
-        languageTag: String,
-        localization: JsonNode,
-        metadata: Map<String, Any?>
-    ) {
-        val stringUnit = localization.get("stringUnit")
-        val translationValue = stringUnit?.get("value")?.asText()
-        
-        if (translationValue != null) {
-            context.addTranslation(
-                keyName = key,
-                languageName = languageTag,
-                value = translationValue,
-                convertedBy = importFormat,
-                metadata = metadata
-            )
-        }
+    if (forms.isNotEmpty()) {
+      val converted =
+        messageConvertor.convert(
+          forms,
+          languageTag,
+          context.importSettings.convertPlaceholdersToIcu,
+          context.projectIcuPlaceholdersEnabled,
+        )
+
+      context.addTranslation(
+        keyName = key,
+        languageName = languageTag,
+        value = converted.message,
+        pluralArgName = converted.pluralArgName,
+        rawData = forms,
+        convertedBy = importFormat,
+      )
     }
+  }
 
-    private fun processPluralTranslation(
-        key: String,
-        languageTag: String,
-        localization: JsonNode,
-        metadata: Map<String, Any?>
-    ) {
-        val variations = localization.get("variations")?.get("plural") ?: return
-        val forms = mutableMapOf<String, String>()
-
-        variations.fields().forEach { (form, content) ->
-            val value = content.get("stringUnit")?.get("value")?.asText()
-            if (value != null) {
-                forms[form] = value
-            }
-        }
-
-        if (forms.isNotEmpty()) {
-            val converted = messageConvertor.convert(
-                forms,
-                languageTag,
-                context.importSettings.convertPlaceholdersToIcu,
-                context.projectIcuPlaceholdersEnabled
-            )
-
-            context.addTranslation(
-                keyName = key,
-                languageName = languageTag,
-                value = converted.message,
-                pluralArgName = converted.pluralArgName,
-                rawData = forms,
-                convertedBy = importFormat,
-                metadata = metadata
-            )
-        }
-    }
-
-    companion object {
-        private val importFormat = ImportFormat.XCSTRINGS
-        private val messageConvertor = importFormat.messageConvertor
-    }
+  companion object {
+    private val importFormat = ImportFormat.XCSTRINGS
+    private val messageConvertor = importFormat.messageConvertor
+  }
 }

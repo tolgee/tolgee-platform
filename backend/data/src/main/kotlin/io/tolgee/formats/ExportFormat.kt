@@ -6,6 +6,7 @@ enum class ExportFormat(
   val extension: String,
   val mediaType: String,
   val defaultFileStructureTemplate: String = ExportFilePathProvider.DEFAULT_TEMPLATE,
+  val multiLanguage: Boolean = false,
 ) {
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
@@ -47,5 +48,6 @@ enum class ExportFormat(
     "xcstrings",
     "application/json",
     defaultFileStructureTemplate = "Localizable.{extension}",
+    multiLanguage = true,
   ),
 }
