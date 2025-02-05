@@ -125,7 +125,7 @@ enum class ImportFormat(
     messageConvertorOrNull = appleConvertor,
   ),
 
-  XCSTRINGS(
+  APPLE_XCSTRINGS(
     fileFormat = ImportFileFormat.XCSTRINGS,
     messageConvertorOrNull =
       GenericMapPluralImportRawDataConvertor(

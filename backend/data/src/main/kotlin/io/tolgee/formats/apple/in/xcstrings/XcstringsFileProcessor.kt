@@ -107,7 +107,7 @@ class XcstringsFileProcessor(
   }
 
   companion object {
-    private val importFormat = ImportFormat.XCSTRINGS
+    private val importFormat = ImportFormat.APPLE_XCSTRINGS
     private val messageConvertor = importFormat.messageConvertor
   }
 }
