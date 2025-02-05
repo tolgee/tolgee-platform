@@ -1,8 +1,9 @@
-import { FunctionComponent } from 'react';
+import React from 'react';
 import { LINKS } from 'tg.constants/links';
 import { BaseUserSettingsView } from 'tg.views/userSettings/BaseUserSettingsView';
 import { useTranslate } from '@tolgee/react';
-import { Box, styled, Switch, Tooltip, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
+import { SettingsRow } from 'tg.views/userSettings/notifications/SettingsRow';
 
 const StyledRoot = styled(Box)`
   display: grid;
@@ -17,11 +18,7 @@ const StyledTableHeader = styled(Box)`
   text-align: center;
 `;
 
-const StyledSwitch = styled(Box)`
-  text-align: center;
-`;
-
-export const NotificationsView: FunctionComponent = () => {
+export const NotificationsView: React.FC = () => {
   const { t } = useTranslate();
   return (
     <BaseUserSettingsView
@@ -40,52 +37,16 @@ export const NotificationsView: FunctionComponent = () => {
         <Box></Box>
         <StyledTableHeader>In-App</StyledTableHeader>
         <StyledTableHeader>Email</StyledTableHeader>
-        <Box>
-          <Box>
-            <Typography variant="body1">Account security</Typography>
-          </Box>
-          <Box>
-            <Typography
-              variant="body2"
-              color={(theme) => theme.palette.text.secondary}
-            >
-              Password-changed, Two-Factor authentication on/off
-            </Typography>
-          </Box>
-        </Box>
-        <Box>
-          <Tooltip title={'Cannot be turned off'}>
-            <StyledSwitch>
-              <Switch defaultChecked disabled={true} />
-            </StyledSwitch>
-          </Tooltip>
-        </Box>
-        <Box>
-          <Tooltip title={'Cannot be turned off'}>
-            <StyledSwitch>
-              <Switch defaultChecked disabled={true} />
-            </StyledSwitch>
-          </Tooltip>
-        </Box>
-        <Box>
-          <Box>
-            <Typography variant="body1">Tasks</Typography>
-          </Box>
-          <Box>
-            <Typography
-              variant="body2"
-              color={(theme) => theme.palette.text.secondary}
-            >
-              Assigned, completed, closed
-            </Typography>
-          </Box>
-        </Box>
-        <StyledSwitch>
-          <Switch defaultChecked />
-        </StyledSwitch>
-        <StyledSwitch>
-          <Switch defaultChecked />
-        </StyledSwitch>
+        <SettingsRow
+          description="Account security"
+          subdescription="Password-changed, Two-Factor authentication on/off"
+          disabledInApp={true}
+          disabledEmail={true}
+        />
+        <SettingsRow
+          description="Tasks"
+          subdescription="Assigned, completed, closed"
+        />
       </StyledRoot>
     </BaseUserSettingsView>
   );
