@@ -8,8 +8,15 @@ export const GlobalStyles = () => {
   return (
     <Global
       styles={css`
-        .SnackbarContainer-root {
+        .notistack-SnackbarContainer {
           margin-top: ${topBannerHeight + TOP_BAR_HEIGHT - 12}px;
+        }
+        .notistack-Snackbar .notistack-CloseButton {
+          opacity: 0;
+          transition: opacity 0.1s ease-in-out;
+        }
+        .notistack-Snackbar:hover .notistack-CloseButton {
+          opacity: 1;
         }
       `}
     />

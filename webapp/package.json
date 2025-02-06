@@ -33,7 +33,7 @@
     "formik": "^2.2.9",
     "intl-messageformat": "^9.8.1",
     "node-fetch": "3.3.0",
-    "notistack": "^2.0.4",
+    "notistack": "^3.0.2",
     "posthog-js": "^1.96.1",
     "prism-react-renderer": "1.2.1",
     "prism-svelte": "0.4.7",

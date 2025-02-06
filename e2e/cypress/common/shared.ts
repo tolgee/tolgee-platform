@@ -75,7 +75,7 @@ export const confirmStandard = () => {
 };
 
 export const assertMessage = (message: string) => {
-  return gcy('global-snackbars').should('contain', message);
+  return gcy('notistack-snackbar').should('contain', message);
 };
 
 export const assertTooltip = (message: string) => {
