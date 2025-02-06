@@ -1986,7 +1986,9 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "sso_domain_not_allowed"
+        | "sso_login_forced_for_this_account";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4337,7 +4339,9 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "sso_domain_not_allowed"
+        | "sso_login_forced_for_this_account";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
