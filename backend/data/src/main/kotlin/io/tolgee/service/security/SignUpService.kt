@@ -13,6 +13,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.QuickStartService
+import io.tolgee.service.TenantService
 import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
@@ -31,12 +32,15 @@ class SignUpService(
   private val organizationRoleService: OrganizationRoleService,
   private val quickStartService: QuickStartService,
   private val passwordEncoder: PasswordEncoder,
+  private val tenantService: TenantService,
 ) {
   @Transactional
   fun signUp(dto: SignUpDto): JwtAuthenticationResponse? {
     userAccountService.findActive(dto.email)?.let {
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
+
+    tenantService.checkSsoNotRequired(dto.email)
 
     val user = dtoToEntity(dto)
     signUp(user, dto.invitationCode, dto.organizationName, dto.userSource)

@@ -1,6 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.sso.SsoTenantDto
@@ -9,6 +10,7 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.SsoTenant
 import io.tolgee.model.enums.OrganizationRoleType
@@ -27,6 +29,7 @@ class SsoProviderController(
   private val ssoTenantAssembler: SsoTenantAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val organizationService: OrganizationService,
+  private val properties: TolgeeProperties,
 ) {
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @PutMapping("")
@@ -41,6 +44,10 @@ class SsoProviderController(
       organizationId = organizationId,
       Feature.SSO,
     )
+
+    if (request.enabled && properties.authentication.ssoOrganizations.isAllowed(request.domain)) {
+      throw PermissionException(Message.SSO_DOMAIN_NOT_ALLOWED)
+    }
 
     val organization = organizationService.get(organizationId)
     return ssoTenantAssembler.toModel(tenantService.createOrUpdate(request.toDto(), organization).toDto())

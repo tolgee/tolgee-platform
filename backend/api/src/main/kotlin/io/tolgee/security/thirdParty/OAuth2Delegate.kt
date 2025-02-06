@@ -10,6 +10,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.service.TenantService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -28,6 +29,7 @@ class OAuth2Delegate(
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
   private val oAuthUserHandler: OAuthUserHandler,
+  private val tenantService: TenantService,
 ) : ThirdPartyAuthDelegate {
   private val oauth2ConfigurationProperties: OAuth2AuthenticationProperties = properties.authentication.oauth2
   private val logger = LoggerFactory.getLogger(this::class.java)
@@ -109,6 +111,8 @@ class OAuth2Delegate(
             ThirdPartyAuthType.OAUTH2,
             UserAccount.AccountType.THIRD_PARTY,
           )
+
+        tenantService.checkSsoNotRequired(user.username)
 
         val jwt = jwtService.emitToken(user.id)
         return JwtAuthenticationResponse(jwt)

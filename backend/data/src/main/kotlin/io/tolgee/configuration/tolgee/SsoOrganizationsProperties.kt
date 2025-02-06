@@ -31,4 +31,19 @@ class SsoOrganizationsProperties {
         " able to access the server after the account has been disabled or deleted in the SSO provider.",
   )
   var sessionExpirationMinutes: Int = 10
+
+  @DocProperty(
+    description =
+      "Only allow listed domains to be used for SSO configuration.",
+  )
+  var allowedDomains: List<String>? = emptyList()
+
+  fun isAllowed(domain: String): Boolean {
+    val allowed = allowedDomains
+    if (allowed == null) {
+      return true
+    }
+
+    return domain in allowed
+  }
 }

@@ -10,6 +10,7 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
+import io.tolgee.service.TenantService
 import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -30,6 +31,7 @@ class GithubOAuthDelegate(
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
   private val authProviderChangeService: AuthProviderChangeService,
+  private val tenantService: TenantService,
 ) : ThirdPartyAuthDelegate {
   private val githubConfigurationProperties: GithubAuthenticationProperties = properties.authentication.github
 
@@ -83,31 +85,9 @@ class GithubOAuthDelegate(
         )?.email
           ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-      val userAccount =
-        userAccountService.findByThirdParty(ThirdPartyAuthType.GITHUB, userResponse!!.id!!) ?: let {
-          userAccountService.findActive(githubEmail)?.let {
-            authProviderChangeService.initiateProviderChange(
-              AuthProviderChangeData(
-                it,
-                UserAccount.AccountType.THIRD_PARTY,
-                ThirdPartyAuthType.GITHUB,
-                userResponse.id,
-              ),
-            )
-            throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
-          }
+      val userAccount = findAccount(githubEmail, userResponse!!, invitationCode)
 
-          val newUserAccount = UserAccount()
-          newUserAccount.username = githubEmail
-          newUserAccount.name = userResponse.name ?: userResponse.login
-          newUserAccount.thirdPartyAuthId = userResponse.id
-          newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GITHUB
-          newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-
-          signUpService.signUp(newUserAccount, invitationCode, null)
-
-          newUserAccount
-        }
+      tenantService.checkSsoNotRequired(userAccount.username)
 
       val jwt = jwtService.emitToken(userAccount.id)
       return JwtAuthenticationResponse(jwt)
@@ -121,6 +101,39 @@ class GithubOAuthDelegate(
     }
 
     throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
+  }
+
+  fun findAccount(
+    githubEmail: String,
+    userResponse: GithubUserResponse,
+    invitationCode: String?,
+  ): UserAccount {
+    userAccountService.findByThirdParty(ThirdPartyAuthType.GITHUB, userResponse.id!!)?.let {
+      return it
+    }
+
+    userAccountService.findActive(githubEmail)?.let {
+      authProviderChangeService.initiateProviderChange(
+        AuthProviderChangeData(
+          it,
+          UserAccount.AccountType.THIRD_PARTY,
+          ThirdPartyAuthType.GITHUB,
+          userResponse.id,
+        ),
+      )
+      return it
+    }
+
+    val newUserAccount = UserAccount()
+    newUserAccount.username = githubEmail
+    newUserAccount.name = userResponse.name ?: userResponse.login
+    newUserAccount.thirdPartyAuthId = userResponse.id
+    newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GITHUB
+    newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
+
+    signUpService.signUp(newUserAccount, invitationCode, null)
+
+    return newUserAccount
   }
 
   class GithubEmailResponse {

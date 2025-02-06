@@ -15,8 +15,6 @@ import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.addMinutes
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthProviderChangeService(
@@ -33,19 +31,39 @@ class AuthProviderChangeService(
     return getActiveAuthProviderChangeRequest(userAccount)?.asAuthProviderDto()
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+//  @Transactional(propagation = Propagation.REQUIRES_NEW)
+//  fun initiateProviderChange(data: AuthProviderChangeData) {
+//    authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
+//    val expirationDate = currentDateProvider.date.addMinutes(30)
+//    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest(expirationDate))
+//    throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
+//  }
+
   fun initiateProviderChange(data: AuthProviderChangeData) {
-    authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
+    // This version of the function is only temporary solution and
+    // supports only SSO account auth provider change for now.
+    // It will be replaced with the version above once full
+    // support for auth provider change is implemented.
+    if (data.accountType != UserAccount.AccountType.MANAGED) {
+      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+    }
     val expirationDate = currentDateProvider.date.addMinutes(30)
-    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest(expirationDate))
+    val change = data.asAuthProviderChangeRequest(expirationDate)
+    acceptProviderChange(change)
   }
 
   fun acceptProviderChange(userAccount: UserAccount) {
+    val req = getActiveAuthProviderChangeRequest(userAccount) ?: return
+    acceptProviderChange(req)
+    authProviderChangeRequestRepository.delete(req)
+  }
+
+  fun acceptProviderChange(req: AuthProviderChangeRequest) {
+    val userAccount = req.userAccount ?: return throw NotFoundException()
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 
-    val req = getActiveAuthProviderChangeRequest(userAccount) ?: return
     userAccount.apply {
       accountType = req.accountType
       thirdPartyAuthType = req.authType
@@ -66,7 +84,6 @@ class AuthProviderChangeService(
       }
       organizationRoleService.setManaged(userAccount, organization, true)
     }
-    authProviderChangeRequestRepository.delete(req)
   }
 
   fun rejectProviderChange(userAccount: UserAccount) {

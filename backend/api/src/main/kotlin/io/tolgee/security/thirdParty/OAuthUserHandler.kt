@@ -62,7 +62,7 @@ class OAuthUserHandler(
     thirdPartyAuthType: ThirdPartyAuthType,
     accountType: UserAccount.AccountType,
   ): UserAccount {
-    val existingUserAccount =
+    var existingUserAccount =
       userAccountService.findActive(userResponse.email)
     if (existingUserAccount != null) {
       authProviderChangeService.initiateProviderChange(
@@ -76,7 +76,7 @@ class OAuthUserHandler(
           ssoExpiration = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType),
         ),
       )
-      throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
+      return existingUserAccount
     }
 
     val newUserAccount = UserAccount()

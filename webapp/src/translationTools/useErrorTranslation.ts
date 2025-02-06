@@ -159,6 +159,10 @@ export function useErrorTranslation() {
         return t('namespace_cannot_be_used_when_feature_is_disabled');
       case 'namespaces_cannot_be_disabled_when_namespace_exists':
         return t('namespaces_cannot_be_disabled_when_namespace_exists');
+      case 'sso_domain_not_allowed':
+        return t('sso_domain_not_allowed');
+      case 'sso_login_forced_for_this_account':
+        return t('sso_login_forced_for_this_account');
       default:
         return code;
     }

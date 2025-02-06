@@ -203,6 +203,14 @@ export const useAuthService = (
     authProviderChange,
   };
 
+  async function loginRedirectSso(domain: string) {
+    localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
+    const state = uuidv4();
+    localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+    const response = await getSsoAuthLinkByDomain(domain, state);
+    window.location.href = response.redirectUrl;
+  }
+
   const actions = {
     async login(credentials: LoginRequest) {
       const response = await loginLoadable.mutateAsync(
@@ -213,6 +221,9 @@ export const useAuthService = (
           onError: (error) => {
             if (error.code === 'third_party_switch_initiated') {
               setAuthProviderChange(true);
+            }
+            if (error.code === 'sso_login_forced_for_this_account') {
+              loginRedirectSso(error.params?.[0]);
             }
           },
         }
@@ -242,19 +253,16 @@ export const useAuthService = (
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
+            if (error.code === 'sso_login_forced_for_this_account') {
+              loginRedirectSso(error.params?.[0]);
+            }
           },
         }
       );
       setInvitationCode(undefined);
       await handleAfterLogin(response!);
     },
-    async loginRedirectSso(domain: string) {
-      localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
-      const state = uuidv4();
-      localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
-      const response = await getSsoAuthLinkByDomain(domain, state);
-      window.location.href = response.redirectUrl;
-    },
+    loginRedirectSso,
     getLastSsoDomain,
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(

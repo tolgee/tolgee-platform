@@ -18,18 +18,22 @@ class TenantServiceImpl(
   private val tenantRepository: TenantRepository,
   private val properties: TolgeeProperties,
 ) : TenantService {
-  override fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
+  override fun getEnabledConfigByDomainOrNull(domain: String): SsoTenantConfig? {
     return properties.authentication.ssoGlobal
       .takeIf { it.enabled && domain == it.domain }
       ?.let { ssoTenantProperties -> SsoTenantConfig(ssoTenantProperties, null) }
       ?: domain
         .takeIf { properties.authentication.ssoOrganizations.enabled }
+        ?.takeIf { properties.authentication.ssoOrganizations.isAllowed(it) }
         ?.let {
           tenantRepository.findEnabledByDomain(it)?.let { ssoTenantEntity ->
             SsoTenantConfig(ssoTenantEntity, ssoTenantEntity.organization)
           }
         }
-      ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
+  }
+
+  override fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
+    return getEnabledConfigByDomainOrNull(domain) ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
   }
 
   override fun save(tenant: SsoTenant): SsoTenant = tenantRepository.save(tenant)
