@@ -1,3 +1,10 @@
+# [3.98.0](https://github.com/tolgee/tolgee-platform/compare/v3.97.0...v3.98.0) (2025-02-06)
+
+
+### Features
+
+* closable notifications ([#2895](https://github.com/tolgee/tolgee-platform/issues/2895)) ([018d630](https://github.com/tolgee/tolgee-platform/commit/018d6307743f1d46abb7046175650c59deb7c7ed))
+
 # [3.97.0](https://github.com/tolgee/tolgee-platform/compare/v3.96.5...v3.97.0) (2025-02-01)
 
 
