@@ -25,6 +25,7 @@ tolgee:
       user-url: "https://dummy-url.com/userinfo"
     sso-organizations:
       enabled: false
+      allowed-domains: "domain.com"
     sso-global:
       enabled: false
       authorization-uri: "https://dummy-url.com"
