@@ -45,7 +45,7 @@ class SsoProviderController(
       Feature.SSO,
     )
 
-    if (request.enabled && properties.authentication.ssoOrganizations.isAllowed(request.domain)) {
+    if (request.enabled && !properties.authentication.ssoOrganizations.isAllowedDomain(request.domain)) {
       throw PermissionException(Message.SSO_DOMAIN_NOT_ALLOWED)
     }
 

@@ -38,7 +38,7 @@ class SsoOrganizationsProperties {
   )
   var allowedDomains: List<String>? = emptyList()
 
-  fun isAllowed(domain: String): Boolean {
+  fun isAllowedDomain(domain: String): Boolean {
     val allowed = allowedDomains
     if (allowed == null) {
       return true
