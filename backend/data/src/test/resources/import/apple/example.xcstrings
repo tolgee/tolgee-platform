@@ -1,0 +1,46 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "hello-world": {
+      "extractionState": "manual",
+      "comment": "A greeting message",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hello, World!"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonjour le monde!"
+          }
+        }
+      }
+    },
+    "messages-count": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have %lld message"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You have %lld messages"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+} 

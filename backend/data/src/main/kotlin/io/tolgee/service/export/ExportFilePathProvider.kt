@@ -52,19 +52,21 @@ class ExportFilePathProvider(
   }
 
   private fun validateTemplate() {
-    val containsLanguageTag =
-      arrayOf(
-        ExportFilePathPlaceholder.LANGUAGE_TAG,
-        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-      ).any { getTemplate().contains(it.placeholder) }
+    if (!params.format.multiLanguage) {
+      val containsLanguageTag =
+        arrayOf(
+          ExportFilePathPlaceholder.LANGUAGE_TAG,
+          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
+          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
+        ).any { getTemplate().contains(it.placeholder) }
 
-    if (!containsLanguageTag) {
-      throw getMissingPlaceholderException(
-        ExportFilePathPlaceholder.LANGUAGE_TAG,
-        ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-        ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-      )
+      if (!containsLanguageTag) {
+        throw getMissingPlaceholderException(
+          ExportFilePathPlaceholder.LANGUAGE_TAG,
+          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
+          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
+        )
+      }
     }
 
     val containsExtension = getTemplate().contains(ExportFilePathPlaceholder.EXTENSION.placeholder)

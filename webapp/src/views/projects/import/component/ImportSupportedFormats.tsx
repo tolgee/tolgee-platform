@@ -54,6 +54,7 @@ const FORMATS = [
   { name: 'PO Python', logo: <PythonLogo /> },
   { name: 'Apple Strings', logo: <AppleLogo /> },
   { name: 'Apple Stringsdict', logo: <AppleLogo /> },
+  { name: 'Apple Strings Catalog', logo: <AppleLogo /> },
   { name: 'Apple XLIFF', logo: <AppleLogo /> },
   { name: 'Android XML', logo: <AndroidLogo /> },
   { name: 'Compose Multiplatform XML', logo: <ComposeMultiplatformLogo /> },
