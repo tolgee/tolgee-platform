@@ -15,6 +15,8 @@ import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.addMinutes
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthProviderChangeService(
@@ -31,25 +33,27 @@ class AuthProviderChangeService(
     return getActiveAuthProviderChangeRequest(userAccount)?.asAuthProviderDto()
   }
 
-//  @Transactional(propagation = Propagation.REQUIRES_NEW)
-//  fun initiateProviderChange(data: AuthProviderChangeData) {
-//    authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
-//    val expirationDate = currentDateProvider.date.addMinutes(30)
-//    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest(expirationDate))
-//    throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
-//  }
-
   fun initiateProviderChange(data: AuthProviderChangeData) {
-    // This version of the function is only temporary solution and
-    // supports only SSO account auth provider change for now.
-    // It will be replaced with the version above once full
-    // support for auth provider change is implemented.
-    if (data.accountType != UserAccount.AccountType.MANAGED) {
-      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+    if (data.accountType == UserAccount.AccountType.MANAGED) {
+      // Immediately accept auth provider change requests for SSO accounts
+      val expirationDate = currentDateProvider.date.addMinutes(30)
+      val change = data.asAuthProviderChangeRequest(expirationDate)
+      acceptProviderChange(change)
+      return
     }
+
+    // Changing authentication provider to non-SSO providers is disabled for now
+    // selfReference.saveProviderChange(data)
+    // throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
+
+    throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun saveProviderChange(data: AuthProviderChangeData) {
+    authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
     val expirationDate = currentDateProvider.date.addMinutes(30)
-    val change = data.asAuthProviderChangeRequest(expirationDate)
-    acceptProviderChange(change)
+    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest(expirationDate))
   }
 
   fun acceptProviderChange(userAccount: UserAccount) {
