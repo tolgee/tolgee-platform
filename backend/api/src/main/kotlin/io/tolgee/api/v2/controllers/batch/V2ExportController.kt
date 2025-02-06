@@ -50,6 +50,7 @@ class V2ExportController(
   @Operation(summary = "Export data")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @ExportApiResponse
   fun exportData(
     @ParameterObject params: ExportParams,
   ): ResponseEntity<StreamingResponseBody> {
@@ -71,6 +72,7 @@ class V2ExportController(
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @ExportApiResponse
   fun exportPost(
     @RequestBody params: ExportParams,
   ): ResponseEntity<StreamingResponseBody> {
