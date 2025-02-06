@@ -1,11 +1,13 @@
 package io.tolgee.security.thirdParty
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.stereotype.Component
@@ -15,6 +17,7 @@ class OAuthUserHandler(
   private val signUpService: SignUpService,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
+  private val authProviderChangeService: AuthProviderChangeService,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -59,8 +62,21 @@ class OAuthUserHandler(
     thirdPartyAuthType: ThirdPartyAuthType,
     accountType: UserAccount.AccountType,
   ): UserAccount {
-    if (userAccountService.findActive(userResponse.email) != null) {
-      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+    var existingUserAccount =
+      userAccountService.findActive(userResponse.email)
+    if (existingUserAccount != null) {
+      authProviderChangeService.initiateProviderChange(
+        AuthProviderChangeData(
+          existingUserAccount,
+          accountType,
+          thirdPartyAuthType,
+          userResponse.sub,
+          ssoDomain = userResponse.tenant?.domain,
+          ssoRefreshToken = userResponse.refreshToken,
+          ssoExpiration = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType),
+        ),
+      )
+      return existingUserAccount
     }
 
     val newUserAccount = UserAccount()
