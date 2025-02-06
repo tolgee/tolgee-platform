@@ -76,8 +76,11 @@ const MainWrapper = () => {
                   {/* @ts-ignore */}
                   <ErrorBoundary>
                     <SnackbarProvider
-                      data-cy="global-snackbars"
                       anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+                      SnackbarProps={{
+                        // @ts-ignore
+                        'data-cy': 'notistack-snackbar',
+                      }}
                     >
                       <GlobalContext>
                         <BottomPanelProvider>
