@@ -1,3 +1,10 @@
+## [3.98.1](https://github.com/tolgee/tolgee-platform/compare/v3.98.0...v3.98.1) (2025-02-07)
+
+
+### Bug Fixes
+
+* OpenApi docs for exporting endpoints ([#2896](https://github.com/tolgee/tolgee-platform/issues/2896)) ([153ff4c](https://github.com/tolgee/tolgee-platform/commit/153ff4cb3b8702f4ed7bad675563bf5fa8fc791f)), closes [#2871](https://github.com/tolgee/tolgee-platform/issues/2871)
+
 # [3.98.0](https://github.com/tolgee/tolgee-platform/compare/v3.97.0...v3.98.0) (2025-02-06)
 
 
