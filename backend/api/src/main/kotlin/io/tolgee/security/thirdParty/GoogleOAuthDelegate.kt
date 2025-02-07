@@ -89,7 +89,7 @@ class GoogleOAuthDelegate(
 
         val userAccount = findAccount(userResponse, invitationCode)
 
-        tenantService.checkSsoNotRequired(userAccount.username)
+        tenantService.checkSsoNotRequired(userAccount)
 
         val jwt = jwtService.emitToken(userAccount.id)
         return JwtAuthenticationResponse(jwt)

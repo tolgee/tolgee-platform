@@ -111,7 +111,8 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     return <FullPageLoading />;
   }
 
-  let infoText: React.ReactNode = null;
+  let titleText: string;
+  let infoText: React.ReactNode;
 
   const accountType = authProviderChangeInfo.data.accountType;
   const authType = authProviderChangeInfo.data.authType;
@@ -124,23 +125,16 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     b: <b />,
   };
 
-  if (accountType === 'MANAGED') {
-    if ((authType == 'SSO' || authType == 'SSO_GLOBAL') && ssoDomain) {
-      infoText = (
-        <T
-          keyName="accept_auth_provider_change_description_managed_sso"
-          params={params}
-        />
-      );
-    } else {
-      infoText = (
-        <T
-          keyName="accept_auth_provider_change_description_managed"
-          params={params}
-        />
-      );
-    }
+  if (accountType === 'MANAGED' && ssoDomain) {
+    titleText = t('accept_auth_provider_change_managed_sso_title');
+    infoText = (
+      <T
+        keyName="accept_auth_provider_change_description_managed_sso"
+        params={params}
+      />
+    );
   } else {
+    titleText = t('accept_auth_provider_change_title');
     infoText = (
       <T keyName="accept_auth_provider_change_description" params={params} />
     );
@@ -157,7 +151,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
         <StyledContent>
           <StyledPaper>
             <Typography variant="h3" sx={{ textAlign: 'center' }}>
-              {t('accept_auth_provider_change_title')}
+              {titleText}
             </Typography>
 
             <Box display="grid" gap="24px" justifyItems="center">
@@ -192,11 +186,11 @@ const AcceptAuthProviderChangeView: React.FC = () => {
               </Box>
             </Box>
           </StyledPaper>
-          <Box display="flex" justifyContent="center">
+          {/*<Box display="flex" justifyContent="center">
             <Link href="https://tolgee.io">
               {t('accept_auth_provider_change_learn_more')}
             </Link>
-          </Box>
+          </Box>*/}
         </StyledContent>
       </StyledContainer>
     </DashboardPage>

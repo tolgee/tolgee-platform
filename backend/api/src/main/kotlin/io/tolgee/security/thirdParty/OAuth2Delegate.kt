@@ -112,7 +112,7 @@ class OAuth2Delegate(
             UserAccount.AccountType.THIRD_PARTY,
           )
 
-        tenantService.checkSsoNotRequired(user.username)
+        tenantService.checkSsoNotRequired(user)
 
         val jwt = jwtService.emitToken(user.id)
         return JwtAuthenticationResponse(jwt)

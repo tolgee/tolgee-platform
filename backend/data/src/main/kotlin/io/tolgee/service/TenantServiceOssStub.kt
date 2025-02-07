@@ -6,6 +6,7 @@ import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
+import io.tolgee.model.UserAccount
 import org.springframework.stereotype.Service
 
 @Service
@@ -53,5 +54,13 @@ class TenantServiceOssStub : TenantService {
   ): SsoTenant {
     // no-op
     throw UnsupportedOperationException("Not included in OSS")
+  }
+
+  override fun checkSsoNotRequired(username: String) {
+    // no-op
+  }
+
+  override fun checkSsoNotRequired(userAccount: UserAccount) {
+    // no-op
   }
 }

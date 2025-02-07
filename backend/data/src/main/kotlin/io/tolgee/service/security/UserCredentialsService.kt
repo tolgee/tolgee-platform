@@ -20,11 +20,13 @@ class UserCredentialsService(
     username: String,
     password: String,
   ): UserAccount {
-    tenantService.checkSsoNotRequired(username)
+    val userAccount = userAccountService.findActive(username)
+    if (userAccount == null) {
+      tenantService.checkSsoNotRequired(username)
+      throw AuthenticationException(Message.BAD_CREDENTIALS)
+    }
 
-    val userAccount =
-      userAccountService.findActive(username)
-        ?: throw AuthenticationException(Message.BAD_CREDENTIALS)
+    tenantService.checkSsoNotRequired(userAccount)
 
     if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
