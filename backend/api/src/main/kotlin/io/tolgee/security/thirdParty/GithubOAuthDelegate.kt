@@ -85,7 +85,7 @@ class GithubOAuthDelegate(
         )?.email
           ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-      val userAccount = findAccount(githubEmail, userResponse!!, invitationCode)
+      val userAccount = findOrCreateAccount(githubEmail, userResponse!!, invitationCode)
 
       tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
 
@@ -103,7 +103,7 @@ class GithubOAuthDelegate(
     throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
   }
 
-  fun findAccount(
+  fun findOrCreateAccount(
     githubEmail: String,
     userResponse: GithubUserResponse,
     invitationCode: String?,

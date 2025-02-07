@@ -14,10 +14,12 @@ import io.tolgee.repository.AuthProviderChangeRequestRepository
 import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.addMinutes
+import org.apache.commons.lang3.time.DateUtils
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.util.Calendar
 
 @Service
 class AuthProviderChangeService(
@@ -49,13 +51,11 @@ class AuthProviderChangeService(
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun saveProviderChange(data: AuthProviderChangeData) {
     authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
-    val expirationDate = currentDateProvider.date.addMinutes(30)
-    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest(expirationDate))
+    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest())
   }
 
   fun acceptProviderChange(data: AuthProviderChangeData) {
-    val expirationDate = currentDateProvider.date.addMinutes(30)
-    val change = data.asAuthProviderChangeRequest(expirationDate)
+    val change = data.asAuthProviderChangeRequest()
     acceptProviderChange(change)
   }
 
@@ -104,5 +104,19 @@ class AuthProviderChangeService(
       return null
     }
     return request
+  }
+
+  fun AuthProviderChangeData.asAuthProviderChangeRequest(): AuthProviderChangeRequest {
+    val expirationDate = currentDateProvider.date.addMinutes(30)
+    return AuthProviderChangeRequest().also {
+      it.userAccount = this.userAccount
+      it.expirationDate = DateUtils.truncate(expirationDate, Calendar.SECOND)
+      it.accountType = this.accountType
+      it.authType = this.authType
+      it.authId = this.authId
+      it.ssoDomain = this.ssoDomain
+      it.ssoRefreshToken = this.ssoRefreshToken
+      it.ssoExpiration = this.ssoExpiration
+    }
   }
 }

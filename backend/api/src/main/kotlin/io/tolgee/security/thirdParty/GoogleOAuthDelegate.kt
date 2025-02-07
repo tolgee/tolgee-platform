@@ -87,7 +87,7 @@ class GoogleOAuthDelegate(
           }
         }
 
-        val userAccount = findAccount(userResponse, invitationCode)
+        val userAccount = findOrCreateAccount(userResponse, invitationCode)
 
         tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
 
@@ -107,7 +107,7 @@ class GoogleOAuthDelegate(
     }
   }
 
-  private fun findAccount(
+  private fun findOrCreateAccount(
     userResponse: GoogleUserResponse,
     invitationCode: String?,
   ): UserAccount {

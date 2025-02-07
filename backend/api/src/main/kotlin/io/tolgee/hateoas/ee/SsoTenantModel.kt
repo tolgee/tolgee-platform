@@ -13,6 +13,9 @@ class SsoTenantModel(
   override val clientId: String,
   override val clientSecret: String,
   override val tokenUri: String,
+  /**
+   * When true, users with an email matching the organization's domain must sign in using SSO
+   */
   override val force: Boolean,
   override val domain: String,
 ) : ISsoTenant,

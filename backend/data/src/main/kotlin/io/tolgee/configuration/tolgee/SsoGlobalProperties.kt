@@ -26,7 +26,7 @@ class SsoGlobalProperties : ISsoTenant {
   @DocProperty(description = "Enables SSO authentication on global level - as a login method for the whole server")
   var enabled: Boolean = false
 
-  @DocProperty(description = "Force sso authentication for all users using matching e-mail domain")
+  @DocProperty(description = "When true, users with an email matching the organization's domain must sign in using SSO")
   override val force: Boolean = false
 
   @DocProperty(description = "Unique identifier for an application")

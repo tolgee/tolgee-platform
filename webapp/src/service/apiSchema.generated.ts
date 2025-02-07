@@ -4,18 +4,6 @@
  */
 
 export interface paths {
-  "/api/auth_provider/changed": {
-    get: operations["getChangedAuthProvider"];
-  };
-  "/api/auth_provider/changed/accept": {
-    post: operations["acceptChangeAuthProvider"];
-  };
-  "/api/auth_provider/changed/reject": {
-    post: operations["rejectChangeAuthProvider"];
-  };
-  "/api/auth_provider/current": {
-    get: operations["getCurrentAuthProvider"];
-  };
   "/api/project/{projectId}/export/jsonZip": {
     /** Exports data as ZIP of jsons */
     get: operations["doExportJsonZip"];
@@ -112,6 +100,18 @@ export interface paths {
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
     get: operations["get_21"];
+  };
+  "/v2/auth-provider/changed": {
+    get: operations["getChangedAuthProvider"];
+  };
+  "/v2/auth-provider/changed/accept": {
+    post: operations["acceptChangeAuthProvider"];
+  };
+  "/v2/auth-provider/changed/reject": {
+    post: operations["rejectChangeAuthProvider"];
+  };
+  "/v2/auth-provider/current": {
+    get: operations["getCurrentAuthProvider"];
   };
   "/v2/ee-license/info": {
     get: operations["getInfo_5"];
@@ -1761,6 +1761,7 @@ export interface components {
         | "key_exists"
         | "third_party_auth_error_message"
         | "third_party_auth_no_email"
+        | "third_party_auth_non_matching_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
         | "email_already_verified"
@@ -4115,6 +4116,7 @@ export interface components {
         | "key_exists"
         | "third_party_auth_error_message"
         | "third_party_auth_no_email"
+        | "third_party_auth_non_matching_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
         | "email_already_verified"
@@ -4775,170 +4777,6 @@ export interface components {
 }
 
 export interface operations {
-  getChangedAuthProvider: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AuthProviderDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  acceptChangeAuthProvider: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["JwtAuthenticationResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  rejectChangeAuthProvider: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getCurrentAuthProvider: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AuthProviderDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
   /** Exports data as ZIP of jsons */
   doExportJsonZip: {
     parameters: {
@@ -6251,6 +6089,170 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getChangedAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  acceptChangeAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  rejectChangeAuthProvider: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getCurrentAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
         };
       };
       /** Bad Request */

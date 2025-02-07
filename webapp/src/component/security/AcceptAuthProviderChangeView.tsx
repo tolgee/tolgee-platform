@@ -53,7 +53,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   const authProviderChange = useGlobalContext((c) => c.auth.authProviderChange);
 
   const acceptChange = useApiMutation({
-    url: '/api/auth_provider/changed/accept',
+    url: '/v2/auth-provider/changed/accept',
     method: 'post',
     fetchOptions: {
       disableAutoErrorHandle: true,
@@ -61,7 +61,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   });
 
   const authProviderCurrentInfo = useApiQuery({
-    url: '/api/auth_provider/current',
+    url: '/v2/auth-provider/current',
     method: 'get',
     options: {
       onError(e) {
@@ -73,7 +73,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   });
 
   const authProviderChangeInfo = useApiQuery({
-    url: '/api/auth_provider/changed',
+    url: '/v2/auth-provider/changed',
     method: 'get',
     options: {
       onError(e) {
@@ -101,11 +101,6 @@ const AcceptAuthProviderChangeView: React.FC = () => {
       }
     );
   }
-
-  // function handleDecline() {
-  //   setAuthProviderChange(false);
-  //   history.push(LINKS.LOGIN.build());
-  // }
 
   if (!authProviderChangeInfo.data || authProviderCurrentInfo.isLoading) {
     return <FullPageLoading />;
@@ -176,25 +171,12 @@ const AcceptAuthProviderChangeView: React.FC = () => {
                 >
                   {t('accept_auth_provider_change_accept')}
                 </LoadingButton>
-                {/*<Button
-                  variant="outlined"
-                  onClick={handleDecline}
-                  data-cy="accept-auth-provider-change-decline"
-                >
-                  {t('accept_auth_provider_change_decline')}
-                </Button>*/}
               </Box>
             </Box>
           </StyledPaper>
-          {/*<Box display="flex" justifyContent="center">
-            <Link href="https://tolgee.io">
-              {t('accept_auth_provider_change_learn_more')}
-            </Link>
-          </Box>*/}
         </StyledContent>
       </StyledContainer>
     </DashboardPage>
   );
 };
-// TODO: learn more link to docs + handle non-sso cases and allow declining the request for them
 export default AcceptAuthProviderChangeView;

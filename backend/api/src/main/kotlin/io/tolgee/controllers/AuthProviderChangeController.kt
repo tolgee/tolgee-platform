@@ -3,6 +3,7 @@ package io.tolgee.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.dtos.response.AuthProviderDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -20,8 +21,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping("/api/auth_provider") // TODO: I should probably use the v2
+@RequestMapping("/v2/auth-provider") // TODO: I should probably use the v2
 @AuthenticationTag
+@OpenApiHideFromPublicDocs
 class AuthProviderChangeController(
   private val authenticationFacade: AuthenticationFacade,
   private val authProviderChangeService: AuthProviderChangeService,
