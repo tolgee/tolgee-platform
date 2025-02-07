@@ -4059,4 +4059,40 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="anty (generated)" id="1738671416787-1">
+        <createTable tableName="auth_provider_change_request">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="auth_provider_change_requestPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_type" type="VARCHAR(255)"/>
+            <column name="auth_id" type="VARCHAR(255)"/>
+            <column name="auth_type" type="VARCHAR(255)"/>
+            <column name="expiration_date" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="sso_domain" type="VARCHAR(255)"/>
+            <column name="sso_expiration" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="sso_refresh_token" type="TEXT"/>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1738671416787-2">
+        <addUniqueConstraint columnNames="user_account_id" constraintName="UC_AUTH_PROVIDER_CHANGE_REQUESTUSER_ACCOUNT_ID_COL" tableName="auth_provider_change_request"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1738671416787-3">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="auth_provider_change_request" constraintName="FKo6db96l21g8a86a9c0t50x32x" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1738932732564-1">
+        <addColumn tableName="tenant">
+            <column defaultValueBoolean="false" name="force" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

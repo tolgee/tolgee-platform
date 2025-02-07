@@ -18,6 +18,7 @@ class SsoTenantAssembler :
       clientId = entity.clientId,
       clientSecret = entity.clientSecret,
       tokenUri = entity.tokenUri,
+      force = entity.force,
       enabled = entity.enabled,
       domain = entity.domain,
     )

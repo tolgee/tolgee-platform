@@ -13,7 +13,6 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useInitialDataService } from './useInitialDataService';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
-import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 
 type LoginRequest = components['schemas']['LoginRequest'];
@@ -23,6 +22,7 @@ type SignUpDto = components['schemas']['SignUpDto'];
 type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
 
 export const INVITATION_CODE_STORAGE_KEY = 'invitationCode';
+export const AUTH_PROVIDER_CHANGE_STORAGE_KEY = 'authProviderChange';
 
 const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
@@ -107,6 +107,23 @@ export const useAuthService = (
       key: INVITATION_CODE_STORAGE_KEY,
     });
 
+  const [
+    authProviderChangeStr,
+    setAuthProviderChangeStr,
+    getAuthProviderChangeStr,
+  ] = useLocalStorageState({
+    initial: 'false',
+    key: AUTH_PROVIDER_CHANGE_STORAGE_KEY,
+  });
+  const authProviderChange = authProviderChangeStr === 'true';
+
+  function setAuthProviderChange(value: boolean) {
+    return setAuthProviderChangeStr(value ? 'true' : 'false');
+  }
+  function getAuthProviderChange() {
+    return getAuthProviderChangeStr() === 'true';
+  }
+
   const [allowRegistration, setAllowRegistration] = useState(
     Boolean(invitationCode)
   );
@@ -183,13 +200,34 @@ export const useAuthService = (
     redirectSsoUrlLoadable,
     allowRegistration,
     invitationCode,
+    authProviderChange,
   };
+
+  async function loginRedirectSso(domain: string) {
+    localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
+    const state = uuidv4();
+    localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+    const response = await getSsoAuthLinkByDomain(domain, state);
+    window.location.href = response.redirectUrl;
+  }
 
   const actions = {
     async login(credentials: LoginRequest) {
-      const response = await loginLoadable.mutateAsync({
-        content: { 'application/json': credentials },
-      });
+      const response = await loginLoadable.mutateAsync(
+        {
+          content: { 'application/json': credentials },
+        },
+        {
+          onError: (error) => {
+            if (error.code === 'third_party_switch_initiated') {
+              setAuthProviderChange(true);
+            }
+            if (error.code === 'sso_login_forced_for_this_account') {
+              loginRedirectSso(error.params?.[0]);
+            }
+          },
+        }
+      );
       response.accessToken;
       await handleAfterLogin(response!);
     },
@@ -209,23 +247,22 @@ export const useAuthService = (
         },
         {
           onError: (error) => {
+            if (error.code === 'third_party_switch_initiated') {
+              setAuthProviderChange(true);
+            }
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
-            messageService.error(<TranslatedError code={error.code!} />);
+            if (error.code === 'sso_login_forced_for_this_account') {
+              loginRedirectSso(error.params?.[0]);
+            }
           },
         }
       );
       setInvitationCode(undefined);
       await handleAfterLogin(response!);
     },
-    async loginRedirectSso(domain: string) {
-      localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
-      const state = uuidv4();
-      localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
-      const response = await getSsoAuthLinkByDomain(domain, state);
-      window.location.href = response.redirectUrl;
-    },
+    loginRedirectSso,
     getLastSsoDomain,
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(
@@ -255,7 +292,9 @@ export const useAuthService = (
     },
     handleAfterLogin,
     redirectAfterLogin() {
-      const link = getRedirectUrl(userId);
+      const link = getAuthProviderChange()
+        ? LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build()
+        : getRedirectUrl(userId);
       history.replace(link);
       securityService.removeAfterLoginLink();
     },
@@ -289,6 +328,8 @@ export const useAuthService = (
       setAdminToken(undefined);
     },
     setInvitationCode,
+    setAuthProviderChange,
+    getAuthProviderChange,
     redirectTo(url: string) {
       history.replace(LINKS.AFTER_LOGIN.build());
     },

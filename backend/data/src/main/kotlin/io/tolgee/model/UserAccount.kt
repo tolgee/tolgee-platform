@@ -59,6 +59,15 @@ data class UserAccount(
   @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, optional = true)
   var emailVerification: EmailVerification? = null
 
+  @OneToOne(
+    mappedBy = "userAccount",
+    fetch = FetchType.LAZY,
+    cascade = [CascadeType.REMOVE],
+    orphanRemoval = true,
+    optional = true,
+  )
+  var authProviderChangeRequest: AuthProviderChangeRequest? = null
+
   @Column(name = "third_party_auth_type")
   @Convert(converter = ThirdPartyAuthTypeConverter::class)
   var thirdPartyAuthType: ThirdPartyAuthType? = null
