@@ -6,10 +6,15 @@ import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
+import io.tolgee.model.UserAccount
 import org.springframework.stereotype.Service
 
 @Service
 class TenantServiceOssStub : TenantService {
+  override fun getEnabledConfigByDomainOrNull(domain: String): SsoTenantConfig? {
+    return null
+  }
+
   override fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
     throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
   }
@@ -49,5 +54,13 @@ class TenantServiceOssStub : TenantService {
   ): SsoTenant {
     // no-op
     throw UnsupportedOperationException("Not included in OSS")
+  }
+
+  override fun checkSsoNotRequired(username: String) {
+    // no-op
+  }
+
+  override fun checkSsoNotRequiredOrAuthProviderChangeActive(userAccount: UserAccount) {
+    // no-op
   }
 }

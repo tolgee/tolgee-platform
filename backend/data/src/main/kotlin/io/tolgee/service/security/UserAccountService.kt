@@ -266,7 +266,7 @@ class UserAccountService(
     userAccount: UserAccount,
     password: String?,
   ): UserAccount {
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    resetTokensValidNotBefore(userAccount)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
@@ -293,7 +293,7 @@ class UserAccountService(
     key: ByteArray,
   ): UserAccount {
     userAccount.totpKey = key
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    resetTokensValidNotBefore(userAccount)
     return userAccountRepository.save(userAccount)
   }
 
@@ -303,7 +303,7 @@ class UserAccountService(
     userAccount.totpKey = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    resetTokensValidNotBefore(userAccount)
     return userAccountRepository.save(userAccount)
   }
 
@@ -458,7 +458,7 @@ class UserAccountService(
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
-    userAccount.tokensValidNotBefore = DateUtils.truncate(Date(), Calendar.SECOND)
+    resetTokensValidNotBefore(userAccount)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
     return userAccountRepository.save(userAccount)
@@ -482,6 +482,15 @@ class UserAccountService(
         userAccount.username = dto.email
       }
     }
+  }
+
+  fun invalidateTokens(userAccount: UserAccount): UserAccount {
+    resetTokensValidNotBefore(userAccount)
+    return userAccountRepository.save(userAccount)
+  }
+
+  private fun resetTokensValidNotBefore(userAccount: UserAccount) {
+    userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
   }
 
   private fun publishUserInfoUpdatedEvent(

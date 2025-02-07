@@ -3,12 +3,15 @@ package io.tolgee.security.thirdParty
 import io.tolgee.configuration.tolgee.GoogleAuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
+import io.tolgee.service.TenantService
+import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.http.HttpEntity
@@ -26,6 +29,8 @@ class GoogleOAuthDelegate(
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
+  private val authProviderChangeService: AuthProviderChangeService,
+  private val tenantService: TenantService,
 ) : ThirdPartyAuthDelegate {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
@@ -82,25 +87,10 @@ class GoogleOAuthDelegate(
           }
         }
 
-        val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
+        val userAccount = findOrCreateAccount(userResponse, invitationCode)
 
-        val userAccount =
-          userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!) ?: let {
-            userAccountService.findActive(googleEmail)?.let {
-              throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
-            }
+        tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
 
-            val newUserAccount = UserAccount()
-            newUserAccount.username = userResponse.email
-              ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
-            newUserAccount.name = userResponse.name ?: (userResponse.given_name + " " + userResponse.family_name)
-            newUserAccount.thirdPartyAuthId = userResponse.sub
-            newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
-            newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-            signUpService.signUp(newUserAccount, invitationCode, null)
-
-            newUserAccount
-          }
         val jwt = jwtService.emitToken(userAccount.id)
         return JwtAuthenticationResponse(jwt)
       }
@@ -115,6 +105,40 @@ class GoogleOAuthDelegate(
     } catch (e: HttpClientErrorException) {
       throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
     }
+  }
+
+  private fun findOrCreateAccount(
+    userResponse: GoogleUserResponse,
+    invitationCode: String?,
+  ): UserAccount {
+    val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
+
+    userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)?.let {
+      return it
+    }
+
+    userAccountService.findActive(googleEmail)?.let {
+      authProviderChangeService.initiateProviderChange(
+        AuthProviderChangeData(
+          it,
+          UserAccount.AccountType.THIRD_PARTY,
+          ThirdPartyAuthType.GOOGLE,
+          userResponse.sub,
+        ),
+      )
+      return it
+    }
+
+    val newUserAccount = UserAccount()
+    newUserAccount.username = userResponse.email
+      ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
+    newUserAccount.name = userResponse.name ?: (userResponse.given_name + " " + userResponse.family_name)
+    newUserAccount.thirdPartyAuthId = userResponse.sub
+    newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
+    newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
+    signUpService.signUp(newUserAccount, invitationCode, null)
+
+    return newUserAccount
   }
 
   @Suppress("PropertyName")

@@ -204,7 +204,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   @Query(
     """
     from Translation t
-    where t.key = :key and t.language.tag in :languageTags
+    where t.key = :key and t.language.tag in :languageTags and t.language.deletedAt is null
   """,
   )
   fun findForKeyByLanguages(

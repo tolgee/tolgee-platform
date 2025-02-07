@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,10 +21,20 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
+    tolgeeProperties.authentication.ssoOrganizations.enabled = true
+    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = listOf("google")
     testData = SsoTestData()
     testDataService.saveTestData(testData.root)
     this.userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
+  }
+
+  @AfterEach
+  fun tearDown() {
+    testDataService.cleanTestData(testData.root)
+    enabledFeaturesProvider.forceEnabled = null
+    tolgeeProperties.authentication.ssoOrganizations.enabled = false
+    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = emptyList()
   }
 
   @Test
@@ -141,7 +152,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
 
   fun requestTenantInvalid2() =
     mapOf(
-      "domain" to "",
+      "domain" to "google",
       "clientId" to "",
       "clientSecret" to "",
       "authorizationUri" to "",

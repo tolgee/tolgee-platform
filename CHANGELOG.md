@@ -1,3 +1,29 @@
+# [3.99.0](https://github.com/tolgee/tolgee-platform/compare/v3.98.1...v3.99.0) (2025-02-07)
+
+
+### Bug Fixes
+
+* Setting translation value for deleted language ([#2899](https://github.com/tolgee/tolgee-platform/issues/2899)) ([b70ed72](https://github.com/tolgee/tolgee-platform/commit/b70ed721457246317bf7284ad6df9253996550da))
+
+
+### Features
+
+* Allow switching to SSO provider ([#2883](https://github.com/tolgee/tolgee-platform/issues/2883)) ([227be09](https://github.com/tolgee/tolgee-platform/commit/227be09d96c254000c07ecf18e5abb273de9d7a5)), closes [#2619](https://github.com/tolgee/tolgee-platform/issues/2619)
+
+## [3.98.1](https://github.com/tolgee/tolgee-platform/compare/v3.98.0...v3.98.1) (2025-02-07)
+
+
+### Bug Fixes
+
+* OpenApi docs for exporting endpoints ([#2896](https://github.com/tolgee/tolgee-platform/issues/2896)) ([153ff4c](https://github.com/tolgee/tolgee-platform/commit/153ff4cb3b8702f4ed7bad675563bf5fa8fc791f)), closes [#2871](https://github.com/tolgee/tolgee-platform/issues/2871)
+
+# [3.98.0](https://github.com/tolgee/tolgee-platform/compare/v3.97.0...v3.98.0) (2025-02-06)
+
+
+### Features
+
+* closable notifications ([#2895](https://github.com/tolgee/tolgee-platform/issues/2895)) ([018d630](https://github.com/tolgee/tolgee-platform/commit/018d6307743f1d46abb7046175650c59deb7c7ed))
+
 # [3.97.0](https://github.com/tolgee/tolgee-platform/compare/v3.96.5...v3.97.0) (2025-02-01)
 
 

@@ -101,6 +101,18 @@ export interface paths {
     /** Returns specific API key info */
     get: operations["get_21"];
   };
+  "/v2/auth-provider/changed": {
+    get: operations["getChangedAuthProvider"];
+  };
+  "/v2/auth-provider/changed/accept": {
+    post: operations["acceptChangeAuthProvider"];
+  };
+  "/v2/auth-provider/changed/reject": {
+    post: operations["rejectChangeAuthProvider"];
+  };
+  "/v2/auth-provider/current": {
+    get: operations["getCurrentAuthProvider"];
+  };
   "/v2/ee-license/info": {
     get: operations["getInfo_5"];
   };
@@ -954,6 +966,11 @@ export interface components {
       ssoGlobal: components["schemas"]["SsoGlobalPublicConfigDTO"];
       ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
     };
+    AuthProviderDto: {
+      accountType?: "LOCAL" | "MANAGED" | "THIRD_PARTY";
+      authType?: "GOOGLE" | "GITHUB" | "OAUTH2" | "SSO" | "SSO_GLOBAL";
+      ssoDomain?: string;
+    };
     AutoTranslationConfigModel: {
       /**
        * @description If true, import will trigger batch operation to translate the new new keys.
@@ -1604,6 +1621,7 @@ export interface components {
       clientSecret: string;
       domain: string;
       enabled: boolean;
+      force: boolean;
       tokenUri: string;
     };
     CreateTaskRequest: {
@@ -1745,11 +1763,13 @@ export interface components {
         | "key_exists"
         | "third_party_auth_error_message"
         | "third_party_auth_no_email"
+        | "third_party_auth_non_matching_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
         | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
+        | "third_party_switch_initiated"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -1970,7 +1990,9 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "sso_domain_not_allowed"
+        | "sso_login_forced_for_this_account";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4065,6 +4087,7 @@ export interface components {
       clientSecret: string;
       domain: string;
       enabled: boolean;
+      force: boolean;
       global: boolean;
       tokenUri: string;
     };
@@ -4097,11 +4120,13 @@ export interface components {
         | "key_exists"
         | "third_party_auth_error_message"
         | "third_party_auth_no_email"
+        | "third_party_auth_non_matching_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
         | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
+        | "third_party_switch_initiated"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -4322,7 +4347,9 @@ export interface components {
         | "user_is_managed_by_organization"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
-        | "namespace_cannot_be_used_when_feature_is_disabled";
+        | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "sso_domain_not_allowed"
+        | "sso_login_forced_for_this_account";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -6066,6 +6093,170 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getChangedAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  acceptChangeAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  rejectChangeAuthProvider: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getCurrentAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
         };
       };
       /** Bad Request */

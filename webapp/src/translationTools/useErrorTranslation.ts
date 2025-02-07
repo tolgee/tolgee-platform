@@ -27,6 +27,10 @@ export function useErrorTranslation() {
         return t('key_exists');
       case 'third_party_auth_error_message':
         return t('third_party_auth_error_message');
+      case 'third_party_auth_non_matching_email':
+        return t('third_party_auth_non_matching_email');
+      case 'third_party_switch_initiated':
+        return t('third_party_switch_initiated');
       case 'username_already_exists':
         return t('username_already_exists');
       case 'user_already_has_permissions':
@@ -145,6 +149,8 @@ export function useErrorTranslation() {
         return t('sso_domain_not_found_or_disabled');
       case 'native_authentication_disabled':
         return t('native_authentication_disabled');
+      case 'operation_unavailable_for_account_type':
+        return t('operation_unavailable_for_account_type');
       case 'invitation_organization_mismatch':
         return t('invitation_organization_mismatch');
       case 'user_is_managed_by_organization':
@@ -155,6 +161,10 @@ export function useErrorTranslation() {
         return t('namespace_cannot_be_used_when_feature_is_disabled');
       case 'namespaces_cannot_be_disabled_when_namespace_exists':
         return t('namespaces_cannot_be_disabled_when_namespace_exists');
+      case 'sso_domain_not_allowed':
+        return t('sso_domain_not_allowed');
+      case 'sso_login_forced_for_this_account':
+        return t('sso_login_forced_for_this_account');
       default:
         return code;
     }

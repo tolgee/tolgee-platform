@@ -28,6 +28,9 @@ class SsoTenant : ISsoTenant, StandardAuditModel() {
   override val global: Boolean
     get() = false
 
+  @ColumnDefault("false")
+  override var force: Boolean = false
+
   @ColumnDefault("true")
   var enabled: Boolean = true
 }

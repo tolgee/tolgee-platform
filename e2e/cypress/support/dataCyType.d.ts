@@ -1,5 +1,8 @@
 declare namespace DataCy {
     export type Value = 
+        "accept-auth-provider-change-accept" |
+        "accept-auth-provider-change-decline" |
+        "accept-auth-provider-change-info-text" |
         "accept-invitation-accept" |
         "accept-invitation-decline" |
         "accept-invitation-info-text" |
@@ -215,7 +218,6 @@ declare namespace DataCy {
         "global-paginated-list" |
         "global-plus-button" |
         "global-search-field" |
-        "global-snackbars" |
         "global-user-menu-button" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
@@ -347,6 +349,7 @@ declare namespace DataCy {
         "namespaces-select-text-field" |
         "namespaces-selector" |
         "navigation-item" |
+        "notistack-snackbar" |
         "order-translation-confirmation" |
         "order-translation-confirmation-ok" |
         "order-translation-invitation-checkbox" |
@@ -381,6 +384,8 @@ declare namespace DataCy {
         "pat-list-item-last-used" |
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
+        "pending-auth-provider-change-banner" |
+        "pending-auth-provider-change-dismiss" |
         "pending-invitation-banner" |
         "pending-invitation-dismiss" |
         "permissions-advanced-checkbox" |

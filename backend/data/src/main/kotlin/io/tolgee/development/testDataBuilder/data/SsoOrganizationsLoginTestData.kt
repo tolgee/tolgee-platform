@@ -33,6 +33,7 @@ class SsoOrganizationsLoginTestData : BaseTestData("ssoOrgLoginTestUser", "Empty
 
       setTenant {
         enabled = true
+        force = false
         authorizationUri = "https://dummy-url.com"
         clientId = "dummy_client_id"
         clientSecret = "clientSecret"

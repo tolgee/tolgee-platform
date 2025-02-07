@@ -153,6 +153,10 @@ class SsoDelegateEe(
         logger.info("Third party user email is null. Missing scope email?")
         throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
       }
+    val emailDomain = email.takeIf { it.count { c -> c == '@' } == 1 }?.split('@')?.getOrNull(1)
+    if (emailDomain.isNullOrEmpty() || tenant.domain != emailDomain) {
+      throw AuthenticationException(Message.THIRD_PARTY_AUTH_NON_MATCHING_EMAIL)
+    }
     val userData =
       OAuthUserDetails(
         sub = userResponse.sub!!,
