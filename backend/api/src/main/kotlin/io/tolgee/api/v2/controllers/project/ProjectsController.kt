@@ -37,6 +37,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
@@ -80,6 +81,7 @@ class ProjectsController(
   private val imageUploadService: ImageUploadService,
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val projectWithStatsFacade: ProjectWithStatsFacade,
+  private val projectCreationService: ProjectCreationService,
 ) {
   @PostMapping(value = [""])
   @Operation(summary = "Create project", description = "Creates a new project with languages and initial settings.")
@@ -92,7 +94,7 @@ class ProjectsController(
     dto: CreateProjectRequest,
   ): ProjectModel {
     organizationRoleService.checkUserIsOwner(dto.organizationId)
-    val project = projectService.createProject(dto)
+    val project = projectCreationService.createProject(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 

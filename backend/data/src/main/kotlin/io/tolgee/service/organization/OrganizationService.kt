@@ -80,7 +80,7 @@ class OrganizationService(
     userAccount: UserAccount,
   ): Organization {
     if (createDto.slug != null && !validateSlugUniqueness(createDto.slug!!)) {
-      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
+      throw ValidationException(Message.SLUG_NOT_UNIQUE)
     }
 
     val slug =
@@ -226,7 +226,7 @@ class OrganizationService(
 
     val newSlug = editDto.slug ?: organization.slug
     if (newSlug != organization.slug && !validateSlugUniqueness(newSlug)) {
-      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
+      throw ValidationException(Message.SLUG_NOT_UNIQUE)
     }
 
     organization.name = editDto.name

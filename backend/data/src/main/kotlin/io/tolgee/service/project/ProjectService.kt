@@ -7,7 +7,6 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -15,7 +14,6 @@ import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
@@ -146,27 +144,6 @@ class ProjectService(
       withoutPermittedLanguages,
       perms.directPermissions?.translateLanguageIds?.toList(),
     )
-  }
-
-  @Transactional
-  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectRequest): Project {
-    val project = Project()
-    project.name = dto.name
-    project.icuPlaceholders = dto.icuPlaceholders
-
-    project.organizationOwner = organizationService.get(dto.organizationId)
-
-    if (dto.slug == null) {
-      project.slug = generateSlug(dto.name, null)
-    }
-
-    save(project)
-
-    val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
-    project.baseLanguage = getOrAssignBaseLanguage(dto, createdLanguages)
-
-    return project
   }
 
   @Transactional
@@ -425,17 +402,6 @@ class ProjectService(
       return project
     }
     return this.projectRepository.findById(project.id).orElseThrow { NotFoundException() }
-  }
-
-  private fun getOrAssignBaseLanguage(
-    dto: CreateProjectRequest,
-    createdLanguages: List<Language>,
-  ): Language {
-    if (dto.baseLanguageTag != null) {
-      return createdLanguages.find { it.tag == dto.baseLanguageTag }
-        ?: throw BadRequestException(Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)
-    }
-    return createdLanguages[0]
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
