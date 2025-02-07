@@ -59,7 +59,7 @@ class SsoMultiTenantsMocks(
           put("given_name", "Test")
           put("given_name", "Test")
           put("family_name", "User")
-          put("email", "mail@mail.com")
+          put("email", "mail@domain.com")
         }
       }
 
@@ -73,7 +73,7 @@ class SsoMultiTenantsMocks(
           put("given_name", "Test2")
           put("given_name", "Test2")
           put("family_name", "User2")
-          put("email", "mai2@mail.com")
+          put("email", "mai2@domain.com")
         }
       }
 
