@@ -1619,6 +1619,7 @@ export interface components {
       clientSecret: string;
       domain: string;
       enabled: boolean;
+      force: boolean;
       tokenUri: string;
     };
     CreateTaskRequest: {
@@ -4081,6 +4082,7 @@ export interface components {
       clientSecret: string;
       domain: string;
       enabled: boolean;
+      force: boolean;
       global: boolean;
       tokenUri: string;
     };

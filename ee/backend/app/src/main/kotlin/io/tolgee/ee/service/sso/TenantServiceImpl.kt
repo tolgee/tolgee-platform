@@ -66,7 +66,7 @@ class TenantServiceImpl(
     val domain = username.takeIf { it.count { it == '@' } == 1 }?.split('@')?.get(1)
     if (domain != null) {
       val tenant = getEnabledConfigByDomainOrNull(domain)
-      if (tenant != null) {
+      if (tenant != null && tenant.force) {
         throw AuthenticationException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(domain))
       }
     }
@@ -93,6 +93,7 @@ class TenantServiceImpl(
     tenant.clientSecret = dto.clientSecret
     tenant.authorizationUri = dto.authorizationUri
     tenant.tokenUri = dto.tokenUri
+    tenant.force = dto.force
     tenant.enabled = dto.enabled
   }
 }

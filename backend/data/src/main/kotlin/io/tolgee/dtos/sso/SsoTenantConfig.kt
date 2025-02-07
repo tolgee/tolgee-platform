@@ -9,6 +9,7 @@ data class SsoTenantConfig(
   override val authorizationUri: String,
   override val domain: String,
   override val tokenUri: String,
+  override val force: Boolean,
   override val global: Boolean,
   val organization: Organization? = null,
 ) : ISsoTenant {
@@ -18,6 +19,7 @@ data class SsoTenantConfig(
     authorizationUri = other.authorizationUri,
     domain = other.domain,
     tokenUri = other.tokenUri,
+    force = other.force,
     global = other.global,
     organization = organization,
   )

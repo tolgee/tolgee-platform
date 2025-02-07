@@ -102,10 +102,10 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     );
   }
 
-  function handleDecline() {
-    setAuthProviderChange(false);
-    history.push(LINKS.LOGIN.build());
-  }
+  // function handleDecline() {
+  //   setAuthProviderChange(false);
+  //   history.push(LINKS.LOGIN.build());
+  // }
 
   if (!authProviderChangeInfo.data || authProviderCurrentInfo.isLoading) {
     return <FullPageLoading />;
@@ -176,13 +176,13 @@ const AcceptAuthProviderChangeView: React.FC = () => {
                 >
                   {t('accept_auth_provider_change_accept')}
                 </LoadingButton>
-                <Button
+                {/*<Button
                   variant="outlined"
                   onClick={handleDecline}
                   data-cy="accept-auth-provider-change-decline"
                 >
                   {t('accept_auth_provider_change_decline')}
-                </Button>
+                </Button>*/}
               </Box>
             </Box>
           </StyledPaper>
@@ -196,5 +196,5 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     </DashboardPage>
   );
 };
-// TODO: learn more link to docs
+// TODO: learn more link to docs + handle non-sso cases and allow declining the request for them
 export default AcceptAuthProviderChangeView;

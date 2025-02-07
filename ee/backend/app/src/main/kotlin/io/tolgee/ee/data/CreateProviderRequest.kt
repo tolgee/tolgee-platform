@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated
 @Validated
 data class CreateProviderRequest(
   val enabled: Boolean,
+  override val force: Boolean,
   @field:NotNull
   @field:Size(max = 255)
   override val clientId: String,

@@ -4088,4 +4088,11 @@
     <changeSet author="anty (generated)" id="1738671416787-3">
         <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="auth_provider_change_request" constraintName="FKo6db96l21g8a86a9c0t50x32x" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="anty (generated)" id="1738932732564-1">
+        <addColumn tableName="tenant">
+            <column defaultValueBoolean="false" name="force" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

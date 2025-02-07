@@ -7,6 +7,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { Switch } from 'tg.component/common/form/fields/Switch';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -16,6 +17,7 @@ const StyledInputFields = styled('div')`
 `;
 
 type FormValues = {
+  force: boolean;
   authorizationUri: string;
   clientId: string;
   clientSecret: string;
@@ -27,6 +29,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
   const organization = useOrganization();
   const { t } = useTranslate();
   const initialValues: FormValues = {
+    force: data?.force ?? false,
     authorizationUri: data?.authorizationUri ?? '',
     clientId: data?.clientId ?? '',
     clientSecret: data?.clientSecret ?? '',
@@ -64,6 +67,14 @@ export function CreateProviderSsoForm({ data, disabled }) {
         );
       }}
     >
+      <StyledInputFields>
+        <Switch
+          disabled={disabled}
+          name="force"
+          label={<T keyName="organization_sso_force" />}
+          helperText={<T keyName="sso_force_helper_text" />}
+        />
+      </StyledInputFields>
       <StyledInputFields>
         <TextField
           disabled={disabled}

@@ -5,6 +5,7 @@ import io.tolgee.model.SsoTenant
 
 data class SsoTenantDto(
   val enabled: Boolean,
+  override val force: Boolean,
   override val authorizationUri: String,
   override val clientId: String,
   override val clientSecret: String,
@@ -22,5 +23,6 @@ fun SsoTenant.toDto(): SsoTenantDto =
     clientSecret = this.clientSecret,
     tokenUri = this.tokenUri,
     enabled = this.enabled,
+    force = this.force,
     domain = this.domain,
   )

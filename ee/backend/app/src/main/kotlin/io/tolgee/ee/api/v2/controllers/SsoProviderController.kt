@@ -96,6 +96,7 @@ class SsoProviderController(
       clientId = this.clientId,
       clientSecret = this.clientSecret,
       tokenUri = this.tokenUri,
+      force = this.force,
       enabled = this.enabled,
       domain = this.domain,
     )

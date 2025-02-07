@@ -6,5 +6,6 @@ interface ISsoTenant {
   val authorizationUri: String
   val domain: String
   val tokenUri: String
+  val force: Boolean
   val global: Boolean
 }
