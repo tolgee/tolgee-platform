@@ -72,7 +72,7 @@ class TenantServiceImpl(
     }
   }
 
-  override fun checkSsoNotRequired(userAccount: UserAccount) {
+  override fun checkSsoNotRequiredOrAuthProviderChangeActive(userAccount: UserAccount) {
     val req = authProviderChangeService.getRequestedChange(userAccount)
     if (req != null && (req.authType == ThirdPartyAuthType.SSO || req.authType == ThirdPartyAuthType.SSO_GLOBAL)) {
       // Allow login for accounts with active auth provider change request for SSO

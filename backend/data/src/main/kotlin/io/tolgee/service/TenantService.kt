@@ -28,5 +28,5 @@ interface TenantService {
 
   fun checkSsoNotRequired(username: String)
 
-  fun checkSsoNotRequired(userAccount: UserAccount)
+  fun checkSsoNotRequiredOrAuthProviderChangeActive(userAccount: UserAccount)
 }

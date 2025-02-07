@@ -87,7 +87,7 @@ class GithubOAuthDelegate(
 
       val userAccount = findAccount(githubEmail, userResponse!!, invitationCode)
 
-      tenantService.checkSsoNotRequired(userAccount)
+      tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
 
       val jwt = jwtService.emitToken(userAccount.id)
       return JwtAuthenticationResponse(jwt)

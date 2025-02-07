@@ -13,7 +13,7 @@ class SsoTestData() : BaseTestData() {
   init {
     userNotOwner =
       root.addUserAccount {
-        username = "userNotOwner"
+        username = "userNotOwner@domain.com"
       }.self
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
@@ -26,7 +26,7 @@ class SsoTestData() : BaseTestData() {
   fun addTenant() {
     tenant =
       userAccountBuilder.defaultOrganizationBuilder.setTenant {
-        domain = "registrationId"
+        domain = "domain.com"
         clientId = "dummy_client_id"
         clientSecret = "clientSecret"
         authorizationUri = "https://dummy-url.com"

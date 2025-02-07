@@ -69,7 +69,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
     currentDateProvider.forcedDate = currentDateProvider.date
     tolgeeProperties.authentication.ssoGlobal.apply {
       enabled = true
-      domain = "registrationId"
+      domain = "domain.com"
       clientId = "dummy_client_id"
       clientSecret = "clientSecret"
       authorizationUri = "https://dummy-url.com"
@@ -108,7 +108,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   @Test
   fun `does not return auth link when tenant is disabled`() {
     tolgeeProperties.authentication.ssoGlobal.enabled = false
-    val response = ssoMultiTenantsMocks.getAuthLink("registrationId").response
+    val response = ssoMultiTenantsMocks.getAuthLink("domain.com").response
     assertThat(response.status).isEqualTo(404)
     assertThat(response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
   }
@@ -118,7 +118,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
     tolgeeProperties.authentication.ssoGlobal.enabled = false
     val response =
       ssoMultiTenantsMocks.authorize(
-        "registrationId",
+        "domain.com",
         tokenUri = tolgeeProperties.authentication.ssoGlobal.tokenUri,
       )
     assertThat(response.response.status).isEqualTo(404)
@@ -129,7 +129,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   fun `doesn't authorize user when token exchange fails`() {
     val response =
       ssoMultiTenantsMocks.authorize(
-        "registrationId",
+        "domain.com",
         ResponseEntity<OAuth2TokenResponse>(null, null, 401),
       )
     assertThat(response.response.status).isEqualTo(401)
@@ -185,7 +185,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
 
   @Test
   fun `sso auth works via global config`() {
-    val response = ssoMultiTenantsMocks.authorize("registrationId")
+    val response = ssoMultiTenantsMocks.authorize("domain.com")
 
     val result = jacksonObjectMapper().readValue(response.response.contentAsString, HashMap::class.java)
     result["accessToken"].assert.isNotNull
@@ -202,6 +202,6 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   fun loginAsSsoUser(
     tokenResponse: ResponseEntity<OAuth2TokenResponse>? = SsoMultiTenantsMocks.defaultTokenResponse,
   ): MvcResult {
-    return ssoMultiTenantsMocks.authorize("registrationId", tokenResponse = tokenResponse)
+    return ssoMultiTenantsMocks.authorize("domain.com", tokenResponse = tokenResponse)
   }
 }

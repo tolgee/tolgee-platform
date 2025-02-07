@@ -60,7 +60,7 @@ class TenantServiceOssStub : TenantService {
     // no-op
   }
 
-  override fun checkSsoNotRequired(userAccount: UserAccount) {
+  override fun checkSsoNotRequiredOrAuthProviderChangeActive(userAccount: UserAccount) {
     // no-op
   }
 }

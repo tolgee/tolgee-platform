@@ -89,7 +89,7 @@ class GoogleOAuthDelegate(
 
         val userAccount = findAccount(userResponse, invitationCode)
 
-        tenantService.checkSsoNotRequired(userAccount)
+        tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
 
         val jwt = jwtService.emitToken(userAccount.id)
         return JwtAuthenticationResponse(jwt)
@@ -111,11 +111,12 @@ class GoogleOAuthDelegate(
     userResponse: GoogleUserResponse,
     invitationCode: String?,
   ): UserAccount {
+    val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
+
     userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)?.let {
       return it
     }
 
-    val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
     userAccountService.findActive(googleEmail)?.let {
       authProviderChangeService.initiateProviderChange(
         AuthProviderChangeData(

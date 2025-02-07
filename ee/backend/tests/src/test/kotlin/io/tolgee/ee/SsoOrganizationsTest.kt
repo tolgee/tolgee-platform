@@ -71,7 +71,7 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
     currentDateProvider.forcedDate = currentDateProvider.date
     tolgeeProperties.authentication.ssoOrganizations.enabled = true
-    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = listOf("registrationId")
+    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = listOf("domain.com")
     testData = SsoTestData()
     testData.addTenant()
     testDataService.saveTestData(testData.root)
@@ -101,7 +101,7 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
   fun `does not return auth link when tenant is disabled`() {
     testData.tenant.enabled = false
     tenantService.save(testData.tenant)
-    val response = ssoMultiTenantsMocks.getAuthLink("registrationId").response
+    val response = ssoMultiTenantsMocks.getAuthLink("domain.com").response
     assertThat(response.status).isEqualTo(404)
     assertThat(response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
   }
@@ -110,7 +110,7 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
   fun `does not auth user when tenant is disabled`() {
     testData.tenant.enabled = false
     tenantService.save(testData.tenant)
-    val response = ssoMultiTenantsMocks.authorize("registrationId", tokenUri = testData.tenant.tokenUri)
+    val response = ssoMultiTenantsMocks.authorize("domain.com", tokenUri = testData.tenant.tokenUri)
     assertThat(response.response.status).isEqualTo(404)
     assertThat(response.response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
   }
@@ -128,7 +128,7 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
   fun `doesn't authorize user when token exchange fails`() {
     val response =
       ssoMultiTenantsMocks.authorize(
-        "registrationId",
+        "domain.com",
         ResponseEntity<OAuth2TokenResponse>(null, null, 401),
       )
     assertThat(response.response.status).isEqualTo(401)
@@ -220,6 +220,6 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
   fun loginAsSsoUser(
     tokenResponse: ResponseEntity<OAuth2TokenResponse>? = SsoMultiTenantsMocks.defaultTokenResponse,
   ): MvcResult {
-    return ssoMultiTenantsMocks.authorize("registrationId", tokenResponse = tokenResponse)
+    return ssoMultiTenantsMocks.authorize("domain.com", tokenResponse = tokenResponse)
   }
 }

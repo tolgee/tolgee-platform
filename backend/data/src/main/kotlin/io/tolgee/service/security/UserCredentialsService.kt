@@ -26,7 +26,7 @@ class UserCredentialsService(
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
 
-    tenantService.checkSsoNotRequired(userAccount)
+    tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
 
     if (userAccount.accountType == UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
