@@ -68,6 +68,13 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     filters: LanguageFilters,
   ): Page<LanguageDto>
 
+  @Query(
+    """
+    select l
+    from Language l
+    where l.tag in :tag and l.project.id = :projectId and l.deletedAt is null
+  """,
+  )
   fun findAllByTagInAndProjectId(
     tag: Collection<String>,
     projectId: Long,
