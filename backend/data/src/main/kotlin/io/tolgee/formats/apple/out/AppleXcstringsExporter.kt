@@ -6,6 +6,7 @@ import io.tolgee.dtos.IExportParams
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
+import io.tolgee.model.enums.TranslationState
 import java.io.InputStream
 
 class AppleXcstringsExporter(
@@ -52,6 +53,10 @@ class AppleXcstringsExporter(
         it as ObjectNode
       } ?: objectMapper.createObjectNode()
 
+    if (translation.description != null) {
+      keyData.put("comment", translation.description)
+    }
+
     if (converted.isPlural()) {
       handlePluralTranslation(localizations, translation, converted.formsResult)
     } else {
@@ -59,6 +64,15 @@ class AppleXcstringsExporter(
     }
 
     keyData.set<ObjectNode>("localizations", localizations)
+  }
+
+  private fun getAppleState(state: TranslationState): String? {
+    return when (state) {
+      TranslationState.TRANSLATED -> "needs_review"
+      TranslationState.REVIEWED -> "translated"
+      TranslationState.UNTRANSLATED -> null
+      TranslationState.DISABLED -> null
+    }
   }
 
   private fun handleSingleTranslation(
@@ -74,7 +88,9 @@ class AppleXcstringsExporter(
         set<ObjectNode>(
           "stringUnit",
           objectMapper.createObjectNode().apply {
-            put("state", "translated")
+            getAppleState(translation.state)?.let { state ->
+              put("state", state)
+            }
             put("value", convertedText)
           },
         )
@@ -97,7 +113,9 @@ class AppleXcstringsExporter(
           set<ObjectNode>(
             "stringUnit",
             objectMapper.createObjectNode().apply {
-              put("state", "translated")
+              getAppleState(translation.state)?.let { state ->
+                put("state", state)
+              }
               put("value", text)
             },
           )
