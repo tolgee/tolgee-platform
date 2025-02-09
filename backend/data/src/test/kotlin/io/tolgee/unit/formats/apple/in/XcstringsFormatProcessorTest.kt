@@ -114,6 +114,21 @@ class XcstringsFormatProcessorTest {
     )
   }
 
+  @Test
+  fun `import with ICU escaping (disabled ICU)`() {
+    mockUtil.mockIt(
+      "example.xcstrings",
+      "src/test/resources/import/apple/example_params_escaped.xcstrings",
+      convertPlaceholders = false,
+      projectIcuPlaceholdersEnabled = false
+    )
+    processFile()
+    mockUtil.fileProcessorContext.assertTranslations("en", "welcome-message-escaped")
+      .assertSingle {
+        hasText("Hello, %@ {meto}")
+      }
+  }
+
   private fun processFile() {
     XcstringsFileProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
   }

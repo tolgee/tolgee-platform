@@ -13,14 +13,16 @@ class XcstringsFileProcessor(
   override val context: FileProcessorContext,
   private val objectMapper: ObjectMapper,
 ) : ImportFileProcessor() {
+  private lateinit var sourceLanguage: String
+
   override fun process() {
     try {
       val root = objectMapper.readTree(context.file.data.inputStream())
-      val strings =
-        root.get("strings") ?: throw ImportCannotParseFileException(
-          context.file.name,
-          "Missing 'strings' object in xcstrings file",
-        )
+      sourceLanguage = root.get("sourceLanguage")?.asText() 
+        ?: throw ImportCannotParseFileException(context.file.name, "Missing sourceLanguage in xcstrings file")
+
+      val strings = root.get("strings") 
+        ?: throw ImportCannotParseFileException(context.file.name, "Missing 'strings' object in xcstrings file")
 
       strings.fields().forEach { (key, value) ->
         processKey(key, value)
@@ -42,11 +44,31 @@ class XcstringsFileProcessor(
       context.addKeyDescription(key, comment)
     }
 
+    if (!localizations.has(sourceLanguage)) {
+      val converted = messageConvertor.convert(
+        rawData = key,
+        languageTag = sourceLanguage,
+        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+        isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled
+      )
+
+      context.addTranslation(
+        keyName = key,
+        languageName = sourceLanguage,
+        value = converted.message,
+        convertedBy = importFormat,
+        state = TranslationState.TRANSLATED,
+        rawData = key,
+        pluralArgName = converted.pluralArgName
+      )
+    }
+
     localizations.fields().forEach { (languageTag, localization) ->
       when {
         localization.has("stringUnit") -> {
           processSingleTranslation(key, languageTag, localization)
         }
+
         localization.has("variations") -> {
           processPluralTranslation(key, languageTag, localization)
         }
@@ -72,17 +94,27 @@ class XcstringsFileProcessor(
     val stringUnit = localization.get("stringUnit")
     val xcState = stringUnit?.get("state")?.asText()
     var translationState = convertXCtoTolgeeTranslationState(xcState)
-    
+
     val translationValue = stringUnit?.get("value")?.asText()
 
     if (translationValue != null) {
+      val converted = messageConvertor.convert(
+        rawData = translationValue,
+        languageTag = languageTag,
+        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+        isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled
+      )
+
       context.addTranslation(
         keyName = key,
         languageName = languageTag,
-        value = translationValue,
+        value = converted.message,
         convertedBy = importFormat,
-        state = translationState
+        state = translationState,
+        rawData = translationValue,
+        pluralArgName = converted.pluralArgName
       )
+      return
     }
   }
 
