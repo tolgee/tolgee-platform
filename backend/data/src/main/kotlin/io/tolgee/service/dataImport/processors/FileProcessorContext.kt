@@ -15,6 +15,7 @@ import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.model.key.KeyMeta
@@ -55,6 +56,7 @@ data class FileProcessorContext(
     replaceNonPlurals: Boolean = false,
     rawData: Any? = null,
     convertedBy: ImportFormat? = null,
+    state: TranslationState = TranslationState.TRANSLATED
   ) {
     val stringValue = value as? String
 
@@ -81,6 +83,7 @@ data class FileProcessorContext(
           it.isPlural = isPlural
           it.rawData = rawData.wrapIfRequired()
           it.convertor = convertedBy
+          it.state = state
         }
       if (isPlural && replaceNonPlurals) {
         _translations[keyName]!!.removeIf { it.language == language && !it.isPlural }

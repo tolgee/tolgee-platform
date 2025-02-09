@@ -276,6 +276,7 @@ class StoredDataImporter(
           this.language = language
         }
       translation.key = existingKey
+      translation.state = this.state
       if (language == language.project.baseLanguage && translation.text != this.text) {
         outdatedFlagKeys.add(translation.key.id)
       }
