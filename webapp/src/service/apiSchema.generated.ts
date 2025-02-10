@@ -149,6 +149,9 @@ export interface paths {
   "/v2/notifications-mark-seen": {
     put: operations["markNotificationsAsSeen"];
   };
+  "/v2/notifications-settings": {
+    get: operations["getNotificationsSettings"];
+  };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
@@ -2960,6 +2963,10 @@ export interface components {
         | "MFA_ENABLED"
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED";
+    };
+    NotificationSettingModel: {
+      enabledForEmail: boolean;
+      enabledForInApp: boolean;
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -6829,6 +6836,50 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
+      };
+    };
+  };
+  getNotificationsSettings: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["NotificationSettingModel"];
+          };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };

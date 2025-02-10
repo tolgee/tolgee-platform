@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, styled, Switch, Tooltip, Typography } from '@mui/material';
+import { components } from 'tg.service/apiSchema.generated';
 
 const StyledSwitch = styled(Box)`
   text-align: center;
@@ -8,6 +9,7 @@ const StyledSwitch = styled(Box)`
 type Props = {
   description: string;
   subdescription: string;
+  settings: components['schemas']['NotificationSettingModel'];
   disabledInApp?: boolean;
   disabledEmail?: boolean;
 };
@@ -15,6 +17,7 @@ type Props = {
 export const SettingsRow: React.FC<Props> = ({
   description = '',
   subdescription = '',
+  settings,
   disabledInApp = false,
   disabledEmail = false,
 }: Props) => {
@@ -36,14 +39,20 @@ export const SettingsRow: React.FC<Props> = ({
       <Box>
         <Tooltip title={disabledInApp && 'Cannot be turned off'}>
           <StyledSwitch>
-            <Switch defaultChecked disabled={disabledInApp} />
+            <Switch
+              checked={settings.enabledForInApp}
+              disabled={disabledInApp}
+            />
           </StyledSwitch>
         </Tooltip>
       </Box>
       <Box>
         <Tooltip title={disabledEmail && 'Cannot be turned off'}>
           <StyledSwitch>
-            <Switch defaultChecked disabled={disabledEmail} />
+            <Switch
+              checked={settings.enabledForEmail}
+              disabled={disabledEmail}
+            />
           </StyledSwitch>
         </Tooltip>
       </Box>

@@ -4,6 +4,7 @@ import { BaseUserSettingsView } from 'tg.views/userSettings/BaseUserSettingsView
 import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 import { SettingsRow } from 'tg.views/userSettings/notifications/SettingsRow';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 const StyledRoot = styled(Box)`
   display: grid;
@@ -20,18 +21,29 @@ const StyledTableHeader = styled(Box)`
 
 export const NotificationsView: React.FC = () => {
   const { t } = useTranslate();
+  const settingsLoadable = useApiQuery({
+    url: '/v2/notifications-settings',
+    method: 'get',
+  });
+
+  const settings = settingsLoadable.data;
+
+  if (!settings) {
+    return null;
+  }
+
   return (
     <BaseUserSettingsView
       windowTitle={t('settings_notifications_title')}
       title={t('settings_notifications_title')}
-      loading={false} // TODO
+      loading={settingsLoadable.isFetching}
       navigation={[
         [
           t('user_menu_notifications'),
           LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
         ],
       ]}
-      hideChildrenOnLoading={false} // TODO
+      hideChildrenOnLoading={true}
     >
       <StyledRoot>
         <Box></Box>
@@ -40,12 +52,14 @@ export const NotificationsView: React.FC = () => {
         <SettingsRow
           description="Account security"
           subdescription="Password-changed, Two-Factor authentication on/off"
+          settings={settings['ACCOUNT_SECURITY']}
           disabledInApp={true}
           disabledEmail={true}
         />
         <SettingsRow
           description="Tasks"
           subdescription="Assigned, completed, closed"
+          settings={settings['TASKS']}
         />
       </StyledRoot>
     </BaseUserSettingsView>
