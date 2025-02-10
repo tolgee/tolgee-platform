@@ -47,7 +47,7 @@ Easily add translations to your code and edit them directly within your app usin
 
 Just one click—that’s all it takes to capture a screenshot of your application with highlighted phrases for translation. Simply hold ALT + click on a string, then hit the camera button. Boom! Your screenshot is instantly generated.
 
-![Sep-06-2022 16-38-49](https://user-images.githubusercontent.com/18496315/188672133-064d2a26-e414-4f5e-ab43-549af8cb2145.gif)
+![Sep-06-2022 16-38-49](https://github.com/techwithprerit/tolgee-platform/blob/b88fe92597412d3c76d733446e408b2ac8d8e618/Tolgee-Application.gif)
 
 ### Translating on production
 
