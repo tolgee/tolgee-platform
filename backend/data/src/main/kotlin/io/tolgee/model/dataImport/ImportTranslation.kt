@@ -4,7 +4,6 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.enums.TranslationState
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -85,19 +84,6 @@ class ImportTranslation(
    */
   @Enumerated(EnumType.STRING)
   var convertor: ImportFormat? = null
-
-  /**
-   * Transient field to store desired state during import process
-   */
-  @Transient
-  var state: TranslationState = TranslationState.TRANSLATED
-    get() = field ?: when {
-      text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
-      else -> TranslationState.TRANSLATED
-    }
-    set(value) {
-      field = value
-    }
 
   private fun String?.computeMurmur(): String? {
     if (this == null) {

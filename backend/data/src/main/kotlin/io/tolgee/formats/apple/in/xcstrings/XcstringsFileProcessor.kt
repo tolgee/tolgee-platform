@@ -7,7 +7,6 @@ import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.model.enums.TranslationState
 
 class XcstringsFileProcessor(
   override val context: FileProcessorContext,
@@ -18,11 +17,12 @@ class XcstringsFileProcessor(
   override fun process() {
     try {
       val root = objectMapper.readTree(context.file.data.inputStream())
-      sourceLanguage = root.get("sourceLanguage")?.asText() 
+      sourceLanguage = root.get("sourceLanguage")?.asText()
         ?: throw ImportCannotParseFileException(context.file.name, "Missing sourceLanguage in xcstrings file")
 
-      val strings = root.get("strings") 
-        ?: throw ImportCannotParseFileException(context.file.name, "Missing 'strings' object in xcstrings file")
+      val strings =
+        root.get("strings")
+          ?: throw ImportCannotParseFileException(context.file.name, "Missing 'strings' object in xcstrings file")
 
       strings.fields().forEach { (key, value) ->
         processKey(key, value)
@@ -32,6 +32,30 @@ class XcstringsFileProcessor(
     } catch (e: Exception) {
       throw ImportCannotParseFileException(context.file.name, e.message)
     }
+  }
+
+  private fun addConvertedTranslation(
+    key: String,
+    languageTag: String,
+    rawValue: String,
+    forms: Map<String, String>? = null,
+  ) {
+    val converted =
+      messageConvertor.convert(
+        rawData = if (forms != null) forms else rawValue,
+        languageTag = languageTag,
+        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
+        isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
+      )
+
+    context.addTranslation(
+      keyName = key,
+      languageName = languageTag,
+      value = converted.message,
+      convertedBy = importFormat,
+      rawData = forms ?: rawValue,
+      pluralArgName = converted.pluralArgName,
+    )
   }
 
   private fun processKey(
@@ -45,22 +69,7 @@ class XcstringsFileProcessor(
     }
 
     if (!localizations.has(sourceLanguage)) {
-      val converted = messageConvertor.convert(
-        rawData = key,
-        languageTag = sourceLanguage,
-        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
-        isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled
-      )
-
-      context.addTranslation(
-        keyName = key,
-        languageName = sourceLanguage,
-        value = converted.message,
-        convertedBy = importFormat,
-        state = TranslationState.TRANSLATED,
-        rawData = key,
-        pluralArgName = converted.pluralArgName
-      )
+      addConvertedTranslation(key, sourceLanguage, key)
     }
 
     localizations.fields().forEach { (languageTag, localization) ->
@@ -76,16 +85,6 @@ class XcstringsFileProcessor(
     }
   }
 
-
-  private fun convertXCtoTolgeeTranslationState(xcState: String?): TranslationState {
-    return when (xcState) {
-      "needs_review" -> TranslationState.TRANSLATED
-      "translated" -> TranslationState.REVIEWED
-      null -> TranslationState.UNTRANSLATED
-      else -> TranslationState.UNTRANSLATED
-    }
-  }
-
   private fun processSingleTranslation(
     key: String,
     languageTag: String,
@@ -93,27 +92,11 @@ class XcstringsFileProcessor(
   ) {
     val stringUnit = localization.get("stringUnit")
     val xcState = stringUnit?.get("state")?.asText()
-    var translationState = convertXCtoTolgeeTranslationState(xcState)
 
     val translationValue = stringUnit?.get("value")?.asText()
 
     if (translationValue != null) {
-      val converted = messageConvertor.convert(
-        rawData = translationValue,
-        languageTag = languageTag,
-        convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
-        isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled
-      )
-
-      context.addTranslation(
-        keyName = key,
-        languageName = languageTag,
-        value = converted.message,
-        convertedBy = importFormat,
-        state = translationState,
-        rawData = translationValue,
-        pluralArgName = converted.pluralArgName
-      )
+      addConvertedTranslation(key, languageTag, translationValue)
       return
     }
   }
@@ -125,39 +108,18 @@ class XcstringsFileProcessor(
   ) {
     val variations = localization.get("variations")?.get("plural") ?: return
     val forms = mutableMapOf<String, String>()
-    var translationState = TranslationState.UNTRANSLATED
 
     variations.fields().forEach { (form, content) ->
       val stringUnit = content.get("stringUnit")
       val value = stringUnit?.get("value")?.asText()
-      val currentState = convertXCtoTolgeeTranslationState(stringUnit?.get("state")?.asText())
 
-      if (form == "other" || form == "zero" || translationState == TranslationState.UNTRANSLATED) {
-        translationState = currentState
-      }
       if (value != null) {
         forms[form] = value
       }
     }
 
     if (forms.isNotEmpty()) {
-      val converted =
-        messageConvertor.convert(
-          forms,
-          languageTag,
-          context.importSettings.convertPlaceholdersToIcu,
-          context.projectIcuPlaceholdersEnabled,
-        )
-
-      context.addTranslation(
-        keyName = key,
-        languageName = languageTag,
-        value = converted.message,
-        pluralArgName = converted.pluralArgName,
-        rawData = forms,
-        convertedBy = importFormat,
-        state = translationState
-      )
+      addConvertedTranslation(key, languageTag, "", forms)
     }
   }
 

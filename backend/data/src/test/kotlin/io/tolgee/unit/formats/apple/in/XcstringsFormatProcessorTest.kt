@@ -120,7 +120,7 @@ class XcstringsFormatProcessorTest {
       "example.xcstrings",
       "src/test/resources/import/apple/example_params_escaped.xcstrings",
       convertPlaceholders = false,
-      projectIcuPlaceholdersEnabled = false
+      projectIcuPlaceholdersEnabled = false,
     )
     processFile()
     mockUtil.fileProcessorContext.assertTranslations("en", "welcome-message-escaped")

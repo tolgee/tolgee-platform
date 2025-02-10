@@ -3,10 +3,10 @@ package io.tolgee.formats.apple.out
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.tolgee.dtos.IExportParams
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
-import io.tolgee.model.enums.TranslationState
 import java.io.InputStream
 
 class AppleXcstringsExporter(
