@@ -24,6 +24,8 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [![Read the Docs](https://img.shields.io/badge/Read%20the%20Docs-8CA1AF?logo=readthedocs&logoColor=fff)](https://docs.tolgee.io/)
 [![Slack](https://img.shields.io/badge/Slack-4A154B?logo=slack&logoColor=fff)](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-2zp55d175-_agXTfKKVbf1BYXlKlmwbA)
 [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://www.youtube.com/@tolgee)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/company/tolgee/)
+[![X](https://img.shields.io/badge/X-%23000000.svg?logo=X&logoColor=white)](https://x.com/Tolgee_i18n)
 </div>
 
 ![Tolgee](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/tolgee.gif)
@@ -40,7 +42,7 @@ Easily add translations to your code and edit them directly within your app usin
 
 Just one click—that’s all it takes to capture a screenshot of your application with highlighted phrases for translation. Simply hold ALT + click on a string, then hit the camera button. Boom! Your screenshot is instantly generated.
 
-![Sep-06-2022 16-38-49](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/Tolgee-Application.gif)
+![Sep-06-2022 16-38-49](https://github.com/techwithprerit/tolgee-platform/blob/b56dd663cacd1c167ac5855a33c5b9fa4aa4276e/tolgee-app.gif)
 
 ### Translating on production
 
