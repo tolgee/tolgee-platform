@@ -1,11 +1,18 @@
 import { default as React, useEffect } from 'react';
-import { List, ListItem, styled, Typography } from '@mui/material';
+import {
+  IconButton,
+  List,
+  ListItem,
+  styled,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import Menu from '@mui/material/Menu';
 import {
   useApiInfiniteQuery,
   useApiMutation,
 } from 'tg.service/http/useQueryApi';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 import { PopoverProps } from '@mui/material/Popover';
@@ -15,6 +22,9 @@ import { components } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
 import { useWindowSize } from 'usehooks-ts';
 import { NotificationItemSkeleton } from 'tg.component/layout/Notifications/NotificationItem';
+import { Link } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
+import { Settings01 } from '@untitled-ui/icons-react';
 
 type PagedModelNotificationModel =
   components['schemas']['PagedModelNotificationModel'];
@@ -25,6 +35,12 @@ const StyledMenu = styled(Menu)`
   .MuiPaper-root {
     margin-top: 5px;
   }
+`;
+
+const StyledHeaderItem = styled(ListItem)`
+  padding-right: 8px;
+  padding-top: 0;
+  padding-bottom: 0;
 `;
 
 const StyledHeader = styled(Typography)`
@@ -52,6 +68,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
 }) => {
   const user = useUser();
   const client = useGlobalContext((c) => c.wsClient.client);
+  const { t } = useTranslate();
 
   const query = { size: 10 };
   const notificationsLoadable = useApiInfiniteQuery({
@@ -151,11 +168,20 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       }}
     >
       <List id="notifications-list" data-cy="notifications-list">
-        <ListItem>
+        <StyledHeaderItem>
           <StyledHeader variant="h6">
             <T keyName="notifications-header" />
           </StyledHeader>
-        </ListItem>
+          <Tooltip title={t('settings_notifications_button')}>
+            <IconButton
+              component={Link}
+              to={LINKS.USER_ACCOUNT_NOTIFICATIONS.build()}
+              sx={{ float: 'right', marginLeft: 'auto' }}
+            >
+              <Settings01 />
+            </IconButton>
+          </Tooltip>
+        </StyledHeaderItem>
         {notifications?.map((notification, i) => {
           const Component = notificationComponents[notification.type]!;
           return (
