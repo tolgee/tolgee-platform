@@ -45,6 +45,7 @@ import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -120,6 +121,7 @@ class ProjectsController(
     @ParameterObject
     filters: ProjectFilters,
     @ParameterObject
+    @SortDefault("name")
     pageable: Pageable,
     @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {

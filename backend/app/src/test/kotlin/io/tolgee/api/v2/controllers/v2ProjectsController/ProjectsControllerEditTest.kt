@@ -85,7 +85,7 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
       deleted.project.slug = "new-slug-2"
       projectService.save(deleted.project)
     }
-    val newSlug = "new-slug-2"
+    val slugToBeReused = "new-slug-2"
     val content =
       EditProjectRequest(
         name = "new name",
@@ -96,7 +96,7 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andIsOk
 
-    assert2ProjectsWithSameSlugExist(newSlug)
+    assert2ProjectsWithSameSlugExist(slugToBeReused)
   }
 
   private fun assert2ProjectsWithSameSlugExist(newSlug: String) {
