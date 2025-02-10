@@ -151,6 +151,7 @@ export interface paths {
   };
   "/v2/notifications-settings": {
     get: operations["getNotificationsSettings"];
+    put: operations["putSettings"];
   };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
@@ -2967,6 +2968,7 @@ export interface components {
     NotificationSettingModel: {
       enabledForEmail: boolean;
       enabledForInApp: boolean;
+      group: "ACCOUNT_SECURITY" | "TASKS";
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -6883,6 +6885,51 @@ export interface operations {
       };
     };
   };
+  putSettings: {
+    parameters: {
+      query: {
+        group: "ACCOUNT_SECURITY" | "TASKS";
+        channel: "IN_APP" | "EMAIL";
+        enabled: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Returns all organizations, which is current user allowed to view */
   getAll_10: {
     parameters: {
@@ -10595,10 +10642,13 @@ export interface operations {
       };
     };
     responses: {
-      /** OK */
+      /**
+       * When multiple files are exported, they are zipped and returned as a single zip file.
+       * When a single file is exported, it is returned directly.
+       */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/*": unknown;
         };
       };
       /** Bad Request */
@@ -10643,10 +10693,13 @@ export interface operations {
       };
     };
     responses: {
-      /** OK */
+      /**
+       * When multiple files are exported, they are zipped and returned as a single zip file.
+       * When a single file is exported, it is returned directly.
+       */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/*": unknown;
         };
       };
       /** Bad Request */

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, styled, Switch, Tooltip, Typography } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 const StyledSwitch = styled(Box)`
   text-align: center;
@@ -21,6 +22,11 @@ export const SettingsRow: React.FC<Props> = ({
   disabledInApp = false,
   disabledEmail = false,
 }: Props) => {
+  const saveMutation = useApiMutation({
+    url: '/v2/notifications-settings',
+    method: 'put',
+  });
+
   return (
     <>
       <Box>
@@ -42,6 +48,16 @@ export const SettingsRow: React.FC<Props> = ({
             <Switch
               checked={settings.enabledForInApp}
               disabled={disabledInApp}
+              onClick={() => {
+                saveMutation.mutate({
+                  query: {
+                    group: settings.group,
+                    channel: 'IN_APP',
+                    enabled: !settings.enabledForInApp,
+                  },
+                });
+                // TODO snackbar notifikaci
+              }}
             />
           </StyledSwitch>
         </Tooltip>
@@ -52,6 +68,16 @@ export const SettingsRow: React.FC<Props> = ({
             <Switch
               checked={settings.enabledForEmail}
               disabled={disabledEmail}
+              onClick={() => {
+                saveMutation.mutate({
+                  query: {
+                    group: settings.group,
+                    channel: 'EMAIL',
+                    enabled: !settings.enabledForEmail,
+                  },
+                });
+                // TODO snackbar notifikaci
+              }}
             />
           </StyledSwitch>
         </Tooltip>
