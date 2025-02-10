@@ -26,13 +26,13 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://www.youtube.com/@tolgee)
 </div>
 
-![Tolgee](https://github.com/techwithprerit/tolgee-platform/blob/46ad8859a33d3c96009c1ff13d491f6ce8ab7be6/Tolgee-specs.gif)
+![Tolgee](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/tolgee.gif)
 
 ## Why use Tolgee?
 
 It saves you valuable time that would otherwise be spent on localization tasks while ensuring your software is flawlessly translated!!!
 
-![Frame 47](https://github.com/techwithprerit/tolgee-platform/blob/b88fe92597412d3c76d733446e408b2ac8d8e618/Tolgee-Application.gif)
+![Frame 47](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/Tolgee-specs.gif)
 
 ### In context translating & One click screenshots
 
@@ -40,7 +40,7 @@ Easily add translations to your code and edit them directly within your app usin
 
 Just one click—that’s all it takes to capture a screenshot of your application with highlighted phrases for translation. Simply hold ALT + click on a string, then hit the camera button. Boom! Your screenshot is instantly generated.
 
-![Sep-06-2022 16-38-49](https://github.com/techwithprerit/tolgee-platform/blob/b88fe92597412d3c76d733446e408b2ac8d8e618/Tolgee-Application.gif)
+![Sep-06-2022 16-38-49](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/Tolgee-Application.gif)
 
 ### Translating on production
 
@@ -92,7 +92,7 @@ The docs cover all aspects of using Tolgee. Some highlights include:
 3. Follow a guide in the integration section of your project
 4. Have fun!
 
-![Integration guides](https://github.com/techwithprerit/tolgee-platform/blob/27711a7c072745f6ef59ff6cfade46b6c5d5bfac/Tolgee-integration.gif)
+![Integration guides](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/Tolgee-integration.gif)
 
 ## Report a Bug
 
