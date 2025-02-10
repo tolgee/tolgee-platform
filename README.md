@@ -26,13 +26,6 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://www.youtube.com/@tolgee)
 </div>
 
-
-<div align="center">
-[![Facebook](https://img.shields.io/badge/Facebook-%231877F2.svg?logo=Facebook&logoColor=white)](https://www.facebook.com/Tolgee.i18n)
-[![X](https://img.shields.io/badge/X-%23000000.svg?logo=X&logoColor=white)](https://x.com/Tolgee_i18n)
-[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/company/tolgee)
-</div>
-
 ![Tolgee](https://github.com/techwithprerit/tolgee-platform/blob/46ad8859a33d3c96009c1ff13d491f6ce8ab7be6/Tolgee-specs.gif)
 
 ## Why use Tolgee?
