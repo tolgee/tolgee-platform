@@ -1,14 +1,10 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
-import io.tolgee.fixtures.AuthorizedRequestFactory
-import io.tolgee.fixtures.andAssertError
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.*
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -67,6 +63,30 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     testCreateValidationSizeLong()
     testCreateCorrectRequest()
   }
+
+  @Test
+  fun `create project respects slug`() {
+    dbPopulator.createBase()
+    createProjectWithSlug().andPrettyPrint.andIsOk.andAssertThatJson {
+      node("name").isString.isEqualTo("What a project")
+      node("slug").isString.isEqualTo("my-slug-11")
+    }
+  }
+
+  @Test
+  fun `throws when slug occupied`() {
+    dbPopulator.createBase()
+    createProjectWithSlug().andIsOk
+    createProjectWithSlug().andIsBadRequest.andHasErrorMessage(Message.SLUG_NOT_UNIQUE)
+  }
+
+  private fun createProjectWithSlug() =
+    performAuthPost(
+      "/v2/projects",
+      createForLanguagesDto.also {
+        it.slug = "my-slug-11"
+      },
+    )
 
   @Test
   fun createProjectOrganization() {

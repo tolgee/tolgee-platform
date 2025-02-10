@@ -4095,4 +4095,11 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik" id="1739184322850-1">
+        <dropUniqueConstraint constraintName="project_address_part_unique" tableName="project"/>
+        <!--        Only when the deleted_at is null-->
+        <sql>
+            create unique index project_address_part_unique on project (address_part) where deleted_at is null;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

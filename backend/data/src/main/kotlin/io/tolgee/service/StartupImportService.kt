@@ -16,6 +16,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.UserAccountService
@@ -38,6 +39,7 @@ class StartupImportService(
   private val apiKeyService: ApiKeyService,
   private val applicationContext: ApplicationContext,
   private val entityManager: EntityManager,
+  private val projectCreationService: ProjectCreationService,
 ) : Logging {
   @Transactional
   fun importFiles() {
@@ -140,7 +142,7 @@ class StartupImportService(
       }.toSet().toList()
 
     val project =
-      projectService.createProject(
+      projectCreationService.createProject(
         CreateProjectRequest(
           name = projectName,
           languages = languages,
