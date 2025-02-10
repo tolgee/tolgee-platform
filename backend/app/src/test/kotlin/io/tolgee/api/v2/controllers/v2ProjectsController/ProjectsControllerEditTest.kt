@@ -90,7 +90,7 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
       EditProjectRequest(
         name = "new name",
         baseLanguageId = base.project.languages.toList()[1].id,
-        slug = newSlug,
+        slug = slugToBeReused,
         icuPlaceholders = true,
         useNamespaces = true,
       )
@@ -99,10 +99,10 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
     assert2ProjectsWithSameSlugExist(slugToBeReused)
   }
 
-  private fun assert2ProjectsWithSameSlugExist(newSlug: String) {
+  private fun assert2ProjectsWithSameSlugExist(slug: String) {
     executeInNewTransaction {
       entityManager.createQuery("from Project where slug = :slug", Project::class.java)
-        .setParameter("slug", newSlug)
+        .setParameter("slug", slug)
         .resultList.assert.hasSize(2)
     }
   }
