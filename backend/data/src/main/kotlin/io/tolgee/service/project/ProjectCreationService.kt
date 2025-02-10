@@ -40,10 +40,9 @@ class ProjectCreationService(
   private fun getSlug(dto: CreateProjectRequest): String {
     val desiredSlug = dto.slug ?: return projectService.generateSlug(dto.name, null)
 
-    if (!projectService.validateSlugUniqueness(desiredSlug))
-      {
-        throw BadRequestException(Message.SLUG_NOT_UNIQUE)
-      }
+    if (!projectService.validateSlugUniqueness(desiredSlug)) {
+      throw BadRequestException(Message.SLUG_NOT_UNIQUE)
+    }
 
     return desiredSlug
   }

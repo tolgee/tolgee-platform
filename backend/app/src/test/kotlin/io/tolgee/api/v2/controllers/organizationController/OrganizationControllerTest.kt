@@ -184,7 +184,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     performAuthPost(
       "/v2/organizations",
       dummyDto.also { it.slug = "hello-1" },
-    ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
+    ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("slug_not_unique")
   }
 
   @Test
@@ -269,7 +269,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       dummyDto.also { organizationDto ->
         organizationDto.slug = "hello-1"
       },
-    ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
+    ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("slug_not_unique")
   }
 
   @Test
