@@ -32,7 +32,7 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 
 ## Why use Tolgee?
 
-It saves you valuable time that would otherwise be spent on localization tasks while ensuring your software is flawlessly translated!!!
+It saves you valuable time that would otherwise be spent on localization tasks while ensuring your software is flawlessly translated.
 
 ![Frame 47](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/Tolgee-specs.gif)
 
