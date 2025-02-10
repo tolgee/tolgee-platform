@@ -14,100 +14,96 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 
 ![example workflow](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
-[![docker](https://img.shields.io/docker/v/tolgee/tolgee/latest?label=DockerHub)](https://hub.docker.com/repository/docker/tolgee/tolgee)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://hub.docker.com/repository/docker/tolgee/tolgee)
 [![github release](https://img.shields.io/github/v/release/tolgee/tolgee-platform?label=GitHub%20Release)](https://github.com/tolgee/tolgee-platform/releases/latest)
 ![licence](https://img.shields.io/badge/license-Apache%202%20%2F%20Tolgee%20EL-blue)
 [![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js)
 [![github stars](https://img.shields.io/github/stars/tolgee/tolgee-platform?style=social&label=Tolgee%20Platform)](https://github.com/tolgee/tolgee-platform)
 [![Github discussions](https://img.shields.io/github/discussions/tolgee/tolgee-platform)](https://github.com/tolgee/tolgee-platform/discussions)
+[![Dev.to](https://img.shields.io/badge/Dev.to-tolgee_i18n?logo=devdotto&logoColor=white)](https://dev.to/tolgee_i18n)
+[![Read the Docs](https://img.shields.io/badge/Read%20the%20Docs-8CA1AF?logo=readthedocs&logoColor=fff)](https://docs.tolgee.io/)
+[![Slack](https://img.shields.io/badge/Slack-4A154B?logo=slack&logoColor=fff)](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-2zp55d175-_agXTfKKVbf1BYXlKlmwbA)
+[![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://www.youtube.com/@tolgee)
 </div>
 
 
 <div align="center">
-
-[<img src="https://img.shields.io/badge/-Facebook-424549?style=social&logo=facebook" height=25 />](https://www.facebook.com/Tolgee.i18n)
-[<img src="https://img.shields.io/badge/-Twitter-424549?style=social&logo=twitter" height=25 />](https://twitter.com/Tolgee_i18n)
-[<img src="https://img.shields.io/badge/-Linkedin-424549?style=social&logo=linkedin" height=25 />](https://www.linkedin.com/company/tolgee)
+[![Facebook](https://img.shields.io/badge/Facebook-%231877F2.svg?logo=Facebook&logoColor=white)](https://www.facebook.com/Tolgee.i18n)
+[![X](https://img.shields.io/badge/X-%23000000.svg?logo=X&logoColor=white)](https://x.com/Tolgee_i18n)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/company/tolgee)
 </div>
 
-![Tolgee](https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png)
-
-## Quick links
-- [Tolgee Website](https://tolgee.io)
-
-  - Product (Learn more about the great features)
-    - [Dev tools](https://tolgee.io/features/dev-tools)
-    - [Translation assistance](https://tolgee.io/features/translation-assistance)
-    - [Collaboration](https://tolgee.io/features/collaboration)
-- Integrations (Learn how to integrate Tolgee with your favourite technology)
-  - [React](https://tolgee.io/integrations/react)
-  - [Angular](https://tolgee.io/integrations/angular)
-  - [Vue](https://tolgee.io/integrations/vue)
-  - [Svelte](https://tolgee.io/integrations/svelte)
-  - [Next.js](https://tolgee.io/integrations/next)
-  - [More...](https://tolgee.io/integrations/all)
-- [Tolgee platform docs](https://docs.tolgee.io/platform)
-  - [Self-hosting](https://docs.tolgee.io/platform/self_hosting/running_with_docker)
-- [How to develop Tolgee locally](DEVELOPMENT.md)
+![Tolgee](https://github.com/techwithprerit/tolgee-platform/blob/46ad8859a33d3c96009c1ff13d491f6ce8ab7be6/Tolgee-specs.gif)
 
 ## Why use Tolgee?
 
-Because it saves a lot of time you would spend on localization tasks without it. Because it enables you to provide perfectly translated software. 
+It saves you valuable time that would otherwise be spent on localization tasks while ensuring your software is flawlessly translated!!!
 
-![Frame 47](https://user-images.githubusercontent.com/18496315/188637819-ac4eb02d-7859-4ca8-9807-27818a52782d.png)
+![Frame 47](https://github.com/techwithprerit/tolgee-platform/blob/b88fe92597412d3c76d733446e408b2ac8d8e618/Tolgee-Application.gif)
 
 ### In context translating & One click screenshots
 
-Add translations in the code, and translate them directly in the app with the Tolgee i18n tool. Clicking an element while holding the ALT/option key opens a dialog where you can simply modify your strings. No need to edit large .json/.po/.whatever file. In-context translating works great also in the production environment.
+Easily add translations to your code and edit them directly within your app using the Tolgee i18n tool. Simply hold the ALT/Option key and click on an element to open a dialog where you can modify your strings effortlessly—no need to navigate through bulky .json/.po/.whatever files. Plus, in-context translation works seamlessly even in the production environment.
 
-Once. That's how many times you have to click to take a screenshot from your application with highlighted phrases to translate. Just ALT + click a string and hit the camera button. Boom! Screenshot is generated.
+Just one click—that’s all it takes to capture a screenshot of your application with highlighted phrases for translation. Simply hold ALT + click on a string, then hit the camera button. Boom! Your screenshot is instantly generated.
 
-![Sep-06-2022 16-38-49](https://user-images.githubusercontent.com/18496315/188672133-064d2a26-e414-4f5e-ab43-549af8cb2145.gif)
+![Sep-06-2022 16-38-49](https://github.com/techwithprerit/tolgee-platform/blob/b88fe92597412d3c76d733446e408b2ac8d8e618/Tolgee-Application.gif)
 
 ### Translating on production
 
-In-context translating also works in the production environment of your deployed app. Using the Tolgee Tools Chrome plugin, you can simply provide your API key and start translating. This enables anybody without developer knowledge to translate your app.
+In-context translation works seamlessly even in the production environment of your deployed app. With the Tolgee Tools Chrome plugin, simply enter your API key and start translating—no coding skills required. This makes it easy for anyone to contribute to your app’s translations effortlessly.
 
 ### True integrations
 
-Tolgee is not just another localization platform offering integrations that just sync your local data with the backend. Tolgee is truly integrated into your app via SDKs.
+Tolgee isn't just another localization platform that simply syncs your local data with a backend. Instead, it seamlessly integrates into your app through powerful SDKs, providing a truly embedded translation experience.
 
 ### Machine translation
 
-We support DeepL, Google Translate, and AWS Translate. Select which services you want to use in the settings section. The machine translation features make the whole localization process significantly faster. Translators can just use translation suggestions provided by third-party machine translation services.
+We support **DeepL, Google Translate, and AWS Translate**—simply choose your preferred services in the settings. With machine translation, the localization process becomes significantly faster, allowing translators to leverage AI-powered suggestions for more efficient and accurate translations.
 
 ### Translation memory
 
-Tolgee automatically makes suggestions from translations you already used in the project so you can translate similar phrases in a similar way.
+Tolgee automatically suggests translations based on those you've previously used in the project, ensuring consistency across similar phrases.  
 
-Translation memory suggestions also show the similarity percentage, the key, and the original text of the translated string.
+Translation memory suggestions include the **similarity percentage, the key, and the original text** of the translated string, making it easy to maintain accuracy and coherence.
 
 ### Auto translation
 
-When enabled, Tolgee automatically translates new keys using translation memory or machine translation services. Your strings are translated immediately, right after creation. Select if you would like to use translation memory and/or which machine translation service you would like to use to automatically translate new keys.
+When enabled, Tolgee instantly translates new keys using **translation memory** or **machine translation services**, ensuring your strings are translated immediately upon creation. Simply choose whether to use translation memory and select your preferred machine translation service for seamless automation.
 
 ### Activity log
 
-See who modified, reviewed, or commented on the phrases in your project. Clearly.
+Easily track who modified, reviewed, or commented on phrases in your project—all with complete clarity.
 
 ### Comment on translations
 
-Does something look off? Tell others what you would change. You can comment on every translation on Tolgee platform.
+If something seems off, let others know what you'd change. You can leave comments on any translation directly within the Tolgee platform.
 
 ### Translation history
 
-See the changes to specific translations of a specific key in a specific language. Something is wrong? You know where to point the finger!
+Easily track changes to specific translations of a particular key in a specific language. If something's amiss, you'll know exactly where to point the finger!
 
-For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.io).
+## Documentation
 
-## Quickstart 🚀
+The docs cover all aspects of using Tolgee. Some highlights include:
+
+- [Get Started](https://docs.tolgee.io/). Sign up, Create a project, follow a guide, have fun!
+- [JavaScript SDK](https://docs.tolgee.io/js-sdk). Play around and Let us know what you think #FeedbackWanted ❤️
+- [Tolgee CLI](https://docs.tolgee.io/tolgee-cli). Make your life easier while using Tolgee
+- [Integrations](https://docs.tolgee.io/platform/integrations/about_integrations). Name it and we have it.
+
+## Getting Started 🚀
 
 1. Sign up at [app.tolgee.io](https://app.tolgee.io/sign_up) or access your self-hosted instance
 2. Create a project
 3. Follow a guide in the integration section of your project
 4. Have fun!
 
-![Integration guides](https://user-images.githubusercontent.com/18496315/188818166-d70d4676-7bd2-4328-91eb-720add935ab6.gif)
+![Integration guides](https://github.com/techwithprerit/tolgee-platform/blob/27711a7c072745f6ef59ff6cfade46b6c5d5bfac/Tolgee-integration.gif)
+
+## Report a Bug
+
+For filing bugs, suggesting improvements, or requesting new features, please open an [issue](https://github.com/tolgee/tolgee-platform/issues).
 
 ## How to contribute
 
