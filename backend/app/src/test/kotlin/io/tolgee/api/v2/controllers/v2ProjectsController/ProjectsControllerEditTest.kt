@@ -90,7 +90,7 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
       EditProjectRequest(
         name = "new name",
         baseLanguageId = base.project.languages.toList()[1].id,
-        slug = "new-slug-2",
+        slug = newSlug,
         icuPlaceholders = true,
         useNamespaces = true,
       )
