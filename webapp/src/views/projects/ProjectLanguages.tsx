@@ -14,7 +14,7 @@ const StyledCircledLanguageIcon = styled(CircledLanguageIcon)`
 const StyledCircledPill = styled(CircledPill)`
   cursor: default;
   & .wrapped {
-    background: ${({ theme }) => theme.palette.emphasis[200]};
+    background: ${({ theme }) => theme.palette.emphasis['50']};
     font-size: 13px;
   }
 `;

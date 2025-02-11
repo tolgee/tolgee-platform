@@ -20,7 +20,7 @@ export const TRANSLATION_STATES: StateStruct = {
   },
   UNTRANSLATED: {
     translation: <T keyName="translation_state_untranslated" />,
-    color: '#C4C4C4',
+    color: 'rgba(218,224,236,0.7)',
     next: null,
   },
   TRANSLATED: {
