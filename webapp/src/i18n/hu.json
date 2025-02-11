@@ -1335,6 +1335,7 @@
   "sensitive-dialog-provide-2fa-code": "Adja meg a kétlépcsős hitelesítő alkalmazásából származó kódot.",
   "set_at_least_one_language_error": "Legalább egy nyelvet válasszon ki.",
   "set_at_least_one_state_error": "Legalább egy állapotot válasszon ki",
+  "settings_notifications_button": "Értesítési beállítások",
   "settings_notifications_title": "Értesítések",
   "sign_up_form_email": "Email",
   "sign_up_form_full_name": "Teljes név",

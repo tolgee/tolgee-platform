@@ -1342,6 +1342,7 @@
   "sensitive-dialog-provide-2fa-code": "Introduceți un cod din aplicația dvs. de autentificare în doi factori.",
   "set_at_least_one_language_error": "Selectați cel puțin o limbă.",
   "set_at_least_one_state_error": "Selectați cel puțin un stat",
+  "settings_notifications_button": "Setări notificări",
   "settings_notifications_title": "Notificări",
   "sign_up_form_email": "Email",
   "sign_up_form_full_name": "Nume complet",

@@ -1335,6 +1335,7 @@
   "sensitive-dialog-provide-2fa-code": "Oppgi en kode fra din tofaktorautentiseringsapp.",
   "set_at_least_one_language_error": "Velg minst ett språk.",
   "set_at_least_one_state_error": "Velg minst én tilstand",
+  "settings_notifications_button": "Varselinnstillinger",
   "settings_notifications_title": "Varsler",
   "sign_up_form_email": "E-post",
   "sign_up_form_full_name": "Fullt navn",

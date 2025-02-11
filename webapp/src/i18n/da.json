@@ -1342,6 +1342,7 @@
   "sensitive-dialog-provide-2fa-code": "Indtast koden der vises i din 2-faktor autentificeringsapp.",
   "set_at_least_one_language_error": "Vælg mindst ét sprog.",
   "set_at_least_one_state_error": "Vælg mindst én status",
+  "settings_notifications_button": "Meddelelsesindstillinger",
   "settings_notifications_title": "Meddelelser",
   "sign_up_form_email": "E-mail",
   "sign_up_form_full_name": "Fulde navn",

@@ -1334,6 +1334,7 @@
   "sensitive-dialog-provide-2fa-code": "请输入您的双因素身份验证代码。",
   "set_at_least_one_language_error": "选择至少一种语言。",
   "set_at_least_one_state_error": "请选择至少一个状态",
+  "settings_notifications_button": "通知设置",
   "settings_notifications_title": "通知",
   "sign_up_form_email": "电子邮箱地址",
   "sign_up_form_full_name": "全名",

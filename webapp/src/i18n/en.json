@@ -1353,6 +1353,7 @@
   "sensitive-dialog-provide-2fa-code": "Provide a code from your 2 factor authenticator app.",
   "set_at_least_one_language_error": "Select at least one language.",
   "set_at_least_one_state_error": "Select at least one state",
+  "settings_notifications_button": "Notification settings",
   "settings_notifications_title": "Notifications",
   "sign_up_form_email": "Email",
   "sign_up_form_full_name": "Full name",

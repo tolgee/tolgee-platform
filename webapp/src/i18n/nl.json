@@ -1337,6 +1337,7 @@
   "sensitive-dialog-provide-2fa-code": "Geef een code op van de 2-factor authenticator app.",
   "set_at_least_one_language_error": "Selecteer ten minste één taal.",
   "set_at_least_one_state_error": "Selecteer ten minste één staat",
+  "settings_notifications_button": "Meldingsinstellingen",
   "settings_notifications_title": "Meldingen",
   "sign_up_form_email": "E-mailadres",
   "sign_up_form_full_name": "Volledige naam",

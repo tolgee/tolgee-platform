@@ -1341,6 +1341,7 @@
   "sensitive-dialog-provide-2fa-code": "Zadejte kód ze své aplikace pro dvoufázové ověření. ",
   "set_at_least_one_language_error": "Vyberte alespoň jeden jazyk.",
   "set_at_least_one_state_error": "Vyberte alespoň jeden stav",
+  "settings_notifications_button": "Nastavení notifikací",
   "settings_notifications_title": "Notifikace",
   "sign_up_form_email": "E-mail",
   "sign_up_form_full_name": "Celé jméno",

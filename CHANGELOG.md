@@ -1,3 +1,10 @@
+## [3.99.1](https://github.com/tolgee/tolgee-platform/compare/v3.99.0...v3.99.1) (2025-02-11)
+
+
+### Bug Fixes
+
+* Project slug issues ([#2898](https://github.com/tolgee/tolgee-platform/issues/2898)) ([9f164ed](https://github.com/tolgee/tolgee-platform/commit/9f164ed8d4e3c2e484a0854cbf55f7edfdbea4bf))
+
 # [3.99.0](https://github.com/tolgee/tolgee-platform/compare/v3.98.1...v3.99.0) (2025-02-07)
 
 
