@@ -19,7 +19,7 @@ class EmailNotificationComposer(
     when (notification.type) {
       NotificationType.TASK_ASSIGNED, NotificationType.TASK_COMPLETED, NotificationType.TASK_CLOSED ->
         """
-          |${taskHeader(notification)}:
+          |${i18n.translate("notifications.email.task-header.${notification.type}")}:
           |<br/>
           |${taskLink(notification)}
           |<br/><br/>
@@ -40,10 +40,6 @@ class EmailNotificationComposer(
           |${checkYourSecuritySettingsFooter()}
         """.trimMargin()
     }
-
-  private fun taskHeader(notification: Notification) =
-    i18n
-      .translate("notifications.email.task-header.${notification.type}")
 
   private fun checkAllYourTasksFooter() =
     i18n
@@ -71,10 +67,7 @@ class EmailNotificationComposer(
   private fun taskType(type: TaskType): String = i18n.translate("notifications.email.task-type.$type")
 
   private fun multiFactorChangedMessage(notification: Notification): String {
-    val enabledDisabled = i18n.translate("notifications.email.mfa.${notification.type}")
-    return i18n
-      .translate("notifications.email.mfa.changed")
-      .replace("\${enabledDisabled}", enabledDisabled)
+    return i18n.translate("notifications.email.mfa.${notification.type}")
   }
 
   private fun passwordChangedMessage() = i18n.translate("notifications.email.password-changed")
