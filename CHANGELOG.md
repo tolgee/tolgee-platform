@@ -1,3 +1,10 @@
+## [3.99.2](https://github.com/tolgee/tolgee-platform/compare/v3.99.1...v3.99.2) (2025-02-11)
+
+
+### Bug Fixes
+
+* Lighter colors in the project dashboard ([#2906](https://github.com/tolgee/tolgee-platform/issues/2906)) ([cf22e04](https://github.com/tolgee/tolgee-platform/commit/cf22e04779ad9f9e9361842dcc36375601376747))
+
 ## [3.99.1](https://github.com/tolgee/tolgee-platform/compare/v3.99.0...v3.99.1) (2025-02-11)
 
 
