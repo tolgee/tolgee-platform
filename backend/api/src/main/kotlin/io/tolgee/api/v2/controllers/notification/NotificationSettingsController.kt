@@ -2,12 +2,14 @@ package io.tolgee.api.v2.controllers.notification
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.hateoas.notification.NotificationSettingChannel
 import io.tolgee.hateoas.notification.NotificationSettingModel
-import io.tolgee.hateoas.notification.NotificationSettingTypeGroup
+import io.tolgee.hateoas.notification.NotificationSettingsModelAssembler
+import io.tolgee.model.notifications.NotificationChannel
+import io.tolgee.model.notifications.NotificationTypeGroup
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.notification.NotificationSettingService
 import org.springframework.web.bind.annotation.*
-import kotlin.random.Random
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -17,35 +19,28 @@ import kotlin.random.Random
   ],
 )
 @Tag(name = "Notifications settings", description = "Manipulates notification settings")
-class NotificationSettingsController {
+class NotificationSettingsController(
+  private val notificationSettingService: NotificationSettingService,
+  private val authenticationFacade: AuthenticationFacade,
+  private val notificationSettingsModelAssembler: NotificationSettingsModelAssembler,
+) {
   @GetMapping
   @Operation(summary = "Gets notifications settings of the currently logged in user.")
   @AllowApiAccess
-  fun getNotificationsSettings(): Map<NotificationSettingTypeGroup, NotificationSettingModel> {
-    Thread.sleep(1000);
-    return mapOf(
-      NotificationSettingTypeGroup.ACCOUNT_SECURITY to
-        NotificationSettingModel(
-          NotificationSettingTypeGroup.ACCOUNT_SECURITY,
-          true,
-          true,
-        ),
-      NotificationSettingTypeGroup.TASKS to
-        NotificationSettingModel(
-          NotificationSettingTypeGroup.TASKS,
-          Random.nextBoolean(), // TODO
-          Random.nextBoolean(), // TODO
-        ),
-    )
+  fun getNotificationsSettings(): NotificationSettingModel {
+    Thread.sleep(1000)
+    val data = notificationSettingService.getSettings(authenticationFacade.authenticatedUserEntity)
+    return notificationSettingsModelAssembler.toModel(data)
   }
 
   @PutMapping
   @Operation(summary = "Saves a new value of setting.")
   @AllowApiAccess
-  fun putSettings(
-    group: NotificationSettingTypeGroup,
-    channel: NotificationSettingChannel,
+  fun putNotificationSetting(
+    group: NotificationTypeGroup,
+    channel: NotificationChannel,
     enabled: Boolean,
   ) {
+    // TODO
   }
 }

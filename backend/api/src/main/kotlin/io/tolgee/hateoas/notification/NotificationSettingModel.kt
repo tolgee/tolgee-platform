@@ -1,7 +1,10 @@
 package io.tolgee.hateoas.notification
 
+import io.tolgee.model.notifications.NotificationChannel
+import io.tolgee.model.notifications.NotificationTypeGroup
+import org.springframework.hateoas.RepresentationModel
+import java.io.Serializable
+
 data class NotificationSettingModel(
-  var group: NotificationSettingTypeGroup,
-  var enabledForInApp: Boolean,
-  var enabledForEmail: Boolean,
-)
+  var items: Map<NotificationTypeGroup, Map<NotificationChannel, Boolean>>
+) : RepresentationModel<NotificationSettingModel>(), Serializable

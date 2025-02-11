@@ -43,7 +43,6 @@ export const NotificationsView: React.FC = () => {
           LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
         ],
       ]}
-      hideChildrenOnLoading={true}
     >
       <StyledRoot>
         <Box></Box>
@@ -52,7 +51,8 @@ export const NotificationsView: React.FC = () => {
         <SettingsRow
           description="Account security"
           subdescription="Password-changed, Two-Factor authentication on/off"
-          settings={settings['ACCOUNT_SECURITY']}
+          group="ACCOUNT_SECURITY"
+          channels={settings.items['ACCOUNT_SECURITY']}
           disabledInApp={true}
           disabledEmail={true}
           afterChange={() => settingsLoadable.refetch()}
@@ -60,7 +60,8 @@ export const NotificationsView: React.FC = () => {
         <SettingsRow
           description="Tasks"
           subdescription="Assigned, completed, closed"
-          settings={settings['TASKS']}
+          group="TASKS"
+          channels={settings.items['TASKS']}
           afterChange={() => settingsLoadable.refetch()}
         />
       </StyledRoot>

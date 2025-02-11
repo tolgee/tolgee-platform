@@ -4174,4 +4174,9 @@
     <changeSet author="stanov (generated)" id="1739269442983-3">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="notification_setting" constraintName="FK3kf7ds88y13aru33m3na3o2co" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1739281862824-1">
+        <addColumn tableName="notification_setting">
+            <column name="channel" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

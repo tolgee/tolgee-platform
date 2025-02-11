@@ -151,7 +151,7 @@ export interface paths {
   };
   "/v2/notifications-settings": {
     get: operations["getNotificationsSettings"];
-    put: operations["putSettings"];
+    put: operations["putNotificationSetting"];
   };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
@@ -2966,9 +2966,7 @@ export interface components {
         | "PASSWORD_CHANGED";
     };
     NotificationSettingModel: {
-      enabledForEmail: boolean;
-      enabledForInApp: boolean;
-      group: "ACCOUNT_SECURITY" | "TASKS";
+      items: { [key: string]: { [key: string]: boolean } };
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -6846,9 +6844,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": {
-            [key: string]: components["schemas"]["NotificationSettingModel"];
-          };
+          "application/json": components["schemas"]["NotificationSettingModel"];
         };
       };
       /** Bad Request */
@@ -6885,7 +6881,7 @@ export interface operations {
       };
     };
   };
-  putSettings: {
+  putNotificationSetting: {
     parameters: {
       query: {
         group: "ACCOUNT_SECURITY" | "TASKS";
