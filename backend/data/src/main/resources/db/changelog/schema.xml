@@ -4148,4 +4148,30 @@
             <column defaultValue="TASK_ASSIGNED" name="type" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="stanov (generated)" id="1739269442983-1">
+        <createTable tableName="notification_setting">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_settingPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="group" type="VARCHAR(255)"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stanov (generated)" id="1739269442983-2">
+        <createIndex indexName="IDXprsli08qedapfuoqx92jd8o7x" tableName="notification_setting">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stanov (generated)" id="1739269442983-3">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="notification_setting" constraintName="FK3kf7ds88y13aru33m3na3o2co" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

@@ -1,10 +1,13 @@
 package io.tolgee.model.notifications
 
-enum class NotificationType {
-  TASK_ASSIGNED,
-  TASK_COMPLETED,
-  TASK_CLOSED,
-  MFA_ENABLED,
-  MFA_DISABLED,
-  PASSWORD_CHANGED,
+import io.tolgee.model.notifications.NotificationTypeGroup.ACCOUNT_SECURITY
+import io.tolgee.model.notifications.NotificationTypeGroup.TASKS
+
+enum class NotificationType(val group: NotificationTypeGroup) {
+  TASK_ASSIGNED(TASKS),
+  TASK_COMPLETED(TASKS),
+  TASK_CLOSED(TASKS),
+  MFA_ENABLED(ACCOUNT_SECURITY),
+  MFA_DISABLED(ACCOUNT_SECURITY),
+  PASSWORD_CHANGED(ACCOUNT_SECURITY),
 }
