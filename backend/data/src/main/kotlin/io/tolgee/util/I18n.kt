@@ -8,7 +8,10 @@ import java.util.*
 class I18n : Logging {
   private val bundle by lazy { ResourceBundle.getBundle("I18n", Locale.ENGLISH) }
 
-  fun translate(key: String, vararg parameters: String): String {
+  fun translate(
+    key: String,
+    vararg parameters: String,
+  ): String {
     val bundleString =
       try {
         bundle.getString(key)
