@@ -154,6 +154,7 @@ jobs:
         with:
           name: Test report for ${{ matrix.command }}
           path: "**/build/test-results/**/TEST-*.xml"
+          fail-on-error: false
           reporter: java-junit
 
   e2e:
