@@ -55,11 +55,13 @@ export const NotificationsView: React.FC = () => {
           settings={settings['ACCOUNT_SECURITY']}
           disabledInApp={true}
           disabledEmail={true}
+          afterChange={() => settingsLoadable.refetch()}
         />
         <SettingsRow
           description="Tasks"
           subdescription="Assigned, completed, closed"
           settings={settings['TASKS']}
+          afterChange={() => settingsLoadable.refetch()}
         />
       </StyledRoot>
     </BaseUserSettingsView>

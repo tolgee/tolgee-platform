@@ -7,6 +7,7 @@ import io.tolgee.hateoas.notification.NotificationSettingModel
 import io.tolgee.hateoas.notification.NotificationSettingTypeGroup
 import io.tolgee.security.authentication.AllowApiAccess
 import org.springframework.web.bind.annotation.*
+import kotlin.random.Random
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -20,8 +21,9 @@ class NotificationSettingsController {
   @GetMapping
   @Operation(summary = "Gets notifications settings of the currently logged in user.")
   @AllowApiAccess
-  fun getNotificationsSettings(): Map<NotificationSettingTypeGroup, NotificationSettingModel> =
-    mapOf(
+  fun getNotificationsSettings(): Map<NotificationSettingTypeGroup, NotificationSettingModel> {
+    Thread.sleep(1000);
+    return mapOf(
       NotificationSettingTypeGroup.ACCOUNT_SECURITY to
         NotificationSettingModel(
           NotificationSettingTypeGroup.ACCOUNT_SECURITY,
@@ -31,10 +33,11 @@ class NotificationSettingsController {
       NotificationSettingTypeGroup.TASKS to
         NotificationSettingModel(
           NotificationSettingTypeGroup.TASKS,
-          false,
-          false,
+          Random.nextBoolean(), // TODO
+          Random.nextBoolean(), // TODO
         ),
     )
+  }
 
   @PutMapping
   @Operation(summary = "Saves a new value of setting.")

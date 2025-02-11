@@ -1,7 +1,9 @@
 import React from 'react';
 import { Box, styled, Switch, Tooltip, Typography } from '@mui/material';
-import { components } from 'tg.service/apiSchema.generated';
+import { components, operations } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { messageService } from 'tg.service/MessageService';
+import { T } from '@tolgee/react';
 
 const StyledSwitch = styled(Box)`
   text-align: center;
@@ -13,6 +15,7 @@ type Props = {
   settings: components['schemas']['NotificationSettingModel'];
   disabledInApp?: boolean;
   disabledEmail?: boolean;
+  afterChange: () => void;
 };
 
 export const SettingsRow: React.FC<Props> = ({
@@ -21,11 +24,35 @@ export const SettingsRow: React.FC<Props> = ({
   settings,
   disabledInApp = false,
   disabledEmail = false,
+  afterChange = () => {},
 }: Props) => {
   const saveMutation = useApiMutation({
     url: '/v2/notifications-settings',
     method: 'put',
   });
+
+  const saveSettings = (
+    channel: operations['putSettings']['parameters']['query']['channel'],
+    enabled: boolean
+  ) => {
+    saveMutation.mutate(
+      {
+        query: {
+          group: settings.group,
+          channel: channel,
+          enabled: enabled,
+        },
+      },
+      {
+        onSuccess() {
+          messageService.success(
+            <T keyName="User data - Successfully updated!" />
+          );
+          afterChange();
+        },
+      }
+    );
+  };
 
   return (
     <>
@@ -48,16 +75,7 @@ export const SettingsRow: React.FC<Props> = ({
             <Switch
               checked={settings.enabledForInApp}
               disabled={disabledInApp}
-              onClick={() => {
-                saveMutation.mutate({
-                  query: {
-                    group: settings.group,
-                    channel: 'IN_APP',
-                    enabled: !settings.enabledForInApp,
-                  },
-                });
-                // TODO snackbar notifikaci
-              }}
+              onClick={() => saveSettings('IN_APP', !settings.enabledForInApp)}
             />
           </StyledSwitch>
         </Tooltip>
@@ -68,16 +86,7 @@ export const SettingsRow: React.FC<Props> = ({
             <Switch
               checked={settings.enabledForEmail}
               disabled={disabledEmail}
-              onClick={() => {
-                saveMutation.mutate({
-                  query: {
-                    group: settings.group,
-                    channel: 'EMAIL',
-                    enabled: !settings.enabledForEmail,
-                  },
-                });
-                // TODO snackbar notifikaci
-              }}
+              onClick={() => saveSettings('EMAIL', !settings.enabledForEmail)}
             />
           </StyledSwitch>
         </Tooltip>
