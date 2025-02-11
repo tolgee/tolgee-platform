@@ -15,11 +15,18 @@ class NotificationSettingsModelAssembler :
   ) {
   override fun toModel(view: List<NotificationSetting>): NotificationSettingModel =
     NotificationSettingModel(
-      NotificationTypeGroup.entries.associateWith { group ->
-        NotificationChannel.entries.associateWith { channel ->
-          view.find { it.group == group && it.channel == channel }?.enabled
-            ?: throw IllegalStateException("Setting with group $group and channel $channel not found")
-        }
-      },
+      items =
+        NotificationTypeGroup.entries.map { group ->
+          NotificationSettingGroupModel(
+            group,
+            NotificationChannel.entries.map { channel ->
+              NotificationSettingChannelModel(
+                channel,
+                view.find { it.group == group && it.channel == channel }?.enabled
+                  ?: throw IllegalStateException("Setting with group $group and channel $channel not found"),
+              )
+            },
+          )
+        },
     )
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, styled, Switch, Tooltip, Typography } from '@mui/material';
-import { operations } from 'tg.service/apiSchema.generated';
+import { components, operations } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { T } from '@tolgee/react';
@@ -12,8 +12,7 @@ const StyledSwitch = styled(Box)`
 type Props = {
   description: string;
   subdescription: string;
-  group: 'ACCOUNT_SECURITY' | 'TASKS';
-  channels: { [key: string]: boolean };
+  channels: components['schemas']['NotificationSettingGroupModel'];
   disabledInApp?: boolean;
   disabledEmail?: boolean;
   afterChange: () => void;
@@ -22,7 +21,6 @@ type Props = {
 export const SettingsRow: React.FC<Props> = ({
   description = '',
   subdescription = '',
-  group,
   channels,
   disabledInApp = false,
   disabledEmail = false,
@@ -40,7 +38,7 @@ export const SettingsRow: React.FC<Props> = ({
     saveMutation.mutate(
       {
         query: {
-          group: group,
+          group: channels.group,
           channel: channel,
           enabled: enabled,
         },
@@ -55,6 +53,14 @@ export const SettingsRow: React.FC<Props> = ({
       }
     );
   };
+
+  const inAppEnabled = channels.channels.find(
+    (it) => it.channel === 'IN_APP'
+  )!.enabled;
+
+  const emailEnabled = channels.channels.find(
+    (it) => it.channel === 'EMAIL'
+  )!.enabled;
 
   return (
     <>
@@ -75,9 +81,9 @@ export const SettingsRow: React.FC<Props> = ({
         <Tooltip title={disabledInApp && 'Cannot be turned off'}>
           <StyledSwitch>
             <Switch
-              checked={channels['IN_APP']}
+              checked={inAppEnabled}
               disabled={disabledInApp}
-              onClick={() => saveSettings('IN_APP', !channels['IN_APP'])}
+              onClick={() => saveSettings('IN_APP', !inAppEnabled)}
             />
           </StyledSwitch>
         </Tooltip>
@@ -86,9 +92,9 @@ export const SettingsRow: React.FC<Props> = ({
         <Tooltip title={disabledEmail && 'Cannot be turned off'}>
           <StyledSwitch>
             <Switch
-              checked={channels['EMAIL']}
+              checked={emailEnabled}
               disabled={disabledEmail}
-              onClick={() => saveSettings('EMAIL', !channels['EMAIL'])}
+              onClick={() => saveSettings('EMAIL', !emailEnabled)}
             />
           </StyledSwitch>
         </Tooltip>

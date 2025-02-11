@@ -2965,8 +2965,16 @@ export interface components {
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED";
     };
+    NotificationSettingChannelModel: {
+      channel: "IN_APP" | "EMAIL";
+      enabled: boolean;
+    };
+    NotificationSettingGroupModel: {
+      channels: components["schemas"]["NotificationSettingChannelModel"][];
+      group: "ACCOUNT_SECURITY" | "TASKS";
+    };
     NotificationSettingModel: {
-      items: { [key: string]: { [key: string]: boolean } };
+      items: components["schemas"]["NotificationSettingGroupModel"][];
     };
     NotificationsMarkSeenRequest: {
       /**
