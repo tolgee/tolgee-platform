@@ -4,7 +4,7 @@ import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.dtos.request.notification.NotificationsMarkSeenRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.repository.NotificationRepository
+import io.tolgee.repository.notification.NotificationRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

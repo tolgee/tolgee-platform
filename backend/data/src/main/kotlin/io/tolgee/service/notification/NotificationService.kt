@@ -3,7 +3,7 @@ package io.tolgee.service.notification
 import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.model.notifications.Notification
-import io.tolgee.repository.NotificationRepository
+import io.tolgee.repository.notification.NotificationRepository
 import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page

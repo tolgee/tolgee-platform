@@ -1,4 +1,4 @@
-package io.tolgee.repository
+package io.tolgee.repository.notification
 
 import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.model.notifications.Notification
