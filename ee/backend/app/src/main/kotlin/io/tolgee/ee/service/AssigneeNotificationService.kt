@@ -1,18 +1,18 @@
 package io.tolgee.ee.service
 
-import io.tolgee.service.notification.EmailNotificationsService
+import io.tolgee.component.FrontendUrlProvider
 import org.springframework.stereotype.Component
 
 @Component
 class AssigneeNotificationService(
-  private val emailNotificationsService: EmailNotificationsService,
+  private val frontendUrlProvider: FrontendUrlProvider,
 ) {
   @Deprecated(
-    "Use EmailNotificationsService.getTaskUrl directly, " +
+    "Use FrontendUrlProvider.getTaskUrl directly, " +
       "this is kept here only for backwards compatibility with billing.",
   )
   fun getTaskUrl(
     projectId: Long,
     taskId: Long,
-  ): String = emailNotificationsService.getTaskUrl(projectId, taskId)
+  ): String = frontendUrlProvider.getTaskUrl(projectId, taskId)
 }
