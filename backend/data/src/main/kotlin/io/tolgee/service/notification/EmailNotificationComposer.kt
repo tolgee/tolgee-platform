@@ -43,13 +43,11 @@ class EmailNotificationComposer(
 
   private fun checkAllYourTasksFooter() =
     i18n
-      .translate("notifications.email.my-tasks-link")
-      .replace("\${myTasksUrl}", frontendUrlProvider.getMyTasksUrl())
+      .translate("notifications.email.my-tasks-link", frontendUrlProvider.getMyTasksUrl())
 
   private fun checkYourSecuritySettingsFooter() =
     i18n
-      .translate("notifications.email.security-settings-link")
-      .replace("\${securitySettingsUrl}", frontendUrlProvider.getAccountSecurityUrl())
+      .translate("notifications.email.security-settings-link", frontendUrlProvider.getAccountSecurityUrl())
 
   private fun taskLink(notification: Notification): String {
     val task =
