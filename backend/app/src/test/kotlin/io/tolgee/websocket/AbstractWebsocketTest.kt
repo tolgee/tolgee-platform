@@ -1,7 +1,7 @@
 package io.tolgee.websocket
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.constants.NotificationType
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId

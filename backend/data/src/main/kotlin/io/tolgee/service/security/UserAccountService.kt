@@ -5,7 +5,7 @@ import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
-import io.tolgee.constants.NotificationType
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto

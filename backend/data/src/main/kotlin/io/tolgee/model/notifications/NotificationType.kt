@@ -1,4 +1,4 @@
-package io.tolgee.constants
+package io.tolgee.model.notifications
 
 enum class NotificationType {
   TASK_ASSIGNED,

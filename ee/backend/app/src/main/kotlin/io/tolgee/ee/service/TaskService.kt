@@ -2,7 +2,7 @@ package io.tolgee.ee.service
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
-import io.tolgee.constants.NotificationType
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.ee.component.TaskReportHelper
 import io.tolgee.ee.data.task.*
 import io.tolgee.ee.repository.TaskRepository

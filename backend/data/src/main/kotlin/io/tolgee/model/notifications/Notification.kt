@@ -1,6 +1,5 @@
 package io.tolgee.model.notifications
 
-import io.tolgee.constants.NotificationType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
