@@ -3,7 +3,7 @@ package io.tolgee.service.notification
 import io.sentry.Sentry
 import io.tolgee.component.email.TolgeeEmailSender
 import io.tolgee.dtos.misc.EmailParams
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger

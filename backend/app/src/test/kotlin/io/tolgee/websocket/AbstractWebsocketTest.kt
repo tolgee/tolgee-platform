@@ -7,9 +7,9 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitFor
-import io.tolgee.model.Notification
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
+import io.tolgee.model.notifications.Notification
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.notification.NotificationService
 import io.tolgee.testing.WebsocketTest

@@ -1,13 +1,13 @@
 package io.tolgee.hateoas.notification
 
 import io.tolgee.api.v2.controllers.notification.NotificationController
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
 import org.springframework.data.domain.Page
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 
 class NotificationModelAssembler(
-  private val enhancers: List<NotificationEnhancer>,
-  private val notifications: Page<Notification>,
+    private val enhancers: List<NotificationEnhancer>,
+    private val notifications: Page<Notification>,
 ) : RepresentationModelAssemblerSupport<Notification, NotificationModel>(
     NotificationController::class.java,
     NotificationModel::class.java,

@@ -9,11 +9,11 @@ import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
-import io.tolgee.model.Notification
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.notifications.Notification
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translationAgency.TranslationAgency

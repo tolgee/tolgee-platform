@@ -1,6 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
 
 class NotificationsTestData : BaseTestData() {
   val originatingUser =
