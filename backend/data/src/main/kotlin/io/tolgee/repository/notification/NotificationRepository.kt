@@ -25,12 +25,17 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
                 :#{#filters.filterSeen} is null
                 OR :#{#filters.filterSeen} = n.seen
             )
+        AND (
+                :cursor is null
+                OR :cursor > n.id
+            )
     """,
   )
   fun fetchNotificationsByUserId(
     userId: Long,
     pageable: Pageable,
     filters: NotificationFilters,
+    cursor: Long? = null,
   ): Page<Notification>
 
   @Query(

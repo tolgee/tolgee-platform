@@ -23,7 +23,14 @@ class NotificationService(
     userId: Long,
     pageable: Pageable,
     filters: NotificationFilters,
-  ): Page<Notification> = notificationRepository.fetchNotificationsByUserId(userId, pageable, filters)
+    cursor: Long?,
+  ): Page<Notification> =
+    notificationRepository.fetchNotificationsByUserId(
+      userId,
+      pageable,
+      filters,
+      cursor,
+    )
 
   fun getCountOfUnseenNotifications(userId: Long): Int =
     notificationRepository

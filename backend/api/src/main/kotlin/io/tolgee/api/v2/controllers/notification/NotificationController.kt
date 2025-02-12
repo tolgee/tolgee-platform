@@ -3,8 +3,11 @@ package io.tolgee.api.v2.controllers.notification
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.events.OnNotificationsChangedForUser
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.hateoas.PagedModelWithNextCursor
 import io.tolgee.hateoas.notification.NotificationEnhancer
 import io.tolgee.hateoas.notification.NotificationModel
 import io.tolgee.hateoas.notification.NotificationModelAssembler
@@ -22,12 +25,12 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
-import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -54,16 +57,35 @@ class NotificationController(
     pageable: Pageable,
     @ParameterObject
     filters: NotificationFilters = NotificationFilters(),
-  ): PagedModel<NotificationModel> {
+    cursor: String? = null,
+  ): PagedModelWithNextCursor<NotificationModel> {
+    if (cursor != null &&
+      pageable.pageNumber > 0 &&
+      pageable.sort.toString() != "id: DESC"
+    ) {
+      throw BadRequestException(Message.SORTING_AND_PAGING_IS_NOT_SUPPORTED_WHEN_USING_CURSOR)
+    }
+
     val notifications =
       notificationService.getNotifications(
         authenticationFacade.authenticatedUser.id,
         pageable,
         filters,
+        cursor?.let { String(Base64.getDecoder().decode(it)).toLong() },
       )
-    return pagedResourcesAssembler.toModel(
-      notifications,
-      NotificationModelAssembler(enhancers, notifications),
+    val model =
+      pagedResourcesAssembler.toModel(
+        notifications,
+        NotificationModelAssembler(enhancers, notifications),
+      )
+    return PagedModelWithNextCursor(
+      model.content,
+      model.metadata,
+      model.links,
+      model.content
+        .let { if (it.isEmpty()) null else it.last() }
+        ?.id
+        ?.toString()?.let { Base64.getEncoder().encodeToString(it.toByteArray()) },
     )
   }
 
