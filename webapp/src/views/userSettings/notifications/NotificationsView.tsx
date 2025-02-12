@@ -48,11 +48,17 @@ export const NotificationsView: React.FC = () => {
     >
       <StyledRoot>
         <Box></Box>
-        <StyledTableHeader>In-App</StyledTableHeader>
-        <StyledTableHeader>Email</StyledTableHeader>
+        <StyledTableHeader>
+          {t('settings_notifications_channel_in_app')}
+        </StyledTableHeader>
+        <StyledTableHeader>
+          {t('settings_notifications_channel_email')}
+        </StyledTableHeader>
         <SettingsRow
-          description="Account security"
-          subdescription="Password-changed, Two-Factor authentication on/off"
+          description={t('settings_notifications_account_security_description')}
+          subdescription={t(
+            'settings_notifications_account_security_subdescription'
+          )}
           group="ACCOUNT_SECURITY"
           channels={settings.accountSecurity}
           disabledInApp={true}
@@ -60,8 +66,8 @@ export const NotificationsView: React.FC = () => {
           afterChange={() => settingsLoadable.refetch()}
         />
         <SettingsRow
-          description="Tasks"
-          subdescription="Assigned, completed, closed"
+          description={t('settings_notifications_tasks_description')}
+          subdescription={t('settings_notifications_tasks_subdescription')}
           group="TASKS"
           channels={settings.tasks}
           afterChange={() => settingsLoadable.refetch()}
