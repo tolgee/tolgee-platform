@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service
 class NotificationService(
   private val notificationRepository: NotificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
+  private val emailNotificationsService: EmailNotificationsService,
 ) {
   fun getNotifications(
     userId: Long,
@@ -33,6 +34,7 @@ class NotificationService(
 
   @Transactional
   fun save(notification: Notification) {
+    emailNotificationsService.sendEmailNotification(notification)
     notificationRepository.save(notification)
     applicationEventPublisher.publishEvent(
       OnNotificationsChangedForUser(
