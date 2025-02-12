@@ -29,7 +29,6 @@ class NotificationSettingsController(
   @Operation(summary = "Gets notifications settings of the currently logged in user.")
   @AllowApiAccess
   fun getNotificationsSettings(): NotificationSettingModel {
-    Thread.sleep(1000)
     val data = notificationSettingService.getSettings(authenticationFacade.authenticatedUserEntity)
     return notificationSettingsModelAssembler.toModel(data)
   }
