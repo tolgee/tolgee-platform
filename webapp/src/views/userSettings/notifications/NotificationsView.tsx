@@ -24,6 +24,7 @@ export const NotificationsView: React.FC = () => {
   const settingsLoadable = useApiQuery({
     url: '/v2/notifications-settings',
     method: 'get',
+    options: { keepPreviousData: true },
   });
 
   const settings = settingsLoadable.data;
@@ -43,6 +44,7 @@ export const NotificationsView: React.FC = () => {
           LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
         ],
       ]}
+      hideChildrenOnLoading={false}
     >
       <StyledRoot>
         <Box></Box>
