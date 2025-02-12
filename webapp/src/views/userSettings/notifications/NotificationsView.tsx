@@ -32,11 +32,6 @@ export const NotificationsView: React.FC = () => {
     return null;
   }
 
-  const accountSecurityChannels = settings.items.find(
-    (it) => it.group === 'ACCOUNT_SECURITY'
-  )!;
-  const tasksChannels = settings.items.find((it) => it.group === 'TASKS')!;
-
   return (
     <BaseUserSettingsView
       windowTitle={t('settings_notifications_title')}
@@ -56,7 +51,8 @@ export const NotificationsView: React.FC = () => {
         <SettingsRow
           description="Account security"
           subdescription="Password-changed, Two-Factor authentication on/off"
-          channels={accountSecurityChannels}
+          group="ACCOUNT_SECURITY"
+          channels={settings.accountSecurity}
           disabledInApp={true}
           disabledEmail={true}
           afterChange={() => settingsLoadable.refetch()}
@@ -64,7 +60,8 @@ export const NotificationsView: React.FC = () => {
         <SettingsRow
           description="Tasks"
           subdescription="Assigned, completed, closed"
-          channels={tasksChannels}
+          group="TASKS"
+          channels={settings.tasks}
           afterChange={() => settingsLoadable.refetch()}
         />
       </StyledRoot>

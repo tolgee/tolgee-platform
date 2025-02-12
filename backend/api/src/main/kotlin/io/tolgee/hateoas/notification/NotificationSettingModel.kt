@@ -4,5 +4,6 @@ import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
 data class NotificationSettingModel(
-  var items: List<NotificationSettingGroupModel>
+  var accountSecurity: NotificationSettingGroupModel,
+  var tasks: NotificationSettingGroupModel
 ) : RepresentationModel<NotificationSettingModel>(), Serializable

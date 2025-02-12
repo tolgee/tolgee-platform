@@ -1794,7 +1794,7 @@ export interface components {
         | "expired_jwt_token"
         | "general_jwt_error"
         | "cannot_find_suitable_address_part"
-        | "address_part_not_unique"
+        | "slug_not_unique"
         | "user_is_not_member_of_organization"
         | "organization_has_no_other_owner"
         | "user_has_no_project_access"
@@ -2965,16 +2965,13 @@ export interface components {
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED";
     };
-    NotificationSettingChannelModel: {
-      channel: "IN_APP" | "EMAIL";
-      enabled: boolean;
-    };
     NotificationSettingGroupModel: {
-      channels: components["schemas"]["NotificationSettingChannelModel"][];
-      group: "ACCOUNT_SECURITY" | "TASKS";
+      email: boolean;
+      inApp: boolean;
     };
     NotificationSettingModel: {
-      items: components["schemas"]["NotificationSettingGroupModel"][];
+      accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
+      tasks: components["schemas"]["NotificationSettingGroupModel"];
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -4191,7 +4188,7 @@ export interface components {
         | "expired_jwt_token"
         | "general_jwt_error"
         | "cannot_find_suitable_address_part"
-        | "address_part_not_unique"
+        | "slug_not_unique"
         | "user_is_not_member_of_organization"
         | "organization_has_no_other_owner"
         | "user_has_no_project_access"

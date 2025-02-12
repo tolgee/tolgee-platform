@@ -15,18 +15,18 @@ class NotificationSettingsModelAssembler :
   ) {
   override fun toModel(view: List<NotificationSetting>): NotificationSettingModel =
     NotificationSettingModel(
-      items =
-        NotificationTypeGroup.entries.map { group ->
-          NotificationSettingGroupModel(
-            group,
-            NotificationChannel.entries.map { channel ->
-              NotificationSettingChannelModel(
-                channel,
-                view.find { it.group == group && it.channel == channel }?.enabled
-                  ?: throw IllegalStateException("Setting with group $group and channel $channel not found"),
-              )
-            },
-          )
-        },
+      accountSecurity = view.groupModel(NotificationTypeGroup.ACCOUNT_SECURITY),
+      tasks = view.groupModel(NotificationTypeGroup.TASKS),
     )
+
+  private fun List<NotificationSetting>.groupModel(group: NotificationTypeGroup) = NotificationSettingGroupModel(
+    inApp = findValue(group, NotificationChannel.IN_APP),
+    email = findValue(group, NotificationChannel.EMAIL),
+  )
+
+  private fun List<NotificationSetting>.findValue(
+    group: NotificationTypeGroup,
+    channel: NotificationChannel
+  ) = (find { it.group == group && it.channel == channel }?.enabled
+    ?: throw IllegalStateException("Setting with group $group and channel $channel not found"))
 }
