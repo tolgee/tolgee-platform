@@ -2,7 +2,6 @@ package io.tolgee.ee.service
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
-import io.tolgee.model.notifications.NotificationType
 import io.tolgee.ee.component.TaskReportHelper
 import io.tolgee.ee.data.task.*
 import io.tolgee.ee.repository.TaskRepository
@@ -14,6 +13,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translationAgency.TranslationAgency
@@ -566,7 +566,7 @@ class TaskService(
 
     val author = task.author ?: return
 
-    notificationService.save(
+    notificationService.notify(
       Notification().apply {
         type = notificationType
         user = author
@@ -585,7 +585,7 @@ class TaskService(
     user: UserAccount,
     task: Task,
   ) {
-    notificationService.save(
+    notificationService.notify(
       Notification().apply {
         this.user = user
         this.linkedTask = task

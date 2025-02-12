@@ -5,7 +5,6 @@ import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
-import io.tolgee.model.notifications.NotificationType
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
@@ -23,6 +22,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -306,7 +306,7 @@ class UserAccountService(
     userAccount.totpKey = key
     resetTokensValidNotBefore(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
-    notificationService.save(
+    notificationService.notify(
       Notification().apply {
         this.user = userAccount
         this.type = NotificationType.MFA_ENABLED
@@ -324,7 +324,7 @@ class UserAccountService(
     userAccount.mfaRecoveryCodes = emptyList()
     resetTokensValidNotBefore(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
-    notificationService.save(
+    notificationService.notify(
       Notification().apply {
         this.user = userAccount
         this.type = NotificationType.MFA_DISABLED
@@ -489,7 +489,7 @@ class UserAccountService(
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
     val savedUser = userAccountRepository.save(userAccount)
-    notificationService.save(
+    notificationService.notify(
       Notification().apply {
         this.user = userAccount
         this.type = NotificationType.PASSWORD_CHANGED

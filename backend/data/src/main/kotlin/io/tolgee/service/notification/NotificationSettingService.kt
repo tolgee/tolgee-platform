@@ -1,6 +1,7 @@
 package io.tolgee.service.notification
 
 import io.tolgee.model.UserAccount
+import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.model.notifications.NotificationSetting
 import io.tolgee.model.notifications.NotificationTypeGroup
@@ -20,6 +21,16 @@ class NotificationSettingService(
       }
     }
   }
+
+  fun getSettingValue(
+    notification: Notification,
+    channel: NotificationChannel,
+  ) = notificationSettingRepository
+    .findByUserIdAndGroupAndChannel(
+      notification.user.id,
+      notification.type.group,
+      channel,
+    )?.enabled ?: true
 
   private fun defaultSettings(
     user: UserAccount,

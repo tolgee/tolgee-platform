@@ -3,6 +3,7 @@ package io.tolgee.service.notification
 import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.repository.notification.NotificationRepository
 import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationEventPublisher
@@ -16,6 +17,7 @@ class NotificationService(
   private val notificationRepository: NotificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val emailNotificationsService: EmailNotificationsService,
+  private val notificationSettingService: NotificationSettingService,
 ) {
   fun getNotifications(
     userId: Long,
@@ -33,15 +35,19 @@ class NotificationService(
       .toInt()
 
   @Transactional
-  fun save(notification: Notification) {
-    emailNotificationsService.sendEmailNotification(notification)
-    notificationRepository.save(notification)
-    applicationEventPublisher.publishEvent(
-      OnNotificationsChangedForUser(
-        notification.user.id,
-        notification,
-      ),
-    )
+  fun notify(notification: Notification) {
+    if (notificationSettingService.getSettingValue(notification, NotificationChannel.EMAIL)) {
+      emailNotificationsService.sendEmailNotification(notification)
+    }
+    if (notificationSettingService.getSettingValue(notification, NotificationChannel.IN_APP)) {
+      notificationRepository.save(notification)
+      applicationEventPublisher.publishEvent(
+        OnNotificationsChangedForUser(
+          notification.user.id,
+          notification,
+        ),
+      )
+    }
   }
 
   @Transactional

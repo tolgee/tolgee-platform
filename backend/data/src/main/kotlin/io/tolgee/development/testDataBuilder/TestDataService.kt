@@ -9,11 +9,7 @@ import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.dataImport.ImportService
-import io.tolgee.service.key.KeyMetaService
-import io.tolgee.service.key.KeyService
-import io.tolgee.service.key.NamespaceService
-import io.tolgee.service.key.ScreenshotService
-import io.tolgee.service.key.TagService
+import io.tolgee.service.key.*
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
@@ -22,11 +18,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.ApiKeyService
-import io.tolgee.service.security.PatService
-import io.tolgee.service.security.PermissionService
-import io.tolgee.service.security.UserAccountService
-import io.tolgee.service.security.UserPreferencesService
+import io.tolgee.service.security.*
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
@@ -469,7 +461,7 @@ class TestDataService(
       .flatMap { it.data.notifications }
       .sortedBy { it.self.linkedTask?.name }
       .forEach {
-        notificationService.save(it.self)
+        notificationService.notify(it.self)
       }
   }
 

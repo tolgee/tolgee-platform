@@ -1,7 +1,6 @@
 package io.tolgee.websocket
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.model.notifications.NotificationType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -10,6 +9,7 @@ import io.tolgee.fixtures.waitFor
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.notification.NotificationService
 import io.tolgee.testing.WebsocketTest
@@ -261,7 +261,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
         user = testData.user
         type = NotificationType.PASSWORD_CHANGED
       }
-    notificationService.save(notification)
+    notificationService.notify(notification)
     return notification
   }
 
