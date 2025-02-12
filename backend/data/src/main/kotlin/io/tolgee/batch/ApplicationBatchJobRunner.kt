@@ -56,6 +56,12 @@ class ApplicationBatchJobRunner(
     isRunning = false
   }
 
+  /**
+   * Whether the batch job queue is empty and there are no running job
+   */
+  val settled
+    get() = batchJobConcurrentLauncher.runningJobs.isEmpty() && batchJobChunkExecutionQueue.isEmpty()
+
   @PreDestroy
   fun preDestroy() {
     stop()
@@ -68,5 +74,10 @@ class ApplicationBatchJobRunner(
   // This should prevent spring from magically giving us different instances
   private val batchJobConcurrentLauncher: BatchJobConcurrentLauncher by lazy {
     applicationContext.getBean(BatchJobConcurrentLauncher::class.java)
+  }
+
+  // We want to keep the same instance of BatchJobChunkExecutionQueue for all instances of ApplicationBatchJobRunner
+  private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue by lazy {
+    applicationContext.getBean(BatchJobChunkExecutionQueue::class.java)
   }
 }
