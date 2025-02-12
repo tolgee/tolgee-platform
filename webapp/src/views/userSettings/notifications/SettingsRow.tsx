@@ -3,7 +3,7 @@ import { Box, styled, Switch, Tooltip, Typography } from '@mui/material';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 const StyledSwitch = styled(Box)`
   text-align: center;
@@ -28,6 +28,7 @@ export const SettingsRow: React.FC<Props> = ({
   disabledEmail = false,
   afterChange = () => {},
 }: Props) => {
+  const { t } = useTranslate();
   const saveMutation = useApiMutation({
     url: '/v2/notifications-settings',
     method: 'put',
@@ -75,7 +76,12 @@ export const SettingsRow: React.FC<Props> = ({
         </Box>
       </Box>
       <Box>
-        <Tooltip title={disabledInApp && 'Cannot be turned off'}>
+        <Tooltip
+          title={
+            disabledInApp &&
+            t('settings_notifications_tooltip_cannot_be_turned_off')
+          }
+        >
           <StyledSwitch>
             <Switch
               checked={inAppEnabled}
@@ -86,7 +92,12 @@ export const SettingsRow: React.FC<Props> = ({
         </Tooltip>
       </Box>
       <Box>
-        <Tooltip title={disabledEmail && 'Cannot be turned off'}>
+        <Tooltip
+          title={
+            disabledEmail &&
+            t('settings_notifications_tooltip_cannot_be_turned_off')
+          }
+        >
           <StyledSwitch>
             <Switch
               checked={emailEnabled}
