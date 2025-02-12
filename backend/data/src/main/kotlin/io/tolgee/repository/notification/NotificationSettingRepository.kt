@@ -12,5 +12,9 @@ import org.springframework.stereotype.Repository
 interface NotificationSettingRepository : JpaRepository<NotificationSetting, Long> {
   fun findByUserId(userId: Long): List<NotificationSetting>
 
-  fun findByUserIdAndGroupAndChannel(userId: Long, group: NotificationTypeGroup, channel: NotificationChannel): NotificationSetting?
+  fun findByUserIdAndGroupAndChannel(
+    userId: Long,
+    group: NotificationTypeGroup,
+    channel: NotificationChannel,
+  ): NotificationSetting?
 }

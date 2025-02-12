@@ -6,8 +6,8 @@ import org.springframework.data.domain.Page
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 
 class NotificationModelAssembler(
-    private val enhancers: List<NotificationEnhancer>,
-    private val notifications: Page<Notification>,
+  private val enhancers: List<NotificationEnhancer>,
+  private val notifications: Page<Notification>,
 ) : RepresentationModelAssemblerSupport<Notification, NotificationModel>(
     NotificationController::class.java,
     NotificationModel::class.java,

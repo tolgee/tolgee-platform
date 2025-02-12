@@ -19,14 +19,17 @@ class NotificationSettingsModelAssembler :
       tasks = view.groupModel(NotificationTypeGroup.TASKS),
     )
 
-  private fun List<NotificationSetting>.groupModel(group: NotificationTypeGroup) = NotificationSettingGroupModel(
-    inApp = findValue(group, NotificationChannel.IN_APP),
-    email = findValue(group, NotificationChannel.EMAIL),
-  )
+  private fun List<NotificationSetting>.groupModel(group: NotificationTypeGroup) =
+    NotificationSettingGroupModel(
+      inApp = findValue(group, NotificationChannel.IN_APP),
+      email = findValue(group, NotificationChannel.EMAIL),
+    )
 
   private fun List<NotificationSetting>.findValue(
     group: NotificationTypeGroup,
-    channel: NotificationChannel
-  ) = (find { it.group == group && it.channel == channel }?.enabled
-    ?: throw IllegalStateException("Setting with group $group and channel $channel not found"))
+    channel: NotificationChannel,
+  ) = (
+    find { it.group == group && it.channel == channel }?.enabled
+      ?: throw IllegalStateException("Setting with group $group and channel $channel not found")
+  )
 }

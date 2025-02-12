@@ -49,12 +49,13 @@ class NotificationSettingService(
     channel: NotificationChannel,
     enabled: Boolean,
   ) {
-    val setting = notificationSettingRepository.findByUserIdAndGroupAndChannel(user.id, group, channel)
-      ?: NotificationSetting().apply {
-        this.user = user
-        this.group = group
-        this.channel = channel
-      }
+    val setting =
+      notificationSettingRepository.findByUserIdAndGroupAndChannel(user.id, group, channel)
+        ?: NotificationSetting().apply {
+          this.user = user
+          this.group = group
+          this.channel = channel
+        }
     setting.enabled = enabled
     notificationSettingRepository.save(setting)
   }
