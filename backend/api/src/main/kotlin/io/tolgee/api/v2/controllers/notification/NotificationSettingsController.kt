@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.notification
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.notification.NotificationSettingModel
 import io.tolgee.hateoas.notification.NotificationSettingsModelAssembler
 import io.tolgee.model.notifications.NotificationChannel
@@ -41,6 +42,10 @@ class NotificationSettingsController(
     channel: NotificationChannel,
     enabled: Boolean,
   ) {
+    if (group == NotificationTypeGroup.ACCOUNT_SECURITY) {
+      throw BadRequestException("Account security settings cannot be changed.")
+    }
+
     notificationSettingService.save(authenticationFacade.authenticatedUserEntity, group, channel, enabled)
   }
 }
