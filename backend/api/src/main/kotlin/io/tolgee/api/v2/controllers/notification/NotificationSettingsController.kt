@@ -41,6 +41,6 @@ class NotificationSettingsController(
     channel: NotificationChannel,
     enabled: Boolean,
   ) {
-    // TODO
+    notificationSettingService.save(authenticationFacade.authenticatedUserEntity, group, channel, enabled)
   }
 }

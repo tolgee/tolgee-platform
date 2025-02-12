@@ -31,4 +31,20 @@ class NotificationSettingService(
     this.channel = channel
     this.enabled = true
   }
+
+  fun save(
+    user: UserAccount,
+    group: NotificationTypeGroup,
+    channel: NotificationChannel,
+    enabled: Boolean,
+  ) {
+    val setting = notificationSettingRepository.findByUserIdAndGroupAndChannel(user.id, group, channel)
+      ?: NotificationSetting().apply {
+        this.user = user
+        this.group = group
+        this.channel = channel
+      }
+    setting.enabled = enabled
+    notificationSettingRepository.save(setting)
+  }
 }
