@@ -370,7 +370,7 @@ export const getAssignedEmailNotification = () =>
     const result = [...content.matchAll(/href="(.*?)"/g)];
     return {
       taskLink: result[0][1],
-      myTasksLink: result[1][1],
+      myTasksLink: result[2][1],
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
       text: r[0].text,
