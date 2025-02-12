@@ -86,13 +86,6 @@ class KeyService(
     return keyRepository.getByNameAndNamespace(projectId, name, namespace)
   }
 
-  fun find(
-    projectId: Long,
-    translationId: Long,
-  ): Optional<Key> {
-    return keyRepository.searchKey(projectId, translationId)
-  }
-
   fun get(id: Long): Key {
     return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
   }

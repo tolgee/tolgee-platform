@@ -5,29 +5,30 @@ import com.slack.api.methods.kotlin_extension.request.chat.blocks
 import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.withBlocks
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
+import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
+import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.service.slackIntegration.*
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
-import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
 @Lazy
 @Component
 class SlackExecutor(
+  private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
-  private val keyService: KeyService,
-  private val permissionService: PermissionService,
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
   private val slackUserConnectionService: SlackUserConnectionService,
@@ -36,17 +37,20 @@ class SlackExecutor(
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val slackClient: Slack,
   private val languageService: LanguageService,
-  private val slackMessageInfoService: SlackMessageInfoService,
 ) : Logging {
+  companion object {
+    const val MAX_MESSAGES_TO_UPDATE = 5
+  }
+
   fun sendMessageOnTranslationSet(
     slackConfig: SlackConfig,
     request: SlackRequest,
   ) {
     val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
-    val counts = slackExecutorHelper.data.activityData?.counts?.get("Translation") ?: 0
-    if (counts >= 10) {
-      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(counts)
+    val count = slackExecutorHelper.data.activityData?.modifiedEntities?.get("Translation")?.size ?: 0
+    if (count >= 10) {
+      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(count.toLong())
       sendRegularMessageWithSaving(messageDto, config)
       return
     }
@@ -54,20 +58,30 @@ class SlackExecutor(
     val messagesDto = slackExecutorHelper.createTranslationChangeMessage()
     val savedMessages = savedSlackMessageService.findAll(messagesDto, config.id)
 
+    val messageUpdateActions: MutableList<() -> Unit> = mutableListOf()
+
     messagesDto.forEach { message ->
+      val messagesToUpdate =
+        savedMessages
+          .filter { it.keyId == message.keyId }
 
-      if (savedMessages.isEmpty()) {
+      messagesToUpdate.forEach { savedMessage ->
+        messageUpdateActions.add {
+          processSavedMessage(savedMessage, message, config, slackExecutorHelper)
+        }
+      }
+
+      // We only want to send message when the user is explicitly subscribed to the language.
+      // If they're subscribed to all languages, we just update the previous messages to not spam so much
+      if (isExplicitlySubscribedToAnyUpdatedLanguage(message, config) || messagesToUpdate.isEmpty()) {
         sendRegularMessageWithSaving(message, config)
-        return@forEach
       }
+    }
 
-      savedMessages.forEach { savedMessage ->
-        processSavedMessage(savedMessage, message, config, slackExecutorHelper)
-      }
-
-      if (shouldSendNewMessage(message, config)) {
-        sendRegularMessageWithSaving(message, config)
-      }
+    // Execute the message updates only if there are not too many messages to update
+    // Otherwise Slack will complain about too many requests
+    if (messageUpdateActions.size <= MAX_MESSAGES_TO_UPDATE) {
+      messageUpdateActions.forEach { it() }
     }
   }
 
@@ -78,21 +92,18 @@ class SlackExecutor(
 
   private fun processSavedMessage(
     savedMsg: SavedSlackMessage,
-    message: SavedMessageDto,
+    message: SlackMessageDto,
     config: SlackConfig,
     slackExecutorHelper: SlackExecutorHelper,
   ) {
     val existingLanguages = savedMsg.info.map { it.languageTag }
-    val newLanguages = message.langTag
+    val newLanguages = message.languageTags
 
     val languagesToAdd = existingLanguages - newLanguages
-    if (languagesToAdd == existingLanguages) {
-      return
-    }
 
     val additionalAttachments: MutableList<Attachment> = mutableListOf()
-    languagesToAdd.forEach { lang ->
 
+    languagesToAdd.forEach { lang ->
       val authorContext = savedMsg.info.find { it.languageTag == lang }?.authorContext
 
       val attachment = slackExecutorHelper.createAttachmentForLanguage(lang, message.keyId, authorContext)
@@ -100,18 +111,20 @@ class SlackExecutor(
         additionalAttachments.add(it)
       }
     }
+
     val updatedAttachments = additionalAttachments + message.attachments
-    val updatedLanguages = message.langTag + languagesToAdd
+    val updatedLanguages = message.languageTags + languagesToAdd
     val authorContextMap = savedMsg.info.associate { it.languageTag to it.authorContext }
     val updatedMessageDto =
       message.copy(
         attachments = addAuthorContextToAttachments(updatedAttachments.toMutableList(), authorContextMap, config),
-        langTag = updatedLanguages,
+        languageTags = updatedLanguages,
       )
 
     if (savedMsg.createdKeyBlocks) {
       updatedMessageDto.blocks = emptyList()
     }
+
     updateMessage(savedMsg, config, updatedMessageDto)
   }
 
@@ -144,14 +157,17 @@ class SlackExecutor(
     }
   }
 
-  private fun shouldSendNewMessage(
-    message: SavedMessageDto,
+  /**
+   * We send new message only when user is subscribed to the language explicitly
+   */
+  private fun isExplicitlySubscribedToAnyUpdatedLanguage(
+    message: SlackMessageDto,
     config: SlackConfig,
   ): Boolean {
-    val languages = message.langTag
+    val languages = message.languageTags
     val subscribedLanguages = config.preferences.mapNotNull { it.languageTag }
 
-    return languages.any { it in subscribedLanguages } && languages.size <= 2
+    return languages.any { it in subscribedLanguages }
   }
 
   fun sortAttachments(attachments: MutableList<Attachment>): MutableList<Attachment> {
@@ -258,7 +274,7 @@ class SlackExecutor(
   private fun updateMessage(
     savedMessage: SavedSlackMessage,
     config: SlackConfig,
-    messageDto: SavedMessageDto,
+    messageDto: SlackMessageDto,
   ) {
     val response =
       slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatUpdate { request ->
@@ -273,14 +289,15 @@ class SlackExecutor(
       }
 
     if (response.isOk) {
-      updateLangTagsMessage(savedMessage.id, messageDto.langTag, messageDto.authorContext)
+      updateLangTagsMessage(savedMessage.id, messageDto.languageTags, messageDto.authorContext)
     } else {
-      logger.info(response.error)
+      Sentry.captureException(RuntimeException("Cannot update message in slack: ${response.error}"))
+      logger.error(response.error)
     }
   }
 
   private fun sendRegularMessageWithSaving(
-    messageDto: SavedMessageDto,
+    messageDto: SlackMessageDto,
     config: SlackConfig,
   ) {
     val response =
@@ -326,19 +343,16 @@ class SlackExecutor(
     data: SlackRequest,
   ): SlackExecutorHelper {
     return SlackExecutorHelper(
+      applicationContext = applicationContext,
       slackConfig,
       data,
-      keyService,
-      permissionService,
       i18n,
-      tolgeeProperties,
       getSlackNickName(data.activityData?.author?.id ?: 0L),
-      slackMessageInfoService,
     )
   }
 
   private fun saveMessage(
-    messageDto: SavedMessageDto,
+    messageDto: SlackMessageDto,
     ts: String,
     config: SlackConfig,
   ) {
@@ -348,11 +362,11 @@ class SlackExecutor(
           messageTimestamp = ts,
           slackConfig = config,
           keyId = messageDto.keyId,
-          languageTags = messageDto.langTag,
+          languageTags = messageDto.languageTags,
           messageDto.createdKeyBlocks,
         ),
       messageDto.authorContext,
-      messageDto.langTag,
+      messageDto.languageTags,
     )
   }
 

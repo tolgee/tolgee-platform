@@ -147,8 +147,8 @@ class SlackTestData {
         }.self
     }
 
-  fun add100Keys(): List<Key> {
-    return (1..100).map {
+  fun add10Keys(): List<Key> {
+    return (1..10).map {
       projectBuilder.addKey("key$it").build {
         addTranslation("en", "Hello")
       }.self

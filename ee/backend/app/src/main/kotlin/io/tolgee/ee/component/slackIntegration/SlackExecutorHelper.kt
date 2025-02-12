@@ -8,44 +8,39 @@ import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.ee.service.slackIntegration.SlackMessageInfoService
-import io.tolgee.model.Language
+import io.tolgee.ee.component.slackIntegration.data.KeyInfoDto
+import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
+import io.tolgee.ee.component.slackIntegration.data.SlackRequest
+import io.tolgee.ee.component.slackIntegration.data.TranslationInfoDto
 import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackConfigPreference
 import io.tolgee.model.slackIntegration.SlackEventType
-import io.tolgee.model.translation.Translation
-import io.tolgee.service.key.KeyService
-import io.tolgee.service.security.PermissionService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.context.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.jvm.optionals.getOrElse
 
 class SlackExecutorHelper(
+  val applicationContext: ApplicationContext,
   val slackConfig: SlackConfig,
   val data: SlackRequest,
-  val keyService: KeyService,
-  val permissionService: PermissionService,
   private val i18n: I18n,
-  private val tolgeeProperties: TolgeeProperties,
   private val author: String?,
-  private val slackMessageInfoService: SlackMessageInfoService,
 ) : Logging {
-  fun createKeyAddMessage(): List<SavedMessageDto> {
+  fun createKeyAddMessage(): List<SlackMessageDto> {
     val activities = data.activityData ?: return emptyList()
-    val baseLanguage = slackConfig.project.baseLanguage ?: return emptyList()
 
-    val messages: MutableList<SavedMessageDto> = mutableListOf()
+    val messages: MutableList<SlackMessageDto> = mutableListOf()
     val modifiedEntities = activities.modifiedEntities ?: return emptyList()
     modifiedEntities.flatMap { (entityType, modifiedEntityList) ->
       modifiedEntityList.map modifiedEntitiesList@{ modifiedEntity ->
         when (entityType) {
           "Key" -> {
-            createMessageForModifiedEntity(modifiedEntity, baseLanguage)?.let { messages.add(it) }
+            createMessageForAddKey(modifiedEntity)?.let { messages.add(it) }
           }
 
           else -> {
@@ -58,30 +53,28 @@ class SlackExecutorHelper(
     return messages
   }
 
-  private fun createMessageForModifiedEntity(
-    modifiedEntity: IModifiedEntityModel,
-    baseLanguage: Language,
-  ): SavedMessageDto? {
+  private fun createMessageForAddKey(modifiedEntity: IModifiedEntityModel): SlackMessageDto? {
     val attachments = mutableListOf<Attachment>()
     val langTags: MutableSet<String> = mutableSetOf()
-    val blocksHeader: List<LayoutBlock>
 
     val keyId = modifiedEntity.entityId
-    val key = keyService.get(keyId)
-    blocksHeader = buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-key"))
-    key.translations.forEach translations@{ translation ->
-      if (!shouldProcessEventNewKeyAdded(translation.language.tag, baseLanguage.tag)) {
+    val key = dataProvider.getKeyInfo(keyId)
+    val blocksHeader: List<LayoutBlock> = buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-key"))
+    val keyTranslations = dataProvider.getKeyTranslations(key.id)
+
+    keyTranslations.forEach translations@{ translation ->
+      if (!shouldProcessEventNewKeyAdded(translation.languageTag, baseLanguage.tag)) {
         return@translations
       }
 
       val attachment = createAttachmentForLanguage(translation, null) ?: return@translations
 
       attachments.add(attachment)
-      langTags.add(translation.language.tag)
+      langTags.add(translation.languageTag)
     }
 
     if (!langTags.contains(baseLanguage.tag) && langTags.isNotEmpty()) {
-      baseLanguage.translations?.find { it.key.id == keyId }?.let { baseTranslation ->
+      keyTranslations.find { it.languageId == baseLanguage.id }?.let { baseTranslation ->
         val attachment = createAttachmentForLanguage(baseTranslation, null) ?: return@let
 
         attachments.add(attachment)
@@ -95,62 +88,57 @@ class SlackExecutorHelper(
       return null
     }
 
-    return SavedMessageDto(
+    return SlackMessageDto(
       blocks = blocksHeader,
       attachments = attachments,
       keyId = keyId,
-      langTag = langTags,
+      languageTags = langTags,
       true,
     )
   }
 
-  private fun buildBlocksNoTranslation(
-    baseLanguage: Language,
-    language: Language,
-  ) = withBlocks {
-    if (shouldSkipModification(
-        slackConfig.preferences,
-        language.tag,
-        baseLanguage,
-        slackConfig.isGlobalSubscription,
-      )
-    ) {
-      return@withBlocks
-    }
-    val languageName = language.name
-    val flagEmoji = language.flagEmoji
-    val ifBase =
-      if (baseLanguage.id == language.id) {
-        "(base)"
-      } else {
-        ""
+  private fun buildBlocksEmptyTranslation(translation: TranslationInfoDto) =
+    withBlocks {
+      if (shouldSkipModification(
+          slackConfig.preferences,
+          translation.languageTag,
+          slackConfig.isGlobalSubscription,
+        )
+      ) {
+        return@withBlocks
+      }
+      val languageName = translation.languageName
+      val flagEmoji = translation.languageFlagEmoji
+      val ifBase =
+        if (baseLanguage.id == translation.languageId) {
+          "(base)"
+        } else {
+          ""
+        }
+
+      section {
+        markdownText("$flagEmoji *$languageName* $ifBase")
       }
 
-    section {
-      markdownText("$flagEmoji *$languageName* $ifBase")
+      context {
+        markdownText("No translation")
+      }
     }
-
-    context {
-      markdownText("No translation")
-    }
-  }
 
   private fun buildBlocksWithTranslation(
-    translation: Translation,
-    baseLanguage: Language,
+    translation: TranslationInfoDto,
     author: String?,
   ) = withBlocks {
     if (shouldSkipModification(
         slackConfig.preferences,
-        translation.language.tag,
-        baseLanguage,
+        translation.languageTag,
         slackConfig.isGlobalSubscription,
       )
     ) {
       return@withBlocks
     }
     section {
-      languageInfoSection(baseLanguage, translation.language)
+      languageInfoSection(translation)
     }
 
     section {
@@ -167,7 +155,7 @@ class SlackExecutorHelper(
   }
 
   private fun buildKeyInfoBlock(
-    key: Key,
+    key: KeyInfoDto,
     head: String,
   ) = withBlocks {
     section {
@@ -176,14 +164,14 @@ class SlackExecutorHelper(
 
     val columnFields = mutableListOf<Pair<String, String?>>()
     columnFields.add("Key" to key.name)
-    key.keyMeta?.tags?.let { tags ->
-      val tagNames = tags.joinToString(", ") { it.name }
+    key.tags?.let { tags ->
+      val tagNames = tags.joinToString(", ")
       if (tagNames.isNotBlank()) {
         columnFields.add("Tags" to tagNames)
       }
     }
-    columnFields.add("Namespace" to key.namespace?.name)
-    columnFields.add("Description" to key.keyMeta?.description)
+    columnFields.add("Namespace" to key.namespace)
+    columnFields.add("Description" to key.description)
 
     field(columnFields)
   }
@@ -202,10 +190,10 @@ class SlackExecutorHelper(
     }
   }
 
-  fun createImportMessage(): SavedMessageDto? {
+  fun createImportMessage(): SlackMessageDto? {
     val importedCount = data.activityData?.counts?.get("Key") ?: return null
 
-    return SavedMessageDto(
+    return SlackMessageDto(
       blocks = buildImportBlocks(importedCount),
       attachments = listOf(createRedirectButton(getUrlOnImport())),
       0L,
@@ -227,8 +215,8 @@ class SlackExecutorHelper(
       }
     }
 
-  fun createTranslationChangeMessage(): MutableList<SavedMessageDto> {
-    val result: MutableList<SavedMessageDto> = mutableListOf()
+  fun createTranslationChangeMessage(): MutableList<SlackMessageDto> {
+    val result: MutableList<SlackMessageDto> = mutableListOf()
 
     data.activityData?.modifiedEntities?.forEach modifiedEntities@{ (_, modifiedEntityList) ->
       modifiedEntityList.forEach { modifiedEntity ->
@@ -239,8 +227,8 @@ class SlackExecutorHelper(
             else -> ""
           }
 
-        val translationKey = modifiedEntity.entityId
-        val translation = findTranslationByKey(translationKey) ?: return@modifiedEntities
+        val translationId = modifiedEntity.entityId
+        val translation = dataProvider.getTranslationById(translationId) ?: return@modifiedEntities
         result.add(
           processTranslationChange(
             translation,
@@ -250,7 +238,7 @@ class SlackExecutorHelper(
         )
 
         val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return@modifiedEntities
-        if (baseLanguageTag == translation.language.tag) {
+        if (baseLanguageTag == translation.languageTag) {
           return@modifiedEntities
         }
       }
@@ -260,13 +248,12 @@ class SlackExecutorHelper(
   }
 
   private fun processTranslationChange(
-    translation: Translation,
+    translation: TranslationInfoDto,
     modificationAuthor: String?,
     event: String,
-  ): SavedMessageDto? {
-    val key = translation.key
+  ): SlackMessageDto? {
     val baseLanguageTag = slackConfig.project.baseLanguage?.tag ?: return null
-    val modifiedLangTag = translation.language.tag
+    val modifiedLangTag = translation.languageTag
     val isBaseChanged = modifiedLangTag == baseLanguageTag
 
     if (!shouldProcessEventTranslationChanged(modifiedLangTag, baseLanguageTag, modifiedLangTag)) return null
@@ -275,8 +262,10 @@ class SlackExecutorHelper(
       if (isBaseChanged) {
         "base language"
       } else {
-        translation.language.name
+        translation.languageName
       }
+
+    val key = dataProvider.getKeyInfo(translation.keyId)
 
     val headerBlock =
       buildKeyInfoBlock(key, i18n.translate("slack.common.message.new-translation").format(langName, event))
@@ -284,17 +273,17 @@ class SlackExecutorHelper(
       mutableListOf(createAttachmentForLanguage(translation, modificationAuthor) ?: return null)
     val langTags = mutableSetOf(modifiedLangTag)
 
-    addLanguagesIfNeed(attachments, langTags, translation.key.id, modifiedLangTag, baseLanguageTag)
+    addLanguagesIfNeed(attachments, langTags, key.id, modifiedLangTag, baseLanguageTag)
     attachments.add(createRedirectButton(getUrlOnSpecifiedKey(key.id)))
 
     return if (langTags.isEmpty()) {
       null
     } else {
-      SavedMessageDto(
+      SlackMessageDto(
         blocks = headerBlock,
         attachments = attachments,
         keyId = key.id,
-        langTag = langTags,
+        languageTags = langTags,
         false,
         isBaseChanged,
         authorContext = mapOf(modifiedLangTag to (modificationAuthor ?: "")),
@@ -353,11 +342,6 @@ class SlackExecutorHelper(
     !addedTags.contains(currentLangTag) &&
       (modifiedLangTag == baseLanguageTag || currentLangTag == baseLanguageTag)
 
-  private fun findTranslationByKey(translationKey: Long): Translation? =
-    keyService.find(slackConfig.project.id, translationKey).getOrElse { null }?.let { key ->
-      key.translations.find { it.id == translationKey }
-    }
-
   private fun determineColorByState(state: TranslationState?): String {
     return when (state) {
       TranslationState.TRANSLATED -> "#FFCE00"
@@ -367,14 +351,11 @@ class SlackExecutorHelper(
     }
   }
 
-  private fun SectionBlockBuilder.languageInfoSection(
-    baseLanguage: Language,
-    language: Language,
-  ) {
-    val languageName = language.name
-    val flagEmoji = language.flagEmoji
+  private fun SectionBlockBuilder.languageInfoSection(translation: TranslationInfoDto) {
+    val languageName = translation.languageName
+    val flagEmoji = translation.languageFlagEmoji
     val ifBase =
-      if (baseLanguage.id == language.id) {
+      if (baseLanguage.id == translation.languageId) {
         "(base)"
       } else {
         ""
@@ -391,7 +372,6 @@ class SlackExecutorHelper(
   private fun shouldSkipModification(
     preferences: Set<SlackConfigPreference>,
     langTag: String,
-    baseLanguage: Language,
     globalSubscription: Boolean,
   ): Boolean {
     val languageTagsSet = preferences.map { it.languageTag }.toSet()
@@ -473,45 +453,20 @@ class SlackExecutorHelper(
     keyId: Long,
     author: String?,
   ): Attachment? {
-    val result =
-      keyService.find(keyId)?.let { foundKey ->
-        val translation = foundKey.translations.find { it.language.tag == langTag }
-        val baseLanguage = slackConfig.project.baseLanguage ?: return null
-
-        if (shouldSkipModification(slackConfig.preferences, langTag, baseLanguage, slackConfig.isGlobalSubscription)) {
-          return null
-        }
-
-        val color = determineColorByState(translation?.state)
-        val blocksBody =
-          if (translation?.text != null) {
-            buildBlocksWithTranslation(translation, baseLanguage, author)
-          } else {
-            val language = slackConfig.project.languages.find { it.tag == langTag } ?: return null
-            buildBlocksNoTranslation(baseLanguage, language)
-          }
-
-        Attachment.builder()
-          .color(color)
-          .blocks(blocksBody)
-          .fallback("New key added to Tolgee project")
-          .build()
-      } ?: return null
-
-    return result
+    val translation = dataProvider.getTranslation(keyId, langTag) ?: return null
+    return createAttachmentForLanguage(translation, author)
   }
 
   private fun createAttachmentForLanguage(
-    translation: Translation,
+    translation: TranslationInfoDto,
     author: String?,
   ): Attachment? {
     val baseLanguage = slackConfig.project.baseLanguage ?: return null
 
-    val savedLanguageTags = slackConfig.preferences
+    val languagePreferences = slackConfig.preferences
     if (shouldSkipModification(
-        savedLanguageTags,
-        translation.language.tag,
-        baseLanguage,
+        languagePreferences,
+        translation.languageTag,
         slackConfig.isGlobalSubscription,
       )
     ) {
@@ -521,14 +476,14 @@ class SlackExecutorHelper(
     val color = determineColorByState(translation.state)
     val blocksBody =
       if (translation.text != null) {
-        buildBlocksWithTranslation(translation, baseLanguage, author)
+        buildBlocksWithTranslation(translation, author)
       } else {
-        buildBlocksNoTranslation(baseLanguage, translation.language)
+        buildBlocksEmptyTranslation(translation)
       }
     return Attachment.builder()
       .color(color)
       .blocks(blocksBody)
-      .fallback("New key added to Tolgee project")
+      .fallback(translation.text ?: "")
       .build()
   }
 
@@ -563,13 +518,29 @@ class SlackExecutorHelper(
     "${tolgeeProperties.frontEndUrl}/projects/${slackConfig.project.id}/" +
       "translations/single?id=$keyId"
 
-  fun createMessageIfTooManyTranslations(counts: Long): SavedMessageDto {
-    return SavedMessageDto(
+  fun createMessageIfTooManyTranslations(counts: Long): SlackMessageDto {
+    return SlackMessageDto(
       blocks = buildBlocksTooManyTranslations(counts),
       attachments = listOf(createRedirectButton(getUrlOnImport())),
       0L,
       setOf(),
       false,
     )
+  }
+
+  private val tolgeeProperties by lazy {
+    applicationContext.getBean(TolgeeProperties::class.java)
+  }
+
+  private val dataProvider by lazy {
+    applicationContext.getBean(SlackIntegrationDataProvider::class.java)
+  }
+
+  private val languageService by lazy {
+    applicationContext.getBean(LanguageService::class.java)
+  }
+
+  private val baseLanguage by lazy {
+    languageService.getProjectBaseLanguage(slackConfig.project.id)
   }
 }

@@ -41,7 +41,7 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
   @BeforeEach
   fun setup() {
     testData = SlackTestData()
-    initMachineTranslationMocks(1_000)
+    initMachineTranslationMocks()
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
     this.projectSupplier = { testData.projectBuilder.self }
     tolgeeProperties.slack.token = "token"
