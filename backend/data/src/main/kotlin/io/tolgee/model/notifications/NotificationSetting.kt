@@ -15,6 +15,7 @@ class NotificationSetting : StandardAuditModel() {
   lateinit var user: UserAccount
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "\"group\"")
   lateinit var group: NotificationTypeGroup
 
   @Enumerated(EnumType.STRING)
