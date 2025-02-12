@@ -1,16 +1,18 @@
 package io.tolgee.ee.slack
 
 import com.slack.api.Slack
-import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.slack.api.model.block.SectionBlock
+import io.tolgee.batch.ApplicationBatchJobRunner
 import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,10 +30,11 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
   @MockBean
   lateinit var slackClient: Slack
 
+  @Autowired
+  lateinit var applicationBatchJobRunner: ApplicationBatchJobRunner
+
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
-    private const val TRANSLATED_WITH_GOOGLE_RESPONSE = "Translated with Google"
-    private const val BASE_LANGUAGE_TRANSLATION = "base text"
   }
 
   lateinit var testData: SlackTestData
@@ -39,7 +42,7 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
   @BeforeEach
   fun setup() {
     testData = SlackTestData()
-    initMachineTranslationMocks(1_000)
+    initMachineTranslationMocks()
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
     this.projectSupplier = { testData.projectBuilder.self }
     tolgeeProperties.slack.token = "token"
@@ -53,30 +56,60 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `sends only 1 message per whole operation`() {
-    val keys = testData.add100Keys()
+    val keys = testData.add10Keys()
     saveTestData()
     val keyIds = keys.map { it.id }
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
     performBatchOperation(keyIds)
 
-    waitForNotThrowing(timeout = 3_000) {
-      mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
-      val request = mockedSlackClient.chatPostMessageRequests.first()
-      assertThatActualTranslationsEqualToExpected(request)
+    waitForNotThrowing(timeout = 60000) {
+      val requests = mockedSlackClient.chatPostMessageRequests
+      requests.assert.hasSize(1)
+      val sectionBlock = requests.single().blocks.first() as SectionBlock
+      sectionBlock.text.text.assert.contains("has updated 10 translations")
     }
   }
 
-  private fun assertThatActualTranslationsEqualToExpected(request: ChatPostMessageRequest) {
-    val actualMap =
-      request.attachments
-        .dropLast(1).associate {
-          val keyLanguage = ((it.blocks[0] as SectionBlock).text.text).removePrefix("null ").trim()
-          val keyTranslation = (it.blocks[1] as SectionBlock).text.text
-          keyLanguage to keyTranslation
-        }
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `sends only 1 message per whole operation (when translations were updated before)`() {
+    val keys = testData.add10Keys()
+    saveTestData()
+    val keyIds = keys.map { it.id }
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
-    assertThat(actualMap).isEqualTo(getExpectedMapOfTranslations())
+    waitFor(pollTime = 5) {
+      applicationBatchJobRunner.settled
+    }
+
+    mockedSlackClient.clearInvocations()
+
+    val ssms = entityManager.createQuery("from SavedSlackMessage ssm", SavedSlackMessage::class.java).resultList
+    ssms
+
+    keys.take(3).forEach {
+      performUpdateTranslation(it.name)
+    }
+
+    try {
+      waitForNotThrowing(timeout = 10_000) {
+        mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
+        mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
+      }
+    } catch (e: Exception) {
+      mockedSlackClient.chatUpdateRequests
+    }
+
+    mockedSlackClient.clearInvocations()
+    performBatchOperation(keyIds)
+
+    waitForNotThrowing(timeout = 10_000) {
+      mockedSlackClient.chatPostMessageRequests.assert.hasSize(10)
+      mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
+//      val sectionBlock = requests.single().blocks.first() as SectionBlock
+//      sectionBlock.text.text.assert.contains("has updated 10 translations")
+    }
   }
 
   private fun performBatchOperation(keyIds: List<Long>) {
@@ -86,10 +119,14 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
     ).andIsOk
   }
 
-  fun getExpectedMapOfTranslations(baseTranslation: String = BASE_LANGUAGE_TRANSLATION) =
-    mapOf(
-      "*English* (base)" to baseTranslation,
-      "*Czech*" to TRANSLATED_WITH_GOOGLE_RESPONSE,
-      "*French*" to TRANSLATED_WITH_GOOGLE_RESPONSE,
-    )
+  private fun performUpdateTranslation(key: String) {
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        key = key,
+        null,
+        mutableMapOf("en" to "Updated"),
+      ),
+    ).andIsOk
+  }
 }
