@@ -58,16 +58,12 @@ const StyledProject = styled(StyledTime)`
   grid-area: notification-project;
 `;
 
-export type NotificationItemProps = NotificationItemInternalProps & {
+export type NotificationItemProps = {
   notification: components['schemas']['NotificationModel'];
-};
-
-type NotificationItemInternalProps = {
-  notification?: components['schemas']['NotificationModel'];
   destinationUrl?: string;
 } & ListItemButtonProps;
 
-export const NotificationItem: React.FC<NotificationItemInternalProps> = ({
+export const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   key,
   destinationUrl,
@@ -87,74 +83,71 @@ export const NotificationItem: React.FC<NotificationItemInternalProps> = ({
       data-cy="notifications-list-item"
     >
       <StyledAvatar>
-        {notification ? (
-          originatingUser && (
-            <AvatarImg
-              owner={{
-                name: originatingUser.name,
-                avatar: originatingUser.avatar,
-                type: 'USER',
-                id: originatingUser.id || 0,
-              }}
-              size={32}
-            />
-          )
-        ) : (
-          <LoadingSkeleton
-            sx={{ height: 32, width: 32 }}
-            variant="circular"
-            animation="wave"
+        {originatingUser && (
+          <AvatarImg
+            owner={{
+              name: originatingUser.name,
+              avatar: originatingUser.avatar,
+              type: 'USER',
+              id: originatingUser.id || 0,
+            }}
+            size={32}
           />
         )}
       </StyledAvatar>
-      <StyledDetail>
-        {notification ? (
-          children
-        ) : (
-          <>
-            <LoadingSkeleton sx={{ height: 14, width: 200 }} animation="wave" />
-            <LoadingSkeleton sx={{ height: 14, width: 120 }} animation="wave" />
-          </>
-        )}
-      </StyledDetail>
-      {notification ? (
-        createdAt && (
-          <StyledTime>
-            <StyledRightDetailText variant="body2">
-              <Tooltip
-                title={formatDate(new Date(createdAt), {
-                  dateStyle: 'long',
-                  timeStyle: 'short',
-                })}
-              >
-                <span>
-                  {formatDistanceToNowStrict(new Date(createdAt), {
-                    addSuffix: true,
-                    locale: locales[language].dateFnsLocale,
-                  })}
-                </span>
-              </Tooltip>
-            </StyledRightDetailText>
-          </StyledTime>
-        )
-      ) : (
+      <StyledDetail>{children}</StyledDetail>
+      {createdAt && (
         <StyledTime>
-          <LoadingSkeleton sx={{ height: 12, width: 60 }} animation="wave" />
+          <StyledRightDetailText variant="body2">
+            <Tooltip
+              title={formatDate(new Date(createdAt), {
+                dateStyle: 'long',
+                timeStyle: 'short',
+              })}
+            >
+              <span>
+                {formatDistanceToNowStrict(new Date(createdAt), {
+                  addSuffix: true,
+                  locale: locales[language].dateFnsLocale,
+                })}
+              </span>
+            </Tooltip>
+          </StyledRightDetailText>
         </StyledTime>
       )}
-      {notification ? (
-        project && (
-          <StyledProject>
-            <StyledRightDetailText variant="body2">
-              {project.name}
-            </StyledRightDetailText>
-          </StyledProject>
-        )
-      ) : (
+      {project && (
         <StyledProject>
-          <LoadingSkeleton sx={{ height: 12, width: 80 }} animation="wave" />
+          <StyledRightDetailText variant="body2">
+            {project.name}
+          </StyledRightDetailText>
         </StyledProject>
       )}
+    </StyledItem>
+  );
+};
+
+export const NotificationItemSkeleton: React.FC<ListItemButtonProps> = (
+  props
+) => {
+  return (
+    <StyledItem {...props}>
+      <StyledAvatar>
+        <LoadingSkeleton
+          sx={{ height: 32, width: 32 }}
+          variant="circular"
+          animation="wave"
+        />
+      </StyledAvatar>
+      <StyledDetail>
+        <LoadingSkeleton sx={{ height: 14, width: 200 }} animation="wave" />
+        <LoadingSkeleton sx={{ height: 14, width: 120 }} animation="wave" />
+      </StyledDetail>
+      <StyledTime>
+        <LoadingSkeleton sx={{ height: 12, width: 60 }} animation="wave" />
+      </StyledTime>
+      <StyledProject>
+        <LoadingSkeleton sx={{ height: 12, width: 80 }} animation="wave" />
+      </StyledProject>
     </StyledItem>
   );
 };

@@ -14,7 +14,7 @@ import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 import { components } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
 import { useWindowSize } from 'usehooks-ts';
-import { NotificationItem } from 'tg.component/layout/Notifications/NotificationItem';
+import { NotificationItemSkeleton } from 'tg.component/layout/Notifications/NotificationItem';
 
 type PagedModelNotificationModel =
   components['schemas']['PagedModelNotificationModel'];
@@ -167,13 +167,9 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
             <T keyName="notifications-empty" />
           </ListItem>
         )}
-        {[1, 2, 3, 4, 5].map(
-          (i) =>
-            (notificationsLoadable.isFetching ||
-              notificationsLoadable.hasNextPage) && (
-              <NotificationItem key={-i} />
-            )
-        )}
+        {(notificationsLoadable.isFetching ||
+          notificationsLoadable.hasNextPage) &&
+          [1, 2, 3, 4, 5].map((i) => <NotificationItemSkeleton key={-i} />)}
       </List>
     </StyledMenu>
   );
