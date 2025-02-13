@@ -34,7 +34,8 @@ export const TaskItem: FunctionComponent<TaskItemProps> = ({
       {...props}
     >
       <Box>
-        <b>{notification.originatingUser?.name}</b>&nbsp;
+        <b>{notification.originatingUser?.name}</b>
+        {'\u205F'}
         {children}
       </Box>
       <Box>
