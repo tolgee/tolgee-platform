@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
+import io.tolgee.formats.apple.`in`.xcstrings.XcstringsFileProcessor
 import io.tolgee.formats.csv.`in`.CsvFileProcessor
 import io.tolgee.formats.flutter.`in`.FlutterArbFileProcessor
 import io.tolgee.formats.importCommon.ImportFileFormat
@@ -66,6 +67,7 @@ class ImportFileProcessorFactory(
       ImportFileFormat.CSV -> CsvFileProcessor(context)
       ImportFileFormat.RESX -> ResxProcessor(context)
       ImportFileFormat.XLSX -> XlsxFileProcessor(context)
+      ImportFileFormat.XCSTRINGS -> XcstringsFileProcessor(context, objectMapper)
     }
   }
 

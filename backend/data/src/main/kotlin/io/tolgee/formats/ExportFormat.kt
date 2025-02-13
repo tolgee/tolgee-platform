@@ -6,6 +6,7 @@ enum class ExportFormat(
   val extension: String,
   val mediaType: String,
   val defaultFileStructureTemplate: String = ExportFilePathProvider.DEFAULT_TEMPLATE,
+  val multiLanguage: Boolean = false,
 ) {
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
@@ -43,4 +44,10 @@ enum class ExportFormat(
   CSV("csv", "text/csv"),
   RESX_ICU("resx", "text/microsoft-resx"),
   XLSX("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+  APPLE_XCSTRINGS(
+    "xcstrings",
+    "application/json",
+    defaultFileStructureTemplate = "Localizable.{extension}",
+    multiLanguage = true,
+  ),
 }

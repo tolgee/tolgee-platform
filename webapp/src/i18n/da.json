@@ -606,6 +606,7 @@
   "export-format-apple-strings": "Apple .strings & .stringsdict",
   "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-apple-xliff": "Apple .xliff",
+  "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-compose-xml": "Sammensæt Multiplatform .xml",
   "export-format-csv": "CSV",
   "export-format-flat-json": "Flad JSON",

@@ -604,6 +604,7 @@
   "export-format-apple-strings": "Apple .strings & .stringsdict",
   "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-apple-xliff": "Apple .xliff",
+  "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-csv": "CSV",
   "export-format-flat-json": "Platte JSON",
   "export-format-flat-yaml": "Platte YAML",

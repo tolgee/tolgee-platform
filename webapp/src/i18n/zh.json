@@ -602,6 +602,7 @@
   "export-format-apple-strings": "Apple .strings 和 .stringsdict",
   "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-apple-xliff": "Apple .xliff",
+  "export-format-apple-xcstrings": "Apple .xcstrings",
   "export-format-csv": "CSV",
   "export-format-flat-json": "扁平 JSON",
   "export-format-flat-yaml": "扁平 YAML",
