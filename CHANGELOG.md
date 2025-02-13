@@ -1,3 +1,10 @@
+# [3.100.0](https://github.com/tolgee/tolgee-platform/compare/v3.99.2...v3.100.0) (2025-02-13)
+
+
+### Features
+
+* Apple String Catalog Support ([#2893](https://github.com/tolgee/tolgee-platform/issues/2893)) ([6f6217d](https://github.com/tolgee/tolgee-platform/commit/6f6217d9702aab2437fd2160ce8fc54f9cc5cadb))
+
 ## [3.99.2](https://github.com/tolgee/tolgee-platform/compare/v3.99.1...v3.99.2) (2025-02-11)
 
 
