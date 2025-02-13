@@ -18,8 +18,9 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.I18n
-import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
@@ -37,7 +38,11 @@ class SlackExecutor(
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val slackClient: Slack,
   private val languageService: LanguageService,
-) : Logging {
+) {
+  val logger: Logger by lazy {
+    LoggerFactory.getLogger(javaClass)
+  }
+
   companion object {
     const val MAX_MESSAGES_TO_UPDATE = 5
   }
@@ -50,6 +55,7 @@ class SlackExecutor(
     val config = slackExecutorHelper.slackConfig
     val count = slackExecutorHelper.data.activityData?.modifiedEntities?.get("Translation")?.size ?: 0
     if (count >= 10) {
+      logger.debug("Too many translations to send message, sending only one message")
       val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(count.toLong())
       sendRegularMessageWithSaving(messageDto, config)
       return
@@ -73,16 +79,30 @@ class SlackExecutor(
 
       // We only want to send message when the user is explicitly subscribed to the language.
       // If they're subscribed to all languages, we just update the previous messages to not spam so much
-      if (isExplicitlySubscribedToAnyUpdatedLanguage(message, config) || messagesToUpdate.isEmpty()) {
-        sendRegularMessageWithSaving(message, config)
+      if (!isExplicitlySubscribedToAnyUpdatedLanguage(message, config) && messagesToUpdate.isNotEmpty()) {
+        logger.debug(
+          "User is not subscribed to any of the languages and there is message to update with a new value.\n" +
+            "Not sending new message.",
+        )
+        return@forEach
       }
+
+      logger.debug("Sending message for key ${message.keyId}")
+      sendRegularMessageWithSaving(message, config)
     }
 
+    executeUpdateActions(messageUpdateActions)
+  }
+
+  private fun executeUpdateActions(messageUpdateActions: MutableList<() -> Unit>) {
     // Execute the message updates only if there are not too many messages to update
     // Otherwise Slack will complain about too many requests
-    if (messageUpdateActions.size <= MAX_MESSAGES_TO_UPDATE) {
-      messageUpdateActions.forEach { it() }
+    if (messageUpdateActions.size > MAX_MESSAGES_TO_UPDATE) {
+      logger.debug("Too many messages to update, skipping")
     }
+
+    logger.debug("Updating ${messageUpdateActions.size} messages")
+    messageUpdateActions.forEach { it() }
   }
 
   fun getSlackNickName(authorId: Long): String? {
