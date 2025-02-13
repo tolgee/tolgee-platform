@@ -533,7 +533,7 @@ class SlackExecutorHelper(
   }
 
   private val dataProvider by lazy {
-    applicationContext.getBean(SlackIntegrationDataProvider::class.java)
+    SlackIntegrationDataProvider(applicationContext)
   }
 
   private val languageService by lazy {

@@ -58,10 +58,11 @@ class SlackIntegrationDataProvider(
     val result =
       entityManager.createQuery(
         """
-      |SELECT k.id, t.name, k.name, k.namespace.name, km.description
+      |SELECT k.id, k.name, t.name, n.name, km.description
       |FROM Key k
       |left join k.keyMeta km
       |left join km.tags t
+      |left join k.namespace n
       |    WHERE k.id = :keyId
       |
         """.trimMargin(),
@@ -117,7 +118,7 @@ class SlackIntegrationDataProvider(
             |)
             |FROM Translation t 
             |    WHERE (t.key.id = :keyId or t.id = :translationId) and
-            |          (:keyId is not null or :translationId is null) and
+            |          (:keyId is not null or :translationId is not null) and
             |          t.language.deletedAt is null and 
             |          t.language.project.deletedAt is null
             |
