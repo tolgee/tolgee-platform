@@ -4,6 +4,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
 import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.component.automations.processors.SlackSubscriptionProcessor
+import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.model.automations.AutomationAction
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component

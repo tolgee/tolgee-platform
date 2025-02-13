@@ -1,7 +1,7 @@
 package io.tolgee.ee.service.slackIntegration
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.ee.component.slackIntegration.SavedMessageDto
+import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.repository.slackIntegration.SavedSlackMessageRepository
 import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.model.slackIntegration.SavedSlackMessage
@@ -96,7 +96,7 @@ class SavedSlackMessageService(
   }
 
   fun findAll(
-    messagesDto: List<SavedMessageDto>,
+    messagesDto: List<SlackMessageDto>,
     config: Long,
   ): List<SavedSlackMessage> {
     val keyIds = messagesDto.map { it.keyId }

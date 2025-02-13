@@ -41,7 +41,7 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
   @BeforeEach
   fun setup() {
     testData = SlackTestData()
-    initMachineTranslationMocks(1_000)
+    initMachineTranslationMocks()
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
     this.projectSupplier = { testData.projectBuilder.self }
     tolgeeProperties.slack.token = "token"
@@ -90,20 +90,6 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
         }
 
     assertThat(actualMap).isEqualTo(getExpectedMapOfTranslations())
-  }
-
-  private fun assertThatKeyAutoTranslated(keyName: String) {
-    waitForNotThrowing {
-      transactionTemplate.execute {
-        val translatedText =
-          keyService.get(testData.projectBuilder.self.id, keyName, null)
-            .getLangTranslation(testData.secondLanguage).text
-
-        assertThat(
-          translatedText,
-        ).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
-      }
-    }
   }
 
   private fun performSetBaseTranslation(key: String) {
