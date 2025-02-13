@@ -1,7 +1,7 @@
 package io.tolgee.hateoas.notification
 
 import io.tolgee.hateoas.project.SimpleProjectModelAssembler
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
 import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Component
 

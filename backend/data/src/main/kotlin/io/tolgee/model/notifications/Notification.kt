@@ -1,6 +1,8 @@
-package io.tolgee.model
+package io.tolgee.model.notifications
 
-import io.tolgee.constants.NotificationType
+import io.tolgee.model.Project
+import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
 import io.tolgee.model.task.Task
 import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault

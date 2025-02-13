@@ -9,12 +9,10 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
-import { locales } from '../../../locales';
-import { formatDistanceToNowStrict } from 'date-fns';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 
 const StyledItem = styled(ListItemButton)`
   display: grid;
@@ -69,8 +67,8 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   destinationUrl,
   children,
 }) => {
-  const language = useCurrentLanguage();
-  const createdAt = notification?.createdAt;
+  const timeDistance = useTimeDistance();
+  const createdAt = notification?.createdAt || '';
   const originatingUser = notification?.originatingUser;
   const project = notification?.project;
   const formatDate = useDateFormatter();
@@ -105,12 +103,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
                 timeStyle: 'short',
               })}
             >
-              <span>
-                {formatDistanceToNowStrict(new Date(createdAt), {
-                  addSuffix: true,
-                  locale: locales[language].dateFnsLocale,
-                })}
-              </span>
+              <span>{timeDistance(createdAt)}</span>
             </Tooltip>
           </StyledRightDetailText>
         </StyledTime>

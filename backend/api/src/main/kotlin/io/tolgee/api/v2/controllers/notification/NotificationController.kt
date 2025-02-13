@@ -9,7 +9,7 @@ import io.tolgee.hateoas.notification.NotificationEnhancer
 import io.tolgee.hateoas.notification.NotificationModel
 import io.tolgee.hateoas.notification.NotificationModelAssembler
 import io.tolgee.hateoas.notification.NotificationWebsocketModel
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.notification.NotificationService

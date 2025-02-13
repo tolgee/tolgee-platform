@@ -117,6 +117,11 @@ export class LINKS {
 
   static USER_SETTINGS = Link.ofRoot('account');
 
+  static USER_ACCOUNT_NOTIFICATIONS = Link.ofParent(
+    LINKS.USER_SETTINGS,
+    'notifications'
+  );
+
   static USER_API_KEYS = Link.ofParent(LINKS.USER_SETTINGS, 'apiKeys');
 
   static USER_API_KEYS_GENERATE = Link.ofParent(

@@ -1,6 +1,6 @@
 package io.tolgee.hateoas.notification
 
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
 
 /**
  * Dynamic component enhancing notifications by additional information if eligible,

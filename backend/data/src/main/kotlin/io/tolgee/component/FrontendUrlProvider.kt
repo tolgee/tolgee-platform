@@ -53,4 +53,6 @@ class FrontendUrlProvider(
   fun getMyTasksUrl(): String = "${this.url}/my-tasks"
 
   fun getAccountSecurityUrl(): String = "${this.url}/account/security"
+
+  fun getNotificationSettingsUrl(): String = "${this.url}/account/notifications"
 }
