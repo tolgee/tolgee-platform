@@ -11,19 +11,16 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.TaskType
-import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType.TASK_CLOSED
 import io.tolgee.model.notifications.NotificationType.TASK_COMPLETED
 import io.tolgee.model.task.TaskKey
 import io.tolgee.repository.TaskKeyRepository
-import io.tolgee.repository.notification.NotificationRepository
+import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Sort
-import org.springframework.data.domain.Sort.Direction.DESC
 import java.math.BigDecimal
 
 class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -36,7 +33,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var taskKeyRepository: TaskKeyRepository
 
   @Autowired
-  private lateinit var notificationRepository: NotificationRepository
+  private lateinit var notificationUtil: NotificationTestUtil
 
   @BeforeEach
   fun setup() {
@@ -100,8 +97,8 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("page.totalElements").isNumber.isEqualTo(BigDecimal(3))
     }
 
-    performAuthGet("/v2/notification").andAssertThatJson {
-      node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Another task")
+    executeInNewTransaction {
+      assertThat(notificationUtil.newestInAppNotification().linkedTask?.name).isEqualTo("Another task")
     }
   }
 
@@ -371,8 +368,10 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk.andAssertThatJson {
       node("state").isEqualTo("CLOSED")
     }
-    assertThat(newestNotification().type).isEqualTo(TASK_CLOSED)
-    assertThat(newestNotification().linkedTask?.id).isEqualTo(testData.translateTask.self.id)
+    notificationUtil.newestInAppNotification().also {
+      assertThat(it.type).isEqualTo(TASK_CLOSED)
+      assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
+    }
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/reopen",
     ).andIsOk.andAssertThatJson {
@@ -384,8 +383,10 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk.andAssertThatJson {
       node("state").isEqualTo("DONE")
     }
-    assertThat(newestNotification().type).isEqualTo(TASK_COMPLETED)
-    assertThat(newestNotification().linkedTask?.id).isEqualTo(testData.translateTask.self.id)
+    notificationUtil.newestInAppNotification().also {
+      assertThat(it.type).isEqualTo(TASK_COMPLETED)
+      assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
+    }
   }
 
   @Test
@@ -421,7 +422,4 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       key.done = true
       taskKeyRepository.save(key)
     }
-
-  private fun newestNotification(): Notification =
-    notificationRepository.findAll(Sort.by(DESC, "id")).first()
 }
