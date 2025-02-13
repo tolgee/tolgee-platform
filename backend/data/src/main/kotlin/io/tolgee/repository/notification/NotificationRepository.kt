@@ -1,7 +1,7 @@
-package io.tolgee.repository
+package io.tolgee.repository.notification
 
 import io.tolgee.dtos.request.notification.NotificationFilters
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

@@ -2,10 +2,10 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
-import io.tolgee.model.Notification
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
+import io.tolgee.model.notifications.Notification
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import org.springframework.core.io.ClassPathResource
 

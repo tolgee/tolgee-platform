@@ -1,7 +1,7 @@
 package io.tolgee.service.notification
 
-import io.tolgee.constants.NotificationType
-import io.tolgee.model.Notification
+import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
 
