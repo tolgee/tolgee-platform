@@ -49,7 +49,7 @@ export const SettingsRow: React.FC<Props> = ({
       {
         onSuccess() {
           messageService.success(
-            <T keyName="User data - Successfully updated!" />
+            <T keyName="settings_notifications_message_saved" />
           );
           afterChange();
         },

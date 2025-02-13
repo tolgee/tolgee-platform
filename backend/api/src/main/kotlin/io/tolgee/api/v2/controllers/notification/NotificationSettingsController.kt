@@ -9,7 +9,7 @@ import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.model.notifications.NotificationTypeGroup
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.notification.NotificationSettingService
+import io.tolgee.service.notification.NotificationSettingsService
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -19,22 +19,25 @@ import org.springframework.web.bind.annotation.*
     "/v2/notifications-settings",
   ],
 )
-@Tag(name = "Notifications settings", description = "Manipulates notification settings")
+@Tag(name = "Notifications", description = "Manipulates notification settings")
 class NotificationSettingsController(
-  private val notificationSettingService: NotificationSettingService,
+  private val notificationSettingsService: NotificationSettingsService,
   private val authenticationFacade: AuthenticationFacade,
   private val notificationSettingsModelAssembler: NotificationSettingsModelAssembler,
 ) {
   @GetMapping
-  @Operation(summary = "Gets notifications settings of the currently logged in user.")
+  @Operation(
+    summary = "Get notification settings",
+    description = "Returns notification settings of the currently logged in user",
+  )
   @AllowApiAccess
   fun getNotificationsSettings(): NotificationSettingModel {
-    val data = notificationSettingService.getSettings(authenticationFacade.authenticatedUserEntity)
+    val data = notificationSettingsService.getSettings(authenticationFacade.authenticatedUserEntity)
     return notificationSettingsModelAssembler.toModel(data)
   }
 
   @PutMapping
-  @Operation(summary = "Saves a new value of setting.")
+  @Operation(summary = "Save notification setting", description = "Saves new value for given parameters")
   @AllowApiAccess
   fun putNotificationSetting(
     group: NotificationTypeGroup,
@@ -45,6 +48,6 @@ class NotificationSettingsController(
       throw BadRequestException("Account security settings cannot be changed.")
     }
 
-    notificationSettingService.save(authenticationFacade.authenticatedUserEntity, group, channel, enabled)
+    notificationSettingsService.save(authenticationFacade.authenticatedUserEntity, group, channel, enabled)
   }
 }

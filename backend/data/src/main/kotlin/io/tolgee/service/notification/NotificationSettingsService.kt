@@ -9,7 +9,7 @@ import io.tolgee.repository.notification.NotificationSettingRepository
 import org.springframework.stereotype.Service
 
 @Service
-class NotificationSettingService(
+class NotificationSettingsService(
   private val notificationSettingRepository: NotificationSettingRepository,
 ) {
   fun getSettings(user: UserAccount): List<NotificationSetting> {
@@ -17,7 +17,7 @@ class NotificationSettingService(
 
     return NotificationTypeGroup.entries.flatMap { group ->
       NotificationChannel.entries.map { channel ->
-        dbData.find { it.group == group && it.channel == channel } ?: defaultSettings(user, group, channel)
+        dbData.find { it.group == group && it.channel == channel } ?: getDefaultSettings(user, group, channel)
       }
     }
   }
@@ -32,7 +32,7 @@ class NotificationSettingService(
       channel,
     )?.enabled ?: true
 
-  private fun defaultSettings(
+  private fun getDefaultSettings(
     user: UserAccount,
     group: NotificationTypeGroup,
     channel: NotificationChannel,

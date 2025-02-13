@@ -17,7 +17,7 @@ class NotificationService(
   private val notificationRepository: NotificationRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val emailNotificationsService: EmailNotificationsService,
-  private val notificationSettingService: NotificationSettingService,
+  private val notificationSettingsService: NotificationSettingsService,
 ) {
   fun getNotifications(
     userId: Long,
@@ -36,10 +36,10 @@ class NotificationService(
 
   @Transactional
   fun notify(notification: Notification) {
-    if (notificationSettingService.getSettingValue(notification, NotificationChannel.EMAIL)) {
+    if (notificationSettingsService.getSettingValue(notification, NotificationChannel.EMAIL)) {
       emailNotificationsService.sendEmailNotification(notification)
     }
-    if (notificationSettingService.getSettingValue(notification, NotificationChannel.IN_APP)) {
+    if (notificationSettingsService.getSettingValue(notification, NotificationChannel.IN_APP)) {
       notificationRepository.save(notification)
       applicationEventPublisher.publishEvent(
         OnNotificationsChangedForUser(

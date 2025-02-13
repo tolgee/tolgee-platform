@@ -1,7 +1,9 @@
 import { useTranslate } from '@tolgee/react';
+import { useDateFormatter } from 'tg.hooks/useLocale';
 
 export function useTimeDistance() {
   const { t } = useTranslate();
+  const formatDate = useDateFormatter();
 
   return (timeInPast: number | string | Date) => {
     const differenceInSeconds =
@@ -23,8 +25,12 @@ export function useTimeDistance() {
       });
     }
 
-    return t('time_difference_days', {
-      value: Math.trunc(differenceInSeconds / (60 * 60 * 24)),
-    });
+    if (differenceInSeconds < 60 * 60 * 24 * 30) {
+      return t('time_difference_days', {
+        value: Math.trunc(differenceInSeconds / (60 * 60 * 24)),
+      });
+    }
+
+    return formatDate(new Date(timeInPast), { dateStyle: 'medium' });
   };
 }
