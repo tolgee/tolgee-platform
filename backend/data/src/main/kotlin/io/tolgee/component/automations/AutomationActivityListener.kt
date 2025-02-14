@@ -20,31 +20,6 @@ class AutomationActivityListener(
   @EventListener
   @Async
   fun listen(event: OnProjectActivityStoredEvent) {
-    executeActivityAutomationIfShould(event)
-    executeTranslationDataModificationAutomationIfShould(event)
-  }
-
-  @TransactionalEventListener
-  @Async
-  fun listen(event: OnBatchJobFinalized) {
-    val revision = activityService.findActivityRevisionInfo(event.activityRevisionId) ?: return
-    if (revision.modifiedEntityCount == 0) {
-      return
-    }
-
-    val projectId = revision.projectId ?: return
-
-    automationsBatchJobCreator.executeActivityAutomation(projectId, revision.type, revision.id)
-  }
-
-  private fun executeTranslationDataModificationAutomationIfShould(event: OnProjectActivityStoredEvent) {
-    val projectId = event.activityRevision.projectId ?: return
-    if (isTranslationDataModification(event)) {
-      automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId, event.activityRevision.id)
-    }
-  }
-
-  private fun executeActivityAutomationIfShould(event: OnProjectActivityStoredEvent) {
     val activityType = event.activityRevision.type ?: return
     val projectId = event.activityRevision.projectId ?: return
     if (event.activityRevision.modifiedEntities.isEmpty()) {
@@ -58,6 +33,27 @@ class AutomationActivityListener(
     }
 
     automationsBatchJobCreator.executeActivityAutomation(projectId, activityType, event.activityRevision.id)
+
+    if (isTranslationDataModification(event)) {
+      automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId, event.activityRevision.id)
+    }
+  }
+
+  @TransactionalEventListener
+  @Async
+  fun listen(event: OnBatchJobFinalized) {
+    val revision = activityService.findActivityRevisionInfo(event.activityRevisionId) ?: return
+    if (revision.modifiedEntityCount == 0) {
+      return
+    }
+
+    val projectId = revision.projectId ?: return
+
+    automationsBatchJobCreator.executeActivityAutomation(projectId, revision.type, revision.id)
+
+    if (revision.isTranslationModification) {
+      automationsBatchJobCreator.executeTranslationDataModificationAutomation(projectId, revision.id)
+    }
   }
 
   private fun isTranslationDataModification(event: OnProjectActivityStoredEvent): Boolean {

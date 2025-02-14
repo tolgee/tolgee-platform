@@ -25,7 +25,7 @@ class SlackSubscriptionProcessorImpl(
       ProjectActivityViewByRevisionProvider(
         applicationContext = applicationContext,
         activityRevisionId,
-        onlyCountInListAbove = 10,
+        onlyCountInListAbove = SlackExecutor.MAX_NEW_MESSAGES_TO_SEND,
       ).get() ?: return
 
     val activityModel = activityModelAssembler.toModel(view)

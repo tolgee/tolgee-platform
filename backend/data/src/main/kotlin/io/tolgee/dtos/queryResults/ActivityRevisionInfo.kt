@@ -7,4 +7,5 @@ data class ActivityRevisionInfo(
   val projectId: Long?,
   val modifiedEntityCount: Int,
   val type: ActivityType,
+  val isTranslationModification: Boolean,
 )

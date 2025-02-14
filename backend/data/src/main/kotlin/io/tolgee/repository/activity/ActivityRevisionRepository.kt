@@ -67,7 +67,15 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       ar.id,
       ar.projectId,
       size(ar.modifiedEntities),
-      ar.type
+      ar.type,
+      case 
+          when exists (
+              select 1 from ActivityModifiedEntity me
+              where me.activityRevision = ar 
+              and me.entityClass in ('Translation', 'Key', 'Project', 'Language')
+          ) then true 
+          else false 
+      end
     )
     from ActivityRevision ar
     where ar.id = :id
