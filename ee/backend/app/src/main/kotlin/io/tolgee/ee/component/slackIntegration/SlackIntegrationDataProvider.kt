@@ -114,13 +114,16 @@ class SlackIntegrationDataProvider(
     entityManager.createQuery(
       """SELECT new 
             |io.tolgee.ee.component.slackIntegration.data.TranslationInfoDto(
-            |    t.key.id, t.id, t.language.tag, t.language.id, t.language.name, t.language.flagEmoji, t.text, t.state
+            |    t2.key.id, t2.id, t2.language.tag, t2.language.id, 
+            |    t2.language.name, t2.language.flagEmoji, t2.text, t2.state
             |)
-            |FROM Translation t 
+            |FROM Translation t
+            |    join t.key k
+            |    join k.translations t2
             |    WHERE (t.key.id = :keyId or t.id = :translationId) and
             |          (:keyId is not null or :translationId is not null) and
-            |          t.language.deletedAt is null and 
-            |          t.language.project.deletedAt is null
+            |          t2.language.deletedAt is null and 
+            |          t2.language.project.deletedAt is null
             |
       """.trimMargin(),
       TranslationInfoDto::class.java,
