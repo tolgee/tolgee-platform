@@ -8,7 +8,6 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
@@ -18,12 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@ContextRecreatingTest
 class SlackWithAutoTranslationTest : MachineTranslationTest() {
   @Autowired
   @MockBean
@@ -41,7 +37,7 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
   @BeforeEach
   fun setup() {
     testData = SlackTestData()
-    initMachineTranslationMocks(1_000)
+    initMachineTranslationMocks()
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
     this.projectSupplier = { testData.projectBuilder.self }
     tolgeeProperties.slack.token = "token"
@@ -90,20 +86,6 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
         }
 
     assertThat(actualMap).isEqualTo(getExpectedMapOfTranslations())
-  }
-
-  private fun assertThatKeyAutoTranslated(keyName: String) {
-    waitForNotThrowing {
-      transactionTemplate.execute {
-        val translatedText =
-          keyService.get(testData.projectBuilder.self.id, keyName, null)
-            .getLangTranslation(testData.secondLanguage).text
-
-        assertThat(
-          translatedText,
-        ).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
-      }
-    }
   }
 
   private fun performSetBaseTranslation(key: String) {

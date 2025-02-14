@@ -5,6 +5,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
+import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.fixtures.WaitNotSatisfiedException
@@ -15,6 +16,7 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.hibernate.query.TypedParameterValue
 import org.hibernate.type.StandardBasicTypes
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
@@ -23,6 +25,7 @@ class BatchJobActivityFinalizer(
   private val entityManager: EntityManager,
   private val activityHolder: ActivityHolder,
   private val batchJobStateProvider: BatchJobStateProvider,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) : Logging {
   @EventListener(OnBatchJobSucceeded::class)
   fun finalizeActivityWhenJobSucceeded(event: OnBatchJobSucceeded) {
@@ -55,6 +58,7 @@ class BatchJobActivityFinalizer(
         mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
         deleteUnusedRevisions(revisionIds)
         setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
+        applicationEventPublisher.publishEvent(OnBatchJobFinalized(job, activityRevisionIdToMergeInto))
       } catch (e: Exception) {
         Sentry.captureException(e)
         throw CannotFinalizeActivityException(e)

@@ -6,6 +6,7 @@ import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.projectActivity.ModificationsByRevisionsProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
+import io.tolgee.dtos.queryResults.ActivityRevisionInfo
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -13,6 +14,7 @@ import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
+import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.util.Logging
 import io.tolgee.util.flushAndClear
 import jakarta.persistence.EntityManager
@@ -31,6 +33,7 @@ class ActivityService(
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
   private val objectMapper: ObjectMapper,
   private val jdbcTemplate: JdbcTemplate,
+  private val activityRevisionRepository: ActivityRevisionRepository,
 ) : Logging {
   @Transactional
   fun storeActivityData(
@@ -159,6 +162,10 @@ class ActivityService(
     val provider =
       ModificationsByRevisionsProvider(applicationContext, projectId, listOf(revisionId), pageable, filterEntityClass)
     return provider.get()
+  }
+
+  fun findActivityRevisionInfo(id: Long): ActivityRevisionInfo? {
+    return activityRevisionRepository.findInfo(id)
   }
 
   private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {

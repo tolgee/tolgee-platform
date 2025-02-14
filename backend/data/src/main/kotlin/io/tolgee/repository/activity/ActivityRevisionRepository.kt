@@ -1,6 +1,7 @@
 package io.tolgee.repository.activity
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.dtos.queryResults.ActivityRevisionInfo
 import io.tolgee.model.activity.ActivityRevision
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -59,4 +60,26 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     projectId: Long?,
     revisionId: Long,
   ): ActivityRevision?
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.ActivityRevisionInfo(
+      ar.id,
+      ar.projectId,
+      size(ar.modifiedEntities),
+      ar.type,
+      case 
+          when exists (
+              select 1 from ActivityModifiedEntity me
+              where me.activityRevision = ar 
+              and me.entityClass in ('Translation', 'Key', 'Project', 'Language')
+          ) then true 
+          else false 
+      end
+    )
+    from ActivityRevision ar
+    where ar.id = :id
+  """,
+  )
+  fun findInfo(id: Long): ActivityRevisionInfo?
 }
