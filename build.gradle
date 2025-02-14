@@ -139,16 +139,6 @@ project(':server-app').afterEvaluate {
     }
 }
 
-// Tests of `ee-test` collide with tests of `server-app`, therefore we run them sequentially.
-// It would be great to make the tests not collide and therefore this block of code can be deleted.
-gradle.projectsEvaluated {
-    project(':server-app').tasks.withType(Test) {
-        if (gradle.ext.eeAppDirectoryExists) {
-            dependsOn project(':ee-test').tasks.withType(Test)
-        }
-    }
-}
-
 ktlint {
     debug = true
     verbose = true

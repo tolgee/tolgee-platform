@@ -8,7 +8,6 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
@@ -18,12 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@ContextRecreatingTest
 class SlackWithAutoTranslationTest : MachineTranslationTest() {
   @Autowired
   @MockBean
