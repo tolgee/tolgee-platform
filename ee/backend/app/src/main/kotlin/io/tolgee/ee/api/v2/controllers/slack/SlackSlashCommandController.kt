@@ -161,7 +161,7 @@ class SlackSlashCommandController(
     languageTag: String?,
     optionsMap: Map<String, String>,
   ): SlackMessageDto? {
-    checkFeatureEnabled(payload.team_id)
+    checkFeatureEnabled(payload.team_id, projectId)
 
     val events: MutableSet<SlackEventType> = mutableSetOf()
 
@@ -259,10 +259,31 @@ class SlackSlashCommandController(
     }
   }
 
-  private fun checkFeatureEnabled(teamId: String) {
+  private fun checkFeatureEnabled(
+    teamId: String,
+    projectId: Long? = null,
+  ) {
     val workspace = organizationSlackWorkspaceService.findBySlackTeamId(teamId)
+
+    // this enables us to bypass the check locally for local development when billing is enabled,
+    // and we are using slack with single workspace global server configuration
+    // in that case workspace is null
+    if (workspace == null) {
+      // we prevent only project commands, which should be enough to prevent users from using it when they don't have
+      // the feature enabled
+      if (projectId != null) {
+        val project = projectService.get(projectId)
+        checkPermissionForOrganizationId(project.organizationOwner.id)
+      }
+      return
+    }
+
+    checkPermissionForOrganizationId(workspace.organization.id)
+  }
+
+  fun checkPermissionForOrganizationId(organizationId: Long) {
     if (!enabledFeaturesProvider.isFeatureEnabled(
-        organizationId = workspace?.organization?.id,
+        organizationId,
         Feature.SLACK_INTEGRATION,
       )
     ) {

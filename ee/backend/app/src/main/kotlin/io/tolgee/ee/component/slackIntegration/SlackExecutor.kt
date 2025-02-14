@@ -6,6 +6,7 @@ import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.sentry.Sentry
+import io.tolgee.api.IProjectActivityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
@@ -18,7 +19,6 @@ import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.I18n
-import io.tolgee.util.logger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
@@ -53,10 +53,12 @@ class SlackExecutor(
   ) {
     val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
-    val count = slackExecutorHelper.data.activityData?.modifiedEntities?.get("Translation")?.size ?: 0
-    if (count >= 10) {
+    val count = getModifiedTranslationsCount(slackExecutorHelper)
+    val isBigOperation =
+      isBigOperation(slackExecutorHelper, count)
+    if (isBigOperation) {
       logger.debug("Too many translations to send message, sending only one message")
-      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(count.toLong())
+      val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(count)
       sendRegularMessageWithSaving(messageDto, config)
       return
     }
@@ -93,6 +95,41 @@ class SlackExecutor(
 
     executeUpdateActions(messageUpdateActions)
   }
+
+  private fun isBigOperation(
+    slackExecutorHelper: SlackExecutorHelper,
+    count: Long,
+  ): Boolean {
+    if (count > 10) {
+      return true
+    }
+
+    // This happens in case that the data are considered big in the view provider and so it is not loaded
+    // In that case we just also consider it big
+    // However, we still need to check whether there are any translations changed
+    return slackExecutorHelper.data.activityData?.let { getTranslationChangeSizeFromModifiedEntities(it) } == null &&
+      count > 0
+  }
+
+  private fun getModifiedTranslationsCount(slackExecutorHelper: SlackExecutorHelper): Long {
+    val activityData = slackExecutorHelper.data.activityData ?: return 0
+
+    val countFromCounts = activityData.counts?.get("Translation")
+
+    // for activities with a lot of data, we get count only in the counts map
+    if (countFromCounts != null) {
+      return countFromCounts
+    }
+
+    // for small activities, we get count from modifiedEntities
+    return getTranslationChangeSizeFromModifiedEntities(activityData) ?: 0
+  }
+
+  /**
+   * If this is empty, it means that the operation is probably big
+   */
+  private fun getTranslationChangeSizeFromModifiedEntities(activityData: IProjectActivityModel) =
+    activityData.modifiedEntities?.get("Translation")?.size?.toLong()
 
   private fun executeUpdateActions(messageUpdateActions: MutableList<() -> Unit>) {
     // Execute the message updates only if there are not too many messages to update
@@ -329,7 +366,7 @@ class SlackExecutor(
     if (response.isOk) {
       saveMessage(messageDto, response.ts, config)
     } else {
-      logger.info(response.error)
+      Sentry.captureException(RuntimeException("Cannot send message in slack: ${response.error}"))
     }
   }
 
@@ -343,7 +380,8 @@ class SlackExecutor(
       }
 
     if (!response.isOk) {
-      logger.info(response.error)
+      Sentry.captureException(RuntimeException("Cannot get channel info in slack: ${response.error}"))
+      logger.error(response.error)
       return false
     }
 
