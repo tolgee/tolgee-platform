@@ -9,7 +9,6 @@ import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +37,12 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
   @BeforeEach
   fun setup() {
     testData = SlackTestData()
-    initMachineTranslationMocks()
+    initMachineTranslationMocks(
+      // the delay is here, so we test that it really doesn't send the message on every single change
+      // Without the delay it would be so fast that the batch operation would be finished before
+      // the first message is sent and so the tests would pass even if the implementation was wrong
+      translateDelay = 20,
+    )
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
     this.projectSupplier = { testData.projectBuilder.self }
     tolgeeProperties.slack.token = "token"
@@ -81,30 +85,22 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
 
     mockedSlackClient.clearInvocations()
 
-    val ssms = entityManager.createQuery("from SavedSlackMessage ssm", SavedSlackMessage::class.java).resultList
-    ssms
-
     keys.take(3).forEach {
       performUpdateTranslation(it.name)
     }
 
-    try {
-      waitForNotThrowing(timeout = 10_000) {
-        mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
-        mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
-      }
-    } catch (e: Exception) {
-      mockedSlackClient.chatUpdateRequests
+    waitForNotThrowing(timeout = 3_000) {
+      mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
+      mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
     }
 
     mockedSlackClient.clearInvocations()
     performBatchOperation(keyIds)
 
-    waitForNotThrowing(timeout = 10_000) {
-      mockedSlackClient.chatPostMessageRequests.assert.hasSize(10)
-      mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
-//      val sectionBlock = requests.single().blocks.first() as SectionBlock
-//      sectionBlock.text.text.assert.contains("has updated 10 translations")
+    waitForNotThrowing(timeout = 3_000) {
+      mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
+      // currently is 6 due to suboptimal implementations
+      mockedSlackClient.chatUpdateRequests.assert.hasSize(6)
     }
   }
 

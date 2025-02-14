@@ -45,6 +45,7 @@ class SlackExecutor(
 
   companion object {
     const val MAX_MESSAGES_TO_UPDATE = 5
+    const val MAX_NEW_MESSAGES_TO_SEND = 5
   }
 
   fun sendMessageOnTranslationSet(
@@ -79,6 +80,12 @@ class SlackExecutor(
         }
       }
 
+      // Execute the message updates only if there are not too many messages to update
+      // Otherwise Slack will complain about too many requests
+      if (messageUpdateActions.size > MAX_MESSAGES_TO_UPDATE) {
+        logger.debug("Too many messages to update, skipping")
+      }
+
       // We only want to send message when the user is explicitly subscribed to the language.
       // If they're subscribed to all languages, we just update the previous messages to not spam so much
       if (!isExplicitlySubscribedToAnyUpdatedLanguage(message, config) && messagesToUpdate.isNotEmpty()) {
@@ -100,7 +107,7 @@ class SlackExecutor(
     slackExecutorHelper: SlackExecutorHelper,
     count: Long,
   ): Boolean {
-    if (count > 10) {
+    if (count > MAX_NEW_MESSAGES_TO_SEND) {
       return true
     }
 
@@ -132,12 +139,6 @@ class SlackExecutor(
     activityData.modifiedEntities?.get("Translation")?.size?.toLong()
 
   private fun executeUpdateActions(messageUpdateActions: MutableList<() -> Unit>) {
-    // Execute the message updates only if there are not too many messages to update
-    // Otherwise Slack will complain about too many requests
-    if (messageUpdateActions.size > MAX_MESSAGES_TO_UPDATE) {
-      logger.debug("Too many messages to update, skipping")
-    }
-
     logger.debug("Updating ${messageUpdateActions.size} messages")
     messageUpdateActions.forEach { it() }
   }
