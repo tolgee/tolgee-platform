@@ -1,29 +1,19 @@
 package io.tolgee.ee.component.slackIntegration.notification
 
 import com.slack.api.model.Attachment
-import com.slack.api.model.block.LayoutBlock
-import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
-import com.slack.api.model.kotlin_extension.block.SectionBlockBuilder
-import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
-import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
-import io.tolgee.ee.component.slackIntegration.SlackNotConfiguredException
-import io.tolgee.ee.component.slackIntegration.data.SlackKeyInfoDto
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.component.slackIntegration.data.SlackTranslationInfoDto
 import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
-import io.tolgee.model.slackIntegration.SlackConfigPreference
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.I18n
-import io.tolgee.util.logger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
@@ -42,7 +32,7 @@ class SlackAutomationMessageSender(
   private val tolgeeProperties: TolgeeProperties,
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
-  private val slackNotificationBlocksProvider: SlackNotificationBlocksProvider,
+  private val blocksProvider: SlackNotificationBlocksProvider,
   private val slackOperations: SlackChannelMessagesOperations,
   private val languageService: LanguageService,
 ) {
@@ -167,7 +157,7 @@ class SlackAutomationMessageSender(
           if (author.isEmpty()) {
             return@attachments
           }
-          attachment.blocks = attachment.blocks + slackNotificationBlocksProvider.getAuthorBlocks(author)
+          attachment.blocks = attachment.blocks + blocksProvider.getAuthorBlocks(author)
         }
       }
     }
@@ -263,10 +253,6 @@ class SlackAutomationMessageSender(
     savedSlackMessageService.update(id, langTags, authorContextMap)
   }
 
-  private fun OrganizationSlackWorkspace?.getSlackToken(): String {
-    return this?.accessToken ?: tolgeeProperties.slack.token ?: throw SlackNotConfiguredException()
-  }
-
   fun sendMessageOnImport(
     slackConfig: SlackConfig,
     data: SlackRequest,
@@ -312,8 +298,7 @@ class SlackAutomationMessageSender(
 
     val keyId = modifiedEntity.entityId
     val key = context.dataProvider.getKeyInfo(keyId)
-    val blocksHeader: List<LayoutBlock> =
-      buildKeyInfoBlock(context, key, i18n.translate("slack.common.message.new-key"))
+    val blocksHeader = blocksProvider.getKeyInfoBlock(context, key, i18n.translate("slack.common.message.new-key"))
     val keyTranslations = context.dataProvider.getKeyTranslations(key.id)
 
     keyTranslations.forEach translations@{ translation ->
@@ -336,7 +321,7 @@ class SlackAutomationMessageSender(
       }
     }
 
-    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(context, key.id)))
+    attachments.add(blocksProvider.getRedirectButtonAttachment(getUrlOnSpecifiedKey(context, key.id)))
 
     if (langTags.isEmpty()) {
       return null
@@ -351,132 +336,15 @@ class SlackAutomationMessageSender(
     )
   }
 
-  private fun buildBlocksEmptyTranslation(
-    context: SlackMessageContext,
-    translation: SlackTranslationInfoDto,
-  ) = withBlocks {
-    if (shouldSkipModification(
-        context,
-        context.slackConfig.preferences,
-        translation.languageTag,
-        context.slackConfig.isGlobalSubscription,
-      )
-    ) {
-      return@withBlocks
-    }
-    val languageName = translation.languageName
-    val flagEmoji = translation.languageFlagEmoji
-    val ifBase =
-      if (context.baseLanguage.id == translation.languageId) {
-        "(base)"
-      } else {
-        ""
-      }
-
-    section {
-      markdownText("$flagEmoji *$languageName* $ifBase")
-    }
-
-    context {
-      markdownText("No translation")
-    }
-  }
-
-  private fun buildBlocksWithTranslation(
-    context: SlackMessageContext,
-    translation: SlackTranslationInfoDto,
-    author: String?,
-  ) = withBlocks {
-    if (shouldSkipModification(
-        context,
-        context.slackConfig.preferences,
-        translation.languageTag,
-        context.slackConfig.isGlobalSubscription,
-      )
-    ) {
-      return@withBlocks
-    }
-    section {
-      languageInfoSection(context, translation)
-    }
-
-    section {
-      val currentTranslate = translation.text!!
-      markdownText(currentTranslate)
-    }
-    val contextText = author ?: return@withBlocks
-    if (contextText.isEmpty()) {
-      return@withBlocks
-    }
-    context {
-      markdownText(contextText)
-    }
-  }
-
-  private fun buildKeyInfoBlock(
-    context: SlackMessageContext,
-    key: SlackKeyInfoDto,
-    head: String,
-  ) = withBlocks {
-    section {
-      authorHeadSection(context, head)
-    }
-
-    val columnFields = mutableListOf<Pair<String, String?>>()
-    columnFields.add("Key" to key.name)
-    key.tags?.let { tags ->
-      val tagNames = tags.joinToString(", ")
-      if (tagNames.isNotBlank()) {
-        columnFields.add("Tags" to tagNames)
-      }
-    }
-    columnFields.add("Namespace" to key.namespace)
-    columnFields.add("Description" to key.description)
-
-    field(columnFields)
-  }
-
-  fun LayoutBlockDsl.field(keyValue: List<Pair<String, String?>>) {
-    section {
-      val filtered = keyValue.filter { it.second != null && it.second!!.isNotEmpty() }
-
-      if (filtered.isEmpty()) return@section
-      fields {
-        filtered.forEachIndexed { index, (key, value) ->
-          val finalValue = value + if (index % 2 == 1 && index != filtered.size - 1) "\n\u200d" else ""
-          markdownText("*$key* \n$finalValue")
-        }
-      }
-    }
-  }
-
   fun createImportMessage(context: SlackMessageContext): SlackMessageDto? {
     val importedCount = context.activityData?.counts?.get("Key") ?: return null
 
     return SlackMessageDto(
-      blocks = buildImportBlocks(context, importedCount),
-      attachments = listOf(createRedirectButton(getUrlOnImport(context))),
+      blocks = blocksProvider.getImportBlocks(context, importedCount),
+      attachments = listOf(blocksProvider.getRedirectButtonAttachment(getUrlOnImport(context))),
       0L,
       setOf(),
     )
-  }
-
-  private fun buildImportBlocks(
-    context: SlackMessageContext,
-    count: Long,
-  ) = withBlocks {
-    section {
-      authorHeadSection(context, i18n.translate("slack.common.message.imported") + " $count keys")
-    }
-  }
-
-  private fun buildBlocksTooManyTranslations(
-    context: SlackMessageContext,
-    count: Long,
-  ) = withBlocks {
-    section {
-      authorHeadSection(context, i18n.translate("slack.common.message.too-many-translations").format(count))
-    }
   }
 
   fun createTranslationChangeMessage(context: SlackMessageContext): MutableList<SlackMessageDto> {
@@ -535,13 +403,17 @@ class SlackAutomationMessageSender(
     val key = context.dataProvider.getKeyInfo(translation.keyId)
 
     val headerBlock =
-      buildKeyInfoBlock(context, key, i18n.translate("slack.common.message.new-translation").format(langName, event))
+      blocksProvider.getKeyInfoBlock(
+        context,
+        key,
+        i18n.translate("slack.common.message.new-translation").format(langName, event),
+      )
     val attachments =
       mutableListOf(createAttachmentForLanguage(context, translation, modificationAuthor) ?: return null)
     val langTags = mutableSetOf(modifiedLangTag)
 
     addLanguagesIfNeed(context, attachments, langTags, key.id, modifiedLangTag, baseLanguageTag)
-    attachments.add(createRedirectButton(getUrlOnSpecifiedKey(context, key.id)))
+    attachments.add(blocksProvider.getRedirectButtonAttachment(getUrlOnSpecifiedKey(context, key.id)))
 
     return if (langTags.isEmpty()) {
       null
@@ -611,51 +483,6 @@ class SlackAutomationMessageSender(
   ): Boolean =
     !addedTags.contains(currentLangTag) &&
       (modifiedLangTag == baseLanguageTag || currentLangTag == baseLanguageTag)
-
-  private fun determineColorByState(state: TranslationState?): String {
-    return when (state) {
-      TranslationState.TRANSLATED -> "#FFCE00"
-      TranslationState.UNTRANSLATED -> "#BCC2CB"
-      TranslationState.REVIEWED -> "#00B962"
-      else -> "#BCC2CB"
-    }
-  }
-
-  private fun SectionBlockBuilder.languageInfoSection(
-    context: SlackMessageContext,
-    translation: SlackTranslationInfoDto,
-  ) {
-    val languageName = translation.languageName
-    val flagEmoji = translation.languageFlagEmoji
-    val ifBase =
-      if (context.baseLanguage.id == translation.languageId) {
-        "(base)"
-      } else {
-        ""
-      }
-
-    markdownText("$flagEmoji *$languageName* $ifBase")
-  }
-
-  private fun SectionBlockBuilder.authorHeadSection(
-    context: SlackMessageContext,
-    head: String,
-  ) {
-    val authorMention = context.authorMention
-    markdownText(" *$authorMention* $head")
-  }
-
-  private fun shouldSkipModification(
-    context: SlackMessageContext,
-    preferences: Set<SlackConfigPreference>,
-    langTag: String,
-    globalSubscription: Boolean,
-  ): Boolean {
-    val languageTagsSet = preferences.map { it.languageTag }.toSet()
-    return !globalSubscription &&
-      !languageTagsSet.contains(langTag) &&
-      context.baseLanguage.tag != langTag
-  }
 
   private fun shouldProcessEventTranslationChanged(
     context: SlackMessageContext,
@@ -748,23 +575,16 @@ class SlackAutomationMessageSender(
   ): Attachment? {
     val baseLanguage = context.slackConfig.project.baseLanguage ?: return null
 
-    val languagePreferences = context.slackConfig.preferences
-    if (shouldSkipModification(
-        context,
-        languagePreferences,
-        translation.languageTag,
-        context.slackConfig.isGlobalSubscription,
-      )
-    ) {
+    if (context.shouldSkipModification(translation.languageTag)) {
       return null
     }
 
     val color = determineColorByState(translation.state)
     val blocksBody =
       if (translation.text != null) {
-        buildBlocksWithTranslation(context, translation, author)
+        blocksProvider.getBlocksWithTranslation(context, translation, author)
       } else {
-        buildBlocksEmptyTranslation(context, translation)
+        blocksProvider.getBlocksEmptyTranslation(context, translation)
       }
     return Attachment.builder()
       .color(color)
@@ -773,26 +593,12 @@ class SlackAutomationMessageSender(
       .build()
   }
 
-  private fun createRedirectButton(url: String) =
-    Attachment.builder()
-      .blocks(
-        withBlocks {
-          actions {
-            logger.trace("URL: $url")
-            redirectOnPlatformButton(url)
-          }
-        },
-      )
-      .color("#00000000")
-      .build()
-
-  private fun ActionsBlockBuilder.redirectOnPlatformButton(tolgeeUrl: String) {
-    button {
-      text(i18n.translate("slack.common.text.button.tolgee_redirect"), emoji = true)
-      value("redirect")
-      url(tolgeeUrl)
-      actionId("button_redirect_to_tolgee")
-      style("danger")
+  private fun determineColorByState(state: TranslationState?): String {
+    return when (state) {
+      TranslationState.TRANSLATED -> "#FFCE00"
+      TranslationState.UNTRANSLATED -> "#BCC2CB"
+      TranslationState.REVIEWED -> "#00B962"
+      else -> "#BCC2CB"
     }
   }
 
@@ -811,8 +617,8 @@ class SlackAutomationMessageSender(
     counts: Long,
   ): SlackMessageDto {
     return SlackMessageDto(
-      blocks = buildBlocksTooManyTranslations(context, counts),
-      attachments = listOf(createRedirectButton(getUrlOnImport(context))),
+      blocks = blocksProvider.getBlocksTooManyTranslations(context, counts),
+      attachments = listOf(blocksProvider.getRedirectButtonAttachment(getUrlOnImport(context))),
       0L,
       setOf(),
       false,
