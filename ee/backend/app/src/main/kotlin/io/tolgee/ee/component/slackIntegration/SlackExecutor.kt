@@ -5,7 +5,6 @@ import com.slack.api.methods.kotlin_extension.request.chat.blocks
 import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.withBlocks
-import io.sentry.Sentry
 import io.tolgee.api.IProjectActivityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
@@ -349,8 +348,8 @@ class SlackExecutor(
     if (response.isOk) {
       updateLangTagsMessage(savedMessage.id, messageDto.languageTags, messageDto.authorContext)
     } else {
-      Sentry.captureException(RuntimeException("Cannot update message in slack: ${response.error}"))
-      logger.error(response.error)
+      RuntimeException("Cannot update message in slack: ${response.error}")
+        .let { logger.error(it.message, it) }
     }
   }
 
@@ -367,7 +366,8 @@ class SlackExecutor(
     if (response.isOk) {
       saveMessage(messageDto, response.ts, config)
     } else {
-      Sentry.captureException(RuntimeException("Cannot send message in slack: ${response.error}"))
+      RuntimeException("Cannot send message in slack: ${response.error}")
+        .let { logger.error(it.message, it) }
     }
   }
 
@@ -381,8 +381,8 @@ class SlackExecutor(
       }
 
     if (!response.isOk) {
-      Sentry.captureException(RuntimeException("Cannot get channel info in slack: ${response.error}"))
-      logger.error(response.error)
+      RuntimeException("Cannot get channel info in slack: ${response.error}")
+        .let { logger.error(it.message, it) }
       return false
     }
 
