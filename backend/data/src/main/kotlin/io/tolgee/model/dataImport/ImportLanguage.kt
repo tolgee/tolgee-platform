@@ -29,4 +29,12 @@ class ImportLanguage(
 
   @ManyToOne
   var existingLanguage: Language? = null
+
+  /**
+   * When true, this language and it's translations will be ignored
+   * Useful when we want to avoid "EXISTING_LANGUAGE_NOT_SELECTED" error
+   */
+  @Column(insertable = false, updatable = false)
+  @Transient
+  var ignored = false
 }

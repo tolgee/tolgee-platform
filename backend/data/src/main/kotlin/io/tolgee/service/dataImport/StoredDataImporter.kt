@@ -263,7 +263,7 @@ class StoredDataImporter(
   }
 
   private fun ImportTranslation.doImport() {
-    if (!this.isSelectedToImport || !this.key.shouldBeImported) {
+    if (!this.isSelectedToImport || !this.key.shouldBeImported || this.language.ignored) {
       return
     }
     this.checkConflictResolved()

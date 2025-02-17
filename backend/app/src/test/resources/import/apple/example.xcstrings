@@ -1,0 +1,24 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "test": {
+      "extractionState": "manual",
+      "comment": "A greeting message",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hello, World!"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hallo, Welt!"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+} 
