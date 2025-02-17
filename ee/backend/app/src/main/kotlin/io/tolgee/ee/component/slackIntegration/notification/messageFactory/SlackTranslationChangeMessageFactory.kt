@@ -20,7 +20,7 @@ class SlackTranslationChangeMessageFactory(
   private val blocksProvider: SlackNotificationBlocksProvider,
 ) {
   fun createTranslationChangeMessages(context: SlackMessageContext): List<SlackMessageDto> {
-    val result: MutableList<SlackMessageDto> = mutableListOf()
+    val result = mutableListOf<SlackMessageDto>()
 
     val activityData = context.activityData
     activityData?.modifiedEntities?.forEach modifiedEntities@{ (_, modifiedEntityList) ->
@@ -34,14 +34,16 @@ class SlackTranslationChangeMessageFactory(
 
         val translationId = modifiedEntity.entityId
         val translation = context.dataProvider.getTranslationById(translationId) ?: return@modifiedEntities
-        result.add(
+
+        val message =
           processTranslationChange(
             context,
             translation,
             getModificationAuthorContext(context, event, activityData.timestamp),
             event,
-          ) ?: return@modifiedEntities,
-        )
+          ) ?: return@modifiedEntities
+
+        result.add(message)
 
         val baseLanguageTag = context.slackConfig.project.baseLanguage?.tag ?: return@modifiedEntities
         if (baseLanguageTag == translation.languageTag) {
