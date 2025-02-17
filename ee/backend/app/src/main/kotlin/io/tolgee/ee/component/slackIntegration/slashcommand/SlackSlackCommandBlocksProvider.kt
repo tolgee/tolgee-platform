@@ -6,7 +6,7 @@ import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
 
 @Component
-class SlackHelpBlocksProvider(
+class SlackSlackCommandBlocksProvider(
   private val i18n: I18n,
 ) {
   companion object {

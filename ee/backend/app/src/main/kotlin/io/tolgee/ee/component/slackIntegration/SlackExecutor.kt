@@ -7,7 +7,6 @@ import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IProjectActivityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
@@ -368,32 +367,6 @@ class SlackExecutor(
       RuntimeException("Cannot send message in slack: ${response.error}")
         .let { logger.error(it.message, it) }
     }
-  }
-
-  fun isBotInChannel(
-    payload: SlackCommandDto,
-    token: String,
-  ): Boolean {
-    val response =
-      slackClient.methods(token).conversationsInfo {
-        it.channel(payload.channel_id)
-      }
-
-    if (!response.isOk) {
-      RuntimeException("Cannot get channel info in slack: ${response.error}")
-        .let { logger.error(it.message, it) }
-      return false
-    }
-
-    if (!response.channel.isPrivate) {
-      return true
-    }
-
-    if (response.channel.isIm) {
-      return true
-    }
-
-    return response.channel.isMember
   }
 
   fun getHelper(
