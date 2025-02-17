@@ -10,8 +10,9 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
-import io.tolgee.ee.component.slackIntegration.notification.SlackExecutor
+import io.tolgee.ee.component.slackIntegration.notification.SlackNotificationBlocksProvider
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.exceptions.BadRequestException
@@ -31,9 +32,10 @@ import org.springframework.web.bind.annotation.*
 )
 class SlackLoginController(
   private val slackUserConnectionService: SlackUserConnectionService,
-  private val slackExecutor: SlackExecutor,
   private val authenticationFacade: AuthenticationFacade,
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
+  private val slackNotificationBlocksProvider: SlackNotificationBlocksProvider,
+  private val slackOperations: SlackChannelMessagesOperations,
   private val slackClient: Slack,
   private val slackProperties: SlackProperties,
   private val slackWorkspaceService: OrganizationSlackWorkspaceService,
@@ -60,7 +62,13 @@ class SlackLoginController(
       decrypted.slackUserId,
       decrypted.slackTeamId,
     )
-    slackExecutor.sendUserLoginSuccessMessage(token, decrypted)
+
+    slackOperations.sendEphemeralMessage(
+      SlackChannelMessagesOperations.SlackWorkspaceToken(token),
+      decrypted.slackChannelId,
+      decrypted.slackUserId,
+      slackNotificationBlocksProvider.getUserLoginSuccessBlocks(),
+    )
   }
 
   @GetMapping("/user-login-info")
