@@ -112,9 +112,14 @@ export const Translations = () => {
         <T keyName="translations_nothing_found" />
       </EmptyListMessage>
     ) : prefilter?.task && prefilter.taskFilterNotDone ? (
-      <TaskAllDonePlaceholder
-        taskNumber={prefilter.task}
-        projectId={project.id}
+      <EmptyListMessage
+        loading={isLoading || isFetching}
+        content={
+          <TaskAllDonePlaceholder
+            taskNumber={prefilter.task}
+            projectId={project.id}
+          />
+        }
       />
     ) : (
       <EmptyListMessage

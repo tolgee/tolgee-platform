@@ -19,12 +19,14 @@ const ProgressWrapper = styled('div')`
 type Props = {
   loading?: boolean;
   wrapperProps?: ComponentProps<typeof Box>;
+  content?: React.ReactNode;
 } & SadEmotionMessageProps;
 
 export const EmptyListMessage: FunctionComponent<Props> = ({
   loading,
   children,
   wrapperProps,
+  content,
   ...otherProps
 }) => {
   wrapperProps = {
@@ -36,9 +38,11 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
     <Box data-cy="global-empty-list" {...wrapperProps}>
       <Fade in={!loading} mountOnEnter unmountOnExit>
         <div>
-          <SadEmotionMessage {...otherProps}>
-            {children || <T keyName="global_empty_list_message" />}
-          </SadEmotionMessage>
+          {content ?? (
+            <SadEmotionMessage {...otherProps}>
+              {children || <T keyName="global_empty_list_message" />}
+            </SadEmotionMessage>
+          )}
         </div>
       </Fade>
       <Fade in={loading} mountOnEnter unmountOnExit>
