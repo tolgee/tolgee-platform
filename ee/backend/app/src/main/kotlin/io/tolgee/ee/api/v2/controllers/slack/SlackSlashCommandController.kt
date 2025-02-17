@@ -136,7 +136,7 @@ class SlackSlashCommandController(
       throw SlackErrorException(slackErrorProvider.getNotSubscribedYetError())
     }
 
-    return slackExecutor.getListOfSubscriptions(payload.user_id, payload.channel_id)
+    return slackSlackCommandBlocksProvider.getListOfSubscriptionsBlocks(payload.user_id, payload.channel_id)
   }
 
   private fun login(payload: SlackCommandDto): SlackMessageDto {
@@ -150,7 +150,7 @@ class SlackSlashCommandController(
 
     return SlackMessageDto(
       blocks =
-        slackExecutor.getLoginRedirectBlocks(
+        slackSlackCommandBlocksProvider.getLoginRedirectBlocks(
           payload.channel_id,
           payload.user_id,
           workspace,

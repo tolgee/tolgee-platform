@@ -1,13 +1,22 @@
 package io.tolgee.ee.component.slackIntegration.slashcommand
 
+import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
+import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
+import io.tolgee.ee.service.slackIntegration.SlackConfigReadService
+import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
+import io.tolgee.model.slackIntegration.SlackEventType
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
 
 @Component
 class SlackSlackCommandBlocksProvider(
   private val i18n: I18n,
+  private val slackConfigReadService: SlackConfigReadService,
+  private val languageService: LanguageService,
+  private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
 ) {
   companion object {
     const val DOCUMENTATION_URL = "https://tolgee.io/platform/integrations/slack_integration/about"
@@ -124,6 +133,108 @@ class SlackSlackCommandBlocksProvider(
         markdownText(i18n.translate("slack.help.message.advanced-subscribe-events-example"))
       }
     }
+
+  fun getListOfSubscriptionsBlocks(
+    userId: String,
+    channelId: String,
+  ): List<LayoutBlock> {
+    val configList = slackConfigReadService.getAllByChannelId(channelId)
+
+    val blocks =
+      withBlocks {
+        header {
+          text("Subscription Details", emoji = true)
+        }
+        divider()
+
+        configList.forEach { config ->
+          section {
+            markdownText("*Project Name:* ${config.project.name} (id: ${config.project.id})")
+          }
+          if (config.isGlobalSubscription) {
+            section {
+              markdownText("*Global Subscription:* Yes")
+            }
+
+            val events = config.events.joinToString(", ") { "$it" }
+
+            val allEventMeaning =
+              if (config.events.contains(SlackEventType.ALL)) {
+                getEventAllMeaning()
+              } else {
+                ""
+              }
+
+            section {
+              markdownText("*Events:* `$events` $allEventMeaning")
+            }
+
+            context {
+              markdownText(
+                i18n.translate("slack.common.message.list-subscriptions-global-subscription-meaning"),
+              )
+            }
+          }
+          config.preferences.forEach {
+            section {
+              if (it.languageTag == null) {
+                return@section
+              }
+              val language = languageService.getByTag(it.languageTag!!, config.project)
+              val flagEmoji = language.flagEmoji
+
+              val fullName = language.name
+              val events = it.events.joinToString(", ") { "$it" }
+              val allEventMeaning =
+                if (it.events.contains(SlackEventType.ALL)) {
+                  getEventAllMeaning()
+                } else {
+                  ""
+                }
+              markdownText(
+                "*Subscribed Languages:*\n- $fullName $flagEmoji : on `$events` $allEventMeaning",
+              )
+            }
+          }
+          divider()
+        }
+      }
+
+    return blocks
+  }
+
+  fun getLoginRedirectBlocks(
+    slackChannelId: String,
+    slackId: String,
+    workspace: OrganizationSlackWorkspace?,
+    slackTeamId: String,
+  ): List<LayoutBlock> {
+    return withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.not-connected"))
+      }
+
+      section {
+        markdownText(i18n.translate("slack.common.message.connect-account-instruction"))
+      }
+
+      actions {
+        button {
+          text(i18n.translate("slack.common.text.button.connect"), emoji = true)
+          value("connect_slack")
+          url(slackUserLoginUrlProvider.getUrl(slackChannelId, slackId, workspace?.id, slackTeamId))
+          actionId("button_connect_slack")
+          style("primary")
+        }
+      }
+    }
+  }
+
+  private fun getEventAllMeaning() =
+    "(" +
+      i18n.translate(
+        "slack.common.message.list-subscriptions-all-events",
+      ) + ")"
 
   private fun ActionsBlockBuilder.advancedCommandsButton() {
     button {
