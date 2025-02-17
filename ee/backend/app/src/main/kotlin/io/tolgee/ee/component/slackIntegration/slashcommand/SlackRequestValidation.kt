@@ -1,6 +1,7 @@
-package io.tolgee.ee.component.slackIntegration
+package io.tolgee.ee.component.slackIntegration.slashcommand
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.ee.component.slackIntegration.SlackErrorProvider
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.util.Logging
 import org.apache.commons.codec.binary.Hex

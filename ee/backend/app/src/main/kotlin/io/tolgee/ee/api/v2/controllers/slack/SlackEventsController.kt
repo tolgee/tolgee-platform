@@ -6,8 +6,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.ee.component.slackIntegration.SlackExecutor
-import io.tolgee.ee.component.slackIntegration.SlackHelpBlocksProvider
-import io.tolgee.ee.component.slackIntegration.SlackRequestValidation
+import io.tolgee.ee.component.slackIntegration.slashcommand.*
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.util.Logging

@@ -1,4 +1,4 @@
-package io.tolgee.ee.component.slackIntegration
+package io.tolgee.ee.component.slackIntegration.slashcommand
 
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.util.json.GsonFactory
