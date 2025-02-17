@@ -9,6 +9,7 @@ import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.component.slackIntegration.*
+import io.tolgee.ee.component.slackIntegration.notification.SlackExecutor
 import io.tolgee.ee.component.slackIntegration.slashcommand.*
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SlackConfigManageService

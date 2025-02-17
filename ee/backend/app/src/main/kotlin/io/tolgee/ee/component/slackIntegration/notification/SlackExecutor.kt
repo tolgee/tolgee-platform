@@ -1,16 +1,17 @@
-package io.tolgee.ee.component.slackIntegration
+package io.tolgee.ee.component.slackIntegration.notification
 
 import com.slack.api.Slack
-import com.slack.api.methods.kotlin_extension.request.chat.blocks
 import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
 import io.tolgee.api.IProjectActivityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
+import io.tolgee.ee.component.slackIntegration.SlackNotConfiguredException
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
-import io.tolgee.ee.component.slackIntegration.notification.SlackNotificationBlocksProvider
-import io.tolgee.ee.service.slackIntegration.*
+import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
+import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
+import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
