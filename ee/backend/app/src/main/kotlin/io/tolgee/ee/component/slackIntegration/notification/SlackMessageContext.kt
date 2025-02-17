@@ -74,6 +74,16 @@ class SlackMessageContext(
     return "<@$slackId>"
   }
 
+  fun shouldSkipModification(languageTag: String): Boolean {
+    val preferences = slackConfig.preferences
+    val globalSubscription = slackConfig.isGlobalSubscription
+
+    val languageTagsSet = preferences.map { it.languageTag }.toSet()
+    return !globalSubscription &&
+      !languageTagsSet.contains(languageTag) &&
+      baseLanguage.tag != languageTag
+  }
+
   val dataProvider by lazy {
     SlackIntegrationDataProvider(applicationContext)
   }
