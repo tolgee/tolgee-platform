@@ -1,10 +1,11 @@
-package io.tolgee.ee.component.slackIntegration
+package io.tolgee.ee.component.slackIntegration.slashcommand
 
 import com.slack.api.model.block.LayoutBlock
 import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackCommandDto
+import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
