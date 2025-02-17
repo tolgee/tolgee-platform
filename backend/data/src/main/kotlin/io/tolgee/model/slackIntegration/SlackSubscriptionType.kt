@@ -1,5 +1,5 @@
 package io.tolgee.model.slackIntegration
 
-enum class SubscriptionType {
+enum class SlackSubscriptionType {
   GLOBAL,
 }
