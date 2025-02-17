@@ -35,10 +35,9 @@ class SlackSubscriptionProcessorImpl(
 
     when (activityModel.type) {
       ActivityType.CREATE_KEY -> slackExecutor.sendMessageOnKeyAdded(config, data)
-      in translationActivities ->
-        slackExecutor.sendMessageOnTranslationSet(config, data)
+      in translationActivities -> slackExecutor.sendMessageOnTranslationSet(config, data)
       ActivityType.IMPORT -> slackExecutor.sendMessageOnImport(config, data)
-      else -> { }
+      else -> {}
     }
   }
 
