@@ -1,7 +1,7 @@
 package io.tolgee.ee.service.slackIntegration
 
 import io.tolgee.dtos.slackintegration.SlackConfigDto
-import io.tolgee.ee.component.slackIntegration.SlackErrorProvider
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackErrorProvider
 import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.slackIntegration.SlackConfig
