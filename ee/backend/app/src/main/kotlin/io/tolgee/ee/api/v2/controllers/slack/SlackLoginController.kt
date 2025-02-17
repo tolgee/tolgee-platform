@@ -10,8 +10,8 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
-import io.tolgee.ee.component.slackIntegration.SlackExecutor
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
+import io.tolgee.ee.component.slackIntegration.notification.SlackExecutor
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.exceptions.BadRequestException

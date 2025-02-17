@@ -1,4 +1,4 @@
-package io.tolgee.ee.component.slackIntegration
+package io.tolgee.ee.component.slackIntegration.notification
 
 import io.tolgee.ee.component.slackIntegration.data.SlackKeyInfoDto
 import io.tolgee.ee.component.slackIntegration.data.SlackTranslationInfoDto

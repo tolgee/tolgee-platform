@@ -1,4 +1,4 @@
-package io.tolgee.ee.component.slackIntegration
+package io.tolgee.ee.component.slackIntegration.notification
 
 import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
@@ -22,7 +22,8 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class SlackExecutorHelper(
   val applicationContext: ApplicationContext,
