@@ -1,6 +1,9 @@
 package io.tolgee.ee.component.slackIntegration.data
 
-data class KeyInfoDto(
+/**
+ * Slack specific view of [io.tolgee.model.key.Key]
+ */
+data class SlackKeyInfoDto(
   val id: Long,
   val name: String,
   val tags: Set<String>?,

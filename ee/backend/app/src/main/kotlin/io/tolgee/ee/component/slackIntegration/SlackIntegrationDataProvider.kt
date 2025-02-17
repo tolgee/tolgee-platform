@@ -1,7 +1,7 @@
 package io.tolgee.ee.component.slackIntegration
 
-import io.tolgee.ee.component.slackIntegration.data.KeyInfoDto
-import io.tolgee.ee.component.slackIntegration.data.TranslationInfoDto
+import io.tolgee.ee.component.slackIntegration.data.SlackKeyInfoDto
+import io.tolgee.ee.component.slackIntegration.data.SlackTranslationInfoDto
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import jakarta.persistence.TypedQuery
@@ -15,16 +15,16 @@ import org.springframework.context.ApplicationContext
 class SlackIntegrationDataProvider(
   val applicationContext: ApplicationContext,
 ) {
-  private val translationCache = mutableMapOf<Long, List<TranslationInfoDto>>()
-  private val keyCache = mutableMapOf<Long, KeyInfoDto>()
+  private val translationCache = mutableMapOf<Long, List<SlackTranslationInfoDto>>()
+  private val keyCache = mutableMapOf<Long, SlackKeyInfoDto>()
 
-  fun getKeyTranslations(keyId: Long): List<TranslationInfoDto> {
+  fun getKeyTranslations(keyId: Long): List<SlackTranslationInfoDto> {
     return translationCache.getOrPut(keyId) {
       getTranslationsViaEntityManager(keyId)
     }
   }
 
-  fun getTranslationById(translationId: Long): TranslationInfoDto? {
+  fun getTranslationById(translationId: Long): SlackTranslationInfoDto? {
     val fromCache = tryToFindInCache(translationId)
     if (fromCache != null) {
       return fromCache
@@ -39,7 +39,7 @@ class SlackIntegrationDataProvider(
     return tryToFindInCache(translationId)
   }
 
-  private fun tryToFindInCache(translationId: Long): TranslationInfoDto? {
+  private fun tryToFindInCache(translationId: Long): SlackTranslationInfoDto? {
     translationCache.forEach { (_, translations) ->
       translations.find { it.translationId == translationId }?.let {
         return it
@@ -48,13 +48,13 @@ class SlackIntegrationDataProvider(
     return null
   }
 
-  fun getKeyInfo(keyId: Long): KeyInfoDto {
+  fun getKeyInfo(keyId: Long): SlackKeyInfoDto {
     return keyCache.getOrPut(keyId) {
       getKeyInfoViaEntityManager(keyId)
     }
   }
 
-  private fun getKeyInfoViaEntityManager(keyId: Long): KeyInfoDto {
+  private fun getKeyInfoViaEntityManager(keyId: Long): SlackKeyInfoDto {
     val result =
       entityManager.createQuery(
         """
@@ -74,7 +74,7 @@ class SlackIntegrationDataProvider(
     return result
       .groupBy { it[0] }
       .map {
-        KeyInfoDto(
+        SlackKeyInfoDto(
           id = it.key as Long,
           name = it.value.firstOrNull()?.get(1) as String,
           tags = it.value.mapNotNull { row -> row[2] as String? }.toSet().nullIfEmpty(),
@@ -88,11 +88,11 @@ class SlackIntegrationDataProvider(
   fun getTranslation(
     keyId: Long,
     languageTag: String,
-  ): TranslationInfoDto? {
+  ): SlackTranslationInfoDto? {
     return getKeyTranslations(keyId).find { it.languageTag == languageTag }
   }
 
-  private fun getTranslationsViaEntityManager(keyId: Long): MutableList<TranslationInfoDto> =
+  private fun getTranslationsViaEntityManager(keyId: Long): MutableList<SlackTranslationInfoDto> =
     getQuery()
       .setParameter("keyId", keyId)
       .setParameter("translationId", null)
@@ -104,16 +104,18 @@ class SlackIntegrationDataProvider(
    * In other words this returns all "siblings" of the translation with the given id, so we can populate the cache
    * for whole key with all it's translations
    */
-  private fun getTranslationsViaEntityManagerByTranslationId(translationId: Long): MutableList<TranslationInfoDto> =
+  private fun getTranslationsViaEntityManagerByTranslationId(
+    translationId: Long,
+  ): MutableList<SlackTranslationInfoDto> =
     getQuery()
       .setParameter("keyId", null)
       .setParameter("translationId", translationId)
       .resultList
 
-  private fun getQuery(): TypedQuery<TranslationInfoDto> =
+  private fun getQuery(): TypedQuery<SlackTranslationInfoDto> =
     entityManager.createQuery(
       """SELECT new 
-            |io.tolgee.ee.component.slackIntegration.data.TranslationInfoDto(
+            |io.tolgee.ee.component.slackIntegration.data.SlackTranslationInfoDto(
             |    t2.key.id, t2.id, t2.language.tag, t2.language.id, 
             |    t2.language.name, t2.language.flagEmoji, t2.text, t2.state
             |)
@@ -126,7 +128,7 @@ class SlackIntegrationDataProvider(
             |          t2.language.project.deletedAt is null
             |
       """.trimMargin(),
-      TranslationInfoDto::class.java,
+      SlackTranslationInfoDto::class.java,
     )
 
   private val entityManager: EntityManager by lazy {

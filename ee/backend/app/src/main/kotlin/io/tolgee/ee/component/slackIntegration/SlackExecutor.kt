@@ -54,8 +54,7 @@ class SlackExecutor(
     val slackExecutorHelper = getHelper(slackConfig, request)
     val config = slackExecutorHelper.slackConfig
     val count = getModifiedTranslationsCount(slackExecutorHelper)
-    val isBigOperation =
-      isBigOperation(slackExecutorHelper, count)
+    val isBigOperation = isBigOperation(slackExecutorHelper, count)
     if (isBigOperation) {
       logger.debug("Too many translations to send message, sending only one message")
       val messageDto = slackExecutorHelper.createMessageIfTooManyTranslations(count)
