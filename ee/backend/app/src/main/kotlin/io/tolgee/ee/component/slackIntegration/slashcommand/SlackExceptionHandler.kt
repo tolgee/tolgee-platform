@@ -1,4 +1,4 @@
-package io.tolgee.ee.component.slackIntegration
+package io.tolgee.ee.component.slackIntegration.slashcommand
 
 import io.tolgee.exceptions.SlackErrorException
 import org.springframework.stereotype.Component
