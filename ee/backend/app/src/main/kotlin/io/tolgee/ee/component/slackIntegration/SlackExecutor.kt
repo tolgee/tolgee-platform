@@ -4,12 +4,12 @@ import com.slack.api.Slack
 import com.slack.api.methods.kotlin_extension.request.chat.blocks
 import com.slack.api.model.Attachment
 import com.slack.api.model.block.LayoutBlock
-import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IProjectActivityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.slack.SlackUserLoginDto
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
+import io.tolgee.ee.component.slackIntegration.notification.SlackNotificationBlocksProvider
 import io.tolgee.ee.service.slackIntegration.*
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SavedSlackMessage
@@ -31,6 +31,7 @@ class SlackExecutor(
   private val i18n: I18n,
   private val slackUserConnectionService: SlackUserConnectionService,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
+  private val slackNotificationBlocksProvider: SlackNotificationBlocksProvider,
   private val slackClient: Slack,
   private val languageService: LanguageService,
 ) {
@@ -193,20 +194,12 @@ class SlackExecutor(
           if (author.isEmpty()) {
             return@attachments
           }
-          attachment.blocks = attachment.blocks + getAuthorBlocks(author)
+          attachment.blocks = attachment.blocks + slackNotificationBlocksProvider.getAuthorBlocks(author)
         }
       }
     }
 
     return additionalAttachments
-  }
-
-  private fun getAuthorBlocks(authorContext: String): List<LayoutBlock> {
-    return withBlocks {
-      context {
-        markdownText(authorContext)
-      }
-    }
   }
 
   /**
@@ -273,14 +266,7 @@ class SlackExecutor(
     slackClient.methods(token).chatPostEphemeral {
       it.user(dto.slackUserId)
       it.channel(dto.slackChannelId)
-        .blocks {
-          section {
-            markdownText(i18n.translate("slack.common.message.success_login"))
-          }
-          context {
-            plainText(i18n.translate("slack.common.context.success_login"))
-          }
-        }
+      it.blocks(slackNotificationBlocksProvider.getUserLoginSuccessBlocks())
     }
   }
 
@@ -397,48 +383,4 @@ class SlackExecutor(
       sendMessageOnKeyAdded(slackConfig, request)
     }
   }
-
-  fun getSuccessfullySubscribedBlocks(config: SlackConfig): List<LayoutBlock> =
-    withBlocks {
-      section {
-        markdownText(i18n.translate("slack.common.message.subscribed-successfully").format(config.project.name))
-      }
-      val subscriptionInfo =
-        buildString {
-          if (config.isGlobalSubscription) {
-            val events = config.events.joinToString(", ") { "$it" }
-            append(
-              i18n.translate(
-                "slack.common.message.subscribed-successfully-global-subscription",
-              ).format(events),
-            )
-          }
-
-          val languageInfo =
-            config.preferences.mapNotNull { pref ->
-              pref.languageTag?.let { tag ->
-                val language = languageService.getByTag(tag, config.project)
-                val flagEmoji = language.flagEmoji
-                val fullName = language.name
-                val events = pref.events.joinToString(", ") { "$it" }
-                " - $fullName $flagEmoji : on `$events`"
-              }
-            }.joinToString("\n")
-
-          if (languageInfo.isNotEmpty()) {
-            if (config.isGlobalSubscription) {
-              append("\n\n").append(i18n.translate("slack.common.message.also-subscribed-to"))
-            } else {
-              append(
-                "\n\n",
-              ).append(i18n.translate("slack.common.message.subscribed-successfully-not-global-subscription"))
-            }
-            append("\n").append(languageInfo)
-          }
-        }
-
-      section {
-        markdownText(subscriptionInfo)
-      }
-    }
 }

@@ -225,7 +225,7 @@ class SlackSlashCommandController(
     try {
       val config = slackConfigManageService.createOrUpdate(slackConfigDto)
       return SlackMessageDto(
-        blocks = slackExecutor.getSuccessfullySubscribedBlocks(config),
+        blocks = slackSlackCommandBlocksProvider.getSuccessfullySubscribedBlocks(config),
       )
     } catch (e: SlackWorkspaceNotFound) {
       throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
