@@ -97,7 +97,7 @@ describe('Tasks from batch operations view', () => {
 
     assertMessage('Keys removed from task');
 
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
   });
 
   it('link to task works', () => {

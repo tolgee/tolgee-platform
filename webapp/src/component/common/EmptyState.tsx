@@ -28,9 +28,9 @@ export const EmptyState = ({ loading, children, wrapperProps }: Props) => {
   } as any;
 
   return (
-    <Box data-cy="global-empty-state" {...wrapperProps}>
+    <Box {...wrapperProps}>
       <Fade in={!loading} mountOnEnter unmountOnExit>
-        <div>{children}</div>
+        <div data-cy="global-empty-state">{children}</div>
       </Fade>
       <Fade in={loading} mountOnEnter unmountOnExit>
         <ProgressWrapper>

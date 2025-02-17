@@ -23,7 +23,7 @@ describe('Translations Base', () => {
 
   it('will switch translation to plural, without a problem', () => {
     cy.wait(100);
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'Test key',
       translation: 'Translated key with { stuff to escape',

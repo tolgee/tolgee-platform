@@ -48,7 +48,7 @@ describe('Translations Base', () => {
     },
     () => {
       cy.wait(100);
-      cy.gcy('global-empty-list').should('be.visible');
+      cy.gcy('global-empty-state').should('be.visible');
       createTranslation({
         key: 'Test key',
         translation: 'Translated test key',
@@ -80,7 +80,7 @@ describe('Translations Base', () => {
   );
 
   it('will create translation with plural', () => {
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'test-key',
       translation: { one: '# key', other: '# keys' },
@@ -96,7 +96,7 @@ describe('Translations Base', () => {
   });
 
   it('will create translation with plural and custom variable name', () => {
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'test-key',
       translation: { one: '# key', other: '# keys' },
@@ -115,7 +115,7 @@ describe('Translations Base', () => {
   it('will create translation with namespace', () => {
     enableNamespaces(project.id);
     cy.wait(100);
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'Test key',
       translation: 'Translated test key',
@@ -130,7 +130,7 @@ describe('Translations Base', () => {
 
   it('will create key with description', () => {
     cy.wait(100);
-    cy.gcy('global-empty-list').should('be.visible');
+    cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'Test key',
       translation: 'Translated test key',
