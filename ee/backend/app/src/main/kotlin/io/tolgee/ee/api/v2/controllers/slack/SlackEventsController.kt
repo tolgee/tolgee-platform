@@ -23,7 +23,7 @@ import java.net.URLDecoder
 class SlackEventsController(
   private val objectMapper: ObjectMapper,
   private val slackRequestValidation: SlackRequestValidation,
-  private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
+  private val slackSlackCommandBlocksProvider: SlackSlackCommandBlocksProvider,
   private val slackExecutor: SlackExecutor,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
 ) : Logging {
@@ -52,14 +52,14 @@ class SlackEventsController(
             slackExecutor.sendBlocksMessage(
               event.team.id,
               event.channel.id,
-              slackHelpBlocksProvider.getHelpBlocks(),
+              slackSlackCommandBlocksProvider.getHelpBlocks(),
             )
 
           "help_advanced_subscribe_btn" ->
             slackExecutor.sendBlocksMessage(
               event.team.id,
               event.channel.id,
-              slackHelpBlocksProvider.getAdvancedSubscriptionHelpBlocks(),
+              slackSlackCommandBlocksProvider.getAdvancedSubscriptionHelpBlocks(),
             )
         }
       }

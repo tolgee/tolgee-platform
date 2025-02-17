@@ -40,13 +40,14 @@ class SlackSlashCommandController(
   private val slackConfigReadService: SlackConfigReadService,
   private val slackUserConnectionService: SlackUserConnectionService,
   private val slackExecutor: SlackExecutor,
+  private val slackBotInfoProvider: SlackBotInfoProvider,
   private val permissionService: PermissionService,
   private val i18n: I18n,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackRequestValidation: SlackRequestValidation,
   private val slackErrorProvider: SlackErrorProvider,
   private val slackExceptionHandler: SlackExceptionHandler,
-  private val slackHelpBlocksProvider: SlackHelpBlocksProvider,
+  private val slackSlackCommandBlocksProvider: SlackSlackCommandBlocksProvider,
   private val tolgeeProperties: TolgeeProperties,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : Logging {
@@ -61,7 +62,7 @@ class SlackSlashCommandController(
     return slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)
       val token = checkIfTokenIsPresent(payload.team_id)
-      if (!slackExecutor.isBotInChannel(payload, token)) {
+      if (!slackBotInfoProvider.isBotInChannel(payload, token)) {
         throw SlackErrorException(slackErrorProvider.getBotNotInChannelError())
       }
 
@@ -92,7 +93,7 @@ class SlackSlashCommandController(
 
         "subscriptions" -> listOfSubscriptions(payload).asSlackResponseString
 
-        "help" -> slackHelpBlocksProvider.getHelpBlocks().asSlackResponseString
+        "help" -> slackSlackCommandBlocksProvider.getHelpBlocks().asSlackResponseString
 
         "logout" -> logout(payload.user_id, payload.team_id).asSlackResponseString
         else -> {
