@@ -8,10 +8,10 @@ import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
 import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.ee.component.slackIntegration.data.KeyInfoDto
+import io.tolgee.ee.component.slackIntegration.data.SlackKeyInfoDto
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
-import io.tolgee.ee.component.slackIntegration.data.TranslationInfoDto
+import io.tolgee.ee.component.slackIntegration.data.SlackTranslationInfoDto
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackConfigPreference
@@ -97,7 +97,7 @@ class SlackExecutorHelper(
     )
   }
 
-  private fun buildBlocksEmptyTranslation(translation: TranslationInfoDto) =
+  private fun buildBlocksEmptyTranslation(translation: SlackTranslationInfoDto) =
     withBlocks {
       if (shouldSkipModification(
           slackConfig.preferences,
@@ -126,7 +126,7 @@ class SlackExecutorHelper(
     }
 
   private fun buildBlocksWithTranslation(
-    translation: TranslationInfoDto,
+    translation: SlackTranslationInfoDto,
     author: String?,
   ) = withBlocks {
     if (shouldSkipModification(
@@ -155,7 +155,7 @@ class SlackExecutorHelper(
   }
 
   private fun buildKeyInfoBlock(
-    key: KeyInfoDto,
+    key: SlackKeyInfoDto,
     head: String,
   ) = withBlocks {
     section {
@@ -248,7 +248,7 @@ class SlackExecutorHelper(
   }
 
   private fun processTranslationChange(
-    translation: TranslationInfoDto,
+    translation: SlackTranslationInfoDto,
     modificationAuthor: String?,
     event: String,
   ): SlackMessageDto? {
@@ -351,7 +351,7 @@ class SlackExecutorHelper(
     }
   }
 
-  private fun SectionBlockBuilder.languageInfoSection(translation: TranslationInfoDto) {
+  private fun SectionBlockBuilder.languageInfoSection(translation: SlackTranslationInfoDto) {
     val languageName = translation.languageName
     val flagEmoji = translation.languageFlagEmoji
     val ifBase =
@@ -458,7 +458,7 @@ class SlackExecutorHelper(
   }
 
   private fun createAttachmentForLanguage(
-    translation: TranslationInfoDto,
+    translation: SlackTranslationInfoDto,
     author: String?,
   ): Attachment? {
     val baseLanguage = slackConfig.project.baseLanguage ?: return null
