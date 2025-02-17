@@ -11,9 +11,7 @@ class SlackTooManyTranslationsMessageFactory(
   private val slackMessageUrlProvider: SlackMessageUrlProvider,
   private val blocksProvider: SlackNotificationBlocksProvider,
 ) {
-  fun createMessageIfTooManyTranslations(
-    context: SlackMessageContext,
-  ): SlackMessageDto {
+  fun createMessageIfTooManyTranslations(context: SlackMessageContext): SlackMessageDto {
     return SlackMessageDto(
       blocks = blocksProvider.getBlocksTooManyTranslations(context, context.modifiedTranslationsCount),
       attachments = listOf(blocksProvider.getRedirectButtonAttachment(slackMessageUrlProvider.getUrlOnImport(context))),

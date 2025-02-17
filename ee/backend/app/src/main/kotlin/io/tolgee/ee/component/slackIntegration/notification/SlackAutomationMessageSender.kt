@@ -55,43 +55,44 @@ class SlackAutomationMessageSender(
     }
 
     val messagesDto = slackTranslationChangeMessageFactory.createTranslationChangeMessages(context)
-    val savedMessages = savedSlackMessageService.findAll(messagesDto, context.slackConfig.id)
+    val savedMessagesByKey = savedSlackMessageService.findAll(messagesDto, context.slackConfig.id).groupBy { it.keyId }
 
-    val messageUpdateActions: MutableList<() -> Unit> = mutableListOf()
+    val messagesToUpdate = mutableMapOf<Long, MutableList<SlackMessageDto>>()
+    val messagesToCreate = mutableListOf<SlackMessageDto>()
 
-    messagesDto.forEach { message ->
-      val messagesToUpdate =
-        savedMessages
-          .filter { it.keyId == message.keyId }
-
-      messagesToUpdate.forEach { savedMessage ->
-        messageUpdateActions.add {
-          processSavedMessage(savedMessage, message, context)
-        }
+    for (message in messagesDto) {
+      if (!isExplicitlySubscribedToAnyUpdatedLanguage(message, context.slackConfig)) {
+        // We only want to send message when the user is explicitly subscribed to the language.
+        // If they're subscribed to all languages, we just update the previous messages to not spam so much
+        continue
       }
 
-      // Execute the message updates only if there are not too many messages to update
-      // Otherwise Slack will complain about too many requests
-      if (messageUpdateActions.size > MAX_MESSAGES_TO_UPDATE) {
-        logger.debug("Too many messages to update, skipping")
+      if (message.keyId in savedMessagesByKey) {
+        messagesToUpdate.getOrPut(message.keyId) { mutableListOf() }.add(message)
+      } else {
+        messagesToCreate.add(message)
       }
+    }
 
-      // We only want to send message when the user is explicitly subscribed to the language.
-      // If they're subscribed to all languages, we just update the previous messages to not spam so much
-      if (!isExplicitlySubscribedToAnyUpdatedLanguage(message, context.slackConfig) && messagesToUpdate.isNotEmpty()) {
-        logger.debug(
-          "User is not subscribed to any of the languages and there is message to update with a new value.\n" +
-            "Not sending new message.",
-        )
-        return@forEach
-      }
-
+    for (message in messagesToCreate) {
       logger.debug("Sending message for key ${message.keyId}")
       sendRegularMessageWithSaving(message, context)
     }
 
-    logger.debug("Updating ${messageUpdateActions.size} messages")
-    messageUpdateActions.forEach { it() }
+    // Execute the message updates only if there are not too many messages to update
+    // Otherwise Slack will complain about too many requests
+    if (messagesToUpdate.size > MAX_MESSAGES_TO_UPDATE) {
+      logger.debug("Too many messages to update, skipping")
+
+    } else {
+      logger.debug("Updating {} messages", messagesToUpdate.size)
+      for ((keyId, messages) in messagesToUpdate) {
+        val messagesToUpdate = savedMessagesByKey[keyId] ?: emptyList()
+        messagesToUpdate.forEach { savedMessage ->
+          processSavedMessage(savedMessage, messages.first(), context)
+        }
+      }
+    }
   }
 
   private fun processSavedMessage(
