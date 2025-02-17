@@ -2,7 +2,10 @@ package io.tolgee.ee.component.slackIntegration.data
 
 import io.tolgee.model.enums.TranslationState
 
-data class TranslationInfoDto(
+/**
+ * Slack specific view of [io.tolgee.model.translation.Translation]
+ */
+data class SlackTranslationInfoDto(
   val keyId: Long,
   val translationId: Long,
   val languageTag: String,
