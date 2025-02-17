@@ -25,6 +25,7 @@ type Props = {
   showSecondaryHighlights?: boolean;
   className?: string;
   style?: CSSProperties;
+  wait: boolean;
 };
 
 export const ScreenshotWithLabels: React.FC<Props> = ({
@@ -35,13 +36,14 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
   showSecondaryHighlights = false,
   className,
   style,
+  wait,
 }) => {
   const strokeWidth = STROKE_WIDTH * scaleHighlight;
   const theme = useTheme();
 
   const { size } = useImagePreload({
     src: screenshot.src,
-    enabled: !screenshot.width || !screenshot.height,
+    enabled: (!screenshot.width || !screenshot.height) && !wait,
   });
 
   const screenshotWidth = screenshot.width || size.width;
@@ -59,11 +61,13 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
       preserveAspectRatio={objectFit === 'cover' ? 'xMinYMin slice' : undefined}
       data-cy="screenshot-image"
     >
-      <image
-        href={screenshot.src}
-        width={screenshotWidth}
-        height={screenshotHeight}
-      />
+      {!wait && (
+        <image
+          href={screenshot.src}
+          width={screenshotWidth}
+          height={screenshotHeight}
+        />
+      )}
       {screenshot.keyReferences
         ?.filter(
           (key) =>

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, styled, SxProps } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import clsx from 'clsx';
@@ -8,6 +8,10 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { useScrollStatus } from '../TranslationsTable/useScrollStatus';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 import { ScreenshotsList } from './ScreenshotsList';
+import { useTranslationsActions } from '../context/TranslationsContext';
+import { isScreenshotExpired } from './useScreenshotLinkCheck';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
 
 export const MAX_FILE_COUNT = 20;
 export const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
@@ -132,8 +136,42 @@ export const Screenshots = ({
   sx,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { updateScreenshots } = useTranslationsActions();
+  const project = useProject();
 
   const [detailData, setDetailData] = useState<number>();
+
+  const firstScreenshot = screenshots[0]?.thumbnailUrl;
+
+  const keyScreenshots = useApiQuery({
+    url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
+    method: 'get',
+    path: { projectId: project.id, keyId },
+    options: {
+      enabled: false,
+      onSuccess(data) {
+        updateScreenshots({
+          keyId,
+          screenshots: data._embedded?.screenshots || [],
+        });
+      },
+    },
+  });
+
+  useEffect(() => {
+    // check if screenshot paths are expired on mount
+    if (isScreenshotExpired(firstScreenshot)) {
+      keyScreenshots.refetch({ cancelRefetch: false });
+    }
+  }, [firstScreenshot, oneBig]);
+
+  async function handleDetailClick(index: number) {
+    setDetailData(index);
+    // check if screenshot path is expired when click on detail
+    if (isScreenshotExpired(screenshots[index]?.thumbnailUrl)) {
+      keyScreenshots.refetch({ cancelRefetch: false });
+    }
+  }
 
   const screenshotsMapped = screenshots.map((sc) => {
     return {
@@ -175,7 +213,8 @@ export const Screenshots = ({
           keyId={keyId}
           screenshots={screenshots}
           oneBig={oneBig}
-          setDetail={setDetailData}
+          setDetail={handleDetailClick}
+          wait={keyScreenshots.isFetching}
         />
       </StyledScrollWrapper>
       {scrollLeft && (
@@ -198,6 +237,7 @@ export const Screenshots = ({
       )}
       {detailData !== undefined && (
         <ScreenshotDetail
+          wait={keyScreenshots.isFetching}
           screenshots={screenshotsMapped}
           initialIndex={detailData}
           onClose={stopAndPrevent(() => setDetailData(undefined))}

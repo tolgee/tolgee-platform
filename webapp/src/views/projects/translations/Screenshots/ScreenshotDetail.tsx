@@ -69,12 +69,14 @@ interface ScreenshotDetailProps {
   onClose: () => void;
   screenshots: ScreenshotProps[];
   initialIndex: number;
+  wait?: boolean;
 }
 
 export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
   onClose,
   screenshots,
   initialIndex,
+  wait,
 }) => {
   const [index, setIndex] = useState(initialIndex);
   const itemsCount = screenshots.length;
@@ -88,6 +90,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
 
   const { size: loadedSize, isLoading } = useImagePreload({
     src: screenshot.src,
+    enabled: !wait,
   });
 
   const screenshotSize = {
@@ -147,7 +150,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
             <ChevronLeft />
           </IconButton>
         )}
-        {isLoading ? (
+        {isLoading || wait ? (
           <BoxLoading />
         ) : (
           <>
@@ -168,6 +171,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
                   maxHeight: 'unset',
                 }}
                 scaleHighlight={scaleMarkers}
+                wait={false}
               />
             )}
           </>
