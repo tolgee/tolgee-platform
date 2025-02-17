@@ -6,6 +6,7 @@ import com.slack.api.model.kotlin_extension.block.withBlocks
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.ee.service.slackIntegration.SlackConfigReadService
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
+import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.I18n
@@ -229,6 +230,50 @@ class SlackSlackCommandBlocksProvider(
       }
     }
   }
+
+  fun getSuccessfullySubscribedBlocks(config: SlackConfig): List<LayoutBlock> =
+    withBlocks {
+      section {
+        markdownText(i18n.translate("slack.common.message.subscribed-successfully").format(config.project.name))
+      }
+      val subscriptionInfo =
+        buildString {
+          if (config.isGlobalSubscription) {
+            val events = config.events.joinToString(", ") { "$it" }
+            append(
+              i18n.translate(
+                "slack.common.message.subscribed-successfully-global-subscription",
+              ).format(events),
+            )
+          }
+
+          val languageInfo =
+            config.preferences.mapNotNull { pref ->
+              pref.languageTag?.let { tag ->
+                val language = languageService.getByTag(tag, config.project)
+                val flagEmoji = language.flagEmoji
+                val fullName = language.name
+                val events = pref.events.joinToString(", ") { "$it" }
+                " - $fullName $flagEmoji : on `$events`"
+              }
+            }.joinToString("\n")
+
+          if (languageInfo.isNotEmpty()) {
+            if (config.isGlobalSubscription) {
+              append("\n\n").append(i18n.translate("slack.common.message.also-subscribed-to"))
+            } else {
+              append(
+                "\n\n",
+              ).append(i18n.translate("slack.common.message.subscribed-successfully-not-global-subscription"))
+            }
+            append("\n").append(languageInfo)
+          }
+        }
+
+      section {
+        markdownText(subscriptionInfo)
+      }
+    }
 
   private fun getEventAllMeaning() =
     "(" +
