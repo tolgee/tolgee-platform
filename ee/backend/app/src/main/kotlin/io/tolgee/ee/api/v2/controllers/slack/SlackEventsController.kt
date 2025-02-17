@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.slack.SlackEventDto
-import io.tolgee.ee.component.slackIntegration.notification.SlackExecutor
+import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
 import io.tolgee.ee.component.slackIntegration.slashcommand.*
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.exceptions.SlackErrorException
@@ -24,7 +24,7 @@ class SlackEventsController(
   private val objectMapper: ObjectMapper,
   private val slackRequestValidation: SlackRequestValidation,
   private val slackSlackCommandBlocksProvider: SlackSlackCommandBlocksProvider,
-  private val slackExecutor: SlackExecutor,
+  private val slackChannelMessagesOperations: SlackChannelMessagesOperations,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
 ) : Logging {
   @Suppress("UastIncorrectHttpHeaderInspection")
@@ -49,22 +49,26 @@ class SlackEventsController(
       event.actions.forEach {
         when (it.value) {
           "help_btn" ->
-            slackExecutor.sendBlocksMessage(
-              event.team.id,
+            slackChannelMessagesOperations.sendMessage(
+              SlackChannelMessagesOperations.SlackTeamId(event.team.id),
               event.channel.id,
               slackSlackCommandBlocksProvider.getHelpBlocks(),
             )
 
           "help_advanced_subscribe_btn" ->
-            slackExecutor.sendBlocksMessage(
-              event.team.id,
+            slackChannelMessagesOperations.sendMessage(
+              SlackChannelMessagesOperations.SlackTeamId(event.team.id),
               event.channel.id,
               slackSlackCommandBlocksProvider.getAdvancedSubscriptionHelpBlocks(),
             )
         }
       }
     } catch (e: SlackErrorException) {
-      slackExecutor.sendBlocksMessage(event.team.id, event.channel.id, e.blocks)
+      slackChannelMessagesOperations.sendMessage(
+        SlackChannelMessagesOperations.SlackTeamId(event.team.id),
+        event.channel.id,
+        e.blocks,
+      )
     }
   }
 
