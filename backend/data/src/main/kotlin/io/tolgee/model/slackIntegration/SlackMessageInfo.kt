@@ -17,7 +17,7 @@ class SlackMessageInfo(
 ) : StandardAuditModel() {
   @Enumerated(EnumType.STRING)
   @ColumnDefault("GLOBAL")
-  var subscriptionType: SubscriptionType = SubscriptionType.GLOBAL
+  var subscriptionType: SlackSubscriptionType = SlackSubscriptionType.GLOBAL
 
   var authorContext: String = "" // string containing author name, event and date
 }
