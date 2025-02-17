@@ -6,11 +6,9 @@ import com.slack.api.model.kotlin_extension.block.ActionsBlockBuilder
 import com.slack.api.model.kotlin_extension.block.SectionBlockBuilder
 import com.slack.api.model.kotlin_extension.block.dsl.LayoutBlockDsl
 import com.slack.api.model.kotlin_extension.block.withBlocks
-import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.ee.component.slackIntegration.data.SlackKeyInfoDto
 import io.tolgee.ee.component.slackIntegration.data.SlackTranslationInfoDto
-import io.tolgee.ee.service.slackIntegration.SlackConfigReadService
-import io.tolgee.service.language.LanguageService
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.util.I18n
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -19,9 +17,6 @@ import org.springframework.stereotype.Component
 @Component
 class SlackNotificationBlocksProvider(
   private val i18n: I18n,
-  private val slackConfigReadService: SlackConfigReadService,
-  private val languageService: LanguageService,
-  private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
 ) {
   val logger: Logger by lazy {
     LoggerFactory.getLogger(javaClass)
@@ -196,5 +191,39 @@ class SlackNotificationBlocksProvider(
       }
 
     markdownText("$flagEmoji *$languageName* $ifBase")
+  }
+
+  fun createAttachmentForLanguage(
+    context: SlackMessageContext,
+    translation: SlackTranslationInfoDto,
+    author: String?,
+  ): Attachment? {
+    val baseLanguage = context.slackConfig.project.baseLanguage ?: return null
+
+    if (context.shouldSkipModification(translation.languageTag)) {
+      return null
+    }
+
+    val color = determineColorByState(translation.state)
+    val blocksBody =
+      if (translation.text != null) {
+        getBlocksWithTranslation(context, translation, author)
+      } else {
+        getBlocksEmptyTranslation(context, translation)
+      }
+    return Attachment.builder()
+      .color(color)
+      .blocks(blocksBody)
+      .fallback(translation.text ?: "")
+      .build()
+  }
+
+  private fun determineColorByState(state: TranslationState?): String {
+    return when (state) {
+      TranslationState.TRANSLATED -> "#FFCE00"
+      TranslationState.UNTRANSLATED -> "#BCC2CB"
+      TranslationState.REVIEWED -> "#00B962"
+      else -> "#BCC2CB"
+    }
   }
 }

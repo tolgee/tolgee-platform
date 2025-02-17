@@ -5,7 +5,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
 import io.tolgee.ee.component.slackIntegration.SlackNotConfiguredException
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
-import io.tolgee.ee.component.slackIntegration.notification.SlackAutomationMessageSender.Companion.MAX_NEW_MESSAGES_TO_SEND
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
@@ -38,7 +37,7 @@ class SlackMessageContext(
   val isBigOperation: Boolean by lazy {
     val count = modifiedTranslationsCount
 
-    if (count > MAX_NEW_MESSAGES_TO_SEND) {
+    if (count > SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND) {
       return@lazy true
     }
 
