@@ -39,7 +39,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     selectAll();
     selectOperation('Delete');
     executeBatchOperationWithConfirmation();
-    gcy('global-empty-list').should('be.visible');
+    gcy('global-empty-state').should('be.visible');
   });
 
   it('will delete all except first one', () => {

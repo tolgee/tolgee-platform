@@ -28,6 +28,7 @@ import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { Prefilter } from './prefilters/Prefilter';
 import { TranslationsTaskDetail } from 'tg.ee';
 import { TaskAllDonePlaceholder } from 'tg.ee';
+import { EmptyState } from 'tg.component/common/EmptyState';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -112,10 +113,12 @@ export const Translations = () => {
         <T keyName="translations_nothing_found" />
       </EmptyListMessage>
     ) : prefilter?.task && prefilter.taskFilterNotDone ? (
-      <TaskAllDonePlaceholder
-        taskNumber={prefilter.task}
-        projectId={project.id}
-      />
+      <EmptyState loading={isLoading || isFetching}>
+        <TaskAllDonePlaceholder
+          taskNumber={prefilter.task}
+          projectId={project.id}
+        />
+      </EmptyState>
     ) : (
       <EmptyListMessage
         loading={isLoading || isFetching}

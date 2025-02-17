@@ -31,7 +31,7 @@ describe('User settings', () => {
   it('Accesses personal access tokens', () => {
     clickOnMenuItem('Personal Access Tokens');
     cy.get('h6').contains('Personal Access Tokens').should('be.visible');
-    gcy('global-empty-list').should('be.visible');
+    gcy('global-empty-state').should('be.visible');
   });
 
   function clickOnMenuItem(itemLabel: string) {
