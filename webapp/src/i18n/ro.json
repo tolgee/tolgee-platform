@@ -1347,6 +1347,7 @@
   "settings_notifications_button": "Setări notificări",
   "settings_notifications_channel_email": "Email",
   "settings_notifications_channel_in_app": "În aplicație",
+  "settings_notifications_message_saved": "Setarea a fost salvată.",
   "settings_notifications_tasks_description": "Sarcini",
   "settings_notifications_tasks_subdescription": "Atribuit, finalizat, închis",
   "settings_notifications_title": "Notificări",

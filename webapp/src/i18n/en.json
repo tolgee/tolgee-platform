@@ -1358,6 +1358,7 @@
   "settings_notifications_button": "Notification settings",
   "settings_notifications_channel_email": "Email",
   "settings_notifications_channel_in_app": "In-App",
+  "settings_notifications_message_saved": "The setting has been saved.",
   "settings_notifications_tasks_description": "Tasks",
   "settings_notifications_tasks_subdescription": "Assigned, completed, closed",
   "settings_notifications_title": "Notifications",

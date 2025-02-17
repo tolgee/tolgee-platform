@@ -1340,6 +1340,7 @@
   "settings_notifications_button": "Varselinnstillinger",
   "settings_notifications_channel_email": "E-post",
   "settings_notifications_channel_in_app": "I appen",
+  "settings_notifications_message_saved": "Innstillingen er lagret.",
   "settings_notifications_tasks_description": "Oppgaver",
   "settings_notifications_tasks_subdescription": "Tildelt, fullført, lukket",
   "settings_notifications_title": "Varsler",

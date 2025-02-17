@@ -1,3 +1,15 @@
+# [3.101.0](https://github.com/tolgee/tolgee-platform/compare/v3.100.0...v3.101.0) (2025-02-17)
+
+
+### Bug Fixes
+
+* prevent showing "all done" while task translations are loading ([#2914](https://github.com/tolgee/tolgee-platform/issues/2914)) ([212a584](https://github.com/tolgee/tolgee-platform/commit/212a58428b647745b3b4d98d003f19100c8efb8c))
+
+
+### Features
+
+* support multi-language files in single step import ([#2915](https://github.com/tolgee/tolgee-platform/issues/2915)) ([d10f8ce](https://github.com/tolgee/tolgee-platform/commit/d10f8ce5c327eedcea8244cf928e02fedc304976))
+
 # [3.100.0](https://github.com/tolgee/tolgee-platform/compare/v3.99.2...v3.100.0) (2025-02-13)
 
 

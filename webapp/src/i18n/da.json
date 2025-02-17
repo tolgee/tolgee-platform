@@ -1347,6 +1347,7 @@
   "settings_notifications_button": "Meddelelsesindstillinger",
   "settings_notifications_channel_email": "E-mail",
   "settings_notifications_channel_in_app": "I appen",
+  "settings_notifications_message_saved": "Indstillingen er blevet gemt.",
   "settings_notifications_tasks_description": "Opgaver",
   "settings_notifications_tasks_subdescription": "Tildelt, fuldført, lukket",
   "settings_notifications_title": "Meddelelser",

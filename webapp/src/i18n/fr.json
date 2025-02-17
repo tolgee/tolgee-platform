@@ -1343,6 +1343,7 @@
   "settings_notifications_button": "Paramètres de notification",
   "settings_notifications_channel_email": "E-mail",
   "settings_notifications_channel_in_app": "Dans l'application",
+  "settings_notifications_message_saved": "Le paramètre a été enregistré.",
   "settings_notifications_tasks_description": "Tâches",
   "settings_notifications_tasks_subdescription": "Attribué, terminé, fermé",
   "settings_notifications_title": "Notifications",

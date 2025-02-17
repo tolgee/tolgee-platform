@@ -1339,6 +1339,7 @@
   "settings_notifications_button": "通知设置",
   "settings_notifications_channel_email": "电子邮件",
   "settings_notifications_channel_in_app": "应用内",
+  "settings_notifications_message_saved": "设置已保存。",
   "settings_notifications_tasks_description": "任务",
   "settings_notifications_tasks_subdescription": "已分配，已完成，已关闭",
   "settings_notifications_title": "通知",
