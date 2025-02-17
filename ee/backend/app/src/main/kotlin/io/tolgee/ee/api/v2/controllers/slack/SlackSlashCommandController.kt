@@ -9,7 +9,6 @@ import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.component.slackIntegration.*
-import io.tolgee.ee.component.slackIntegration.notification.SlackExecutor
 import io.tolgee.ee.component.slackIntegration.slashcommand.*
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
@@ -40,7 +39,6 @@ class SlackSlashCommandController(
   private val slackConfigManageService: SlackConfigManageService,
   private val slackConfigReadService: SlackConfigReadService,
   private val slackUserConnectionService: SlackUserConnectionService,
-  private val slackExecutor: SlackExecutor,
   private val slackBotInfoProvider: SlackBotInfoProvider,
   private val permissionService: PermissionService,
   private val i18n: I18n,

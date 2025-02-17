@@ -1,15 +1,12 @@
 package io.tolgee.ee.component.slackIntegration.notification
 
-import com.slack.api.Slack
 import com.slack.api.model.Attachment
-import com.slack.api.model.block.LayoutBlock
 import io.tolgee.api.IProjectActivityModel
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.slack.SlackUserLoginDto
+import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
 import io.tolgee.ee.component.slackIntegration.SlackNotConfiguredException
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
-import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
@@ -22,18 +19,19 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
+import kotlin.collections.forEach
+import kotlin.collections.plus
 
 @Lazy
 @Component
-class SlackExecutor(
+class SlackAutomationMessageSender(
   private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
   private val slackUserConnectionService: SlackUserConnectionService,
-  private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackNotificationBlocksProvider: SlackNotificationBlocksProvider,
-  private val slackClient: Slack,
+  private val slackOperations: SlackChannelMessagesOperations,
   private val languageService: LanguageService,
 ) {
   val logger: Logger by lazy {
@@ -139,7 +137,7 @@ class SlackExecutor(
     messageUpdateActions.forEach { it() }
   }
 
-  fun getSlackNickName(authorId: Long): String? {
+  private fun getSlackNickName(authorId: Long): String? {
     val slackId = slackUserConnectionService.findByUserAccountId(authorId)?.slackUserId ?: return null
     return "<@$slackId>"
   }
@@ -216,7 +214,7 @@ class SlackExecutor(
     return languages.any { it in subscribedLanguages }
   }
 
-  fun sortAttachments(attachments: MutableList<Attachment>): MutableList<Attachment> {
+  private fun sortAttachments(attachments: MutableList<Attachment>): MutableList<Attachment> {
     fun getLanguageName(attachment: Attachment): String {
       val textBlock = attachment.blocks[0].toString()
       // Assuming the language name is surrounded by asterisks (e.g., 🇸🇬 *Chinese*)
@@ -260,51 +258,23 @@ class SlackExecutor(
     }
   }
 
-  fun sendUserLoginSuccessMessage(
-    token: String,
-    dto: SlackUserLoginDto,
-  ) {
-    slackClient.methods(token).chatPostEphemeral {
-      it.user(dto.slackUserId)
-      it.channel(dto.slackChannelId)
-      it.blocks(slackNotificationBlocksProvider.getUserLoginSuccessBlocks())
-    }
-  }
-
-  fun sendBlocksMessage(
-    teamId: String,
-    channelId: String,
-    blocks: List<LayoutBlock>,
-  ) {
-    val workspace = organizationSlackWorkspaceService.findBySlackTeamId(teamId)
-    slackClient.methods(workspace.getSlackToken()).chatPostMessage {
-      it.channel(channelId)
-        .blocks(blocks)
-    }
-  }
-
   private fun updateMessage(
     savedMessage: SavedSlackMessage,
     config: SlackConfig,
     messageDto: SlackMessageDto,
   ) {
-    val response =
-      slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatUpdate { request ->
-        request
-          .channel(config.channelId)
-          .ts(savedMessage.messageTimestamp)
-          .attachments(sortAttachments(messageDto.attachments.toMutableList()))
+    val token = SlackChannelMessagesOperations.SlackWorkspaceToken(config.organizationSlackWorkspace.getSlackToken())
+
+    val result =
+      slackOperations.updateMessage(token, config.channelId, savedMessage.messageTimestamp) {
         if (messageDto.blocks.isNotEmpty()) {
-          request.blocks(messageDto.blocks)
+          it.blocks(messageDto.blocks)
         }
-        request
+        it.attachments(sortAttachments(messageDto.attachments.toMutableList()))
       }
 
-    if (response.isOk) {
+    if (result is SlackChannelMessagesOperations.ChatSuccess) {
       updateLangTagsMessage(savedMessage.id, messageDto.languageTags, messageDto.authorContext)
-    } else {
-      RuntimeException("Cannot update message in slack: ${response.error}")
-        .let { logger.error(it.message, it) }
     }
   }
 
@@ -312,21 +282,18 @@ class SlackExecutor(
     messageDto: SlackMessageDto,
     config: SlackConfig,
   ) {
-    val response =
-      slackClient.methods(config.organizationSlackWorkspace.getSlackToken()).chatPostMessage { request ->
-        request.channel(config.channelId)
-          .blocks(messageDto.blocks)
-          .attachments(sortAttachments(messageDto.attachments.toMutableList()))
+    val token = SlackChannelMessagesOperations.SlackWorkspaceToken(config.organizationSlackWorkspace.getSlackToken())
+
+    val result =
+      slackOperations.sendMessage(token, config.channelId, messageDto.blocks) {
+        it.attachments(sortAttachments(messageDto.attachments.toMutableList()))
       }
-    if (response.isOk) {
-      saveMessage(messageDto, response.ts, config)
-    } else {
-      RuntimeException("Cannot send message in slack: ${response.error}")
-        .let { logger.error(it.message, it) }
+    if (result is SlackChannelMessagesOperations.ChatSuccess) {
+      saveMessage(messageDto, result.response.ts, config)
     }
   }
 
-  fun getHelper(
+  private fun getHelper(
     slackConfig: SlackConfig,
     data: SlackRequest,
   ): SlackExecutorHelper {
