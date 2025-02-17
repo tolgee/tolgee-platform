@@ -5,7 +5,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
-import io.tolgee.ee.service.slackIntegration.SlackConfigService
+import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
@@ -29,7 +29,7 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
   lateinit var slackMessageService: SavedSlackMessageService
 
   @Autowired
-  lateinit var slackConfigService: SlackConfigService
+  lateinit var slackConfigManageService: SlackConfigManageService
 
   @BeforeAll
   fun setup() {
@@ -86,8 +86,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         events = mutableSetOf(SlackEventType.ALL),
         slackTeamId = "slackTeamId",
       )
-    slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
-    val config = slackConfigService.createOrUpdate(updatedConfig)
+    slackConfigManageService.delete(testData.slackConfig.project.id, "testChannel", "")
+    val config = slackConfigManageService.createOrUpdate(updatedConfig)
 
     loginAsUser(testData.user.username)
 
@@ -114,8 +114,8 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
         events = mutableSetOf(SlackEventType.TRANSLATION_CHANGED),
         slackTeamId = "slackTeamId",
       )
-    slackConfigService.delete(testData.slackConfig.project.id, "testChannel", "")
-    val config = slackConfigService.createOrUpdate(updatedConfig)
+    slackConfigManageService.delete(testData.slackConfig.project.id, "testChannel", "")
+    val config = slackConfigManageService.createOrUpdate(updatedConfig)
 
     loginAsUser(testData.user.username)
 

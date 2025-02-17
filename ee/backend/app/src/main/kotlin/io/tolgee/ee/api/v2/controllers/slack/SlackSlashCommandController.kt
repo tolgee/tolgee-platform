@@ -9,8 +9,10 @@ import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.component.slackIntegration.*
+import io.tolgee.ee.component.slackIntegration.slashcommand.*
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
-import io.tolgee.ee.service.slackIntegration.SlackConfigService
+import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
+import io.tolgee.ee.service.slackIntegration.SlackConfigReadService
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.ee.service.slackIntegration.SlackWorkspaceNotFound
 import io.tolgee.exceptions.NotFoundException
@@ -34,7 +36,8 @@ import org.springframework.web.bind.annotation.*
 )
 class SlackSlashCommandController(
   private val projectService: ProjectService,
-  private val slackConfigService: SlackConfigService,
+  private val slackConfigManageService: SlackConfigManageService,
+  private val slackConfigReadService: SlackConfigReadService,
   private val slackUserConnectionService: SlackUserConnectionService,
   private val slackExecutor: SlackExecutor,
   private val permissionService: PermissionService,
@@ -128,7 +131,7 @@ class SlackSlashCommandController(
     slackUserConnectionService.findBySlackId(payload.user_id, payload.team_id)
       ?: throw SlackErrorException(slackErrorProvider.getUserNotConnectedError(payload))
 
-    if (slackConfigService.getAllByChannelId(payload.channel_id).isEmpty()) {
+    if (slackConfigReadService.getAllByChannelId(payload.channel_id).isEmpty()) {
       throw SlackErrorException(slackErrorProvider.getNotSubscribedYetError())
     }
 
@@ -219,7 +222,7 @@ class SlackSlashCommandController(
         isGlobal = isGlobal,
       )
     try {
-      val config = slackConfigService.createOrUpdate(slackConfigDto)
+      val config = slackConfigManageService.createOrUpdate(slackConfigDto)
       return SlackMessageDto(
         blocks = slackExecutor.getSuccessfullySubscribedBlocks(config),
       )
@@ -236,7 +239,7 @@ class SlackSlashCommandController(
     val user = getUserAccount(payload)
     checkPermissions(projectId, user.id)
 
-    slackConfigService.delete(projectId, payload.channel_id, languageTag)
+    slackConfigManageService.delete(projectId, payload.channel_id, languageTag)
 
     return SlackMessageDto(
       text = i18n.translate("slack.common.message.unsubscribed-successfully"),

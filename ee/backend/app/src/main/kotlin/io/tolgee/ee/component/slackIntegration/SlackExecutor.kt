@@ -32,7 +32,7 @@ class SlackExecutor(
   private val savedSlackMessageService: SavedSlackMessageService,
   private val i18n: I18n,
   private val slackUserConnectionService: SlackUserConnectionService,
-  private val slackConfigService: SlackConfigService,
+  private val slackConfigReadService: SlackConfigReadService,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
   private val slackUserLoginUrlProvider: SlackUserLoginUrlProvider,
   private val slackClient: Slack,
@@ -440,7 +440,7 @@ class SlackExecutor(
     userId: String,
     channelId: String,
   ): List<LayoutBlock> {
-    val configList = slackConfigService.getAllByChannelId(channelId)
+    val configList = slackConfigReadService.getAllByChannelId(channelId)
 
     val blocks =
       withBlocks {
