@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { Tooltip, useTheme } from '@mui/material';
-import { CSSProperties, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { useImagePreload } from 'tg.fixtures/useImagePreload';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -42,14 +42,20 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
 }) => {
   const strokeWidth = STROKE_WIDTH * scaleHighlight;
   const theme = useTheme();
-  const [srcImageExpired, setSrcImageExpired] = useState(false);
+  const [srcExpired, setSrcExpired] = useState(false);
+  useEffect(() => {
+    setSrcExpired(false);
+  }, [screenshot.src]);
 
-  const { size, srcExpired, isLoading } = useImagePreload({
+  const { size, isLoading } = useImagePreload({
     src: screenshot.src,
-    onSrcExpired,
+    onSrcExpired() {
+      setSrcExpired(true);
+      onSrcExpired();
+    },
   });
 
-  const ready = !srcExpired && !srcImageExpired && !isLoading;
+  const ready = !srcExpired && !isLoading;
 
   const screenshotWidth = screenshot.width || size.width;
   const screenshotHeight = screenshot.height || size.height;
@@ -72,12 +78,9 @@ export const ScreenshotWithLabels: React.FC<Props> = ({
             href={screenshot.src}
             width={screenshotWidth}
             height={screenshotHeight}
-            onLoad={() => {
-              setSrcImageExpired(false);
-            }}
             onError={() => {
               if (isScreenshotExpired(screenshot.src)) {
-                setSrcImageExpired(true);
+                setSrcExpired(true);
                 onSrcExpired();
               }
             }}
