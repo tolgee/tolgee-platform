@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isScreenshotExpired } from 'tg.views/projects/translations/Screenshots/useScreenshotLinkCheck';
 
 type Size = {
   width: number;
@@ -8,14 +9,21 @@ type Size = {
 type Props = {
   src: string;
   enabled?: boolean;
+  onSrcExpired: () => void;
 };
 
-export const useImagePreload = ({ src, enabled = true }: Props) => {
+export const useImagePreload = ({
+  src,
+  enabled = true,
+  onSrcExpired,
+}: Props) => {
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const [srcExpired, setSrcExpired] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (enabled) {
       setIsLoading(true);
+      setSrcExpired(false);
       let mounted = true;
       const img = new Image();
       img.src = src;
@@ -28,6 +36,10 @@ export const useImagePreload = ({ src, enabled = true }: Props) => {
       img.onerror = () => {
         if (mounted) {
           setIsLoading(false);
+          if (isScreenshotExpired(src)) {
+            setSrcExpired(true);
+            onSrcExpired();
+          }
         }
       };
       return () => {
@@ -39,7 +51,7 @@ export const useImagePreload = ({ src, enabled = true }: Props) => {
     }
   }, [src]);
 
-  return { size, isLoading };
+  return { size, isLoading, srcExpired };
 };
 
 export function scaleImage(imageSize: Size, containerSize: Size): Size {

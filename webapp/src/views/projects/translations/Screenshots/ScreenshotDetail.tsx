@@ -69,14 +69,14 @@ interface ScreenshotDetailProps {
   onClose: () => void;
   screenshots: ScreenshotProps[];
   initialIndex: number;
-  wait?: boolean;
+  onSrcExpired: () => void;
 }
 
 export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
   onClose,
   screenshots,
   initialIndex,
-  wait,
+  onSrcExpired,
 }) => {
   const [index, setIndex] = useState(initialIndex);
   const itemsCount = screenshots.length;
@@ -88,9 +88,13 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
     height: viewPort.height * SCREENSHOT_DETAIL_SIZE,
   };
 
-  const { size: loadedSize, isLoading } = useImagePreload({
+  const {
+    size: loadedSize,
+    srcExpired,
+    isLoading,
+  } = useImagePreload({
     src: screenshot.src,
-    enabled: !wait,
+    onSrcExpired,
   });
 
   const screenshotSize = {
@@ -138,7 +142,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
           width,
           height,
         }}
-        className={clsx({ loading: isLoading })}
+        className={clsx({ loading: isLoading || srcExpired })}
       >
         {multiple && (
           <IconButton
@@ -150,7 +154,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
             <ChevronLeft />
           </IconButton>
         )}
-        {isLoading || wait ? (
+        {isLoading || srcExpired ? (
           <BoxLoading />
         ) : (
           <>
@@ -171,7 +175,7 @@ export const ScreenshotDetail: React.FC<ScreenshotDetailProps> = ({
                   maxHeight: 'unset',
                 }}
                 scaleHighlight={scaleMarkers}
-                wait={false}
+                onSrcExpired={onSrcExpired}
               />
             )}
           </>

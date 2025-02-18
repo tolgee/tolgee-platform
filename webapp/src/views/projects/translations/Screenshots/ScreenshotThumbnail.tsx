@@ -87,7 +87,7 @@ type Props = {
   sx?: SxProps;
   objectFit: 'contain' | 'cover';
   scaleHighlight?: number;
-  wait: boolean;
+  onSrcExpired: () => void;
 };
 
 export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
@@ -133,7 +133,7 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
             screenshot={props.screenshot}
             objectFit={props.objectFit}
             scaleHighlight={props.scaleHighlight}
-            wait={props.wait}
+            onSrcExpired={props.onSrcExpired}
           />
         </StyledScreenshotOverflowWrapper>
       </StyledScreenshotBox>

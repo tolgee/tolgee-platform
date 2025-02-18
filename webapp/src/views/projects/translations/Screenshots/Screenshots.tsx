@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Box, styled, SxProps } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import clsx from 'clsx';
@@ -141,8 +141,6 @@ export const Screenshots = ({
 
   const [detailData, setDetailData] = useState<number>();
 
-  const firstScreenshot = screenshots[0]?.thumbnailUrl;
-
   const keyScreenshots = useApiQuery({
     url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
     method: 'get',
@@ -158,19 +156,16 @@ export const Screenshots = ({
     },
   });
 
-  useEffect(() => {
-    // check if screenshot paths are expired on mount
-    if (isScreenshotExpired(firstScreenshot)) {
-      keyScreenshots.refetch({ cancelRefetch: false });
-    }
-  }, [firstScreenshot, oneBig]);
-
   async function handleDetailClick(index: number) {
     setDetailData(index);
     // check if screenshot path is expired when click on detail
     if (isScreenshotExpired(screenshots[index]?.thumbnailUrl)) {
-      keyScreenshots.refetch({ cancelRefetch: false });
+      handleScreenshotsRefetch();
     }
+  }
+
+  async function handleScreenshotsRefetch() {
+    await keyScreenshots.refetch({ cancelRefetch: false });
   }
 
   const screenshotsMapped = screenshots.map((sc) => {
@@ -214,7 +209,7 @@ export const Screenshots = ({
           screenshots={screenshots}
           oneBig={oneBig}
           setDetail={handleDetailClick}
-          wait={keyScreenshots.isFetching}
+          onSrcExpired={handleScreenshotsRefetch}
         />
       </StyledScrollWrapper>
       {scrollLeft && (
@@ -237,10 +232,10 @@ export const Screenshots = ({
       )}
       {detailData !== undefined && (
         <ScreenshotDetail
-          wait={keyScreenshots.isFetching}
           screenshots={screenshotsMapped}
           initialIndex={detailData}
           onClose={stopAndPrevent(() => setDetailData(undefined))}
+          onSrcExpired={handleScreenshotsRefetch}
         />
       )}
     </StyledContainer>

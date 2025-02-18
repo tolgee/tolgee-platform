@@ -18,7 +18,7 @@ type Props = {
   width?: number;
   keyId: number;
   setDetail: (index: number) => void;
-  wait: boolean;
+  onSrcExpired: () => void;
 };
 
 export const ScreenshotsList = ({
@@ -27,7 +27,7 @@ export const ScreenshotsList = ({
   width,
   keyId,
   setDetail,
-  wait,
+  onSrcExpired,
 }: Props) => {
   const size = width && Math.floor(width / 50) * 50;
 
@@ -108,7 +108,7 @@ export const ScreenshotsList = ({
             screenshot={screenshot}
             objectFit={oneOnly ? 'cover' : 'contain'}
             scaleHighlight={(sc.width! / width - 1) * 0.5 + 1}
-            wait={wait}
+            onSrcExpired={onSrcExpired}
             onClick={stopAndPrevent(() => {
               setDetail(index);
             })}
