@@ -1,3 +1,11 @@
+## [3.101.1](https://github.com/tolgee/tolgee-platform/compare/v3.101.0...v3.101.1) (2025-02-18)
+
+
+### Bug Fixes
+
+* expired screenshot urls fix ([#2919](https://github.com/tolgee/tolgee-platform/issues/2919)) ([da35f8c](https://github.com/tolgee/tolgee-platform/commit/da35f8c772b3cb053fef9ebb386cc58b84fb5b09))
+* Make image expiration longer ([#2918](https://github.com/tolgee/tolgee-platform/issues/2918)) ([532a86c](https://github.com/tolgee/tolgee-platform/commit/532a86c4916f071073820c891f5f6333c7af7a55))
+
 # [3.101.0](https://github.com/tolgee/tolgee-platform/compare/v3.100.0...v3.101.0) (2025-02-17)
 
 
