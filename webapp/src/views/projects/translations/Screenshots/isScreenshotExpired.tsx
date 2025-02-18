@@ -1,18 +1,3 @@
-import { useEffect } from 'react';
-
-type Props = {
-  src: string | undefined;
-  onExpired: () => void;
-};
-
-export const useScreenshotExpiredCheck = ({ src, onExpired }: Props) => {
-  useEffect(() => {
-    if (isScreenshotExpired(src)) {
-      onExpired();
-    }
-  }, [src]);
-};
-
 export function isScreenshotExpired(src: string | undefined): boolean {
   if (!src) {
     return false;

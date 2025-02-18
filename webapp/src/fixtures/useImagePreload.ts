@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { isScreenshotExpired } from 'tg.views/projects/translations/Screenshots/useScreenshotLinkCheck';
+import { isScreenshotExpired } from 'tg.views/projects/translations/Screenshots/isScreenshotExpired';
 
 type Size = {
   width: number;

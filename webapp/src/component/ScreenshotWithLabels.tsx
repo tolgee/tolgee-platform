@@ -4,7 +4,7 @@ import { CSSProperties, useEffect, useState } from 'react';
 import { useImagePreload } from 'tg.fixtures/useImagePreload';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { isScreenshotExpired } from 'tg.views/projects/translations/Screenshots/useScreenshotLinkCheck';
+import { isScreenshotExpired } from 'tg.views/projects/translations/Screenshots/isScreenshotExpired';
 
 type KeyInScreenshotModel = components['schemas']['KeyInScreenshotModel'];
 

@@ -9,7 +9,7 @@ import { useScrollStatus } from '../TranslationsTable/useScrollStatus';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 import { ScreenshotsList } from './ScreenshotsList';
 import { useTranslationsActions } from '../context/TranslationsContext';
-import { isScreenshotExpired } from './useScreenshotLinkCheck';
+import { isScreenshotExpired } from './isScreenshotExpired';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 
