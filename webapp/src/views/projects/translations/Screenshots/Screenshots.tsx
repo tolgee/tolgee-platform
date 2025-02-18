@@ -8,6 +8,10 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { useScrollStatus } from '../TranslationsTable/useScrollStatus';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 import { ScreenshotsList } from './ScreenshotsList';
+import { useTranslationsActions } from '../context/TranslationsContext';
+import { isScreenshotExpired } from './isScreenshotExpired';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
 
 export const MAX_FILE_COUNT = 20;
 export const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
@@ -132,8 +136,37 @@ export const Screenshots = ({
   sx,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { updateScreenshots } = useTranslationsActions();
+  const project = useProject();
 
   const [detailData, setDetailData] = useState<number>();
+
+  const keyScreenshots = useApiQuery({
+    url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
+    method: 'get',
+    path: { projectId: project.id, keyId },
+    options: {
+      enabled: false,
+      onSuccess(data) {
+        updateScreenshots({
+          keyId,
+          screenshots: data._embedded?.screenshots || [],
+        });
+      },
+    },
+  });
+
+  async function handleDetailClick(index: number) {
+    setDetailData(index);
+    // check if screenshot path is expired when click on detail
+    if (isScreenshotExpired(screenshots[index]?.thumbnailUrl)) {
+      handleScreenshotsRefetch();
+    }
+  }
+
+  async function handleScreenshotsRefetch() {
+    await keyScreenshots.refetch({ cancelRefetch: false });
+  }
 
   const screenshotsMapped = screenshots.map((sc) => {
     return {
@@ -175,7 +208,8 @@ export const Screenshots = ({
           keyId={keyId}
           screenshots={screenshots}
           oneBig={oneBig}
-          setDetail={setDetailData}
+          setDetail={handleDetailClick}
+          onSrcExpired={handleScreenshotsRefetch}
         />
       </StyledScrollWrapper>
       {scrollLeft && (
@@ -201,6 +235,7 @@ export const Screenshots = ({
           screenshots={screenshotsMapped}
           initialIndex={detailData}
           onClose={stopAndPrevent(() => setDetailData(undefined))}
+          onSrcExpired={handleScreenshotsRefetch}
         />
       )}
     </StyledContainer>
