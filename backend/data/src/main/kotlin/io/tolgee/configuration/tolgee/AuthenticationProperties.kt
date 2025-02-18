@@ -6,7 +6,6 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
-import io.tolgee.exceptions.BadRequestException
 import jakarta.validation.constraints.Size
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -129,9 +128,9 @@ class AuthenticationProperties(
   var createDemoForInitialUser: Boolean = true,
   @DocProperty(
     description = "Expiration time of a generated image access token in milliseconds.",
-    defaultExplanation = "= 10 minutes",
+    defaultExplanation = "= 2 hours",
   )
-  var securedImageTimestampMaxAge: Long = 10 * 60 * 1000,
+  var securedImageTimestampMaxAge: Long = 2 * 60 * 60 * 1000,
   @E2eRuntimeMutable
   @DocProperty(
     description =
@@ -149,10 +148,4 @@ class AuthenticationProperties(
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
   var ssoGlobal: SsoGlobalProperties = SsoGlobalProperties(),
   var ssoOrganizations: SsoOrganizationsProperties = SsoOrganizationsProperties(),
-) {
-  fun checkAllowedRegistrations() {
-    if (!this.registrationsAllowed) {
-      throw BadRequestException(io.tolgee.constants.Message.REGISTRATIONS_NOT_ALLOWED)
-    }
-  }
-}
+)
