@@ -83,9 +83,11 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `logs in for same Tolgee acc and different workspace`() {
+  fun `logs in for same Tolgee account and different workspace`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
+
+    MockedSlackClient.mockSlackClient(slackClient)
 
     slackUserLoginUrlProvider.encryptData(
       "ChannelTest",
