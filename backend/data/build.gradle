@@ -197,10 +197,7 @@ dependencies {
     /**
      * AZURE
      */
-    implementation(libs.azureBlob) {
-        exclude group: 'io.netty', module: 'netty-codec-http'
-    }
-    implementation('io.netty:netty-codec-http:4.1.115.Final')
+    implementation(libs.azureBlob)
 
     /**
      * SLACK SDK
