@@ -12,7 +12,6 @@ import {
   FormHelperText,
   Switch,
 } from '@mui/material';
-import { DateTimePickerField } from 'tg.component/common/form/fields/DateTimePickerField';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
@@ -24,6 +23,8 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { PlanSelectorField } from '../../subscriptionPlans/components/planForm/fields/PlanSelectorField';
 import { CloudPlanFormData } from '../../subscriptionPlans/components/planForm/CloudPlanFormBase';
 import { useTestClock } from 'tg.service/useTestClock';
+import { AssignTrialDatePicker } from './AssignTrialDatePicker';
+import { useCurrentDate } from 'tg.hooks/useCurrentDate';
 
 export const AssignCloudTrialDialog: FC<{
   open: boolean;
@@ -89,6 +90,8 @@ export const AssignCloudTrialDialog: FC<{
     });
   }
 
+  const currentDate = useCurrentDate();
+
   return (
     <Formik
       initialValues={
@@ -102,7 +105,7 @@ export const AssignCloudTrialDialog: FC<{
       validationSchema={Yup.object().shape({
         trialEnd: Yup.date()
           .required()
-          .min(new Date(), t('date-must-be-in-future-error-message')),
+          .min(currentDate, t('date-must-be-in-future-error-message')),
         planId: Yup.number().required(),
         customPlan: Validation.CLOUD_PLAN_FORM,
       })}
@@ -114,19 +117,7 @@ export const AssignCloudTrialDialog: FC<{
               <T keyName="administration-subscription-assign-trial-dialog-title" />
             </DialogTitle>
             <DialogContent sx={{ display: 'grid', gap: '16px' }}>
-              <DateTimePickerField
-                formControlProps={{
-                  'data-cy': 'administration-trial-end-date-field',
-                  sx: { mt: 1 },
-                }}
-                dateTimePickerProps={{
-                  disablePast: true,
-                  label: (
-                    <T keyName="administration-subscription-assign-trial-end-date-field" />
-                  ),
-                }}
-                name="trialEnd"
-              />
+              <AssignTrialDatePicker />
               <FormHelperText>
                 <T keyName="administration-subscription-assign-trial-plan-help" />
               </FormHelperText>
