@@ -3,9 +3,11 @@ package io.tolgee.ee.slack
 import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
 import com.slack.api.methods.MethodsClient
+import com.slack.api.methods.request.chat.ChatPostEphemeralRequest
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.slack.api.methods.request.chat.ChatUpdateRequest
 import com.slack.api.methods.request.users.UsersInfoRequest
+import com.slack.api.methods.response.chat.ChatPostEphemeralResponse
 import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import com.slack.api.methods.response.chat.ChatUpdateResponse
 import com.slack.api.methods.response.users.UsersInfoResponse
@@ -67,6 +69,16 @@ class MockedSlackClient(val methodsClientMock: MethodsClient) {
           any<RequestConfigurator<ChatPostMessageRequest.ChatPostMessageRequestBuilder>>(),
         ),
       ).thenReturn(mockPostMessageResponse)
+
+      whenever(
+        methodsClientMock.chatPostEphemeral(
+          any<RequestConfigurator<ChatPostEphemeralRequest.ChatPostEphemeralRequestBuilder>>(),
+        ),
+      ).thenReturn(
+        ChatPostEphemeralResponse().also {
+          it.isOk = true
+        },
+      )
 
       whenever(
         methodsClientMock.usersInfo(

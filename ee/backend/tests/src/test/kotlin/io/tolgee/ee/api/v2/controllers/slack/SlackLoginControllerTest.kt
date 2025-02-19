@@ -1,20 +1,25 @@
 package io.tolgee.ee.api.v2.controllers.slack
 
+import com.slack.api.Slack
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SlackNoUserConnectionTestData
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.component.slackIntegration.SlackUserLoginUrlProvider
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
+import io.tolgee.ee.slack.MockedSlackClient
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.ContextRecreatingTest
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 
+@ContextRecreatingTest
 class SlackLoginControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var slackUserConnectionService: SlackUserConnectionService
@@ -24,6 +29,10 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  @MockBean
+  lateinit var slackClient: Slack
 
   @BeforeAll
   fun setUp() {
@@ -35,6 +44,8 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
   fun `user logs in`() {
     val testData = SlackNoUserConnectionTestData()
     testDataService.saveTestData(testData.root)
+
+    MockedSlackClient.mockSlackClient(slackClient)
 
     slackUserLoginUrlProvider.encryptData(
       "ChannelTest",
@@ -54,6 +65,8 @@ class SlackLoginControllerTest : AuthorizedControllerTest() {
   fun `should not allow duplicate SlackUserConnection for same Tolgee account and workspace`() {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
+
+    MockedSlackClient.mockSlackClient(slackClient)
 
     slackUserLoginUrlProvider.encryptData(
       "ChannelTest",
