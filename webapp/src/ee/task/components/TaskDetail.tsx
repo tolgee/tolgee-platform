@@ -30,7 +30,7 @@ import { TaskInfoItem } from './TaskInfoItem';
 import { TaskScope } from './TaskScope';
 import { TaskMenu } from './TaskMenu';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { getTaskUrl } from './utils';
+import { getTaskUrl } from 'tg.constants/links';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -260,7 +260,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                   <Button
                     color="primary"
                     component={Link}
-                    to={project ? getTaskUrl(project, data.number) : ''}
+                    to={project ? getTaskUrl(project.id, data.number) : ''}
                   >
                     <T keyName="task_link_translations_tooltip" />
                   </Button>

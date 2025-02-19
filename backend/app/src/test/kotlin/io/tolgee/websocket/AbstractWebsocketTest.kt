@@ -5,9 +5,13 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitFor
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
+import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.translation.Translation
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -16,6 +20,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.server.LocalServerPort
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -24,8 +29,12 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   lateinit var testData: BaseTestData
   lateinit var translation: Translation
   lateinit var key: Key
-  lateinit var notPermittedUser: UserAccount
-  lateinit var helper: WebsocketTestHelper
+  lateinit var anotherUser: UserAccount
+  lateinit var currentUserWebsocket: WebsocketTestHelper
+  lateinit var anotherUserWebsocket: WebsocketTestHelper
+
+  @Autowired
+  lateinit var notificationService: NotificationService
 
   @LocalServerPort
   private val port: Int? = null
@@ -33,24 +42,32 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @BeforeEach
   fun beforeEach() {
     prepareTestData()
-    helper =
+    currentUserWebsocket =
       WebsocketTestHelper(
         port,
         jwtService.emitToken(testData.user.id),
         testData.projectBuilder.self.id,
+        testData.user.id,
       )
-    helper.listenForTranslationDataModified()
+    anotherUserWebsocket =
+      WebsocketTestHelper(
+        port,
+        jwtService.emitToken(anotherUser.id),
+        testData.projectBuilder.self.id,
+        anotherUser.id,
+      )
   }
 
   @AfterEach
   fun after() {
-    helper.stop()
+    currentUserWebsocket.stop()
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key modification`() {
-    helper.assertNotified(
+    currentUserWebsocket.listenForTranslationDataModified()
+    currentUserWebsocket.assertNotified(
       {
         performProjectAuthPut("keys/${key.id}", mapOf("name" to "name edited"))
       },
@@ -74,7 +91,8 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key deletion`() {
-    helper.assertNotified(
+    currentUserWebsocket.listenForTranslationDataModified()
+    currentUserWebsocket.assertNotified(
       {
         performProjectAuthDelete("keys/${key.id}")
       },
@@ -95,7 +113,8 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on key creation`() {
-    helper.assertNotified(
+    currentUserWebsocket.listenForTranslationDataModified()
+    currentUserWebsocket.assertNotified(
       {
         performProjectAuthPost("keys", mapOf("name" to "new key"))
       },
@@ -116,7 +135,8 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `notifies on translation modification`() {
-    helper.assertNotified(
+    currentUserWebsocket.listenForTranslationDataModified()
+    currentUserWebsocket.assertNotified(
       {
         performProjectAuthPut(
           "translations",
@@ -144,6 +164,53 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `notifies user on a new notification`() {
+    currentUserWebsocket.listenForNotificationsChanged()
+    anotherUserWebsocket.listenForNotificationsChanged()
+    var newNotification: Notification? = null
+
+    currentUserWebsocket.assertNotified(
+      {
+        newNotification = saveNotificationForCurrentUser()
+      },
+    ) {
+      assertThatJson(it.poll()).apply {
+        node("data.currentlyUnseenCount").isEqualTo(1)
+        node("data.newNotification.id").isEqualTo(newNotification!!.id)
+        node("timestamp").isNotNull
+      }
+    }
+
+    anotherUserWebsocket.receivedMessages.assert.isEmpty()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `notifies user on notifications marked as seen`() {
+    val newNotification = saveNotificationForCurrentUser()
+
+    currentUserWebsocket.listenForNotificationsChanged()
+    anotherUserWebsocket.listenForNotificationsChanged()
+
+    currentUserWebsocket.assertNotified(
+      {
+        executeInNewTransaction {
+          notificationService.markNotificationsAsSeen(listOf(newNotification.id), testData.user.id)
+        }
+      },
+    ) {
+      assertThatJson(it.poll()).apply {
+        node("data.currentlyUnseenCount").isEqualTo(0)
+        node("data.newNotification").isNull()
+        node("timestamp").isNotNull
+      }
+    }
+
+    anotherUserWebsocket.receivedMessages.assert.isEmpty()
+  }
+
   /**
    * The request is made by permitted user, but user without permission tries to listen, so they shell
    * not be notified
@@ -151,13 +218,8 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `doesn't subscribe without permissions`() {
-    val notPermittedSubscriptionHelper =
-      WebsocketTestHelper(
-        port,
-        jwtService.emitToken(notPermittedUser.id),
-        testData.projectBuilder.self.id,
-      )
-    notPermittedSubscriptionHelper.listenForTranslationDataModified()
+    currentUserWebsocket.listenForTranslationDataModified()
+    anotherUserWebsocket.listenForTranslationDataModified()
     performProjectAuthPut(
       "translations",
       mapOf(
@@ -165,18 +227,49 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
         "translations" to mapOf("en" to "haha"),
       ),
     ).andIsOk
-    Thread.sleep(1000)
-    notPermittedSubscriptionHelper.receivedMessages.assert.isEmpty()
 
-    // but authorized user received the message
-    helper.receivedMessages.assert.isNotEmpty
+    assertCurrentUserReceivedMessage()
+    anotherUserWebsocket.receivedMessages.assert.isEmpty()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `doesn't subscribe as another user`() {
+    currentUserWebsocket.listenForNotificationsChanged()
+    val spyingUserWebsocket =
+      WebsocketTestHelper(
+        port,
+        jwtService.emitToken(anotherUser.id),
+        testData.projectBuilder.self.id,
+        // anotherUser trying to spy on other user's websocket
+        testData.user.id,
+      )
+    spyingUserWebsocket.listenForNotificationsChanged()
+    saveNotificationForCurrentUser()
+
+    assertCurrentUserReceivedMessage()
+    spyingUserWebsocket.receivedMessages.assert.isEmpty()
+  }
+
+  private fun assertCurrentUserReceivedMessage() {
+    waitFor { currentUserWebsocket.receivedMessages.isNotEmpty() }
+  }
+
+  private fun saveNotificationForCurrentUser(): Notification {
+    val notification =
+      Notification().apply {
+        user = testData.user
+        type = NotificationType.PASSWORD_CHANGED
+      }
+    notificationService.notify(notification)
+    return notification
   }
 
   private fun prepareTestData() {
     testData = BaseTestData()
     testData.root.addUserAccount {
-      username = "franta"
-      notPermittedUser = this
+      username = "anotherUser"
+      anotherUser = this
     }
     testData.projectBuilder.apply {
       addKey {

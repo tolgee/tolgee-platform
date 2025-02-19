@@ -143,6 +143,16 @@ export interface paths {
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
+  "/v2/notifications": {
+    get: operations["getNotifications"];
+  };
+  "/v2/notifications-mark-seen": {
+    put: operations["markNotificationsAsSeen"];
+  };
+  "/v2/notifications-settings": {
+    get: operations["getNotificationsSettings"];
+    put: operations["putNotificationSetting"];
+  };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
@@ -1784,7 +1794,7 @@ export interface components {
         | "expired_jwt_token"
         | "general_jwt_error"
         | "cannot_find_suitable_address_part"
-        | "address_part_not_unique"
+        | "slug_not_unique"
         | "user_is_not_member_of_organization"
         | "organization_has_no_other_owner"
         | "user_has_no_project_access"
@@ -2939,6 +2949,37 @@ export interface components {
       /** @example homepage */
       name: string;
     };
+    NotificationModel: {
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: int64 */
+      id: number;
+      linkedTask?: components["schemas"]["TaskModel"];
+      originatingUser?: components["schemas"]["SimpleUserAccountModel"];
+      project?: components["schemas"]["SimpleProjectModel"];
+      type:
+        | "TASK_ASSIGNED"
+        | "TASK_COMPLETED"
+        | "TASK_CLOSED"
+        | "MFA_ENABLED"
+        | "MFA_DISABLED"
+        | "PASSWORD_CHANGED";
+    };
+    NotificationSettingGroupModel: {
+      email: boolean;
+      inApp: boolean;
+    };
+    NotificationSettingModel: {
+      accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
+      tasks: components["schemas"]["NotificationSettingGroupModel"];
+    };
+    NotificationsMarkSeenRequest: {
+      /**
+       * @description Notification IDs to be marked as seen
+       * @example 1,2,3
+       */
+      notificationIds: number[];
+    };
     OAuthPublicConfigDTO: {
       clientId?: string;
       enabled: boolean;
@@ -3079,6 +3120,12 @@ export interface components {
     PagedModelNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["NamespaceModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelNotificationModel: {
+      _embedded?: {
+        notificationModelList?: components["schemas"]["NotificationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4141,7 +4188,7 @@ export interface components {
         | "expired_jwt_token"
         | "general_jwt_error"
         | "cannot_find_suitable_address_part"
-        | "address_part_not_unique"
+        | "slug_not_unique"
         | "user_is_not_member_of_organization"
         | "organization_has_no_other_owner"
         | "user_has_no_project_access"
@@ -6653,6 +6700,198 @@ export interface operations {
     parameters: {
       path: {
         invitationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getNotifications: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /**
+         * Filter by the `seen` parameter.
+         *
+         * no value = request everything
+         *
+         * true = only seen
+         *
+         * false = only unseen
+         */
+        filterSeen?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelNotificationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  markNotificationsAsSeen: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
+      };
+    };
+  };
+  getNotificationsSettings: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationSettingModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  putNotificationSetting: {
+    parameters: {
+      query: {
+        group: "ACCOUNT_SECURITY" | "TASKS";
+        channel: "IN_APP" | "EMAIL";
+        enabled: boolean;
       };
     };
     responses: {
@@ -10404,10 +10643,13 @@ export interface operations {
       };
     };
     responses: {
-      /** OK */
+      /**
+       * When multiple files are exported, they are zipped and returned as a single zip file.
+       * When a single file is exported, it is returned directly.
+       */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/*": unknown;
         };
       };
       /** Bad Request */
@@ -10452,10 +10694,13 @@ export interface operations {
       };
     };
     responses: {
-      /** OK */
+      /**
+       * When multiple files are exported, they are zipped and returned as a single zip file.
+       * When a single file is exported, it is returned directly.
+       */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/*": unknown;
         };
       };
       /** Bad Request */

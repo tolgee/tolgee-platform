@@ -6,6 +6,11 @@ import { tasks } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage, dismissMenu } from '../../common/shared';
 import { getTaskPreview, visitTasks } from '../../common/tasks';
+import {
+  assertNotificationListIsEmpty,
+  assertUnseenNotificationsCount,
+  getNotifications,
+} from '../../common/notifications';
 
 describe('tasks notifications', () => {
   beforeEach(() => {
@@ -23,7 +28,10 @@ describe('tasks notifications', () => {
     waitForGlobalLoading();
   });
 
-  it('sends email to assignee of newly created task', () => {
+  it('sends email to assignee of newly created task and creates notification', () => {
+    assertUnseenNotificationsCount(0);
+    assertNotificationListIsEmpty();
+
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-name').type('New review task');
     cy.gcy('create-task-field-languages').click();
@@ -33,11 +41,15 @@ describe('tasks notifications', () => {
     cy.gcy('assignee-search-select-popover')
       .contains('Organization member')
       .click();
+    cy.gcy('assignee-search-select-popover')
+      .contains('Tasks test user')
+      .click();
     dismissMenu();
 
     cy.gcy('create-task-submit').click();
 
     assertMessage('1 task created');
+    assertUnseenNotificationsCount(1);
 
     getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
@@ -47,11 +59,31 @@ describe('tasks notifications', () => {
       .should('be.visible')
       .findDcy('task-label-name')
       .should('contain', 'New review task');
+    dismissMenu();
+
+    getNotifications()
+      .should('have.length', 1)
+      .first()
+      .should('include.text', 'Tasks test user')
+      .should('include.text', 'New review task')
+      .should('include.text', 'Project with tasks')
+      .click();
+
+    cy.url().should('include', '/translations?task=');
   });
 
   it('sends email to new assignee', () => {
+    let taskLink: string;
     cy.gcy('task-item')
       .contains('Translate task')
+      .as('translateTask')
+      .closest('a')
+      .invoke('attr', 'href')
+      .then((href) => {
+        taskLink = href;
+      });
+
+    cy.get('@translateTask')
       .closestDcy('task-item')
       .findDcy('task-item-detail')
       .click();
@@ -64,10 +96,16 @@ describe('tasks notifications', () => {
 
     assertMessage('Task updated sucessfully');
 
-    getAssignedEmailNotification().then(({ toAddress, myTasksLink }) => {
-      assert(toAddress === 'organization.member@test.com', 'correct recipient');
-      cy.visit(myTasksLink);
-    });
+    getAssignedEmailNotification().then(
+      ({ toAddress, myTasksLink, taskLink: taskLinkFromMail }) => {
+        assert(taskLinkFromMail.includes(taskLink), 'correct task link');
+        assert(
+          toAddress === 'organization.member@test.com',
+          'correct recipient'
+        );
+        cy.visit(myTasksLink);
+      }
+    );
     cy.gcy('global-base-view-title').should('contain', 'My tasks');
     cy.gcy('task-item').contains('Translate task').should('be.visible');
   });
