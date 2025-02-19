@@ -77,13 +77,15 @@ class SlackChannelMessagesOperations(
       }
     }
 
-  private fun getWorkspaceSlackClient(token: SlackToken): MethodsClient =
-    slackClient.methods(
+  private fun getWorkspaceSlackClient(token: SlackToken): MethodsClient {
+    val tokenString =
       when (token) {
         is SlackTeamId -> organizationSlackWorkspaceService.findBySlackTeamId(token.teamId)?.getSlackToken()
         is SlackWorkspaceToken -> token.token
-      },
-    )!!
+      }
+
+    return slackClient.methods(tokenString)!!
+  }
 
   private fun <R : SlackApiTextResponse> trySend(method: () -> R): MessageSendResult<R> {
     try {
