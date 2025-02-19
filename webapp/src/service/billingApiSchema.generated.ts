@@ -7,6 +7,10 @@ export interface paths {
   "/v2/administration/billing/add-usage-items-to-invoice-and-finalize-it/{invoiceId}": {
     put: operations["addUsageItemsToInvoiceAndFinalizeIt"];
   };
+  "/v2/administration/billing/cancel-local-subscriptions": {
+    /** Cancel local subscriptions */
+    put: operations["cancelLocalSubscriptions"];
+  };
   "/v2/administration/billing/cloud-plans": {
     get: operations["getPlans_2"];
     post: operations["create_2"];
@@ -21,6 +25,10 @@ export interface paths {
   };
   "/v2/administration/billing/features": {
     get: operations["getAllFeatures"];
+  };
+  "/v2/administration/billing/inconsistent-subscriptions": {
+    /** Returns active cloud subscriptions, which have inconsistent state in Tolgee and Stripe */
+    get: operations["getInconsistentSubscriptions"];
   };
   "/v2/administration/billing/organizations": {
     get: operations["getOrganizations"];
@@ -153,6 +161,30 @@ export interface paths {
   "/v2/public/billing/plans": {
     get: operations["getPlans"];
   };
+  "/v2/public/licensing/prepare-set-key": {
+    post: operations["prepareSetLicenseKey"];
+  };
+  "/v2/public/licensing/release-key": {
+    post: operations["releaseKey"];
+  };
+  "/v2/public/licensing/report-error": {
+    post: operations["reportError"];
+  };
+  "/v2/public/licensing/report-usage": {
+    post: operations["reportUsage"];
+  };
+  "/v2/public/licensing/set-key": {
+    post: operations["onLicenceSetKey"];
+  };
+  "/v2/public/licensing/subscription": {
+    post: operations["getMySubscription"];
+  };
+  "/v2/public/telemetry/report": {
+    post: operations["report"];
+  };
+  "/v2/public/translator/translate": {
+    post: operations["translate"];
+  };
 }
 
 export interface components {
@@ -181,7 +213,7 @@ export interface components {
       )[];
       /**
        * Format: int64
-       * @description Only single organization is using this plan or can see this plan. This is the organization id.When provided, we are sure that no other organization is currently using or have been invoiced with this plan.
+       * @description If only single organization is using this plan or can see this plan, this is the organization id, null otherwise.When provided, we are sure that no other organization is currently using or have been invoiced with this plan.
        */
       exclusiveForOrganizationId?: number;
       forOrganizationIds: number[];
@@ -259,6 +291,9 @@ export interface components {
       amount: number;
       /** Format: int64 */
       priceId: number;
+    };
+    CancelLocalSubscriptionsRequest: {
+      ids: components["schemas"]["SubscriptionId"][];
     };
     CloudPlanModel: {
       enabledFeatures: (
@@ -371,6 +406,11 @@ export interface components {
         plans?: components["schemas"]["CloudPlanModel"][];
       };
     };
+    CollectionModelInconsistentSubscriptionModel: {
+      _embedded?: {
+        subscription?: components["schemas"]["InconsistentSubscriptionModel"][];
+      };
+    };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
         prices?: components["schemas"]["MtCreditsPriceModel"][];
@@ -459,11 +499,13 @@ export interface components {
         | "key_exists"
         | "third_party_auth_error_message"
         | "third_party_auth_no_email"
+        | "third_party_auth_non_matching_email"
         | "third_party_auth_no_sub"
         | "third_party_auth_unknown_error"
         | "email_already_verified"
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
+        | "third_party_switch_initiated"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -478,7 +520,7 @@ export interface components {
         | "expired_jwt_token"
         | "general_jwt_error"
         | "cannot_find_suitable_address_part"
-        | "address_part_not_unique"
+        | "slug_not_unique"
         | "user_is_not_member_of_organization"
         | "organization_has_no_other_owner"
         | "user_has_no_project_access"
@@ -684,6 +726,8 @@ export interface components {
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled"
+        | "sso_domain_not_allowed"
+        | "sso_login_forced_for_this_account"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -695,8 +739,34 @@ export interface components {
         | "current_subscription_is_not_trialing";
       params?: { [key: string]: unknown }[];
     };
+    ExampleItem: {
+      key: string;
+      keyNamespace?: string;
+      source: string;
+      target: string;
+    };
+    GetMySubscriptionDto: {
+      instanceId: string;
+      licenseKey: string;
+    };
     GoToCustomerPortalModel: {
       url: string;
+    };
+    InconsistentSubscriptionModel: {
+      id: components["schemas"]["SubscriptionId"];
+      organization?: components["schemas"]["SimpleOrganizationModel"];
+      /** Format: int64 */
+      organizationId: number;
+      stripeSubscriptionId: string;
+      stripeSubscriptionStatus: string;
+      tolgeeSubscriptionStatus:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
     };
     InvoiceModel: {
       /** Format: int64 */
@@ -712,12 +782,25 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
+    Metadata: {
+      closeItems: components["schemas"]["ExampleItem"][];
+      examples: components["schemas"]["ExampleItem"][];
+      keyDescription?: string;
+      languageDescription?: string;
+      projectDescription?: string;
+    };
     MtCreditsPriceModel: {
       /** Format: int64 */
       amount: number;
       /** Format: int64 */
       id: number;
       price: number;
+    };
+    MtResult: {
+      contextDescription?: string;
+      /** Format: int32 */
+      price: number;
+      translated?: string;
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
@@ -861,6 +944,27 @@ export interface components {
       /** Format: int64 */
       preferredAgencyId?: number;
     };
+    PrepareSetEeLicenceKeyModel: {
+      plan: components["schemas"]["SelfHostedEePlanModel"];
+      usage: components["schemas"]["UsageModel"];
+    };
+    PrepareSetLicenseKeyDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
+    ReleaseKeyDto: {
+      licenseKey: string;
+    };
+    ReportErrorDto: {
+      licenseKey: string;
+      stackTrace: string;
+    };
+    ReportUsageDto: {
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
     SelfHostedEeFreeSubscribeRequest: {
       /**
        * Format: int64
@@ -998,6 +1102,12 @@ export interface components {
         | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
     };
+    SetLicenseKeyLicensingDto: {
+      instanceId: string;
+      licenseKey: string;
+      /** Format: int64 */
+      seats: number;
+    };
     SimpleOrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
@@ -1018,6 +1128,11 @@ export interface components {
     };
     SubscribeModel: {
       url: string;
+    };
+    SubscriptionId: {
+      /** Format: int64 */
+      id: number;
+      type: "CLOUD" | "SELF_HOSTED";
     };
     SubscriptionUpdatePreviewItem: {
       amount: number;
@@ -1041,6 +1156,30 @@ export interface components {
       usedQuantity: number;
       /** Format: int64 */
       usedQuantityOverPlan: number;
+    };
+    TelemetryReportRequest: {
+      /** Format: int64 */
+      distinctLanguagesCount: number;
+      instanceId: string;
+      /** Format: int64 */
+      languagesCount: number;
+      /** Format: int64 */
+      projectsCount: number;
+      /** Format: int64 */
+      translationsCount: number;
+      /** Format: int64 */
+      usersCount: number;
+    };
+    TolgeeTranslateParams: {
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      keyName?: string;
+      metadata?: components["schemas"]["Metadata"];
+      pluralFormExamples?: { [key: string]: string };
+      pluralForms?: { [key: string]: string };
+      sourceTag: string;
+      targetTag: string;
+      text: string;
     };
     TranslationAgencyModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -1141,13 +1280,59 @@ export interface operations {
       };
     };
   };
+  /** Cancel local subscriptions */
+  cancelLocalSubscriptions: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelLocalSubscriptionsRequest"];
+      };
+    };
+  };
   getPlans_2: {
     parameters: {
       query: {
         /**
-         * Can be
-         * - private free, visible for organization
-         * - or paid (Assignable as trial)
+         * Filters only plans which can be assignable to the provided organization it.
+         *
+         * Plan can be assignable to organization because of one of these reasons:
+         * - plan is private free, visible to organization
+         * - plan is paid (Assignable as trial)
          */
         filterAssignableToOrganization?: number;
         filterPlanIds?: number[];
@@ -1465,6 +1650,49 @@ export interface operations {
             | "SSO"
             | "ORDER_TRANSLATION"
           )[];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns active cloud subscriptions, which have inconsistent state in Tolgee and Stripe */
+  getInconsistentSubscriptions: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelInconsistentSubscriptionModel"];
         };
       };
       /** Bad Request */
@@ -3765,6 +3993,366 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  prepareSetLicenseKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrepareSetEeLicenceKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrepareSetLicenseKeyDto"];
+      };
+    };
+  };
+  releaseKey: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReleaseKeyDto"];
+      };
+    };
+  };
+  reportError: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportErrorDto"];
+      };
+    };
+  };
+  reportUsage: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportUsageDto"];
+      };
+    };
+  };
+  onLicenceSetKey: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetLicenseKeyLicensingDto"];
+      };
+    };
+  };
+  getMySubscription: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEeSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetMySubscriptionDto"];
+      };
+    };
+  };
+  report: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TelemetryReportRequest"];
+      };
+    };
+  };
+  translate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["MtResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TolgeeTranslateParams"];
       };
     };
   };

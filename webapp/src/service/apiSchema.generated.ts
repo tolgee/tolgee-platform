@@ -1063,7 +1063,8 @@ export interface components {
         | "TAG_KEYS"
         | "UNTAG_KEYS"
         | "SET_KEYS_NAMESPACE"
-        | "AUTOMATION";
+        | "AUTOMATION"
+        | "BILLING_TRIAL_EXPIRATION_NOTICE";
       /**
        * Format: int64
        * @description The time when the job was last updated (status change)
@@ -1353,7 +1354,6 @@ export interface components {
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
-        | "APPLE_XCSTRINGS"
         | "ANDROID_XML"
         | "COMPOSE_XML"
         | "FLUTTER_ARB"
@@ -1363,7 +1363,8 @@ export interface components {
         | "JSON_I18NEXT"
         | "CSV"
         | "RESX_ICU"
-        | "XLSX";
+        | "XLSX"
+        | "APPLE_XCSTRINGS";
       /** Format: int64 */
       id: number;
       /**
@@ -1465,7 +1466,6 @@ export interface components {
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
-        | "APPLE_XCSTRINGS"
         | "ANDROID_XML"
         | "COMPOSE_XML"
         | "FLUTTER_ARB"
@@ -1475,7 +1475,8 @@ export interface components {
         | "JSON_I18NEXT"
         | "CSV"
         | "RESX_ICU"
-        | "XLSX";
+        | "XLSX"
+        | "APPLE_XCSTRINGS";
       /**
        * @description Languages to be contained in export.
        *
@@ -1725,6 +1726,7 @@ export interface components {
         | "PAST_DUE"
         | "UNPAID"
         | "ERROR"
+        | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE";
     };
     EntityDescriptionWithRelations: {
@@ -1784,7 +1786,7 @@ export interface components {
         | "expired_jwt_token"
         | "general_jwt_error"
         | "cannot_find_suitable_address_part"
-        | "address_part_not_unique"
+        | "slug_not_unique"
         | "user_is_not_member_of_organization"
         | "organization_has_no_other_owner"
         | "user_has_no_project_access"
@@ -1972,7 +1974,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -1992,7 +1993,16 @@ export interface components {
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
-        | "sso_login_forced_for_this_account";
+        | "sso_login_forced_for_this_account"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation"
+        | "cannot_cancel_trial"
+        | "cannot_update_without_modification"
+        | "current_subscription_is_not_trialing";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2015,7 +2025,6 @@ export interface components {
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
-        | "APPLE_XCSTRINGS"
         | "ANDROID_XML"
         | "COMPOSE_XML"
         | "FLUTTER_ARB"
@@ -2025,7 +2034,8 @@ export interface components {
         | "JSON_I18NEXT"
         | "CSV"
         | "RESX_ICU"
-        | "XLSX";
+        | "XLSX"
+        | "APPLE_XCSTRINGS";
       mediaType: string;
     };
     ExportParams: {
@@ -2072,7 +2082,6 @@ export interface components {
         | "PO"
         | "APPLE_STRINGS_STRINGSDICT"
         | "APPLE_XLIFF"
-        | "APPLE_XCSTRINGS"
         | "ANDROID_XML"
         | "COMPOSE_XML"
         | "FLUTTER_ARB"
@@ -2082,7 +2091,8 @@ export interface components {
         | "JSON_I18NEXT"
         | "CSV"
         | "RESX_ICU"
-        | "XLSX";
+        | "XLSX"
+        | "APPLE_XCSTRINGS";
       /**
        * @description Languages to be contained in export.
        *
@@ -2236,6 +2246,7 @@ export interface components {
         | "STRINGS"
         | "STRINGSDICT"
         | "APPLE_XLIFF"
+        | "APPLE_XCSTRINGS"
         | "PROPERTIES_ICU"
         | "PROPERTIES_JAVA"
         | "PROPERTIES_UNKNOWN"
@@ -2262,6 +2273,12 @@ export interface components {
        * When null, Tolgee will try to guess the language from the file contents or file name.
        */
       languageTag?: string;
+      /**
+       * @description Tags of languages to be imported. When null, all languages from will be imported.
+       *
+       * This field is useful when the file contains multiple languages and you want to import only some of them. For example when importing Apple String Catalog (APPLE_XCSTRINGS), you might want only to import the base language.
+       */
+      languageTagsToImport?: string[];
       /** @description Namespace to import the file to. If not provided, the key will be imported without namespace. */
       namespace?: string;
     };
@@ -3363,6 +3380,7 @@ export interface components {
       usage: components["schemas"]["UsageModel"];
     };
     PrivateOrganizationModel: {
+      activeCloudSubscription?: components["schemas"]["PublicCloudSubscriptionModel"];
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
       /**
@@ -3624,6 +3642,21 @@ export interface components {
     };
     PublicBillingConfigurationDTO: {
       enabled: boolean;
+    };
+    /** @example Current active subscription info */
+    PublicCloudSubscriptionModel: {
+      cancelAtPeriodEnd: boolean;
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE";
+      /** Format: int64 */
+      trialEnd?: number;
     };
     PublicConfigurationDTO: {
       allowRegistrations: boolean;
@@ -4141,7 +4174,7 @@ export interface components {
         | "expired_jwt_token"
         | "general_jwt_error"
         | "cannot_find_suitable_address_part"
-        | "address_part_not_unique"
+        | "slug_not_unique"
         | "user_is_not_member_of_organization"
         | "organization_has_no_other_owner"
         | "user_has_no_project_access"
@@ -4329,7 +4362,6 @@ export interface components {
         | "cannot_subscribe_to_free_plan"
         | "plan_auto_assignment_only_for_free_plans"
         | "plan_auto_assignment_only_for_private_plans"
-        | "plan_auto_assignment_organization_ids_not_in_for_organization_ids"
         | "task_not_found"
         | "task_not_finished"
         | "task_not_open"
@@ -4349,7 +4381,16 @@ export interface components {
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
-        | "sso_login_forced_for_this_account";
+        | "sso_login_forced_for_this_account"
+        | "date_has_to_be_in_the_future"
+        | "custom_plan_and_plan_id_cannot_be_set_together"
+        | "specify_plan_id_or_custom_plan"
+        | "custom_plans_has_to_be_private"
+        | "cannot_create_free_plan_with_prices"
+        | "subscription_not_scheduled_for_cancellation"
+        | "cannot_cancel_trial"
+        | "cannot_update_without_modification"
+        | "current_subscription_is_not_trialing";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -10309,7 +10350,6 @@ export interface operations {
           | "PO"
           | "APPLE_STRINGS_STRINGSDICT"
           | "APPLE_XLIFF"
-          | "APPLE_XCSTRINGS"
           | "ANDROID_XML"
           | "COMPOSE_XML"
           | "FLUTTER_ARB"
@@ -10319,7 +10359,8 @@ export interface operations {
           | "JSON_I18NEXT"
           | "CSV"
           | "RESX_ICU"
-          | "XLSX";
+          | "XLSX"
+          | "APPLE_XCSTRINGS";
         /**
          * Delimiter to structure file content.
          *
@@ -10404,10 +10445,13 @@ export interface operations {
       };
     };
     responses: {
-      /** OK */
+      /**
+       * When multiple files are exported, they are zipped and returned as a single zip file.
+       * When a single file is exported, it is returned directly.
+       */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/*": unknown;
         };
       };
       /** Bad Request */
@@ -10452,10 +10496,13 @@ export interface operations {
       };
     };
     responses: {
-      /** OK */
+      /**
+       * When multiple files are exported, they are zipped and returned as a single zip file.
+       * When a single file is exported, it is returned directly.
+       */
       200: {
         content: {
-          "application/json": components["schemas"]["StreamingResponseBody"];
+          "application/*": unknown;
         };
       };
       /** Bad Request */
