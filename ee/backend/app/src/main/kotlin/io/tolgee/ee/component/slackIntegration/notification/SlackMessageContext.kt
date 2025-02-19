@@ -64,7 +64,7 @@ class SlackMessageContext(
   /**
    * If this is empty, it means that the operation is probably big
    */
-  val translationChangeSizeFromModifiedEntities: Long by lazy {
+  private val translationChangeSizeFromModifiedEntities: Long by lazy {
     activityData?.modifiedEntities?.get("Translation")?.size?.toLong() ?: 0L
   }
 

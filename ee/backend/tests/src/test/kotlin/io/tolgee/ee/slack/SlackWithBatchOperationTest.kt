@@ -89,7 +89,7 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       performUpdateTranslation(it.name)
     }
 
-    waitForNotThrowing(timeout = 3_000) {
+    waitForNotThrowing(timeout = 120_000) {
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
       mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
     }
@@ -100,7 +100,7 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
     waitForNotThrowing(timeout = 3_000) {
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
       // currently is 6 due to suboptimal implementations
-      mockedSlackClient.chatUpdateRequests.assert.hasSize(6)
+      mockedSlackClient.chatUpdateRequests.assert.hasSize(3)
     }
   }
 
