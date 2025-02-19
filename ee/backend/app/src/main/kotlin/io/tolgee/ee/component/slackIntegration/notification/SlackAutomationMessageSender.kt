@@ -61,14 +61,12 @@ class SlackAutomationMessageSender(
     val messagesToCreate = mutableListOf<SlackMessageDto>()
 
     for (message in messagesDto) {
-      if (!isExplicitlySubscribedToAnyUpdatedLanguage(message, context.slackConfig)) {
-        // We only want to send message when the user is explicitly subscribed to the language.
-        // If they're subscribed to all languages, we just update the previous messages to not spam so much
-        continue
-      }
-
       if (message.keyId in savedMessagesByKey) {
         messagesToUpdate.getOrPut(message.keyId) { mutableListOf() }.add(message)
+        // for explicitly subscribed languages we want to always send the new message on change
+        if (isExplicitlySubscribedToAnyUpdatedLanguage(message, context.slackConfig)) {
+          messagesToCreate.add(message)
+        }
       } else {
         messagesToCreate.add(message)
       }
@@ -83,7 +81,6 @@ class SlackAutomationMessageSender(
     // Otherwise Slack will complain about too many requests
     if (messagesToUpdate.size > MAX_MESSAGES_TO_UPDATE) {
       logger.debug("Too many messages to update, skipping")
-
     } else {
       logger.debug("Updating {} messages", messagesToUpdate.size)
       for ((keyId, messages) in messagesToUpdate) {
