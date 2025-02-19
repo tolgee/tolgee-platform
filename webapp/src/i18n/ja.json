@@ -939,7 +939,7 @@
   "namespace_menu_rename": "名前空間の名前を変更",
   "namespace_rename_cancel": "キャンセル",
   "namespace_rename_confirm": "名前を変更",
-  "namespace_rename_confirmation_message": "本当に名前空間の名前をへんこうしますか? この変更は、必ず翻訳済みアプリケーションに反映してください。",
+  "namespace_rename_confirmation_message": "本当に名前空間の名前を変更しますか？ この変更は、必ず翻訳済みアプリケーションに反映してください。",
   "namespace_rename_confirmation_title": "確認",
   "namespace_rename_placeholder": "新しい名前...",
   "namespace_rename_success": "名前空間の名前が変更されました",

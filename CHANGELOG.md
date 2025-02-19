@@ -1,3 +1,10 @@
+## [3.101.2](https://github.com/tolgee/tolgee-platform/compare/v3.101.1...v3.101.2) (2025-02-19)
+
+
+### Bug Fixes
+
+* update netty dependency ([#2922](https://github.com/tolgee/tolgee-platform/issues/2922)) ([c74bad6](https://github.com/tolgee/tolgee-platform/commit/c74bad6969bb96271467fd08605c951b086096dc)), closes [#2920](https://github.com/tolgee/tolgee-platform/issues/2920) [#2921](https://github.com/tolgee/tolgee-platform/issues/2921)
+
 ## [3.101.1](https://github.com/tolgee/tolgee-platform/compare/v3.101.0...v3.101.1) (2025-02-18)
 
 
