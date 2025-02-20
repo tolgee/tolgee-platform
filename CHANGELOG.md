@@ -1,3 +1,39 @@
+# [3.102.0](https://github.com/tolgee/tolgee-platform/compare/v3.101.3...v3.102.0) (2025-02-20)
+
+
+### Bug Fixes
+
+* Add tests & final touch ([4f9483d](https://github.com/tolgee/tolgee-platform/commit/4f9483d1ab844adc741a1b49662b74f9e5d18066))
+* Build ([fe5d435](https://github.com/tolgee/tolgee-platform/commit/fe5d4351e5e892f89116c523b773dffebc134bc6))
+* Demo feedback issues ([b9cae0e](https://github.com/tolgee/tolgee-platform/commit/b9cae0e2102e753b6ed5a9400a0be81c51ce5ccd))
+* Enable canceling trial early and subscribing to a real plan ([0041654](https://github.com/tolgee/tolgee-platform/commit/0041654217306444ed2fbcec004291cafb6557f3))
+* Free trials and tests ([ecd0259](https://github.com/tolgee/tolgee-platform/commit/ecd0259507e9a8b8bc1c59f06670ac4b68dcf46e))
+* Improvements, fixes and e2e test ([91bcb63](https://github.com/tolgee/tolgee-platform/commit/91bcb63a0ce5b9f7bd66002b8ce19de7b5cdd383))
+* Limit trials ([78db1e4](https://github.com/tolgee/tolgee-platform/commit/78db1e4f7143e8dcde3800a1e17371590494931e))
+* Make scheduling working correctly ([62cc7b3](https://github.com/tolgee/tolgee-platform/commit/62cc7b3c10defe010d4a5acf562c6b4783a31bcf))
+* Proper limit error & Test the limits ([9f38006](https://github.com/tolgee/tolgee-platform/commit/9f38006041eb1f70984b24d9dd36a242105ae47d))
+* remove it ([a747154](https://github.com/tolgee/tolgee-platform/commit/a747154d0e057472b55e30ab67548084f6d0bc44))
+* Remove the trial subscription on create event & test it ([e46e9d6](https://github.com/tolgee/tolgee-platform/commit/e46e9d6c67b6ea0493df5a43394021f002366c83))
+* Test trial limit reaching message & fixes ([ec2bf08](https://github.com/tolgee/tolgee-platform/commit/ec2bf081195a4313dbd0bc03c916d41219296313))
+* Trial announcement ([41fcbb2](https://github.com/tolgee/tolgee-platform/commit/41fcbb2bfb06c7e4fc947747e4185ac3545d555d))
+* Trial badge ([b958c5e](https://github.com/tolgee/tolgee-platform/commit/b958c5ec9f6f9d4690369ad50e675109da2de59f))
+* Update schema ([6daab14](https://github.com/tolgee/tolgee-platform/commit/6daab14a535450b76d6245e4916724f5bcc07380))
+
+
+### Features
+
+* All types of free trial with notice ([5b467de](https://github.com/tolgee/tolgee-platform/commit/5b467deb2714cce3a0a3ced319a927ea71dd2440))
+* Cloud billing, trials and admin > working ([1c42785](https://github.com/tolgee/tolgee-platform/commit/1c427854009ed74604e0a9db78e8b1c1c579a29c))
+* Free trial & administration subscriptions view ([75c713e](https://github.com/tolgee/tolgee-platform/commit/75c713e0b92de5b72ad2d5df92666b2e45b5e2b5))
+* Free trial assigment & end handling ([2e1fe6c](https://github.com/tolgee/tolgee-platform/commit/2e1fe6ca0e36599181836d217f17af558e8e808f))
+* Remove all trial renew logic ([c2786ca](https://github.com/tolgee/tolgee-platform/commit/c2786cab10236dd4854d24940944e5d25b0988a0))
+* Send e-mail about expiration & improvements ([805a933](https://github.com/tolgee/tolgee-platform/commit/805a93305d27495df70774639dfe55c4ba50655d))
+* Send e-mail about expiration > Tests and fixes ([1e7af67](https://github.com/tolgee/tolgee-platform/commit/1e7af67c3768bdf0e595d96b7537b0413bee9b40))
+* Server task runner (draft) ([eee7a2f](https://github.com/tolgee/tolgee-platform/commit/eee7a2f6e86cefd5f24dc4f1e9055c242714a9ac))
+* Simplify trial messaging & fix e-mails ([62a7ee0](https://github.com/tolgee/tolgee-platform/commit/62a7ee0a8b78af4cf2394fe0b454329a16575cf9))
+* trial info popover ([1a11f2f](https://github.com/tolgee/tolgee-platform/commit/1a11f2fe1b2d2f8849ec7fb8d5b2b9e0b7158370))
+* Trials frontend > untested ([cb6bcce](https://github.com/tolgee/tolgee-platform/commit/cb6bcce58512fde86bb7701308181b5f7be870dc))
+
 ## [3.101.3](https://github.com/tolgee/tolgee-platform/compare/v3.101.2...v3.101.3) (2025-02-20)
 
 
