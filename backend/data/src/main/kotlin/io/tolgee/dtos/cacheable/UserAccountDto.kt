@@ -16,6 +16,7 @@ data class UserAccountDto(
   val tokensValidNotBefore: Date?,
   val emailVerified: Boolean,
   val thirdPartyAuth: ThirdPartyAuthType?,
+//  val ssoRequired: Boolean,
   val ssoRefreshToken: String?,
   val ssoSessionExpiry: Date?,
 ) : Serializable {
@@ -32,6 +33,7 @@ data class UserAccountDto(
         tokensValidNotBefore = entity.tokensValidNotBefore,
         emailVerified = entity.emailVerification == null,
         thirdPartyAuth = entity.thirdPartyAuthType,
+//        ssoRequired = entity.organizationRoles.firstOrNull { it.managed }?.organization?.ssoTenant?.force == true,
         ssoRefreshToken = entity.ssoRefreshToken,
         ssoSessionExpiry = entity.ssoSessionExpiry,
       )

@@ -16,6 +16,8 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.BypassEmailVerification
+import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -56,6 +58,7 @@ class V2UserController(
     description = "Resends email verification email to currently authenticated user.",
   )
   @PostMapping("/send-email-verification")
+  @BypassEmailVerification
   fun sendEmailVerification(request: HttpServletRequest) {
     val user = authenticationFacade.authenticatedUserEntity
     emailVerificationService.resendEmailVerification(user, request)
@@ -66,6 +69,8 @@ class V2UserController(
     description = "Returns information about currently authenticated user.",
   )
   @GetMapping("")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   @AllowApiAccess
   @OpenApiOrderExtension(1)
   fun getInfo(): PrivateUserAccountModel {
@@ -163,6 +168,8 @@ class V2UserController(
 
   @PostMapping("/generate-super-token")
   @Operation(summary = "Get super JWT", description = "Generates new JWT token permitted to sensitive operations")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun getSuperToken(
     @RequestBody @Valid
     req: SuperTokenRequest,

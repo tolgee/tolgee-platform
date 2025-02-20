@@ -25,6 +25,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.BypassEmailVerification
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationRoleService

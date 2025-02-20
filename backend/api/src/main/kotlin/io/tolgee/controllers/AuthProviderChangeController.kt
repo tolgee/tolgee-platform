@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping("/v2/auth-provider") // TODO: I should probably use the v2
+@RequestMapping("/v2/auth-provider")
 @AuthenticationTag
 @OpenApiHideFromPublicDocs
 class AuthProviderChangeController(
@@ -53,7 +53,7 @@ class AuthProviderChangeController(
   @Transactional
   fun acceptChangeAuthProvider(): JwtAuthenticationResponse {
     val user = authenticationFacade.authenticatedUserEntity
-    authProviderChangeService.acceptProviderChange(user)
+    authProviderChangeService.accept(user)
     userAccountService.invalidateTokens(user)
     return JwtAuthenticationResponse(
       jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
@@ -65,6 +65,6 @@ class AuthProviderChangeController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @Transactional
   fun rejectChangeAuthProvider() {
-    authProviderChangeService.rejectProviderChange(authenticationFacade.authenticatedUserEntity)
+    authProviderChangeService.reject(authenticationFacade.authenticatedUserEntity)
   }
 }

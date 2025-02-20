@@ -4,12 +4,13 @@ import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
-import io.tolgee.model.UserAccount
 
 interface TenantService {
   fun getEnabledConfigByDomainOrNull(domain: String): SsoTenantConfig?
 
   fun getEnabledConfigByDomain(domain: String): SsoTenantConfig
+
+  fun isSsoForcedForDomain(domain: String?): Boolean
 
   fun save(tenant: SsoTenant): SsoTenant
 
@@ -25,8 +26,4 @@ interface TenantService {
     request: SsoTenantDto,
     organization: Organization,
   ): SsoTenant
-
-  fun checkSsoNotRequired(username: String)
-
-  fun checkSsoNotRequiredOrAuthProviderChangeActive(userAccount: UserAccount)
 }

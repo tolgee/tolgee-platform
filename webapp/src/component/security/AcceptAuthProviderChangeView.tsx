@@ -1,14 +1,11 @@
 import { useHistory } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Paper, styled, Typography } from '@mui/material';
+import { Box, Button, Paper, styled, Typography } from '@mui/material';
 
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -48,12 +45,18 @@ const AcceptAuthProviderChangeView: React.FC = () => {
 
   useWindowTitle(t('accept_auth_provider_change_title'));
 
-  const { setAuthProviderChange, redirectAfterLogin, handleAfterLogin } =
-    useGlobalActions();
-  const authProviderChange = useGlobalContext((c) => c.auth.authProviderChange);
+  const { handleAfterLogin } = useGlobalActions();
 
   const acceptChange = useApiMutation({
     url: '/v2/auth-provider/changed/accept',
+    method: 'post',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+    },
+  });
+
+  const rejectChange = useApiMutation({
+    url: '/v2/auth-provider/changed/reject',
     method: 'post',
     fetchOptions: {
       disableAutoErrorHandle: true,
@@ -77,8 +80,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     method: 'get',
     options: {
       onError(e) {
-        setAuthProviderChange(false);
-        history.replace(LINKS.PROJECTS.build());
+        history.replace(LINKS.USER_ACCOUNT_SECURITY.build());
         if (e.code) {
           messageService.error(<TranslatedError code={e.code} />);
         }
@@ -91,12 +93,25 @@ const AcceptAuthProviderChangeView: React.FC = () => {
       {},
       {
         onSuccess(r) {
-          setAuthProviderChange(false);
           handleAfterLogin(r);
           messageService.success(<T keyName="auth_provider_change_accepted" />);
         },
         onSettled() {
-          history.replace(LINKS.PROJECTS.build());
+          history.replace(LINKS.USER_ACCOUNT_SECURITY.build());
+        },
+      }
+    );
+  }
+
+  function handleReject() {
+    rejectChange.mutate(
+      {},
+      {
+        onSuccess(r) {
+          messageService.success(<T keyName="auth_provider_change_rejected" />);
+        },
+        onSettled() {
+          history.replace(LINKS.USER_ACCOUNT_SECURITY.build());
         },
       }
     );
@@ -120,7 +135,9 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     b: <b />,
   };
 
-  if (accountType === 'MANAGED' && ssoDomain) {
+  const willBeManaged = accountType === 'MANAGED';
+
+  if (willBeManaged) {
     titleText = t('accept_auth_provider_change_managed_sso_title');
     infoText = (
       <T
@@ -133,11 +150,6 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     infoText = (
       <T keyName="accept_auth_provider_change_description" params={params} />
     );
-  }
-
-  if (!authProviderChange) {
-    redirectAfterLogin();
-    return null;
   }
 
   return (
@@ -163,7 +175,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
                 justifyContent="center"
               >
                 <LoadingButton
-                  loading={acceptChange.isLoading}
+                  loading={acceptChange.isLoading || rejectChange.isLoading}
                   variant="contained"
                   color="primary"
                   onClick={handleAccept}
@@ -171,6 +183,16 @@ const AcceptAuthProviderChangeView: React.FC = () => {
                 >
                   {t('accept_auth_provider_change_accept')}
                 </LoadingButton>
+                {!willBeManaged && (
+                  <LoadingButton
+                    loading={acceptChange.isLoading || rejectChange.isLoading}
+                    variant="outlined"
+                    onClick={handleReject}
+                    data-cy="accept-invitation-decline"
+                  >
+                    {t('accept_invitation_decline')}
+                  </LoadingButton>
+                )}
               </Box>
             </Box>
           </StyledPaper>
