@@ -48,7 +48,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   const { handleAfterLogin } = useGlobalActions();
 
   const acceptChange = useApiMutation({
-    url: '/v2/auth-provider/changed/accept',
+    url: '/v2/auth-provider/change',
     method: 'post',
     fetchOptions: {
       disableAutoErrorHandle: true,
@@ -56,15 +56,15 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   });
 
   const rejectChange = useApiMutation({
-    url: '/v2/auth-provider/changed/reject',
-    method: 'post',
+    url: '/v2/auth-provider/change',
+    method: 'delete',
     fetchOptions: {
       disableAutoErrorHandle: true,
     },
   });
 
   const authProviderCurrentInfo = useApiQuery({
-    url: '/v2/auth-provider/current',
+    url: '/v2/auth-provider',
     method: 'get',
     options: {
       onError(e) {
@@ -76,7 +76,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   });
 
   const authProviderChangeInfo = useApiQuery({
-    url: '/v2/auth-provider/changed',
+    url: '/v2/auth-provider/change',
     method: 'get',
     options: {
       onError(e) {

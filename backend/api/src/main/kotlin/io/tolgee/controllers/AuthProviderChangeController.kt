@@ -7,6 +7,8 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.BypassEmailVerification
+import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -14,6 +16,7 @@ import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -30,25 +33,29 @@ class AuthProviderChangeController(
   private val userAccountService: UserAccountService,
   private val jwtService: JwtService,
 ) {
-  @GetMapping("/current")
+  @GetMapping("")
   @Operation(summary = "Get current third party authentication provider")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun getCurrentAuthProvider(): AuthProviderDto {
     val info = authProviderChangeService.getCurrent(authenticationFacade.authenticatedUserEntity)
     return info ?: throw NotFoundException()
   }
 
-  @GetMapping("/changed")
+  @GetMapping("/change")
   @Operation(summary = "Get info about authentication provider which can replace the current one")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @BypassForcedSsoAuthentication
   fun getChangedAuthProvider(): AuthProviderDto {
     val info = authProviderChangeService.getRequestedChange(authenticationFacade.authenticatedUserEntity)
     return info ?: throw NotFoundException()
   }
 
-  @PostMapping("/changed/accept")
+  @PostMapping("/change")
   @Operation(summary = "Accept change of the third party authentication provider")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @BypassForcedSsoAuthentication
   @RequiresSuperAuthentication
   @Transactional
   fun acceptChangeAuthProvider(): JwtAuthenticationResponse {
@@ -60,9 +67,10 @@ class AuthProviderChangeController(
     )
   }
 
-  @PostMapping("/changed/reject")
+  @DeleteMapping("/change")
   @Operation(summary = "Reject change of the third party authentication provider")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @BypassForcedSsoAuthentication
   @Transactional
   fun rejectChangeAuthProvider() {
     authProviderChangeService.reject(authenticationFacade.authenticatedUserEntity)
