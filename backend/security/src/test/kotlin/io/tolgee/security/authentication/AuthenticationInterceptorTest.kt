@@ -4,10 +4,13 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.TenantService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,7 +23,12 @@ class AuthenticationInterceptorTest {
 
   private val authenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
 
-  private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade, authenticationProperties)
+  private val emailVerificationService = Mockito.mock(EmailVerificationService::class.java)
+
+  private val tenantService = Mockito.mock(TenantService::class.java)
+
+  private val authenticationInterceptor =
+    AuthenticationInterceptor(authenticationFacade, authenticationProperties, emailVerificationService, tenantService)
 
   private val mockMvc =
     MockMvcBuilders.standaloneSetup(TestController::class.java)
@@ -34,6 +42,8 @@ class AuthenticationInterceptorTest {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
     Mockito.`when`(userAccount.needsSuperJwt).thenReturn(true)
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(true)
+    Mockito.`when`(tenantService.isSsoForcedForDomain(any())).thenReturn(false)
   }
 
   @AfterEach
@@ -71,6 +81,18 @@ class AuthenticationInterceptorTest {
     mockMvc.perform(get("/requires-super-auth")).andIsOk
   }
 
+  @Test
+  fun `rejects access if the user does not have a verified email`() {
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(false)
+    mockMvc.perform(get("/email-verified")).andIsForbidden
+  }
+
+  @Test
+  fun `not throw when annotated by email verification bypass`() {
+    Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(false)
+    mockMvc.perform(get("/email-bypass")).andIsOk
+  }
+
   @RestController
   class TestController {
     @GetMapping("/no-annotation")
@@ -83,5 +105,12 @@ class AuthenticationInterceptorTest {
     @GetMapping("/requires-super-auth")
     @RequiresSuperAuthentication
     fun superAuth(): String = "hello!"
+
+    @GetMapping("/email-bypass")
+    @BypassEmailVerification
+    fun emailBypass(): String = "hello!"
+
+    @GetMapping("/email-verified")
+    fun emailVerified(): String = "hello!"
   }
 }

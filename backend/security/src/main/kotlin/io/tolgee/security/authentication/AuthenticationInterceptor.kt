@@ -86,9 +86,11 @@ class AuthenticationInterceptor(
       throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
     }
 
-    val user = authenticationFacade.authenticatedUser
-    checkEmailVerificationOrThrow(user, handler)
-    checkNonSsoAccessAllowed(user, handler)
+    if (authenticationFacade.isAuthenticated) {
+      val user = authenticationFacade.authenticatedUser
+      checkEmailVerificationOrThrow(user, handler)
+      checkNonSsoAccessAllowed(user, handler)
+    }
 
     return true
   }
