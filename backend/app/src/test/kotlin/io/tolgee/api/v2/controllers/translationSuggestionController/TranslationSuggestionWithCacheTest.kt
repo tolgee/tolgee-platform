@@ -5,7 +5,8 @@ import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
-import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
+import io.tolgee.component.mtBucketSizeProvider.PayAsYouGoCreditsProvider
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
@@ -16,13 +17,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
@@ -40,7 +41,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @Autowired
   @MockBean
-  lateinit var mtBucketSizeProvider: MtBucketSizeProvider
+  lateinit var payAsYouGoCreditsProvider: PayAsYouGoCreditsProvider
 
   @Autowired
   @MockBean
@@ -57,6 +58,11 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   lateinit var cacheMock: Cache
 
   lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
+
+  @Suppress("LateinitVarOverridesLateinitVar")
+  @MockBean
+  @SpyBean
+  override lateinit var machineTranslationProperties: MachineTranslationProperties
 
   @BeforeEach
   fun setup() {
@@ -75,7 +81,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
-    whenever(mtBucketSizeProvider.getSize(anyOrNull())).thenAnswer {
+    whenever(machineTranslationProperties.freeCreditsAmount).thenAnswer {
       size
     }
   }

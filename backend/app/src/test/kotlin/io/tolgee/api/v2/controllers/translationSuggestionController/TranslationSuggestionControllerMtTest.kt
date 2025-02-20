@@ -11,7 +11,7 @@ import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
-import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
@@ -44,6 +43,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
@@ -55,10 +55,6 @@ import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
 class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
-
-  @Autowired
-  @MockBean
-  lateinit var mtBucketSizeProvider: MtBucketSizeProvider
 
   @Autowired
   @MockBean
@@ -93,6 +89,11 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @MockBean
   override lateinit var cacheManager: CacheManager
 
+  @Suppress("LateinitVarOverridesLateinitVar")
+  @MockBean
+  @SpyBean
+  override lateinit var machineTranslationProperties: MachineTranslationProperties
+
   lateinit var cacheMock: Cache
 
   lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
@@ -118,7 +119,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
-    whenever(mtBucketSizeProvider.getSize(anyOrNull())).thenAnswer {
+    whenever(machineTranslationProperties.freeCreditsAmount).thenAnswer {
       size
     }
   }
