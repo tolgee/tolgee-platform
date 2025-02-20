@@ -44,6 +44,7 @@ class SlackChannelMessagesOperations(
         it.channel(channelId)
         it.blocks(blocks)
         extra?.configure(it)
+        it
       }
     }
 
@@ -60,6 +61,7 @@ class SlackChannelMessagesOperations(
           it.blocks(blocks)
         }
         extra?.configure(it)
+        it
       }
     }
 
@@ -74,6 +76,7 @@ class SlackChannelMessagesOperations(
         it.channel(channelId)
         it.ts(messageTimestamp)
         update?.configure(it)
+        it
       }
     }
 
