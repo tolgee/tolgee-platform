@@ -1,3 +1,10 @@
+## [3.102.1](https://github.com/tolgee/tolgee-platform/compare/v3.102.0...v3.102.1) (2025-02-20)
+
+
+### Bug Fixes
+
+* NPE in Slack integration. ([b963bc5](https://github.com/tolgee/tolgee-platform/commit/b963bc564554cb0f2d61b676ec08c9b8a5ad2e2e))
+
 # [3.102.0](https://github.com/tolgee/tolgee-platform/compare/v3.101.3...v3.102.0) (2025-02-20)
 
 
