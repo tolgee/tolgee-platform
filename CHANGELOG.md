@@ -1,3 +1,15 @@
+## [3.101.3](https://github.com/tolgee/tolgee-platform/compare/v3.101.2...v3.101.3) (2025-02-20)
+
+
+### Bug Fixes
+
+* Batch slack spamming > not working test ([115832e](https://github.com/tolgee/tolgee-platform/commit/115832e001263289ac3942f16b62683f167bcd6d))
+* Fix tests ([0322633](https://github.com/tolgee/tolgee-platform/commit/03226336a5461a786f056d740f81ad89fce4e3ae))
+* Fix tests & little refactor ([7f90736](https://github.com/tolgee/tolgee-platform/commit/7f90736d2baeb9af2f571bac81e6e7962b0593f7))
+* Fix the spamming > batch operation automation is not executed until the batch operation completes and merges the activity ([69fb908](https://github.com/tolgee/tolgee-platform/commit/69fb908af88b31901d5e5bb8507ac8dd863f34ec))
+* spamming on TRANSLATION_DATA_MODIFICATION operation & tests ([ef27132](https://github.com/tolgee/tolgee-platform/commit/ef271328c10c8d9e3d4e95d7ca5af4846fe3c9a3))
+* The explicit message sending bug and tests ([3bf51b9](https://github.com/tolgee/tolgee-platform/commit/3bf51b9ecd2b5b16823618994208ffa24019e564))
+
 ## [3.101.2](https://github.com/tolgee/tolgee-platform/compare/v3.101.1...v3.101.2) (2025-02-19)
 
 
