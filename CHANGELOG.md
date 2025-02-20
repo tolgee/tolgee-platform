@@ -1,3 +1,10 @@
+## [3.102.2](https://github.com/tolgee/tolgee-platform/compare/v3.102.1...v3.102.2) (2025-02-20)
+
+
+### Bug Fixes
+
+* Prevent assigning non-active plans ([8f85996](https://github.com/tolgee/tolgee-platform/commit/8f85996c3b7eaddb5cf1c384558154bb661cec22))
+
 ## [3.102.1](https://github.com/tolgee/tolgee-platform/compare/v3.102.0...v3.102.1) (2025-02-20)
 
 
