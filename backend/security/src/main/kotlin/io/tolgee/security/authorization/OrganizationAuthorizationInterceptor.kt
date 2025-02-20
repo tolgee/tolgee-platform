@@ -23,7 +23,6 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationRoleService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -45,8 +44,6 @@ class OrganizationAuthorizationInterceptor(
   @Lazy
   private val requestContextService: RequestContextService,
   private val organizationHolder: OrganizationHolder,
-  @Lazy
-  private val emailVerificationService: EmailVerificationService,
 ) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -55,10 +52,7 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val user = authenticationFacade.authenticatedUser
-    checkEmailVerificationOrThrow(emailVerificationService::isVerified, user, handler)
-
-    val userId = user.id
+    val userId = authenticationFacade.authenticatedUser.id
     val organization =
       requestContextService.getTargetOrganization(request)
         // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.

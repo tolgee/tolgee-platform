@@ -18,6 +18,8 @@ import io.tolgee.model.Pat
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.BypassEmailVerification
+import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.service.security.PatService
 import jakarta.validation.Valid
@@ -50,6 +52,8 @@ class PatController(
 ) : IController {
   @GetMapping(value = [""])
   @Operation(summary = "Get PAKs")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun getAll(
     @ParameterObject pageable: Pageable,
   ): PagedModel<PatModel> {
@@ -61,6 +65,8 @@ class PatController(
 
   @GetMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Get one PAK")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun get(
     @PathVariable id: Long,
   ): PatModel {
@@ -111,6 +117,8 @@ class PatController(
   @DeleteMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Delete PAK", description = "Deletes Personal Access Token")
   @RequiresSuperAuthentication
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun delete(
     @PathVariable id: Long,
   ) {

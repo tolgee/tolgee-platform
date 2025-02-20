@@ -10,7 +10,6 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
-import io.tolgee.service.TenantService
 import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -30,7 +29,6 @@ class GoogleOAuthDelegate(
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
   private val authProviderChangeService: AuthProviderChangeService,
-  private val tenantService: TenantService,
 ) : ThirdPartyAuthDelegate {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
@@ -89,8 +87,6 @@ class GoogleOAuthDelegate(
 
         val userAccount = findOrCreateAccount(userResponse, invitationCode)
 
-        tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
-
         val jwt = jwtService.emitToken(userAccount.id)
         return JwtAuthenticationResponse(jwt)
       }
@@ -103,7 +99,7 @@ class GoogleOAuthDelegate(
       }
       throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
     } catch (e: HttpClientErrorException) {
-      throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
+      throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR, null, e)
     }
   }
 
@@ -113,20 +109,24 @@ class GoogleOAuthDelegate(
   ): UserAccount {
     val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-    userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)?.let {
-      return it
+    val userAccount = userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)
+
+    authProviderChangeService.initiate(
+      userAccount,
+      googleEmail,
+      AuthProviderChangeData(
+        UserAccount.AccountType.THIRD_PARTY,
+        ThirdPartyAuthType.GOOGLE,
+        userResponse.sub,
+      ),
+    )
+
+    if (userAccount != null) {
+      return userAccount
     }
 
     userAccountService.findActive(googleEmail)?.let {
-      authProviderChangeService.initiateProviderChange(
-        AuthProviderChangeData(
-          it,
-          UserAccount.AccountType.THIRD_PARTY,
-          ThirdPartyAuthType.GOOGLE,
-          userResponse.sub,
-        ),
-      )
-      return it
+      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
     }
 
     val newUserAccount = UserAccount()

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.hateoas.userPreferences.UserPreferencesModel
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.BypassEmailVerification
+import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserPreferencesService
@@ -30,6 +32,8 @@ class UserPreferencesController(
 ) {
   @GetMapping("")
   @Operation(summary = "Get user's preferences")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun get(): UserPreferencesModel {
     return userPreferencesService.findOrCreate(authenticationFacade.authenticatedUser.id).let {
       UserPreferencesModel(language = it.language, preferredOrganizationId = it.preferredOrganization?.id)
@@ -38,6 +42,8 @@ class UserPreferencesController(
 
   @PutMapping("/set-language/{languageTag}")
   @Operation(summary = "Set user's UI language")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun setLanguage(
     @PathVariable languageTag: String,
   ) {

@@ -1,5 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/sso"])
+@Tag(name = "Sso Tenant", description = "SSO Tenant configuration authentication")
 class SsoProviderController(
   private val tenantService: TenantService,
   private val ssoTenantAssembler: SsoTenantAssembler,
@@ -33,6 +36,9 @@ class SsoProviderController(
 ) {
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @PutMapping("")
+  @Operation(
+    summary = "Set SSO Tenant configuration for organization",
+  )
   @RequiresSuperAuthentication
   fun setProvider(
     @RequestBody @Valid request: CreateProviderRequest,
@@ -55,6 +61,9 @@ class SsoProviderController(
 
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @GetMapping("")
+  @Operation(
+    summary = "Get SSO Tenant configuration for organization",
+  )
   @RequiresSuperAuthentication
   fun findProvider(
     @PathVariable organizationId: Long,
