@@ -16,7 +16,6 @@ import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.JwtService
-import io.tolgee.security.authorization.BypassEmailVerification
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
@@ -103,7 +102,6 @@ class PublicController(
     description = "It checks whether the code from email is valid",
   )
   @OpenApiHideFromPublicDocs
-  @BypassEmailVerification
   fun verifyEmail(
     @PathVariable("userId") @NotNull userId: Long,
     @PathVariable("code") @NotBlank code: String,
