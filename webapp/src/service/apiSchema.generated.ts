@@ -9,6 +9,7 @@ export interface paths {
     get: operations["doExportJsonZip"];
   };
   "/api/public/authorize_oauth/sso/authentication-url": {
+    /** Returns URL which can be used to authenticate user using third party SSO service */
     post: operations["getAuthenticationUrl"];
   };
   "/api/public/authorize_oauth/{serviceType}": {
@@ -101,17 +102,13 @@ export interface paths {
     /** Returns specific API key info */
     get: operations["get_21"];
   };
-  "/v2/auth-provider/changed": {
-    get: operations["getChangedAuthProvider"];
-  };
-  "/v2/auth-provider/changed/accept": {
-    post: operations["acceptChangeAuthProvider"];
-  };
-  "/v2/auth-provider/changed/reject": {
-    post: operations["rejectChangeAuthProvider"];
-  };
-  "/v2/auth-provider/current": {
+  "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
+  };
+  "/v2/auth-provider/change": {
+    get: operations["getChangedAuthProvider"];
+    post: operations["acceptChangeAuthProvider"];
+    delete: operations["rejectChangeAuthProvider"];
   };
   "/v2/ee-license/info": {
     get: operations["getInfo_5"];
@@ -1772,6 +1769,7 @@ export interface components {
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "third_party_switch_initiated"
+        | "third_party_switch_conflict"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -1853,6 +1851,7 @@ export interface components {
         | "cannot_create_organization"
         | "wrong_current_password"
         | "wrong_param_type"
+        | "user_missing_password"
         | "expired_super_jwt_token"
         | "cannot_delete_your_own_account"
         | "cannot_sort_by_this_column"
@@ -4160,6 +4159,7 @@ export interface components {
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "third_party_switch_initiated"
+        | "third_party_switch_conflict"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -4241,6 +4241,7 @@ export interface components {
         | "cannot_create_organization"
         | "wrong_current_password"
         | "wrong_param_type"
+        | "user_missing_password"
         | "expired_super_jwt_token"
         | "cannot_delete_your_own_account"
         | "cannot_sort_by_this_column"
@@ -4870,6 +4871,7 @@ export interface operations {
       };
     };
   };
+  /** Returns URL which can be used to authenticate user using third party SSO service */
   getAuthenticationUrl: {
     responses: {
       /** OK */
@@ -6170,6 +6172,48 @@ export interface operations {
       };
     };
   };
+  getCurrentAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getChangedAuthProvider: {
     responses: {
       /** OK */
@@ -6258,48 +6302,6 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getCurrentAuthProvider: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AuthProviderDto"];
-        };
-      };
       /** Bad Request */
       400: {
         content: {
