@@ -38,7 +38,7 @@ import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsConsumer
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.organization.OrganizationStatsService
@@ -87,7 +87,7 @@ class OrganizationController(
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   private val imageUploadService: ImageUploadService,
-  private val mtCreditBucketService: MtCreditBucketService,
+  private val mtCreditConsumer: MtCreditsConsumer,
   private val organizationStatsService: OrganizationStatsService,
   private val translationsLimitProvider: TranslationsLimitProvider,
   private val projectService: ProjectService,
@@ -310,7 +310,7 @@ class OrganizationController(
     @PathVariable organizationId: Long,
   ): PublicUsageModel {
     val organization = organizationService.get(organizationId)
-    val creditBalances = mtCreditBucketService.getCreditBalances(organization)
+    val creditBalances = mtCreditConsumer.getCreditBalances(organization.id)
     val currentTranslationSlots = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
     val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)

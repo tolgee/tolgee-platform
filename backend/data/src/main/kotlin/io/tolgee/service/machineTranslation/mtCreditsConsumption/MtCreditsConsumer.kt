@@ -1,5 +1,7 @@
 package io.tolgee.service.machineTranslation.mtCreditsConsumption
 
+import io.tolgee.dtos.MtCreditBalanceDto
+
 interface MtCreditsConsumer {
   fun consumeCredits(
     organizationId: Long,
@@ -7,4 +9,6 @@ interface MtCreditsConsumer {
   )
 
   fun checkPositiveBalance(organizationId: Long)
+
+  fun getCreditBalances(organizationId: Long): MtCreditBalanceDto
 }

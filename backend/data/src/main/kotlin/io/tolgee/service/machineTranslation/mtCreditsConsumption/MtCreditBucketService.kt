@@ -159,11 +159,11 @@ class MtCreditBucketService(
   }
 
   @Transactional
-  fun getCreditBalances(organizationId: Long): MtCreditBalanceDto {
+  override fun getCreditBalances(organizationId: Long): MtCreditBalanceDto {
     return getCreditBalances(findOrCreateBucketByOrganizationId(organizationId))
   }
 
-  fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
+  private fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
     refillIfItsTime(bucket)
     return MtCreditBalanceDto(
       creditBalance = bucket.credits,
@@ -171,10 +171,6 @@ class MtCreditBucketService(
       refilledAt = bucket.refilled,
       nextRefillAt = bucket.getNextRefillDate(),
     )
-  }
-
-  fun getCreditBalances(organization: Organization): MtCreditBalanceDto {
-    return getCreditBalances(findOrCreateBucket(organization))
   }
 
   private fun MtCreditBucket.getNextRefillDate(): Date {
