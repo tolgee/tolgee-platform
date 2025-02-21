@@ -1,3 +1,10 @@
+# [3.103.0](https://github.com/tolgee/tolgee-platform/compare/v3.102.2...v3.103.0) (2025-02-21)
+
+
+### Features
+
+* add japanese localization ([#2932](https://github.com/tolgee/tolgee-platform/issues/2932)) ([6db72c8](https://github.com/tolgee/tolgee-platform/commit/6db72c80141bc502256712778875e9beab56f892))
+
 ## [3.102.2](https://github.com/tolgee/tolgee-platform/compare/v3.102.1...v3.102.2) (2025-02-20)
 
 
