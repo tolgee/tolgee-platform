@@ -28,7 +28,7 @@ class MtCreditBucketService(
 ) : Logging, MtCreditsConsumer {
   override fun consumeCredits(
     organizationId: Long,
-    amount: Int,
+    creditsInCents: Int,
   ) {
     if (!shouldConsumeCredits()) {
       return
@@ -39,7 +39,7 @@ class MtCreditBucketService(
         tryUntilItDoesntBreakConstraint {
           executeInNewTransaction(transactionManager) {
             val bucket = findOrCreateBucketByOrganizationId(organizationId)
-            consumeCredits(bucket, amount)
+            consumeCredits(bucket, creditsInCents)
             bucket
           }
         }

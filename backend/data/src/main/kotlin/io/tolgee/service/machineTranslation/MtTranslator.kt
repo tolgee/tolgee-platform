@@ -102,10 +102,10 @@ class MtTranslator(
 
   private fun publishAfterEvent(
     project: ProjectDto,
-    actualPrice: Int,
+    actualPriceInCents: Int,
   ) {
     applicationContext.publishEvent(
-      OnAfterMachineTranslationEvent(this, project.organizationOwnerId, actualPrice),
+      OnAfterMachineTranslationEvent(this, project.organizationOwnerId, actualPriceInCents),
     )
   }
 }

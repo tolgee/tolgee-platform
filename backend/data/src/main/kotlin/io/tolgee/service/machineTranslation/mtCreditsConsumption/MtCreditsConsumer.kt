@@ -3,7 +3,7 @@ package io.tolgee.service.machineTranslation.mtCreditsConsumption
 interface MtCreditsConsumer {
   fun consumeCredits(
     organizationId: Long,
-    amount: Int,
+    creditsInCents: Int,
   )
 
   fun checkPositiveBalance(organizationId: Long)
