@@ -5,6 +5,7 @@ import esDateLocale from 'date-fns/locale/es';
 import deDateLocale from 'date-fns/locale/de';
 import ptDateLocale from 'date-fns/locale/pt';
 import daDateLocale from 'date-fns/locale/da';
+import jaDateLocale from 'date-fns/locale/ja';
 
 export const locales = {
   en: {
@@ -41,5 +42,10 @@ export const locales = {
     name: 'Dansk',
     flag: '🇩🇰',
     dateFnsLocale: daDateLocale,
+  },
+  ja: {
+    name: '日本語',
+    flag: '🇯🇵',
+    dateFnsLocale: jaDateLocale,
   },
 };
