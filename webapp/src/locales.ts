@@ -44,7 +44,7 @@ export const locales = {
     dateFnsLocale: daDateLocale,
   },
   ja: {
-    name: 'Japanese',
+    name: '日本語',
     flag: '🇯🇵',
     dateFnsLocale: jaDateLocale,
   },
