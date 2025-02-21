@@ -5,8 +5,6 @@ import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
-import io.tolgee.component.mtBucketSizeProvider.PayAsYouGoCreditsProvider
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
@@ -23,8 +21,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import java.util.*
@@ -41,10 +37,6 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @Autowired
   @MockBean
-  lateinit var payAsYouGoCreditsProvider: PayAsYouGoCreditsProvider
-
-  @Autowired
-  @MockBean
   lateinit var eeTolgeeTranslateApiService: EeTolgeeTranslateApiService
 
   @Autowired
@@ -55,14 +47,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   @Autowired
   override lateinit var cacheManager: CacheManager
 
-  lateinit var cacheMock: Cache
-
   lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
-
-  @Suppress("LateinitVarOverridesLateinitVar")
-  @MockBean
-  @SpyBean
-  override lateinit var machineTranslationProperties: MachineTranslationProperties
 
   @BeforeEach
   fun setup() {
