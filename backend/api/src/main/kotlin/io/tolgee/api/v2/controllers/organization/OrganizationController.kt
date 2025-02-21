@@ -319,7 +319,6 @@ class OrganizationController(
       organizationId = organizationId,
       creditBalance = creditBalances.creditBalance / 100,
       includedMtCredits = creditBalances.bucketSize / 100,
-      extraCreditBalance = creditBalances.extraCreditBalance / 100,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
       currentPayAsYouGoMtCredits = currentPayAsYouGoMtCredits,

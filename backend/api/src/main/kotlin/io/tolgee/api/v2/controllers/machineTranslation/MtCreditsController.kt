@@ -57,6 +57,5 @@ class MtCreditsController(
       CreditBalanceModel(
         creditBalance = this.creditBalance / 100,
         bucketSize = this.bucketSize / 100,
-        extraCreditBalance = this.extraCreditBalance / 100,
       )
 }

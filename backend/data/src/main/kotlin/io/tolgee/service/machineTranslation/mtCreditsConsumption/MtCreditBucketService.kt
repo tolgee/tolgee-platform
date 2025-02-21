@@ -113,7 +113,7 @@ class MtCreditBucketService(
 
   private fun MtCreditBucketService.getTotalBalance(bucket: MtCreditBucket): Long {
     val balances = getCreditBalances(bucket)
-    return balances.creditBalance + balances.extraCreditBalance
+    return balances.creditBalance
   }
 
   private fun MtCreditBucket.consumeSufficientCredits(
@@ -129,12 +129,7 @@ class MtCreditBucketService(
       return
     }
 
-    if (this.extraCredits + this.credits >= amount) {
-      val amountToConsumeFromExtraCredits = amount - this.credits
-      this.credits = 0
-      this.extraCredits -= amountToConsumeFromExtraCredits
-      return
-    }
+    this.credits = 0
   }
 
   @Transactional
@@ -173,7 +168,6 @@ class MtCreditBucketService(
     return MtCreditBalanceDto(
       creditBalance = bucket.credits,
       bucketSize = bucket.bucketSize,
-      extraCreditBalance = bucket.extraCredits,
       refilledAt = bucket.refilled,
       nextRefillAt = bucket.getNextRefillDate(),
     )
