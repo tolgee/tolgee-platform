@@ -120,7 +120,6 @@ declare namespace DataCy {
         "batch-operations-submit-button" |
         "batch-progress" |
         "batch-select-item" |
-        "billing-actual-extra-credits" |
         "billing-actual-period" |
         "billing-actual-period-end" |
         "billing-actual-used-monthly-credits" |
