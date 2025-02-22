@@ -38,7 +38,7 @@ import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsConsumer
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.organization.OrganizationStatsService
@@ -87,7 +87,7 @@ class OrganizationController(
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   private val imageUploadService: ImageUploadService,
-  private val mtCreditConsumer: MtCreditsConsumer,
+  private val mtCreditConsumer: MtCreditsService,
   private val organizationStatsService: OrganizationStatsService,
   private val translationsLimitProvider: TranslationsLimitProvider,
   private val projectService: ProjectService,

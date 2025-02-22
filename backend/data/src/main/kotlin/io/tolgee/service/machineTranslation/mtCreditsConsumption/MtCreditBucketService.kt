@@ -25,7 +25,7 @@ class MtCreditBucketService(
   private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
   private val machineTranslationProperties: MachineTranslationProperties,
-) : Logging, MtCreditsConsumer {
+) : Logging, MtCreditsService {
   override fun consumeCredits(
     organizationId: Long,
     creditsInCents: Int,
