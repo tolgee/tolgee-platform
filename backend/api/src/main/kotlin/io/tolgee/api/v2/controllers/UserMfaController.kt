@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.BypassEmailVerification
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.MfaService
@@ -29,6 +30,7 @@ class UserMfaController(
     summary = "Enable TOTP",
     description = "Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.",
   )
+  @BypassEmailVerification
   fun enableMfa(
     @RequestBody @Valid
     dto: UserTotpEnableRequestDto,
@@ -44,6 +46,7 @@ class UserMfaController(
     summary = "Disable TOTP",
     description = "Disables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.",
   )
+  @BypassEmailVerification
   fun disableMfa(
     @RequestBody @Valid
     dto: UserTotpDisableRequestDto,
@@ -56,6 +59,7 @@ class UserMfaController(
 
   @PutMapping("/recovery")
   @Operation(summary = "Regenerate Codes", description = "Regenerates multi-factor authentication recovery codes")
+  @BypassEmailVerification
   fun regenerateRecoveryCodes(
     @RequestBody @Valid
     dto: UserMfaRecoveryRequestDto,

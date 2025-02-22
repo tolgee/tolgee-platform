@@ -28,6 +28,19 @@ class OAuthUserHandler(
     val userAccount =
       getUserAccount(thirdPartyAuthType, userResponse)
 
+    authProviderChangeService.initiate(
+      userAccount,
+      userResponse.email,
+      AuthProviderChangeData(
+        accountType,
+        thirdPartyAuthType,
+        userResponse.sub,
+        ssoDomain = userResponse.tenant?.domain,
+        ssoRefreshToken = userResponse.refreshToken,
+        ssoExpiration = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType),
+      ),
+    )
+
     if (userAccount != null) {
       if (thirdPartyAuthType in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)) {
         userAccountService.updateSsoSession(userAccount, userResponse.refreshToken)
@@ -62,21 +75,8 @@ class OAuthUserHandler(
     thirdPartyAuthType: ThirdPartyAuthType,
     accountType: UserAccount.AccountType,
   ): UserAccount {
-    var existingUserAccount =
-      userAccountService.findActive(userResponse.email)
-    if (existingUserAccount != null) {
-      authProviderChangeService.initiateProviderChange(
-        AuthProviderChangeData(
-          existingUserAccount,
-          accountType,
-          thirdPartyAuthType,
-          userResponse.sub,
-          ssoDomain = userResponse.tenant?.domain,
-          ssoRefreshToken = userResponse.refreshToken,
-          ssoExpiration = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType),
-        ),
-      )
-      return existingUserAccount
+    userAccountService.findActive(userResponse.email)?.let {
+      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
     }
 
     val newUserAccount = UserAccount()

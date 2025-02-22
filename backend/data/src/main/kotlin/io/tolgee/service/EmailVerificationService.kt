@@ -76,7 +76,7 @@ class EmailVerificationService(
     newEmail: String? = null,
   ) {
     if (newEmail == null && isVerified(userAccount)) {
-      throw BadRequestException(io.tolgee.constants.Message.EMAIL_ALREADY_VERIFIED)
+      throw BadRequestException(Message.EMAIL_ALREADY_VERIFIED)
     }
 
     val email = newEmail ?: getEmail(userAccount)
@@ -104,11 +104,8 @@ class EmailVerificationService(
   }
 
   fun check(userAccount: UserAccount) {
-    if (
-      tolgeeProperties.authentication.needsEmailVerification &&
-      userAccount.emailVerification != null
-    ) {
-      throw AuthenticationException(io.tolgee.constants.Message.EMAIL_NOT_VERIFIED)
+    if (!isVerified(userAccount)) {
+      throw AuthenticationException(Message.EMAIL_NOT_VERIFIED)
     }
   }
 
@@ -163,7 +160,7 @@ class EmailVerificationService(
     var resultCallbackUrl = tolgeeProperties.frontEndUrl ?: callbackUrl
 
     if (resultCallbackUrl == null) {
-      throw BadRequestException(io.tolgee.constants.Message.MISSING_CALLBACK_URL)
+      throw BadRequestException(Message.MISSING_CALLBACK_URL)
     }
 
     resultCallbackUrl += "/login/verify_email"

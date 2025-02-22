@@ -6,11 +6,13 @@ import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.dtos.response.AuthProviderDto
 import io.tolgee.dtos.response.AuthProviderDto.Companion.asAuthProviderDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.AuthProviderChangeRequest
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.repository.AuthProviderChangeRequestRepository
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.addMinutes
@@ -25,8 +27,10 @@ import java.util.Calendar
 class AuthProviderChangeService(
   private val authProviderChangeRequestRepository: AuthProviderChangeRequestRepository,
   private val tenantService: TenantService,
+  private val userAccountService: UserAccountService,
   private val organizationRoleService: OrganizationRoleService,
   private val currentDateProvider: CurrentDateProvider,
+  private val authenticationFacade: AuthenticationFacade,
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: AuthProviderChangeService,
 ) {
@@ -38,34 +42,72 @@ class AuthProviderChangeService(
     return getActiveAuthProviderChangeRequest(userAccount)?.asAuthProviderDto()
   }
 
-  fun initiateProviderChange(data: AuthProviderChangeData) {
-    if (data.accountType == UserAccount.AccountType.MANAGED) {
-      self.saveProviderChange(data)
-      throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
+  fun initiate(
+    resolvedUser: UserAccount?,
+    userEmail: String,
+    data: AuthProviderChangeData,
+  ) {
+    val currentUser = authenticationFacade.authenticatedUserOrNull
+
+    if (currentUser == null) {
+      // Provider change can be only initiated for already signed-in user
+      return
     }
 
-    // Changing authentication provider to non-SSO providers is disabled for now
-    throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+    if (resolvedUser?.id == currentUser.id) {
+      // Trying to log-in as already logged-in user??
+      return
+    }
+
+    val targetUser = resolvedUser ?: userAccountService.findActive(userEmail)
+    if (targetUser?.id != currentUser.id) {
+      // User is trying to switch third party authentication provider, but
+      // the account e-mail does not match the email of the third party account
+      throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
+    }
+
+    self.save(targetUser, data)
+    throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  fun saveProviderChange(data: AuthProviderChangeData) {
-    authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
-    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest())
+  fun save(
+    user: UserAccount,
+    data: AuthProviderChangeData,
+  ) {
+    authProviderChangeRequestRepository.deleteByUserAccountId(user.id)
+    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest(user))
   }
 
-  fun acceptProviderChange(data: AuthProviderChangeData) {
-    val change = data.asAuthProviderChangeRequest()
-    acceptProviderChange(change)
+  fun apply(
+    user: UserAccount,
+    data: AuthProviderChangeData,
+  ) {
+    val change = data.asAuthProviderChangeRequest(user)
+    self.apply(change)
   }
 
-  fun acceptProviderChange(userAccount: UserAccount) {
+  fun removeCurrent(user: UserAccount) {
+    if (user.password == null) {
+      throw BadRequestException(Message.USER_MISSING_PASSWORD)
+    }
+    self.apply(
+      AuthProviderChangeData(
+        UserAccount.AccountType.LOCAL,
+        null,
+      ).asAuthProviderChangeRequest(user),
+    )
+  }
+
+  @Transactional
+  fun accept(userAccount: UserAccount) {
     val req = getActiveAuthProviderChangeRequest(userAccount) ?: return
-    acceptProviderChange(req)
+    self.apply(req)
     authProviderChangeRequestRepository.delete(req)
   }
 
-  fun acceptProviderChange(req: AuthProviderChangeRequest) {
+  @Transactional
+  fun apply(req: AuthProviderChangeRequest) {
     val userAccount = req.userAccount ?: return throw NotFoundException()
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
       throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
@@ -78,6 +120,7 @@ class AuthProviderChangeService(
       ssoRefreshToken = req.ssoRefreshToken
       ssoSessionExpiry = req.ssoExpiration
     }
+    userAccountService.save(userAccount)
 
     val domain = req.ssoDomain
     if (domain != null && req.authType == ThirdPartyAuthType.SSO) {
@@ -93,7 +136,8 @@ class AuthProviderChangeService(
     }
   }
 
-  fun rejectProviderChange(userAccount: UserAccount) {
+  @Transactional
+  fun reject(userAccount: UserAccount) {
     authProviderChangeRequestRepository.deleteByUserAccountId(userAccount.id)
   }
 
@@ -106,10 +150,10 @@ class AuthProviderChangeService(
     return request
   }
 
-  fun AuthProviderChangeData.asAuthProviderChangeRequest(): AuthProviderChangeRequest {
+  fun AuthProviderChangeData.asAuthProviderChangeRequest(user: UserAccount): AuthProviderChangeRequest {
     val expirationDate = currentDateProvider.date.addMinutes(30)
     return AuthProviderChangeRequest().also {
-      it.userAccount = this.userAccount
+      it.userAccount = user
       it.expirationDate = DateUtils.truncate(expirationDate, Calendar.SECOND)
       it.accountType = this.accountType
       it.authType = this.authType

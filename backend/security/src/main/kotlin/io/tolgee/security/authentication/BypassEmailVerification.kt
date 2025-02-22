@@ -1,4 +1,4 @@
-package io.tolgee.security.authorization
+package io.tolgee.security.authentication
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
