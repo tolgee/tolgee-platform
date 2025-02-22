@@ -28,12 +28,6 @@ open class PublicUsageModel(
   )
   val availablePayAsYouGoMtCredits: Long,
   @Schema(
-    description =
-      "Extra credits, which are neither refilled nor reset every month. These credits are " +
-        "used when there are no standard credits",
-  )
-  val extraCreditBalance: Long,
-  @Schema(
     description = """How many translations can be stored within your organization""",
   )
   val translationSlotsLimit: Long,
@@ -63,4 +57,13 @@ open class PublicUsageModel(
         "(For pay us you go, the top limit is the spending limit)",
   )
   val translationsLimit: Long,
-) : RepresentationModel<PublicUsageModel>(), Serializable
+) : RepresentationModel<PublicUsageModel>(), Serializable {
+  @Schema(
+    deprecated = true,
+    description =
+      "Customers were able to buy extra credits separately in the past.\n\n" +
+        "This option is not available anymore and this field is kept only for " +
+        "backward compatibility purposes and is always 0.",
+  )
+  val extraCreditBalance: Long = 0
+}

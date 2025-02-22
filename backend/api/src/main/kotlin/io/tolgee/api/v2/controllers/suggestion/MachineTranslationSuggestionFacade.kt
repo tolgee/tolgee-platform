@@ -10,8 +10,8 @@ import io.tolgee.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.springframework.context.ApplicationContext
@@ -102,7 +102,11 @@ class MachineTranslationSuggestionFacade(
       val balance = mtCreditBucketService.getCreditBalances(organizationId)
       throw BadRequestException(
         Message.OUT_OF_CREDITS,
-        listOf(balance.creditBalance, balance.extraCreditBalance),
+        listOf(
+          balance.creditBalance,
+          // This is the extra credits balance, which is not supported anymore
+          0,
+        ),
       )
     }
   }

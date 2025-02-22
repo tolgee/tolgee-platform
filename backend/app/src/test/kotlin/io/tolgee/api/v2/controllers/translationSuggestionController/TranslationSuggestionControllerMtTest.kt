@@ -11,19 +11,13 @@ import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
-import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andHasErrorMessage
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.mapResponseTo
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -33,15 +27,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.Cache
@@ -55,10 +41,6 @@ import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
 class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
-
-  @Autowired
-  @MockBean
-  lateinit var mtBucketSizeProvider: MtBucketSizeProvider
 
   @Autowired
   @MockBean
@@ -93,6 +75,11 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @MockBean
   override lateinit var cacheManager: CacheManager
 
+  @Suppress("LateinitVarOverridesLateinitVar")
+  @MockBean
+  @Autowired
+  override lateinit var machineTranslationProperties: MachineTranslationProperties
+
   lateinit var cacheMock: Cache
 
   lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
@@ -118,7 +105,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
-    whenever(mtBucketSizeProvider.getSize(anyOrNull())).thenAnswer {
+    whenever(machineTranslationProperties.freeCreditsAmount).thenAnswer {
       size
     }
   }
@@ -310,7 +297,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @Test
   @ProjectJWTAuthTestMethod
   fun `primary service is first (AWS)`() {
-    machineTranslationProperties.freeCreditsAmount = -1
+    mockDefaultMtBucketSize(-1)
     testData.enableAll()
     saveTestData()
 
@@ -322,7 +309,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @Test
   @ProjectJWTAuthTestMethod
   fun `primary service is first (GOOGLE)`() {
-    machineTranslationProperties.freeCreditsAmount = -1
+    mockDefaultMtBucketSize(-1)
     testData.enableAllGooglePrimary()
     saveTestData()
 
@@ -343,20 +330,6 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
     setForcedDate(Date().addMonths(2))
     testMtCreditConsumption()
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it consumes extra credits`() {
-    testData.addBucketWithExtraCredits()
-    saveTestData()
-    performMtRequestAndExpectAfterBalance(1, 10)
-    performMtRequestAndExpectAfterBalance(0, 2)
-    performMtRequestAndExpectAfterBalance(0, 0)
-    performMtRequestAndExpectBadRequest().andAssertThatJson {
-      node("params[0]").isEqualTo("0")
-      node("params[1]").isEqualTo("0")
-    }
   }
 
   @Test
@@ -461,15 +434,10 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     performMtRequestAndExpectBadRequest()
   }
 
-  private fun performMtRequestAndExpectAfterBalance(
-    creditBalance: Long,
-    extraCreditBalance: Long = 0,
-  ) {
+  private fun performMtRequestAndExpectAfterBalance(creditBalance: Long) {
     performMtRequest().andIsOk
     mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
       .assert.isEqualTo(creditBalance * 100)
-    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).extraCreditBalance
-      .assert.isEqualTo(extraCreditBalance * 100)
   }
 
   private fun performMtRequestAndExpectBadRequest(): ResultActions {
