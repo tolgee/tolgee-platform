@@ -86,9 +86,10 @@ export const LimitedHeightText: React.FC<Props> = ({
   const detectExpandability = () => {
     const textElement = textRef.current;
     if (textElement != null) {
-      // values should be the same, however firefox applies some weird rounding
-      // so by adding one we eliminate that
-      setExpandable(textElement.clientHeight + 1 < textElement.scrollHeight);
+      // Use a 2px threshold to account for browser rounding differences
+      const heightDifference =
+        textElement.scrollHeight - textElement.clientHeight;
+      setExpandable(heightDifference > 2);
     }
   };
 
