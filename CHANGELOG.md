@@ -1,3 +1,10 @@
+## [3.103.1](https://github.com/tolgee/tolgee-platform/compare/v3.103.0...v3.103.1) (2025-02-23)
+
+
+### Bug Fixes
+
+* Japanese static data load ([#2933](https://github.com/tolgee/tolgee-platform/issues/2933)) ([59f860b](https://github.com/tolgee/tolgee-platform/commit/59f860b3b05119bb2dcb35c4ebffb7145573dd3d))
+
 # [3.103.0](https://github.com/tolgee/tolgee-platform/compare/v3.102.2...v3.103.0) (2025-02-21)
 
 
