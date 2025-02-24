@@ -111,7 +111,7 @@ class WebSecurityConfig(
   @ConditionalOnProperty(value = ["tolgee.internal.controller-enabled"], havingValue = "false", matchIfMissing = true)
   fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
     return httpSecurity
-      .securityMatcher("/internal/**")
+      .securityMatcher(*INTERNAL_ENDPOINTS)
       .authorizeRequests()
       .anyRequest()
       .denyAll()
@@ -123,9 +123,9 @@ class WebSecurityConfig(
     registry.addInterceptor(rateLimitInterceptor)
     registry.addInterceptor(authenticationInterceptor)
     registry.addInterceptor(emailValidInterceptor)
-      .excludePathPatterns(*PUBLIC_ENDPOINTS)
+      .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
     registry.addInterceptor(ssoAuthenticationInterceptor)
-      .excludePathPatterns(*PUBLIC_ENDPOINTS)
+      .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
 
     registry.addInterceptor(organizationAuthorizationInterceptor)
       .addPathPatterns("/v2/organizations/**")
@@ -137,12 +137,13 @@ class WebSecurityConfig(
   fun customFilterRegistration(): FilterRegistrationBean<TransferEncodingHeaderDebugFilter>? {
     val registration: FilterRegistrationBean<TransferEncodingHeaderDebugFilter> =
       FilterRegistrationBean<TransferEncodingHeaderDebugFilter>()
-    registration.setFilter(TransferEncodingHeaderDebugFilter())
-    registration.setOrder(Ordered.HIGHEST_PRECEDENCE)
+    registration.filter = TransferEncodingHeaderDebugFilter()
+    registration.order = Ordered.HIGHEST_PRECEDENCE
     return registration
   }
 
   companion object {
-    val PUBLIC_ENDPOINTS = arrayOf("/api/public/**", "/v2/public/**")
+    private val PUBLIC_ENDPOINTS = arrayOf("/api/public/**", "/v2/public/**")
+    private val INTERNAL_ENDPOINTS = arrayOf("/internal/**")
   }
 }
