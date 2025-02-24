@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.notification
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
