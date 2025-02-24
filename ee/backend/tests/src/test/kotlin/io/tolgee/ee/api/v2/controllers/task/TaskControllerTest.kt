@@ -374,6 +374,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       assertThat(it.type).isEqualTo(TASK_CLOSED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
+    assertThat(notificationUtil.newestEmailNotification()).contains("has been closed")
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/reopen",
     ).andIsOk.andAssertThatJson {
@@ -389,6 +390,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       assertThat(it.type).isEqualTo(TASK_COMPLETED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
+    assertThat(notificationUtil.newestEmailNotification()).contains("has been completed")
   }
 
   @Test
