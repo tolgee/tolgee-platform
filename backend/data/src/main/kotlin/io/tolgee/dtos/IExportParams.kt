@@ -18,6 +18,7 @@ import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.HTML_ESCAPE_DESCRIPTION
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
@@ -94,6 +95,11 @@ interface IExportParams {
   )
   var fileStructureTemplate: String?
 
+  @get:Schema(
+    description = HTML_ESCAPE_DESCRIPTION,
+  )
+  var escapeHtml: Boolean
+
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages
     this.format = other.format
@@ -109,6 +115,7 @@ interface IExportParams {
     this.messageFormat = other.messageFormat
     this.supportArrays = other.supportArrays
     this.fileStructureTemplate = other.fileStructureTemplate
+    this.escapeHtml = other.escapeHtml
   }
 
   @get:Hidden

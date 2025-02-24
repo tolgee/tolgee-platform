@@ -35,6 +35,7 @@ import {
 import { useCdActions } from './useCdActions';
 import { useExportHelper } from 'tg.hooks/useExportHelper';
 import { CdPruneBeforePublish } from './CdPruneBeforePublish';
+import { CdEscapeHtml } from './CdEscapeHtml';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -170,6 +171,9 @@ export const CdDialog = ({ onClose, data }: Props) => {
                     )}
                     <CdAutoPublish />
                     <CdPruneBeforePublish />
+                    {getFormatById(values.format).showEscapeHtml && (
+                      <CdEscapeHtml />
+                    )}
                   </StyledOptions>
                 </StyledDialogContent>
                 <DialogActions sx={{ justifyContent: 'space-between' }}>

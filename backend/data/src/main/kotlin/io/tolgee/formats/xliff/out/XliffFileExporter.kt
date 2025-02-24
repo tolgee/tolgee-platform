@@ -12,6 +12,7 @@ import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
+import org.apache.commons.text.StringEscapeUtils
 
 class XliffFileExporter(
   val translations: List<ExportTranslationView>,
@@ -66,8 +67,17 @@ class XliffFileExporter(
     text: String?,
     plural: Boolean,
   ): String? {
+    val processedText =
+      text?.let {
+        if (exportParams.escapeHtml) {
+          StringEscapeUtils.escapeXml10(text)
+        } else {
+          text
+        }
+      }
+
     return IcuToGenericFormatMessageConvertor(
-      text,
+      processedText,
       plural,
       projectIcuPlaceholdersSupport,
       paramConvertorFactory = messageFormat.paramConvertorFactory,

@@ -1312,6 +1312,12 @@ export interface components {
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
       /**
+       * @description If true, HTML tags are escaped in the exported file.
+       *
+       * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
+       */
+      escapeHtml: boolean;
+      /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
        * The template is a string that can contain the following placeholders: {namespace}, {languageTag},
@@ -1423,6 +1429,12 @@ export interface components {
        * @description Id of custom storage to use for content delivery. If null, default server storage is used. Tolgee Cloud provides default Content Storage.
        */
       contentStorageId?: number;
+      /**
+       * @description If true, HTML tags are escaped in the exported file.
+       *
+       * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
+       */
+      escapeHtml: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
@@ -1649,7 +1661,13 @@ export interface components {
       bucketSize: number;
       /** Format: int64 */
       creditBalance: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @deprecated
+       * @description Customers were able to buy extra credits separately in the past.
+       *
+       * This option is not available anymore and this field is kept only for backward compatibility purposes and is always 0.
+       */
       extraCreditBalance: number;
     };
     DeleteKeysDto: {
@@ -1727,7 +1745,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
     };
     EntityDescriptionWithRelations: {
       data: { [key: string]: { [key: string]: unknown } };
@@ -2039,6 +2058,12 @@ export interface components {
       mediaType: string;
     };
     ExportParams: {
+      /**
+       * @description If true, HTML tags are escaped in the exported file.
+       *
+       * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
+       */
+      escapeHtml: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
@@ -3654,7 +3679,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
       /** Format: int64 */
       trialEnd?: number;
     };
@@ -3735,7 +3761,10 @@ export interface components {
       currentTranslations: number;
       /**
        * Format: int64
-       * @description Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits
+       * @deprecated
+       * @description Customers were able to buy extra credits separately in the past.
+       *
+       * This option is not available anymore and this field is kept only for backward compatibility purposes and is always 0.
        */
       extraCreditBalance: number;
       /**
@@ -10439,6 +10468,12 @@ export interface operations {
          * e.g. Key hello[0] will be exported as {"hello": ["..."]}
          */
         supportArrays?: boolean;
+        /**
+         * If true, HTML tags are escaped in the exported file.
+         *
+         * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
+         */
+        escapeHtml?: boolean;
       };
       path: {
         projectId: number;
