@@ -1,3 +1,10 @@
+## [3.104.1](https://github.com/tolgee/tolgee-platform/compare/v3.104.0...v3.104.1) (2025-02-24)
+
+
+### Bug Fixes
+
+* hide user tasks requests error ([#2938](https://github.com/tolgee/tolgee-platform/issues/2938)) ([50e168d](https://github.com/tolgee/tolgee-platform/commit/50e168d51a024c9f707cc7eb01b44e4d13d025c2))
+
 # [3.104.0](https://github.com/tolgee/tolgee-platform/compare/v3.103.2...v3.104.0) (2025-02-24)
 
 
