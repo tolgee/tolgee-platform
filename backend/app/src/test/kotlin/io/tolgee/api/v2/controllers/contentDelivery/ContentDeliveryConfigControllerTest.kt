@@ -8,8 +8,10 @@ import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
+import io.tolgee.dtos.request.ContentDeliveryConfigRequest
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -85,6 +87,16 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     tolgeeProperties.contentDelivery.storage.s3.bucketName = "my-bucket"
     val mocked = mockS3FileStorage()
     performProjectAuthPost("content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}").andIsOk
+    assertStored(mocked)
+    assertPruned(mocked)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `publishes to custom server content delivery config`() {
+    tolgeeProperties.contentDelivery.storage.s3.bucketName = "my-bucket"
+    val mocked = mockS3FileStorage()
+    performProjectAuthPost("content-delivery-configs/${testData.s3ContentDeliveryConfigWithCustomSlug.self.id}").andIsOk
     assertStored(mocked)
     assertPruned(mocked)
   }
