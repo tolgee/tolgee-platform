@@ -1,5 +1,5 @@
 import { useProject } from 'tg.hooks/useProject';
-import create from 'zustand';
+import { create } from 'zustand';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { T } from '@tolgee/react';
