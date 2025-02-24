@@ -11,6 +11,7 @@ import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_NOT_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.HTML_ESCAPE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
@@ -82,7 +83,12 @@ data class ExportParams(
     description = ExportParamsDocs.FILE_STRUCTURE_TEMPLATE_DESCRIPTION,
   )
   override var fileStructureTemplate: String? = null,
-) : IExportParams {
-  @field:Parameter(description = SUPPORT_ARRAYS_DESCRIPTION)
-  override var supportArrays: Boolean = false
-}
+  @field:Parameter(
+    description = SUPPORT_ARRAYS_DESCRIPTION,
+  )
+  override var supportArrays: Boolean = false,
+  @field:Parameter(
+    description = HTML_ESCAPE_DESCRIPTION,
+  )
+  override var escapeHtml: Boolean = false,
+) : IExportParams

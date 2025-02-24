@@ -71,4 +71,9 @@ class ContentDeliveryConfigRequest() : IExportParams {
   override var messageFormat: ExportMessageFormat? = null
 
   override var fileStructureTemplate: String? = null
+
+  @Schema(
+    description = "If true, HTML tags are escaped in the exported file.",
+  )
+  override var escapeHtml: Boolean = false
 }

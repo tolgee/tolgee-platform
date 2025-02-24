@@ -4102,4 +4102,9 @@
             create unique index project_address_part_unique on project (address_part) where deleted_at is null;
         </sql>
     </changeSet>
+    <changeSet author="neo (generated)" id="1740409127117-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="escape_html" type="BOOLEAN"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
