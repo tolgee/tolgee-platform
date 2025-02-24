@@ -1,6 +1,6 @@
 import { useHistory } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, Paper, styled, Typography } from '@mui/material';
+import { Box, Paper, styled, Typography } from '@mui/material';
 
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
