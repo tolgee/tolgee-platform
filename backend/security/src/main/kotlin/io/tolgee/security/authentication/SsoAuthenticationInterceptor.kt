@@ -1,0 +1,78 @@
+package io.tolgee.security.authentication
+
+import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.service.TenantService
+import jakarta.servlet.DispatcherType
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.annotation.Lazy
+import org.springframework.core.Ordered
+import org.springframework.stereotype.Component
+import org.springframework.web.method.HandlerMethod
+import org.springframework.web.servlet.HandlerInterceptor
+
+@Component
+class SsoAuthenticationInterceptor(
+  private val authenticationFacade: AuthenticationFacade,
+  @Lazy
+  private val tenantService: TenantService,
+) : HandlerInterceptor, Ordered {
+  override fun preHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+  ): Boolean {
+    if (handler !is HandlerMethod || DispatcherType.ASYNC == request.dispatcherType) {
+      return super.preHandle(request, response, handler)
+    }
+
+    if (request.method == "OPTIONS") {
+      // Do not process OPTIONS requests
+      return true
+    }
+
+    val user = authenticationFacade.authenticatedUser
+    checkNonSsoAccessAllowed(user, handler)
+
+    return true
+  }
+
+  override fun getOrder(): Int {
+    return Ordered.HIGHEST_PRECEDENCE
+  }
+
+  private fun checkNonSsoAccessAllowed(
+    userAccount: UserAccountDto,
+    handler: HandlerMethod,
+  ) {
+    if (handler.hasMethodAnnotation(BypassForcedSsoAuthentication::class.java)) {
+      return
+    }
+
+    val isSsoLocal = userAccount.thirdPartyAuth == ThirdPartyAuthType.SSO
+    val isSsoGlobal = userAccount.thirdPartyAuth == ThirdPartyAuthType.SSO_GLOBAL
+    if (isSsoGlobal || isSsoLocal) {
+      // Already an SSO account
+      return
+    }
+
+    val domain = extractDomainFromUsername(userAccount.username)
+    if (!tenantService.isSsoForcedForDomain(domain)) {
+      return
+    }
+
+    throw AuthenticationException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(domain))
+  }
+
+  private fun extractDomainFromUsername(username: String): String? {
+    val valid = username.count { it == '@' } == 1
+    if (!valid) {
+      return null
+    }
+    val (_, domain) = username.split('@')
+    return domain
+  }
+}
