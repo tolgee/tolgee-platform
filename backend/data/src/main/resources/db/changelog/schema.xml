@@ -4102,4 +4102,10 @@
             create unique index project_address_part_unique on project (address_part) where deleted_at is null;
         </sql>
     </changeSet>
+    <changeSet author="martin" id="1740401511843-1">
+        <addColumn tableName="s3content_storage_config">
+            <column name="path" type="TEXT">
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

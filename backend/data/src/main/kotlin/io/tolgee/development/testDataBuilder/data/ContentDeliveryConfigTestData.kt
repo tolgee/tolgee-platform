@@ -54,6 +54,14 @@ class ContentDeliveryConfigTestData : BaseTestData() {
       customSlug = true
     }
 
+  val s3ContentDeliveryConfigWithCustomSlugAndPath =
+    projectBuilder.addContentDeliveryConfig {
+      contentStorage = s3ContentStorage.self
+      name = "Custom Slug"
+      slug = "my-slug"
+      customSlug = true
+    }
+
   val automation =
     projectBuilder.addAutomation {
       this.triggers.add(

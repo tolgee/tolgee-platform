@@ -1727,7 +1727,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
     };
     EntityDescriptionWithRelations: {
       data: { [key: string]: { [key: string]: unknown } };
@@ -3654,7 +3655,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
       /** Format: int64 */
       trialEnd?: number;
     };
@@ -3838,12 +3840,14 @@ export interface components {
       contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
       endpoint: string;
+      path: string;
       secretKey?: string;
       signingRegion: string;
     };
     S3ContentStorageConfigModel: {
       bucketName: string;
       endpoint: string;
+      path: string;
       signingRegion: string;
     };
     ScreenshotInfoDto: {
