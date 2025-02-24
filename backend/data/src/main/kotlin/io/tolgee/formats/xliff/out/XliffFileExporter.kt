@@ -11,8 +11,8 @@ import io.tolgee.model.ILanguage
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
-import java.io.InputStream
 import org.apache.commons.text.StringEscapeUtils
+import java.io.InputStream
 
 class XliffFileExporter(
   val translations: List<ExportTranslationView>,

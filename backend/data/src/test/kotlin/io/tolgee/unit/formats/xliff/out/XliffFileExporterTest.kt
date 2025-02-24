@@ -405,33 +405,35 @@ class XliffFileExporterTest {
 
   @Test
   fun `exports with HTML escaping when escapeHtml is true`() {
-    val built = buildExportTranslationList {
-      add(
-        languageTag = "en",
-        keyName = "simple_html",
-        text = "<b>Bold text</b> and <i>italic text</i>",
-      )
-      add(
-        languageTag = "en",
-        keyName = "nested_html",
-        text = "<div><p>Nested <b>bold</b> text</p></div>",
-      )
-      add(
-        languageTag = "en",
-        keyName = "mixed_entities",
-        text = "<span>Copyright © 2024 & <b>Terms</b></span>",
-      )
-      add(
-        languageTag = "en",
-        keyName = "html_attributes",
-        text = "<a href='https://example.com' class='link'>Click here</a>",
-      )
-    }
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "en",
+          keyName = "simple_html",
+          text = "<b>Bold text</b> and <i>italic text</i>",
+        )
+        add(
+          languageTag = "en",
+          keyName = "nested_html",
+          text = "<div><p>Nested <b>bold</b> text</p></div>",
+        )
+        add(
+          languageTag = "en",
+          keyName = "mixed_entities",
+          text = "<span>Copyright © 2024 & <b>Terms</b></span>",
+        )
+        add(
+          languageTag = "en",
+          keyName = "html_attributes",
+          text = "<a href='https://example.com' class='link'>Click here</a>",
+        )
+      }
 
-    val exporter = getExporter(
-      built.translations,
-      exportParams = ExportParams(escapeHtml = true)
-    )
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = ExportParams(escapeHtml = true),
+      )
     val data = getExported(exporter)
     data.assertFile(
       "en.xliff",
@@ -463,7 +465,7 @@ class XliffFileExporterTest {
       |  </file>
       |</xliff>
       |
-      """.trimMargin()
+      """.trimMargin(),
     )
   }
 

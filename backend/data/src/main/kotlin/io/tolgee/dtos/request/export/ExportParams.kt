@@ -11,10 +11,10 @@ import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_TAG_NOT_IN_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FORMAT_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.HTML_ESCAPE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
-import io.tolgee.dtos.ExportParamsDocs.HTML_ESCAPE_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.ZIP_DESCRIPTION
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
