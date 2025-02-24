@@ -40,6 +40,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun init() {
     emailTestUtil.initMocks()
+    notificationUtil.init()
   }
 
   @Test
@@ -72,6 +73,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       assertThat(it.user.id).isEqualTo(userAccount?.id)
       assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
     }
+    assertThat(notificationUtil.newestEmailNotification()).contains("Password has been changed for your account")
   }
 
   @Test

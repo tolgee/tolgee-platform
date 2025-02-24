@@ -14,6 +14,7 @@ import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.codec.binary.Base32
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -28,10 +29,15 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var notificationUtil: NotificationTestUtil
 
-  fun enableMfa() {
+  private fun enableMfa() {
     userAccount?.let {
       userAccountService.enableMfaTotp(userAccountService.get(it.id), encodedKey)
     }
+  }
+
+  @BeforeEach
+  fun setUp() {
+    notificationUtil.init()
   }
 
   @Test
@@ -53,6 +59,9 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
         assertThat(it.user.id).isEqualTo(userAccount?.id)
         assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
       }
+      assertThat(
+        notificationUtil.newestEmailNotification(),
+      ).contains("Multi-factor authentication has been enabled for your account")
     }
   }
 
@@ -72,6 +81,9 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       assertThat(it.user.id).isEqualTo(userAccount?.id)
       assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
     }
+    assertThat(
+      notificationUtil.newestEmailNotification(),
+    ).contains("Multi-factor authentication has been disabled for your account")
   }
 
   @Test
