@@ -550,6 +550,7 @@ declare namespace DataCy {
         "storage-form-s3-access-key" |
         "storage-form-s3-bucket-name" |
         "storage-form-s3-endpoint" |
+        "storage-form-s3-path" |
         "storage-form-s3-secret-key" |
         "storage-form-s3-signing-region" |
         "storage-form-save" |
