@@ -11,8 +11,8 @@ import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.*
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService

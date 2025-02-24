@@ -132,16 +132,6 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
           <Box gridColumn="2 / -1" data-cy="billing-actual-period">
             {formatDate(usage.creditBalanceNextRefillAt)}
           </Box>
-          <PlanMetric
-            data-cy="billing-actual-extra-credits"
-            name={
-              <T
-                keyName="billing_actual_extra_credits"
-                params={{ hint: <MtHint /> }}
-              />
-            }
-            currentQuantity={usage.extraCreditBalance || 0}
-          />
           <TrialInfo subscription={activeSubscription} />
           <BillingPeriodInfo subscription={activeSubscription} />
         </StyledContent>

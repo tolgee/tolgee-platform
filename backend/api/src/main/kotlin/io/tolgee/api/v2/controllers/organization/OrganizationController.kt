@@ -6,7 +6,7 @@ package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
+import io.tolgee.component.mtBucketSizeProvider.PayAsYouGoCreditsProvider
 import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -38,7 +38,7 @@ import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.machineTranslation.MtCreditBucketService
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.organization.OrganizationStatsService
@@ -87,11 +87,11 @@ class OrganizationController(
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   private val imageUploadService: ImageUploadService,
-  private val mtCreditBucketService: MtCreditBucketService,
+  private val mtCreditConsumer: MtCreditsService,
   private val organizationStatsService: OrganizationStatsService,
   private val translationsLimitProvider: TranslationsLimitProvider,
   private val projectService: ProjectService,
-  private val mtBucketSizeProvider: MtBucketSizeProvider,
+  private val payAsYouGoCreditsProvider: PayAsYouGoCreditsProvider,
 ) {
   @PostMapping
   @Transactional
@@ -310,16 +310,15 @@ class OrganizationController(
     @PathVariable organizationId: Long,
   ): PublicUsageModel {
     val organization = organizationService.get(organizationId)
-    val creditBalances = mtCreditBucketService.getCreditBalances(organization)
+    val creditBalances = mtCreditConsumer.getCreditBalances(organization.id)
     val currentTranslationSlots = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
-    val currentPayAsYouGoMtCredits = mtBucketSizeProvider.getUsedPayAsYouGoCredits(organization)
-    val availablePayAsYouGoMtCredits = mtBucketSizeProvider.getPayAsYouGoAvailableCredits(organization)
+    val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
+    val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)
     val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
     return PublicUsageModel(
       organizationId = organizationId,
       creditBalance = creditBalances.creditBalance / 100,
       includedMtCredits = creditBalances.bucketSize / 100,
-      extraCreditBalance = creditBalances.extraCreditBalance / 100,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
       currentPayAsYouGoMtCredits = currentPayAsYouGoMtCredits,

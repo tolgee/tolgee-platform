@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
     "spring.jpa.properties.hibernate.generate_statistics=true",
     "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN",
     "spring.jpa.show-sql=true",
+    "tolgee.machine-translation.free-credits-amount=100000",
   ],
 )
 class OrganizationServiceTest : AbstractSpringTest() {

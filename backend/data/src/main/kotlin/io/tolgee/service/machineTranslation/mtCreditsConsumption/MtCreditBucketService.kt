@@ -1,21 +1,15 @@
-package io.tolgee.service.machineTranslation
+package io.tolgee.service.machineTranslation.mtCreditsConsumption
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
-import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.dtos.MtCreditBalanceDto
-import io.tolgee.events.OnConsumePayAsYouGoMtCredits
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
-import io.tolgee.util.Logging
-import io.tolgee.util.addMonths
-import io.tolgee.util.executeInNewTransaction
-import io.tolgee.util.logger
-import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import io.tolgee.util.*
 import jakarta.persistence.EntityManager
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
@@ -27,25 +21,67 @@ import kotlin.time.measureTime
 class MtCreditBucketService(
   private val machineTranslationCreditBucketRepository: MachineTranslationCreditBucketRepository,
   private val currentDateProvider: CurrentDateProvider,
-  private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
-  private val eventPublisher: ApplicationEventPublisher,
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
-) : Logging {
-  fun consumeCredits(
+  private val machineTranslationProperties: MachineTranslationProperties,
+) : Logging, MtCreditsService {
+  override fun consumeCredits(
     organizationId: Long,
-    amount: Int,
-  ): MtCreditBucket {
-    return lockingProvider.withLocking(getMtCreditBucketLockName(organizationId)) {
+    creditsInCents: Int,
+  ) {
+    if (!shouldConsumeCredits()) {
+      return
+    }
+
+    val bucket =
+      lockingProvider.withLocking(getMtCreditBucketLockName(organizationId)) {
+        tryUntilItDoesntBreakConstraint {
+          executeInNewTransaction(transactionManager) {
+            val bucket = findOrCreateBucketByOrganizationId(organizationId)
+            consumeCredits(bucket, creditsInCents)
+            bucket
+          }
+        }
+      }
+
+    detachBucketAfterConsumption(bucket)
+  }
+
+  @Transactional(noRollbackFor = [OutOfCreditsException::class])
+  @ExperimentalTime
+  override fun checkPositiveBalance(organizationId: Long) {
+    if (!shouldConsumeCredits()) {
+      return
+    }
+
+    lockingProvider.withLocking(getMtCreditBucketLockName(organizationId)) {
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
-          val bucket = findOrCreateBucketByOrganizationId(organizationId)
-          consumeCredits(bucket, amount)
-          bucket
+          val time =
+            measureTime {
+              val bucket = findOrCreateBucketByOrganizationId(organizationId)
+              checkPositiveBalance(bucket)
+            }
+          logger.debug("Checked for positive credits in $time")
         }
       }
     }
+  }
+
+  private fun shouldConsumeCredits(): Boolean {
+    return machineTranslationProperties.freeCreditsAmount > -1
+  }
+
+  /**
+   * Since consumption does happen in a separate transaction,
+   * we need to detach the bucket from the current transaction
+   *
+   * Otherwise, hibernate saves the entity and credits won't be consumed
+   */
+  private fun detachBucketAfterConsumption(bucket: MtCreditBucket) {
+    val bucketRef = entityManager.getReference(MtCreditBucket::class.java, bucket.id)
+    entityManager.detach(bucketRef)
   }
 
   private fun getMtCreditBucketLockName(organizationId: Long) = "mt-credit-lock-$organizationId"
@@ -67,38 +103,17 @@ class MtCreditBucketService(
     save(bucket)
   }
 
-  @Transactional(noRollbackFor = [OutOfCreditsException::class])
-  @ExperimentalTime
-  fun checkPositiveBalance(organizationId: Long) {
-    lockingProvider.withLocking(getMtCreditBucketLockName(organizationId)) {
-      tryUntilItDoesntBreakConstraint {
-        executeInNewTransaction(transactionManager) {
-          val time =
-            measureTime {
-              val bucket = findOrCreateBucketByOrganizationId(organizationId)
-              checkPositiveBalance(bucket)
-            }
-          logger.debug("Checked for positive credits in $time")
-        }
-      }
-    }
-  }
-
   private fun checkPositiveBalance(bucket: MtCreditBucket) {
     val totalBalance = getTotalBalance(bucket)
 
     if (totalBalance <= 0) {
-      if (mtCreditBucketSizeProvider.isPayAsYouGo(bucket.organization)) {
-        throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED)
-      }
       throw OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS)
     }
   }
 
   private fun MtCreditBucketService.getTotalBalance(bucket: MtCreditBucket): Long {
     val balances = getCreditBalances(bucket)
-    val availablePayAsYouGoCredits = mtCreditBucketSizeProvider.getPayAsYouGoAvailableCredits(bucket.organization)
-    return balances.creditBalance + balances.extraCreditBalance + availablePayAsYouGoCredits
+    return balances.creditBalance
   }
 
   private fun MtCreditBucket.consumeSufficientCredits(
@@ -114,24 +129,7 @@ class MtCreditBucketService(
       return
     }
 
-    if (this.extraCredits + this.credits >= amount) {
-      val amountToConsumeFromExtraCredits = amount - this.credits
-      this.credits = 0
-      this.extraCredits -= amountToConsumeFromExtraCredits
-      return
-    }
-
-    val amountToConsumeFromPayAsYouGo = amount - this.credits - this.extraCredits
     this.credits = 0
-    this.extraCredits = 0
-
-    eventPublisher.publishEvent(
-      OnConsumePayAsYouGoMtCredits(
-        this@MtCreditBucketService,
-        organizationId,
-        amountToConsumeFromPayAsYouGo,
-      ),
-    )
   }
 
   @Transactional
@@ -161,23 +159,18 @@ class MtCreditBucketService(
   }
 
   @Transactional
-  fun getCreditBalances(organizationId: Long): MtCreditBalanceDto {
+  override fun getCreditBalances(organizationId: Long): MtCreditBalanceDto {
     return getCreditBalances(findOrCreateBucketByOrganizationId(organizationId))
   }
 
-  fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
+  private fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
     refillIfItsTime(bucket)
     return MtCreditBalanceDto(
       creditBalance = bucket.credits,
       bucketSize = bucket.bucketSize,
-      extraCreditBalance = bucket.extraCredits,
       refilledAt = bucket.refilled,
       nextRefillAt = bucket.getNextRefillDate(),
     )
-  }
-
-  fun getCreditBalances(organization: Organization): MtCreditBalanceDto {
-    return getCreditBalances(findOrCreateBucket(organization))
   }
 
   private fun MtCreditBucket.getNextRefillDate(): Date {
@@ -185,7 +178,7 @@ class MtCreditBucketService(
   }
 
   fun refillBucket(bucket: MtCreditBucket) {
-    refillBucket(bucket, getRefillAmount(bucket.organization))
+    refillBucket(bucket, getRefillAmount())
   }
 
   fun refillBucket(
@@ -197,8 +190,8 @@ class MtCreditBucketService(
     bucket.bucketSize = bucket.credits
   }
 
-  private fun getRefillAmount(organization: Organization?): Long {
-    return mtCreditBucketSizeProvider.getSize(organization)
+  private fun getRefillAmount(): Long {
+    return machineTranslationProperties.freeCreditsAmount
   }
 
   private fun refillIfItsTime(bucket: MtCreditBucket) {
@@ -223,7 +216,7 @@ class MtCreditBucketService(
   }
 
   private fun MtCreditBucket.initCredits() {
-    credits = getRefillAmount(this.organization)
+    credits = getRefillAmount()
     bucketSize = credits
   }
 

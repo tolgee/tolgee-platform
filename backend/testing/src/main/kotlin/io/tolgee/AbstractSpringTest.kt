@@ -34,9 +34,9 @@ import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
@@ -146,7 +146,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var fileStorage: FileStorage
 
   @Autowired
-  lateinit var machineTranslationProperties: MachineTranslationProperties
+  open lateinit var machineTranslationProperties: MachineTranslationProperties
 
   @Autowired
   lateinit var awsMachineTranslationProperties: AwsMachineTranslationProperties
