@@ -1,5 +1,6 @@
 package io.tolgee.security.authentication
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.HandlerInterceptor
 @Component
 class SsoAuthenticationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
+  private val tolgeeProperties: TolgeeProperties,
   @Lazy
   private val tenantService: TenantService,
 ) : HandlerInterceptor, Ordered {
@@ -49,6 +51,10 @@ class SsoAuthenticationInterceptor(
     handler: HandlerMethod,
   ) {
     if (handler.hasMethodAnnotation(BypassForcedSsoAuthentication::class.java)) {
+      return
+    }
+
+    if (!tolgeeProperties.authentication.enabled) {
       return
     }
 
