@@ -7,9 +7,14 @@ export const useUserTasks = (props: { enabled: boolean }) => {
     url: '/v2/user-tasks',
     method: 'get',
     query: { size: 1, filterState: TASK_ACTIVE_STATES },
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableErrorNotification: true,
+    },
     options: {
       enabled: props.enabled,
       refetchInterval: 60_000,
+      noGlobalLoading: true,
     },
   });
 };

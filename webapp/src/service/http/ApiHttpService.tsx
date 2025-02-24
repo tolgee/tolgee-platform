@@ -101,13 +101,15 @@ export class ApiHttpService {
             }
             // eslint-disable-next-line no-console
             console.error(e);
-            globalContext.actions?.setGlobalError(
-              new GlobalError(
-                'Error while loading resource',
-                input.toString(),
-                e
-              )
-            );
+            if (!options.disableAutoErrorHandle) {
+              globalContext.actions?.setGlobalError(
+                new GlobalError(
+                  'Error while loading resource',
+                  input.toString(),
+                  e
+                )
+              );
+            }
             reject(e);
           });
       };
