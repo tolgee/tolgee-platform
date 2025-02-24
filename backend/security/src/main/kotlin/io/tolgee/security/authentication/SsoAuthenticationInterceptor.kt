@@ -3,7 +3,7 @@ package io.tolgee.security.authentication
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.service.TenantService
 import jakarta.servlet.DispatcherType
@@ -70,7 +70,7 @@ class SsoAuthenticationInterceptor(
       return
     }
 
-    throw AuthenticationException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(domain))
+    throw PermissionException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(domain))
   }
 
   private fun extractDomainFromUsername(username: String): String? {
