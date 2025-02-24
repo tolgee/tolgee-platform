@@ -1,12 +1,10 @@
 package io.tolgee.security.authentication
 
-import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.ThirdPartyAuthType
-import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.TenantService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
