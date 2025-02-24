@@ -1446,7 +1446,7 @@
   "this_will_delete_project_forever": "Questa opzione eliminerà per sempre questo progetto.",
   "this_will_transfer_project": "Questo trasferirà il progetto a un altro proprietario.",
   "time_difference_days": "{value, plural, one {un giorno fa} other {{value} giorni fa} }",
-  "time_difference_hours": "{value, plural, one {un'ora fa} other {{value} ore fa} }",
+  "time_difference_hours": "{value, plural, one {un'ora fa} other {{value}h fa} }",
   "time_difference_minutes": "{value, plural, one {un minuto fa} other {{value} minuti fa} }",
   "time_difference_right_now": "proprio adesso",
   "token-regenerate-message": "Il token attuale verrà sostituito. Non sarà più possibile utilizzarlo.",

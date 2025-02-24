@@ -1,3 +1,10 @@
+## [3.103.2](https://github.com/tolgee/tolgee-platform/compare/v3.103.1...v3.103.2) (2025-02-24)
+
+
+### Bug Fixes
+
+* Adjust height threshold for Firefox compatibility ([#2927](https://github.com/tolgee/tolgee-platform/issues/2927)) ([661368f](https://github.com/tolgee/tolgee-platform/commit/661368fb9da2f7cfb642af446ccdfe1fff9362ba)), closes [#2924](https://github.com/tolgee/tolgee-platform/issues/2924) [#2924](https://github.com/tolgee/tolgee-platform/issues/2924)
+
 ## [3.103.1](https://github.com/tolgee/tolgee-platform/compare/v3.103.0...v3.103.1) (2025-02-23)
 
 
