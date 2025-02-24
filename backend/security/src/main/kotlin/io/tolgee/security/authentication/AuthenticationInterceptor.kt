@@ -18,16 +18,10 @@ package io.tolgee.security.authentication
 
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.enums.ThirdPartyAuthType
-import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.TenantService
 import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.context.annotation.Lazy
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
@@ -41,10 +35,6 @@ import org.springframework.web.servlet.HandlerInterceptor
 class AuthenticationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   private val authenticationProperties: AuthenticationProperties,
-  @Lazy
-  private val emailVerificationService: EmailVerificationService,
-  @Lazy
-  private val tenantService: TenantService,
 ) : HandlerInterceptor, Ordered {
   override fun preHandle(
     request: HttpServletRequest,
@@ -86,12 +76,6 @@ class AuthenticationInterceptor(
       throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
     }
 
-    if (authenticationFacade.isAuthenticated) {
-      val user = authenticationFacade.authenticatedUser
-      checkEmailVerificationOrThrow(user, handler)
-      checkNonSsoAccessAllowed(user, handler)
-    }
-
     return true
   }
 
@@ -109,50 +93,5 @@ class AuthenticationInterceptor(
 
   override fun getOrder(): Int {
     return Ordered.HIGHEST_PRECEDENCE
-  }
-
-  private fun checkEmailVerificationOrThrow(
-    userAccount: UserAccountDto,
-    handler: HandlerMethod,
-  ) {
-    if (
-      !emailVerificationService.isVerified(
-        userAccount,
-      ) && !handler.hasMethodAnnotation(BypassEmailVerification::class.java)
-    ) {
-      throw PermissionException(Message.EMAIL_NOT_VERIFIED)
-    }
-  }
-
-  private fun checkNonSsoAccessAllowed(
-    userAccount: UserAccountDto,
-    handler: HandlerMethod,
-  ) {
-    if (handler.hasMethodAnnotation(BypassForcedSsoAuthentication::class.java)) {
-      return
-    }
-
-    val isSsoLocal = userAccount.thirdPartyAuth == ThirdPartyAuthType.SSO
-    val isSsoGlobal = userAccount.thirdPartyAuth == ThirdPartyAuthType.SSO_GLOBAL
-    if (isSsoGlobal || isSsoLocal) {
-      // Already an SSO account
-      return
-    }
-
-    val domain = extractDomainFromUsername(userAccount.username)
-    if (!tenantService.isSsoForcedForDomain(domain)) {
-      return
-    }
-
-    throw AuthenticationException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(domain))
-  }
-
-  private fun extractDomainFromUsername(username: String): String? {
-    val valid = username.count { it == '@' } == 1
-    if (!valid) {
-      return null
-    }
-    val (_, domain) = username.split('@')
-    return domain
   }
 }

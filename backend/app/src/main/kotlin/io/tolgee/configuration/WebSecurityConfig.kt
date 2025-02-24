@@ -20,6 +20,8 @@ import io.tolgee.component.ExceptionHandlerFilter
 import io.tolgee.component.TransferEncodingHeaderDebugFilter
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
+import io.tolgee.security.authentication.EmailValidInterceptor
+import io.tolgee.security.authentication.SsoAuthenticationInterceptor
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.ProjectAuthorizationInterceptor
 import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
@@ -58,6 +60,10 @@ class WebSecurityConfig(
   @Lazy
   private val authenticationInterceptor: AuthenticationInterceptor,
   @Lazy
+  private val emailValidInterceptor: EmailValidInterceptor,
+  @Lazy
+  private val ssoAuthenticationInterceptor: SsoAuthenticationInterceptor,
+  @Lazy
   private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
   @Lazy
   private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
@@ -84,7 +90,7 @@ class WebSecurityConfig(
             }
           },
         )
-        it.requestMatchers("/api/public/**", "/v2/public/**").permitAll()
+        it.requestMatchers(*PUBLIC_ENDPOINTS).permitAll()
         it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
         it.requestMatchers("/api/**", "/v2/**").authenticated()
         it.anyRequest().permitAll()
@@ -116,6 +122,10 @@ class WebSecurityConfig(
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(rateLimitInterceptor)
     registry.addInterceptor(authenticationInterceptor)
+    registry.addInterceptor(emailValidInterceptor)
+      .excludePathPatterns(*PUBLIC_ENDPOINTS)
+    registry.addInterceptor(ssoAuthenticationInterceptor)
+      .excludePathPatterns(*PUBLIC_ENDPOINTS)
 
     registry.addInterceptor(organizationAuthorizationInterceptor)
       .addPathPatterns("/v2/organizations/**")
@@ -130,5 +140,9 @@ class WebSecurityConfig(
     registration.setFilter(TransferEncodingHeaderDebugFilter())
     registration.setOrder(Ordered.HIGHEST_PRECEDENCE)
     return registration
+  }
+
+  companion object {
+    val PUBLIC_ENDPOINTS = arrayOf("/api/public/**", "/v2/public/**")
   }
 }
