@@ -30,7 +30,7 @@ export const SettingsRow: React.FC<Props> = ({
 }: Props) => {
   const { t } = useTranslate();
   const saveMutation = useApiMutation({
-    url: '/v2/notifications-settings',
+    url: '/v2/notification-settings',
     method: 'put',
   });
 

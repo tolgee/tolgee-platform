@@ -72,7 +72,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
 
   const query = { size: 10 };
   const notificationsLoadable = useApiInfiniteQuery({
-    url: '/v2/notifications',
+    url: '/v2/notification',
     method: 'get',
     query: query,
     options: {
@@ -108,7 +108,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
   });
 
   const markSeenMutation = useApiMutation({
-    url: '/v2/notifications-mark-seen',
+    url: '/v2/notification-mark-seen',
     method: 'put',
   });
 

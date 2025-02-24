@@ -25,7 +25,7 @@ export const NotificationsView: React.FC = () => {
   const { isEnabled } = useEnabledFeatures();
 
   const settingsLoadable = useApiQuery({
-    url: '/v2/notifications-settings',
+    url: '/v2/notification-settings',
     method: 'get',
     options: { keepPreviousData: true },
   });

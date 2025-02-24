@@ -21,7 +21,7 @@ class NotificationOperationsController(
   private val notificationService: NotificationService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
-  @PutMapping("/notifications-mark-seen")
+  @PutMapping("/notification-mark-seen")
   @Operation(summary = "Marks notifications of the currently logged in user with given IDs as seen.")
   @AllowApiAccess
   fun markNotificationsAsSeen(

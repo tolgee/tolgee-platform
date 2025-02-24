@@ -82,7 +82,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("page.totalElements").isNumber.isEqualTo(BigDecimal(3))
     }
 
-    performAuthGet("/v2/notifications").andAssertThatJson {
+    performAuthGet("/v2/notification").andAssertThatJson {
       node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Another task")
     }
   }

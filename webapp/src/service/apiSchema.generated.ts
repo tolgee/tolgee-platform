@@ -143,13 +143,13 @@ export interface paths {
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
-  "/v2/notifications": {
+  "/v2/notification": {
     get: operations["getNotifications"];
   };
-  "/v2/notifications-mark-seen": {
+  "/v2/notification-mark-seen": {
     put: operations["markNotificationsAsSeen"];
   };
-  "/v2/notifications-settings": {
+  "/v2/notification-settings": {
     get: operations["getNotificationsSettings"];
     put: operations["putNotificationSetting"];
   };

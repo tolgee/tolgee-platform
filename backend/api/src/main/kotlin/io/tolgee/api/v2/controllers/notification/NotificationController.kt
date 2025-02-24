@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/notifications",
+    "/v2/notification",
   ],
 )
 @Tag(name = "Notifications", description = "Manipulates notifications")

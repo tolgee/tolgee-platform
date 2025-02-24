@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/notifications-settings",
+    "/v2/notification-settings",
   ],
 )
 @Tag(name = "Notifications", description = "Manipulates notification settings")
