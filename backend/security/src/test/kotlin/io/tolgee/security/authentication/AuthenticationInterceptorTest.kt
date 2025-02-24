@@ -39,8 +39,10 @@ class AuthenticationInterceptorTest {
   fun setupMocks() {
     Mockito.`when`(authenticationProperties.enabled).thenReturn(true)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
+    Mockito.`when`(authenticationFacade.isAuthenticated).thenReturn(true)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
+    Mockito.`when`(userAccount.username).thenReturn("user")
     Mockito.`when`(userAccount.needsSuperJwt).thenReturn(true)
     Mockito.`when`(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(true)
     Mockito.`when`(tenantService.isSsoForcedForDomain(any())).thenReturn(false)
