@@ -42,6 +42,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     enabledFeaturesProvider.forceEnabled = setOf(Feature.TASKS)
+    notificationUtil.init()
   }
 
   @Test
@@ -99,6 +100,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     executeInNewTransaction {
       assertThat(notificationUtil.newestInAppNotification().linkedTask?.name).isEqualTo("Another task")
+      assertThat(notificationUtil.newestEmailNotification()).contains("/projects/${testData.project.id}/task?number=3")
     }
   }
 
