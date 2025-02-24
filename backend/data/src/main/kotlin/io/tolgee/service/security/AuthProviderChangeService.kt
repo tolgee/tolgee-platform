@@ -50,8 +50,10 @@ class AuthProviderChangeService(
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun saveProviderChange(data: AuthProviderChangeData) {
-    authProviderChangeRequestRepository.deleteByUserAccountId(data.userAccount.id)
-    authProviderChangeRequestRepository.save(data.asAuthProviderChangeRequest())
+    val req =
+      authProviderChangeRequestRepository.findByUserAccountId(data.userAccount.id)
+        ?: AuthProviderChangeRequest()
+    authProviderChangeRequestRepository.save(data.apply(req))
   }
 
   fun acceptProviderChange(data: AuthProviderChangeData) {
@@ -106,17 +108,15 @@ class AuthProviderChangeService(
     return request
   }
 
-  fun AuthProviderChangeData.asAuthProviderChangeRequest(): AuthProviderChangeRequest {
+  fun AuthProviderChangeData.apply(req: AuthProviderChangeRequest) {
     val expirationDate = currentDateProvider.date.addMinutes(30)
-    return AuthProviderChangeRequest().also {
-      it.userAccount = this.userAccount
-      it.expirationDate = DateUtils.truncate(expirationDate, Calendar.SECOND)
-      it.accountType = this.accountType
-      it.authType = this.authType
-      it.authId = this.authId
-      it.ssoDomain = this.ssoDomain
-      it.ssoRefreshToken = this.ssoRefreshToken
-      it.ssoExpiration = this.ssoExpiration
-    }
+    req.userAccount = this.userAccount
+    req.expirationDate = DateUtils.truncate(expirationDate, Calendar.SECOND)
+    req.accountType = this.accountType
+    req.authType = this.authType
+    req.authId = this.authId
+    req.ssoDomain = this.ssoDomain
+    req.ssoRefreshToken = this.ssoRefreshToken
+    req.ssoExpiration = this.ssoExpiration
   }
 }
