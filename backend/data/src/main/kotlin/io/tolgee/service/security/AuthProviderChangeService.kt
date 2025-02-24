@@ -53,11 +53,13 @@ class AuthProviderChangeService(
     val req =
       authProviderChangeRequestRepository.findByUserAccountId(data.userAccount.id)
         ?: AuthProviderChangeRequest()
-    authProviderChangeRequestRepository.save(data.apply(req))
+    data.apply(req)
+    authProviderChangeRequestRepository.save(req)
   }
 
   fun acceptProviderChange(data: AuthProviderChangeData) {
-    val change = data.asAuthProviderChangeRequest()
+    val change = AuthProviderChangeRequest()
+    data.apply(change)
     acceptProviderChange(change)
   }
 
