@@ -1195,7 +1195,7 @@
   "project_dashboard_chart_daily_activity_count_tooltip": "Denní aktivita",
   "project_dashboard_key_count": "Klíče",
   "project_dashboard_key_count_plural": "{value, plural, one {Klíč} few {Klíče} many {Klíče} other {Klíčů}}",
-  "project_dashboard_language_keys": "{count, plural, one {1 klíč```} few {# klíče```} many {# klíče```} other {# klíčů```}}",
+  "project_dashboard_language_keys": "{count, plural, one {# klíč} few {# klíče} many {# klíče} other {# klíčů}}",
   "project_dashboard_language_words": "{count, plural, one {# slovo} few {# slova} many {# slova} other {# slov}}",
   "project_dashboard_member_count": "Uživatelé",
   "project_dashboard_member_count_plural": "{value, plural, one {Člen} few {Členové} many {Členové} other {Členů}}",

@@ -1,3 +1,10 @@
+# [3.104.0](https://github.com/tolgee/tolgee-platform/compare/v3.103.2...v3.104.0) (2025-02-24)
+
+
+### Features
+
+* Split MT credit consumption logic to public and billing ([#2931](https://github.com/tolgee/tolgee-platform/issues/2931)) ([d6716ac](https://github.com/tolgee/tolgee-platform/commit/d6716ac1abeb903f5de6d1b09f35039704d1c189))
+
 ## [3.103.2](https://github.com/tolgee/tolgee-platform/compare/v3.103.1...v3.103.2) (2025-02-24)
 
 
