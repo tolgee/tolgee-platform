@@ -34,7 +34,7 @@ class TenantServiceImpl(
         ?.takeIf { properties.authentication.ssoOrganizations.isAllowedDomain(it) }
         ?.let {
           tenantRepository.findEnabledByDomain(it)?.let { ssoTenantEntity ->
-            SsoTenantConfig(ssoTenantEntity, ssoTenantEntity.organization)
+            SsoTenantConfig(ssoTenantEntity, ssoTenantEntity.organization.id)
           }
         }
   }

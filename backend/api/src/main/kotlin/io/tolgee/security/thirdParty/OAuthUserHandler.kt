@@ -7,6 +7,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 class OAuthUserHandler(
   private val signUpService: SignUpService,
+  private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   private val authProviderChangeService: AuthProviderChangeService,
@@ -97,7 +99,10 @@ class OAuthUserHandler(
     newUserAccount.accountType = accountType
     newUserAccount.ssoSessionExpiry = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType)
 
-    val organization = userResponse.tenant?.organization
+    val organization =
+      userResponse.tenant?.organizationId?.let {
+        organizationService.find(it) ?: throw AuthenticationException(Message.ORGANIZATION_NOT_FOUND)
+      }
     signUpService.signUp(newUserAccount, invitationCode, null, organizationForced = organization)
 
     if (organization != null) {
