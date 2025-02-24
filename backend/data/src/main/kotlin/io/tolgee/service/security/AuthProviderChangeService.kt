@@ -15,6 +15,7 @@ import io.tolgee.repository.AuthProviderChangeRequestRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.addMinutes
 import org.apache.commons.lang3.time.DateUtils
 import org.springframework.context.annotation.Lazy
@@ -28,6 +29,7 @@ class AuthProviderChangeService(
   private val authProviderChangeRequestRepository: AuthProviderChangeRequestRepository,
   private val tenantService: TenantService,
   private val userAccountService: UserAccountService,
+  private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
   private val currentDateProvider: CurrentDateProvider,
   private val authenticationFacade: AuthenticationFacade,
@@ -132,10 +134,13 @@ class AuthProviderChangeService(
     val domain = req.ssoDomain
     if (domain != null && req.authType == ThirdPartyAuthType.SSO) {
       val tenant = tenantService.getEnabledConfigByDomain(domain)
-      val organization = tenant.organization
-      if (organization == null) {
+      val organizationId = tenant.organizationId
+      if (organizationId == null) {
         throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
       }
+      val organization =
+        organizationService.find(organizationId)
+          ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
       if (!organizationRoleService.isUserMemberOrOwner(userAccount.id, organization.id)) {
         organizationRoleService.grantMemberRoleToUser(userAccount, organization)
       }

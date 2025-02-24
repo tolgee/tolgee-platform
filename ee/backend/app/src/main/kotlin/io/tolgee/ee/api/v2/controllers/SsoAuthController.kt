@@ -30,7 +30,7 @@ class SsoAuthController(
     val registrationId = request.domain
     val tenant = tenantService.getEnabledConfigByDomain(registrationId)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization?.id,
+      organizationId = tenant.organizationId,
       Feature.SSO,
     )
     val redirectUrl = buildAuthUrl(tenant, state = request.state)

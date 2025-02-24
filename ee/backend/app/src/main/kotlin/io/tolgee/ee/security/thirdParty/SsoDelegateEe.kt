@@ -72,7 +72,7 @@ class SsoDelegateEe(
 
     val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization?.id,
+      organizationId = tenant.organizationId,
       Feature.SSO,
     )
 
@@ -213,7 +213,7 @@ class SsoDelegateEe(
   ): Boolean {
     val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization?.id,
+      organizationId = tenant.organizationId,
       Feature.SSO,
     )
 

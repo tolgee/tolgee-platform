@@ -1,7 +1,6 @@
 package io.tolgee.dtos.sso
 
 import io.tolgee.api.ISsoTenant
-import io.tolgee.model.Organization
 
 data class SsoTenantConfig(
   override val clientId: String,
@@ -14,9 +13,9 @@ data class SsoTenantConfig(
    */
   override val force: Boolean,
   override val global: Boolean,
-  val organization: Organization? = null,
+  val organizationId: Long? = null,
 ) : ISsoTenant {
-  constructor(other: ISsoTenant, organization: Organization?) : this(
+  constructor(other: ISsoTenant, organizationId: Long?) : this(
     clientId = other.clientId,
     clientSecret = other.clientSecret,
     authorizationUri = other.authorizationUri,
@@ -24,6 +23,6 @@ data class SsoTenantConfig(
     tokenUri = other.tokenUri,
     force = other.force,
     global = other.global,
-    organization = organization,
+    organizationId = organizationId,
   )
 }
