@@ -1,3 +1,10 @@
+## [3.104.2](https://github.com/tolgee/tolgee-platform/compare/v3.104.1...v3.104.2) (2025-02-24)
+
+
+### Bug Fixes
+
+* reuse existing db entry for auth provider change request instead of deleting existing entry ([#2940](https://github.com/tolgee/tolgee-platform/issues/2940)) ([9d16c33](https://github.com/tolgee/tolgee-platform/commit/9d16c334adeac52c94407590a0589ba0c99659a4))
+
 ## [3.104.1](https://github.com/tolgee/tolgee-platform/compare/v3.104.0...v3.104.1) (2025-02-24)
 
 
