@@ -53,13 +53,13 @@ class AuthProviderChangeService(
     val req =
       authProviderChangeRequestRepository.findByUserAccountId(data.userAccount.id)
         ?: AuthProviderChangeRequest()
-    data.apply(req)
+    data.to(req)
     authProviderChangeRequestRepository.save(req)
   }
 
   fun acceptProviderChange(data: AuthProviderChangeData) {
     val change = AuthProviderChangeRequest()
-    data.apply(change)
+    data.to(change)
     acceptProviderChange(change)
   }
 
@@ -110,7 +110,7 @@ class AuthProviderChangeService(
     return request
   }
 
-  fun AuthProviderChangeData.apply(req: AuthProviderChangeRequest) {
+  fun AuthProviderChangeData.to(req: AuthProviderChangeRequest) {
     val expirationDate = currentDateProvider.date.addMinutes(30)
     req.userAccount = this.userAccount
     req.expirationDate = DateUtils.truncate(expirationDate, Calendar.SECOND)
