@@ -16,5 +16,17 @@ class NotificationTestUtil(
 
   fun newestInAppNotification(): Notification = notificationRepository.findAll(Sort.by(DESC, "id")).first()
 
+  fun assertNoInAppNotifications() {
+    if (notificationRepository.findAll().isNotEmpty()) {
+      throw AssertionError("There should be no in-app notifications.")
+    }
+  }
+
   fun newestEmailNotification(): String = emailTestUtil.messageContents.last()
+
+  fun assertNoEmailNotifications() {
+    if (emailTestUtil.messageContents.isNotEmpty()) {
+      throw AssertionError("There should be no email notifications.")
+    }
+  }
 }
