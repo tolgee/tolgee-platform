@@ -139,17 +139,21 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
         from Organization o
         join o.basePermission bp
         left join OrganizationRole r on r.user.id = :userId and r.organization = o
-        where lower(o.name) like lower(concat('%', :search, '%')) or
+        where (:search is null or
+              lower(o.name) like lower(concat('%', :search, '%')) or
               lower(o.slug) like lower(concat('%', :search, '%')) or
               lower(cast(o.id as string)) like lower(concat(:search, '%'))
+              )
         and o.deletedAt is null
         """,
     countQuery =
       """select count(o)
         from Organization o
-        where lower(o.name) like lower(concat('%', :search, '%')) or
+        where (:search is null or
+              lower(o.name) like lower(concat('%', :search, '%')) or
               lower(o.slug) like lower(concat('%', :search, '%')) or
               lower(cast(o.id as string)) like lower(concat(:search, '%'))
+              )
         and o.deletedAt is null
         """,
   )
