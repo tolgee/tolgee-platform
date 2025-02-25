@@ -71,9 +71,14 @@ class SignUpService(
     val invitation = invitationCode?.let(invitationService::getInvitation)
     val user = userAccountService.createUser(entity, userSource)
     if (invitation != null) {
-      if (organizationForced != null && invitation.organizationRole?.organization != organizationForced) {
-        // Invitations are allowed only for specific organization
-        throw BadRequestException(Message.INVITATION_ORGANIZATION_MISMATCH)
+      if (organizationForced != null) {
+        val targetOrganization = invitation.organizationRole?.organization
+          ?: invitation.permission?.organization
+          ?: invitation.permission?.project?.organizationOwner
+        if (targetOrganization?.id != organizationForced.id) {
+          // Invitations are allowed only for specific organization
+          throw BadRequestException(Message.INVITATION_ORGANIZATION_MISMATCH)
+        }
       }
       invitationService.accept(invitation.code, user)
     } else if (organizationForced != null) {
