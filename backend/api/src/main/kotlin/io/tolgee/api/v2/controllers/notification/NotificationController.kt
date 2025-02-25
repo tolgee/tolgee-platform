@@ -16,6 +16,7 @@ import io.tolgee.model.notifications.Notification
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.notification.NotificationService
+import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.websocket.WebsocketEvent
 import io.tolgee.websocket.WebsocketEventPublisher
 import io.tolgee.websocket.WebsocketEventType
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -72,25 +72,34 @@ class NotificationController(
       throw BadRequestException(Message.SORTING_AND_PAGING_IS_NOT_SUPPORTED_WHEN_USING_CURSOR)
     }
 
+    val parsedCursor =
+      cursor
+        ?.let { CursorUtil.parseCursor(it) }
+        ?.apply {
+          if (get("createdAt")?.direction != Sort.Direction.DESC ||
+            get("id")?.direction != Sort.Direction.DESC
+          ) {
+            throw BadRequestException("Supplied cursor is not valid, custom sorting is not supported.")
+          }
+        }
     val notifications =
       notificationService.getNotifications(
         authenticationFacade.authenticatedUser.id,
         pageable,
         filters,
-        cursor?.let { String(Base64.getDecoder().decode(it)).toLong() },
+        parsedCursor,
       )
     val model =
       pagedResourcesAssembler.toModel(
         notifications,
         NotificationModelAssembler(enhancers, notifications),
       )
-    return PagedModelWithNextCursor(
-      model,
+    val nextCursor =
       model.content
-        .let { if (it.isEmpty()) null else it.last() }
-        ?.id
-        ?.toString()?.let { Base64.getEncoder().encodeToString(it.toByteArray()) },
-    )
+        .let { if (it.size < pageable.pageSize) null else it.last() }
+        ?.let { CursorUtil.getCursor(it, pageable.sort) }
+
+    return PagedModelWithNextCursor(model, nextCursor)
   }
 
   @TransactionalEventListener

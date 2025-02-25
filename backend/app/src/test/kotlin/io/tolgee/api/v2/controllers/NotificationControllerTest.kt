@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.dtos.request.notification.NotificationsMarkSeenRequest
 import io.tolgee.fixtures.andAssertThatJson
@@ -9,6 +10,7 @@ import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.web.servlet.ResultActions
 
 class NotificationControllerTest : AuthorizedControllerTest() {
   @Autowired
@@ -38,6 +40,41 @@ class NotificationControllerTest : AuthorizedControllerTest() {
       node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task 104")
       node("_embedded.notificationModelList[0].originatingUser.name").isEqualTo("originating user")
     }
+  }
+
+  @Test
+  fun `gets notifications by cursor`() {
+    val testData = NotificationsTestData()
+
+    (101L..205).forEach { taskNumber ->
+      testData.generateNotificationWithTask(taskNumber)
+    }
+
+    testDataService.saveTestData(testData.root)
+    loginAsUser(testData.user.username)
+
+    var nextCursor: String? = null
+
+    (0..9).forEach { i ->
+      getNotificationsByCursor(nextCursor).andAssertThatJson {
+        node("_embedded.notificationModelList").isArray.hasSize(10)
+        node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task ${205 - 10 * i}")
+        node("_embedded.notificationModelList[9].linkedTask.name").isEqualTo("Notification task ${205 - 10 * i - 9}")
+        node("nextCursor").isNotNull
+      }.andDo {
+        nextCursor = ObjectMapper().readValue(it.response.contentAsString, Map::class.java)["nextCursor"] as String
+      }
+    }
+
+    getNotificationsByCursor(nextCursor).andAssertThatJson {
+      node("_embedded.notificationModelList").isArray.hasSize(5)
+      node("nextCursor").isNull()
+    }
+  }
+
+  private fun getNotificationsByCursor(cursor: String?): ResultActions {
+    val cursorQuery = cursor?.let { "&cursor=$it" } ?: ""
+    return performAuthGet("/v2/notifications?size=10$cursorQuery")
   }
 
   @Test

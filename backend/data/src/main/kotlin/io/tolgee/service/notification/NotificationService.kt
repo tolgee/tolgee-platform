@@ -1,6 +1,7 @@
 package io.tolgee.service.notification
 
 import io.tolgee.dtos.request.notification.NotificationFilters
+import io.tolgee.dtos.response.CursorValue
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationChannel
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.sql.Timestamp
+import java.time.Instant
 
 @Service
 class NotificationService(
@@ -23,13 +26,14 @@ class NotificationService(
     userId: Long,
     pageable: Pageable,
     filters: NotificationFilters,
-    cursor: Long?,
+    cursor: Map<String, CursorValue>?,
   ): Page<Notification> =
     notificationRepository.fetchNotificationsByUserId(
       userId,
       pageable,
       filters,
-      cursor,
+      cursor?.get("createdAt")?.value?.let { Timestamp.from(Instant.ofEpochMilli(it.toLong())) },
+      cursor?.get("id")?.value?.toLong(),
     )
 
   fun getCountOfUnseenNotifications(userId: Long): Int =

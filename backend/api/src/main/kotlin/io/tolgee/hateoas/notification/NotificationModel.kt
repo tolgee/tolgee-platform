@@ -4,6 +4,7 @@ import io.tolgee.hateoas.project.SimpleProjectModel
 import io.tolgee.hateoas.task.TaskModel
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.notifications.NotificationType
+import io.tolgee.service.queryBuilders.Cursorable
 import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.util.*
@@ -15,4 +16,11 @@ data class NotificationModel(
   var originatingUser: SimpleUserAccountModel? = null,
   var linkedTask: TaskModel? = null,
   var createdAt: Date?,
-) : RepresentationModel<NotificationModel>(), Serializable
+) : RepresentationModel<NotificationModel>(), Serializable, Cursorable {
+  override fun toCursorValue(property: String): String? =
+    when (property) {
+      "id" -> id.toString()
+      "createdAt" -> createdAt?.time?.toString()
+      else -> null
+    }
+}
