@@ -16,15 +16,15 @@ interface IUserAccount {
     get() = this.accountType == UserAccount.AccountType.LOCAL || isMfaEnabled
 
   val domain: String?
-  get() {
-    val username = this.username
-    val valid = username.count { it == '@' } == 1
-    if (!valid) {
-      return null
+    get() {
+      val username = this.username
+      val valid = username.count { it == '@' } == 1
+      if (!valid) {
+        return null
+      }
+      val (_, domain) = username.split('@')
+      return domain
     }
-    val (_, domain) = username.split('@')
-    return domain
-  }
 
   val totpKey: ByteArray?
 

@@ -5,7 +5,7 @@ import { T } from '@tolgee/react';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
-import { LogIn01 } from '@untitled-ui/icons-react';
+import { Key02 } from '@untitled-ui/icons-react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 export const ChangeAuthProvider: FunctionComponent = () => {
@@ -23,11 +23,14 @@ export const ChangeAuthProvider: FunctionComponent = () => {
 
   if (!user) return null;
 
+  const isUserManaged = user.accountType === 'MANAGED';
+
   return (
     <Box>
       <Typography variant="h6" mt={2}>
         <T keyName="third-party-authentication-options" />
       </Typography>
+      {/* TODO: Show info card when user is managed explaining why no third-party provider changes are available */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -38,31 +41,47 @@ export const ChangeAuthProvider: FunctionComponent = () => {
           <LoadingButton
             loading={ssoUrl.isLoading}
             href={ssoUrl.data?.redirectUrl || ''}
-            disabled={!ssoUrl.isLoading && !ssoUrl.data?.redirectUrl}
+            disabled={
+              isUserManaged || (!ssoUrl.isLoading && !ssoUrl.data?.redirectUrl)
+            }
             size="medium"
-            endIcon={<LogIn01 />}
+            endIcon={<Key02 />}
             variant="outlined"
             style={{ marginBottom: '0.5rem' }}
             color="inherit"
           >
-            <T keyName="login_sso" />
+            {/* TODO: Maybe hover hint explaining when is SSO available? */}
+            <T keyName="connect_sso" />
           </LoadingButton>
         )}
 
         {oAuthServices.map((provider) => (
-          // {provider.id === user?.accountType}
           <React.Fragment key={provider.id}>
-            <Button
-              component="a"
-              href={provider.authenticationUrl}
-              size="medium"
-              endIcon={provider.buttonIcon}
-              variant="outlined"
-              style={{ marginBottom: '0.5rem' }}
-              color="inherit"
-            >
-              {provider.loginButtonTitle}
-            </Button>
+            {provider.id.toUpperCase() === user?.thirdPartyAuthType ? (
+              <Button
+                disabled={isUserManaged}
+                size="medium"
+                endIcon={provider.buttonIcon}
+                variant="outlined"
+                style={{ marginBottom: '0.5rem' }}
+                color="success"
+              >
+                {provider.disconnectButtonTitle}
+              </Button>
+            ) : (
+              <Button
+                disabled={isUserManaged}
+                component="a"
+                href={provider.authenticationUrl}
+                size="medium"
+                endIcon={provider.buttonIcon}
+                variant="outlined"
+                style={{ marginBottom: '0.5rem' }}
+                color="inherit"
+              >
+                {provider.connectButtonTitle}
+              </Button>
+            )}
           </React.Fragment>
         ))}
       </Box>

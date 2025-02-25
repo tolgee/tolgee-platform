@@ -400,8 +400,6 @@ declare namespace DataCy {
         "pat-list-item-last-used" |
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
-        "pending-auth-provider-change-banner" |
-        "pending-auth-provider-change-dismiss" |
         "pending-invitation-banner" |
         "pending-invitation-dismiss" |
         "permissions-advanced-checkbox" |

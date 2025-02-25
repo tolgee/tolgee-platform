@@ -8,8 +8,11 @@ import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
+import io.tolgee.hateoas.sso.PublicSsoTenantModel
+import io.tolgee.hateoas.sso.PublicSsoTenantModelAssembler
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModel
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -23,6 +26,7 @@ import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
+import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.UserAccountService
@@ -44,8 +48,10 @@ class V2UserController(
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
   private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
+  private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
   private val imageUploadService: ImageUploadService,
   private val organizationService: OrganizationService,
+  private val tenantService: TenantService,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
   private val passwordEncoder: PasswordEncoder,
   private val jwtService: JwtService,
@@ -144,6 +150,21 @@ class V2UserController(
   @OpenApiOrderExtension(6)
   fun delete() {
     userAccountService.delete(authenticationFacade.authenticatedUserEntity)
+  }
+
+  @Operation(
+    summary = "Get information about SSO configuration",
+    description = "Returns information about sso configuration affecting the user.",
+  )
+  @GetMapping("/sso")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
+  @AllowApiAccess
+  fun getSso(): PublicSsoTenantModel {
+    val userAccount = authenticationFacade.authenticatedUser
+    val domain = userAccount.domain ?: throw NotFoundException()
+    val tenant = tenantService.getEnabledConfigByDomain(domain)
+    return publicSsoTenantModelAssembler.toModel(tenant)
   }
 
   @PostMapping("")
