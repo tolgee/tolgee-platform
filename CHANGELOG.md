@@ -1,3 +1,10 @@
+# [3.105.0](https://github.com/tolgee/tolgee-platform/compare/v3.104.2...v3.105.0) (2025-02-25)
+
+
+### Features
+
+* Search by ID in administration organizations ([#2939](https://github.com/tolgee/tolgee-platform/issues/2939)) ([009fff2](https://github.com/tolgee/tolgee-platform/commit/009fff2bb4bb8a4fa71942d905ce0636a4db9b8b))
+
 ## [3.104.2](https://github.com/tolgee/tolgee-platform/compare/v3.104.1...v3.104.2) (2025-02-24)
 
 
