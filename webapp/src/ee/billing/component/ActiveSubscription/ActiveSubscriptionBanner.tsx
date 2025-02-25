@@ -45,6 +45,10 @@ export const ActiveSubscriptionBanner = ({ status, custom }: Props) => {
       label: t('ee_license_status_label_key_used_by_another_instance'),
       color: 'error',
     },
+    UNKNOWN: {
+      label: t('ee_license_status_label_unknown'),
+      color: 'error',
+    },
   };
 
   const { label, color } = statusMap[status];

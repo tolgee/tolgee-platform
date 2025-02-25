@@ -1649,7 +1649,13 @@ export interface components {
       bucketSize: number;
       /** Format: int64 */
       creditBalance: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @deprecated
+       * @description Customers were able to buy extra credits separately in the past.
+       *
+       * This option is not available anymore and this field is kept only for backward compatibility purposes and is always 0.
+       */
       extraCreditBalance: number;
     };
     DeleteKeysDto: {
@@ -1727,7 +1733,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
     };
     EntityDescriptionWithRelations: {
       data: { [key: string]: { [key: string]: unknown } };
@@ -3654,7 +3661,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
       /** Format: int64 */
       trialEnd?: number;
     };
@@ -3735,7 +3743,10 @@ export interface components {
       currentTranslations: number;
       /**
        * Format: int64
-       * @description Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits
+       * @deprecated
+       * @description Customers were able to buy extra credits separately in the past.
+       *
+       * This option is not available anymore and this field is kept only for backward compatibility purposes and is always 0.
        */
       extraCreditBalance: number;
       /**
