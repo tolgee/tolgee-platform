@@ -3435,6 +3435,8 @@ export interface components {
     };
     PlanIncludedUsageModel: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
@@ -3445,6 +3447,7 @@ export interface components {
     };
     PlanPricesModel: {
       perSeat: number;
+      perThousandKeys: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;

@@ -314,8 +314,10 @@ export class Validation {
     prices: Yup.object().when('type', {
       is: 'PAY_AS_YOU_GO',
       then: Yup.object({
-        perThousandMtCredits: Yup.number().moreThan(0),
-        perThousandTranslations: Yup.number().moreThan(0),
+        perThousandMtCredits: Yup.number().min(0),
+        perThousandTranslations: Yup.number().min(0),
+        perSeat: Yup.number().min(0),
+        perThousandKeys: Yup.number().min(0),
       }),
     }),
     free: Yup.boolean(),
