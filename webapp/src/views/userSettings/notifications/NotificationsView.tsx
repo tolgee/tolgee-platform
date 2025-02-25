@@ -5,6 +5,7 @@ import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
 import { SettingsRow } from 'tg.views/userSettings/notifications/SettingsRow';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 const StyledRoot = styled(Box)`
   display: grid;
@@ -21,6 +22,8 @@ const StyledTableHeader = styled(Box)`
 
 export const NotificationsView: React.FC = () => {
   const { t } = useTranslate();
+  const { isEnabled } = useEnabledFeatures();
+
   const settingsLoadable = useApiQuery({
     url: '/v2/notifications-settings',
     method: 'get',
@@ -32,6 +35,8 @@ export const NotificationsView: React.FC = () => {
   if (!settings) {
     return null;
   }
+
+  const tasksEnabled = isEnabled('TASKS');
 
   return (
     <BaseUserSettingsView
@@ -65,13 +70,15 @@ export const NotificationsView: React.FC = () => {
           disabledEmail={true}
           afterChange={() => settingsLoadable.refetch()}
         />
-        <SettingsRow
-          description={t('settings_notifications_tasks_description')}
-          subdescription={t('settings_notifications_tasks_subdescription')}
-          group="TASKS"
-          channels={settings.tasks}
-          afterChange={() => settingsLoadable.refetch()}
-        />
+        {tasksEnabled && (
+          <SettingsRow
+            description={t('settings_notifications_tasks_description')}
+            subdescription={t('settings_notifications_tasks_subdescription')}
+            group="TASKS"
+            channels={settings.tasks}
+            afterChange={() => settingsLoadable.refetch()}
+          />
+        )}
       </StyledRoot>
     </BaseUserSettingsView>
   );
