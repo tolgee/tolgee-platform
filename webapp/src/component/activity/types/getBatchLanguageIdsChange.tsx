@@ -9,7 +9,7 @@ type Props = {
   input: DiffValue<number[]>;
 };
 
-const DISPLAY_MAX_ITEMS = 2;
+const DISPLAY_MAX_ITEMS = 3;
 
 const LanguageIdsComponent: React.FC<Props> = ({ input }) => {
   const allLangs = useProjectLanguages();
@@ -18,9 +18,9 @@ const LanguageIdsComponent: React.FC<Props> = ({ input }) => {
   let displayed = input.new || [];
   let other: number[] = [];
 
-  if (displayed?.length > DISPLAY_MAX_ITEMS + 1) {
-    displayed = input.new?.slice(0, DISPLAY_MAX_ITEMS) || [];
-    other = input.new?.slice(DISPLAY_MAX_ITEMS) || [];
+  if (displayed?.length > DISPLAY_MAX_ITEMS) {
+    displayed = input.new?.slice(0, DISPLAY_MAX_ITEMS - 1) || [];
+    other = input.new?.slice(DISPLAY_MAX_ITEMS - 1) || [];
   }
 
   const { t } = useTranslate();
