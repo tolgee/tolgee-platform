@@ -13,4 +13,7 @@ open class PlanPricesModel(
   val perThousandMtCredits: BigDecimal? = BigDecimal.ZERO,
   val subscriptionMonthly: BigDecimal = BigDecimal.ZERO,
   val subscriptionYearly: BigDecimal = BigDecimal.ZERO,
+  val perThousandKeys: BigDecimal = BigDecimal.ZERO,
 ) : RepresentationModel<PlanPricesModel>(), Serializable
+
+// TODO: Test it always counts usage, to handle situation when user switches between free plan, strings or key based plans.

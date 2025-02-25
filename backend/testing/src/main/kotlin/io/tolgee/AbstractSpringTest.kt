@@ -1,6 +1,7 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.activity.ActivityService
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
@@ -19,6 +20,8 @@ import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslatio
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
+import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.repository.EmailVerificationRepository
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.OrganizationRepository
@@ -56,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
@@ -223,6 +227,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var allCachesProvider: AllCachesProvider
 
+  @Autowired
+  lateinit var objectMapper: ObjectMapper
+
   @BeforeEach
   fun clearCaches() {
     allCachesProvider.getAllCaches().forEach { cacheName ->
@@ -283,5 +290,20 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   open fun moveCurrentDate(duration: Duration) {
     currentDateProvider.move(duration)
+  }
+
+  protected inline fun <reified T> ResultActions.getContent(): T {
+    val stringContent = this.andGetContentAsString
+    return objectMapper.readValue(stringContent)
+  }
+
+  protected fun ResultActions.getIdFromResponse(): Long {
+    this.andIsOk
+    val response: Map<String, Any> = getContent()
+    try {
+      return (response["id"] as Number).toLong()
+    } catch (e: Exception) {
+      throw Error("Response does not contain id", e)
+    }
   }
 }
