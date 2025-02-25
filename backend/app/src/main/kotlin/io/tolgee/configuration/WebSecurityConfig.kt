@@ -143,7 +143,7 @@ class WebSecurityConfig(
   }
 
   companion object {
-    private val PUBLIC_ENDPOINTS = arrayOf("/api/public/**", "/v2/public/**")
+    private val PUBLIC_ENDPOINTS = arrayOf("/api/public/**", "/v2/public/**", "/v3/api-docs/**")
     private val INTERNAL_ENDPOINTS = arrayOf("/internal/**")
   }
 }
