@@ -101,10 +101,11 @@ class AuthProviderChangeService(
     if (user.password == null) {
       throw BadRequestException(Message.USER_MISSING_PASSWORD)
     }
-    val data = AuthProviderChangeData(
-      UserAccount.AccountType.LOCAL,
-      null,
-    )
+    val data =
+      AuthProviderChangeData(
+        UserAccount.AccountType.LOCAL,
+        null,
+      )
     self.apply(AuthProviderChangeRequest().from(user, data))
   }
 
@@ -162,7 +163,10 @@ class AuthProviderChangeService(
     return request
   }
 
-  fun AuthProviderChangeRequest.from(user: UserAccount, data: AuthProviderChangeData): AuthProviderChangeRequest {
+  fun AuthProviderChangeRequest.from(
+    user: UserAccount,
+    data: AuthProviderChangeData,
+  ): AuthProviderChangeRequest {
     val expiration = currentDateProvider.date.addMinutes(30)
     userAccount = user
     expirationDate = DateUtils.truncate(expiration, Calendar.SECOND)

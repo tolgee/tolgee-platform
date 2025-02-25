@@ -3,7 +3,6 @@ import { GitHub, Google } from 'tg.component/CustomIcons';
 import { LogIn01 } from '@untitled-ui/icons-react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
-import { v4 as uuidv4 } from 'uuid';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
