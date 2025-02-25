@@ -128,18 +128,18 @@ export const useAuthService = (
     });
   }
 
-  function useSsoAuthLinkByEmail(username: string | undefined) {
-    const split = username?.split('@');
-    let domain = '';
-    if (split?.length === 2) {
-      domain = split.at(1) || '';
-    }
+  function useSsoAuthLinkByDomain(domain: string) {
     localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain);
     const state = generateSsoStateKey();
     return useApiQuery({
       url: '/api/public/authorize_oauth/sso/authentication-url',
       method: 'post',
       content: { 'application/json': { domain, state } },
+      fetchOptions: {
+        disableAutoErrorHandle: true,
+        disableErrorNotification: true,
+        disable404Redirect: true,
+      },
     });
   }
 
@@ -290,7 +290,7 @@ export const useAuthService = (
     },
     loginRedirectSso,
     getSsoAuthLinkByDomain,
-    useSsoAuthLinkByEmail,
+    useSsoAuthLinkByDomain,
     generateSsoStateKey,
     getSsoStateKey,
     clearSsoStateKey,

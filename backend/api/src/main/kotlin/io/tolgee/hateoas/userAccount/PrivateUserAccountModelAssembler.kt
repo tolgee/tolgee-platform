@@ -21,6 +21,7 @@ class PrivateUserAccountModelAssembler(
       id = view.id,
       username = view.username,
       name = view.name,
+      domain = view.domain,
       emailAwaitingVerification = view.emailAwaitingVerification,
       mfaEnabled = view.isMfaEnabled,
       avatar = avatar,

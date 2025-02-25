@@ -65,20 +65,10 @@ class SsoAuthenticationInterceptor(
       return
     }
 
-    val domain = extractDomainFromUsername(userAccount.username)
-    if (!tenantService.isSsoForcedForDomain(domain)) {
+    if (!tenantService.isSsoForcedForDomain(userAccount.domain)) {
       return
     }
 
-    throw PermissionException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(domain))
-  }
-
-  private fun extractDomainFromUsername(username: String): String? {
-    val valid = username.count { it == '@' } == 1
-    if (!valid) {
-      return null
-    }
-    val (_, domain) = username.split('@')
-    return domain
+    throw PermissionException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(userAccount.domain))
   }
 }

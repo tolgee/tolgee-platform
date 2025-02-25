@@ -34,7 +34,7 @@ data class UserAccount(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
   @field:NotBlank
-  var username: String = "",
+  override var username: String = "",
   var password: String? = null,
   var name: String = "",
   @Enumerated(EnumType.STRING)
