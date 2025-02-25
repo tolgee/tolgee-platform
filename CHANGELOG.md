@@ -1,3 +1,10 @@
+## [3.105.1](https://github.com/tolgee/tolgee-platform/compare/v3.105.0...v3.105.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* many language references in activity ([#2944](https://github.com/tolgee/tolgee-platform/issues/2944)) ([3f0cd2a](https://github.com/tolgee/tolgee-platform/commit/3f0cd2a058ad27b44439be089ead39b1c36d36b8))
+
 # [3.105.0](https://github.com/tolgee/tolgee-platform/compare/v3.104.2...v3.105.0) (2025-02-25)
 
 

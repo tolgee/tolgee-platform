@@ -47,6 +47,7 @@
   "active-plan-license-key-button": "ライセンスキーを見る",
   "active-plan-license-key-caption": "このライセンスキーをローカルのTolgeeインスタンスに適用する",
   "active-plan-subscribed-at-tooltip": "契約内容: ",
+  "activity_batch_more_items": "{value, plural, other {+ # 言語...} }",
   "activity_batch_operation_auto_translate": "{TranslationCount, plural, other {# 件の自動翻訳} }",
   "activity_batch_operation_clear_translations": "{TranslationCount, plural, other {# 件の翻訳をクリア} }",
   "activity_batch_operation_copy_translations": "{TranslationCount, plural, other {# 件の翻訳をコピー} }",
