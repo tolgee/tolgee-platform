@@ -68,7 +68,7 @@ class TenantServiceImpl(
   ): SsoTenant {
     val tenant = findTenant(organization.id) ?: SsoTenant()
     setTenantsFields(tenant, request, organization)
-    return save(tenant)
+    return self.save(tenant)
   }
 
   private fun setTenantsFields(
