@@ -9,7 +9,7 @@ import { LogIn01 } from '@untitled-ui/icons-react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 export const ChangeAuthProvider: FunctionComponent = () => {
-  const { useSsoAuthLinkByEmail } = useGlobalActions();
+  const { useSsoAuthLinkByDomain } = useGlobalActions();
   const user = useUser();
   const oAuthServices = useOAuthServices();
 
@@ -19,44 +19,53 @@ export const ChangeAuthProvider: FunctionComponent = () => {
   const globalSsoEnabled = remoteConfig.authMethods?.ssoGlobal.enabled ?? false;
   const ssoEnabled = organizationsSsoEnabled || globalSsoEnabled;
 
-  const ssoUrl = useSsoAuthLinkByEmail(user?.username);
+  const ssoUrl = useSsoAuthLinkByDomain(user?.domain || '');
 
   if (!user) return null;
 
   return (
     <Box>
-      <Typography variant="h6">
+      <Typography variant="h6" mt={2}>
         <T keyName="third-party-authentication-options" />
       </Typography>
-      {ssoEnabled && (
-        <LoadingButton
-          loading={ssoUrl.isLoading}
-          href={ssoUrl.data?.redirectUrl || ''}
-          size="medium"
-          endIcon={<LogIn01 />}
-          variant="outlined"
-          style={{ marginBottom: '0.5rem' }}
-          color="inherit"
-        >
-          <T keyName="login_sso" />
-        </LoadingButton>
-      )}
-
-      {oAuthServices.map((provider) => (
-        <React.Fragment key={provider.id}>
-          <Button
-            component="a"
-            href={provider.authenticationUrl}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mt={2}
+      >
+        {ssoEnabled && (
+          <LoadingButton
+            loading={ssoUrl.isLoading}
+            href={ssoUrl.data?.redirectUrl || ''}
+            disabled={!ssoUrl.isLoading && !ssoUrl.data?.redirectUrl}
             size="medium"
-            endIcon={provider.buttonIcon}
+            endIcon={<LogIn01 />}
             variant="outlined"
             style={{ marginBottom: '0.5rem' }}
             color="inherit"
           >
-            {provider.loginButtonTitle}
-          </Button>
-        </React.Fragment>
-      ))}
+            <T keyName="login_sso" />
+          </LoadingButton>
+        )}
+
+        {oAuthServices.map((provider) => (
+          // {provider.id === user?.accountType}
+          <React.Fragment key={provider.id}>
+            <Button
+              component="a"
+              href={provider.authenticationUrl}
+              size="medium"
+              endIcon={provider.buttonIcon}
+              variant="outlined"
+              style={{ marginBottom: '0.5rem' }}
+              color="inherit"
+            >
+              {provider.loginButtonTitle}
+            </Button>
+          </React.Fragment>
+        ))}
+      </Box>
     </Box>
   );
 };

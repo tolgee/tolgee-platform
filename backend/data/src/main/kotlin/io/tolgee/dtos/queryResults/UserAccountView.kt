@@ -5,7 +5,7 @@ import io.tolgee.model.UserAccount
 
 class UserAccountView(
   val id: Long,
-  val username: String,
+  override val username: String,
   val name: String,
   val emailAwaitingVerification: String?,
   val avatarHash: String?,

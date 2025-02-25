@@ -8,6 +8,7 @@ import java.util.*
 data class UserAccountDto(
   val name: String,
   val username: String,
+  val domain: String?,
   val role: UserAccount.Role?,
   val id: Long,
   val needsSuperJwt: Boolean,
@@ -16,7 +17,6 @@ data class UserAccountDto(
   val tokensValidNotBefore: Date?,
   val emailVerified: Boolean,
   val thirdPartyAuth: ThirdPartyAuthType?,
-//  val ssoRequired: Boolean,
   val ssoRefreshToken: String?,
   val ssoSessionExpiry: Date?,
 ) : Serializable {
@@ -25,6 +25,7 @@ data class UserAccountDto(
       UserAccountDto(
         name = entity.name,
         username = entity.username,
+        domain = entity.domain,
         role = entity.role,
         id = entity.id,
         needsSuperJwt = entity.needsSuperJwt,
@@ -33,7 +34,6 @@ data class UserAccountDto(
         tokensValidNotBefore = entity.tokensValidNotBefore,
         emailVerified = entity.emailVerification == null,
         thirdPartyAuth = entity.thirdPartyAuthType,
-//        ssoRequired = entity.organizationRoles.firstOrNull { it.managed }?.organization?.ssoTenant?.force == true,
         ssoRefreshToken = entity.ssoRefreshToken,
         ssoSessionExpiry = entity.ssoSessionExpiry,
       )

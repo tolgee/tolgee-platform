@@ -10,6 +10,7 @@ data class PrivateUserAccountModel(
   val id: Long,
   val username: String,
   var name: String?,
+  val domain: String?,
   var emailAwaitingVerification: String?,
   var mfaEnabled: Boolean,
   var avatar: Avatar?,
