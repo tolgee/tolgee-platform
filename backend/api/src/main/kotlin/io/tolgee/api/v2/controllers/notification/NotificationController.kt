@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
+import org.springframework.data.web.SortDefault.SortDefaults
 import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -48,12 +49,17 @@ class NotificationController(
   private val websocketEventPublisher: WebsocketEventPublisher,
   private val currentDateProvider: CurrentDateProvider,
 ) {
+  private val defaultSort: Sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"))
+
   @GetMapping
   @Operation(summary = "Gets notifications of the currently logged in user, newest is first.")
   @AllowApiAccess
   fun getNotifications(
     @ParameterObject
-    @SortDefault(sort = ["id"], direction = Sort.Direction.DESC)
+    @SortDefaults(
+      SortDefault(sort = ["createdAt"], direction = Sort.Direction.DESC),
+      SortDefault(sort = ["id"], direction = Sort.Direction.DESC),
+    )
     pageable: Pageable,
     @ParameterObject
     filters: NotificationFilters = NotificationFilters(),
@@ -61,7 +67,7 @@ class NotificationController(
   ): PagedModelWithNextCursor<NotificationModel> {
     if (cursor != null &&
       pageable.pageNumber > 0 &&
-      pageable.sort.toString() != "id: DESC"
+      !pageable.sort.equals(defaultSort)
     ) {
       throw BadRequestException(Message.SORTING_AND_PAGING_IS_NOT_SUPPORTED_WHEN_USING_CURSOR)
     }
