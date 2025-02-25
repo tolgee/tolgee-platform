@@ -72,9 +72,10 @@ class SignUpService(
     val user = userAccountService.createUser(entity, userSource)
     if (invitation != null) {
       if (organizationForced != null) {
-        val targetOrganization = invitation.organizationRole?.organization
-          ?: invitation.permission?.organization
-          ?: invitation.permission?.project?.organizationOwner
+        val targetOrganization =
+          invitation.organizationRole?.organization
+            ?: invitation.permission?.organization
+            ?: invitation.permission?.project?.organizationOwner
         if (targetOrganization?.id != organizationForced.id) {
           // Invitations are allowed only for specific organization
           throw BadRequestException(Message.INVITATION_ORGANIZATION_MISMATCH)
