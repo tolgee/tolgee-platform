@@ -13,20 +13,22 @@ export const getCloudPlanInitialValues = (
         perSeat: planData.prices.perSeat ?? 0,
         subscriptionMonthly: planData.prices.subscriptionMonthly ?? 0,
         subscriptionYearly: planData.prices.subscriptionYearly ?? 0,
+        perThousandKeys: planData.prices.perThousandKeys ?? 0,
       },
       includedUsage: {
-        seats: planData.includedUsage.seats,
-        mtCredits: planData.includedUsage.mtCredits,
+        ...planData.includedUsage,
         translations:
           planData.type === 'SLOTS_FIXED'
             ? planData.includedUsage.translationSlots
             : planData.includedUsage.translations,
       },
-    };
+      metricType: planData.includedUsage.keys > 0 ? 'SEATS_KEYS' : 'STRINGS',
+    } as CloudPlanFormData;
   }
 
   return {
     type: 'PAY_AS_YOU_GO',
+    metricType: 'SEATS_KEYS',
     name: '',
     stripeProductId: '',
     prices: {
@@ -35,11 +37,13 @@ export const getCloudPlanInitialValues = (
       perThousandTranslations: 0,
       subscriptionMonthly: 0,
       subscriptionYearly: 0,
+      perThousandKeys: 0,
     },
     includedUsage: {
       seats: 0,
       translations: 0,
       mtCredits: 0,
+      keys: 0,
     },
     enabledFeatures: [],
     public: false,

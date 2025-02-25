@@ -4,6 +4,8 @@ import { Box, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { CloudPlanFormData } from '../CloudPlanFormBase';
 import { useFormikContext } from 'formik';
+import { getCloudPlanInitialValues } from '../getCloudPlanInitialValues';
+import { useCloudPlanFormValues } from '../useCloudPlanFormValues';
 
 type CloudPlanPricesProps = {
   parentName: string | undefined;
@@ -12,16 +14,16 @@ type CloudPlanPricesProps = {
 export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
   const { t } = useTranslate();
 
-  const { setFieldValue, getFieldProps } =
-    useFormikContext<CloudPlanFormData>();
-
   // Here we store the non-zero prices to be able to restore them when the plan is set back to non-free
   const [nonZeroPrices, setNonZeroPrices] =
     useState<CloudPlanFormData['prices']>();
 
-  const free = getFieldProps(`${parentName}free`).value;
-  const prices = getFieldProps(`${parentName}prices`).value;
-  const type = getFieldProps(`${parentName}type`).value;
+  const { values, setFieldValue } = useCloudPlanFormValues(parentName);
+
+  const free = values.free;
+  const prices = values.prices;
+  const type = values.type;
+  const metricType = values.metricType;
 
   function setPriceValuesZero() {
     setNonZeroPrices(prices);
@@ -30,11 +32,11 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
       {}
     );
 
-    setFieldValue(`${parentName}prices`, zeroPrices);
+    setFieldValue(`prices`, zeroPrices);
   }
 
   function setPriceValuesNonZero() {
-    setFieldValue(`${parentName}prices`, nonZeroPrices);
+    setFieldValue(`prices`, nonZeroPrices);
   }
 
   useEffect(() => {
@@ -79,17 +81,6 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
           fullWidth
         />
         <TextField
-          name={`${parentName}prices.perThousandTranslations`}
-          size="small"
-          data-cy="administration-cloud-plan-field-price-per-thousand-translations"
-          label={t(
-            'administration_cloud_plan_field_price_per_thousand_translations'
-          )}
-          type="number"
-          fullWidth
-          disabled={type !== 'PAY_AS_YOU_GO'}
-        />
-        <TextField
           name={`${parentName}prices.perThousandMtCredits`}
           size="small"
           data-cy="administration-cloud-plan-field-price-per-thousand-mt-credits"
@@ -100,6 +91,46 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
           fullWidth
           disabled={type !== 'PAY_AS_YOU_GO'}
         />
+        {/*TODO: Split usage based and subscription based prices*/}
+        {metricType == 'STRINGS' && (
+          <>
+            <TextField
+              name={`${parentName}prices.perThousandTranslations`}
+              size="small"
+              data-cy="administration-cloud-plan-field-price-per-thousand-translations"
+              label={t(
+                'administration_cloud_plan_field_price_per_thousand_translations'
+              )}
+              type="number"
+              fullWidth
+              disabled={type !== 'PAY_AS_YOU_GO'}
+            />
+          </>
+        )}
+        {metricType == 'SEATS_KEYS' && (
+          <>
+            <TextField
+              name={`${parentName}prices.perThousandKeys`}
+              size="small"
+              data-cy="administration-cloud-plan-field-price-per-thousand-keys"
+              label={t(
+                'administration_cloud_plan_field_price_per_thousand_keys'
+              )}
+              type="number"
+              fullWidth
+              disabled={type !== 'PAY_AS_YOU_GO'}
+            />
+            <TextField
+              name={`${parentName}prices.perSeat`}
+              size="small"
+              data-cy="administration-cloud-plan-field-price-per-seat"
+              label={t('administration_cloud_plan_field_price_per_seat')}
+              type="number"
+              fullWidth
+              disabled={type !== 'PAY_AS_YOU_GO'}
+            />
+          </>
+        )}
       </Box>
     </>
   );
