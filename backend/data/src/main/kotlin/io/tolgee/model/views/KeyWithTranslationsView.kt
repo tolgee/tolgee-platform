@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Tag
+import io.tolgee.service.queryBuilders.Cursorable
 
 data class KeyWithTranslationsView(
   val keyId: Long,
@@ -17,7 +18,7 @@ data class KeyWithTranslationsView(
   val screenshotCount: Long,
   val contextPresent: Boolean,
   val translations: MutableMap<String, TranslationView> = mutableMapOf(),
-) {
+) : Cursorable {
   lateinit var keyTags: List<Tag>
   var screenshots: Collection<Screenshot>? = null
   var tasks: List<KeyTaskView>? = null
@@ -60,6 +61,26 @@ data class KeyWithTranslationsView(
         }
       }
       return result
+    }
+  }
+
+  override fun toCursorValue(property: String): String? {
+    val path = property.split(".")
+    return when (path[0]) {
+      KeyWithTranslationsView::keyId.name -> keyId.toString()
+      KeyWithTranslationsView::keyNamespace.name -> keyNamespace
+      KeyWithTranslationsView::keyName.name -> keyName
+      KeyWithTranslationsView::screenshotCount.name -> screenshotCount.toString()
+      KeyWithTranslationsView::translations.name -> {
+        val translation = translations[path[1]]
+        when (path[2]) {
+          TranslationView::text.name -> translation?.text
+          TranslationView::id.name -> translation?.id.toString()
+          TranslationView::state.name -> translation?.state?.name
+          else -> null
+        }
+      }
+      else -> null
     }
   }
 }
