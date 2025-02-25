@@ -150,7 +150,9 @@ export interface paths {
     put: operations["markNotificationsAsSeen"];
   };
   "/v2/notification-settings": {
+    /** Returns notification settings of the currently logged in user */
     get: operations["getNotificationsSettings"];
+    /** Saves new value for given parameters */
     put: operations["putNotificationSetting"];
   };
   "/v2/organizations": {
@@ -2019,7 +2021,8 @@ export interface components {
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
-        | "current_subscription_is_not_trialing";
+        | "current_subscription_is_not_trialing"
+        | "sorting_and_paging_is_not_supported_when_using_cursor";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2996,6 +2999,14 @@ export interface components {
     NotificationSettingModel: {
       accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
       tasks: components["schemas"]["NotificationSettingGroupModel"];
+    };
+    NotificationSettingsRequest: {
+      /** @example IN_APP */
+      channel: "IN_APP" | "EMAIL";
+      /** @description True if the setting should be enabled, false for disabled */
+      enabled: boolean;
+      /** @example TASKS */
+      group: "ACCOUNT_SECURITY" | "TASKS";
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -4455,7 +4466,8 @@ export interface components {
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
-        | "current_subscription_is_not_trialing";
+        | "current_subscription_is_not_trialing"
+        | "sorting_and_paging_is_not_supported_when_using_cursor";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -6817,6 +6829,7 @@ export interface operations {
          * false = only unseen
          */
         filterSeen?: boolean;
+        cursor?: string;
       };
     };
     responses: {
@@ -6903,6 +6916,7 @@ export interface operations {
       };
     };
   };
+  /** Returns notification settings of the currently logged in user */
   getNotificationsSettings: {
     responses: {
       /** OK */
@@ -6945,14 +6959,8 @@ export interface operations {
       };
     };
   };
+  /** Saves new value for given parameters */
   putNotificationSetting: {
-    parameters: {
-      query: {
-        group: "ACCOUNT_SECURITY" | "TASKS";
-        channel: "IN_APP" | "EMAIL";
-        enabled: boolean;
-      };
-    };
     responses: {
       /** OK */
       200: unknown;
@@ -6987,6 +6995,11 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationSettingsRequest"];
       };
     };
   };

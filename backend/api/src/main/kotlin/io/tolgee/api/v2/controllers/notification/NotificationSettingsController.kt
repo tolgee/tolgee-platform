@@ -2,14 +2,15 @@ package io.tolgee.api.v2.controllers.notification
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.request.notification.NotificationSettingsRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.notification.NotificationSettingModel
 import io.tolgee.hateoas.notification.NotificationSettingsModelAssembler
-import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.model.notifications.NotificationTypeGroup
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.notification.NotificationSettingsService
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -40,14 +41,17 @@ class NotificationSettingsController(
   @Operation(summary = "Save notification setting", description = "Saves new value for given parameters")
   @AllowApiAccess
   fun putNotificationSetting(
-    group: NotificationTypeGroup,
-    channel: NotificationChannel,
-    enabled: Boolean,
+    @RequestBody @Valid request: NotificationSettingsRequest,
   ) {
-    if (group == NotificationTypeGroup.ACCOUNT_SECURITY) {
+    if (request.group == NotificationTypeGroup.ACCOUNT_SECURITY) {
       throw BadRequestException("Account security settings cannot be changed.")
     }
 
-    notificationSettingsService.save(authenticationFacade.authenticatedUserEntity, group, channel, enabled)
+    notificationSettingsService.save(
+      authenticationFacade.authenticatedUserEntity,
+      request.group,
+      request.channel,
+      request.enabled,
+    )
   }
 }

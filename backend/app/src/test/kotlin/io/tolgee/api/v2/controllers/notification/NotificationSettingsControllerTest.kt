@@ -1,12 +1,14 @@
 package io.tolgee.api.v2.controllers.notification
 
 import io.tolgee.development.testDataBuilder.data.TaskTestData
+import io.tolgee.dtos.request.notification.NotificationSettingsRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.model.notifications.NotificationType
+import io.tolgee.model.notifications.NotificationTypeGroup
 import io.tolgee.service.notification.NotificationService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.NotificationTestUtil
@@ -86,8 +88,8 @@ class NotificationSettingsControllerTest : AuthorizedControllerTest() {
 
   private fun disableChannel(channel: NotificationChannel) {
     performAuthPut(
-      "/v2/notification-settings?group=TASKS&channel=$channel&enabled=false",
-      content = "", // TODO
+      "/v2/notification-settings",
+      content = NotificationSettingsRequest(NotificationTypeGroup.TASKS, channel, false),
     ).andIsOk
   }
 
