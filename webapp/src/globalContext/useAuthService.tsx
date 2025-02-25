@@ -9,7 +9,7 @@ import {
   tokenService,
 } from 'tg.service/TokenService';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useInitialDataService } from './useInitialDataService';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
@@ -23,7 +23,8 @@ type SuperTokenAction = { onCancel: () => void; onSuccess: () => void };
 
 export const INVITATION_CODE_STORAGE_KEY = 'invitationCode';
 
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
+const LOCAL_STORAGE_OAUTH_STATE_KEY = 'oauth2State';
+const LOCAL_STORAGE_SSO_STATE_KEY = 'ssoState';
 const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
 
 export function getRedirectUrl(userId?: number) {
@@ -119,14 +120,61 @@ export const useAuthService = (
 
   const history = useHistory();
 
-  async function getSsoAuthLinkByDomain(domain: string, state: string) {
+  async function getSsoAuthLinkByDomain(domain: string) {
+    localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain);
+    const state = generateSsoStateKey();
     return await redirectSsoUrlLoadable.mutateAsync({
       content: { 'application/json': { domain, state } },
     });
   }
 
+  function useSsoAuthLinkByEmail(username: string | undefined) {
+    const split = username?.split('@');
+    let domain = '';
+    if (split?.length === 2) {
+      domain = split.at(1) || '';
+    }
+    localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain);
+    const state = generateSsoStateKey();
+    return useApiQuery({
+      url: '/api/public/authorize_oauth/sso/authentication-url',
+      method: 'post',
+      content: { 'application/json': { domain, state } },
+    });
+  }
+
   function getLastSsoDomain() {
-    return localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY);
+    return localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY) ?? undefined;
+  }
+
+  function generateStateKey(key: string): string {
+    const state = uuidv4();
+    localStorage.setItem(key, state);
+    return state;
+  }
+
+  function generateOAuthStateKey(): string {
+    return generateStateKey(LOCAL_STORAGE_OAUTH_STATE_KEY);
+  }
+
+  function getOAuthStateKey(): string | undefined {
+    return localStorage.getItem(LOCAL_STORAGE_OAUTH_STATE_KEY) ?? undefined;
+  }
+
+  function clearOAuthStateKey() {
+    localStorage.removeItem(LOCAL_STORAGE_OAUTH_STATE_KEY);
+  }
+
+  function generateSsoStateKey(): string {
+    return generateStateKey(LOCAL_STORAGE_SSO_STATE_KEY);
+  }
+
+  function getSsoStateKey(): string | undefined {
+    return localStorage.getItem(LOCAL_STORAGE_SSO_STATE_KEY) ?? undefined;
+  }
+
+  function clearSsoStateKey() {
+    localStorage.removeItem(LOCAL_STORAGE_SSO_STATE_KEY);
   }
 
   async function setJwtToken(token: string | undefined) {
@@ -185,10 +233,7 @@ export const useAuthService = (
   };
 
   async function loginRedirectSso(domain: string) {
-    localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain || '');
-    const state = uuidv4();
-    localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
-    const response = await getSsoAuthLinkByDomain(domain, state);
+    const response = await getSsoAuthLinkByDomain(domain);
     window.location.href = response.redirectUrl;
   }
 
@@ -244,6 +289,14 @@ export const useAuthService = (
       await handleAfterLogin(response!);
     },
     loginRedirectSso,
+    getSsoAuthLinkByDomain,
+    useSsoAuthLinkByEmail,
+    generateSsoStateKey,
+    getSsoStateKey,
+    clearSsoStateKey,
+    generateOAuthStateKey,
+    getOAuthStateKey,
+    clearOAuthStateKey,
     getLastSsoDomain,
     async signUp(data: Omit<SignUpDto, 'invitationCode'>) {
       signupLoadable.mutate(

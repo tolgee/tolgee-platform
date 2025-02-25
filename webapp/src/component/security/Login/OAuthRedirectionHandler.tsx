@@ -10,16 +10,20 @@ import {
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
-const LOCAL_STORAGE_DOMAIN_KEY = 'ssoDomain';
-
 export const OAuthRedirectionHandler: FunctionComponent<
   OAuthRedirectionHandlerProps
 > = () => {
   const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
   const loginLoadable = useGlobalContext((c) => c.auth.authorizeOAuthLoadable);
 
-  const { loginWithOAuthCode } = useGlobalActions();
+  const {
+    loginWithOAuthCode,
+    getLastSsoDomain,
+    getOAuthStateKey,
+    getSsoStateKey,
+    clearOAuthStateKey,
+    clearSsoStateKey,
+  } = useGlobalActions();
   const match = useRouteMatch();
   const history = useHistory();
 
@@ -29,19 +33,33 @@ export const OAuthRedirectionHandler: FunctionComponent<
     const code = url.get('code');
     let domain: string | undefined = undefined;
 
-    if (type == 'oauth2' || type == 'sso') {
+    function checkState(
+      storedState: string | undefined,
+      clearfn: () => void
+    ): boolean {
       const state = url.get('state');
-      const storedState = localStorage.getItem(LOCAL_STORAGE_STATE_KEY);
       if (storedState !== state) {
         history.replace(LINKS.LOGIN.build());
-        return;
+        return false;
       } else {
-        localStorage.removeItem(LOCAL_STORAGE_STATE_KEY);
+        clearfn();
+        return true;
       }
     }
 
+    if (
+      type == 'oauth2' &&
+      !checkState(getOAuthStateKey(), clearOAuthStateKey)
+    ) {
+      return;
+    }
+
     if (type == 'sso') {
-      domain = localStorage.getItem(LOCAL_STORAGE_DOMAIN_KEY) ?? undefined;
+      if (!checkState(getSsoStateKey(), clearSsoStateKey)) {
+        return;
+      }
+
+      domain = getLastSsoDomain();
       if (!domain) {
         history.replace(LINKS.LOGIN.build());
         return;

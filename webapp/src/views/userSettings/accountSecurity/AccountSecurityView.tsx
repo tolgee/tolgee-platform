@@ -15,6 +15,7 @@ import { MfaSettings } from './MfaSettings';
 import { EnableMfaDialog } from './EnableMfaDialog';
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
+import { ChangeAuthProvider } from './ChangeAuthProvider';
 
 export const AccountSecurityView: FunctionComponent = () => {
   const { t } = useTranslate();
@@ -98,6 +99,7 @@ export const AccountSecurityView: FunctionComponent = () => {
       )}
       {!isManaged && <ChangePassword />}
       <MfaSettings />
+      {!isManaged && <ChangeAuthProvider />}
 
       <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
         <EnableMfaDialog />
