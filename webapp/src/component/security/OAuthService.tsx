@@ -4,10 +4,10 @@ import { LogIn01 } from '@untitled-ui/icons-react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
 import { v4 as uuidv4 } from 'uuid';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const GOOGLE_BASE = 'https://accounts.google.com/o/oauth2/v2/auth';
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 
 export interface OAuthService {
   id: string;
@@ -52,9 +52,9 @@ export const oauth2Service = (
   authorizationUrl: string,
   scopes: string[] = []
 ): OAuthService => {
+  const { generateOAuthStateKey } = useGlobalActions();
   const [authenticationUrl] = useState(() => {
-    const state = uuidv4();
-    localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+    const state = generateOAuthStateKey();
     const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
       [PARAMS.SERVICE_TYPE]: 'oauth2',
     });
