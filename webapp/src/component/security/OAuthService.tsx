@@ -14,6 +14,8 @@ export interface OAuthService {
   buttonIcon: React.ReactElement;
   loginButtonTitle: React.ReactElement;
   signUpButtonTitle: React.ReactElement;
+  connectButtonTitle: React.ReactElement;
+  disconnectButtonTitle: React.ReactElement;
 }
 
 export const gitHubService = (clientId: string): OAuthService => {
@@ -28,6 +30,8 @@ export const gitHubService = (clientId: string): OAuthService => {
     buttonIcon: <GitHub width={20} height={20} />,
     loginButtonTitle: <T keyName="login_github_login_button" />,
     signUpButtonTitle: <T keyName="login_github_signup_button" />,
+    connectButtonTitle: <T keyName="login_github_connect_button" />,
+    disconnectButtonTitle: <T keyName="login_github_disconnect_button" />,
   };
 };
 
@@ -43,6 +47,8 @@ export const googleService = (clientId: string): OAuthService => {
     buttonIcon: <Google width={20} height={20} />,
     loginButtonTitle: <T keyName="login_google_login_button" />,
     signUpButtonTitle: <T keyName="login_google_signup_button" />,
+    connectButtonTitle: <T keyName="login_google_connect_button" />,
+    disconnectButtonTitle: <T keyName="login_google_disconnect_button" />,
   };
 };
 
@@ -72,5 +78,7 @@ export const oauth2Service = (
     buttonIcon: <LogIn01 />,
     loginButtonTitle: <T keyName="login_oauth2_login_button" />,
     signUpButtonTitle: <T keyName="login_oauth2_signup_button" />,
+    connectButtonTitle: <T keyName="login_oauth2_connect_button" />,
+    disconnectButtonTitle: <T keyName="login_oauth2_disconnect_button" />,
   };
 };

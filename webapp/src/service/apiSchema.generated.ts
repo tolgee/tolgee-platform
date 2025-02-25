@@ -901,6 +901,10 @@ export interface paths {
     /** Returns all organizations owned only by current user */
     get: operations["getAllSingleOwnedOrganizations"];
   };
+  "/v2/user/sso": {
+    /** Returns information about sso configuration affecting the user. */
+    get: operations["getSso"];
+  };
 }
 
 export interface components {
@@ -2437,6 +2441,7 @@ export interface components {
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
+      ssoInfo?: components["schemas"]["PublicSsoTenantModel"];
       userInfo?: components["schemas"]["PrivateUserAccountModel"];
     };
     JwtAuthenticationResponse: {
@@ -3511,6 +3516,7 @@ export interface components {
       accountType: "LOCAL" | "MANAGED" | "THIRD_PARTY";
       avatar?: components["schemas"]["Avatar"];
       deletable: boolean;
+      domain?: string;
       emailAwaitingVerification?: string;
       globalServerRole: "USER" | "ADMIN";
       /** Format: int64 */
@@ -3518,6 +3524,12 @@ export interface components {
       mfaEnabled: boolean;
       name?: string;
       needsSuperJwtToken: boolean;
+      thirdPartyAuthType?:
+        | "GOOGLE"
+        | "GITHUB"
+        | "OAUTH2"
+        | "SSO"
+        | "SSO_GLOBAL";
       username: string;
     };
     ProjectActivityAuthorModel: {
@@ -3816,6 +3828,11 @@ export interface components {
       id: number;
       organizationName?: string;
       projectName?: string;
+    };
+    PublicSsoTenantModel: {
+      domain: string;
+      force: boolean;
+      global: boolean;
     };
     PublicUsageModel: {
       /**
@@ -19208,6 +19225,49 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns information about sso configuration affecting the user. */
+  getSso: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublicSsoTenantModel"];
         };
       };
       /** Bad Request */

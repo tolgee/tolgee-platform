@@ -8,6 +8,7 @@ import io.tolgee.hateoas.InitialDataModel
 import io.tolgee.hateoas.ee.IEeSubscriptionModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.TenantService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -34,6 +35,7 @@ class InitialDataController(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val eeSubscriptionProvider: EeSubscriptionProvider?,
   private val announcementController: AnnouncementController,
+  private val ssoTenantService: TenantService,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(summary = "Get initial data", description = "Returns initial data required by the UI to load")
@@ -52,6 +54,7 @@ class InitialDataController(
     val userAccount = authenticationFacade.authenticatedUserOrNull
     if (userAccount != null) {
       data.userInfo = userController.getInfo()
+      data.ssoInfo = userController.getSso()
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()

@@ -143,6 +143,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     case when ev is not null then coalesce(ev.newEmail, ua.username) else null end,
     ua.avatarHash,
     ua.accountType,
+    ua.thirdPartyAuthType,
     ua.role,
     ua.isInitialUser,
     ua.totpKey
