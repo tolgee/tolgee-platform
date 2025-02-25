@@ -23,10 +23,13 @@ declare namespace DataCy {
         "administration-billing-trial-badge" |
         "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |
+        "administration-cloud-plan-field-included-keys" |
         "administration-cloud-plan-field-included-mt-credits" |
         "administration-cloud-plan-field-included-translations" |
         "administration-cloud-plan-field-name" |
         "administration-cloud-plan-field-price-monthly" |
+        "administration-cloud-plan-field-price-per-seat" |
+        "administration-cloud-plan-field-price-per-thousand-keys" |
         "administration-cloud-plan-field-price-per-thousand-mt-credits" |
         "administration-cloud-plan-field-price-per-thousand-translations" |
         "administration-cloud-plan-field-price-yearly" |
@@ -47,7 +50,6 @@ declare namespace DataCy {
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-cancel-button" |
-        "administration-ee-plan-field-feature" |
         "administration-ee-plan-field-free" |
         "administration-ee-plan-field-included-mt-credits" |
         "administration-ee-plan-field-included-seats" |

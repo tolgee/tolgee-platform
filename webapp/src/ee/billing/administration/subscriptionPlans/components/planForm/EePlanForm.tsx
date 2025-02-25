@@ -15,6 +15,7 @@ import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { EePlanOrganizations } from './EePlanOrganizations';
+import { PlanEnabledFeaturesField } from './fields/PlanEnabledFeaturesField';
 
 type SelfHostedEePlanRequest = components['schemas']['SelfHostedEePlanRequest'];
 type EnabledFeature =
@@ -39,16 +40,12 @@ type Props = {
   loading: boolean | undefined;
 };
 
+// TODO: Refactor this so it's split into smaller components
 export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
   const { t } = useTranslate();
 
   const productsLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/stripe-products',
-    method: 'get',
-  });
-
-  const featuresLoadable = useBillingApiQuery({
-    url: '/v2/administration/billing/features',
     method: 'get',
   });
 
@@ -173,44 +170,7 @@ export function EePlanForm({ planId, initialData, onSubmit, loading }: Props) {
                 label={t('administration_ee_plan_field_included_mt_credits')}
               />
             </Box>
-            <Box>
-              <Typography sx={{ mt: 2 }}>
-                {t('administration_ee_plan_form_features_title')}
-              </Typography>
-              <Field name="enabledFeatures">
-                {(props: FieldProps<string[]>) =>
-                  featuresLoadable.data?.map((feature) => {
-                    const values = props.field.value;
-
-                    const toggleField = () => {
-                      let newValues = values;
-                      if (values.includes(feature)) {
-                        newValues = values.filter((val) => val !== feature);
-                      } else {
-                        newValues = [...values, feature];
-                      }
-                      props.form.setFieldValue(props.field.name, newValues);
-                    };
-
-                    return (
-                      <FormControlLabel
-                        data-cy="administration-ee-plan-field-feature"
-                        key={feature}
-                        control={
-                          <Checkbox
-                            value={feature}
-                            checked={props.field.value.includes(feature)}
-                            onChange={toggleField}
-                          />
-                        }
-                        label={feature}
-                      />
-                    );
-                  }) || []
-                }
-              </Field>
-            </Box>
-
+            <PlanEnabledFeaturesField parentName="" />
             <FormControlLabel
               control={
                 <Switch
