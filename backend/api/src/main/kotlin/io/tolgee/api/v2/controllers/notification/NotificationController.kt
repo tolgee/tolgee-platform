@@ -85,9 +85,7 @@ class NotificationController(
         NotificationModelAssembler(enhancers, notifications),
       )
     return PagedModelWithNextCursor(
-      model.content,
-      model.metadata,
-      model.links,
+      model,
       model.content
         .let { if (it.isEmpty()) null else it.last() }
         ?.id
