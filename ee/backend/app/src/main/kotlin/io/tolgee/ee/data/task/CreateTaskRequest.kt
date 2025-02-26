@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.TaskType
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
-import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
