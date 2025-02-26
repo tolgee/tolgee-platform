@@ -66,6 +66,6 @@ class AssigneeNotificationService(
   }
 
   fun getTaskName(name: String?): String {
-    return if (name.isNullOrBlank()) "Task" else name;
+    return if (name.isNullOrBlank()) "Task" else name
   }
 }
