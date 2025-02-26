@@ -524,5 +524,5 @@ export const setContentStorageBypass = (value: boolean) =>
 export const setWebhookControllerStatus = (value: number) =>
   setProperty('internal.webhookControllerStatus', value);
 
-export const setTranslationsViewMaxLanguagesSelected = (value: number) =>
+export const setTranslationsViewLanguagesLimit = (value: number) =>
   setProperty('translationsViewLanguagesLimit', value);

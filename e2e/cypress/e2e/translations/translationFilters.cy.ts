@@ -11,7 +11,7 @@ import { waitForGlobalLoading } from '../../common/loading';
 import { translationsTestData } from '../../common/apiCalls/testData/testData';
 import {
   login,
-  setTranslationsViewMaxLanguagesSelected,
+  setTranslationsViewLanguagesLimit,
 } from '../../common/apiCalls/common';
 
 const TIMEOUT_ONE_MINUTE = 1000 * 60;
@@ -45,11 +45,11 @@ describe('Translations Base', () => {
 
   it('allows to select max languages', () => {
     toggleLang('German');
-    setTranslationsViewMaxLanguagesSelected(1);
+    setTranslationsViewLanguagesLimit(1);
     visit();
     toggleLang('German');
     assertMessage('Cannot select more than 1 languages');
-    setTranslationsViewMaxLanguagesSelected(3);
+    setTranslationsViewLanguagesLimit(3);
     visit();
     toggleLang('German');
     assertMultiselect(cy.gcy('translations-language-select-form-control'), [
