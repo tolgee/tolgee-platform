@@ -130,6 +130,25 @@ export const toggleInMultiselect = (
   waitForGlobalLoading();
 };
 
+export const assertMultiselect = (chainable: Chainable, values: string[]) => {
+  chainable.find('div').first().click();
+
+  getPopover().within(() => {
+    getPopover()
+      .get('li.MuiMenuItem-root')
+      .each(($li) => {
+        const labelText = $li.find('.MuiListItemText-primary').text();
+        const input = cy.wrap($li).find('input');
+        if (values.includes(labelText)) {
+          input.should('be.checked');
+        } else {
+          input.should('not.be.checked');
+        }
+      });
+  });
+  dismissMenu();
+};
+
 export const getInputByName = (name: string): Chainable => {
   return cy.xpath(getInput(name));
 };

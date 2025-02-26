@@ -3682,6 +3682,8 @@ export interface components {
       /** Format: int64 */
       maxTranslationTextLength: number;
       /** Format: int32 */
+        maxTranslationViewLanguagesSelect: number;
+      /** Format: int32 */
       maxUploadFileSize: number;
       nativeEnabled: boolean;
       needsEmailVerification: boolean;

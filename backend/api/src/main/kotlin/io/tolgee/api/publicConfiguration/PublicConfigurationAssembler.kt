@@ -69,6 +69,7 @@ class PublicConfigurationAssembler(
       passwordResettable = properties.authentication.nativeEnabled,
       allowRegistrations = properties.authentication.registrationsAllowed,
       authMethods = properties.authentication.asAuthMethodsDTO(),
+      maxTranslationViewLanguagesSelect = properties.maxTranslationViewLanguagesSelect,
     )
   }
 
