@@ -257,6 +257,9 @@ export const deleteUserSql = (username: string) => {
       from notification
       where user_id in (select id from user_account where username = '${username}');
       delete
+      from notification_setting
+      where user_id in (select id from user_account where username = '${username}');
+      delete
       from user_account
       where username = '${username}';
   `;
