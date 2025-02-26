@@ -25,7 +25,7 @@ class PrivateUserAccountModelAssembler(
       emailAwaitingVerification = view.emailAwaitingVerification,
       mfaEnabled = view.isMfaEnabled,
       avatar = avatar,
-      accountType = view.accountType,
+      accountType = view.accountType ?: UserAccount.AccountType.LOCAL,
       thirdPartyAuthType = view.thirdPartyAuthType,
       globalServerRole = view.role ?: UserAccount.Role.USER,
       deletable = view.isDeletable,
