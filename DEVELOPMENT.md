@@ -96,6 +96,18 @@ On the backend, there is Gradle task `ktlintFormat`, which helps you to format K
 ./gradlew ktlintFormat
 ```
 
+## Using current translations from the Tolgee app
+
+This is an optional step for contributors with access to the Tolgee project at `app.tolgee.io`.
+
+Create a file `webapp/.env.development.local` with following content.
+Don't forget to supply it with your API key generated in the Tolgee app:
+
+```properties
+VITE_APP_TOLGEE_API_URL=https://app.tolgee.io
+VITE_APP_TOLGEE_API_KEY=your-tolgee-api-key
+```
+
 ## Troubleshooting
 
 ### Command not found when executing gradle tasks on MacOS
