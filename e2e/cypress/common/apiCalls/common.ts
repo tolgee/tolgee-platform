@@ -376,7 +376,6 @@ export const getAssignedEmailNotification = () =>
       myTasksLink: result[2][1],
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
-      text: r[0].text,
     };
   });
 
@@ -386,7 +385,6 @@ export const getParsedEmailVerification = () =>
       verifyEmailLink: r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
-      text: r[0].text,
     };
   });
 
@@ -396,7 +394,6 @@ export const getParsedEmailVerificationByIndex = (index: number) =>
       verifyEmailLink: r[index].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
       fromAddress: r[index].from.value[0].address,
       toAddress: r[index].to.value[0].address,
-      text: r[index].text,
     };
   });
 
@@ -449,7 +446,6 @@ export const getOrderConfirmation = () =>
   });
 
 type Email = {
-  text: string;
   to: any;
   from: any;
   html: string;
