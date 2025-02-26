@@ -455,6 +455,7 @@ export const getOrderConfirmation = () =>
     return {
       project,
       tasks,
+      content: email.html,
     };
   });
 

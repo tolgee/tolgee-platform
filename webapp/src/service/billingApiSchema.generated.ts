@@ -454,7 +454,7 @@ export interface components {
        * @example 1
        */
       languageId: number;
-      name: string;
+      name?: string;
       type: "TRANSLATE" | "REVIEW";
     };
     CreateTranslationAgencyRequest: {
