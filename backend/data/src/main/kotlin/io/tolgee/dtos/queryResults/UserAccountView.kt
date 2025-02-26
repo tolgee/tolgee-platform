@@ -10,7 +10,7 @@ class UserAccountView(
   val name: String,
   val emailAwaitingVerification: String?,
   val avatarHash: String?,
-  override val accountType: UserAccount.AccountType,
+  override val accountType: UserAccount.AccountType?,
   val thirdPartyAuthType: ThirdPartyAuthType?,
   val role: UserAccount.Role?,
   override var isInitialUser: Boolean,
