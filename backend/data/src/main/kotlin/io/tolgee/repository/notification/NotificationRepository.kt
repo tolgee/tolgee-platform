@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.sql.Timestamp
 
 @Repository
 @Lazy
@@ -25,12 +26,20 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
                 :#{#filters.filterSeen} is null
                 OR :#{#filters.filterSeen} = n.seen
             )
+        AND (
+                CAST(:cursorCreatedAt AS timestamp) is null
+                OR :cursorId is null
+                OR :cursorCreatedAt > n.createdAt
+                OR :cursorCreatedAt = n.createdAt AND :cursorId > n.id
+            )
     """,
   )
   fun fetchNotificationsByUserId(
     userId: Long,
     pageable: Pageable,
     filters: NotificationFilters,
+    cursorCreatedAt: Timestamp? = null,
+    cursorId: Long? = null,
   ): Page<Notification>
 
   @Query(

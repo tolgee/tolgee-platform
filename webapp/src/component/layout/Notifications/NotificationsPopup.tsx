@@ -27,7 +27,7 @@ import { LINKS } from 'tg.constants/links';
 import { Settings01 } from '@untitled-ui/icons-react';
 
 type PagedModelNotificationModel =
-  components['schemas']['PagedModelNotificationModel'];
+  components['schemas']['PagedModelWithNextCursorNotificationModel'];
 
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
@@ -81,14 +81,11 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
       staleTime: Infinity,
       cacheTime: Infinity,
       getNextPageParam: (lastPage) => {
-        if (
-          lastPage.page &&
-          lastPage.page.number! < lastPage.page.totalPages! - 1
-        ) {
+        if (lastPage.nextCursor) {
           return {
             query: {
               ...query,
-              page: lastPage.page!.number! + 1,
+              cursor: lastPage.nextCursor,
             },
           };
         } else {

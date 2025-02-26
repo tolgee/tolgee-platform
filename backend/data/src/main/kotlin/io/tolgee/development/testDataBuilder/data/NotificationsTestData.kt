@@ -9,9 +9,6 @@ class NotificationsTestData : BaseTestData() {
       username = "notificationsOriginatingUser"
     }
 
-  val notification = generateNotificationWithTask(100)
-  val task = notification.linkedTask
-
   fun generateNotificationWithTask(taskNumber: Long): Notification {
     val task =
       projectBuilder.addTask {
