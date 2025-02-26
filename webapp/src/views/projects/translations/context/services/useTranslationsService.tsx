@@ -267,7 +267,12 @@ export const useTranslationsService = (props: Props) => {
           params={{ max: limit }}
         />
       );
-      return;
+      if (value.length - limit > 1) {
+        // handle edge case when limit was lowered and user had more languages selected
+        value = value.slice(0, limit);
+      } else {
+        return;
+      }
     }
     if (props.updateLocalStorageLanguages) {
       projectPreferencesService.setForProject(props.projectId, value);
