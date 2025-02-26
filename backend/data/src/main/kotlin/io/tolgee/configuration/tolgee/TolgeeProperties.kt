@@ -129,5 +129,5 @@ open class TolgeeProperties(
   @DocProperty(
     description = "Maximum amount of languages that can be selected in Translations.",
   )
-  var translationsViewLanguagesLimit: Int = 10
+  var translationsViewLanguagesLimit: Int = 10,
 )
