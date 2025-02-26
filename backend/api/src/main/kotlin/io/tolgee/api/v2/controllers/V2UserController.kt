@@ -8,7 +8,6 @@ import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.sso.PublicSsoTenantModel
