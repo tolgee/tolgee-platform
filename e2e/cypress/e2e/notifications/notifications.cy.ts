@@ -122,4 +122,20 @@ describe('notifications', () => {
     );
     targetPageShouldHaveInUrl('/account/security');
   });
+
+  it('disabled task notifications do not generate notifications', () => {
+    cy.gcy('notifications-button').click();
+    cy.gcy('notifications-settings-icon').click();
+    cy.get('[data-cy="notifications-settings-TASKS-IN_APP"]').click();
+    cy.get('[data-cy="notifications-settings-TASKS-EMAIL"]').click();
+
+    generateNotification(userId, 'TASK_ASSIGNED');
+    generateNotification(userId, 'PASSWORD_CHANGED');
+
+    notifications.assertUnseenNotificationsCount(1);
+    assertNewestEmail(
+      'Password has been changed for your account',
+      'Password has been changed for your account'
+    );
+  });
 });

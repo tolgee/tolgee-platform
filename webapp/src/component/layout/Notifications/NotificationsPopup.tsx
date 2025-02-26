@@ -174,6 +174,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
               component={Link}
               to={LINKS.USER_ACCOUNT_NOTIFICATIONS.build()}
               sx={{ float: 'right', marginLeft: 'auto' }}
+              data-cy="notifications-settings-icon"
             >
               <Settings01 />
             </IconButton>
