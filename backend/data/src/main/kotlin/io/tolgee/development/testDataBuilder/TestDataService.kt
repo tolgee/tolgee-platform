@@ -115,6 +115,7 @@ class TestDataService(
       executeInNewTransaction(transactionManager) {
         builder.data.userAccounts.forEach {
           userAccountService.findActive(it.self.username)?.let { user ->
+            notificationService.deleteNotificationsOfUser(user.id)
             userAccountService.delete(user)
           }
         }
