@@ -34,6 +34,11 @@ export const handleApiError = (
         return;
       }
 
+      if (resObject?.code === 'sso_login_forced_for_this_account') {
+        globalContext.actions?.redirectTo(LINKS.SSO_MIGRATION.build());
+        return;
+      }
+
       if (init?.method === undefined || init?.method === 'get') {
         globalContext.actions?.redirectTo(LINKS.AFTER_LOGIN.build());
       }
