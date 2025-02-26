@@ -62,7 +62,7 @@ describe('tasks notifications', () => {
     dismissMenu();
     cy.gcy('task-detail-submit').click();
 
-    assertMessage('Task updated sucessfully');
+    assertMessage('Task updated successfully');
 
     getAssignedEmailNotification().then(({ toAddress, myTasksLink }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
