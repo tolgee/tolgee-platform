@@ -1,3 +1,10 @@
+## [3.105.2](https://github.com/tolgee/tolgee-platform/compare/v3.105.1...v3.105.2) (2025-02-26)
+
+
+### Bug Fixes
+
+* allow invites for managed accounts for projects owned by correct organization ([#2946](https://github.com/tolgee/tolgee-platform/issues/2946)) ([e90135e](https://github.com/tolgee/tolgee-platform/commit/e90135e9b2294573ec65705edc56f0ecc5ef0d06))
+
 ## [3.105.1](https://github.com/tolgee/tolgee-platform/compare/v3.105.0...v3.105.1) (2025-02-25)
 
 
