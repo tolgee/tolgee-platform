@@ -1,5 +1,6 @@
 import {
   deleteAllEmails,
+  getAllEmails,
   getLastEmail,
   internalFetch,
   login,
@@ -75,6 +76,7 @@ describe('notifications', () => {
       .scrollIntoView();
     notifications.assertUnseenNotificationsCount(0);
     cy.get('@notificationList').should('have.length', 25);
+    getAllEmails().then((emails) => assert(emails.length === 25, 'mail count'));
   });
 
   it('notifications are clickable and correct mails are sent', () => {
