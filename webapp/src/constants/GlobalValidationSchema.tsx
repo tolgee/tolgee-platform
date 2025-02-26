@@ -408,7 +408,7 @@ export class Validation {
 
   static readonly CREATE_TASK_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
-      name: Yup.string().min(3).required(),
+      name: Yup.string().min(3).optional(),
       languages: Yup.array(Yup.number()).min(
         1,
         t('validation_no_language_selected')

@@ -148,7 +148,9 @@ export const TaskCreateForm = ({
         </FormSelect>
         <TextField
           name="name"
-          label={t('create_task_field_name')}
+          label={t('form_field_optional', {
+            label: t('create_task_field_name'),
+          })}
           data-cy="create-task-field-name"
           disabled={disabled}
           fullWidth

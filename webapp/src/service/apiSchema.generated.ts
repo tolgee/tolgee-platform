@@ -1653,7 +1653,7 @@ export interface components {
        * @example 1
        */
       languageId: number;
-      name: string;
+      name?: string;
       type: "TRANSLATE" | "REVIEW";
     };
     CreditBalanceModel: {
@@ -4570,7 +4570,7 @@ export interface components {
       /** Format: int64 */
       dueDate?: number;
       language: components["schemas"]["LanguageModel"];
-      name: string;
+      name?: string;
       /** Format: int64 */
       number: number;
       state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
@@ -4605,7 +4605,7 @@ export interface components {
       /** Format: int64 */
       dueDate?: number;
       language: components["schemas"]["LanguageModel"];
-      name: string;
+      name?: string;
       /** Format: int64 */
       number: number;
       project: components["schemas"]["SimpleProjectModel"];
@@ -4785,7 +4785,7 @@ export interface components {
        * @example 1661172869000
        */
       dueDate?: number;
-      name: string;
+      name?: string;
     };
     UploadedImageModel: {
       /** Format: date-time */

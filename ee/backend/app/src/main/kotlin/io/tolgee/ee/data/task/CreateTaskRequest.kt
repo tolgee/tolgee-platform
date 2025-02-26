@@ -9,9 +9,8 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
 data class CreateTaskRequest(
-  @field:NotBlank
   @field:Size(min = 3, max = 255)
-  var name: String = "",
+  var name: String? = null,
   @field:Size(min = 0, max = 2000)
   var description: String = "",
   @Enumerated(EnumType.STRING)

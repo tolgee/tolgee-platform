@@ -12,7 +12,7 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "tasks", itemRelation = "task")
 data class TaskWithProjectModel(
   var number: Long = 0L,
-  var name: String = "",
+  var name: String? = null,
   var description: String = "",
   var type: TaskType = TaskType.TRANSLATE,
   var language: LanguageModel,
