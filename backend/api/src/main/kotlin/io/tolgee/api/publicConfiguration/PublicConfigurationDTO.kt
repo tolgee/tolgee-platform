@@ -34,7 +34,7 @@ class PublicConfigurationDTO(
   val userSourceField: Boolean,
   val plausible: PlausibleDto,
   val slack: SlackDTO,
-  val maxTranslationViewLanguagesSelect: Int,
+  val translationsViewLanguagesLimit: Int,
 ) {
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,

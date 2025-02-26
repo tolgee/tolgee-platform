@@ -3682,8 +3682,6 @@ export interface components {
       /** Format: int64 */
       maxTranslationTextLength: number;
       /** Format: int32 */
-        maxTranslationViewLanguagesSelect: number;
-      /** Format: int32 */
       maxUploadFileSize: number;
       nativeEnabled: boolean;
       needsEmailVerification: boolean;
@@ -3695,6 +3693,8 @@ export interface components {
       screenshotsUrl: string;
       showVersion: boolean;
       slack: components["schemas"]["SlackDTO"];
+      /** Format: int32 */
+      translationsViewLanguagesLimit: number;
       userCanCreateOrganizations: boolean;
       userSourceField: boolean;
       version: string;

@@ -259,7 +259,7 @@ export const useTranslationsService = (props: Props) => {
   };
 
   const setLanguages = (value: string[] | undefined) => {
-    const limit = config.maxTranslationViewLanguagesSelect;
+    const limit = config.translationsViewLanguagesLimit;
     if (value && value.length > limit) {
       messaging.error(
         <T

@@ -525,4 +525,4 @@ export const setWebhookControllerStatus = (value: number) =>
   setProperty('internal.webhookControllerStatus', value);
 
 export const setTranslationsViewMaxLanguagesSelected = (value: number) =>
-  setProperty('maxTranslationViewLanguagesSelect', value);
+  setProperty('translationsViewLanguagesLimit', value);
