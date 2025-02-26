@@ -367,6 +367,16 @@ export const addScreenshot = (
   });
 };
 
+export const getLastEmail = () =>
+  getAllEmails().then((r) => {
+    return {
+      fromAddress: r[0].from.value[0].address,
+      toAddress: r[0].to.value[0].address,
+      subject: r[0].subject,
+      html: r[0].html,
+    };
+  });
+
 export const getAssignedEmailNotification = () =>
   getAllEmails().then((r) => {
     const content = r[0].html;

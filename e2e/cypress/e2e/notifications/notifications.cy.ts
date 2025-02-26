@@ -1,4 +1,8 @@
-import { internalFetch, login } from '../../common/apiCalls/common';
+import {
+  getLastEmail,
+  internalFetch,
+  login,
+} from '../../common/apiCalls/common';
 import { notificationTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import { notifications } from '../../common/notifications';
@@ -10,6 +14,22 @@ function generateNotification(userId: number, type: string) {
     method: 'POST',
     body: { type: type, userId: userId },
   });
+}
+
+function assertNewestEmail(
+  expectedSubject: string,
+  expectedTextFragment: string
+) {
+  getLastEmail().then(({ subject, html }) => {
+    assert(subject === expectedSubject, 'mail subject');
+    assert(html.includes(expectedTextFragment), 'mail text');
+  });
+}
+
+function targetPageShouldHaveInUrl(expectedUrlFragment: string) {
+  cy.visit(`${HOST}`);
+  notifications.getNotifications().first().click();
+  cy.location().its('href').should('contain', expectedUrlFragment);
 }
 
 describe('notifications', () => {
@@ -33,7 +53,7 @@ describe('notifications', () => {
     notificationTestData.clean();
   });
 
-  it('shows notifications in batches', () => {
+  it('shows paged notifications', () => {
     for (let i = 0; i < 25; i++) {
       generateNotification(userId, 'PASSWORD_CHANGED');
     }
@@ -52,5 +72,49 @@ describe('notifications', () => {
       .scrollIntoView();
     notifications.assertUnseenNotificationsCount(0);
     cy.get('@notificationList').should('have.length', 25);
+  });
+
+  it('notifications are clickable and correct mails are sent', () => {
+    notifications.assertUnseenNotificationsCount(0);
+    notifications.assertNotificationListIsEmpty();
+
+    generateNotification(userId, 'TASK_ASSIGNED');
+    assertNewestEmail(
+      'Task has been assigned to you',
+      "You've been assigned to a task"
+    );
+    targetPageShouldHaveInUrl('/translations?task=');
+
+    generateNotification(userId, 'TASK_COMPLETED');
+    assertNewestEmail(
+      'Task has been completed',
+      "you've created has been completed"
+    );
+    targetPageShouldHaveInUrl('/translations?task=');
+
+    generateNotification(userId, 'TASK_CLOSED');
+    assertNewestEmail('Task has been closed', "you've created has been closed");
+    targetPageShouldHaveInUrl('/translations?task=');
+
+    generateNotification(userId, 'MFA_ENABLED');
+    assertNewestEmail(
+      'Multi-factor authentication has been enabled for your account',
+      'Multi-factor authentication has been enabled for your account'
+    );
+    targetPageShouldHaveInUrl('/account/security');
+
+    generateNotification(userId, 'MFA_DISABLED');
+    assertNewestEmail(
+      'Multi-factor authentication has been disabled for your account',
+      'Multi-factor authentication has been disabled for your account'
+    );
+    targetPageShouldHaveInUrl('/account/security');
+
+    generateNotification(userId, 'PASSWORD_CHANGED');
+    assertNewestEmail(
+      'Password has been changed for your account',
+      'Password has been changed for your account'
+    );
+    targetPageShouldHaveInUrl('/account/security');
   });
 });
