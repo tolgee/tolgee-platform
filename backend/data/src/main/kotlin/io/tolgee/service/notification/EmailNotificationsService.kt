@@ -18,6 +18,14 @@ class EmailNotificationsService(
   private val frontendUrlProvider: FrontendUrlProvider,
 ) : Logging {
   fun sendEmailNotification(notification: Notification) {
+    if (notification.user.deletedAt != null || notification.user.disabledAt != null) {
+      logger.info(
+        "Trying to send an email notification to user ${notification.user.username}, " +
+          "but the user has been deleted or disabled, skipping.",
+      )
+      return
+    }
+
     val subject = emailComposer.composeEmailSubject(notification)
     val text = emailComposer.composeEmailText(notification)
     val params =
