@@ -160,9 +160,9 @@ class V2UserController(
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   @AllowApiAccess
-  fun getSso(): PublicSsoTenantModel {
+  fun getSso(): PublicSsoTenantModel? {
     val userAccount = authenticationFacade.authenticatedUser
-    val domain = userAccount.domain ?: throw NotFoundException()
+    val domain = userAccount.domain ?: return null
     val tenant = tenantService.getEnabledConfigByDomain(domain)
     return publicSsoTenantModelAssembler.toModel(tenant)
   }
