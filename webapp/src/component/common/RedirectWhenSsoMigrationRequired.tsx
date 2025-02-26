@@ -1,11 +1,7 @@
-import { useEffect } from 'react';
-import { Redirect, matchPath, useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { GlobalLoading } from 'tg.component/GlobalLoading';
 import { LINKS } from 'tg.constants/links';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const RedirectWhenSsoMigrationRequired: React.FC = ({ children }) => {
   const shouldRedirect = useGlobalContext(
