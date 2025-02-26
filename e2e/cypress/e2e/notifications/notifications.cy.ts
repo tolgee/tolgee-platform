@@ -1,4 +1,5 @@
 import {
+  deleteAllEmails,
   getLastEmail,
   internalFetch,
   login,
@@ -47,10 +48,12 @@ describe('notifications', () => {
       })
       .then(() => cy.visit(`${HOST}`));
     waitForGlobalLoading();
+    deleteAllEmails();
   });
 
   afterEach(() => {
     notificationTestData.clean();
+    deleteAllEmails();
   });
 
   it('shows paged notifications', () => {
