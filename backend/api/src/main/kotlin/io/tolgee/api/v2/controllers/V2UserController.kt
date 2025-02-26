@@ -162,7 +162,7 @@ class V2UserController(
   fun getSso(): PublicSsoTenantModel? {
     val userAccount = authenticationFacade.authenticatedUser
     val domain = userAccount.domain ?: return null
-    val tenant = tenantService.getEnabledConfigByDomain(domain)
+    val tenant = tenantService.getEnabledConfigByDomainOrNull(domain) ?: return null
     return publicSsoTenantModelAssembler.toModel(tenant)
   }
 
