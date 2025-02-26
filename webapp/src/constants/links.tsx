@@ -102,6 +102,8 @@ export class LINKS {
     'accept_invitation/' + p(PARAMS.INVITATION_CODE)
   );
 
+  static SSO_MIGRATION = Link.ofRoot('sso_migration');
+
   static ACCEPT_AUTH_PROVIDER_CHANGE = Link.ofRoot(
     'accept_auth_provider_change'
   );
