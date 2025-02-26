@@ -6,11 +6,7 @@ import { tasks } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage, dismissMenu } from '../../common/shared';
 import { getTaskPreview, visitTasks } from '../../common/tasks';
-import {
-  assertNotificationListIsEmpty,
-  assertUnseenNotificationsCount,
-  getNotifications,
-} from '../../common/notifications';
+import { notifications } from '../../common/notifications';
 
 describe('tasks notifications', () => {
   beforeEach(() => {
@@ -29,8 +25,8 @@ describe('tasks notifications', () => {
   });
 
   it('sends email to assignee of newly created task and creates notification', () => {
-    assertUnseenNotificationsCount(0);
-    assertNotificationListIsEmpty();
+    notifications.assertUnseenNotificationsCount(0);
+    notifications.assertNotificationListIsEmpty();
 
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-name').type('New review task');
@@ -49,7 +45,7 @@ describe('tasks notifications', () => {
     cy.gcy('create-task-submit').click();
 
     assertMessage('1 task created');
-    assertUnseenNotificationsCount(1);
+    notifications.assertUnseenNotificationsCount(1);
 
     getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
@@ -61,7 +57,8 @@ describe('tasks notifications', () => {
       .should('contain', 'New review task');
     dismissMenu();
 
-    getNotifications()
+    notifications
+      .getNotifications()
       .should('have.length', 1)
       .first()
       .should('include.text', 'Tasks test user')
