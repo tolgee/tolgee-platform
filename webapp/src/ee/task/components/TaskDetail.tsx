@@ -177,7 +177,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
         <>
           <Formik
             initialValues={{
-              name: data.name,
+              name: data.name || '',
               description: data.description,
               dueDate: data.dueDate,
               assignees: data.assignees,
@@ -216,6 +216,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                     label={t('form_field_optional', {
                       label: t('task_detail_field_name'),
                     })}
+                    placeholder={t('task_default_name')}
                     data-cy="task-detail-field-name"
                     fullWidth
                     disabled={!canEditTask}

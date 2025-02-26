@@ -151,6 +151,7 @@ export const TaskCreateForm = ({
           label={t('form_field_optional', {
             label: t('create_task_field_name'),
           })}
+          placeholder={t('task_default_name')}
           data-cy="create-task-field-name"
           disabled={disabled}
           fullWidth

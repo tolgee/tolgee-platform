@@ -417,7 +417,7 @@ export class Validation {
 
   static readonly UPDATE_TASK_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
-      name: Yup.string().min(3).required(),
+      name: Yup.string().min(3).optional(),
     });
 
   private static readonly validateUrlWithPort = (
