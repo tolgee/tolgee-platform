@@ -43,6 +43,7 @@ class SsoAuthenticationInterceptorTest {
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isAuthenticated).thenReturn(true)
     Mockito.`when`(userAccount.username).thenReturn("user@domain.com")
+    Mockito.`when`(userAccount.domain).thenReturn("domain.com")
     Mockito.`when`(userAccount.thirdPartyAuth).thenReturn(null)
     Mockito.`when`(tenantService.isSsoForcedForDomain("domain.com")).thenReturn(true)
   }
@@ -84,6 +85,7 @@ class SsoAuthenticationInterceptorTest {
   fun `it allows access for user with invalid email as username`() {
     Mockito.`when`(tenantService.isSsoForcedForDomain(any())).thenReturn(true)
     Mockito.`when`(userAccount.username).thenReturn("user")
+    Mockito.`when`(userAccount.domain).thenReturn(null)
     mockMvc.perform(get("/no-annotation")).andIsOk
   }
 
