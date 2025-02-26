@@ -127,7 +127,7 @@ open class TolgeeProperties(
   @DocProperty(hidden = true)
   var plausible: PlausibleProperties = PlausibleProperties(),
   @DocProperty(
-    description = "Maximum amount of languages that can be selected in Translations.",
+    description = "Maximum amount of languages that can be selected in the Translations view",
   )
   var translationsViewLanguagesLimit: Int = 10,
 )
