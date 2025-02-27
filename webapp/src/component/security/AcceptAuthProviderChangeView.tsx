@@ -199,11 +199,9 @@ const AcceptAuthProviderChangeView: React.FC = () => {
                   onClick={handleAccept}
                   data-cy="accept-auth-provider-change-accept"
                 >
-                  {t(
-                    willBeManaged
-                      ? 'accept_auth_provider_change_accept'
-                      : 'accept_auth_provider_change_accept_non_managed'
-                  )}
+                  {willBeManaged
+                    ? t('accept_auth_provider_change_accept')
+                    : t('accept_auth_provider_change_accept_non_managed')}
                 </LoadingButton>
                 {(!willBeManaged || !isSsoMigrationForced) && (
                   <LoadingButton
