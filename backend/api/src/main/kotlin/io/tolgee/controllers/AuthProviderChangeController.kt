@@ -43,6 +43,21 @@ class AuthProviderChangeController(
     return info ?: throw NotFoundException()
   }
 
+  @DeleteMapping("")
+  @Operation(summary = "Remove current third party authentication provider")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @BypassForcedSsoAuthentication
+  @RequiresSuperAuthentication
+  @Transactional
+  fun deleteCurrentAuthProvider(): JwtAuthenticationResponse {
+    val user = authenticationFacade.authenticatedUserEntity
+    authProviderChangeService.removeCurrent(user)
+    userAccountService.invalidateTokens(user)
+    return JwtAuthenticationResponse(
+      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
+    )
+  }
+
   @GetMapping("/change")
   @Operation(summary = "Get info about authentication provider which can replace the current one")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)

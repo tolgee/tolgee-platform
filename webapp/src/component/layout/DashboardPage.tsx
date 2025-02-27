@@ -49,7 +49,9 @@ export const DashboardPage: FunctionComponent<Props> = ({
     (c) => Boolean(c.auth.jwtToken) && Boolean(c.auth.adminToken)
   );
 
-  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
+  const rightPanelWidth = hideQuickStart
+    ? 0
+    : useGlobalContext((c) => c.layout.rightPanelWidth);
 
   return (
     <>
@@ -64,6 +66,7 @@ export const DashboardPage: FunctionComponent<Props> = ({
         flexGrow={1}
       >
         <TopBar
+          hideQuickStart={hideQuickStart}
           isAdminAccess={isAdminAccess}
           isDebuggingCustomerAccount={isDebuggingCustomerAccount}
         />

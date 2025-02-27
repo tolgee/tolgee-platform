@@ -13,7 +13,6 @@ interface OAuthRedirectionHandlerProps {}
 export const OAuthRedirectionHandler: FunctionComponent<
   OAuthRedirectionHandlerProps
 > = () => {
-  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
   const loginLoadable = useGlobalContext((c) => c.auth.authorizeOAuthLoadable);
 
   const {
@@ -66,10 +65,13 @@ export const OAuthRedirectionHandler: FunctionComponent<
       }
     }
 
-    if (code && !allowPrivate) {
-      loginWithOAuthCode(type, code, domain);
+    if (!code) {
+      history.replace(LINKS.LOGIN.build());
+      return;
     }
-  }, [allowPrivate]);
+
+    loginWithOAuthCode(type, code, domain);
+  });
 
   if (loginLoadable.error) {
     return (

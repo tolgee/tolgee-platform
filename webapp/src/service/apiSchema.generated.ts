@@ -104,6 +104,7 @@ export interface paths {
   };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
+    delete: operations["deleteCurrentAuthProvider"];
   };
   "/v2/auth-provider/change": {
     get: operations["getChangedAuthProvider"];
@@ -6320,6 +6321,48 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["AuthProviderDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  deleteCurrentAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */

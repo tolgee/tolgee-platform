@@ -12,7 +12,10 @@ import { MenuHeader } from './MenuHeader';
 import { OrganizationSwitch } from './OrganizationSwitch';
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { UserMenuItems } from './UserMenuItems';
 import { billingMenuItems } from 'tg.ee';
 
@@ -47,6 +50,12 @@ export const UserPresentAvatarMenu: React.FC = () => {
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser()!;
+
+  const isSsoMigrationRequired = useGlobalContext(
+    (c) =>
+      c.initialData.ssoInfo?.force &&
+      c.initialData.userInfo?.accountType !== 'MANAGED'
+  );
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -116,7 +125,7 @@ export const UserPresentAvatarMenu: React.FC = () => {
           subtitle={user.username}
         />
         <UserMenuItems onClose={handleClose} />
-        {preferredOrganization && (
+        {!isSsoMigrationRequired && preferredOrganization && (
           <>
             <StyledDivider />
             <MenuHeader

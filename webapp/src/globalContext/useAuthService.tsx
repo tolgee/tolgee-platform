@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -129,8 +129,8 @@ export const useAuthService = (
   }
 
   function useSsoAuthLinkByDomain(domain: string) {
+    const state = useMemo(() => generateSsoStateKey(), []);
     localStorage.setItem(LOCAL_STORAGE_DOMAIN_KEY, domain);
-    const state = generateSsoStateKey();
     return useApiQuery({
       url: '/api/public/authorize_oauth/sso/authentication-url',
       method: 'post',
@@ -360,8 +360,11 @@ export const useAuthService = (
       setAdminToken(undefined);
     },
     setInvitationCode,
+    currentLocation() {
+      return history.location.pathname + history.location.search;
+    },
     redirectTo(url: string) {
-      history.replace(LINKS.AFTER_LOGIN.build());
+      history.replace(url);
     },
   };
 

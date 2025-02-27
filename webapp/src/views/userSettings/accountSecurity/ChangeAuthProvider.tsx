@@ -7,9 +7,11 @@ import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useOAuthServices } from 'tg.hooks/useOAuthServices';
 import { Key02 } from '@untitled-ui/icons-react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { messageService } from 'tg.service/MessageService';
 
 export const ChangeAuthProvider: FunctionComponent = () => {
-  const { useSsoAuthLinkByDomain } = useGlobalActions();
+  const { handleAfterLogin, useSsoAuthLinkByDomain } = useGlobalActions();
   const user = useUser();
   const oAuthServices = useOAuthServices();
 
@@ -21,7 +23,27 @@ export const ChangeAuthProvider: FunctionComponent = () => {
 
   const ssoUrl = useSsoAuthLinkByDomain(user?.domain || '');
 
+  const rejectChange = useApiMutation({
+    url: '/v2/auth-provider',
+    method: 'delete',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+    },
+  });
+
   if (!user) return null;
+
+  function handleDisconnect() {
+    rejectChange.mutate(
+      {},
+      {
+        onSuccess(r) {
+          handleAfterLogin(r);
+          messageService.success(<T keyName="auth_provider_change_accepted" />);
+        },
+      }
+    );
+  }
 
   const isUserManaged = user.accountType === 'MANAGED';
 
@@ -65,6 +87,7 @@ export const ChangeAuthProvider: FunctionComponent = () => {
                 variant="outlined"
                 style={{ marginBottom: '0.5rem' }}
                 color="success"
+                onClick={handleDisconnect}
               >
                 {provider.disconnectButtonTitle}
               </Button>
