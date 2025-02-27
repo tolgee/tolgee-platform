@@ -44,7 +44,6 @@ export const usePrefilter = (): PrefilterType | undefined => {
     QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE,
     {
       defaultVal: undefined,
-      history: true,
     }
   );
 
