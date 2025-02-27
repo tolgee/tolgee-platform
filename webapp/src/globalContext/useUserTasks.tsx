@@ -9,6 +9,7 @@ export const useUserTasks = (props: { enabled: boolean }) => {
     query: { size: 1, filterState: TASK_ACTIVE_STATES },
     fetchOptions: {
       disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
       disableErrorNotification: true,
     },
     options: {

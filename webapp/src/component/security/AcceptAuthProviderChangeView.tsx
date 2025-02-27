@@ -5,7 +5,10 @@ import { Box, Paper, styled, Typography } from '@mui/material';
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -46,6 +49,11 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   useWindowTitle(t('accept_auth_provider_change_title'));
 
   const { handleAfterLogin } = useGlobalActions();
+  const isSsoMigrationForced = useGlobalContext(
+    (c) =>
+      c.initialData.ssoInfo?.force &&
+      c.initialData.userInfo?.accountType !== 'MANAGED'
+  );
 
   const acceptChange = useApiMutation({
     url: '/v2/auth-provider/change',
@@ -66,6 +74,11 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   const authProviderCurrentInfo = useApiQuery({
     url: '/v2/auth-provider',
     method: 'get',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+    },
     options: {
       onError(e) {
         if (e.code && e.code != 'resource_not_found') {
@@ -78,6 +91,11 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   const authProviderChangeInfo = useApiQuery({
     url: '/v2/auth-provider/change',
     method: 'get',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+    },
     options: {
       onError(e) {
         history.replace(LINKS.USER_ACCOUNT_SECURITY.build());
@@ -181,16 +199,20 @@ const AcceptAuthProviderChangeView: React.FC = () => {
                   onClick={handleAccept}
                   data-cy="accept-auth-provider-change-accept"
                 >
-                  {t('accept_auth_provider_change_accept')}
+                  {t(
+                    willBeManaged
+                      ? 'accept_auth_provider_change_accept'
+                      : 'accept_auth_provider_change_accept_non_managed'
+                  )}
                 </LoadingButton>
-                {!willBeManaged && (
+                {(!willBeManaged || !isSsoMigrationForced) && (
                   <LoadingButton
                     loading={acceptChange.isLoading || rejectChange.isLoading}
                     variant="outlined"
                     onClick={handleReject}
-                    data-cy="accept-invitation-decline"
+                    data-cy="accept-auth-provider-change-decline"
                   >
-                    {t('accept_invitation_decline')}
+                    {t('accept_auth_provider_change_decline')}
                   </LoadingButton>
                 )}
               </Box>

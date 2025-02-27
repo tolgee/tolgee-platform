@@ -45,7 +45,7 @@ const StyledPaper = styled(Paper)`
 `;
 
 const SsoMigrationView: React.FC = () => {
-  const { useSsoAuthLinkByDomain } = useGlobalActions();
+  const { useSsoAuthLinkByDomain, refetchInitialData } = useGlobalActions();
   const user = useUser();
 
   const migrationRequired = useGlobalContext(
@@ -62,6 +62,11 @@ const SsoMigrationView: React.FC = () => {
   const authProviderChangeInfo = useApiQuery({
     url: '/v2/auth-provider/change',
     method: 'get',
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+    },
     options: {
       onError(e) {
         if (e.code && e.code != 'resource_not_found') {
@@ -76,6 +81,7 @@ const SsoMigrationView: React.FC = () => {
   const ssoUrlValue = ssoUrl.data?.redirectUrl || '';
 
   if (!migrationRequired) {
+    refetchInitialData(); // Avoid loop if initial data are invalid
     history.replace(LINKS.ROOT.build());
   }
 
@@ -101,7 +107,10 @@ const SsoMigrationView: React.FC = () => {
                 textAlign="center"
                 data-cy="accept-auth-provider-change-info-text"
               >
-                <T keyName="sso_migration_description" />
+                <T
+                  keyName="sso_migration_description"
+                  params={{ domain: user?.domain || '', br: <br /> }}
+                />
                 {ssoUrlUnavailable && (
                   // TODO: use error color
                   <T keyName="sso_migration_redirect_url_failed" />

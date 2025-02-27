@@ -1,6 +1,7 @@
 declare namespace DataCy {
     export type Value = 
         "accept-auth-provider-change-accept" |
+        "accept-auth-provider-change-decline" |
         "accept-auth-provider-change-info-text" |
         "accept-invitation-accept" |
         "accept-invitation-decline" |

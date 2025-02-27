@@ -7,6 +7,13 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { RequestOptions } from './ApiHttpService';
 import { globalContext } from 'tg.globalContext/globalActions';
 import { LINKS } from 'tg.constants/links';
+import { matchPath } from 'react-router-dom';
+
+// Paths which user must be able to access during SSO migration
+const SSO_MIGRATION_PATHS = [
+  LINKS.SSO_MIGRATION,
+  LINKS.ACCEPT_AUTH_PROVIDER_CHANGE,
+];
 
 export const handleApiError = (
   r: Response,
@@ -35,6 +42,23 @@ export const handleApiError = (
       }
 
       if (resObject?.code === 'sso_login_forced_for_this_account') {
+        const currentLocation = globalContext.actions?.currentLocation();
+        const alreadyCorrectPath =
+          currentLocation &&
+          SSO_MIGRATION_PATHS.some((link) =>
+            matchPath(currentLocation, {
+              path: link.template,
+              exact: true,
+              strict: false,
+            })
+          );
+        if (alreadyCorrectPath) {
+          // Safety net check: Don't redirect if user is already on one of the SSO migration pages
+          // This shouldn't happen; It means frontend is trying to load one of the disabled
+          // endpoints in the background and should be fixed
+          // TODO: log warning into sentry
+          return;
+        }
         globalContext.actions?.redirectTo(LINKS.SSO_MIGRATION.build());
         return;
       }
