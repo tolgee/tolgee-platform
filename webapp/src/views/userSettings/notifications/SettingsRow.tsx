@@ -12,7 +12,7 @@ const StyledSwitch = styled(Box)`
 type Props = {
   description: string;
   subdescription: string;
-  group: operations['putNotificationSetting']['parameters']['query']['group'];
+  group: operations['putNotificationSetting']['requestBody']['content']['application/json']['group'];
   channels: components['schemas']['NotificationSettingGroupModel'];
   disabledInApp?: boolean;
   disabledEmail?: boolean;
@@ -30,20 +30,22 @@ export const SettingsRow: React.FC<Props> = ({
 }: Props) => {
   const { t } = useTranslate();
   const saveMutation = useApiMutation({
-    url: '/v2/notifications-settings',
+    url: '/v2/notification-settings',
     method: 'put',
   });
 
   const saveSettings = (
-    channel: operations['putNotificationSetting']['parameters']['query']['channel'],
+    channel: operations['putNotificationSetting']['requestBody']['content']['application/json']['channel'],
     enabled: boolean
   ) => {
     saveMutation.mutate(
       {
-        query: {
-          group: group,
-          channel: channel,
-          enabled: enabled,
+        content: {
+          'application/json': {
+            group: group,
+            channel: channel,
+            enabled: enabled,
+          },
         },
       },
       {

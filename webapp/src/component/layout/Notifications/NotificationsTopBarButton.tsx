@@ -20,7 +20,7 @@ export const NotificationsTopBarButton: React.FC = () => {
   const [unseenCount, setUnseenCount] = useState<number>();
 
   const unseenNotificationsLoadable = useApiQuery({
-    url: '/v2/notifications',
+    url: '/v2/notification',
     method: 'get',
     query: { size: 1, filterSeen: false },
     options: {

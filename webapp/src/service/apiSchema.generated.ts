@@ -143,15 +143,17 @@ export interface paths {
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
-  "/v2/notifications": {
+  "/v2/notification": {
     get: operations["getNotifications"];
+  };
+  "/v2/notification-settings": {
+    /** Returns notification settings of the currently logged in user */
+    get: operations["getNotificationsSettings"];
+    /** Saves new value for given parameters */
+    put: operations["putNotificationSetting"];
   };
   "/v2/notifications-mark-seen": {
     put: operations["markNotificationsAsSeen"];
-  };
-  "/v2/notifications-settings": {
-    get: operations["getNotificationsSettings"];
-    put: operations["putNotificationSetting"];
   };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
@@ -2019,7 +2021,8 @@ export interface components {
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
-        | "current_subscription_is_not_trialing";
+        | "current_subscription_is_not_trialing"
+        | "sorting_and_paging_is_not_supported_when_using_cursor";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2722,6 +2725,7 @@ export interface components {
        */
       nextCursor?: string;
       page?: components["schemas"]["PageMetadata"];
+      pagedModel?: components["schemas"]["PagedModelKeyWithTranslationsModel"];
       /** @description Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
     };
@@ -2997,6 +3001,14 @@ export interface components {
       accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
       tasks: components["schemas"]["NotificationSettingGroupModel"];
     };
+    NotificationSettingsRequest: {
+      /** @example IN_APP */
+      channel: "IN_APP" | "EMAIL";
+      /** @description True if the setting should be enabled, false for disabled */
+      enabled: boolean;
+      /** @example TASKS */
+      group: "ACCOUNT_SECURITY" | "TASKS";
+    };
     NotificationsMarkSeenRequest: {
       /**
        * @description Notification IDs to be marked as seen
@@ -3129,6 +3141,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelKeyWithTranslationsModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithTranslationsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["LanguageModel"][];
@@ -3144,6 +3162,12 @@ export interface components {
     PagedModelNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["NamespaceModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelNotificationModel: {
+      _embedded?: {
+        notificationModelList?: components["schemas"]["NotificationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -3253,6 +3277,7 @@ export interface components {
        */
       nextCursor?: string;
       page?: components["schemas"]["PageMetadata"];
+      pagedModel?: components["schemas"]["PagedModelNotificationModel"];
     };
     PatModel: {
       /** Format: int64 */
@@ -4455,7 +4480,8 @@ export interface components {
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
-        | "current_subscription_is_not_trialing";
+        | "current_subscription_is_not_trialing"
+        | "sorting_and_paging_is_not_supported_when_using_cursor";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -6817,6 +6843,7 @@ export interface operations {
          * false = only unseen
          */
         filterSeen?: boolean;
+        cursor?: string;
       };
     };
     responses: {
@@ -6860,49 +6887,7 @@ export interface operations {
       };
     };
   };
-  markNotificationsAsSeen: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
-      };
-    };
-  };
+  /** Returns notification settings of the currently logged in user */
   getNotificationsSettings: {
     responses: {
       /** OK */
@@ -6945,14 +6930,8 @@ export interface operations {
       };
     };
   };
+  /** Saves new value for given parameters */
   putNotificationSetting: {
-    parameters: {
-      query: {
-        group: "ACCOUNT_SECURITY" | "TASKS";
-        channel: "IN_APP" | "EMAIL";
-        enabled: boolean;
-      };
-    };
     responses: {
       /** OK */
       200: unknown;
@@ -6987,6 +6966,54 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationSettingsRequest"];
+      };
+    };
+  };
+  markNotificationsAsSeen: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
       };
     };
   };

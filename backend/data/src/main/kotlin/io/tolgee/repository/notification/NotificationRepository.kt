@@ -22,6 +22,8 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      LEFT JOIN FETCH n.originatingUser
      LEFT JOIN FETCH n.linkedTask
      WHERE u.id = :userId
+        AND u.deletedAt is null
+        AND u.disabledAt is null
         AND (
                 :#{#filters.filterSeen} is null
                 OR :#{#filters.filterSeen} = n.seen
