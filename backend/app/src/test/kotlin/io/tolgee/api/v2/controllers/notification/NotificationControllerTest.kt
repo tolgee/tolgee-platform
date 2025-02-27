@@ -91,7 +91,7 @@ class NotificationControllerTest : AuthorizedControllerTest() {
     loginAsUser(testData.user.username)
 
     performAuthPut(
-      "/v2/notification-mark-seen",
+      "/v2/notifications-mark-seen",
       NotificationsMarkSeenRequest().apply {
         notificationIds =
           listOf(

@@ -146,14 +146,14 @@ export interface paths {
   "/v2/notification": {
     get: operations["getNotifications"];
   };
-  "/v2/notification-mark-seen": {
-    put: operations["markNotificationsAsSeen"];
-  };
   "/v2/notification-settings": {
     /** Returns notification settings of the currently logged in user */
     get: operations["getNotificationsSettings"];
     /** Saves new value for given parameters */
     put: operations["putNotificationSetting"];
+  };
+  "/v2/notifications-mark-seen": {
+    put: operations["markNotificationsAsSeen"];
   };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
@@ -2725,6 +2725,7 @@ export interface components {
        */
       nextCursor?: string;
       page?: components["schemas"]["PageMetadata"];
+      pagedModel?: components["schemas"]["PagedModelKeyWithTranslationsModel"];
       /** @description Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
     };
@@ -3140,6 +3141,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelKeyWithTranslationsModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithTranslationsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["LanguageModel"][];
@@ -3155,6 +3162,12 @@ export interface components {
     PagedModelNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["NamespaceModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelNotificationModel: {
+      _embedded?: {
+        notificationModelList?: components["schemas"]["NotificationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -3264,6 +3277,7 @@ export interface components {
        */
       nextCursor?: string;
       page?: components["schemas"]["PageMetadata"];
+      pagedModel?: components["schemas"]["PagedModelNotificationModel"];
     };
     PatModel: {
       /** Format: int64 */
@@ -6873,49 +6887,6 @@ export interface operations {
       };
     };
   };
-  markNotificationsAsSeen: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
-      };
-    };
-  };
   /** Returns notification settings of the currently logged in user */
   getNotificationsSettings: {
     responses: {
@@ -7000,6 +6971,49 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NotificationSettingsRequest"];
+      };
+    };
+  };
+  markNotificationsAsSeen: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
       };
     };
   };

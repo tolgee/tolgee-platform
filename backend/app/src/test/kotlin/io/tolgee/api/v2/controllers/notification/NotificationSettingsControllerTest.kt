@@ -76,7 +76,7 @@ class NotificationSettingsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `notification gets not dispatched if disabled`() {
+  fun `notification does not get dispatched if disabled`() {
     disableChannel(NotificationChannel.IN_APP)
     disableChannel(NotificationChannel.EMAIL)
 

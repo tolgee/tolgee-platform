@@ -31,14 +31,14 @@ class NotificationServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun inAppAndEmailNotificationAreCreated() {
+  fun `in-app and email notification are created`() {
     notifyUser()
     assertInAppNotificationExists()
     assertEmailNotificationExists()
   }
 
   @Test
-  fun inAppNotificationIsNotCreatedWhenDisabled() {
+  fun `in-app notification is not created when disabled`() {
     disableChannel(NotificationChannel.IN_APP)
     notifyUser()
     assertInAppNotificationNotExists()
@@ -46,7 +46,7 @@ class NotificationServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun emailNotificationIsNotCreatedWhenDisabled() {
+  fun `email notification is not created when disabled`() {
     disableChannel(NotificationChannel.EMAIL)
     notifyUser()
     assertInAppNotificationExists()

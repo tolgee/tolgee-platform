@@ -108,7 +108,7 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
   });
 
   const markSeenMutation = useApiMutation({
-    url: '/v2/notification-mark-seen',
+    url: '/v2/notifications-mark-seen',
     method: 'put',
   });
 
