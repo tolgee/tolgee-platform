@@ -19,6 +19,13 @@ type Props = {
   afterChange: () => void;
 };
 
+function settingsToggleDataCy(
+  group: Props['group'],
+  channel: components['schemas']['NotificationSettingsRequest']['channel']
+) {
+  return `notifications-settings-${group}-${channel}`;
+}
+
 export const SettingsRow: React.FC<Props> = ({
   description = '',
   subdescription = '',
@@ -89,6 +96,7 @@ export const SettingsRow: React.FC<Props> = ({
               checked={inAppEnabled}
               disabled={disabledInApp}
               onClick={() => saveSettings('IN_APP', !inAppEnabled)}
+              data-cy={settingsToggleDataCy(group, 'IN_APP')}
             />
           </StyledSwitch>
         </Tooltip>
@@ -105,6 +113,7 @@ export const SettingsRow: React.FC<Props> = ({
               checked={emailEnabled}
               disabled={disabledEmail}
               onClick={() => saveSettings('EMAIL', !emailEnabled)}
+              data-cy={settingsToggleDataCy(group, 'EMAIL')}
             />
           </StyledSwitch>
         </Tooltip>

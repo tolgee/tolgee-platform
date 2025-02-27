@@ -112,6 +112,8 @@ export const tasks = generateTestDataObject('task');
 
 export const batchJobs = generateTestDataObject('batch-jobs');
 
+export const notificationTestData = generateTestDataObject('notification');
+
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>

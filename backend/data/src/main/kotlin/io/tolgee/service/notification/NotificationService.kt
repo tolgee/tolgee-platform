@@ -25,9 +25,9 @@ class NotificationService(
 ) {
   fun getNotifications(
     userId: Long,
-    pageable: Pageable,
-    filters: NotificationFilters,
-    cursor: Map<String, CursorValue>?,
+    pageable: Pageable = Pageable.unpaged(),
+    filters: NotificationFilters = NotificationFilters(),
+    cursor: Map<String, CursorValue>? = null,
   ): Page<Notification> =
     notificationRepository.fetchNotificationsByUserId(
       userId,
@@ -45,6 +45,12 @@ class NotificationService(
         NotificationFilters(false),
       ).totalElements
       .toInt()
+
+  fun deleteNotificationsOfUser(userId: Long) {
+    getNotifications(userId).forEach {
+      notificationRepository.delete(it)
+    }
+  }
 
   @Transactional
   fun notify(notification: Notification) {

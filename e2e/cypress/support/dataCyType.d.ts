@@ -364,6 +364,7 @@ declare namespace DataCy {
         "notifications-empty-message" |
         "notifications-list" |
         "notifications-list-item" |
+        "notifications-settings-icon" |
         "notistack-snackbar" |
         "order-translation-confirmation" |
         "order-translation-confirmation-ok" |
