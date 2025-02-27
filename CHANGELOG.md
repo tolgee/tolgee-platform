@@ -1,3 +1,15 @@
+# [3.106.0](https://github.com/tolgee/tolgee-platform/compare/v3.105.2...v3.106.0) (2025-02-27)
+
+
+### Bug Fixes
+
+* add sso user to organization explicitly - fixes accepting project invitations during signup ([#2954](https://github.com/tolgee/tolgee-platform/issues/2954)) ([f7e45bb](https://github.com/tolgee/tolgee-platform/commit/f7e45bb70060fd549597076bda370139e6315f40))
+
+
+### Features
+
+* Configurable selected languages limit ([#2953](https://github.com/tolgee/tolgee-platform/issues/2953)) ([915b29f](https://github.com/tolgee/tolgee-platform/commit/915b29fca128c3d162d1c8683430a97ee029ef17))
+
 ## [3.105.2](https://github.com/tolgee/tolgee-platform/compare/v3.105.1...v3.105.2) (2025-02-26)
 
 
