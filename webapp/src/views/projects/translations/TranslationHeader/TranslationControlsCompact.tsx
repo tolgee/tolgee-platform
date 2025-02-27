@@ -32,7 +32,6 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
-import { StickyHeader } from './StickyHeader';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -43,8 +42,6 @@ const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(0, 1.5)};
   z-index: ${({ theme }) => theme.zIndex.appBar + 1};
   transition: transform 0.2s ease-in-out;
-  padding-bottom: 4px;
-  padding-top: 9px;
 `;
 
 const StyledSpaced = styled('div')`
@@ -138,118 +135,116 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   };
 
   return (
-    <StickyHeader height={45}>
-      <StyledContainer>
-        {searchOpen ? (
-          <StyledSearchSpaced>
-            <StyledSearch
-              value={search || ''}
-              onSearchChange={handleSearchChange}
-              label={null}
-              variant="outlined"
-              placeholder={t('standard_search_label')}
-              style={{
-                height: 35,
-                maxWidth: 'unset',
-                width: '100%',
-              }}
+    <StyledContainer>
+      {searchOpen ? (
+        <StyledSearchSpaced>
+          <StyledSearch
+            value={search || ''}
+            onSearchChange={handleSearchChange}
+            label={null}
+            variant="outlined"
+            placeholder={t('standard_search_label')}
+            style={{
+              height: 35,
+              maxWidth: 'unset',
+              width: '100%',
+            }}
+          />
+          <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
+            <XClose />
+          </StyledIconButton>
+        </StyledSearchSpaced>
+      ) : (
+        <>
+          <StyledSpaced>
+            <Badge color="primary" badgeContent={search.length} variant="dot">
+              <StyledButtonWrapper>
+                <StyledIconButton
+                  size="small"
+                  onClick={() => setSearchOpen(true)}
+                >
+                  <SearchSm />
+                </StyledIconButton>
+              </StyledButtonWrapper>
+            </Badge>
+
+            <Badge color="primary" badgeContent={activeFilters?.length}>
+              <StyledButtonWrapper>
+                <StyledIconButton
+                  size="small"
+                  onClick={(e) => setAnchorFiltersEl(e.currentTarget)}
+                >
+                  <FilterLines />
+                </StyledIconButton>
+              </StyledButtonWrapper>
+            </Badge>
+            <FiltersMenu
+              filters={filters}
+              anchorEl={anchorFiltersEl}
+              onClose={() => setAnchorFiltersEl(null)}
+              filtersContent={filtersContent}
+              onChange={setFilters}
             />
-            <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
-              <XClose />
+          </StyledSpaced>
+
+          <Box overflow="hidden" position="relative">
+            {taskPrefilter && (
+              <PrefilterTaskShowDoneSwitch
+                sx={{
+                  ml: 0,
+                }}
+              />
+            )}
+          </Box>
+
+          <StyledSpaced>
+            <StyledIconButton
+              size="small"
+              onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
+            >
+              <Globe02 />
             </StyledIconButton>
-          </StyledSearchSpaced>
-        ) : (
-          <>
-            <StyledSpaced>
-              <Badge color="primary" badgeContent={search.length} variant="dot">
-                <StyledButtonWrapper>
-                  <StyledIconButton
-                    size="small"
-                    onClick={() => setSearchOpen(true)}
-                  >
-                    <SearchSm />
-                  </StyledIconButton>
-                </StyledButtonWrapper>
-              </Badge>
 
-              <Badge color="primary" badgeContent={activeFilters?.length}>
-                <StyledButtonWrapper>
-                  <StyledIconButton
-                    size="small"
-                    onClick={(e) => setAnchorFiltersEl(e.currentTarget)}
-                  >
-                    <FilterLines />
-                  </StyledIconButton>
-                </StyledButtonWrapper>
-              </Badge>
-              <FiltersMenu
-                filters={filters}
-                anchorEl={anchorFiltersEl}
-                onClose={() => setAnchorFiltersEl(null)}
-                filtersContent={filtersContent}
-                onChange={setFilters}
-              />
-            </StyledSpaced>
+            <LanguagesMenu
+              anchorEl={anchorLanguagesEl}
+              onClose={() => setAnchorLanguagesEl(null)}
+              onChange={handleLanguageChange}
+              value={selectedLanguages}
+              languages={languages}
+            />
 
-            <Box overflow="hidden" position="relative">
-              {taskPrefilter && (
-                <PrefilterTaskShowDoneSwitch
-                  sx={{
-                    ml: 0,
-                  }}
-                />
-              )}
-            </Box>
-
-            <StyledSpaced>
-              <StyledIconButton
-                size="small"
-                onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
+            <ButtonGroup>
+              <StyledToggleButton
+                color={view === 'LIST' ? 'primary' : 'default'}
+                onClick={() => handleViewChange('LIST')}
+                data-cy="translations-view-list-button"
               >
-                <Globe02 />
-              </StyledIconButton>
+                <LayoutLeft />
+              </StyledToggleButton>
+              <StyledToggleButton
+                color={view === 'TABLE' ? 'primary' : 'default'}
+                onClick={() => handleViewChange('TABLE')}
+                data-cy="translations-view-table-button"
+              >
+                <LayoutGrid02 />
+              </StyledToggleButton>
+            </ButtonGroup>
 
-              <LanguagesMenu
-                anchorEl={anchorLanguagesEl}
-                onClose={() => setAnchorLanguagesEl(null)}
-                onChange={handleLanguageChange}
-                value={selectedLanguages}
-                languages={languages}
-              />
-
-              <ButtonGroup>
-                <StyledToggleButton
-                  color={view === 'LIST' ? 'primary' : 'default'}
-                  onClick={() => handleViewChange('LIST')}
-                  data-cy="translations-view-list-button"
+            {projectPermissions.satisfiesPermission('keys.edit') && (
+              <QuickStartHighlight itemKey="add_key">
+                <StyledIconButton
+                  color="primary"
+                  size="small"
+                  onClick={handleAddTranslation}
+                  data-cy="translations-add-button"
                 >
-                  <LayoutLeft />
-                </StyledToggleButton>
-                <StyledToggleButton
-                  color={view === 'TABLE' ? 'primary' : 'default'}
-                  onClick={() => handleViewChange('TABLE')}
-                  data-cy="translations-view-table-button"
-                >
-                  <LayoutGrid02 />
-                </StyledToggleButton>
-              </ButtonGroup>
-
-              {projectPermissions.satisfiesPermission('keys.edit') && (
-                <QuickStartHighlight itemKey="add_key">
-                  <StyledIconButton
-                    color="primary"
-                    size="small"
-                    onClick={handleAddTranslation}
-                    data-cy="translations-add-button"
-                  >
-                    <Plus />
-                  </StyledIconButton>
-                </QuickStartHighlight>
-              )}
-            </StyledSpaced>
-          </>
-        )}
-      </StyledContainer>
-    </StickyHeader>
+                  <Plus />
+                </StyledIconButton>
+              </QuickStartHighlight>
+            )}
+          </StyledSpaced>
+        </>
+      )}
+    </StyledContainer>
   );
 };

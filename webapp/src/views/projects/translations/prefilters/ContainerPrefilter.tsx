@@ -7,8 +7,6 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import React from 'react';
 
 const StyledContainer = styled('div')`
-  margin-top: -4px;
-  margin-bottom: 12px;
   background: ${({ theme }) => theme.palette.revisionFilterBanner.background};
   padding: 0px 4px 0px 14px;
   border-radius: 4px;
@@ -56,7 +54,7 @@ export const PrefilterContainer = ({
   icon,
   closeButton,
 }: Props) => {
-  const { clear } = usePrefilter();
+  const prefilter = usePrefilter();
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isSmall = useMediaQuery(
@@ -72,7 +70,7 @@ export const PrefilterContainer = ({
       {!isSmall && content}
       <StyledClear>
         {closeButton ?? (
-          <Button size="small" onClick={clear} color="inherit">
+          <Button size="small" onClick={prefilter?.clear} color="inherit">
             <T keyName="activity_filter_indicator_clear" />
           </Button>
         )}

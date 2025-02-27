@@ -57,7 +57,7 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
 
   const [_, setTaskDetail] = useUrlSearchState(QUERY.TRANSLATIONS_TASK_DETAIL);
 
-  const { clear } = usePrefilter();
+  const prefilter = usePrefilter();
 
   function handleShowDetails() {
     setTaskDetail(String(taskNumber));
@@ -104,7 +104,7 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
         }
         closeButton={
           <Tooltip title={t('task_filter_close_tooltip')} disableInteractive>
-            <IconButton size="small" onClick={clear}>
+            <IconButton size="small" onClick={prefilter?.clear}>
               <X />
             </IconButton>
           </Tooltip>

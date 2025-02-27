@@ -13,14 +13,11 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import { StickyHeader } from './StickyHeader';
 
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: start;
-  padding-bottom: 8px;
-  padding-top: 13px;
 `;
 
 const StyledSpaced = styled('div')`
@@ -65,72 +62,70 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   };
 
   return (
-    <StickyHeader height={55}>
-      <StyledContainer>
-        <StyledSpaced>
-          <StyledTranslationsSearchField
-            value={search || ''}
-            onSearchChange={setSearch}
-            label={null}
-            variant="outlined"
-            placeholder={t('standard_search_label')}
-          />
-          <TranslationFilters
-            selectedLanguages={selectedLanguagesMapped}
-            value={filters}
-            onChange={setFilters}
-          />
-        </StyledSpaced>
+    <StyledContainer>
+      <StyledSpaced>
+        <StyledTranslationsSearchField
+          value={search || ''}
+          onSearchChange={setSearch}
+          label={null}
+          variant="outlined"
+          placeholder={t('standard_search_label')}
+        />
+        <TranslationFilters
+          selectedLanguages={selectedLanguagesMapped}
+          value={filters}
+          onChange={setFilters}
+        />
+      </StyledSpaced>
 
-        <Box overflow="hidden" position="relative">
-          {taskPrefilter && (
-            <PrefilterTaskShowDoneSwitch
-              sx={{
-                ml: 0,
-              }}
-            />
-          )}
-        </Box>
-
-        <StyledSpaced>
-          <LanguagesSelect
-            onChange={selectLanguages}
-            value={selectedLanguages || []}
-            languages={languages || []}
-            context="translations"
+      <Box overflow="hidden" position="relative">
+        {taskPrefilter && (
+          <PrefilterTaskShowDoneSwitch
+            sx={{
+              ml: 0,
+            }}
           />
-          <ButtonGroup>
-            <StyledToggleButton
-              color={view === 'LIST' ? 'primary' : 'default'}
-              onClick={() => changeView('LIST')}
-              data-cy="translations-view-list-button"
+        )}
+      </Box>
+
+      <StyledSpaced>
+        <LanguagesSelect
+          onChange={selectLanguages}
+          value={selectedLanguages || []}
+          languages={languages || []}
+          context="translations"
+        />
+        <ButtonGroup>
+          <StyledToggleButton
+            color={view === 'LIST' ? 'primary' : 'default'}
+            onClick={() => changeView('LIST')}
+            data-cy="translations-view-list-button"
+          >
+            <LayoutLeft />
+          </StyledToggleButton>
+          <StyledToggleButton
+            color={view === 'TABLE' ? 'primary' : 'default'}
+            onClick={() => changeView('TABLE')}
+            data-cy="translations-view-table-button"
+          >
+            <LayoutGrid02 />
+          </StyledToggleButton>
+        </ButtonGroup>
+
+        {canCreateKeys && (
+          <QuickStartHighlight itemKey="add_key">
+            <Button
+              startIcon={<Plus width={19} height={19} />}
+              color="primary"
+              variant="contained"
+              onClick={handleAddTranslation}
+              data-cy="translations-add-button"
             >
-              <LayoutLeft />
-            </StyledToggleButton>
-            <StyledToggleButton
-              color={view === 'TABLE' ? 'primary' : 'default'}
-              onClick={() => changeView('TABLE')}
-              data-cy="translations-view-table-button"
-            >
-              <LayoutGrid02 />
-            </StyledToggleButton>
-          </ButtonGroup>
-
-          {canCreateKeys && (
-            <QuickStartHighlight itemKey="add_key">
-              <Button
-                startIcon={<Plus width={19} height={19} />}
-                color="primary"
-                variant="contained"
-                onClick={handleAddTranslation}
-                data-cy="translations-add-button"
-              >
-                <T keyName="key_add" />
-              </Button>
-            </QuickStartHighlight>
-          )}
-        </StyledSpaced>
-      </StyledContainer>
-    </StickyHeader>
+              <T keyName="key_add" />
+            </Button>
+          </QuickStartHighlight>
+        )}
+      </StyledSpaced>
+    </StyledContainer>
   );
 };

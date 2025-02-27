@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { styled } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
 
 import {
   useHeaderNsActions,
@@ -9,13 +9,11 @@ import { NamespaceContent } from '../Namespace/NamespaceContent';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledContainer = styled('div')`
-  position: sticky;
   box-sizing: border-box;
-  margin: -12px -5px -10px -5px;
+  margin-bottom: -10px;
   margin-left: ${({ theme }) => theme.spacing(-2)};
   margin-right: ${({ theme }) => theme.spacing(-2)};
   background: ${({ theme }) => theme.palette.background.default};
-  z-index: ${({ theme }) => theme.zIndex.appBar + 1};
   transition: transform 0.2s ease-in-out;
   overflow: visible;
   display: grid;
@@ -23,6 +21,7 @@ const StyledContainer = styled('div')`
 
 const StyledControls = styled('div')`
   padding: ${({ theme }) => theme.spacing(0, 1.5)};
+  padding-top: 5px;
   background: ${({ theme }) => theme.palette.background.default};
 `;
 
@@ -38,6 +37,7 @@ const StyledNs = styled('div')`
 const StyledShadow = styled('div')`
   background: ${({ theme }) => theme.palette.divider1};
   height: 1px;
+  margin-bottom: 10px;
   position: sticky;
   z-index: ${({ theme }) => theme.zIndex.appBar};
   margin-left: ${({ theme }) => theme.spacing(-1)};
@@ -51,13 +51,19 @@ const StyledShadow = styled('div')`
 
 type Props = {
   height: number;
+  marginBottom?: number;
 };
 
-export const StickyHeader: React.FC<Props> = ({ height, children }) => {
+export const StickyHeader: React.FC<Props> = ({
+  height,
+  children,
+  marginBottom,
+}) => {
   const { setFloatingBannerHeight } = useHeaderNsActions();
   const topNamespace = useHeaderNsContext((c) => c.topNamespace);
   const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
   const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);
+  const theme = useTheme();
 
   useEffect(() => {
     setFloatingBannerHeight(height);
@@ -69,6 +75,9 @@ export const StickyHeader: React.FC<Props> = ({ height, children }) => {
         style={{
           top: 50 + topBannerHeight,
           height: height + 5,
+          position: 'sticky',
+          zIndex: theme.zIndex.appBar + 1,
+          marginBottom,
           transform: topBarHidden
             ? `translate(0px, -55px)`
             : `translate(0px, 0px)`,

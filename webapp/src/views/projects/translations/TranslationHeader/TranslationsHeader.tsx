@@ -1,4 +1,4 @@
-import { Typography, Dialog, useMediaQuery, styled } from '@mui/material';
+import { Typography, Dialog, useMediaQuery, styled, Box } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -12,9 +12,11 @@ import { useState } from 'react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { SelectAllCheckbox } from '../BatchOperations/SelectAllCheckbox';
+import { StickyHeader } from './StickyHeader';
+import { Prefilter } from '../prefilters/Prefilter';
 
 const StyledResultCount = styled('div')`
-  padding: 9px 0px 4px 0px;
+  padding: 0px 0px 4px 0px;
   margin-left: 15px;
   display: flex;
   align-items: center;
@@ -26,6 +28,7 @@ const StyledDialog = styled(Dialog)`
 `;
 
 export const TranslationsHeader = () => {
+  const prefilter = useTranslationsSelector((c) => c.prefilter);
   const [newCreateDialog, setNewCreateDialog] = useUrlSearchState('create', {
     defaultVal: 'false',
   });
@@ -61,12 +64,32 @@ export const TranslationsHeader = () => {
     }
   }
 
+  const controls = isSmall ? (
+    <Box sx={{ padding: '4px 0px' }}>
+      <TranslationControlsCompact onDialogOpen={onDialogOpen} />
+    </Box>
+  ) : (
+    <Box sx={{ padding: '8px 0px' }}>
+      <TranslationControls onDialogOpen={onDialogOpen} />
+    </Box>
+  );
+
   return (
     <>
-      {isSmall ? (
-        <TranslationControlsCompact onDialogOpen={onDialogOpen} />
+      {prefilter && (
+        <>
+          <StickyHeader height={48}>
+            <Box sx={{ paddingTop: '4px', paddingX: 0.5 }}>
+              <Prefilter prefilter={prefilter} />
+            </Box>
+          </StickyHeader>
+        </>
+      )}
+
+      {!prefilter ? (
+        <StickyHeader height={isSmall ? 46 : 55}>{controls}</StickyHeader>
       ) : (
-        <TranslationControls onDialogOpen={onDialogOpen} />
+        <Box sx={{ marginX: -0.5 }}>{controls}</Box>
       )}
       {dataReady && translationsTotal ? (
         <StyledResultCount>
