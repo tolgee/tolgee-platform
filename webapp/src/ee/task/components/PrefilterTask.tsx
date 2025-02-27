@@ -21,6 +21,7 @@ import { TaskLabel } from './TaskLabel';
 import { PrefilterTaskProps } from '../../../eeSetup/EeModuleType';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 import { QUERY } from 'tg.constants/links';
+import { PrefilterTaskHideDoneSwitch } from './PrefilterTaskHideDoneSwitch';
 
 const StyledWarning = styled('div')`
   display: flex;
@@ -124,13 +125,16 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
               </IconButton>
             </Tooltip>
             {!isActive && <TaskState state={data.state} />}
-            {alert ? (
-              <StyledWarning>
-                <AlertCircle width={20} height={20} />
-                <Box>{alert}</Box>
-              </StyledWarning>
-            ) : null}
           </Box>
+        }
+        controls={<PrefilterTaskHideDoneSwitch />}
+        alert={
+          Boolean(alert) && (
+            <StyledWarning>
+              <AlertCircle width={20} height={20} />
+              <Box>{alert}</Box>
+            </StyledWarning>
+          )
         }
       />
     </>

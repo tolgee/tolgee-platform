@@ -8,14 +8,7 @@ import {
   LayoutGrid02,
   LayoutLeft,
 } from '@untitled-ui/icons-react';
-import {
-  Badge,
-  Box,
-  Button,
-  ButtonGroup,
-  IconButton,
-  styled,
-} from '@mui/material';
+import { Badge, Button, ButtonGroup, IconButton, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -25,7 +18,6 @@ import { getActiveFilters } from 'tg.component/translation/translationFilters/ge
 import { FiltersMenu } from 'tg.component/translation/translationFilters/FiltersMenu';
 import { useFiltersContent } from 'tg.component/translation/translationFilters/useFiltersContent';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
-import { PrefilterTaskShowDoneSwitch } from 'tg.ee';
 
 import {
   useTranslationsActions,
@@ -35,7 +27,7 @@ import { ViewMode } from '../context/types';
 
 const StyledContainer = styled('div')`
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   margin-left: ${({ theme }) => theme.spacing(-1)};
   margin-right: ${({ theme }) => theme.spacing(-2)};
@@ -109,9 +101,6 @@ export const TranslationControlsCompact: React.FC<Props> = ({
     setSearch(value);
   };
   const filters = useTranslationsSelector((c) => c.filters);
-  const taskPrefilter = useTranslationsSelector(
-    (c) => c.prefilter?.task !== undefined
-  );
   const activeFilters = getActiveFilters(filters);
   const { setFilters } = useTranslationsActions();
   const selectedLanguagesMapped =
@@ -186,16 +175,6 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               onChange={setFilters}
             />
           </StyledSpaced>
-
-          <Box overflow="hidden" position="relative">
-            {taskPrefilter && (
-              <PrefilterTaskShowDoneSwitch
-                sx={{
-                  ml: 0,
-                }}
-              />
-            )}
-          </Box>
 
           <StyledSpaced>
             <StyledIconButton

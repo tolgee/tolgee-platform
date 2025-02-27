@@ -1,5 +1,5 @@
 import { LayoutGrid02, LayoutLeft, Plus } from '@untitled-ui/icons-react';
-import { Box, Button, ButtonGroup, styled } from '@mui/material';
+import { Button, ButtonGroup, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
@@ -7,7 +7,6 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
-import { PrefilterTaskShowDoneSwitch } from 'tg.ee';
 
 import {
   useTranslationsActions,
@@ -16,7 +15,7 @@ import {
 
 const StyledContainer = styled('div')`
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: start;
 `;
 
@@ -53,9 +52,6 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { setFilters } = useTranslationsActions();
   const selectedLanguagesMapped =
     allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
-  const taskPrefilter = useTranslationsSelector(
-    (c) => c.prefilter?.task !== undefined
-  );
 
   const handleAddTranslation = () => {
     onDialogOpen();
@@ -77,16 +73,6 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           onChange={setFilters}
         />
       </StyledSpaced>
-
-      <Box overflow="hidden" position="relative">
-        {taskPrefilter && (
-          <PrefilterTaskShowDoneSwitch
-            sx={{
-              ml: 0,
-            }}
-          />
-        )}
-      </Box>
 
       <StyledSpaced>
         <LanguagesSelect

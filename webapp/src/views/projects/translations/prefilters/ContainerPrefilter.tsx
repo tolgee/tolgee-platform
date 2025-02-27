@@ -1,5 +1,5 @@
 import { FilterLines } from '@untitled-ui/icons-react';
-import { Button, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, styled, useMediaQuery } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { usePrefilter } from './usePrefilter';
@@ -46,6 +46,8 @@ type Props = {
   content: React.ReactNode;
   icon?: React.ReactNode;
   closeButton?: React.ReactNode;
+  controls?: React.ReactNode;
+  alert?: React.ReactNode;
 };
 
 export const PrefilterContainer = ({
@@ -53,6 +55,8 @@ export const PrefilterContainer = ({
   content,
   icon,
   closeButton,
+  controls,
+  alert,
 }: Props) => {
   const prefilter = usePrefilter();
 
@@ -67,7 +71,11 @@ export const PrefilterContainer = ({
         {icon ?? <FilterLines />}
         <StyledLabelText>{title}</StyledLabelText>
       </StyledLabel>
-      {!isSmall && content}
+      <Box display="flex" gap={0.5}>
+        {!isSmall && content}
+        {controls}
+        {!isSmall && alert}
+      </Box>
       <StyledClear>
         {closeButton ?? (
           <Button size="small" onClick={prefilter?.clear} color="inherit">
