@@ -1,9 +1,18 @@
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import { visitTranslations } from '../../common/translations';
-import { gcy, getPopover, selectInSelect } from '../../common/shared';
+import { toggleLang, visitTranslations } from '../../common/translations';
+import {
+  assertMessage,
+  assertMultiselect,
+  gcy,
+  getPopover,
+  selectInSelect,
+} from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 import { translationsTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
+import {
+  login,
+  setTranslationsViewLanguagesLimit,
+} from '../../common/apiCalls/common';
 
 const TIMEOUT_ONE_MINUTE = 1000 * 60;
 
@@ -32,6 +41,21 @@ describe('Translations Base', () => {
 
   after(() => {
     translationsTestData.cleanupForFilters();
+  });
+
+  it('allows to select max languages', () => {
+    toggleLang('German');
+    setTranslationsViewLanguagesLimit(1);
+    visit();
+    toggleLang('German');
+    assertMessage('Cannot select more than 1 languages');
+    setTranslationsViewLanguagesLimit(3);
+    visit();
+    toggleLang('German');
+    assertMultiselect(cy.gcy('translations-language-select-form-control'), [
+      'German',
+      'English',
+    ]);
   });
 
   it(`filters work correctly`, () => {

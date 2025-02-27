@@ -126,4 +126,8 @@ open class TolgeeProperties(
   var slack: SlackProperties = SlackProperties(),
   @DocProperty(hidden = true)
   var plausible: PlausibleProperties = PlausibleProperties(),
+  @DocProperty(
+    description = "Maximum amount of languages that can be selected in the Translations view",
+  )
+  var translationsViewLanguagesLimit: Int = 10,
 )

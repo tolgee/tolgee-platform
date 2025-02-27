@@ -3693,6 +3693,8 @@ export interface components {
       screenshotsUrl: string;
       showVersion: boolean;
       slack: components["schemas"]["SlackDTO"];
+      /** Format: int32 */
+      translationsViewLanguagesLimit: number;
       userCanCreateOrganizations: boolean;
       userSourceField: boolean;
       version: string;
