@@ -33,6 +33,9 @@ export const FloatingToolsPanel = ({ width }: Props) => {
   const languageTag = useTranslationsSelector((c) => c.cursor?.language);
   const languages = useTranslationsSelector((c) => c.languages);
   const [fixedTopDistance, setFixedTopDistance] = useState(0);
+  const firstTranslationHasNamespace = useTranslationsSelector((c) =>
+    Boolean(c.translations?.[0].keyNamespace)
+  );
 
   useEffect(() => {
     function recalculate() {
@@ -72,6 +75,7 @@ export const FloatingToolsPanel = ({ width }: Props) => {
           floatingBannerHeight
         )}px + 100vh)`,
         width,
+        marginTop: firstTranslationHasNamespace ? 7 : 0,
       }}
       ref={containerRef}
     >
