@@ -12,7 +12,6 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
