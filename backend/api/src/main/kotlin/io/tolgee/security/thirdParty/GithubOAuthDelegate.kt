@@ -5,11 +5,13 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.model.SsoTenant_.domain
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
+import io.tolgee.service.TenantService
 import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -30,6 +32,7 @@ class GithubOAuthDelegate(
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
   private val authProviderChangeService: AuthProviderChangeService,
+  private val tenantService: TenantService,
 ) : ThirdPartyAuthDelegate {
   private val githubConfigurationProperties: GithubAuthenticationProperties = properties.authentication.github
 
@@ -99,6 +102,13 @@ class GithubOAuthDelegate(
     throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
   }
 
+  private fun checkNotManagedByOrganization(domain: String?) {
+    if (tenantService.getEnabledConfigByDomainOrNull(domain) != null) {
+      // There is sso configured for the domain - don't allow sign up
+      throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
+    }
+  }
+
   fun findOrCreateAccount(
     githubEmail: String,
     userResponse: GithubUserResponse,
@@ -106,7 +116,7 @@ class GithubOAuthDelegate(
   ): UserAccount {
     val userAccount = userAccountService.findByThirdParty(ThirdPartyAuthType.GITHUB, userResponse.id!!)
 
-    authProviderChangeService.initiate(
+    authProviderChangeService.tryInitiate(
       userAccount,
       githubEmail,
       AuthProviderChangeData(
@@ -131,6 +141,7 @@ class GithubOAuthDelegate(
     newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GITHUB
     newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
 
+    checkNotManagedByOrganization(newUserAccount.domain)
     signUpService.signUp(newUserAccount, invitationCode, null)
 
     return newUserAccount

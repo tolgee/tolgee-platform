@@ -248,7 +248,7 @@ export const useAuthService = (
             if (error.code === 'third_party_switch_initiated') {
               history.replace(LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build());
             }
-            if (error.code === 'sso_login_forced_for_this_account') {
+            if (error.code === 'use_sso_for_authentication_instead') {
               loginRedirectSso(error.params?.[0]);
             }
           },
@@ -279,7 +279,7 @@ export const useAuthService = (
             if (error.code === 'invitation_code_does_not_exist_or_expired') {
               setInvitationCode(undefined);
             }
-            if (error.code === 'sso_login_forced_for_this_account') {
+            if (error.code === 'use_sso_for_authentication_instead') {
               loginRedirectSso(error.params?.[0]);
             }
           },
