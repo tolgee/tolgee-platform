@@ -9,7 +9,7 @@ import jakarta.persistence.MapsId
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
 
-@Entity()
+@Entity
 class S3ContentStorageConfig(
   @MapsId
   @JoinColumn(name = "content_storage_id")
@@ -34,4 +34,6 @@ class S3ContentStorageConfig(
 
   @field:NotBlank
   override var signingRegion: String = ""
+
+  override var path: String = ""
 }
