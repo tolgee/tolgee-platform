@@ -91,10 +91,6 @@ const SsoMigrationView: React.FC = () => {
       <StyledContainer>
         <StyledContent>
           <StyledPaper>
-            <Typography variant="h3" sx={{ textAlign: 'center' }}>
-              <T keyName="sso_migration_title" />
-            </Typography>
-
             <Box display="grid" gap="24px" justifyItems="center">
               <Box
                 textAlign="center"
