@@ -15,7 +15,9 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.SsoTenant
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.service.TenantService
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/sso"])
 @Tag(name = "Sso Tenant", description = "SSO Tenant configuration authentication")
 class SsoProviderController(
+  private val authenticationFacade: AuthenticationFacade,
   private val tenantService: TenantService,
   private val ssoTenantAssembler: SsoTenantAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
@@ -55,8 +58,11 @@ class SsoProviderController(
       throw PermissionException(Message.SSO_DOMAIN_NOT_ALLOWED)
     }
 
+    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val organization = organizationService.get(organizationId)
-    return ssoTenantAssembler.toModel(tenantService.createOrUpdate(request.toDto(), organization).toDto())
+    return ssoTenantAssembler.toModel(
+      tenantService.createOrUpdate(request.toDto(), organization, allowChangeDomain = isAdmin).toDto(),
+    )
   }
 
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)

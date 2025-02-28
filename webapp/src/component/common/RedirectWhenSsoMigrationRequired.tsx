@@ -1,14 +1,10 @@
 import { Redirect } from 'react-router-dom';
 import { GlobalLoading } from 'tg.component/GlobalLoading';
 import { LINKS } from 'tg.constants/links';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useIsSsoMigrationRequired } from 'tg.globalContext/helpers';
 
 export const RedirectWhenSsoMigrationRequired: React.FC = ({ children }) => {
-  const shouldRedirect = useGlobalContext(
-    (c) =>
-      c.initialData.ssoInfo?.force &&
-      c.initialData.userInfo?.accountType !== 'MANAGED'
-  );
+  const shouldRedirect = useIsSsoMigrationRequired();
 
   if (shouldRedirect) {
     return (

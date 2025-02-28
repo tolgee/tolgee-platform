@@ -8,6 +8,7 @@ import { messageService } from 'tg.service/MessageService';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { Switch } from 'tg.component/common/form/fields/Switch';
+import { useIsAdmin } from 'tg.globalContext/helpers';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -27,6 +28,7 @@ type FormValues = {
 
 export function CreateProviderSsoForm({ data, disabled }) {
   const organization = useOrganization();
+  const isAdmin = useIsAdmin();
   const { t } = useTranslate();
   const initialValues: FormValues = {
     force: data?.force ?? false,
@@ -37,20 +39,24 @@ export function CreateProviderSsoForm({ data, disabled }) {
     domain: data?.domain ?? '',
   };
 
-  if (!organization) {
-    return null;
-  }
-
   const providersCreate = useApiMutation({
     url: `/v2/organizations/{organizationId}/sso`,
     method: 'put',
     invalidatePrefix: '/v2/organizations',
   });
 
+  if (!organization) {
+    return null;
+  }
+
   return (
     <StandardForm
       initialValues={initialValues}
-      validationSchema={Validation.SSO_PROVIDER(t)}
+      validationSchema={
+        disabled
+          ? Validation.SSO_PROVIDER_DISABLED(t)
+          : Validation.SSO_PROVIDER_ENABLED(t)
+      }
       onSubmit={async (data) => {
         providersCreate.mutate(
           {
@@ -77,7 +83,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
       </StyledInputFields>
       <StyledInputFields>
         <TextField
-          disabled={disabled}
+          disabled={disabled || !isAdmin}
           variant="standard"
           name="domain"
           label={<T keyName="organization_sso_domain_name" />}

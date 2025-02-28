@@ -21,6 +21,13 @@ export const useEmailAwaitingVerification = () =>
 export const useIsAdmin = () =>
   useGlobalContext((c) => c.initialData.userInfo?.globalServerRole === 'ADMIN');
 
+export const useIsSsoMigrationRequired = () =>
+  useGlobalContext(
+    (c) =>
+      c.initialData.ssoInfo?.force &&
+      c.initialData.userInfo?.accountType !== 'MANAGED'
+  );
+
 export const usePreferredOrganization = () => {
   const { updatePreferredOrganization } = useGlobalActions();
   const preferredOrganization = useGlobalContext(

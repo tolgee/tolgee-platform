@@ -12,11 +12,8 @@ import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import React from 'react';
 import { Key02 } from '@untitled-ui/icons-react';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
-import { useUser } from 'tg.globalContext/helpers';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { useIsSsoMigrationRequired, useUser } from 'tg.globalContext/helpers';
 
 export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
 
@@ -48,11 +45,7 @@ const SsoMigrationView: React.FC = () => {
   const { useSsoAuthLinkByDomain, refetchInitialData } = useGlobalActions();
   const user = useUser();
 
-  const migrationRequired = useGlobalContext(
-    (c) =>
-      c.initialData.ssoInfo?.force &&
-      c.initialData.userInfo?.accountType !== 'MANAGED'
-  );
+  const migrationRequired = useIsSsoMigrationRequired();
 
   const history = useHistory();
   const { t } = useTranslate();

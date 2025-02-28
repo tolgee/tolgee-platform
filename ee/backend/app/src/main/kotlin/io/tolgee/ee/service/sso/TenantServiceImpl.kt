@@ -7,6 +7,7 @@ import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.ee.repository.TenantRepository
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
 import io.tolgee.service.TenantService
@@ -65,8 +66,12 @@ class TenantServiceImpl(
   override fun createOrUpdate(
     request: SsoTenantDto,
     organization: Organization,
+    allowChangeDomain: Boolean,
   ): SsoTenant {
     val tenant = findTenant(organization.id) ?: SsoTenant()
+    if (!allowChangeDomain && tenant.domain != request.domain) {
+      throw PermissionException(Message.SSO_DOMAIN_NOT_ALLOWED)
+    }
     setTenantsFields(tenant, request, organization)
     return self.save(tenant)
   }
