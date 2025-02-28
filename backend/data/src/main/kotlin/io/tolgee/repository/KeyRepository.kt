@@ -41,7 +41,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, k.isPlural)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
@@ -131,7 +131,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, k.isPlural)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
@@ -238,7 +238,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, k.isPlural)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns

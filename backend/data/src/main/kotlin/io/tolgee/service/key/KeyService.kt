@@ -23,6 +23,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.key.resolvableImport.ResolvableImporter
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.translation.TranslationService
@@ -370,7 +371,7 @@ class KeyService(
     projectEntity: Project,
   ): KeyImportResolvableResult {
     val importer =
-      ResolvingKeyImporter(
+      ResolvableImporter(
         applicationContext = applicationContext,
         keysToImport = keys,
         projectEntity = projectEntity,

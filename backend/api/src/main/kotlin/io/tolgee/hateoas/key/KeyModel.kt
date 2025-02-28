@@ -21,4 +21,6 @@ open class KeyModel(
   val description: String?,
   @Schema(description = "Custom values of the key")
   val custom: Map<String, Any?>?,
+  @Schema(description = "If the translations of this key are different for each plural form")
+  val isPlural: Boolean,
 ) : RepresentationModel<KeyModel>(), Serializable
