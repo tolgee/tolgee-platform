@@ -44,7 +44,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslate();
 
-  useWindowTitle(t('accept_auth_provider_change_title'));
+  useWindowTitle(t('auth_provider_migration_title'));
 
   const { handleAfterLogin } = useGlobalActions();
   const isSsoMigrationRequired = useIsSsoMigrationRequired();
@@ -129,39 +129,87 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     );
   }
 
-  if (!authProviderChangeInfo.data || authProviderCurrentInfo.isLoading) {
-    return <FullPageLoading />;
-  }
-
-  let titleText: string;
-  let infoText: React.ReactNode;
-
-  const accountType = authProviderChangeInfo.data.accountType;
-  const authType = authProviderChangeInfo.data.authType;
+  const accountType = authProviderChangeInfo.data?.accountType;
+  const authType = authProviderChangeInfo.data?.authType ?? 'NONE';
   const authTypeOld = authProviderCurrentInfo.data?.authType ?? 'NONE';
-  const ssoDomain = authProviderChangeInfo.data.ssoDomain;
+  const ssoDomain = authProviderChangeInfo.data?.ssoDomain ?? '';
   const params = {
     authType,
     authTypeOld,
     ssoDomain,
     b: <b />,
+    br: <br />,
   };
 
   const willBeManaged = accountType === 'MANAGED';
 
-  if (willBeManaged) {
-    titleText = t('accept_auth_provider_change_managed_sso_title');
-    infoText = (
-      <T
-        keyName="accept_auth_provider_change_description_managed_sso"
-        params={params}
-      />
-    );
-  } else {
-    titleText = t('accept_auth_provider_change_title');
-    infoText = (
-      <T keyName="accept_auth_provider_change_description" params={params} />
-    );
+  let titleText: React.ReactNode | null;
+  let infoText: React.ReactNode;
+
+  switch (true) {
+    case willBeManaged && isSsoMigrationRequired:
+      // Migrating to SSO; migration is forced
+      titleText = null;
+      infoText = (
+        <T
+          keyName="accept_auth_provider_change_description_managed_sso"
+          params={params}
+        />
+      );
+      break;
+    case willBeManaged:
+      // Migrating to SSO; migration is voluntary
+      titleText = null;
+      infoText = (
+        <T
+          keyName="accept_auth_provider_change_description_managed_sso_optional"
+          params={params}
+        />
+      );
+      break;
+    case authTypeOld === 'NONE':
+      // Currently user has no third-party provider
+      titleText = (
+        <T
+          keyName="accept_auth_provider_change_title_no_existing_provider"
+          params={params}
+        />
+      );
+      infoText = (
+        <T
+          keyName="accept_auth_provider_change_description_no_existing_provider"
+          params={params}
+        />
+      );
+      break;
+    case authType === 'NONE':
+      // User is removing third-party provider
+      titleText = (
+        <T
+          keyName="accept_auth_provider_change_title_remove_existing_provider"
+          params={params}
+        />
+      );
+      infoText = (
+        <T
+          keyName="accept_auth_provider_change_description_remove_existing_provider"
+          params={params}
+        />
+      );
+      break;
+    default:
+      // From one third-party provider to another third-party provider
+      titleText = (
+        <T keyName="accept_auth_provider_change_title" params={params} />
+      );
+      infoText = (
+        <T keyName="accept_auth_provider_change_description" params={params} />
+      );
+      break;
+  }
+
+  if (!authProviderChangeInfo.data || authProviderCurrentInfo.isLoading) {
+    return <FullPageLoading />;
   }
 
   return (
@@ -169,9 +217,11 @@ const AcceptAuthProviderChangeView: React.FC = () => {
       <StyledContainer>
         <StyledContent>
           <StyledPaper>
-            <Typography variant="h3" sx={{ textAlign: 'center' }}>
-              {titleText}
-            </Typography>
+            {titleText && (
+              <Typography variant="h3" sx={{ textAlign: 'center' }}>
+                {titleText}
+              </Typography>
+            )}
 
             <Box display="grid" gap="24px" justifyItems="center">
               <Box
