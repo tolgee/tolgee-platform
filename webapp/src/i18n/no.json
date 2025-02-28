@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "Konverter",
-  "accept_auth_provider_change_decline": "Minn meg senere",
-  "accept_auth_provider_change_description": "Du prøvde nylig å logge inn med en annen tredjeparts autentiseringsleverandør (<b>{authType}</b>). Du kan nå velge å enten erstatte din eksisterende autentiseringsleverandør (<b>{authTypeOld}</b>) med en ny en (<b>{authType}</b>) eller beholde den gamle. Hvis du godtar denne endringen, vil du ikke kunne logge inn med din gamle autentiseringsleverandør (<b>{authTypeOld}</b>) lenger!",
+  "accept_auth_provider_change_accept_non_managed": "Endre",
+  "accept_auth_provider_change_decline": "Avbryt",
+  "accept_auth_provider_change_description": "Vil du endre autentiseringsleverandøren din til (<b>{authType}</b>)? Hvis du godtar denne endringen, vil du ikke kunne logge inn med din gamle autentiseringsleverandør (<b>{authTypeOld}</b>) lenger!",
   "accept_auth_provider_change_description_managed": "Du prøvde nylig å logge inn med en organisasjonsstyrt autentiseringsleverandør (<b>{authType}</b>). Du kan nå velge å enten endre kontoen din til å bli styrt av organisasjonen og enten erstatte din eksisterende autentiseringsleverandør (<b>{authTypeOld}</b>) med en ny en (<b>{authType}</b>) eller beholde den gamle autentiseringsleverandøren og la kontoen bli styrt av deg. Hvis du godtar denne endringen, vil organisasjonen styre kontoen din, og du vil ikke kunne logge inn med din gamle autentiseringsleverandør (<b>{authTypeOld}</b>), og du vil ikke kunne endre autentiseringsleverandøren din lenger; du vil heller ikke kunne logge inn med brukernavn og passord lenger!",
   "accept_auth_provider_change_description_managed_sso": "Din organisasjon (<b>{ssoDomain}</b>) har aktivert SSO-autentisering. Ved å klikke på <b>Konverter</b>-knappen nedenfor, vil kontoen din bli konvertert til en konto administrert av din organisasjon. Du vil kun kunne logge inn ved hjelp av SSO; du vil ikke lenger kunne logge inn ved hjelp av noen annen autentiseringsmetode.",
   "accept_auth_provider_change_learn_more": "Lær mer i Tolgee-dokumentasjonen",
@@ -286,6 +287,7 @@
   "assignee_select_unassigned": "Ikke tildelt",
   "authentication_cancelled": "Autentisering avbrutt",
   "auth_provider_change_accepted": "Autentiseringsleverandør endret vellykket",
+  "auth_provider_change_rejected": "Endring av autentiseringsleverandør avvist",
   "automation_view_title": "Utviklerinnstillinger",
   "back_to_editing": "Tilbake til redigering",
   "bad_credentials": "Ugyldig påloggingsinformasjon",

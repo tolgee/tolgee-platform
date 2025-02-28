@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "Convertiți",
-  "accept_auth_provider_change_decline": "Reamintiți-mi mai târziu",
-  "accept_auth_provider_change_description": "Ați încercat recent să vă conectați utilizând un alt furnizor de autentificare terță parte (<b>{authType}</b>). Acum puteți decide fie să înlocuiți furnizorul de autentificare existent (<b>{authTypeOld}</b>) cu unul nou (<b>{authType}</b>), fie să păstrați pe cel vechi. Dacă acceptați această schimbare, nu veți mai putea să vă conectați utilizând vechiul furnizor de autentificare (<b>{authTypeOld}</b>)!",
+  "accept_auth_provider_change_accept_non_managed": "Schimbare",
+  "accept_auth_provider_change_decline": "Anulați",
+  "accept_auth_provider_change_description": "Doriți să schimbați furnizorul de autentificare în (<b>{authType}</b>)? Dacă acceptați această schimbare, nu veți mai putea să vă autentificați folosind vechiul furnizor de autentificare (<b>{authTypeOld}</b>)!",
   "accept_auth_provider_change_description_managed": "Ați încercat recent să vă conectați utilizând un furnizor de autentificare gestionat de organizație (<b>{authType}</b>). Acum puteți decide fie să schimbați contul pentru a fi gestionat de organizație și fie să înlocuiți furnizorul de autentificare existent (<b>{authTypeOld}</b>) cu unul nou (<b>{authType}</b>), fie să păstrați vechiul furnizor de autentificare și să lăsați contul să fie gestionat de dumneavoastră. Dacă acceptați această schimbare, organizația vă va gestiona contul și nu veți mai putea să vă conectați utilizând vechiul furnizor de autentificare (<b>{authTypeOld}</b>), și nu veți mai putea schimba furnizorul de autentificare; de asemenea, nu veți mai putea să vă conectați utilizând numele de utilizator și parola!",
   "accept_auth_provider_change_description_managed_sso": "Organizația dvs. (<b>{ssoDomain}</b>) a activat autentificarea SSO. Făcând clic pe butonul <b>Convertiți</b> de mai jos, contul dvs. va fi convertit într-un cont gestionat de organizația dvs. Veți putea să vă conectați doar folosind SSO; nu veți mai putea să vă conectați folosind nicio altă metodă de autentificare.",
   "accept_auth_provider_change_learn_more": "Aflați mai multe în documentația Tolgee",
@@ -287,6 +288,7 @@
   "assignee_select_unassigned": "Neatribuit",
   "authentication_cancelled": "Autentificare anulată",
   "auth_provider_change_accepted": "Furnizorul de autentificare a fost schimbat cu succes",
+  "auth_provider_change_rejected": "Schimbarea furnizorului de autentificare a fost respinsă",
   "automation_view_title": "Setări dezvoltator",
   "back_to_editing": "Înapoi la editare",
   "bad_credentials": "Credențiale invalide",

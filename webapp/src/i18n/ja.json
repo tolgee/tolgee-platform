@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "変換",
-  "accept_auth_provider_change_decline": "後で通知する",
-  "accept_auth_provider_change_description": "最近、別のサードパーティ認証プロバイダー (<b>{authType}</b>) を使用してログインしようとしました。既存の認証プロバイダー (<b>{authTypeOld}</b>) を新しい認証プロバイダー (<b>{authType}</b>) に変更するか、古い認証プロバイダーを維持するかを決定できます。この変更を受け入れると、古い認証プロバイダー (<b>{authTypeOld}</b>) を使ってログインすることはできなくなります！",
+  "accept_auth_provider_change_accept_non_managed": "変更",
+  "accept_auth_provider_change_decline": "キャンセル",
+  "accept_auth_provider_change_description": "認証プロバイダを (<b>{authType}</b>) に変更しますか？この変更を承認すると、以前の認証プロバイダ (<b>{authTypeOld}</b>) を使用してログインできなくなります！",
   "accept_auth_provider_change_description_managed": "最近、組織が管理する認証プロバイダー (<b>{authType}</b>) を使用してログインしようとしました。アカウントを組織が管理するように変更し、既存の認証プロバイダー (<b>{authTypeOld}</b>) を新しい認証プロバイダー (<b>{authType}</b>) に置き換えるか、古い認証プロバイダーを保持してアカウントを自分で管理するようにするかを決定できます。この変更を承認すると、組織がアカウントを管理することになり、古い認証プロバイダー (<b>{authTypeOld}</b>) を使用してログインすることはできなくなります。また、認証プロバイダーを変更できなくなります。また、ユーザー名とパスワードを使用してログインすることもできなくなります！",
   "accept_auth_provider_change_description_managed_sso": "あなたの組織 (<b>{ssoDomain}</b>) は SSO 認証を有効にしています。下の <b>変換</b> ボタンをクリックすると、あなたのアカウントは組織によって管理されるアカウントに変換されます。SSO を使用してのみログインできるようになります。他の認証方法を使用してログインすることはできなくなります。",
   "accept_auth_provider_change_learn_more": "Tolgeeのドキュメントで詳細を確認",
@@ -287,6 +288,7 @@
   "assignee_select_unassigned": "割り当てなし",
   "authentication_cancelled": "認証がキャンセルされました",
   "auth_provider_change_accepted": "認証プロバイダーが正常に変更されました",
+  "auth_provider_change_rejected": "認証プロバイダの変更が拒否されました",
   "automation_view_title": "開発者向け設定",
   "back_to_editing": "編集に戻る",
   "bad_credentials": "無効な資格情報",

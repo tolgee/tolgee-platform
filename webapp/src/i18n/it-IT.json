@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "Converti",
-  "accept_auth_provider_change_decline": "Ricordamelo più tardi",
-  "accept_auth_provider_change_description": "Di recente hai provato ad accedere utilizzando un diverso provider di autenticazione di terze parti (<b>{authType}</b>). Ora puoi decidere se sostituire il tuo attuale provider di autenticazione (<b>{authTypeOld}</b>) con uno nuovo (<b>{authType}</b>) o mantenere quello vecchio. Se accetti questa modifica, non potrai più accedere utilizzando il tuo vecchio provider di autenticazione (<b>{authTypeOld}</b>)!",
+  "accept_auth_provider_change_accept_non_managed": "Cambia",
+  "accept_auth_provider_change_decline": "Annulla",
+  "accept_auth_provider_change_description": "Vuoi cambiare il tuo provider di autenticazione in (<b>{authType}</b>)? Se accetti questa modifica, non potrai più accedere utilizzando il tuo vecchio provider di autenticazione (<b>{authTypeOld}</b>)!",
   "accept_auth_provider_change_description_managed": "Di recente hai provato ad accedere utilizzando un provider di autenticazione gestito dall'organizzazione (<b>{authType}</b>). Ora puoi decidere se cambiare il tuo account per essere gestito dall'organizzazione e sostituire il tuo attuale provider di autenticazione (<b>{authTypeOld}</b>) con uno nuovo (<b>{authType}</b>) o mantenere il vecchio provider di autenticazione e lasciare che l'account sia gestito da te. Se accetti questa modifica, l'organizzazione gestirà il tuo account e non potrai più accedere utilizzando il tuo vecchio provider di autenticazione (<b>{authTypeOld}</b>), e non potrai più cambiare il tuo provider di autenticazione; inoltre, non potrai più accedere utilizzando nome utente e password!",
   "accept_auth_provider_change_description_managed_sso": "La tua organizzazione (<b>{ssoDomain}</b>) ha abilitato l'autenticazione SSO. Cliccando sul pulsante <b>Converti</b> qui sotto, il tuo account verrà convertito in un account gestito dalla tua organizzazione. Potrai accedere solo utilizzando SSO; non potrai più accedere utilizzando altri metodi di autenticazione.",
   "accept_auth_provider_change_learn_more": "Scopri di più nella documentazione di Tolgee",
@@ -285,6 +286,7 @@
   "assignee_select_unassigned": "Non assegnato",
   "authentication_cancelled": "Autenticazione annullata",
   "auth_provider_change_accepted": "Provider di autenticazione cambiato con successo",
+  "auth_provider_change_rejected": "Cambio del provider di autenticazione rifiutato",
   "automation_view_title": "Impostazioni dello sviluppatore",
   "back_to_editing": "Torna alla modifica",
   "bad_credentials": "Credenziali non valide",

@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "Convertir",
-  "accept_auth_provider_change_decline": "Recordarme más tarde",
-  "accept_auth_provider_change_description": "Recientemente intentó iniciar sesión utilizando un proveedor de autenticación de terceros diferente (<b>{authType}</b>). Ahora puede decidir reemplazar su proveedor de autenticación existente (<b>{authTypeOld}</b>) con uno nuevo (<b>{authType}</b>) o mantener el antiguo. Si acepta este cambio, ¡no podrá iniciar sesión utilizando su antiguo proveedor de autenticación (<b>{authTypeOld}</b>) nunca más!",
+  "accept_auth_provider_change_accept_non_managed": "Cambiar",
+  "accept_auth_provider_change_decline": "Cancelar",
+  "accept_auth_provider_change_description": "¿Desea cambiar su proveedor de autenticación a (<b>{authType}</b>)? Si acepta este cambio, ¡ya no podrá iniciar sesión usando su antiguo proveedor de autenticación (<b>{authTypeOld}</b>)!",
   "accept_auth_provider_change_description_managed": "Recientemente intentó iniciar sesión utilizando un proveedor de autenticación gestionado por la organización (<b>{authType}</b>). Ahora puede decidir cambiar su cuenta para que sea gestionada por la organización y reemplazar su proveedor de autenticación existente (<b>{authTypeOld}</b>) con uno nuevo (<b>{authType}</b>) o mantener el antiguo proveedor de autenticación y dejar que la cuenta sea gestionada por usted. Si acepta este cambio, la organización gestionará su cuenta, y no podrá iniciar sesión utilizando su antiguo proveedor de autenticación (<b>{authTypeOld}</b>), y no podrá cambiar su proveedor de autenticación nunca más; ¡tampoco podrá iniciar sesión utilizando nombre de usuario y contraseña nunca más!",
   "accept_auth_provider_change_description_managed_sso": "Su organización (<b>{ssoDomain}</b>) ha habilitado la autenticación SSO. Al hacer clic en el botón <b>Convertir</b> a continuación, su cuenta se convertirá en una cuenta gestionada por su organización. Solo podrá iniciar sesión utilizando SSO; ya no podrá iniciar sesión utilizando ningún otro método de autenticación.",
   "accept_auth_provider_change_learn_more": "Obtén más información en la documentación de Tolgee",
@@ -286,6 +287,7 @@
   "assignee_select_unassigned": "No asignado",
   "authentication_cancelled": "Autenticación cancelada",
   "auth_provider_change_accepted": "Proveedor de autenticación cambiado con éxito",
+  "auth_provider_change_rejected": "Cambio de proveedor de autenticación rechazado",
   "automation_view_title": "Ajustes del desarrollador",
   "back_to_editing": "Volver a editar",
   "bad_credentials": "Credenciales no válidas",

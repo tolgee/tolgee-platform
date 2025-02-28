@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "Converteren",
-  "accept_auth_provider_change_decline": "Herinner me later",
-  "accept_auth_provider_change_description": "U heeft onlangs geprobeerd in te loggen met een andere externe authenticatieprovider (<b>{authType}</b>). U kunt nu beslissen om uw bestaande authenticatieprovider (<b>{authTypeOld}</b>) te vervangen door een nieuwe (<b>{authType}</b>) of de oude te behouden. Als u deze wijziging accepteert, kunt u niet meer inloggen met uw oude authenticatieprovider (<b>{authTypeOld}</b>)!",
+  "accept_auth_provider_change_accept_non_managed": "Wijzigen",
+  "accept_auth_provider_change_decline": "Annuleren",
+  "accept_auth_provider_change_description": "Wilt u uw authenticatieprovider wijzigen naar (<b>{authType}</b>)? Als u deze wijziging accepteert, kunt u niet meer inloggen met uw oude authenticatieprovider (<b>{authTypeOld}</b>)!",
   "accept_auth_provider_change_description_managed": "U heeft onlangs geprobeerd in te loggen met een door de organisatie beheerde authenticatieprovider (<b>{authType}</b>). U kunt nu beslissen om uw account door de organisatie te laten beheren en uw bestaande authenticatieprovider (<b>{authTypeOld}</b>) te vervangen door een nieuwe (<b>{authType}</b>) of de oude authenticatieprovider te behouden en het account door uzelf te laten beheren. Als u deze wijziging accepteert, zal de organisatie uw account beheren en kunt u niet meer inloggen met uw oude authenticatieprovider (<b>{authTypeOld}</b>), en kunt u uw authenticatieprovider niet meer wijzigen; u kunt ook niet meer inloggen met gebruikersnaam en wachtwoord!",
   "accept_auth_provider_change_description_managed_sso": "Uw organisatie (<b>{ssoDomain}</b>) heeft SSO-authenticatie ingeschakeld. Door op de knop <b>Converteren</b> hieronder te klikken, wordt uw account omgezet naar een account dat door uw organisatie wordt beheerd. U kunt alleen inloggen met SSO; u kunt niet meer inloggen met een andere authenticatiemethode.",
   "accept_auth_provider_change_learn_more": "Meer informatie in Tolgee documentatie",
@@ -287,6 +288,7 @@
   "assignee_select_unassigned": "Niet toegewezen",
   "authentication_cancelled": "Authenticatie geannuleerd",
   "auth_provider_change_accepted": "Authenticatieprovider succesvol gewijzigd",
+  "auth_provider_change_rejected": "Wijziging van authenticatieprovider afgewezen",
   "automation_view_title": "Ontwikkelaarsinstellingen",
   "back_to_editing": "Terug naar bewerken",
   "bad_credentials": "Ongeldige inloggegevens",

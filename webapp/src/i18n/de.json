@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "Akzeptieren",
-  "accept_auth_provider_change_decline": "Später erinnern",
-  "accept_auth_provider_change_description": "Sie haben kürzlich versucht, sich mit einem anderen Drittanbieter-Authentifizierungsanbieter (<b>{authType}</b>) anzumelden. Sie können nun entscheiden, ob Sie Ihren bestehenden Authentifizierungsanbieter (<b>{authTypeOld}</b>) durch einen neuen (<b>{authType}</b>) ersetzen oder den alten beibehalten möchten. Wenn Sie diese Änderung akzeptieren, können Sie sich nicht mehr mit Ihrem alten Authentifizierungsanbieter (<b>{authTypeOld}</b>) anmelden!",
+  "accept_auth_provider_change_accept_non_managed": "Ändern",
+  "accept_auth_provider_change_decline": "Abbrechen",
+  "accept_auth_provider_change_description": "Möchten Sie Ihren Authentifizierungsanbieter auf (<b>{authType}</b>) ändern? Wenn Sie diese Änderung akzeptieren, können Sie sich nicht mehr mit Ihrem alten Authentifizierungsanbieter (<b>{authTypeOld}</b>) anmelden!",
   "accept_auth_provider_change_description_managed": "Sie haben kürzlich versucht, sich mit einem von der Organisation verwalteten Authentifizierungsanbieter (<b>{authType}</b>) anzumelden. Sie können nun entscheiden, ob Ihr Konto von der Organisation verwaltet werden soll und ob Sie Ihren bestehenden Authentifizierungsanbieter (<b>{authTypeOld}</b>) durch einen neuen (<b>{authType}</b>) ersetzen oder den alten Authentifizierungsanbieter beibehalten und das Konto weiterhin selbst verwalten möchten. Wenn Sie diese Änderung akzeptieren, wird die Organisation Ihr Konto verwalten, und Sie können sich nicht mehr mit Ihrem alten Authentifizierungsanbieter (<b>{authTypeOld}</b>) anmelden und Ihren Authentifizierungsanbieter nicht mehr ändern; Sie können sich auch nicht mehr mit Benutzernamen und Passwort anmelden!",
   "accept_auth_provider_change_description_managed_sso": "Ihre Organisation (<b>{ssoDomain}</b>) hat die SSO-Authentifizierung aktiviert. Durch Klicken auf die Schaltfläche <b>Konvertieren</b> unten wird Ihr Konto in ein von Ihrer Organisation verwaltetes Konto umgewandelt. Sie können sich nur noch mit SSO anmelden; Sie können sich nicht mehr mit einer anderen Authentifizierungsmethode anmelden.",
   "accept_auth_provider_change_learn_more": "Erfahren Sie mehr in der Tolgee-Dokumentation",
@@ -286,6 +287,7 @@
   "assignee_select_unassigned": "Nicht zugewiesen",
   "authentication_cancelled": "Authentifizierung abgebrochen",
   "auth_provider_change_accepted": "Authentifizierungsanbieter erfolgreich geändert",
+  "auth_provider_change_rejected": "Änderung des Authentifizierungsanbieters abgelehnt",
   "automation_view_title": "Entwickler-Einstellungen",
   "back_to_editing": "Zurück zur Bearbeitung",
   "bad_credentials": "Fehlerhafte Anmeldedaten",

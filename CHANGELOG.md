@@ -1,3 +1,10 @@
+## [3.106.1](https://github.com/tolgee/tolgee-platform/compare/v3.106.0...v3.106.1) (2025-02-28)
+
+
+### Bug Fixes
+
+* organization avatar ([#2957](https://github.com/tolgee/tolgee-platform/issues/2957)) ([5cde78a](https://github.com/tolgee/tolgee-platform/commit/5cde78abf89f7ba669634187fd0f844cda7cab74))
+
 # [3.106.0](https://github.com/tolgee/tolgee-platform/compare/v3.105.2...v3.106.0) (2025-02-27)
 
 

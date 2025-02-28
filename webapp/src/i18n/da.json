@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "Konverter",
-  "accept_auth_provider_change_decline": "Mind mig senere",
-  "accept_auth_provider_change_description": "Du har for nylig forsøgt at logge ind ved hjælp af en anden tredjepartsautentifikationsudbyder (<b>{authType}</b>). Du kan nu beslutte at erstatte din eksisterende autentifikationsudbyder (<b>{authTypeOld}</b>) med en ny (<b>{authType}</b>) eller beholde den gamle. Hvis du accepterer denne ændring, vil du ikke længere kunne logge ind ved hjælp af din gamle autentifikationsudbyder (<b>{authTypeOld}</b>)!",
+  "accept_auth_provider_change_accept_non_managed": "Skift",
+  "accept_auth_provider_change_decline": "Annuller",
+  "accept_auth_provider_change_description": "Vil du skifte din autentifikationsudbyder til (<b>{authType}</b>)? Hvis du accepterer denne ændring, vil du ikke længere kunne logge ind med din gamle autentifikationsudbyder (<b>{authTypeOld}</b>)!",
   "accept_auth_provider_change_description_managed": "Du har for nylig forsøgt at logge ind ved hjælp af en organisationsstyret autentifikationsudbyder (<b>{authType}</b>). Du kan nu beslutte at ændre din konto til at blive administreret af organisationen og enten erstatte din eksisterende autentifikationsudbyder (<b>{authTypeOld}</b>) med en ny (<b>{authType}</b>) eller beholde den gamle autentifikationsudbyder og lade kontoen blive administreret af dig. Hvis du accepterer denne ændring, vil organisationen administrere din konto, og du vil ikke længere kunne logge ind ved hjælp af din gamle autentifikationsudbyder (<b>{authTypeOld}</b>), og du vil ikke længere kunne ændre din autentifikationsudbyder; du vil heller ikke længere kunne logge ind ved hjælp af brugernavn og adgangskode!",
   "accept_auth_provider_change_description_managed_sso": "Din organisation (<b>{ssoDomain}</b>) har aktiveret SSO-autentifikation. Ved at klikke på <b>Konverter</b>-knappen nedenfor, vil din konto blive konverteret til en konto administreret af din organisation. Du vil kun kunne logge ind ved hjælp af SSO; du vil ikke længere kunne logge ind ved hjælp af andre autentifikationsmetoder.",
   "accept_auth_provider_change_learn_more": "Lær mere i Tolgee dokumentationen",
@@ -287,6 +288,7 @@
   "assignee_select_unassigned": "Ikke tildelt",
   "authentication_cancelled": "Godkendelse annulleret",
   "auth_provider_change_accepted": "Autentifikationsudbyder ændret med succes",
+  "auth_provider_change_rejected": "Ændring af autentifikationsudbyder afvist",
   "automation_view_title": "Udviklerindstillinger",
   "back_to_editing": "Tilbage til redigering",
   "bad_credentials": "Ugyldige loginoplysninger",

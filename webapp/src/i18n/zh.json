@@ -1,7 +1,8 @@
 {
   "accept_auth_provider_change_accept": "转换",
-  "accept_auth_provider_change_decline": "稍后提醒我",
-  "accept_auth_provider_change_description": "您最近尝试使用不同的第三方授权提供商（<b>{authType}</b>）登录。您现在可以决定是用新的授权提供商（<b>{authType}</b>）替换现有的授权提供商（<b>{authTypeOld}</b>），还是保留旧的授权提供商。如果您接受此更改，您将无法再使用旧的授权提供商（<b>{authTypeOld}</b>）登录！",
+  "accept_auth_provider_change_accept_non_managed": "更改",
+  "accept_auth_provider_change_decline": "取消",
+  "accept_auth_provider_change_description": "您是否要将授权提供商更改为（<b>{authType}</b>）？如果您接受此更改，您将无法再使用旧的授权提供商（<b>{authTypeOld}</b>）登录！",
   "accept_auth_provider_change_description_managed": "您最近尝试使用团队管理的授权提供商（<b>{authType}</b>）登录。您现在可以决定是将您的账户改为由团队管理，并用新的授权提供商（<b>{authType}</b>）替换现有的授权提供商（<b>{authTypeOld}</b>），还是保留旧的授权提供商并继续由您自己管理账户。如果您接受此更改，团队将管理您的账户，您将无法再使用旧的授权提供商（<b>{authTypeOld}</b>）登录，并且您将无法再更改您的授权提供商；您也将无法再使用用户名和密码登录！",
   "accept_auth_provider_change_description_managed_sso": "您的团队 (<b>{ssoDomain}</b>) 已启用 SSO 认证。点击下面的 <b>转换</b> 按钮后，您的账户将转换为由您的团队管理的账户。您将只能使用 SSO 登录；您将无法再使用任何其他认证方法登录。",
   "accept_auth_provider_change_learn_more": "在 Tolgee 文档中了解更多",
@@ -286,6 +287,7 @@
   "assignee_select_unassigned": "未分配",
   "authentication_cancelled": "身份验证已取消",
   "auth_provider_change_accepted": "授权提供商更换成功",
+  "auth_provider_change_rejected": "授权提供商更换被拒绝",
   "automation_view_title": "开发者设置",
   "back_to_editing": "返回编辑",
   "bad_credentials": "凭证无效",
