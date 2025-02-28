@@ -1,14 +1,6 @@
 package io.tolgee.unit.formats
 
-import io.tolgee.formats.convertToIcuPlural
-import io.tolgee.formats.convertToIcuPlurals
-import io.tolgee.formats.getPluralForms
-import io.tolgee.formats.getPluralFormsForLocale
-import io.tolgee.formats.isSamePossiblePlural
-import io.tolgee.formats.normalizePlurals
-import io.tolgee.formats.optimizePluralForms
-import io.tolgee.formats.optimizePossiblePlural
-import io.tolgee.formats.orderPluralForms
+import io.tolgee.formats.*
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -219,14 +211,14 @@ class PluralsFormUtilTest {
 
   @Test
   fun `plural normalization does not escape escape characters`() {
-    normalizePlurals(mapOf(0 to "{0, plural, one {dog} other {'}'}}"))[0].assert.isEqualTo(
+    normalizePlurals(mapOf(0 to "{0, plural, one {dog} other {'}'}}")).convertedStrings[0].assert.isEqualTo(
       "{0, plural,\none {dog}\nother {'}'}\n}",
     )
   }
 
   @Test
   fun `works with massive escaping`() {
-    normalizePlurals(mapOf(0 to "{value, plural, one {'{'} few {'''{'''} many {'''{'''} other {}}"))[0]
+    normalizePlurals(mapOf(0 to "{value, plural, one {'{'} few {'''{'''} many {'''{'''} other {}}")).convertedStrings[0]
       .assert.isEqualTo(
         "{value, plural,\none {'{'}\nfew {'''{'''}\nmany {'''{'''}\nother {}\n}",
       )

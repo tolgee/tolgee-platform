@@ -54,10 +54,19 @@ class ResolvableImporter(
         ResolvableKeyImporter(keyToImport, context).import()
       }
 
-    translationService.onKeyIsPluralChanged(context.isPluralChangedForKeys, true, context.updatedTranslationIds)
-    translationService.setOutdatedBatch(context.outdatedKeys)
+    handlePluralMigration()
 
+    translationService.setOutdatedBatch(context.outdatedKeys)
     return result
+  }
+
+  private fun handlePluralMigration() {
+    val (newPlurals, newNotPlurals) = context.isPluralChangedForKeys.asSequence()
+      .map { it.key to it.value }
+      .partition { (_, pluralArgName) -> pluralArgName != null }
+
+    translationService.onKeyIsPluralChanged(newPlurals.toMap(), true, context.updatedTranslationIds)
+    translationService.onKeyIsPluralChanged(newNotPlurals.toMap(), false, context.updatedTranslationIds)
   }
 
   class TranslationToModify(

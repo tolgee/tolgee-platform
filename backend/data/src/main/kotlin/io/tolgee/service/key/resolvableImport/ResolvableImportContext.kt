@@ -28,7 +28,10 @@ class ResolvableImportContext(
   val errors = mutableListOf<List<Serializable?>>()
   var importedKeys: List<Key> = emptyList()
   val updatedTranslationIds = mutableListOf<Long>()
-  val isPluralChangedForKeys = mutableMapOf<Long, String>()
+
+  // If argName is null, the change was from plural to not plural
+  // If argName is not null, the change was from not plural to plural
+  val isPluralChangedForKeys = mutableMapOf<Long, String?>()
   val outdatedKeys: MutableList<Long> = mutableListOf()
 
   private fun getAllByNamespaceAndName(
@@ -130,11 +133,11 @@ class ResolvableImportContext(
     applicationContext.getBean(LanguageService::class.java)
   }
 
-  val entityManager by lazy {
+  val entityManager: EntityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
   }
 
-  private val translationService by lazy {
+  val translationService: TranslationService by lazy {
     applicationContext.getBean(TranslationService::class.java)
   }
 }
