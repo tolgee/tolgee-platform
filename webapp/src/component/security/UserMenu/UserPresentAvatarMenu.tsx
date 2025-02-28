@@ -3,7 +3,11 @@ import { IconButton, MenuItem, Popover, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import { usePreferredOrganization, useUser } from 'tg.globalContext/helpers';
+import {
+  useIsSsoMigrationRequired,
+  usePreferredOrganization,
+  useUser,
+} from 'tg.globalContext/helpers';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,10 +16,7 @@ import { MenuHeader } from './MenuHeader';
 import { OrganizationSwitch } from './OrganizationSwitch';
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { UserMenuItems } from './UserMenuItems';
 import { billingMenuItems } from 'tg.ee';
 
@@ -51,11 +52,7 @@ export const UserPresentAvatarMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser()!;
 
-  const isSsoMigrationRequired = useGlobalContext(
-    (c) =>
-      c.initialData.ssoInfo?.force &&
-      c.initialData.userInfo?.accountType !== 'MANAGED'
-  );
+  const isSsoMigrationRequired = useIsSsoMigrationRequired();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore

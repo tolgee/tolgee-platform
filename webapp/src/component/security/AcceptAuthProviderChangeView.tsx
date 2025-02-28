@@ -5,16 +5,14 @@ import { Box, Paper, styled, Typography } from '@mui/material';
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import React from 'react';
+import { useIsSsoMigrationRequired } from 'tg.globalContext/helpers';
 
 export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
 
@@ -49,11 +47,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   useWindowTitle(t('accept_auth_provider_change_title'));
 
   const { handleAfterLogin } = useGlobalActions();
-  const isSsoMigrationForced = useGlobalContext(
-    (c) =>
-      c.initialData.ssoInfo?.force &&
-      c.initialData.userInfo?.accountType !== 'MANAGED'
-  );
+  const isSsoMigrationRequired = useIsSsoMigrationRequired();
 
   const acceptChange = useApiMutation({
     url: '/v2/auth-provider/change',
@@ -203,7 +197,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
                     ? t('accept_auth_provider_change_accept')
                     : t('accept_auth_provider_change_accept_non_managed')}
                 </LoadingButton>
-                {(!willBeManaged || !isSsoMigrationForced) && (
+                {(!willBeManaged || !isSsoMigrationRequired) && (
                   <LoadingButton
                     loading={acceptChange.isLoading || rejectChange.isLoading}
                     variant="outlined"

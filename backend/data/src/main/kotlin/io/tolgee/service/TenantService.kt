@@ -25,5 +25,6 @@ interface TenantService {
   fun createOrUpdate(
     request: SsoTenantDto,
     organization: Organization,
+    allowChangeDomain: Boolean = false,
   ): SsoTenant
 }

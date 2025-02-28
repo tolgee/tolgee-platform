@@ -54,6 +54,7 @@ class TenantServiceOssStub : TenantService {
   override fun createOrUpdate(
     request: SsoTenantDto,
     organization: Organization,
+    allowChangeDomain: Boolean,
   ): SsoTenant {
     // no-op
     throw UnsupportedOperationException("Not included in OSS")
