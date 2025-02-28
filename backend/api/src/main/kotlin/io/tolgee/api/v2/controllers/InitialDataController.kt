@@ -53,6 +53,7 @@ class InitialDataController(
     if (userAccount != null) {
       data.userInfo = userController.getInfo()
       data.ssoInfo = userController.getSso()
+      data.managedByOrganization = userController.getManagedBy()
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()

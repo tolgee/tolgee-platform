@@ -880,6 +880,10 @@ export interface paths {
     /** Generates new JWT token permitted to sensitive operations */
     post: operations["getSuperToken"];
   };
+  "/v2/user/managed-by": {
+    /** Returns the organization that manages a given user or null */
+    get: operations["getManagedBy"];
+  };
   "/v2/user/mfa/recovery": {
     /** Regenerates multi-factor authentication recovery codes */
     put: operations["regenerateRecoveryCodes"];
@@ -2020,6 +2024,7 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
         | "sso_login_forced_for_this_account"
+        | "use_sso_for_authentication_instead"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -2440,6 +2445,7 @@ export interface components {
       announcement?: components["schemas"]["AnnouncementDto"];
       eeSubscription?: components["schemas"]["EeSubscriptionModel"];
       languageTag?: string;
+      managedByOrganization?: components["schemas"]["PrivateOrganizationModel"];
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
       ssoInfo?: components["schemas"]["PublicSsoTenantModel"];
@@ -4525,6 +4531,7 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
         | "sso_login_forced_for_this_account"
+        | "use_sso_for_authentication_instead"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -19027,6 +19034,49 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SuperTokenRequest"];
+      };
+    };
+  };
+  /** Returns the organization that manages a given user or null */
+  getManagedBy: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrivateOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };

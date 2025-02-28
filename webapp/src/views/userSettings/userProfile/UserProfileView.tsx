@@ -7,7 +7,10 @@ import { Redirect, useHistory } from 'react-router-dom';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import {
+  useGlobalActions,
+  useGlobalContext,
+} from 'tg.globalContext/GlobalContext';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
@@ -21,6 +24,9 @@ import { DeleteUserButton } from './DeleteUserButton';
 export const UserProfileView: FunctionComponent = () => {
   const { t } = useTranslate();
   const { refetchInitialData } = useGlobalActions();
+  const managedBy = useGlobalContext(
+    (c) => c.initialData.managedByOrganization?.name
+  );
   const user = useUser();
 
   const updateUser = useApiMutation({
@@ -121,7 +127,10 @@ export const UserProfileView: FunctionComponent = () => {
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          <T keyName="managed-account-notice" />
+          <T
+            keyName="managed-account-notice-organization"
+            params={{ organization: managedBy }}
+          />
         </Alert>
       )}
       {user && (

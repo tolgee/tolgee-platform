@@ -16,6 +16,7 @@ import { EnableMfaDialog } from './EnableMfaDialog';
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
 import { ChangeAuthProvider } from './ChangeAuthProvider';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const AccountSecurityView: FunctionComponent = () => {
   const { t } = useTranslate();
@@ -25,6 +26,9 @@ export const AccountSecurityView: FunctionComponent = () => {
     url: '/api/public/reset_password_request',
     method: 'post',
   });
+  const managedBy = useGlobalContext(
+    (c) => c.initialData.managedByOrganization?.name
+  );
 
   const isManaged = user?.accountType === 'MANAGED';
   const isThirdParty = user?.accountType === 'THIRD_PARTY';
@@ -94,7 +98,10 @@ export const AccountSecurityView: FunctionComponent = () => {
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          <T keyName="managed-account-notice" />
+          <T
+            keyName="managed-account-notice-organization"
+            params={{ organization: managedBy }}
+          />
         </Alert>
       )}
       {!isManaged && <ChangePassword />}
