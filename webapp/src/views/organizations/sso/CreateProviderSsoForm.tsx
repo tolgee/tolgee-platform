@@ -71,8 +71,8 @@ export function CreateProviderSsoForm({ data, disabled }) {
         <Switch
           disabled={disabled}
           name="force"
-          label={<T keyName="organization_sso_force" />}
-          helperText={<T keyName="sso_force_helper_text" />}
+          label={<T keyName="organization_sso_legacy_force" />}
+          helperText={<T keyName="sso_legacy_force_helper_text" />}
         />
       </StyledInputFields>
       <StyledInputFields>

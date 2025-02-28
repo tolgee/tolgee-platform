@@ -44,7 +44,7 @@ class AuthProviderChangeService(
     return getActiveAuthProviderChangeRequest(userAccount)?.asAuthProviderDto()
   }
 
-  fun initiate(
+  fun tryInitiate(
     resolvedUser: UserAccount?,
     userEmail: String,
     data: AuthProviderChangeData,

@@ -25,7 +25,8 @@ class TenantServiceImpl(
   private val self: TenantServiceImpl,
 ) : TenantService {
   @Cacheable(Caches.SSO_TENANTS, key = "#domain")
-  override fun getEnabledConfigByDomainOrNull(domain: String): SsoTenantConfig? {
+  override fun getEnabledConfigByDomainOrNull(domain: String?): SsoTenantConfig? {
+    if (domain.isNullOrEmpty()) return null
     return properties.authentication.ssoGlobal
       .takeIf { it.enabled && domain == it.domain }
       ?.let { ssoTenantProperties -> SsoTenantConfig(ssoTenantProperties, null) }
@@ -39,13 +40,12 @@ class TenantServiceImpl(
         }
   }
 
-  override fun getEnabledConfigByDomain(domain: String): SsoTenantConfig {
+  override fun getEnabledConfigByDomain(domain: String?): SsoTenantConfig {
     return self.getEnabledConfigByDomainOrNull(domain)
       ?: throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
   }
 
   override fun isSsoForcedForDomain(domain: String?): Boolean {
-    if (domain.isNullOrEmpty()) return false
     val tenant = self.getEnabledConfigByDomainOrNull(domain)
     return tenant?.force == true
   }

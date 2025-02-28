@@ -2,8 +2,6 @@ package io.tolgee.component.email
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.misc.EmailParams
-import io.tolgee.util.Logging
-import io.tolgee.util.logger
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Component
@@ -13,16 +11,9 @@ class TolgeeEmailSender(
   private val tolgeeProperties: TolgeeProperties,
   private val mailSender: JavaMailSender,
   private val mimeMessageHelperFactory: MimeMessageHelperFactory,
-) : Logging {
+) {
   fun sendEmail(params: EmailParams) {
-    if (!validateProps()) {
-      logger.error(
-        """tolgee.smtp.from property not provided.
-        |You have to configure smtp properties to send an e-mail.
-        """.trimMargin(),
-      )
-      return
-    }
+    validateProps()
     val helper = mimeMessageHelperFactory.create()
     helper.setFrom(params.from ?: tolgeeProperties.smtp.from!!)
     helper.setTo(params.to)
@@ -57,11 +48,14 @@ class TolgeeEmailSender(
     mailSender.send(helper.mimeMessage)
   }
 
-  private fun validateProps(): Boolean {
+  private fun validateProps() {
     if (tolgeeProperties.smtp.from.isNullOrEmpty()) {
-      return false
+      throw IllegalStateException(
+        """tolgee.smtp.from property not provided.
+        |You have to configure smtp properties to send an e-mail.
+        """.trimMargin(),
+      )
     }
-    return true
   }
 
   fun getSignature(): String {

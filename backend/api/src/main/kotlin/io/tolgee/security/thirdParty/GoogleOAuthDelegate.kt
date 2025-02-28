@@ -10,6 +10,7 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
+import io.tolgee.service.TenantService
 import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -29,6 +30,7 @@ class GoogleOAuthDelegate(
   properties: TolgeeProperties,
   private val signUpService: SignUpService,
   private val authProviderChangeService: AuthProviderChangeService,
+  private val tenantService: TenantService,
 ) : ThirdPartyAuthDelegate {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
@@ -103,6 +105,13 @@ class GoogleOAuthDelegate(
     }
   }
 
+  private fun checkNotManagedByOrganization(domain: String?) {
+    if (tenantService.getEnabledConfigByDomainOrNull(domain) != null) {
+      // There is sso configured for the domain - don't allow sign up
+      throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
+    }
+  }
+
   private fun findOrCreateAccount(
     userResponse: GoogleUserResponse,
     invitationCode: String?,
@@ -111,7 +120,7 @@ class GoogleOAuthDelegate(
 
     val userAccount = userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)
 
-    authProviderChangeService.initiate(
+    authProviderChangeService.tryInitiate(
       userAccount,
       googleEmail,
       AuthProviderChangeData(
@@ -136,6 +145,8 @@ class GoogleOAuthDelegate(
     newUserAccount.thirdPartyAuthId = userResponse.sub
     newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
     newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
+
+    checkNotManagedByOrganization(newUserAccount.domain)
     signUpService.signUp(newUserAccount, invitationCode, null)
 
     return newUserAccount

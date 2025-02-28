@@ -6,9 +6,9 @@ import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
 
 interface TenantService {
-  fun getEnabledConfigByDomainOrNull(domain: String): SsoTenantConfig?
+  fun getEnabledConfigByDomainOrNull(domain: String?): SsoTenantConfig?
 
-  fun getEnabledConfigByDomain(domain: String): SsoTenantConfig
+  fun getEnabledConfigByDomain(domain: String?): SsoTenantConfig
 
   fun isSsoForcedForDomain(domain: String?): Boolean
 
