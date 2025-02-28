@@ -54,10 +54,6 @@ class SsoProviderController(
       Feature.SSO,
     )
 
-    if (request.enabled && !properties.authentication.ssoOrganizations.isAllowedDomain(request.domain)) {
-      throw PermissionException(Message.SSO_DOMAIN_NOT_ALLOWED)
-    }
-
     val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val organization = organizationService.get(organizationId)
     return ssoTenantAssembler.toModel(
