@@ -50,7 +50,19 @@ Follow the steps in the [E2E readme](e2e/README.md).
 
 To configure Tolgee, create an empty file `backend/app/src/main/resources/application-dev.yaml`.
 In this file, you can override default configuration properties.
-You can check `application-e2e.yaml` for inspiration.
+
+Here are some useful settings for localhost development:
+
+```yaml
+spring:
+  jpa:
+    show-sql: true
+tolgee:
+  front-end-url: http://localhost:3000
+  file-storage-url: http://localhost:8080
+```
+
+You can check `application-e2e.yaml` for further inspiration.
 To learn more about externalized configuration in Spring boot, read [the docs](https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/boot-features-external-config.html).
 
 Since we set the active profile to `dev`, Spring uses the `application-dev.yaml` configuration file.
