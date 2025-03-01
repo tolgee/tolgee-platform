@@ -71,7 +71,6 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
     currentDateProvider.forcedDate = currentDateProvider.date
     tolgeeProperties.authentication.ssoOrganizations.enabled = true
-    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = listOf("domain.com")
     testData = SsoTestData()
     testData.addTenant()
     testDataService.saveTestData(testData.root)
@@ -81,7 +80,6 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
   fun tearDown() {
     testDataService.cleanTestData(testData.root)
     tolgeeProperties.authentication.ssoOrganizations.enabled = false
-    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = emptyList()
     currentDateProvider.forcedDate = null
     enabledFeaturesProvider.forceEnabled = null
   }
