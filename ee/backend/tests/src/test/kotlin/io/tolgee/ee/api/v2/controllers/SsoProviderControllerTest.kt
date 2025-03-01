@@ -23,7 +23,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
     tolgeeProperties.authentication.ssoOrganizations.enabled = true
-    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = listOf("google")
     testData = SsoTestData()
     testDataService.saveTestData(testData.root)
     this.userAccount = testData.user
@@ -34,7 +33,6 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
     testDataService.cleanTestData(testData.root)
     enabledFeaturesProvider.forceEnabled = null
     tolgeeProperties.authentication.ssoOrganizations.enabled = false
-    tolgeeProperties.authentication.ssoOrganizations.allowedDomains = emptyList()
   }
 
   @Test
