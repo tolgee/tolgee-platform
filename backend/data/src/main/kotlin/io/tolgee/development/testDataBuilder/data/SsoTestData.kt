@@ -7,10 +7,16 @@ import io.tolgee.model.enums.OrganizationRoleType
 class SsoTestData() : BaseTestData() {
   val organization = this.projectBuilder.self.organizationOwner
 
+  var userAdmin: UserAccount
   var userNotOwner: UserAccount
   lateinit var tenant: SsoTenant
 
   init {
+    userAdmin =
+      root.addUserAccount {
+        username = "userAdmin@unrelated.com"
+        role = UserAccount.Role.ADMIN
+      }.self
     userNotOwner =
       root.addUserAccount {
         username = "userNotOwner@domain.com"

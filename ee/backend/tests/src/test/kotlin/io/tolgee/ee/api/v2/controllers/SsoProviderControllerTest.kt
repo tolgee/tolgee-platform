@@ -25,7 +25,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
     tolgeeProperties.authentication.ssoOrganizations.enabled = true
     testData = SsoTestData()
     testDataService.saveTestData(testData.root)
-    this.userAccount = testData.user
+    this.userAccount = testData.userAdmin
   }
 
   @AfterEach
@@ -42,6 +42,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       requestTenant(),
     ).andIsOk
 
+    loginAsUser(testData.user)
     performAuthGet("/v2/organizations/${testData.organization.id}/sso")
       .andIsOk
       .andAssertThatJson {
@@ -51,6 +52,34 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
         node("authorizationUri").isEqualTo("https://dummy-url.com")
         node("tokenUri").isEqualTo("tokenUri")
         node("enabled").isEqualTo(true)
+        node("force").isEqualTo(false)
+      }
+  }
+
+  @Test
+  fun `allows organization admin to modify tenant when domain is unmodified sso provider`() {
+    performAuthPut(
+      "/v2/organizations/${testData.organization.id}/sso",
+      requestTenant(),
+    ).andIsOk
+
+    loginAsUser(testData.user)
+
+    performAuthPut(
+      "/v2/organizations/${testData.organization.id}/sso",
+      requestTenant1(),
+    ).andIsOk
+
+    performAuthGet("/v2/organizations/${testData.organization.id}/sso")
+      .andIsOk
+      .andAssertThatJson {
+        node("domain").isEqualTo("google")
+        node("clientId").isEqualTo("dummy_client_id1")
+        node("clientSecret").isEqualTo("clientSecret1")
+        node("authorizationUri").isEqualTo("https://dummy-url1.com")
+        node("tokenUri").isEqualTo("tokenUri1")
+        node("enabled").isEqualTo(true)
+        node("force").isEqualTo(true)
       }
   }
 
@@ -61,6 +90,7 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       requestTenant2(),
     ).andIsOk
 
+    loginAsUser(testData.user)
     performAuthGet("/v2/organizations/${testData.organization.id}/sso")
       .andIsOk
       .andAssertThatJson {
@@ -124,6 +154,18 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
       "enabled" to true,
+    )
+
+  fun requestTenant1() =
+    mapOf(
+      "domain" to "google",
+      "clientId" to "dummy_client_id1",
+      "clientSecret" to "clientSecret1",
+      "authorizationUri" to "https://dummy-url1.com",
+      "redirectUri" to "redirectUri1",
+      "tokenUri" to "tokenUri1",
+      "enabled" to true,
+      "force" to true,
     )
 
   fun requestTenant2() =
