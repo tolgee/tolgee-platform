@@ -359,6 +359,11 @@ export const useAuthService = (
       setJwtToken(adminToken);
       setAdminToken(undefined);
     },
+    exitDebugCustomerAccountOrLogout() {
+      // TODO: This is basically duplicate of exitDebugCustomerAccount; better solution?
+      setJwtToken(adminToken);
+      setAdminToken(undefined);
+    },
     setInvitationCode,
     currentLocation() {
       return history.location.pathname + history.location.search;
