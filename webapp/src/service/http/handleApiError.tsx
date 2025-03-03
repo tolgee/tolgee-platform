@@ -31,8 +31,14 @@ export const handleApiError = (
     if (r.status == 401) {
       // eslint-disable-next-line no-console
       console.warn('Redirecting to login - unauthorized user');
-      messageService.error(<T keyName="expired_jwt_token" />);
-      globalContext.actions?.logout();
+      messageService.error(
+        resObject?.code ? (
+          <TranslatedError code={resObject?.code} />
+        ) : (
+          <T keyName="expired_jwt_token" />
+        )
+      );
+      globalContext.actions?.exitDebugCustomerAccountOrLogout();
       return;
     }
     if (r.status == 403) {
