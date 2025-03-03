@@ -88,7 +88,7 @@ export function CreateProviderSsoForm({ data, disabled }) {
           name="domain"
           label={<T keyName="organization_sso_domain_name" />}
           minHeight={false}
-          helperText={<T keyName="sso_domain_name_helper_text" />}
+          helperText={<T keyName="sso_domain_name_helper_text_only_admin" />}
         />
       </StyledInputFields>
       <StyledInputFields>
