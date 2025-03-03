@@ -33,7 +33,7 @@ class TaskEmailComposer(
   private fun taskLink(task: Task): String {
     return """
         |<a href="${taskUrl(task)}">
-        |  #${task.number} ${task.name} (${task.language.name})
+        |  ${taskName(task.name)} #${task.number} (${task.language.name})
         |</a>
       """.trimMargin()
   }
@@ -48,4 +48,8 @@ class TaskEmailComposer(
   private fun taskUrl(task: Task) = frontendUrlProvider.getTaskUrl(task.project.id, task.number)
 
   private fun taskType(task: Task): String = i18n.translate("notifications.email.task-type.${task.type}")
+
+  public fun taskName(name: String?): String {
+    return if (name.isNullOrBlank()) "Task" else name
+  }
 }
