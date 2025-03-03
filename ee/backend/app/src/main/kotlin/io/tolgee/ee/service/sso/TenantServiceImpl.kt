@@ -25,9 +25,13 @@ class TenantServiceImpl(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: TenantServiceImpl,
 ) : TenantService {
-  @Cacheable(Caches.SSO_TENANTS, key = "#domain")
   override fun getEnabledConfigByDomainOrNull(domain: String?): SsoTenantConfig? {
     if (domain.isNullOrEmpty()) return null
+    return self.getEnabledConfigByDomainOrNullCached(domain)
+  }
+
+  @Cacheable(Caches.SSO_TENANTS, key = "#domain")
+  protected fun getEnabledConfigByDomainOrNullCached(domain: String): SsoTenantConfig? {
     return properties.authentication.ssoGlobal
       .takeIf { it.enabled && domain == it.domain }
       ?.let { ssoTenantProperties -> SsoTenantConfig(ssoTenantProperties, null) }
