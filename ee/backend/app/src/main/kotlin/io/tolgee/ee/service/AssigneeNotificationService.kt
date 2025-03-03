@@ -16,6 +16,7 @@ class AssigneeNotificationService(
   private val tolgeeEmailSender: TolgeeEmailSender,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
+
   fun notifyNewAssignee(
     user: UserAccount,
     task: Task,
