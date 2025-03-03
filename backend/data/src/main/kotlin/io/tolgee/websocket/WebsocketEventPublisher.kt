@@ -1,6 +1,6 @@
 package io.tolgee.websocket
 
-interface WebsocketEventPublisher {
+fun interface WebsocketEventPublisher {
   operator fun invoke(
     destination: String,
     message: WebsocketEvent,

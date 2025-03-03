@@ -7,11 +7,16 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.retry
+import io.tolgee.model.notifications.NotificationType.MFA_DISABLED
+import io.tolgee.model.notifications.NotificationType.MFA_ENABLED
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.codec.binary.Base32
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 class UserMfaControllerTest : AuthorizedControllerTest() {
@@ -21,10 +26,18 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
   private val encodedKey: ByteArray = Base32().decode(TOTP_KEY)
 
-  fun enableMfa() {
+  @Autowired
+  private lateinit var notificationUtil: NotificationTestUtil
+
+  private fun enableMfa() {
     userAccount?.let {
       userAccountService.enableMfaTotp(userAccountService.get(it.id), encodedKey)
     }
+  }
+
+  @BeforeEach
+  fun setUp() {
+    notificationUtil.init()
   }
 
   @Test
@@ -40,6 +53,15 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
       val fromDb = userAccountService.findActive(initialUsername)
       Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
+
+      notificationUtil.newestInAppNotification().also {
+        assertThat(it.type).isEqualTo(MFA_ENABLED)
+        assertThat(it.user.id).isEqualTo(userAccount?.id)
+        assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
+      }
+      assertThat(
+        notificationUtil.newestEmailNotification(),
+      ).contains("Multi-factor authentication has been enabled for your account")
     }
   }
 
@@ -53,6 +75,15 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
     performAuthDelete("/v2/user/mfa/totp", requestDto).andIsOk
     val fromDb = userAccountService.findActive(initialUsername)
     Assertions.assertThat(fromDb!!.totpKey).isNull()
+
+    notificationUtil.newestInAppNotification().also {
+      assertThat(it.type).isEqualTo(MFA_DISABLED)
+      assertThat(it.user.id).isEqualTo(userAccount?.id)
+      assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
+    }
+    assertThat(
+      notificationUtil.newestEmailNotification(),
+    ).contains("Multi-factor authentication has been disabled for your account")
   }
 
   @Test

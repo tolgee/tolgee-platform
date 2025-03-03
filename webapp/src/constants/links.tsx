@@ -117,6 +117,11 @@ export class LINKS {
 
   static USER_SETTINGS = Link.ofRoot('account');
 
+  static USER_ACCOUNT_NOTIFICATIONS = Link.ofParent(
+    LINKS.USER_SETTINGS,
+    'notifications'
+  );
+
   static USER_API_KEYS = Link.ofParent(LINKS.USER_SETTINGS, 'apiKeys');
 
   static USER_API_KEYS_GENERATE = Link.ofParent(
@@ -408,3 +413,9 @@ export enum QUERY {
   TRANSLATIONS_TASK_DETAIL = 'taskDetail',
   TASKS_FILTERS_SHOW_ALL = 'showAll',
 }
+
+export const getTaskUrl = (projectId: number, taskNumber: number) => {
+  return `${LINKS.GO_TO_PROJECT_TASK.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  })}?number=${taskNumber}`;
+};
