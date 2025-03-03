@@ -71,7 +71,7 @@ export const OAuthRedirectionHandler: FunctionComponent<
     }
 
     loginWithOAuthCode(type, code, domain);
-  });
+  }, []);
 
   if (loginLoadable.error) {
     return (
