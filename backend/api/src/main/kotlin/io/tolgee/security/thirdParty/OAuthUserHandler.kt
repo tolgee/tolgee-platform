@@ -64,7 +64,7 @@ class OAuthUserHandler(
   }
 
   private fun checkNotManagedByOrganization(domain: String?) {
-    if (tenantService.getEnabledConfigByDomainOrNull(domain) != null) {
+    if (tenantService.getEnabledConfigByDomainOrNull(domain)?.organizationId != null) {
       // There is sso configured for the domain - don't allow sign up without sso
       throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
     }
