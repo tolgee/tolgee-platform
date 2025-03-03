@@ -4,11 +4,6 @@
   "patterns": ["./src/**/*.ts?(x)"],
   "strictNamespace": false,
   "pull": {
-    "path": "./src/i18n",
-    "fileStructureTemplate": ""
-  },
-  "push": {
-    "filePatterns": ["./src/i18n/{language}.json"],
-    "files": []
+    "path": "./src/i18n"
   }
 }
