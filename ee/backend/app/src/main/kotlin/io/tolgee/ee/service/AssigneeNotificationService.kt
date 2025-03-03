@@ -1,17 +1,26 @@
 package io.tolgee.ee.service
 
+import io.sentry.Sentry
 import io.tolgee.component.FrontendUrlProvider
+import io.tolgee.component.email.TolgeeEmailSender
+import io.tolgee.dtos.misc.EmailParams
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.TaskType
+import io.tolgee.model.task.Task
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class AssigneeNotificationService(
   private val frontendUrlProvider: FrontendUrlProvider,
+  private val tolgeeEmailSender: TolgeeEmailSender,
 ) {
+  private val logger = LoggerFactory.getLogger(this::class.java)
   fun notifyNewAssignee(
     user: UserAccount,
     task: Task,
   ) {
-    val taskUrl = getTaskUrl(task.project.id, task.number)
+    val taskUrl = frontendUrlProvider.getTaskUrl(task.project.id, task.number)
     val myTasksUrl = getMyTasksUrl()
 
     val params =
