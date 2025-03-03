@@ -11,7 +11,6 @@ class InitialDataModel(
   val serverConfiguration: PublicConfigurationDTO,
   var userInfo: PrivateUserAccountModel? = null,
   var ssoInfo: PublicSsoTenantModel? = null,
-  var managedByOrganization: PrivateOrganizationModel? = null,
   var preferredOrganization: PrivateOrganizationModel? = null,
   var languageTag: String? = null,
   val eeSubscription: EeSubscriptionModel? = null,

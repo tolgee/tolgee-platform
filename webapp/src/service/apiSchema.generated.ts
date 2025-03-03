@@ -2442,7 +2442,6 @@ export interface components {
       announcement?: components["schemas"]["AnnouncementDto"];
       eeSubscription?: components["schemas"]["EeSubscriptionModel"];
       languageTag?: string;
-      managedByOrganization?: components["schemas"]["PrivateOrganizationModel"];
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
       ssoInfo?: components["schemas"]["PublicSsoTenantModel"];
