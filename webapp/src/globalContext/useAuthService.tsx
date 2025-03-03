@@ -272,6 +272,9 @@ export const useAuthService = (
           },
         },
         {
+          onSuccess: (response) => {
+            history.replace(LINKS.AFTER_LOGIN.build());
+          },
           onError: (error) => {
             if (error.code === 'third_party_switch_initiated') {
               history.replace(LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build());
