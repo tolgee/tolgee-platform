@@ -7,7 +7,7 @@ import { LINKS } from 'tg.constants/links';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { Alert } from 'tg.component/common/Alert';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { ChangePassword } from './ChangePassword';
@@ -16,7 +16,6 @@ import { EnableMfaDialog } from './EnableMfaDialog';
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
 import { ChangeAuthProvider } from './ChangeAuthProvider';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const AccountSecurityView: FunctionComponent = () => {
   const { t } = useTranslate();
@@ -26,9 +25,10 @@ export const AccountSecurityView: FunctionComponent = () => {
     url: '/api/public/reset_password_request',
     method: 'post',
   });
-  const managedBy = useGlobalContext(
-    (c) => c.initialData.managedByOrganization?.name
-  );
+  const managedBy = useApiQuery({
+    url: `/v2/user/managed-by`,
+    method: 'get',
+  });
 
   const isManaged = user?.accountType === 'MANAGED';
   const isThirdParty = user?.accountType === 'THIRD_PARTY';
@@ -98,10 +98,14 @@ export const AccountSecurityView: FunctionComponent = () => {
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          <T
-            keyName="managed-account-notice-organization"
-            params={{ organization: managedBy }}
-          />
+          {managedBy.isLoading || !managedBy.data ? (
+            <T keyName="managed-account-notice" />
+          ) : (
+            <T
+              keyName="managed-account-notice-organization"
+              params={{ organization: managedBy.data?.name }}
+            />
+          )}
         </Alert>
       )}
       {!isManaged && <ChangePassword />}
