@@ -31,6 +31,8 @@ export function useErrorTranslation() {
         return t('third_party_auth_non_matching_email');
       case 'third_party_switch_initiated':
         return t('third_party_switch_initiated');
+      case 'third_party_switch_conflict':
+        return t('third_party_switch_conflict');
       case 'username_already_exists':
         return t('username_already_exists');
       case 'user_already_has_permissions':
@@ -165,6 +167,12 @@ export function useErrorTranslation() {
         return t('sso_domain_not_allowed');
       case 'sso_login_forced_for_this_account':
         return t('sso_login_forced_for_this_account');
+      case 'use_sso_for_authentication_instead':
+        return t('use_sso_for_authentication_instead');
+      case 'user_missing_password':
+        return t('user_missing_password');
+      case 'invalid_jwt_token':
+        return t('expired_jwt_token');
       default:
         return code;
     }
