@@ -13,7 +13,7 @@ export interface paths {
   };
   "/v2/administration/billing/cloud-plans": {
     get: operations["getPlans_2"];
-    post: operations["create_1"];
+    post: operations["create_2"];
   };
   "/v2/administration/billing/cloud-plans/{planId}": {
     get: operations["getPlan_1"];
@@ -35,7 +35,7 @@ export interface paths {
   };
   "/v2/administration/billing/self-hosted-ee-plans": {
     get: operations["getPlans_1"];
-    post: operations["create"];
+    post: operations["create_1"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}": {
     get: operations["getPlan"];
@@ -48,12 +48,31 @@ export interface paths {
   "/v2/administration/billing/stripe-products": {
     get: operations["getStripeProducts"];
   };
+  "/v2/administration/billing/translation-agency": {
+    get: operations["getAll_1"];
+    post: operations["create"];
+  };
+  "/v2/administration/billing/translation-agency/{agencyId}": {
+    get: operations["get_1"];
+    put: operations["update"];
+    delete: operations["delete"];
+  };
+  "/v2/administration/billing/translation-agency/{agencyId}/avatar": {
+    put: operations["uploadAvatar"];
+    delete: operations["removeAvatar"];
+  };
   "/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan": {
     /** Assigns a private free plan or trial plan to an organization. */
     put: operations["assignCloudPlan"];
   };
   "/v2/administration/organizations/{organizationId}/billing/update-trial-end-date": {
     put: operations["updateTrialEndDAte"];
+  };
+  "/v2/billing/translation-agency": {
+    get: operations["getAll"];
+  };
+  "/v2/billing/translation-agency/{agencyId}": {
+    get: operations["get"];
   };
   "/v2/organizations/{organizationId}/billing/billing-info": {
     get: operations["getBillingInfo"];
@@ -130,6 +149,12 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/update-subscription": {
     put: operations["updateSubscription"];
   };
+  "/v2/projects/{projectId}/billing/order-translation": {
+    post: operations["createTranslationOrder"];
+  };
+  "/v2/projects/{projectId}/billing/order-translation/preferred-agency": {
+    get: operations["getPreferredAgency"];
+  };
   "/v2/public/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
   };
@@ -156,6 +181,9 @@ export interface paths {
   };
   "/v2/public/telemetry/report": {
     post: operations["report"];
+  };
+  "/v2/public/translator/translate": {
+    post: operations["translate"];
   };
 }
 
@@ -194,6 +222,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -234,7 +263,6 @@ export interface components {
       /** Format: int64 */
       trialEnd?: number;
     };
-    /** @example Links to avatar images */
     Avatar: {
       large: string;
       thumbnail: string;
@@ -327,6 +355,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
@@ -410,6 +439,39 @@ export interface components {
       _embedded?: {
         stripeProducts?: components["schemas"]["StripeProductModel"][];
       };
+    };
+    CreateTaskRequest: {
+      assignees: number[];
+      description: string;
+      /**
+       * Format: int64
+       * @description Due to date in epoch format (milliseconds).
+       * @example 1661172869000
+       */
+      dueDate?: number;
+      keys: number[];
+      /**
+       * Format: int64
+       * @description Id of language, this task is attached to.
+       * @example 1
+       */
+      languageId: number;
+      name: string;
+      type: "TRANSLATE" | "REVIEW";
+    };
+    CreateTranslationAgencyRequest: {
+      description: string;
+      email: string;
+      emailBcc: string[];
+      name: string;
+      services: string[];
+      url: string;
+    };
+    CreateTranslationOrderRequest: {
+      /** Format: int64 */
+      agencyId: number;
+      sendReadOnlyInvitation: boolean;
+      tasks: components["schemas"]["CreateTaskRequest"][];
     };
     ErrorResponseBody: {
       code: string;
@@ -679,8 +741,15 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported";
       params?: { [key: string]: unknown }[];
+    };
+    ExampleItem: {
+      key: string;
+      keyNamespace?: string;
+      source: string;
+      target: string;
     };
     GetMySubscriptionDto: {
       instanceId: string;
@@ -720,12 +789,25 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
+    Metadata: {
+      closeItems: components["schemas"]["ExampleItem"][];
+      examples: components["schemas"]["ExampleItem"][];
+      keyDescription?: string;
+      languageDescription?: string;
+      projectDescription?: string;
+    };
     MtCreditsPriceModel: {
       /** Format: int64 */
       amount: number;
       /** Format: int64 */
       id: number;
       price: number;
+    };
+    MtResult: {
+      contextDescription?: string;
+      /** Format: int32 */
+      price: number;
+      translated?: string;
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
@@ -757,6 +839,18 @@ export interface components {
     PagedModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationAgencyModel: {
+      _embedded?: {
+        translationAgencies?: components["schemas"]["TranslationAgencyModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationAgencyPublicModel: {
+      _embedded?: {
+        translationAgencies?: components["schemas"]["TranslationAgencyPublicModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -858,6 +952,10 @@ export interface components {
       perThousandTranslations?: number;
       subscriptionMonthly: number;
       subscriptionYearly: number;
+    };
+    PreferredAgencyResponse: {
+      /** Format: int64 */
+      preferredAgencyId?: number;
     };
     PrepareSetEeLicenceKeyModel: {
       plan: components["schemas"]["SelfHostedEePlanModel"];
@@ -977,6 +1075,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
@@ -1086,6 +1185,37 @@ export interface components {
       /** Format: int64 */
       usersCount: number;
     };
+    TolgeeTranslateParams: {
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      keyName?: string;
+      metadata?: components["schemas"]["Metadata"];
+      pluralFormExamples?: { [key: string]: string };
+      pluralForms?: { [key: string]: string };
+      sourceTag: string;
+      targetTag: string;
+      text: string;
+    };
+    TranslationAgencyModel: {
+      avatar?: components["schemas"]["Avatar"];
+      description?: string;
+      email?: string;
+      emailBcc: string[];
+      /** Format: int64 */
+      id: number;
+      name: string;
+      services: string[];
+      url?: string;
+    };
+    TranslationAgencyPublicModel: {
+      avatar?: components["schemas"]["Avatar"];
+      description?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      services: string[];
+      url?: string;
+    };
     UpdateSubscriptionPrepareRequest: {
       period: "MONTHLY" | "YEARLY";
       /**
@@ -1096,6 +1226,14 @@ export interface components {
     };
     UpdateSubscriptionRequest: {
       token: string;
+    };
+    UpdateTranslationAgencyRequest: {
+      description: string;
+      email: string;
+      emailBcc: string[];
+      name: string;
+      services: string[];
+      url: string;
     };
     UpdateTrialEndDateRequest: {
       /** Format: int64 */
@@ -1257,7 +1395,7 @@ export interface operations {
       };
     };
   };
-  create_1: {
+  create_2: {
     responses: {
       /** OK */
       200: {
@@ -1703,7 +1841,7 @@ export interface operations {
       };
     };
   };
-  create: {
+  create_1: {
     responses: {
       /** OK */
       200: {
@@ -1990,6 +2128,342 @@ export interface operations {
       };
     };
   };
+  getAll_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationAgencyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  create: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAgencyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationAgencyRequest"];
+      };
+    };
+  };
+  get_1: {
+    parameters: {
+      path: {
+        agencyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAgencyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update: {
+    parameters: {
+      path: {
+        agencyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAgencyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTranslationAgencyRequest"];
+      };
+    };
+  };
+  delete: {
+    parameters: {
+      path: {
+        agencyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  uploadAvatar: {
+    parameters: {
+      path: {
+        agencyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          avatar: string;
+        };
+      };
+    };
+  };
+  removeAvatar: {
+    parameters: {
+      path: {
+        agencyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Assigns a private free plan or trial plan to an organization. */
   assignCloudPlan: {
     parameters: {
@@ -2084,6 +2558,106 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpdateTrialEndDateRequest"];
+      };
+    };
+  };
+  getAll: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationAgencyPublicModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  get: {
+    parameters: {
+      path: {
+        agencyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAgencyPublicModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
@@ -3249,6 +3823,110 @@ export interface operations {
       };
     };
   };
+  createTranslationOrder: {
+    parameters: {
+      query: {
+        filterState?: (
+          | "UNTRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "DISABLED"
+        )[];
+        filterOutdated?: boolean;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationOrderRequest"];
+      };
+    };
+  };
+  getPreferredAgency: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PreferredAgencyResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getMtCreditPrices: {
     responses: {
       /** OK */
@@ -3643,6 +4321,53 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["TelemetryReportRequest"];
+      };
+    };
+  };
+  translate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["MtResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TolgeeTranslateParams"];
       };
     };
   };

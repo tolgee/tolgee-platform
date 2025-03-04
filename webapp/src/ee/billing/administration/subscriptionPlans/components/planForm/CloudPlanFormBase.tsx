@@ -8,7 +8,8 @@ type CloudPlanModel = components['schemas']['CloudPlanRequest'];
 type EnabledFeature =
   components['schemas']['CloudPlanRequest']['enabledFeatures'][number];
 
-export type MetricType = 'STRINGS' | 'SEATS_KEYS';
+export type MetricType =
+  components['schemas']['CloudPlanRequest']['metricType'];
 
 export type CloudPlanFormData = {
   type: CloudPlanModel['type'];
