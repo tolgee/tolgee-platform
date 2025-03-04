@@ -199,6 +199,8 @@
   "administration_cloud_plan_form_organizations_filter_own": "Filtrează propriile",
   "administration_cloud_plan_form_organizations_new": "{num} element(e) noi",
   "administration_cloud_plan_form_organizations_title": "Organizații",
+  "administration_cloud_plan_form_prices_per_subscription": "Pe abonament",
+  "administration_cloud_plan_form_prices_per_usage": "Pe utilizare",
   "administration_cloud_plan_form_prices_title": "Prețuri",
   "administration_cloud_plan_for_organization_alert": "Sunteți pe cale să creați un plan personalizat pentru organizația <b>{organizationName}</b> cu id-ul <b>{id}</b> și slug-ul <b>{slug}</b>. Acest plan nu va fi atribuit automat acestei organizații, dar organizația îl va putea vedea.",
   "administration_cloud_plan_organization_field_auto_assign": "Desemnează",

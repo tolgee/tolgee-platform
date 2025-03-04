@@ -199,6 +199,8 @@
   "administration_cloud_plan_form_organizations_filter_own": "Filter eigen",
   "administration_cloud_plan_form_organizations_new": "{num} nieuwe item(s)",
   "administration_cloud_plan_form_organizations_title": "Organisaties",
+  "administration_cloud_plan_form_prices_per_subscription": "Per abonnement",
+  "administration_cloud_plan_form_prices_per_usage": "Per gebruik",
   "administration_cloud_plan_form_prices_title": "Prijzen",
   "administration_cloud_plan_for_organization_alert": "U staat op het punt een aangepast plan te maken voor organisatie <b>{organizationName}</b> met id <b>{id}</b> en slug <b>{slug}</b>. Dit plan wordt niet automatisch aan deze organisatie toegewezen, maar de organisatie zal het kunnen zien.",
   "administration_cloud_plan_organization_field_auto_assign": "Toewijzen",

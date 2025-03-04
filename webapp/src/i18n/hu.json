@@ -198,6 +198,8 @@
   "administration_cloud_plan_form_organizations_filter_own": "Saját szűrése",
   "administration_cloud_plan_form_organizations_new": "{num} új elem",
   "administration_cloud_plan_form_organizations_title": "Szervezetek",
+  "administration_cloud_plan_form_prices_per_subscription": "Előfizetésenként",
+  "administration_cloud_plan_form_prices_per_usage": "Használatonként",
   "administration_cloud_plan_form_prices_title": "Árak",
   "administration_cloud_plan_for_organization_alert": "Egyéni csomagot készül létrehozni a(z) <b>{organizationName}</b> szervezet számára, azonosítóval: <b>{id}</b> és slug: <b>{slug}</b>. Ez a csomag nem lesz automatikusan hozzárendelve ehhez a szervezethez, de a szervezet látni fogja.",
   "administration_cloud_plan_organization_field_auto_assign": "Hozzárendelés",

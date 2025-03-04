@@ -199,6 +199,8 @@
   "administration_cloud_plan_form_organizations_filter_own": "Filter own",
   "administration_cloud_plan_form_organizations_new": "{num} new item(s)",
   "administration_cloud_plan_form_organizations_title": "Organizations",
+  "administration_cloud_plan_form_prices_per_subscription": "Per subscription",
+  "administration_cloud_plan_form_prices_per_usage": "Per usage",
   "administration_cloud_plan_form_prices_title": "Prices",
   "administration_cloud_plan_for_organization_alert": "You are about to create custom plan for organization <b>{organizationName}</b> with id <b>{id}</b> and slug <b>{slug}</b>. This plan won't be automatically assigned to this organization, but the organization will be able to see it.",
   "administration_cloud_plan_organization_field_auto_assign": "Assign",

@@ -198,6 +198,8 @@
   "administration_cloud_plan_form_organizations_filter_own": "筛选自己的",
   "administration_cloud_plan_form_organizations_new": "{num}个新项目",
   "administration_cloud_plan_form_organizations_title": "团队",
+  "administration_cloud_plan_form_prices_per_subscription": "每个订阅",
+  "administration_cloud_plan_form_prices_per_usage": "每次使用",
   "administration_cloud_plan_form_prices_title": "价格",
   "administration_cloud_plan_for_organization_alert": "您即将为组织 <b>{organizationName}</b> 创建自定义计划，ID 为 <b>{id}</b>，别名为 <b>{slug}</b>。此计划不会自动分配给该组织，但该组织将能够看到它。",
   "administration_cloud_plan_organization_field_auto_assign": "分配",

@@ -199,6 +199,8 @@
   "administration_cloud_plan_form_organizations_filter_own": "Filtrovat vlastní",
   "administration_cloud_plan_form_organizations_new": "{num} nové položky",
   "administration_cloud_plan_form_organizations_title": "Organizace",
+  "administration_cloud_plan_form_prices_per_subscription": "Za předplatné",
+  "administration_cloud_plan_form_prices_per_usage": "Za použití",
   "administration_cloud_plan_form_prices_title": "Ceny",
   "administration_cloud_plan_for_organization_alert": "Chystáte se vytvořit vlastní plán pro organizaci <b>{organizationName}</b> s ID <b>{id}</b> a slugem <b>{slug}</b>. Tento plán nebude automaticky přiřazen této organizaci, ale organizace ho bude moci vidět.",
   "administration_cloud_plan_organization_field_auto_assign": "Přiřadit",

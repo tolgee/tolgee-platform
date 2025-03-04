@@ -1,3 +1,10 @@
+# [3.108.0](https://github.com/tolgee/tolgee-platform/compare/v3.107.0...v3.108.0) (2025-03-04)
+
+
+### Features
+
+* make task name optional ([#2948](https://github.com/tolgee/tolgee-platform/issues/2948)) ([2dcac95](https://github.com/tolgee/tolgee-platform/commit/2dcac955715951aaf61b3625f16e6d2ffccf2a4f))
+
 # [3.107.0](https://github.com/tolgee/tolgee-platform/compare/v3.106.1...v3.107.0) (2025-03-03)
 
 

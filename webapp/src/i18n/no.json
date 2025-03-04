@@ -198,6 +198,8 @@
   "administration_cloud_plan_form_organizations_filter_own": "Filtrer egne",
   "administration_cloud_plan_form_organizations_new": "{num} nye element(er)",
   "administration_cloud_plan_form_organizations_title": "Organisasjoner",
+  "administration_cloud_plan_form_prices_per_subscription": "Per abonnement",
+  "administration_cloud_plan_form_prices_per_usage": "Per bruk",
   "administration_cloud_plan_form_prices_title": "Priser",
   "administration_cloud_plan_for_organization_alert": "Du er i ferd med å opprette en tilpasset plan for organisasjonen <b>{organizationName}</b> med id <b>{id}</b> og slug <b>{slug}</b>. Denne planen vil ikke bli automatisk tildelt denne organisasjonen, men organisasjonen vil kunne se den.",
   "administration_cloud_plan_organization_field_auto_assign": "Tildel",
