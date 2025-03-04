@@ -1,5 +1,4 @@
-import { CompatClient, Stomp } from '@stomp/stompjs';
-// @ts-ignore
+import { CompatClient, Stomp } from '@stomp/stompjs'; // @ts-ignore
 import SockJS from 'sockjs-client/dist/sockjs';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -110,7 +109,7 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
    * @param callback Callback function to be executed when event is triggered
    * @return Function Function unsubscribing the event listening
    */
-  function subscribe<T extends Channel>(
+  function subscribe<T extends ChannelProject | ChannelUser>(
     channel: T,
     callback: (data: Data<T>) => void
   ): () => void {
@@ -138,8 +137,13 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
   return Object.freeze({ subscribe, disconnect });
 };
 
-export type EventType = 'translation-data-modified' | 'batch-job-progress';
-export type Channel = `/projects/${number}/${EventType}`;
+export type EventTypeProject =
+  | 'translation-data-modified'
+  | 'batch-job-progress';
+export type ChannelProject = `/projects/${number}/${EventTypeProject}`;
+
+export type EventTypeUser = 'notifications-changed';
+export type ChannelUser = `/users/${number}/${EventTypeUser}`;
 
 export type TranslationsModifiedData = WebsocketEvent<{
   translations: EntityModification<'translation'>[] | null;
@@ -152,6 +156,11 @@ export type BatchJobProgress = WebsocketEvent<{
   status: BatchJobModelStatus;
   total: number;
   errorMessage: string | undefined;
+}>;
+
+export type NotificationsChanged = WebsocketEvent<{
+  currentlyUnseenCount: number;
+  newNotification?: components['schemas']['NotificationModel'];
 }>;
 
 export type EntityModification<T> = T extends keyof schemas
@@ -217,4 +226,6 @@ export type Data<T> = T extends `/projects/${number}/translation-data-modified`
   ? TranslationsModifiedData
   : T extends `/projects/${number}/batch-job-progress`
   ? BatchJobProgress
+  : T extends `/users/${number}/notifications-changed`
+  ? NotificationsChanged
   : never;

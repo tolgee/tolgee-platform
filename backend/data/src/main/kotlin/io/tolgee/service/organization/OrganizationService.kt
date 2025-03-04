@@ -314,7 +314,7 @@ class OrganizationService(
     organization: Organization,
     avatar: InputStream,
   ) {
-    avatarService.setAvatar(organization, avatar, Dimension(300, 60))
+    avatarService.setAvatar(organization, avatar, Dimension(300, 300))
   }
 
   /**

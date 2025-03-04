@@ -4,7 +4,7 @@ import { styled } from '@mui/material';
 import { useProject } from 'tg.hooks/useProject';
 
 import { TaskTooltip } from './TaskTooltip';
-import { getTaskUrl } from './utils';
+import { getTaskUrl } from 'tg.constants/links';
 import { TaskReferenceProps } from '../../../eeSetup/EeModuleType';
 
 const StyledId = styled('span')`
@@ -23,7 +23,7 @@ export const TaskReference: React.FC<TaskReferenceProps> = ({ data }) => {
       <Link
         style={{ textDecoration: 'none' }}
         className="reference"
-        to={getTaskUrl(project, data.number)}
+        to={getTaskUrl(project.id, data.number)}
       >
         <span>{data.name} </span>
         <StyledId>#{data.number} </StyledId>

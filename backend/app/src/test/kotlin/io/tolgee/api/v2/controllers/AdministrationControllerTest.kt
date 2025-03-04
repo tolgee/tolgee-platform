@@ -41,6 +41,21 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `searches by id in organizations`() {
+    val organizationId = testData.adminBuilder.defaultOrganizationBuilder.self.id
+    performAuthGet("/v2/administration/organizations?search=$organizationId")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.organizations") {
+          isArray.hasSize(1)
+          node("[0]") {
+            node("name").isEqualTo("Peter Administrator")
+          }
+        }
+      }
+  }
+
+  @Test
   fun `returns users`() {
     performAuthGet("/v2/administration/users").andPrettyPrint.andAssertThatJson {
       node("_embedded.users") {

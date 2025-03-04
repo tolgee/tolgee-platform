@@ -249,7 +249,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
       stripeSubscriptionId?: string;
       /** Format: int64 */
       trialEnd?: number;
@@ -392,7 +393,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
       /** Format: int64 */
       trialEnd?: number;
     };
@@ -766,7 +768,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
     };
     InvoiceModel: {
       /** Format: int64 */
@@ -1100,7 +1103,8 @@ export interface components {
         | "UNPAID"
         | "ERROR"
         | "TRIALING"
-        | "KEY_USED_BY_ANOTHER_INSTANCE";
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
     };
     SetLicenseKeyLicensingDto: {
       instanceId: string;

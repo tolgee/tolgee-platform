@@ -1,3 +1,55 @@
+# [3.107.0](https://github.com/tolgee/tolgee-platform/compare/v3.106.1...v3.107.0) (2025-03-03)
+
+
+### Bug Fixes
+
+* use lowercase for anchors ([#2963](https://github.com/tolgee/tolgee-platform/issues/2963)) ([5e1ac1e](https://github.com/tolgee/tolgee-platform/commit/5e1ac1e2c313207971f37e652055f0ea30b20de8))
+
+
+### Features
+
+* Notifications ([#2839](https://github.com/tolgee/tolgee-platform/issues/2839)) ([7916a12](https://github.com/tolgee/tolgee-platform/commit/7916a1297bf392dc32b0a8802687d8b1a963656d)), closes [#2577](https://github.com/tolgee/tolgee-platform/issues/2577)
+
+## [3.106.1](https://github.com/tolgee/tolgee-platform/compare/v3.106.0...v3.106.1) (2025-02-28)
+
+
+### Bug Fixes
+
+* organization avatar ([#2957](https://github.com/tolgee/tolgee-platform/issues/2957)) ([5cde78a](https://github.com/tolgee/tolgee-platform/commit/5cde78abf89f7ba669634187fd0f844cda7cab74))
+
+# [3.106.0](https://github.com/tolgee/tolgee-platform/compare/v3.105.2...v3.106.0) (2025-02-27)
+
+
+### Bug Fixes
+
+* add sso user to organization explicitly - fixes accepting project invitations during signup ([#2954](https://github.com/tolgee/tolgee-platform/issues/2954)) ([f7e45bb](https://github.com/tolgee/tolgee-platform/commit/f7e45bb70060fd549597076bda370139e6315f40))
+
+
+### Features
+
+* Configurable selected languages limit ([#2953](https://github.com/tolgee/tolgee-platform/issues/2953)) ([915b29f](https://github.com/tolgee/tolgee-platform/commit/915b29fca128c3d162d1c8683430a97ee029ef17))
+
+## [3.105.2](https://github.com/tolgee/tolgee-platform/compare/v3.105.1...v3.105.2) (2025-02-26)
+
+
+### Bug Fixes
+
+* allow invites for managed accounts for projects owned by correct organization ([#2946](https://github.com/tolgee/tolgee-platform/issues/2946)) ([e90135e](https://github.com/tolgee/tolgee-platform/commit/e90135e9b2294573ec65705edc56f0ecc5ef0d06))
+
+## [3.105.1](https://github.com/tolgee/tolgee-platform/compare/v3.105.0...v3.105.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* many language references in activity ([#2944](https://github.com/tolgee/tolgee-platform/issues/2944)) ([3f0cd2a](https://github.com/tolgee/tolgee-platform/commit/3f0cd2a058ad27b44439be089ead39b1c36d36b8))
+
+# [3.105.0](https://github.com/tolgee/tolgee-platform/compare/v3.104.2...v3.105.0) (2025-02-25)
+
+
+### Features
+
+* Search by ID in administration organizations ([#2939](https://github.com/tolgee/tolgee-platform/issues/2939)) ([009fff2](https://github.com/tolgee/tolgee-platform/commit/009fff2bb4bb8a4fa71942d905ce0636a4db9b8b))
+
 ## [3.104.2](https://github.com/tolgee/tolgee-platform/compare/v3.104.1...v3.104.2) (2025-02-24)
 
 

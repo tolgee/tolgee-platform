@@ -19,8 +19,8 @@ import {
   UpdateTranslation,
 } from '../types';
 import { PrefilterType } from '../../prefilters/usePrefilter';
+import { useConfig } from 'tg.globalContext/helpers';
 
-const MAX_LANGUAGES = 10;
 const PAGE_SIZE = 60;
 
 type TranslationsQueryType =
@@ -80,6 +80,7 @@ const flattenKeys = (
   data?.pages.filter(Boolean).flatMap((p) => p._embedded?.keys || []) || [];
 
 export const useTranslationsService = (props: Props) => {
+  const config = useConfig();
   const [filters, _setFilters] = useUrlSearchState('filters', {
     defaultVal: JSON.stringify({}),
   });
@@ -258,14 +259,20 @@ export const useTranslationsService = (props: Props) => {
   };
 
   const setLanguages = (value: string[] | undefined) => {
-    if (value && value.length > 10) {
+    const limit = config.translationsViewLanguagesLimit;
+    if (value && value.length > limit) {
       messaging.error(
         <T
           keyName="translations_languages_limit_reached"
-          params={{ max: MAX_LANGUAGES }}
+          params={{ max: limit }}
         />
       );
-      return;
+      if (value.length - limit > 1) {
+        // handle edge case when limit was lowered and user had more languages selected
+        value = value.slice(0, limit);
+      } else {
+        return;
+      }
     }
     if (props.updateLocalStorageLanguages) {
       projectPreferencesService.setForProject(props.projectId, value);

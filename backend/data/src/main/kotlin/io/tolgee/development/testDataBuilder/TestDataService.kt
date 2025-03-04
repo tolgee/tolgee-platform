@@ -13,6 +13,7 @@ import io.tolgee.service.key.*
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.LanguageStatsService
@@ -59,6 +60,7 @@ class TestDataService(
   private val userPreferencesService: UserPreferencesService,
   private val languageStatsService: LanguageStatsService,
   private val patService: PatService,
+  private val notificationService: NotificationService,
   private val namespaceService: NamespaceService,
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
@@ -98,6 +100,7 @@ class TestDataService(
 
     executeInNewTransaction(transactionManager) {
       saveProjectData(builder)
+      saveNotifications(builder)
       finalize()
     }
 
@@ -112,6 +115,7 @@ class TestDataService(
       executeInNewTransaction(transactionManager) {
         builder.data.userAccounts.forEach {
           userAccountService.findActive(it.self.username)?.let { user ->
+            notificationService.deleteNotificationsOfUser(user.id)
             userAccountService.delete(user)
           }
         }
@@ -455,6 +459,15 @@ class TestDataService(
     data.forEach {
       entityManager.persist(it.self)
     }
+  }
+
+  private fun saveNotifications(builder: TestDataBuilder) {
+    builder.data.userAccounts
+      .flatMap { it.data.notifications }
+      .sortedBy { it.self.linkedTask?.name }
+      .forEach {
+        notificationService.notify(it.self)
+      }
   }
 
   private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {

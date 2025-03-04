@@ -14,7 +14,7 @@ import { TaskLabel } from './TaskLabel';
 import { TaskState } from 'tg.component/task/TaskState';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { TaskAssignees } from './TaskAssignees';
-import { getTaskUrl } from './utils';
+import { getTaskUrl } from 'tg.constants/links';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -80,7 +80,7 @@ export const TaskItem = ({
 
   const linkProps = {
     component: Link,
-    to: getTaskUrl(project, task.number),
+    to: getTaskUrl(project.id, task.number),
   };
 
   return (

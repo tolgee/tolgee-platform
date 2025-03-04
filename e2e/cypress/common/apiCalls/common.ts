@@ -254,6 +254,12 @@ export const deleteUserSql = (username: string) => {
       from quick_start
       where user_account_id in (select id from user_account where username = '${username}');
       delete
+      from notification
+      where user_id in (select id from user_account where username = '${username}');
+      delete
+      from notification_setting
+      where user_id in (select id from user_account where username = '${username}');
+      delete
       from user_account
       where username = '${username}';
   `;
@@ -361,16 +367,25 @@ export const addScreenshot = (
   });
 };
 
+export const getLastEmail = () =>
+  getAllEmails().then((r) => {
+    return {
+      fromAddress: r[0].from.value[0].address,
+      toAddress: r[0].to.value[0].address,
+      subject: r[0].subject,
+      html: r[0].html,
+    };
+  });
+
 export const getAssignedEmailNotification = () =>
   getAllEmails().then((r) => {
     const content = r[0].html;
     const result = [...content.matchAll(/href="(.*?)"/g)];
     return {
       taskLink: result[0][1],
-      myTasksLink: result[1][1],
+      myTasksLink: result[2][1],
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
-      text: r[0].text,
     };
   });
 
@@ -380,7 +395,6 @@ export const getParsedEmailVerification = () =>
       verifyEmailLink: r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
-      text: r[0].text,
     };
   });
 
@@ -390,7 +404,6 @@ export const getParsedEmailVerificationByIndex = (index: number) =>
       verifyEmailLink: r[index].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
       fromAddress: r[index].from.value[0].address,
       toAddress: r[index].to.value[0].address,
-      text: r[index].text,
     };
   });
 
@@ -443,7 +456,6 @@ export const getOrderConfirmation = () =>
   });
 
 type Email = {
-  text: string;
   to: any;
   from: any;
   html: string;
@@ -523,3 +535,6 @@ export const setContentStorageBypass = (value: boolean) =>
 
 export const setWebhookControllerStatus = (value: number) =>
   setProperty('internal.webhookControllerStatus', value);
+
+export const setTranslationsViewLanguagesLimit = (value: number) =>
+  setProperty('translationsViewLanguagesLimit', value);

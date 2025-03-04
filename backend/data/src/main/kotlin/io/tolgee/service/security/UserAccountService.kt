@@ -21,12 +21,15 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.notification.NotificationService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
@@ -73,6 +76,9 @@ class UserAccountService(
   @Lazy
   lateinit var permissionService: PermissionService
 
+  @Autowired
+  private lateinit var notificationService: NotificationService
+
   private val emailValidator = EmailValidator()
 
   fun findActive(username: String): UserAccount? {
@@ -104,6 +110,11 @@ class UserAccountService(
     return userAccountRepository.findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
+  }
+
+  @Transactional
+  fun findAll(ids: List<Long>): List<UserAccountDto> {
+    return userAccountRepository.findAllById(ids).map { UserAccountDto.fromEntity(it) }
   }
 
   @Transactional
@@ -294,7 +305,15 @@ class UserAccountService(
   ): UserAccount {
     userAccount.totpKey = key
     resetTokensValidNotBefore(userAccount)
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notificationService.notify(
+      Notification().apply {
+        this.user = userAccount
+        this.type = NotificationType.MFA_ENABLED
+        this.originatingUser = userAccount
+      },
+    )
+    return savedUser
   }
 
   @Transactional
@@ -304,7 +323,15 @@ class UserAccountService(
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
     resetTokensValidNotBefore(userAccount)
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notificationService.notify(
+      Notification().apply {
+        this.user = userAccount
+        this.type = NotificationType.MFA_DISABLED
+        this.originatingUser = userAccount
+      },
+    )
+    return savedUser
   }
 
   @Transactional
@@ -461,7 +488,15 @@ class UserAccountService(
     resetTokensValidNotBefore(userAccount)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
-    return userAccountRepository.save(userAccount)
+    val savedUser = userAccountRepository.save(userAccount)
+    notificationService.notify(
+      Notification().apply {
+        this.user = userAccount
+        this.type = NotificationType.PASSWORD_CHANGED
+        this.originatingUser = userAccount
+      },
+    )
+    return savedUser
   }
 
   private fun updateUserEmail(

@@ -7,7 +7,6 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -70,17 +69,28 @@ class SignUpService(
 
     val invitation = invitationCode?.let(invitationService::getInvitation)
     val user = userAccountService.createUser(entity, userSource)
+
     if (invitation != null) {
-      if (organizationForced != null && invitation.organizationRole?.organization != organizationForced) {
-        // Invitations are allowed only for specific organization
-        throw BadRequestException(Message.INVITATION_ORGANIZATION_MISMATCH)
+      if (organizationForced != null) {
+        val targetOrganization =
+          invitation.organizationRole?.organization
+            ?: invitation.permission?.organization
+            ?: invitation.permission?.project?.organizationOwner
+        if (targetOrganization?.id != organizationForced.id) {
+          // Invitations are allowed only for specific organization
+          throw BadRequestException(Message.INVITATION_ORGANIZATION_MISMATCH)
+        }
       }
       invitationService.accept(invitation.code, user)
-    } else if (organizationForced != null) {
-      organizationRoleService.grantRoleToUser(
+    }
+
+    if (
+      organizationForced != null &&
+      !organizationRoleService.isUserMemberOrOwner(user.id, organizationForced.id)
+    ) {
+      organizationRoleService.grantMemberRoleToUser(
         user,
         organizationForced,
-        OrganizationRoleType.MEMBER,
       )
     }
 

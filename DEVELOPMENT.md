@@ -50,7 +50,19 @@ Follow the steps in the [E2E readme](e2e/README.md).
 
 To configure Tolgee, create an empty file `backend/app/src/main/resources/application-dev.yaml`.
 In this file, you can override default configuration properties.
-You can check `application-e2e.yaml` for inspiration.
+
+Here are some useful settings for localhost development:
+
+```yaml
+spring:
+  jpa:
+    show-sql: true
+tolgee:
+  front-end-url: http://localhost:3000
+  file-storage-url: http://localhost:8080
+```
+
+You can check `application-e2e.yaml` for further inspiration.
 To learn more about externalized configuration in Spring boot, read [the docs](https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/boot-features-external-config.html).
 
 Since we set the active profile to `dev`, Spring uses the `application-dev.yaml` configuration file.
@@ -94,6 +106,18 @@ On the backend, there is Gradle task `ktlintFormat`, which helps you to format K
 
 ```shell
 ./gradlew ktlintFormat
+```
+
+## Using current translations from the Tolgee app
+
+This is an optional step for contributors with access to the Tolgee project at `app.tolgee.io`.
+
+Create a file `webapp/.env.development.local` with following content.
+Don't forget to supply it with your API key generated in the Tolgee app:
+
+```properties
+VITE_APP_TOLGEE_API_URL=https://app.tolgee.io
+VITE_APP_TOLGEE_API_KEY=your-tolgee-api-key
 ```
 
 ## Troubleshooting
