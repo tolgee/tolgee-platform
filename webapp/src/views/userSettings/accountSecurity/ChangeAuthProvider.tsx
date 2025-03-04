@@ -8,12 +8,14 @@ import { useOAuthServices } from 'tg.hooks/useOAuthServices';
 import { Key02 } from '@untitled-ui/icons-react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { messageService } from 'tg.service/MessageService';
+import { LINKS } from 'tg.constants/links';
+import { useHistory } from 'react-router-dom';
 
 export const ChangeAuthProvider: FunctionComponent = () => {
-  const { handleAfterLogin, useSsoAuthLinkByDomain } = useGlobalActions();
+  const { useSsoAuthLinkByDomain } = useGlobalActions();
   const user = useUser();
   const oAuthServices = useOAuthServices();
+  const history = useHistory();
 
   const remoteConfig = useConfig();
   const organizationsSsoEnabled =
@@ -29,6 +31,7 @@ export const ChangeAuthProvider: FunctionComponent = () => {
     fetchOptions: {
       disableAutoErrorHandle: true,
     },
+    invalidatePrefix: '/v2/auth-provider',
   });
 
   if (!user) return null;
@@ -38,8 +41,7 @@ export const ChangeAuthProvider: FunctionComponent = () => {
       {},
       {
         onSuccess(r) {
-          handleAfterLogin(r);
-          messageService.success(<T keyName="auth_provider_change_accepted" />);
+          history.push(LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build());
         },
       }
     );

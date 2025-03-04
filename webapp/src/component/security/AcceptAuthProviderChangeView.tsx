@@ -1,6 +1,6 @@
 import { useHistory } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Paper, styled, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
@@ -11,10 +11,9 @@ import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import React from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useIsSsoMigrationRequired } from 'tg.globalContext/helpers';
-
-export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
+import { AuthProviderChangeBody } from 'tg.component/security/AuthProviderChangeBody';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -26,18 +25,6 @@ const StyledContent = styled(Box)`
   display: grid;
   width: min(100vw, 660px);
   gap: 32px;
-`;
-
-const StyledPaper = styled(Paper)`
-  padding: 60px;
-  display: grid;
-  gap: 32px;
-  background: ${({ theme }) => theme.palette.tokens.background['paper-1']};
-  @media ${FULL_PAGE_BREAK_POINT} {
-    padding: 10px;
-    box-shadow: none;
-    background: transparent;
-  }
 `;
 
 const AcceptAuthProviderChangeView: React.FC = () => {
@@ -130,136 +117,69 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   }
 
   const accountType = authProviderChangeInfo.data?.accountType;
-  const authType = authProviderChangeInfo.data?.authType ?? 'NONE';
-  const authTypeOld = authProviderCurrentInfo.data?.authType ?? 'NONE';
-  const ssoDomain = authProviderChangeInfo.data?.ssoDomain ?? '';
-  const params = {
-    authType,
-    authTypeOld,
-    ssoDomain,
-    b: <b />,
-    br: <br />,
-  };
-
   const willBeManaged = accountType === 'MANAGED';
 
-  let titleText: React.ReactNode | null;
-  let infoText: React.ReactNode;
-
-  switch (true) {
-    case willBeManaged && isSsoMigrationRequired:
-      // Migrating to SSO; migration is forced
-      titleText = null;
-      infoText = (
-        <T
-          keyName="accept_auth_provider_change_description_managed_sso"
-          params={params}
-        />
-      );
-      break;
-    case willBeManaged:
-      // Migrating to SSO; migration is voluntary
-      titleText = null;
-      infoText = (
-        <T
-          keyName="accept_auth_provider_change_description_managed_sso_optional"
-          params={params}
-        />
-      );
-      break;
-    case authTypeOld === 'NONE':
-      // Currently user has no third-party provider
-      titleText = (
-        <T
-          keyName="accept_auth_provider_change_title_no_existing_provider"
-          params={params}
-        />
-      );
-      infoText = (
-        <T
-          keyName="accept_auth_provider_change_description_no_existing_provider"
-          params={params}
-        />
-      );
-      break;
-    case authType === 'NONE':
-      // User is removing third-party provider
-      titleText = (
-        <T
-          keyName="accept_auth_provider_change_title_remove_existing_provider"
-          params={params}
-        />
-      );
-      infoText = (
-        <T
-          keyName="accept_auth_provider_change_description_remove_existing_provider"
-          params={params}
-        />
-      );
-      break;
-    default:
-      // From one third-party provider to another third-party provider
-      titleText = (
-        <T keyName="accept_auth_provider_change_title" params={params} />
-      );
-      infoText = (
-        <T keyName="accept_auth_provider_change_description" params={params} />
-      );
-      break;
-  }
+  const [autoAccepted, setAutoAccepted] = useState(false);
+  useEffect(() => {
+    // Auto-accept forced sso migration to avoid second confirmation dialog
+    if (
+      authProviderChangeInfo.data &&
+      willBeManaged &&
+      isSsoMigrationRequired &&
+      !autoAccepted
+    ) {
+      setAutoAccepted(true);
+      handleAccept();
+    }
+  }, [
+    authProviderChangeInfo,
+    willBeManaged,
+    isSsoMigrationRequired,
+    autoAccepted,
+  ]);
 
   if (!authProviderChangeInfo.data || authProviderCurrentInfo.isLoading) {
     return <FullPageLoading />;
   }
 
+  const buttons = (
+    <Fragment>
+      <LoadingButton
+        loading={acceptChange.isLoading || rejectChange.isLoading}
+        variant="contained"
+        color="primary"
+        onClick={handleAccept}
+        data-cy="accept-auth-provider-change-accept"
+      >
+        {willBeManaged
+          ? t('accept_auth_provider_change_accept')
+          : t('accept_auth_provider_change_accept_non_managed')}
+      </LoadingButton>
+      {(!willBeManaged || !isSsoMigrationRequired) && (
+        <LoadingButton
+          loading={acceptChange.isLoading || rejectChange.isLoading}
+          variant="outlined"
+          onClick={handleReject}
+          data-cy="accept-auth-provider-change-decline"
+        >
+          {t('accept_auth_provider_change_decline')}
+        </LoadingButton>
+      )}
+    </Fragment>
+  );
+
   return (
     <DashboardPage hideQuickStart>
       <StyledContainer>
         <StyledContent>
-          <StyledPaper>
-            {titleText && (
-              <Typography variant="h3" sx={{ textAlign: 'center' }}>
-                {titleText}
-              </Typography>
-            )}
-
-            <Box display="grid" gap="24px" justifyItems="center">
-              <Box
-                textAlign="center"
-                data-cy="accept-auth-provider-change-info-text"
-              >
-                {infoText}
-              </Box>
-              <Box
-                display="flex"
-                gap={3}
-                flexWrap="wrap"
-                justifyContent="center"
-              >
-                <LoadingButton
-                  loading={acceptChange.isLoading || rejectChange.isLoading}
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAccept}
-                  data-cy="accept-auth-provider-change-accept"
-                >
-                  {willBeManaged
-                    ? t('accept_auth_provider_change_accept')
-                    : t('accept_auth_provider_change_accept_non_managed')}
-                </LoadingButton>
-                {(!willBeManaged || !isSsoMigrationRequired) && (
-                  <LoadingButton
-                    loading={acceptChange.isLoading || rejectChange.isLoading}
-                    variant="outlined"
-                    onClick={handleReject}
-                    data-cy="accept-auth-provider-change-decline"
-                  >
-                    {t('accept_auth_provider_change_decline')}
-                  </LoadingButton>
-                )}
-              </Box>
-            </Box>
-          </StyledPaper>
+          <AuthProviderChangeBody
+            willBeManaged={willBeManaged}
+            authType={authProviderChangeInfo.data?.authType ?? 'NONE'}
+            authTypeOld={authProviderCurrentInfo.data?.authType ?? 'NONE'}
+            ssoDomain={authProviderChangeInfo.data?.ssoDomain ?? ''}
+          >
+            {buttons}
+          </AuthProviderChangeBody>
         </StyledContent>
       </StyledContainer>
     </DashboardPage>

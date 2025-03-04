@@ -100,10 +100,6 @@ const SsoMigrationView: React.FC = () => {
                   keyName="sso_migration_description"
                   params={{ domain: user?.domain || '', br: <br /> }}
                 />
-                {/*{ssoUrlUnavailable && (*/}
-                {/*  // TODO: should we do this? ; use error color*/}
-                {/*  <T keyName="sso_migration_redirect_url_failed" />*/}
-                {/*)}*/}
               </Box>
               <Box
                 display="flex"

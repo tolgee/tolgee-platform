@@ -29,6 +29,11 @@ export const NotificationsTopBarButton: React.FC = () => {
       staleTime: Infinity,
       cacheTime: Infinity,
     },
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+    },
   });
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {

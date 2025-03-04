@@ -97,16 +97,13 @@ class AuthProviderChangeService(
     self.apply(AuthProviderChangeRequest().from(user, data))
   }
 
-  fun removeCurrent(user: UserAccount) {
-    if (user.password == null) {
-      throw BadRequestException(Message.USER_MISSING_PASSWORD)
-    }
+  fun initiateRemove(user: UserAccount) {
     val data =
       AuthProviderChangeData(
         UserAccount.AccountType.LOCAL,
         null,
       )
-    self.apply(AuthProviderChangeRequest().from(user, data))
+    self.save(user, data)
   }
 
   @Transactional
@@ -120,7 +117,11 @@ class AuthProviderChangeService(
   fun apply(req: AuthProviderChangeRequest) {
     val userAccount = req.userAccount ?: return throw NotFoundException()
     if (userAccount.accountType === UserAccount.AccountType.MANAGED) {
-      throw AuthenticationException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+      throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
+    }
+
+    if (req.accountType == UserAccount.AccountType.LOCAL && userAccount.password == null) {
+      throw BadRequestException(Message.USER_MISSING_PASSWORD)
     }
 
     userAccount.apply {

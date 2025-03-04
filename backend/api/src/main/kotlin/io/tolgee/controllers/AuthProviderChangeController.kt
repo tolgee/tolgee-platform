@@ -44,18 +44,14 @@ class AuthProviderChangeController(
   }
 
   @DeleteMapping("")
-  @Operation(summary = "Remove current third party authentication provider")
+  @Operation(summary = "Initiate provider change to remove current third party authentication provider")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @BypassForcedSsoAuthentication
   @RequiresSuperAuthentication
   @Transactional
-  fun deleteCurrentAuthProvider(): JwtAuthenticationResponse {
+  fun deleteCurrentAuthProvider() {
     val user = authenticationFacade.authenticatedUserEntity
-    authProviderChangeService.removeCurrent(user)
-    userAccountService.invalidateTokens(user)
-    return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
-    )
+    authProviderChangeService.initiateRemove(user)
   }
 
   @GetMapping("/change")
