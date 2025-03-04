@@ -55,4 +55,10 @@ class FrontendUrlProvider(
   fun getAccountSecurityUrl(): String = "${this.url}/account/security"
 
   fun getNotificationSettingsUrl(): String = "${this.url}/account/notifications"
+
+  fun getProjectUrl(projectId: Long): String = "${this.url}/projects/$projectId"
+
+  fun getMembersUrl(projectId: Long): String = "${getProjectUrl(projectId)}/manage/permissions"
+
+  fun getTasksUrl(projectId: Long): String = "${getProjectUrl(projectId)}/tasks"
 }

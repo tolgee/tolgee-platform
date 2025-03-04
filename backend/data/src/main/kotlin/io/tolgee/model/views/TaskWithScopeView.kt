@@ -12,7 +12,7 @@ import java.util.*
 data class TaskWithScopeView(
   val project: Project,
   val number: Long,
-  val name: String,
+  val name: String?,
   val description: String,
   val type: TaskType,
   val language: Language,

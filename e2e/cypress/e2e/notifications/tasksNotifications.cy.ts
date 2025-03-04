@@ -47,7 +47,8 @@ describe('tasks notifications', () => {
     assertMessage('1 task created');
     notifications.assertUnseenNotificationsCount(1);
 
-    getAssignedEmailNotification().then(({ taskLink, toAddress }) => {
+    getAssignedEmailNotification().then(({ taskLink, toAddress, content }) => {
+      expect(content).contain('New review task #3');
       assert(toAddress === 'organization.member@test.com', 'correct recipient');
       cy.visit(taskLink);
     });
@@ -94,16 +95,39 @@ describe('tasks notifications', () => {
     assertMessage('Task updated successfully');
 
     getAssignedEmailNotification().then(
-      ({ toAddress, myTasksLink, taskLink: taskLinkFromMail }) => {
+      ({ toAddress, myTasksLink, taskLink: taskLinkFromMail, content }) => {
+        expect(content).contain('Translate task #1');
         assert(taskLinkFromMail.includes(taskLink), 'correct task link');
         assert(
           toAddress === 'organization.member@test.com',
           'correct recipient'
         );
+        assert(taskLinkFromMail.includes(taskLink), 'correct task link');
         cy.visit(myTasksLink);
       }
     );
     cy.gcy('global-base-view-title').should('contain', 'My tasks');
     cy.gcy('task-item').contains('Translate task').should('be.visible');
+  });
+
+  it('sends correct email to assignee if task name empty', () => {
+    cy.gcy('task-item')
+      .contains('Translate task')
+      .closestDcy('task-item')
+      .findDcy('task-item-detail')
+      .click();
+
+    waitForGlobalLoading();
+    cy.gcy('task-detail-field-name').clear();
+    cy.gcy('task-detail').findDcy('assignee-select').click();
+    cy.gcy('user-switch-item').contains('Organization member').click();
+    dismissMenu();
+    cy.gcy('task-detail-submit').click();
+
+    assertMessage('Task updated successfully');
+
+    getAssignedEmailNotification().then(({ content }) => {
+      expect(content).contain('Task #1');
+    });
   });
 });

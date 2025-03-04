@@ -558,6 +558,7 @@ declare namespace DataCy {
         "task-item-detail" |
         "task-item-menu" |
         "task-label-name" |
+        "task-number" |
         "task-preview" |
         "task-preview-alert" |
         "task-preview-characters" |

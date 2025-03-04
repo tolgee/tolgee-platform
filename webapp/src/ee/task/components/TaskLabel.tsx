@@ -53,7 +53,7 @@ export const TaskLabel = ({
         </Box>
       </Tooltip>
       <StyledTaskName data-cy="task-label-name" sx={{ flexShrink: 1 }}>
-        {task.name}
+        {task.name || t('task_default_name')}
       </StyledTaskName>
       {project ? (
         <TaskNumberWithLink project={project} taskNumber={task.number} />

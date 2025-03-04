@@ -99,7 +99,9 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
     <>
       <PrefilterContainer
         icon={<ClipboardCheck />}
-        title={<T keyName="task_filter_indicator_label" />}
+        title={
+          data && data.name ? <T keyName="task_filter_indicator_label" /> : ''
+        }
         closeButton={
           <Tooltip title={t('task_filter_close_tooltip')} disableInteractive>
             <IconButton size="small" onClick={clear}>

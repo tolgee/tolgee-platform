@@ -28,7 +28,9 @@ export const useTaskReport = () => {
           const data = await res.blob();
           const url = URL.createObjectURL(data);
           const a = document.createElement('a');
-          a.download = `${toFileName(task.name)}_report.xlsx`;
+          a.download = `${toFileName(
+            task.name || `task_${task.number}`
+          )}_report.xlsx`;
           a.href = url;
           a.click();
         },

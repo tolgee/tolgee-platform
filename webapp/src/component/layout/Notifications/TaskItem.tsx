@@ -6,6 +6,7 @@ import {
 } from 'tg.component/layout/Notifications/NotificationItem';
 import { getTaskUrl } from 'tg.constants/links';
 import { FlagImage } from 'tg.component/languages/FlagImage';
+import { useTranslate } from '@tolgee/react';
 
 const StyledLinkedDetailItem = styled(Box)`
   margin-right: 10px;
@@ -23,6 +24,7 @@ export const TaskItem: FunctionComponent<TaskItemProps> = ({
   children,
   ...props
 }) => {
+  const { t } = useTranslate();
   const destinationUrl = getTaskUrl(
     notification.project!.id,
     notification.linkedTask!.number
@@ -47,7 +49,7 @@ export const TaskItem: FunctionComponent<TaskItemProps> = ({
           />
         </StyledLinkedDetailItem>
         <StyledLinkedDetailItem>
-          {notification.linkedTask?.name}
+          {notification.linkedTask?.name || t('task_default_name')}
         </StyledLinkedDetailItem>
         <StyledLinkedDetailNumber>
           #{notification.linkedTask?.number}

@@ -272,7 +272,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
               (languageId) =>
                 ({
                   type: values.type,
-                  name: values.name,
+                  name: values.name || undefined,
                   description: values.description,
                   languageId: languageId,
                   dueDate: values.dueDate,

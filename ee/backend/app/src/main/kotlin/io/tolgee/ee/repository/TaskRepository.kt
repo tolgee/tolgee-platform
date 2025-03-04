@@ -16,7 +16,9 @@ import org.springframework.stereotype.Repository
 private const val TASK_SEARCH = """
     (
         cast(:search as text) is null
+        or cast(:search as text) = ''
         or lower(tk.name) like lower(concat('%', cast(:search as text),'%'))
+        or cast(tk.number as text) = cast(:search as text)
     )
 """
 

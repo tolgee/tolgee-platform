@@ -177,7 +177,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
         <>
           <Formik
             initialValues={{
-              name: data.name,
+              name: data.name || '',
               description: data.description,
               dueDate: data.dueDate,
               assignees: data.assignees,
@@ -190,7 +190,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                   path: { projectId, taskNumber },
                   content: {
                     'application/json': {
-                      name: values.name,
+                      name: values.name || undefined,
                       description: values.description,
                       dueDate: values.dueDate,
                       assignees: values.assignees.map((u) => u.id),
@@ -213,7 +213,10 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                 <StyledTopPart>
                   <TextField
                     name="name"
-                    label={t('task_detail_field_name')}
+                    label={t('form_field_optional', {
+                      label: t('task_detail_field_name'),
+                    })}
+                    placeholder={t('task_default_name')}
                     data-cy="task-detail-field-name"
                     fullWidth
                     disabled={!canEditTask}
