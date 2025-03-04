@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AbstractControllerTest
@@ -30,16 +31,20 @@ import kotlin.properties.Delegates
 class PublicControllerTest :
   AbstractControllerTest() {
   private var canCreateOrganizations by Delegates.notNull<Boolean>()
+  private var registrationsAllowed by Delegates.notNull<Boolean>()
+  private var globalSsoEnabled by Delegates.notNull<Boolean>()
 
   @BeforeEach
   fun setup() {
     Mockito.reset(postHog)
     canCreateOrganizations = tolgeeProperties.authentication.userCanCreateOrganizations
+    registrationsAllowed = tolgeeProperties.authentication.registrationsAllowed
   }
 
   @AfterEach
   fun tearDown() {
     tolgeeProperties.authentication.userCanCreateOrganizations = canCreateOrganizations
+    tolgeeProperties.authentication.registrationsAllowed = registrationsAllowed
   }
 
   @MockBean
@@ -127,6 +132,19 @@ class PublicControllerTest :
       )
     performPost("/api/public/sign_up", dto).andIsOk
     assertThat(organizationRepository.findAllByName("Jejda")).hasSize(0)
+  }
+
+  @Test
+  fun `doesn't allow sign up when disabled`() {
+    tolgeeProperties.authentication.registrationsAllowed = false
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "aaaa@aaaa.com",
+        organizationName = "Jejda",
+      )
+    performPost("/api/public/sign_up", dto).andIsUnauthorized
   }
 
   @Test

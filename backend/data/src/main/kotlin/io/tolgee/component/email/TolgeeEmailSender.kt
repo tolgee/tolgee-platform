@@ -13,6 +13,9 @@ class TolgeeEmailSender(
   private val mimeMessageHelperFactory: MimeMessageHelperFactory,
 ) {
   fun sendEmail(params: EmailParams) {
+    if (tolgeeProperties.smtp.from.isNullOrEmpty()) {
+      return
+    }
     validateProps()
     val helper = mimeMessageHelperFactory.create()
     helper.setFrom(params.from ?: tolgeeProperties.smtp.from!!)
