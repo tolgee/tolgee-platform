@@ -4102,7 +4102,7 @@
             create unique index project_address_part_unique on project (address_part) where deleted_at is null;
         </sql>
     </changeSet>
-      <changeSet author="stanov (generated)" id="1740659624320-1">
+    <changeSet author="stanov (generated)" id="1740659624320-1">
         <createTable tableName="notification">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="notificationPK"/>
