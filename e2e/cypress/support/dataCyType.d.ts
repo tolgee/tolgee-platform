@@ -21,11 +21,13 @@ declare namespace DataCy {
         "administration-billing-edit-custom-plan-button" |
         "administration-billing-exclusive-plan-chip" |
         "administration-billing-trial-badge" |
-        "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-keys" |
         "administration-cloud-plan-field-included-mt-credits" |
+        "administration-cloud-plan-field-included-seats" |
         "administration-cloud-plan-field-included-translations" |
+        "administration-cloud-plan-field-metric-type" |
+        "administration-cloud-plan-field-metric-type-item" |
         "administration-cloud-plan-field-name" |
         "administration-cloud-plan-field-price-monthly" |
         "administration-cloud-plan-field-price-per-seat" |
@@ -75,6 +77,7 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-plan-field-feature" |
         "administration-plan-field-non-commercial" |
         "administration-plan-selector" |
         "administration-subscriptions-cloud-plan-name" |
