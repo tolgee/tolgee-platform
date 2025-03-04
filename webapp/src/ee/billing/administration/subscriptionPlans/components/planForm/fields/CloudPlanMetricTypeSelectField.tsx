@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import { Select } from 'tg.component/common/form/fields/Select';
 import { MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
@@ -17,9 +17,9 @@ export const CloudPlanMetricTypeSelectField: FC<
   const { values } = useCloudPlanFormValues(parentName);
 
   const options = [
-    { value: 'SEATS_KEYS', label: 'Keys & Seats' },
+    { value: 'KEYS_SEATS', label: 'Keys & Seats' },
     { value: 'STRINGS', label: 'Strings' },
-  ] as { value: MetricType; label: string }[];
+  ] satisfies { value: MetricType; label: string }[];
 
   if (values.type == 'SLOTS_FIXED') {
     return null;
@@ -33,14 +33,14 @@ export const CloudPlanMetricTypeSelectField: FC<
       fullWidth
       minHeight={false}
       sx={{ flexBasis: '50%' }}
-      data-cy="administration-cloud-plan-field-type"
+      data-cy="administration-cloud-plan-field-metric-type"
       renderValue={(val) => options.find((o) => o.value === val)?.label}
     >
       {options.map(({ value, label }) => (
         <MenuItem
           key={value}
           value={value}
-          data-cy="administration-cloud-plan-field-type-item"
+          data-cy="administration-cloud-plan-field-metric-type-item"
         >
           {label}
         </MenuItem>

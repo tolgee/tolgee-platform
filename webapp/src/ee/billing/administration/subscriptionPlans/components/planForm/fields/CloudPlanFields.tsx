@@ -1,20 +1,13 @@
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useTranslate } from '@tolgee/react';
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Switch,
-  Typography,
-} from '@mui/material';
-import { Field, FieldProps, useFormikContext } from 'formik';
-import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import { Box, FormControlLabel, Switch } from '@mui/material';
+import { useFormikContext } from 'formik';
 import React, { FC } from 'react';
 import { CloudPlanPricesAndLimits } from './CloudPlanPricesAndLimits';
 import { PlanNonCommercialSwitch } from './PlanNonCommercialSwitch';
 import { useCloudPlanFormValues } from '../useCloudPlanFormValues';
 import { CloudPlanTypeSelectField } from './CloudPlanTypeSelectField';
-import { StripeProductSelectField } from './StripeProductSelectField';
+import { PlanStripeProductSelectField } from './PlanStripeProductSelectField';
 import { CloudPlanMetricTypeSelectField } from './CloudPlanMetricTypeSelectField';
 import { PlanEnabledFeaturesField } from './PlanEnabledFeaturesField';
 
@@ -25,7 +18,7 @@ export const CloudPlanFields: FC<{
 }> = ({ parentName, isUpdate, canEditPrices }) => {
   const { t } = useTranslate();
 
-  const { setFieldValue } = useFormikContext<any>();
+  const { setFieldValue, errors } = useFormikContext<any>();
 
   const { values } = useCloudPlanFormValues(parentName);
 
@@ -34,6 +27,8 @@ export const CloudPlanFields: FC<{
   function onFreeChange() {
     setFieldValue(`${parentName}free`, !values.free);
   }
+
+  console.log({ errors, values });
 
   return (
     <>
@@ -62,7 +57,7 @@ export const CloudPlanFields: FC<{
       >
         <CloudPlanTypeSelectField parentName={parentName} />
         <CloudPlanMetricTypeSelectField parentName={parentName} />
-        <StripeProductSelectField />
+        <PlanStripeProductSelectField parentName={parentName} />
       </Box>
 
       <CloudPlanPricesAndLimits

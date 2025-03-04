@@ -22,13 +22,12 @@ export const getCloudPlanInitialValues = (
             ? planData.includedUsage.translationSlots
             : planData.includedUsage.translations,
       },
-      metricType: planData.includedUsage.keys > 0 ? 'SEATS_KEYS' : 'STRINGS',
     } as CloudPlanFormData;
   }
 
   return {
     type: 'PAY_AS_YOU_GO',
-    metricType: 'SEATS_KEYS',
+    metricType: 'KEYS_SEATS',
     name: '',
     stripeProductId: '',
     prices: {

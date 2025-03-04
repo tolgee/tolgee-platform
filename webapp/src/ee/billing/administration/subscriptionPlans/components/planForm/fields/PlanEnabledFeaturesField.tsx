@@ -40,7 +40,7 @@ export const PlanEnabledFeaturesField: FC<EnabledFeaturesFieldProps> = ({
 
             return (
               <FormControlLabel
-                data-cy="administration-cloud-plan-field-feature"
+                data-cy="administration-plan-field-feature"
                 key={feature}
                 control={
                   <Checkbox

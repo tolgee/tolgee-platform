@@ -8,9 +8,9 @@ type StripeProductSelectFieldProps = {
   parentName?: string;
 };
 
-export const StripeProductSelectField: FC<StripeProductSelectFieldProps> = ({
-  parentName,
-}) => {
+export const PlanStripeProductSelectField: FC<
+  StripeProductSelectFieldProps
+> = ({ parentName }) => {
   const productsLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/stripe-products',
     method: 'get',

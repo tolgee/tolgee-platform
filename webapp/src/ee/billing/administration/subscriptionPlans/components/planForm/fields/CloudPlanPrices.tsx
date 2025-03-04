@@ -55,12 +55,15 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
 
   return (
     <>
-      <Typography sx={{ mt: 2 }}>
+      <Typography sx={{ mt: 4 }} variant="h3">
         {t('administration_cloud_plan_form_prices_title')}
+      </Typography>
+      <Typography>
+        {t('administration_cloud_plan_form_prices_per_subscription')}
       </Typography>
       <Box
         display="grid"
-        gridTemplateColumns="repeat(4, 1fr)"
+        gridTemplateColumns="repeat(2, 1fr)"
         gap={2}
         sx={{ mt: 1 }}
       >
@@ -80,6 +83,18 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
           type="number"
           fullWidth
         />
+      </Box>
+
+      <Typography>
+        {t('administration_cloud_plan_form_prices_per_usage')}
+      </Typography>
+
+      <Box
+        display="grid"
+        gridTemplateColumns="repeat(3, 1fr)"
+        gap={2}
+        sx={{ mt: 1 }}
+      >
         <TextField
           name={`${parentName}prices.perThousandMtCredits`}
           size="small"
@@ -91,7 +106,6 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
           fullWidth
           disabled={type !== 'PAY_AS_YOU_GO'}
         />
-        {/*TODO: Split usage based and subscription based prices*/}
         {metricType == 'STRINGS' && (
           <>
             <TextField
@@ -107,7 +121,7 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
             />
           </>
         )}
-        {metricType == 'SEATS_KEYS' && (
+        {metricType == 'KEYS_SEATS' && (
           <>
             <TextField
               name={`${parentName}prices.perThousandKeys`}

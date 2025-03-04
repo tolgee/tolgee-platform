@@ -22,7 +22,7 @@ export const CloudPlanIncludedUsage: FC<CloudPlanPricesProps> = ({
       </Typography>
       <Box
         display="grid"
-        gridTemplateColumns="repeat(4, 1fr)"
+        gridTemplateColumns="repeat(3, 1fr)"
         gap={2}
         sx={{ mt: 1 }}
       >
@@ -52,9 +52,8 @@ export const CloudPlanIncludedUsage: FC<CloudPlanPricesProps> = ({
           />
         )}
 
-        {values.metricType == 'SEATS_KEYS' && (
+        {values.metricType == 'KEYS_SEATS' && (
           <>
-            {/*TODO: Test that for fixed plan we cannot set the prices in the backend tests  */}
             <TextField
               name={`${parentName}includedUsage.keys`}
               size="small"
@@ -68,7 +67,7 @@ export const CloudPlanIncludedUsage: FC<CloudPlanPricesProps> = ({
               size="small"
               type="number"
               fullWidth
-              data-cy="administration-cloud-plan-field-included-keys"
+              data-cy="administration-cloud-plan-field-included-seats"
               label={t('administration_cloud_plan_field_included_seats')}
             />
           </>
