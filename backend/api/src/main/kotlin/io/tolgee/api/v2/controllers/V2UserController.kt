@@ -178,6 +178,7 @@ class V2UserController(
     summary = "Get organization which manages user",
     description = "Returns the organization that manages a given user or null",
   )
+  @BypassForcedSsoAuthentication
   @OpenApiHideFromPublicDocs
   fun getManagedBy(): PrivateOrganizationModel? {
     val userAccount = authenticationFacade.authenticatedUser

@@ -105,6 +105,10 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
         });
       },
     },
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+    },
   });
 
   const markSeenMutation = useApiMutation({

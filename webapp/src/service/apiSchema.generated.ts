@@ -6332,11 +6332,7 @@ export interface operations {
   deleteCurrentAuthProvider: {
     responses: {
       /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["JwtAuthenticationResponse"];
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
