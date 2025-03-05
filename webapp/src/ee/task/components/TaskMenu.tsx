@@ -226,7 +226,7 @@ export const TaskMenu = ({
         )}
         {TASK_ACTIVE_STATES.includes(task.state) && (
           <MenuItem disabled={!canEditTask} onClick={handleClose}>
-            {t('task_menu_close_task')}
+            {t('task_menu_cancel_task')}
           </MenuItem>
         )}
         {!hideTaskDetail && (

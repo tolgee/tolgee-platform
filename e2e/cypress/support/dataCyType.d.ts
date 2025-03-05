@@ -542,6 +542,7 @@ declare namespace DataCy {
         "task-detail" |
         "task-detail-author" |
         "task-detail-characters" |
+        "task-detail-close" |
         "task-detail-closed-at" |
         "task-detail-created-at" |
         "task-detail-download-report" |

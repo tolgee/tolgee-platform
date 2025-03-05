@@ -1,7 +1,10 @@
 import { useRef, useState } from 'react';
 import { Box, IconButton, Tooltip, styled } from '@mui/material';
 import { Placeholder } from '@tginternal/editor';
+import { useTranslate } from '@tolgee/react';
+import { HelpCircle } from '@untitled-ui/icons-react';
 
+import { TaskInfoMessage } from 'tg.ee';
 import { ControlsEditorMain } from '../cell/ControlsEditorMain';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
 import { useTranslationsSelector } from '../context/TranslationsContext';
@@ -14,8 +17,6 @@ import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
-import { HelpCircle } from '@untitled-ui/icons-react';
-import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -48,9 +49,14 @@ const StyledContainer = styled('div')`
 const StyledBottom = styled(Box)`
   grid-area: controls-b;
   padding: 0px 12px 4px 16px;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
+
+const StyledControls = styled(Box)`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
@@ -83,7 +89,11 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
   const editVal = tools.editVal!;
   const state = translation?.state || 'UNTRANSLATED';
   const activeVariant = editVal.activeVariant;
-
+  const prefilteredTask = useTranslationsSelector((c) =>
+    c.prefilteredTask?.language.id === language.id
+      ? c.prefilteredTask
+      : undefined
+  );
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
   const editorRef = useRef<EditorView>(null);
   const baseLanguage = useTranslationsSelector((c) => c.baseLanguage);
@@ -127,6 +137,10 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     }
   };
 
+  const translationTasks = keyData.tasks?.filter(
+    (t) => t.languageTag === language.tag
+  );
+
   return (
     <StyledContainer>
       <TranslationLanguage
@@ -165,32 +179,36 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
       <StyledBottom onMouseDown={(e) => e.preventDefault()}>
         {editEnabled ? (
           <>
-            <Box display="flex" alignItems="center" gap="8px">
-              <Tooltip title={t('translation_format_help')}>
-                <IconButton
-                  style={{ margin: '-4px -4px -4px -6px' }}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  href="https://tolgee.io/platform/projects_and_organizations/editing_translations"
-                >
-                  <HelpCircle width={20} height={20} />
-                </IconButton>
-              </Tooltip>
-              <MissingPlaceholders
-                placeholders={missingPlaceholders}
-                onPlaceholderClick={handlePlaceholderClick}
-                variant={editVal.value.parameter ? activeVariant : undefined}
-                locale={language.tag}
-              />
-            </Box>
-            <ControlsEditorMain
-              className="controls-main"
-              onSave={handleSave}
-              onCancel={() => handleClose(true)}
-              tasks={keyData.tasks?.filter(
-                (t) => t.languageTag === language.tag
-              )}
+            <TaskInfoMessage
+              tasks={translationTasks}
+              currentTask={prefilteredTask?.number}
             />
+            <StyledControls>
+              <Box display="flex" alignItems="center" gap="8px">
+                <Tooltip title={t('translation_format_help')}>
+                  <IconButton
+                    style={{ margin: '-4px -4px -4px -6px' }}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    href="https://tolgee.io/platform/projects_and_organizations/editing_translations"
+                  >
+                    <HelpCircle width={20} height={20} />
+                  </IconButton>
+                </Tooltip>
+                <MissingPlaceholders
+                  placeholders={missingPlaceholders}
+                  onPlaceholderClick={handlePlaceholderClick}
+                  variant={editVal.value.parameter ? activeVariant : undefined}
+                  locale={language.tag}
+                />
+              </Box>
+              <ControlsEditorMain
+                className="controls-main"
+                onSave={handleSave}
+                onCancel={() => handleClose(true)}
+                tasks={translationTasks}
+              />
+            </StyledControls>
           </>
         ) : (
           <ControlsEditorReadOnly

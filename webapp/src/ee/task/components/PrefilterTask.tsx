@@ -81,11 +81,7 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
           <T keyName="task_filter_indicator_blocking_warning" />{' '}
           {blockingTasksLoadable.data.map((taskNumber, i) => (
             <React.Fragment key={taskNumber}>
-              <TaskTooltip
-                taskNumber={taskNumber}
-                project={project}
-                newTaskActions={true}
-              >
+              <TaskTooltip taskNumber={taskNumber} project={project}>
                 <StyledTaskId>#{taskNumber}</StyledTaskId>
               </TaskTooltip>
               {i !== blockingTasksLoadable.data.length - 1 && ', '}

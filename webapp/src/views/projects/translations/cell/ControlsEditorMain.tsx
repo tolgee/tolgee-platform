@@ -39,13 +39,8 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
   const anchorEl = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const task = tasks?.[0];
-  const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const displayTaskControls =
-    task &&
-    task.number === prefilteredTask &&
-    task.userAssigned &&
-    !task.done &&
-    task.type === 'TRANSLATE';
+    task && task.userAssigned && !task.done && task.type === 'TRANSLATE';
 
   const withClose = (callback?: () => void) => () => {
     setOpen(false);

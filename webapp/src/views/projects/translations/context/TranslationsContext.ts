@@ -68,6 +68,18 @@ export const [
 
   const { satisfiesLanguageAccess } = useProjectPermissions();
 
+  const prefilteredTaskLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}',
+    method: 'get',
+    path: {
+      projectId: props.projectId,
+      taskNumber: props.prefilter?.task as number,
+    },
+    options: {
+      enabled: props.prefilter?.task !== undefined,
+    },
+  });
+
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
     method: 'get',
@@ -303,6 +315,7 @@ export const [
     elementsRef: viewRefs.elementsRef,
     reactList: viewRefs.reactList,
     prefilter: props.prefilter,
+    prefilteredTask: prefilteredTaskLoadable.data,
     layout,
   };
 
