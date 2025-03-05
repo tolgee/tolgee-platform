@@ -1,5 +1,7 @@
 package io.tolgee.controllers.internal.e2eData
 
+import io.tolgee.data.StandardTestDataResult
+import io.tolgee.data.service.TestDataGeneratingService
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.service.organization.OrganizationService
@@ -40,32 +42,15 @@ abstract class AbstractE2eDataController {
   @Autowired
   private lateinit var applicationContext: ApplicationContext
 
+  @Autowired
+  private lateinit var testDataGeneratingService: TestDataGeneratingService
+
   open fun afterTestDataStored(data: TestDataBuilder) {}
 
   @GetMapping(value = ["/generate-standard"])
   @Transactional
   open fun generate(): StandardTestDataResult {
-    val data = this.testData
-    testDataService.saveTestData(data)
-    afterTestDataStored(data)
-    return getStandardResult(data)
-  }
-
-  fun getStandardResult(data: TestDataBuilder): StandardTestDataResult {
-    return StandardTestDataResult(
-      projects =
-        data.data.projects.map {
-          StandardTestDataResult.ProjectModel(name = it.self.name, id = it.self.id)
-        },
-      users =
-        data.data.userAccounts.map {
-          StandardTestDataResult.UserModel(name = it.self.name, username = it.self.username, id = it.self.id)
-        },
-      organizations =
-        data.data.organizations.map {
-          StandardTestDataResult.OrganizationModel(id = it.self.id, name = it.self.name, slug = it.self.slug)
-        },
-    )
+    return testDataGeneratingService.generate(testData, this::afterTestDataStored)
   }
 
   @GetMapping(value = ["/clean"])
@@ -81,28 +66,5 @@ abstract class AbstractE2eDataController {
         return@executeInNewRepeatableTransaction null
       }
     }
-  }
-
-  data class StandardTestDataResult(
-    val projects: List<ProjectModel>,
-    val users: List<UserModel>,
-    val organizations: List<OrganizationModel>,
-  ) {
-    data class UserModel(
-      val name: String,
-      val username: String,
-      val id: Long,
-    )
-
-    data class ProjectModel(
-      val name: String,
-      val id: Long,
-    )
-
-    data class OrganizationModel(
-      val id: Long,
-      val slug: String,
-      val name: String,
-    )
   }
 }
