@@ -1,6 +1,7 @@
 package io.tolgee.controllers.internal.e2eData
 
 import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.data.StandardTestDataResult
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.PermissionsTestData
 import io.tolgee.model.enums.ProjectPermissionType
