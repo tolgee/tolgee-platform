@@ -155,7 +155,7 @@ describe('Content delivery', () => {
     cy.gcy('export-format-selector-item').contains('XLIFF').click();
 
     // Enable HTML escaping
-    cy.gcy('content-delivery-escape-html-checkbox')
+    cy.gcy('export-escape_html-selector')
       .find('input')
       .should('not.be.checked')
       .click();
@@ -166,9 +166,7 @@ describe('Content delivery', () => {
 
     // Verify the settings persist
     openEditDialog('XLIFF Test');
-    cy.gcy('content-delivery-escape-html-checkbox')
-      .find('input')
-      .should('be.checked');
+    cy.gcy('export-escape_html-selector').find('input').should('be.checked');
 
     // Verify format is still XLIFF
     gcy('export-format-selector').should('contain', 'XLIFF');
