@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.ExportParamsDocs
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
@@ -73,7 +74,7 @@ class ContentDeliveryConfigRequest() : IExportParams {
   override var fileStructureTemplate: String? = null
 
   @Schema(
-    description = "If true, HTML tags are escaped in the exported file.",
+    description = ExportParamsDocs.HTML_ESCAPE_DESCRIPTION,
   )
   override var escapeHtml: Boolean = false
 }
