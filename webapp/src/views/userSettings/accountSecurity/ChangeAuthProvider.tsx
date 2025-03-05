@@ -51,7 +51,7 @@ export const ChangeAuthProvider: FunctionComponent = () => {
 
   return (
     <Box>
-      <Typography variant="h6" mt={2}>
+      <Typography variant="h6" mt={4}>
         <T keyName="third-party-authentication-options" />
       </Typography>
       {/* TODO: Show info card when user is managed explaining why no third-party provider changes are available */}
@@ -61,54 +61,62 @@ export const ChangeAuthProvider: FunctionComponent = () => {
         alignItems="center"
         mt={2}
       >
-        {ssoEnabled && (
-          <LoadingButton
-            loading={ssoUrl.isLoading}
-            href={ssoUrl.data?.redirectUrl || ''}
-            disabled={
-              isUserManaged || (!ssoUrl.isLoading && !ssoUrl.data?.redirectUrl)
-            }
-            size="medium"
-            endIcon={<Key02 />}
-            variant="outlined"
-            style={{ marginBottom: '0.5rem' }}
-            color="inherit"
-          >
-            {/* TODO: Maybe hover hint explaining when is SSO available? */}
-            <T keyName="connect_sso" />
-          </LoadingButton>
-        )}
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="stretch"
+          minWidth={345}
+        >
+          {ssoEnabled && (
+            <LoadingButton
+              loading={ssoUrl.isLoading}
+              href={ssoUrl.data?.redirectUrl || ''}
+              disabled={
+                isUserManaged ||
+                (!ssoUrl.isLoading && !ssoUrl.data?.redirectUrl)
+              }
+              size="medium"
+              endIcon={<Key02 />}
+              variant="outlined"
+              style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}
+              color="inherit"
+            >
+              {/* TODO: Maybe hover hint explaining when is SSO available? */}
+              <T keyName="connect_sso" />
+            </LoadingButton>
+          )}
 
-        {oAuthServices.map((provider) => (
-          <React.Fragment key={provider.id}>
-            {provider.id.toUpperCase() === user?.thirdPartyAuthType ? (
-              <Button
-                disabled={isUserManaged}
-                size="medium"
-                endIcon={provider.buttonIcon}
-                variant="outlined"
-                style={{ marginBottom: '0.5rem' }}
-                color="success"
-                onClick={handleDisconnect}
-              >
-                {provider.disconnectButtonTitle}
-              </Button>
-            ) : (
-              <Button
-                disabled={isUserManaged}
-                component="a"
-                href={provider.authenticationUrl}
-                size="medium"
-                endIcon={provider.buttonIcon}
-                variant="outlined"
-                style={{ marginBottom: '0.5rem' }}
-                color="inherit"
-              >
-                {provider.connectButtonTitle}
-              </Button>
-            )}
-          </React.Fragment>
-        ))}
+          {oAuthServices.map((provider) => (
+            <React.Fragment key={provider.id}>
+              {provider.id.toUpperCase() === user?.thirdPartyAuthType ? (
+                <Button
+                  disabled={isUserManaged}
+                  size="medium"
+                  endIcon={provider.buttonIcon}
+                  variant="outlined"
+                  style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}
+                  color="success"
+                  onClick={handleDisconnect}
+                >
+                  {provider.disconnectButtonTitle}
+                </Button>
+              ) : (
+                <Button
+                  disabled={isUserManaged}
+                  component="a"
+                  href={provider.authenticationUrl}
+                  size="medium"
+                  endIcon={provider.buttonIcon}
+                  variant="outlined"
+                  style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}
+                  color="inherit"
+                >
+                  {provider.connectButtonTitle}
+                </Button>
+              )}
+            </React.Fragment>
+          ))}
+        </Box>
       </Box>
     </Box>
   );
