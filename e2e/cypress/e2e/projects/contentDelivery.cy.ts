@@ -146,7 +146,7 @@ describe('Content delivery', () => {
     );
   });
 
-  it('tests XLIFF format with HTML escaping', () => {
+  it('stores content delivery configuration for XLIFF format with HTML escaping', () => {
     cy.gcy('content-delivery-add-button').click();
     fillContentDeliveryConfigForm('XLIFF Test');
 
