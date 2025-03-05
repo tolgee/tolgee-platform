@@ -61,12 +61,6 @@ open class TaskFilters {
   )
   var filterAgency: List<Long>? = null
 
-  @Deprecated("Confusing logic and naming", ReplaceWith("filterNotClosedBefore"))
-  @field:Parameter(
-    description = """Exclude "done" tasks which are older than specified timestamp""",
-  )
-  var filterDoneMinClosedAt: Long? = null
-
   @field:Parameter(
     description = """Exclude tasks which were closed before specified timestamp""",
   )

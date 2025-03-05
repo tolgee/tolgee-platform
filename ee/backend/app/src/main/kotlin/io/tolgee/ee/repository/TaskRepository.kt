@@ -76,11 +76,6 @@ private const val TASK_FILTERS = """
         )
     )
     and (
-        tk.state != 'DONE'
-        or :#{#filters.filterDoneMinClosedAt} is null
-        or tk.closedAt > :#{#filters.filterDoneMinClosedAt}
-    )
-    and (
         :#{#filters.filterNotClosedBefore} is null
         or tk.closedAt is null
         or tk.closedAt > :#{#filters.filterNotClosedBefore}

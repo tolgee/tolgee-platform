@@ -22,7 +22,7 @@ type Props = {
 export const TaskDetailActions = ({ task, project, projectScopes }: Props) => {
   const user = useUser();
   const cancelMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/tasks/{taskNumber}/close',
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}/cancel',
     method: 'put',
     invalidatePrefix: [
       '/v2/projects/{projectId}/translations',
@@ -123,7 +123,7 @@ export const TaskDetailActions = ({ task, project, projectScopes }: Props) => {
           onClick={handleMarkAsDone}
           disabled={task.doneItems !== task.totalItems || !canMarkAsDone}
         >
-          {t('task_menu_mark_as_done')}
+          {t('task_menu_mark_as_finished')}
         </Button>
       ) : (
         <Button

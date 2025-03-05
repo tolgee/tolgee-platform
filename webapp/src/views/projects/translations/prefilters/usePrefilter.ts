@@ -41,7 +41,7 @@ export const usePrefilter = (): PrefilterType | undefined => {
   );
 
   const [taskHideDone, setTaskHideDone] = useUrlSearchState(
-    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE,
+    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED,
     {
       defaultVal: undefined,
     }

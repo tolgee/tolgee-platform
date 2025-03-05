@@ -232,7 +232,7 @@ class TaskService(
   ): TaskWithScopeView {
     val task = findByNumber(projectId, taskNumber)
     val taskWithScope = getTaskWithScope(task)
-    if (state == TaskState.DONE && taskWithScope.doneItems != taskWithScope.totalItems) {
+    if (state == TaskState.FINISHED && taskWithScope.doneItems != taskWithScope.totalItems) {
       throw BadRequestException(Message.TASK_NOT_FINISHED)
     }
     if (state == TaskState.NEW || state == TaskState.IN_PROGRESS) {
@@ -297,7 +297,7 @@ class TaskService(
   ): UpdateTaskKeyResponse {
     val task = findByNumber(projectId, taskNumber)
 
-    if (task.state == TaskState.CLOSED || task.state == TaskState.DONE) {
+    if (task.state == TaskState.CANCELED || task.state == TaskState.FINISHED) {
       throw BadRequestException(Message.TASK_NOT_OPEN)
     }
 
@@ -559,8 +559,8 @@ class TaskService(
   private fun createNotificationIfApplicable(task: Task) {
     val notificationType =
       when (task.state) {
-        TaskState.DONE -> NotificationType.TASK_COMPLETED
-        TaskState.CLOSED -> NotificationType.TASK_CLOSED
+        TaskState.FINISHED -> NotificationType.TASK_COMPLETED
+        TaskState.CANCELED -> NotificationType.TASK_CLOSED
         else -> return
       }
 

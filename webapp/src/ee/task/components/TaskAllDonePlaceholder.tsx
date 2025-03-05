@@ -15,7 +15,7 @@ type Props = {
 
 export const TaskAllDonePlaceholder = ({ taskNumber, projectId }: Props) => {
   const [_, setTaskHideDone] = useUrlSearchState(
-    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE
+    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED
   );
   const { finishTask } = useTranslationsActions();
   const user = useUser();
@@ -40,7 +40,9 @@ export const TaskAllDonePlaceholder = ({ taskNumber, projectId }: Props) => {
       height="0px"
       hint={
         isAssigned &&
-        !['DONE', 'CLOSED'].includes(taskLoadable.data?.state as TaskState) && (
+        !['FINISHED', 'CANCELED'].includes(
+          taskLoadable.data?.state as TaskState
+        ) && (
           <Button onClick={handleFinishTask} color="primary">
             <T keyName="task_all_done_placeholder_finish_task" />
           </Button>

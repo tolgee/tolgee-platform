@@ -41,7 +41,7 @@ export const TaskMenu = ({
   const [taskCreate, setTaskCreate] = useState<Partial<InitialValues>>();
   const [taskDetail, setTaskDetail] = useState<TaskModel>();
   const closeMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/tasks/{taskNumber}/close',
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}/cancel',
     method: 'put',
     invalidatePrefix: [
       '/v2/projects/{projectId}/translations',
@@ -113,7 +113,7 @@ export const TaskMenu = ({
 
   function handleClose() {
     confirmation({
-      title: <T keyName="task_menu_close_confirmation_title" />,
+      title: <T keyName="task_menu_cancel_confirmation_title" />,
       onConfirm() {
         onClose();
         closeMutation.mutate(
@@ -122,7 +122,7 @@ export const TaskMenu = ({
           },
           {
             onSuccess() {
-              messageService.success(<T keyName="task_menu_close_success" />);
+              messageService.success(<T keyName="task_menu_cancel_success" />);
             },
           }
         );
@@ -217,7 +217,7 @@ export const TaskMenu = ({
             onClick={handleMarkAsDone}
             disabled={task.doneItems !== task.totalItems || !canMarkAsDone}
           >
-            {t('task_menu_mark_as_done')}
+            {t('task_menu_mark_as_finished')}
           </MenuItem>
         ) : (
           <MenuItem onClick={handleReopen} disabled={!canEditTask}>
