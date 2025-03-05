@@ -6,7 +6,6 @@ import { T } from '@tolgee/react';
 import {
   useApiInfiniteQuery,
   useApiMutation,
-  useApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';

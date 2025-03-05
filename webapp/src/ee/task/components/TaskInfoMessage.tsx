@@ -1,10 +1,10 @@
-import { Alert, AlertTitle, styled } from '@mui/material';
+import { Alert, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { TaskTooltip } from './TaskTooltip';
 
-type TaskModel = components['schemas']['KeyTaskViewModel'];
+type KeyTaskViewModel = components['schemas']['KeyTaskViewModel'];
 
 const StyledTaskId = styled('span')`
   color: ${({ theme }) => theme.palette.primary.main};
@@ -27,7 +27,7 @@ const TaskLink = (props: { task: number }) => {
 };
 
 type Props = {
-  tasks: TaskModel[] | undefined;
+  tasks: KeyTaskViewModel[] | undefined;
   currentTask: number | undefined;
 };
 
@@ -35,7 +35,7 @@ export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
   const firstTask = tasks?.[0];
   const userAssignedTask = tasks?.find((t) => t.userAssigned);
 
-  if (firstTask && currentTask && firstTask.number !== currentTask) {
+  if (currentTask && firstTask && firstTask.number !== currentTask) {
     return (
       <Alert severity="error" icon={false}>
         <T
