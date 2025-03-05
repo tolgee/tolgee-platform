@@ -28,8 +28,6 @@ export const CloudPlanFields: FC<{
     setFieldValue(`${parentName}free`, !values.free);
   }
 
-  console.log({ errors, values });
-
   return (
     <>
       <TextField
