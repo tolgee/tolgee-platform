@@ -32,7 +32,6 @@ class PublicControllerTest :
   AbstractControllerTest() {
   private var canCreateOrganizations by Delegates.notNull<Boolean>()
   private var registrationsAllowed by Delegates.notNull<Boolean>()
-  private var globalSsoEnabled by Delegates.notNull<Boolean>()
 
   @BeforeEach
   fun setup() {
