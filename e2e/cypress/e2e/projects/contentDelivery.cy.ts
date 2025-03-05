@@ -146,6 +146,32 @@ describe('Content delivery', () => {
     );
   });
 
+  it('stores content delivery configuration for XLIFF format with HTML escaping', () => {
+    cy.gcy('content-delivery-add-button').click();
+    fillContentDeliveryConfigForm('XLIFF Test');
+
+    // Select XLIFF format
+    cy.gcy('export-format-selector').click();
+    cy.gcy('export-format-selector-item').contains('XLIFF').click();
+
+    // Enable HTML escaping
+    cy.gcy('export-escape_html-selector')
+      .find('input')
+      .should('not.be.checked')
+      .click();
+
+    // Save the configuration
+    saveForm();
+    waitForGlobalLoading();
+
+    // Verify the settings persist
+    openEditDialog('XLIFF Test');
+    cy.gcy('export-escape_html-selector').find('input').should('be.checked');
+
+    // Verify format is still XLIFF
+    gcy('export-format-selector').should('contain', 'XLIFF');
+  });
+
   it('updates existing content delivery', () => {
     const name = 'Azure edited';
     gcyAdvanced({ value: 'content-delivery-list-item', name: 'Azure' })

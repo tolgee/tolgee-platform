@@ -9,6 +9,7 @@ import { FormatSelector } from './components/FormatSelector';
 import { SupportArraysSelector } from './components/SupportArraysSelector';
 import { MessageFormatSelector } from './components/MessageFormatSelector';
 import { NsSelector } from './components/NsSelector';
+import { EscapeHtmlSelector } from './components/EscapeHtmlSelector';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -23,6 +24,7 @@ type FormValues = {
   namespaces?: string[];
   nested: boolean;
   supportArrays: boolean;
+  escapeHtml: boolean;
   messageFormat: MessageFormat | undefined;
 };
 
@@ -48,6 +50,11 @@ export const ExportFormContent = ({
             <SupportArraysSelector />
           </StyledOptions>
         </>
+      )}
+      {getFormatById(values.format).showEscapeHtml && (
+        <StyledOptions className="options">
+          <EscapeHtmlSelector />
+        </StyledOptions>
       )}
       <MessageFormatSelector className="messageFormat" />
       <NsSelector className="ns" namespaces={allNamespaces} />
