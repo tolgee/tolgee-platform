@@ -5,15 +5,13 @@ import { useProject } from 'tg.hooks/useProject';
 import { TaskTooltip } from './TaskTooltip';
 
 type KeyTaskViewModel = components['schemas']['KeyTaskViewModel'];
+type TaskModel = components['schemas']['TaskModel'];
 
 const StyledTaskId = styled('span')`
   color: ${({ theme }) => theme.palette.primary.main};
   cursor: default;
   text-decoration-line: underline;
   text-decoration-style: solid;
-  text-decoration-skip-ink: none;
-  text-decoration-thickness: auto;
-  text-underline-offset: auto;
   text-underline-position: from-font;
 `;
 
@@ -28,20 +26,47 @@ const TaskLink = (props: { task: number }) => {
 
 type Props = {
   tasks: KeyTaskViewModel[] | undefined;
-  currentTask: number | undefined;
+  currentTask: TaskModel | undefined;
 };
 
 export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
   const firstTask = tasks?.[0];
   const userAssignedTask = tasks?.find((t) => t.userAssigned);
 
-  if (currentTask && firstTask && firstTask.number !== currentTask) {
+  if (currentTask?.closedAt) {
+    return (
+      <Alert severity="error" icon={false}>
+        <T
+          keyName="task_info_message_current_task_closed"
+          params={{
+            currentTask: <TaskLink task={currentTask.number} />,
+          }}
+        />
+      </Alert>
+    );
+  }
+
+  if (currentTask && firstTask && firstTask.number !== currentTask.number) {
     return (
       <Alert severity="error" icon={false}>
         <T
           keyName="task_info_message_current_task_blocked"
           params={{
-            currentTask: <TaskLink task={currentTask} />,
+            currentTask: <TaskLink task={currentTask.number} />,
+            blockingTask: <TaskLink task={firstTask.number} />,
+          }}
+        />
+      </Alert>
+    );
+  }
+
+  if (currentTask && firstTask && firstTask.number !== currentTask.number) {
+    return (
+      <Alert severity="error" icon={false}>
+        <T
+          keyName="task_info_message_current_task_blocked"
+          params={{
+            currentTask: <TaskLink task={currentTask.number} />,
             blockingTask: <TaskLink task={firstTask.number} />,
           }}
         />
@@ -53,7 +78,7 @@ export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
     firstTask &&
     !firstTask?.userAssigned &&
     userAssignedTask &&
-    currentTask !== firstTask.number
+    currentTask?.number !== firstTask.number
   ) {
     return (
       <Alert severity="error" icon={false}>

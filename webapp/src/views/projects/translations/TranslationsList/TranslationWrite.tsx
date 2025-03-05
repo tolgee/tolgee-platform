@@ -181,7 +181,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
           <>
             <TaskInfoMessage
               tasks={translationTasks}
-              currentTask={prefilteredTask?.number}
+              currentTask={prefilteredTask}
             />
             <StyledControls>
               <Box display="flex" alignItems="center" gap="8px">

@@ -140,7 +140,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
         {editEnabled && (
           <TaskInfoMessage
             tasks={translationTasks}
-            currentTask={prefilteredTask?.number}
+            currentTask={prefilteredTask}
           />
         )}
         <StyledPlaceholdersAndControls>
