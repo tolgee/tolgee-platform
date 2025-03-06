@@ -1,6 +1,7 @@
 package io.tolgee.service.security
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.dtos.response.AuthProviderDto
@@ -23,9 +24,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.Calendar
+import java.util.UUID
 
 @Service
 class AuthProviderChangeService(
+  private val tolgeeProperties: TolgeeProperties,
   private val authProviderChangeRequestRepository: AuthProviderChangeRequestRepository,
   private val tenantService: TenantService,
   private val userAccountService: UserAccountService,
@@ -37,7 +40,7 @@ class AuthProviderChangeService(
   private val self: AuthProviderChangeService,
 ) {
   fun getCurrent(user: UserAccount): AuthProviderDto? {
-    return user.asAuthProviderDto()
+    return user.asAuthProviderDto(tolgeeProperties)
   }
 
   fun getRequestedChange(userAccount: UserAccount): AuthProviderDto? {
@@ -87,7 +90,11 @@ class AuthProviderChangeService(
   ) {
     val existing = authProviderChangeRequestRepository.findByUserAccountId(user.id)
     val request = existing ?: AuthProviderChangeRequest()
-    authProviderChangeRequestRepository.save(request.from(user, data))
+    self.save(request.from(user, data))
+  }
+
+  fun save(request: AuthProviderChangeRequest) {
+    authProviderChangeRequestRepository.save(request)
   }
 
   fun apply(
@@ -107,8 +114,15 @@ class AuthProviderChangeService(
   }
 
   @Transactional
-  fun accept(userAccount: UserAccount) {
-    val req = getActiveAuthProviderChangeRequest(userAccount) ?: return
+  fun accept(
+    userAccount: UserAccount,
+    id: String?,
+  ) {
+    val req = getActiveAuthProviderChangeRequest(userAccount) ?: throw NotFoundException()
+    if (id != null && req.identifier != id) {
+      throw NotFoundException()
+    }
+
     self.apply(req)
     authProviderChangeRequestRepository.delete(req)
   }
@@ -124,35 +138,82 @@ class AuthProviderChangeService(
       throw BadRequestException(Message.USER_MISSING_PASSWORD)
     }
 
-    userAccount.apply {
-      accountType = req.accountType
-      thirdPartyAuthType = req.authType
-      thirdPartyAuthId = req.authId
-      ssoRefreshToken = req.ssoRefreshToken
-      ssoSessionExpiry = req.ssoExpiration
-    }
-    userAccountService.save(userAccount)
+    checkEnabled(req.authType)
 
-    val domain = req.ssoDomain
-    if (domain != null && req.authType == ThirdPartyAuthType.SSO) {
-      val tenant = tenantService.getEnabledConfigByDomain(domain)
-      val organizationId = tenant.organizationId
-      if (organizationId == null) {
-        throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
+    userAccount.applyRequest(req)
+  }
+
+  private fun checkEnabled(provider: ThirdPartyAuthType?) {
+    val providerEnabled =
+      when (provider) {
+        ThirdPartyAuthType.SSO_GLOBAL -> tolgeeProperties.authentication.ssoGlobal.enabled
+        ThirdPartyAuthType.SSO -> tolgeeProperties.authentication.ssoOrganizations.enabled
+        ThirdPartyAuthType.GITHUB -> tolgeeProperties.authentication.github.clientId != null
+        ThirdPartyAuthType.GOOGLE -> tolgeeProperties.authentication.google.clientId != null
+        ThirdPartyAuthType.OAUTH2 -> tolgeeProperties.authentication.oauth2.clientId != null
+        null -> true // native login
       }
-      val organization =
-        organizationService.find(organizationId)
-          ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
-      if (!organizationRoleService.isUserMemberOrOwner(userAccount.id, organization.id)) {
-        organizationRoleService.grantMemberRoleToUser(userAccount, organization)
-      }
-      organizationRoleService.setManaged(userAccount, organization, true)
+
+    if (!providerEnabled) {
+      // Don't allow user to switch to disabled authentication provider
+      throw BadRequestException(Message.AUTHENTICATION_METHOD_DISABLED)
     }
+  }
+
+  private fun UserAccount.applyRequest(req: AuthProviderChangeRequest) {
+    accountType = req.accountType
+    thirdPartyAuthType = req.authType
+    thirdPartyAuthId = req.authId
+    ssoRefreshToken = req.ssoRefreshToken
+    ssoSessionExpiry = req.ssoExpiration
+    userAccountService.save(this)
+    applyDomain(req)
+  }
+
+  private fun UserAccount.applyDomain(req: AuthProviderChangeRequest) {
+    val userAccount = this
+    val domain = req.ssoDomain
+    if (domain == null) {
+      return
+    }
+
+    if (userAccount.domain != domain) {
+      // User probably changed his email between change request creation and the apply call
+      throw BadRequestException(Message.THIRD_PARTY_SWITCH_CONFLICT)
+    }
+
+    if (req.authType != ThirdPartyAuthType.SSO) {
+      if (req.authType != ThirdPartyAuthType.SSO_GLOBAL) {
+        // Shouldn't happen
+        throw IllegalStateException(
+          "AuthProviderChangeRequest with ssoDomain set (${req.ssoDomain} but non-SSO authType: ${req.authType}",
+        )
+      }
+      return
+    }
+
+    val tenant = tenantService.getEnabledConfigByDomain(domain)
+
+    val organizationId = tenant.organizationId
+    if (organizationId == null) {
+      throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
+    }
+
+    val organization = organizationService.find(organizationId)
+    if (organization == null) {
+      throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    }
+
+    if (!organizationRoleService.isUserMemberOrOwner(userAccount.id, organization.id)) {
+      organizationRoleService.grantMemberRoleToUser(userAccount, organization)
+    }
+    organizationRoleService.setManaged(userAccount, organization, true)
   }
 
   @Transactional
   fun reject(userAccount: UserAccount) {
-    authProviderChangeRequestRepository.deleteByUserAccountId(userAccount.id)
+    val req = getActiveAuthProviderChangeRequest(userAccount) ?: throw NotFoundException()
+    authProviderChangeRequestRepository.delete(req)
   }
 
   private fun getActiveAuthProviderChangeRequest(user: UserAccount): AuthProviderChangeRequest? {
@@ -171,6 +232,7 @@ class AuthProviderChangeService(
     val expiration = currentDateProvider.date.addMinutes(30)
     userAccount = user
     expirationDate = DateUtils.truncate(expiration, Calendar.SECOND)
+    identifier = UUID.randomUUID().toString()
     accountType = data.accountType
     authType = data.authType
     authId = data.authId

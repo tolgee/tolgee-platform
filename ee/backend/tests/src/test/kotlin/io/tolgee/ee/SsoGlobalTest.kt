@@ -69,14 +69,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
     currentDateProvider.forcedDate = currentDateProvider.date
-    tolgeeProperties.authentication.ssoGlobal.apply {
-      enabled = true
-      domain = "domain.com"
-      clientId = "dummy_client_id"
-      clientSecret = "clientSecret"
-      authorizationUri = "https://dummy-url.com"
-      tokenUri = "http://tokenUri"
-    }
+    tolgeeProperties.authentication.ssoGlobal.enabled = true
     testData = SsoTestData()
     testDataService.saveTestData(testData.root)
   }
@@ -84,14 +77,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   @AfterEach
   fun tearDown() {
     testDataService.cleanTestData(testData.root)
-    tolgeeProperties.authentication.ssoGlobal.apply {
-      enabled = false
-      domain = ""
-      clientId = ""
-      clientSecret = ""
-      authorizationUri = ""
-      tokenUri = ""
-    }
+    tolgeeProperties.authentication.ssoGlobal.enabled = false
     currentDateProvider.forcedDate = null
     enabledFeaturesProvider.forceEnabled = null
   }

@@ -166,11 +166,11 @@ class V2UserController(
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   @AllowApiAccess
-  fun getSso(): PublicSsoTenantModel? {
+  fun getSso(): ResponseEntity<PublicSsoTenantModel> {
     val userAccount = authenticationFacade.authenticatedUser
-    val domain = userAccount.domain ?: return null
-    val tenant = tenantService.getEnabledConfigByDomainOrNull(domain) ?: return null
-    return publicSsoTenantModelAssembler.toModel(tenant)
+    val domain = userAccount.domain ?: return ResponseEntity.noContent().build()
+    val tenant = tenantService.getEnabledConfigByDomainOrNull(domain) ?: return ResponseEntity.noContent().build()
+    return ResponseEntity.ok(publicSsoTenantModelAssembler.toModel(tenant))
   }
 
   @GetMapping("/managed-by")
@@ -181,15 +181,17 @@ class V2UserController(
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   @OpenApiHideFromPublicDocs
-  fun getManagedBy(): PrivateOrganizationModel? {
+  fun getManagedBy(): ResponseEntity<PrivateOrganizationModel> {
     val userAccount = authenticationFacade.authenticatedUser
-    val org = organizationRoleService.getManagedBy(userId = userAccount.id) ?: return null
+    val org = organizationRoleService.getManagedBy(userId = userAccount.id) ?: return ResponseEntity.noContent().build()
     val view =
       organizationService.findPrivateView(org.id, authenticationFacade.authenticatedUser.id)
-        ?: return null
-    return this.privateOrganizationModelAssembler.toModel(
-      view,
-      enabledFeaturesProvider.get(view.organization.id),
+        ?: return ResponseEntity.noContent().build()
+    return ResponseEntity.ok(
+      privateOrganizationModelAssembler.toModel(
+        view,
+        enabledFeaturesProvider.get(view.organization.id),
+      ),
     )
   }
 

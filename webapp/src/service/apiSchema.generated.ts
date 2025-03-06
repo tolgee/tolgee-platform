@@ -911,6 +911,9 @@ export interface paths {
 
 export interface components {
   schemas: {
+    AcceptAuthProviderChangeRequest: {
+      id: string;
+    };
     AnnouncementDto: {
       type:
         | "FEATURE_BATCH_OPERATIONS"
@@ -987,6 +990,7 @@ export interface components {
     AuthProviderDto: {
       accountType?: "LOCAL" | "MANAGED" | "THIRD_PARTY";
       authType?: "GOOGLE" | "GITHUB" | "OAUTH2" | "SSO" | "SSO_GLOBAL";
+      id?: string;
       ssoDomain?: string;
     };
     AutoTranslationConfigModel: {
@@ -2013,6 +2017,7 @@ export interface components {
         | "sso_cant_verify_user"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
+        | "authentication_method_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
@@ -4488,6 +4493,7 @@ export interface components {
         | "sso_cant_verify_user"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
+        | "authentication_method_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
@@ -6448,6 +6454,11 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AcceptAuthProviderChangeRequest"];
       };
     };
   };
