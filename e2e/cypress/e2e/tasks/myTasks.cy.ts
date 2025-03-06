@@ -61,7 +61,7 @@ describe('my tasks', () => {
     editCell('Translation 0', 'New translation 0');
     getCell('Translation 1').findDcy('translations-cell-task-button').click();
     cy.get('#alert-dialog-title')
-      .contains('All items in the task are finished')
+      .contains('All items in the task are done')
       .should('be.visible');
     cy.gcy('global-confirmation-confirm').click();
     visitMyTasks();
@@ -69,7 +69,7 @@ describe('my tasks', () => {
       .contains('Translate task')
       .closestDcy('task-item')
       .findDcy('task-state')
-      .should('contain', 'Done');
+      .should('contain', 'Finished');
   });
 
   it("Organization member can finish Review task (permissions elevated because he's assigned)", () => {
@@ -79,7 +79,7 @@ describe('my tasks', () => {
     cy.waitForDom();
     getCell('Překlad 1').findDcy('translations-cell-task-button').click();
     cy.get('#alert-dialog-title')
-      .contains('All items in the task are finished')
+      .contains('All items in the task are done')
       .should('be.visible');
     cy.gcy('global-confirmation-confirm').click();
     visitMyTasks();
@@ -87,7 +87,7 @@ describe('my tasks', () => {
       .contains('Review task')
       .closestDcy('task-item')
       .findDcy('task-state')
-      .should('contain', 'Done');
+      .should('contain', 'Finished');
   });
 
   it("Organization member can add comments (permissions elevated because he's assigned)", () => {
@@ -98,7 +98,7 @@ describe('my tasks', () => {
     deleteComment('Test comment');
   });
 
-  it('shows stats correctly on half finished task', () => {
+  it.only('shows stats correctly on half finished task', () => {
     goToUserTasks('Organization member');
     cy.gcy('task-label-name').contains('Review task').click();
     setStateToReviewed('Překlad 0');

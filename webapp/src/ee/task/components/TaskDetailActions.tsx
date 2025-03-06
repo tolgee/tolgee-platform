@@ -11,15 +11,18 @@ import { useUser } from 'tg.globalContext/helpers';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 
 type TaskModel = components['schemas']['TaskModel'];
-type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
 type Props = {
   task: TaskModel;
-  project: SimpleProjectModel;
+  projectId: number;
   projectScopes?: Scope[];
 };
 
-export const TaskDetailActions = ({ task, project, projectScopes }: Props) => {
+export const TaskDetailActions = ({
+  task,
+  projectId,
+  projectScopes,
+}: Props) => {
   const user = useUser();
   const cancelMutation = useApiMutation({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/cancel',
@@ -62,7 +65,7 @@ export const TaskDetailActions = ({ task, project, projectScopes }: Props) => {
       onConfirm() {
         cancelMutation.mutate(
           {
-            path: { projectId: project.id, taskNumber: task.number },
+            path: { projectId, taskNumber: task.number },
           },
           {
             onSuccess() {
@@ -77,7 +80,7 @@ export const TaskDetailActions = ({ task, project, projectScopes }: Props) => {
   function handleReopen() {
     reopenMutation.mutate(
       {
-        path: { projectId: project.id, taskNumber: task.number },
+        path: { projectId, taskNumber: task.number },
       },
       {
         onSuccess() {
@@ -90,7 +93,7 @@ export const TaskDetailActions = ({ task, project, projectScopes }: Props) => {
   function handleMarkAsDone() {
     finishMutation.mutate(
       {
-        path: { projectId: project.id, taskNumber: task.number },
+        path: { projectId, taskNumber: task.number },
       },
       {
         onSuccess() {

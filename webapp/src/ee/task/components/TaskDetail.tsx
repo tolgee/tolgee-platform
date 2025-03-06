@@ -296,8 +296,8 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                   <StyledActionGroup>
                     <TaskDetailActions
                       task={data}
-                      project={project!}
-                      projectScopes={project!.computedPermission.scopes}
+                      projectId={projectId}
+                      projectScopes={scopes}
                     />
                   </StyledActionGroup>
                   <StyledActionGroup>
