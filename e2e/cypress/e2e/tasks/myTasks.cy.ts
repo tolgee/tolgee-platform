@@ -98,7 +98,7 @@ describe('my tasks', () => {
     deleteComment('Test comment');
   });
 
-  it.only('shows stats correctly on half finished task', () => {
+  it('shows stats correctly on half finished task', () => {
     goToUserTasks('Organization member');
     cy.gcy('task-label-name').contains('Review task').click();
     setStateToReviewed('Překlad 0');
