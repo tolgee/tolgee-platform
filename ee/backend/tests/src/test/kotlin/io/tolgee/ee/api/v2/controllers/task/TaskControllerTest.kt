@@ -366,15 +366,15 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `close, reopen and complete task, check notifications`() {
     performProjectAuthPut(
-      "tasks/${testData.translateTask.self.number}/close",
+      "tasks/${testData.translateTask.self.number}/cancel",
     ).andIsOk.andAssertThatJson {
-      node("state").isEqualTo("CLOSED")
+      node("state").isEqualTo("CANCELED")
     }
     notificationUtil.newestInAppNotification().also {
       assertThat(it.type).isEqualTo(TASK_CLOSED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
-    assertThat(notificationUtil.newestEmailNotification()).contains("has been closed")
+    assertThat(notificationUtil.newestEmailNotification()).contains("has been canceled")
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/reopen",
     ).andIsOk.andAssertThatJson {
@@ -384,7 +384,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/finish",
     ).andIsOk.andAssertThatJson {
-      node("state").isEqualTo("DONE")
+      node("state").isEqualTo("FINISHED")
     }
     notificationUtil.newestInAppNotification().also {
       assertThat(it.type).isEqualTo(TASK_COMPLETED)
@@ -395,12 +395,12 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `closed tasks can be filtered out by timestamp`() {
+  fun `canceled tasks can be filtered out by timestamp`() {
     val timeBeforeCreation = System.currentTimeMillis()
     performProjectAuthPut(
-      "tasks/${testData.translateTask.self.number}/close",
+      "tasks/${testData.translateTask.self.number}/cancel",
     ).andIsOk.andAssertThatJson {
-      node("state").isEqualTo("CLOSED")
+      node("state").isEqualTo("CANCELED")
     }
     val timeAfterCreation = System.currentTimeMillis()
 
