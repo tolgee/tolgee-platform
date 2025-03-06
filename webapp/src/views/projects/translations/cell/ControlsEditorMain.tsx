@@ -27,6 +27,7 @@ type ControlsProps = {
   onCancel?: () => void;
   className?: string;
   tasks: TaskModel[] | undefined;
+  currentTask: number | undefined;
 };
 
 export const ControlsEditorMain: React.FC<ControlsProps> = ({
@@ -34,13 +35,18 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
   onCancel,
   className,
   tasks,
+  currentTask,
 }) => {
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
   const anchorEl = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const task = tasks?.[0];
   const displayTaskControls =
-    task && task.userAssigned && !task.done && task.type === 'TRANSLATE';
+    (currentTask === undefined || currentTask === task?.number) &&
+    task &&
+    task.userAssigned &&
+    !task.done &&
+    task.type === 'TRANSLATE';
 
   const withClose = (callback?: () => void) => () => {
     setOpen(false);

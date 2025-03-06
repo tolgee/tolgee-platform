@@ -176,6 +176,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                 onSave={handleSave}
                 onCancel={() => handleClose(true)}
                 tasks={translationTasks}
+                currentTask={prefilteredTask?.number}
               />
             ) : (
               <ControlsEditorReadOnly onClose={() => handleClose(true)} />
