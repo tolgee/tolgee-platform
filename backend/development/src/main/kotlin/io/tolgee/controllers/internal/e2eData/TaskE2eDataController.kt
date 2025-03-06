@@ -28,7 +28,6 @@ class TaskE2eDataController() : AbstractE2eDataController() {
     return getStandardResult(data.root)
   }
 
-
   override val testData: TestDataBuilder
     get() = TaskTestData().root
 }

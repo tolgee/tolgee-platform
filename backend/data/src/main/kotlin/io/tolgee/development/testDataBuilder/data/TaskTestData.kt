@@ -231,7 +231,12 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
     }
   }
 
-  fun addTaskInState(name: String, state: TaskState, type: TaskType, number: Long) {
+  fun addTaskInState(
+    name: String,
+    state: TaskState,
+    type: TaskType,
+    number: Long,
+  ) {
     projectBuilder.apply {
       blockedTask =
         addTask {
