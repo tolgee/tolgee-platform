@@ -58,6 +58,7 @@ class TestDataService(
   private val transactionManager: PlatformTransactionManager,
   private val additionalTestDataSavers: List<AdditionalTestDataSaver>,
   private val userPreferencesService: UserPreferencesService,
+  private val authProviderChangeService: AuthProviderChangeService,
   private val languageStatsService: LanguageStatsService,
   private val patService: PatService,
   private val notificationService: NotificationService,
@@ -436,17 +437,13 @@ class TestDataService(
 
   private fun saveAllUsers(builder: TestDataBuilder) {
     val userAccountBuilders = builder.data.userAccounts
-    userAccountService.saveAll(
-      userAccountBuilders.map { userBuilder ->
-        userBuilder.self.password =
-          passwordHashCache.computeIfAbsent(userBuilder.rawPassword) {
-            passwordEncoder.encode(userBuilder.rawPassword)
-          }
-        userBuilder.self
-      },
-    )
+    userAccountBuilders.forEach { userBuilder ->
+      userBuilder.self.password = encodePassword(userBuilder.rawPassword)
+    }
+    userAccountService.saveAll(userAccountBuilders.map { it.self })
     saveUserAvatars(userAccountBuilders)
     saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
+    saveAuthProviderChangeRequests(userAccountBuilders.mapNotNull { it.data.authProviderChangeRequest })
     saveUserPats(userAccountBuilders.flatMap { it.data.pats })
     saveUserSlackConnections(userAccountBuilders.flatMap { it.data.slackUserConnections })
   }
@@ -472,6 +469,10 @@ class TestDataService(
 
   private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {
     data.forEach { userPreferencesService.save(it.self) }
+  }
+
+  private fun saveAuthProviderChangeRequests(data: List<AuthProviderChangeRequestBuilder>) {
+    data.forEach { authProviderChangeService.save(it.self) }
   }
 
   private fun saveUserAvatars(userAccountBuilders: MutableList<UserAccountBuilder>) {
@@ -515,6 +516,13 @@ class TestDataService(
 
   private fun clearEntityManager() {
     entityManager.clear()
+  }
+
+  private fun encodePassword(rawPassword: String?): String? {
+    rawPassword ?: return null
+    return passwordHashCache.computeIfAbsent(rawPassword) {
+      passwordEncoder.encode(rawPassword)
+    }
   }
 
   companion object {

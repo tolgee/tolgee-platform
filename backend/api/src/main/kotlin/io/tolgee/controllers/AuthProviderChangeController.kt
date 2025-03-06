@@ -1,6 +1,7 @@
 package io.tolgee.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.tolgee.dtos.request.auth.AcceptAuthProviderChangeRequest
 import io.tolgee.dtos.response.AuthProviderDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -14,11 +15,13 @@ import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.UserAccountService
+import jakarta.validation.Valid
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -69,9 +72,12 @@ class AuthProviderChangeController(
   @BypassForcedSsoAuthentication
   @RequiresSuperAuthentication
   @Transactional
-  fun acceptChangeAuthProvider(): JwtAuthenticationResponse {
+  fun acceptChangeAuthProvider(
+    @RequestBody @Valid
+    request: AcceptAuthProviderChangeRequest,
+  ): JwtAuthenticationResponse {
     val user = authenticationFacade.authenticatedUserEntity
-    authProviderChangeService.accept(user)
+    authProviderChangeService.accept(user, request.id)
     userAccountService.invalidateTokens(user)
     return JwtAuthenticationResponse(
       jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),

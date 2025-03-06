@@ -269,6 +269,18 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     }
   }
 
+  @Test
+  fun `it returns null sso info`() {
+    // EE dependant endpoint - without EE always returns null
+    performAuthGet("/v2/user/sso").andIsOk.andAssertThatJson { isNull() }
+  }
+
+  @Test
+  fun `it returns null for managed by`() {
+    // EE dependant endpoint - without EE always returns null
+    performAuthGet("/v2/user/managed-by").andIsOk.andAssertThatJson { isNull() }
+  }
+
   private fun assertSingleOwned(
     user: UserAccount,
     names: List<String>,

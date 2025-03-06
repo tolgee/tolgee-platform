@@ -89,7 +89,13 @@ const AcceptAuthProviderChangeView: React.FC = () => {
 
   function handleAccept() {
     acceptChange.mutate(
-      {},
+      {
+        content: {
+          'application/json': {
+            id: authProviderChangeInfo.data?.id || '',
+          },
+        },
+      },
       {
         onSuccess(r) {
           handleAfterLogin(r);

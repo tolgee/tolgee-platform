@@ -18,6 +18,9 @@ import java.nio.charset.StandardCharsets
 val ResultActions.andIsOk: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isOk) }
 
+val ResultActions.andIsNoContent: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().isNoContent) }
+
 val ResultActions.andIsUnauthorized: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isUnauthorized) }
 
