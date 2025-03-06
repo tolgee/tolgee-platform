@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, IconButton, Tooltip } from '@mui/material';
-import { Translate01 } from '@untitled-ui/icons-react';
+import { InfoCircle, Translate01 } from '@untitled-ui/icons-react';
 import { TaskDetail as TaskDetailIcon } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
@@ -64,7 +64,7 @@ export const TaskTooltip = ({
                 size="small"
                 onClick={() => setTaskDetailData(task)}
               >
-                <TaskDetailIcon width={20} height={20} />
+                <InfoCircle width={20} height={20} />
               </IconButton>
             </Tooltip>
           )}

@@ -105,7 +105,6 @@ export const TaskDetailActions = ({ task, project, projectScopes }: Props) => {
     <>
       {TASK_ACTIVE_STATES.includes(task.state) && (
         <Button
-          color="error"
           variant="outlined"
           size="small"
           disabled={!canEditTask}

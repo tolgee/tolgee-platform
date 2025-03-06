@@ -120,7 +120,6 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
                 <InfoCircle width={20} height={20} />
               </IconButton>
             </Tooltip>
-            {!isActive && <TaskState state={data.state} />}
           </Box>
         }
         controls={<PrefilterTaskHideDoneSwitch />}

@@ -125,7 +125,7 @@ export const BoardItem = ({
       <StyledRow>
         <TaskTypeChip type={task.type} />
         <StyledProgress>
-          {task.state === 'IN_PROGRESS' ? (
+          {['IN_PROGRESS', 'NEW'].includes(task.state) ? (
             <BatchProgress progress={task.doneItems} max={task.totalItems} />
           ) : (
             <TaskState state={task.state} />

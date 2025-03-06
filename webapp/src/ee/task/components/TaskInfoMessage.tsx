@@ -33,11 +33,22 @@ export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
   const firstTask = tasks?.[0];
   const userAssignedTask = tasks?.find((t) => t.userAssigned);
 
-  if (currentTask?.closedAt) {
+  if (currentTask?.state === 'FINISHED') {
     return (
       <Alert severity="error" icon={false}>
         <T
-          keyName="task_info_message_current_task_closed"
+          keyName="task_info_message_current_task_finished"
+          params={{
+            currentTask: <TaskLink task={currentTask.number} />,
+          }}
+        />
+      </Alert>
+    );
+  } else if (currentTask?.state === 'CANCELED') {
+    return (
+      <Alert severity="error" icon={false}>
+        <T
+          keyName="task_info_message_current_task_canceled"
           params={{
             currentTask: <TaskLink task={currentTask.number} />,
           }}
