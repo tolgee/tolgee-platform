@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, IconButton, Tooltip } from '@mui/material';
 import { InfoCircle, Translate01 } from '@untitled-ui/icons-react';
-import { TaskDetail as TaskDetailIcon } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
