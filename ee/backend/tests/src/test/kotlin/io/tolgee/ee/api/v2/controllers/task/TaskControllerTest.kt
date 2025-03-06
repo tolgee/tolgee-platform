@@ -390,7 +390,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       assertThat(it.type).isEqualTo(TASK_COMPLETED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
-    assertThat(notificationUtil.newestEmailNotification()).contains("has been completed")
+    assertThat(notificationUtil.newestEmailNotification()).contains("has been finished")
   }
 
   @Test
