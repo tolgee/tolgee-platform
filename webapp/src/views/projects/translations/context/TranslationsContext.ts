@@ -120,7 +120,6 @@ export const [
   const stateService = useStateService({
     translations: translationService,
     taskService,
-    prefilter: props.prefilter,
   });
 
   const positionService = usePositionService({
@@ -133,7 +132,6 @@ export const [
     translationService,
     viewRefs,
     taskService,
-    prefilter: props.prefilter,
   });
 
   const tagsService = useTagsService({
