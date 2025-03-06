@@ -410,6 +410,55 @@ class KeyControllerResolvableImportTest : ProjectAuthControllerTest("/v2/project
     }
   }
 
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `correctly updates isPlural`() {
+    performProjectAuthPost(
+      "keys/import-resolvable",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "key-1",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "de" to
+                    mapOf(
+                      "text" to "new",
+                      "resolution" to "FORCE_OVERRIDE",
+                    ),
+                  "en" to
+                    mapOf(
+                      "text" to "new",
+                      "resolution" to "FORCE_OVERRIDE",
+                    ),
+                ),
+            ),
+            mapOf(
+              "name" to "key-2",
+              "namespace" to "namespace-1",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "existing translation",
+                      "resolution" to "FORCE_OVERRIDE",
+                    ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      assertTranslationText("namespace-1", "key-1", "de", "new")
+      assertTranslationText("namespace-1", "key-1", "en", "new")
+      assertTranslationText("namespace-1", "key-2", "en", "existing translation")
+    }
+  }
+
   fun assertTranslationText(
     namespace: String?,
     keyName: String,
