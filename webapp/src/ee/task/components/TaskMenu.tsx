@@ -216,16 +216,25 @@ export const TaskMenu = ({
           <MenuItem
             onClick={handleMarkAsDone}
             disabled={task.doneItems !== task.totalItems || !canMarkAsDone}
+            data-cy="task-menu-item-mark-as-done"
           >
             {t('task_menu_mark_as_finished')}
           </MenuItem>
         ) : (
-          <MenuItem onClick={handleReopen} disabled={!canEditTask}>
+          <MenuItem
+            onClick={handleReopen}
+            disabled={!canEditTask}
+            data-cy="task-menu-item-reopen"
+          >
             {t('task_menu_mark_as_in_progress')}
           </MenuItem>
         )}
         {TASK_ACTIVE_STATES.includes(task.state) && (
-          <MenuItem disabled={!canEditTask} onClick={handleClose}>
+          <MenuItem
+            disabled={!canEditTask}
+            onClick={handleClose}
+            data-cy="task-menu-item-cancel-task"
+          >
             {t('task_menu_cancel_task')}
           </MenuItem>
         )}

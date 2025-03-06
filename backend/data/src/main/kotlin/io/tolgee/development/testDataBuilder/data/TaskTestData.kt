@@ -2,10 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.*
 import io.tolgee.model.Language
-import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.enums.Scope
-import io.tolgee.model.enums.TaskType
+import io.tolgee.model.enums.*
 import io.tolgee.model.task.TaskKey
 
 class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
@@ -229,6 +226,35 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
         addTaskKey {
           task = blockedTask.self
           key = it.self
+        }
+      }
+    }
+  }
+
+  fun addTaskInState(name: String, state: TaskState, type: TaskType, number: Long) {
+    projectBuilder.apply {
+      blockedTask =
+        addTask {
+          this.number = number
+          this.name = name
+          this.type = type
+          assignees =
+            mutableSetOf(
+              projectUser.self,
+              user,
+            )
+          project = projectBuilder.self
+          language = englishLanguage
+          author = projectUser.self
+          this.state = state
+        }
+
+      keysInTask.forEach { it ->
+        addTaskKey {
+          task = blockedTask.self
+          key = it.self
+          done = true
+          author = user
         }
       }
     }

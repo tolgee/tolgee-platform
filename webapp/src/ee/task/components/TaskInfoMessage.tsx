@@ -1,4 +1,4 @@
-import { Alert, styled } from '@mui/material';
+import { Alert, AlertColor, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
@@ -29,37 +29,48 @@ type Props = {
   currentTask: TaskModel | undefined;
 };
 
-export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
+function getMessage(
+  tasks: KeyTaskViewModel[] | undefined,
+  currentTask: TaskModel | undefined
+):
+  | {
+      severity: AlertColor;
+      content: React.ReactNode;
+    }
+  | undefined {
   const firstTask = tasks?.[0];
   const userAssignedTask = tasks?.find((t) => t.userAssigned);
 
   if (currentTask?.state === 'FINISHED') {
-    return (
-      <Alert severity="error" icon={false}>
+    return {
+      severity: 'error',
+      content: (
         <T
           keyName="task_info_message_current_task_finished"
           params={{
             currentTask: <TaskLink task={currentTask.number} />,
           }}
         />
-      </Alert>
-    );
+      ),
+    };
   } else if (currentTask?.state === 'CANCELED') {
-    return (
-      <Alert severity="error" icon={false}>
+    return {
+      severity: 'error',
+      content: (
         <T
           keyName="task_info_message_current_task_canceled"
           params={{
             currentTask: <TaskLink task={currentTask.number} />,
           }}
         />
-      </Alert>
-    );
+      ),
+    };
   }
 
   if (currentTask && firstTask && firstTask.number !== currentTask.number) {
-    return (
-      <Alert severity="error" icon={false}>
+    return {
+      severity: 'error',
+      content: (
         <T
           keyName="task_info_message_current_task_blocked"
           params={{
@@ -67,13 +78,14 @@ export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
             blockingTask: <TaskLink task={firstTask.number} />,
           }}
         />
-      </Alert>
-    );
+      ),
+    };
   }
 
   if (currentTask && firstTask && firstTask.number !== currentTask.number) {
-    return (
-      <Alert severity="error" icon={false}>
+    return {
+      severity: 'error',
+      content: (
         <T
           keyName="task_info_message_current_task_blocked"
           params={{
@@ -81,8 +93,8 @@ export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
             blockingTask: <TaskLink task={firstTask.number} />,
           }}
         />
-      </Alert>
-    );
+      ),
+    };
   }
 
   if (
@@ -91,8 +103,9 @@ export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
     userAssignedTask &&
     currentTask?.number !== firstTask.number
   ) {
-    return (
-      <Alert severity="error" icon={false}>
+    return {
+      severity: 'error',
+      content: (
         <T
           keyName="task_info_message_assigned_to_blocked_task"
           params={{
@@ -100,52 +113,72 @@ export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
             blockingTask: <TaskLink task={firstTask.number} />,
           }}
         />
-      </Alert>
-    );
+      ),
+    };
   }
 
   if (firstTask && firstTask.userAssigned && !currentTask) {
     if (firstTask.type === 'TRANSLATE') {
-      return (
-        <Alert severity="info" icon={false}>
+      return {
+        severity: 'info',
+        content: (
           <T
             keyName="task_info_message_in_translation_task"
             params={{ task: <TaskLink task={firstTask.number} /> }}
           />
-        </Alert>
-      );
+        ),
+      };
     } else {
-      return (
-        <Alert severity="info" icon={false}>
+      return {
+        severity: 'info',
+        content: (
           <T
             keyName="task_info_message_in_review_task"
             params={{ task: <TaskLink task={firstTask.number} /> }}
           />
-        </Alert>
-      );
+        ),
+      };
     }
   }
 
   if (firstTask && !firstTask?.userAssigned) {
     if (firstTask.type === 'TRANSLATE') {
-      return (
-        <Alert severity="error" icon={false}>
+      return {
+        severity: 'error',
+        content: (
           <T
             keyName="task_info_message_in_translation_task_unassigned"
             params={{ task: <TaskLink task={firstTask.number} /> }}
           />
-        </Alert>
-      );
+        ),
+      };
     } else {
-      return (
-        <Alert severity="error" icon={false}>
+      return {
+        severity: 'error',
+        content: (
           <T
             keyName="task_info_message_in_review_task_unassigned"
             params={{ task: <TaskLink task={firstTask.number} /> }}
           />
-        </Alert>
-      );
+        ),
+      };
     }
+  }
+}
+
+export const TaskInfoMessage = ({ tasks, currentTask }: Props) => {
+  const message = getMessage(tasks, currentTask);
+
+  if (message) {
+    return (
+      <Alert
+        severity={message.severity}
+        icon={false}
+        data-cy="task-info-message"
+      >
+        {message.content}
+      </Alert>
+    );
   }
 
   return null;

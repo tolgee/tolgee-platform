@@ -555,10 +555,14 @@ declare namespace DataCy {
         "task-detail-user-keys" |
         "task-detail-user-words" |
         "task-detail-words" |
+        "task-info-message" |
         "task-item" |
         "task-item-detail" |
         "task-item-menu" |
         "task-label-name" |
+        "task-menu-item-cancel-task" |
+        "task-menu-item-mark-as-done" |
+        "task-menu-item-reopen" |
         "task-number" |
         "task-preview" |
         "task-preview-alert" |
