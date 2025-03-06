@@ -50,6 +50,10 @@ class ResolvableImportTestData : BaseTestData() {
         }
       }
 
+      addKey("plural key") {
+        addTranslation("en", "{value, plural, one {# dog} other {# dogs}}")
+      }
+
       addAutoTranslationConfig {
         usingTm = true
         usingPrimaryMtService = true
