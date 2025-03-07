@@ -656,6 +656,9 @@ export interface paths {
     /** If the tasks is blocked by other tasks, it returns numbers of these tasks. */
     get: operations["getBlockingTasks"];
   };
+  "/v2/projects/{projectId}/tasks/{taskNumber}/cancel": {
+    put: operations["cancelTask"];
+  };
   "/v2/projects/{projectId}/tasks/{taskNumber}/close": {
     put: operations["closeTask"];
   };
@@ -2987,8 +2990,8 @@ export interface components {
       project?: components["schemas"]["SimpleProjectModel"];
       type:
         | "TASK_ASSIGNED"
-        | "TASK_COMPLETED"
-        | "TASK_CLOSED"
+        | "TASK_FINISHED"
+        | "TASK_CANCELED"
         | "MFA_ENABLED"
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED";
@@ -4573,7 +4576,7 @@ export interface components {
       name?: string;
       /** Format: int64 */
       number: number;
-      state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
+      state: "NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
       /** Format: int64 */
       totalItems: number;
       type: "TRANSLATE" | "REVIEW";
@@ -4609,7 +4612,7 @@ export interface components {
       /** Format: int64 */
       number: number;
       project: components["schemas"]["SimpleProjectModel"];
-      state: "NEW" | "IN_PROGRESS" | "DONE" | "CLOSED";
+      state: "NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
       /** Format: int64 */
       totalItems: number;
       type: "TRANSLATE" | "REVIEW";
@@ -14861,9 +14864,9 @@ export interface operations {
     parameters: {
       query: {
         /** Filter tasks by state */
-        filterState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
+        filterState?: ("NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED")[];
         /** Filter tasks without state */
-        filterNotState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
+        filterNotState?: ("NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED")[];
         /** Filter tasks by assignee */
         filterAssignee?: number[];
         /** Filter tasks by type */
@@ -14882,8 +14885,6 @@ export interface operations {
         filterKey?: number[];
         /** Filter tasks by agency */
         filterAgency?: number[];
-        /** Exclude "done" tasks which are older than specified timestamp */
-        filterDoneMinClosedAt?: number;
         /** Exclude tasks which were closed before specified timestamp */
         filterNotClosedBefore?: number;
         /** Zero-based page index (0..N) */
@@ -15298,6 +15299,54 @@ export interface operations {
       200: {
         content: {
           "application/json": number[];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  cancelTask: {
+    parameters: {
+      path: {
+        taskNumber: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TaskModel"];
         };
       };
       /** Bad Request */
@@ -18675,9 +18724,9 @@ export interface operations {
     parameters: {
       query: {
         /** Filter tasks by state */
-        filterState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
+        filterState?: ("NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED")[];
         /** Filter tasks without state */
-        filterNotState?: ("NEW" | "IN_PROGRESS" | "DONE" | "CLOSED")[];
+        filterNotState?: ("NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED")[];
         /** Filter tasks by assignee */
         filterAssignee?: number[];
         /** Filter tasks by type */
@@ -18696,8 +18745,6 @@ export interface operations {
         filterKey?: number[];
         /** Filter tasks by agency */
         filterAgency?: number[];
-        /** Exclude "done" tasks which are older than specified timestamp */
-        filterDoneMinClosedAt?: number;
         /** Exclude tasks which were closed before specified timestamp */
         filterNotClosedBefore?: number;
         /** Zero-based page index (0..N) */

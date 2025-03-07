@@ -16,7 +16,7 @@ export const useStateColor = () => {
   const theme = useTheme();
 
   return (state: TaskState) =>
-    state === 'DONE'
+    state === 'FINISHED'
       ? theme.palette.tokens._components.progressbar.task.done
       : state === 'IN_PROGRESS'
       ? theme.palette.tokens._components.progressbar.task.inProgress

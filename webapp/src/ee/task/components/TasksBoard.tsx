@@ -4,13 +4,12 @@ import { LoadingButton } from '@mui/lab';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { useTaskStateTranslation } from 'tg.translationTools/useTaskStateTranslation';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
-import { useStateColor } from 'tg.component/task/TaskState';
 
 import { useProjectBoardTasks } from '../views/projectTasks/useProjectBoardTasks';
 import { BoardColumn } from './BoardColumn';
+import { LabelHint } from 'tg.component/common/LabelHint';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -50,8 +49,6 @@ export const TasksBoard = ({
 }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
-  const translateState = useTaskStateTranslation();
-  const stateColor = useStateColor();
   const { isEnabled } = useEnabledFeatures();
 
   const tasksFeature = isEnabled('TASKS');
@@ -114,27 +111,14 @@ export const TasksBoard = ({
           newTaskActions={newTaskActions}
         />
         <BoardColumn
-          state="DONE"
           title={
-            showAll ? (
-              <Box>
-                <Box display="inline" color={stateColor('DONE')}>
-                  {translateState('DONE')}
+            <Box display="inline" color={theme.palette.text.secondary}>
+              <LabelHint title={t('task_board_closed_column_title_hint')}>
+                <Box display="inline">
+                  {t('task_board_closed_column_title')}
                 </Box>
-                <Box display="inline" color={stateColor('CLOSED')}>
-                  {' & '}
-                  {translateState('CLOSED')}
-                </Box>
-              </Box>
-            ) : (
-              <Box display="inline">
-                <Box display="inline" color={stateColor('DONE')}>
-                  {translateState('DONE')}
-                </Box>
-                <Box display="inline" color={stateColor('CLOSED')}>
-                  {' & '}
-                  {translateState('CLOSED')}
-                </Box>
+              </LabelHint>
+              {!showAll && (
                 <Box
                   display="inline"
                   textTransform="lowercase"
@@ -144,14 +128,14 @@ export const TasksBoard = ({
                   {' '}
                   {t('task_board_last_30_days')}
                 </Box>
-              </Box>
-            )
+              )}
+            </Box>
           }
           tasks={doneTasks.items}
           total={doneTasks.data?.pages?.[0]?.page?.totalElements ?? 0}
           project={project}
           onDetailOpen={onOpenDetail}
-          emptyMessage={t('task_board_empty_completed')}
+          emptyMessage={t('task_board_empty_closed')}
           newTaskActions={newTaskActions}
         />
       </StyledColumns>

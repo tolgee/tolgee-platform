@@ -47,7 +47,7 @@ export const ProjectTasksBoard = ({
     projectId: project.id,
     query: {
       ...query,
-      filterState: ['DONE', 'CLOSED'],
+      filterState: ['FINISHED', 'CANCELED'],
       filterNotClosedBefore: filter.filterNotClosedBefore,
     },
   });

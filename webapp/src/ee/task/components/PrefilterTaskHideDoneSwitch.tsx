@@ -17,7 +17,7 @@ type Props = {
 
 export const PrefilterTaskHideDoneSwitch = ({ sx }: Props) => {
   const [taskHideDone, setTaskHideDone] = useUrlSearchState(
-    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE
+    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED
   );
   const { t } = useTranslate();
 

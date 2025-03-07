@@ -4,19 +4,14 @@ import { useProject } from 'tg.hooks/useProject';
 import { SetTranslationState } from '../types';
 import { useTranslationsService } from './useTranslationsService';
 import { useTaskService } from './useTaskService';
-import { PrefilterType } from '../../prefilters/usePrefilter';
+import { taskReviewControlsShouldBeVisible } from './utils';
 
 type Props = {
   translations: ReturnType<typeof useTranslationsService>;
   taskService: ReturnType<typeof useTaskService>;
-  prefilter: PrefilterType | undefined;
 };
 
-export const useStateService = ({
-  translations,
-  taskService,
-  prefilter,
-}: Props) => {
+export const useStateService = ({ translations, taskService }: Props) => {
   const putTranslationState = usePutTranslationState();
   const project = useProject();
 
@@ -37,17 +32,17 @@ export const useStateService = ({
           const key = translations.fixedTranslations?.find(
             (k) => k.keyId === data.keyId
           );
-          const task = key?.tasks?.find((t) => t.languageTag === data.language);
+          const firstTask = key?.tasks?.find(
+            (t) => t.languageTag === data.language
+          );
           if (
             data.state === 'REVIEWED' &&
-            task?.userAssigned &&
-            prefilter?.task === task?.number &&
-            task.type === 'REVIEW' &&
-            !task.done
+            firstTask &&
+            taskReviewControlsShouldBeVisible(firstTask)
           ) {
             taskService.setTaskTranslationState({
               keyId: data.keyId,
-              taskNumber: task.number,
+              taskNumber: firstTask.number,
               done: true,
             });
           }

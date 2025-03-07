@@ -11,8 +11,8 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.TaskType
-import io.tolgee.model.notifications.NotificationType.TASK_CLOSED
-import io.tolgee.model.notifications.NotificationType.TASK_COMPLETED
+import io.tolgee.model.notifications.NotificationType.TASK_CANCELED
+import io.tolgee.model.notifications.NotificationType.TASK_FINISHED
 import io.tolgee.model.task.TaskKey
 import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.testing.NotificationTestUtil
@@ -364,17 +364,17 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `close, reopen and complete task, check notifications`() {
+  fun `cancel, reopen and finish task, check notifications`() {
     performProjectAuthPut(
-      "tasks/${testData.translateTask.self.number}/close",
+      "tasks/${testData.translateTask.self.number}/cancel",
     ).andIsOk.andAssertThatJson {
-      node("state").isEqualTo("CLOSED")
+      node("state").isEqualTo("CANCELED")
     }
     notificationUtil.newestInAppNotification().also {
-      assertThat(it.type).isEqualTo(TASK_CLOSED)
+      assertThat(it.type).isEqualTo(TASK_CANCELED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
-    assertThat(notificationUtil.newestEmailNotification()).contains("has been closed")
+    assertThat(notificationUtil.newestEmailNotification()).contains("has been canceled")
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/reopen",
     ).andIsOk.andAssertThatJson {
@@ -384,23 +384,23 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/finish",
     ).andIsOk.andAssertThatJson {
-      node("state").isEqualTo("DONE")
+      node("state").isEqualTo("FINISHED")
     }
     notificationUtil.newestInAppNotification().also {
-      assertThat(it.type).isEqualTo(TASK_COMPLETED)
+      assertThat(it.type).isEqualTo(TASK_FINISHED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
-    assertThat(notificationUtil.newestEmailNotification()).contains("has been completed")
+    assertThat(notificationUtil.newestEmailNotification()).contains("has been finished")
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `closed tasks can be filtered out by timestamp`() {
+  fun `canceled tasks can be filtered out by timestamp`() {
     val timeBeforeCreation = System.currentTimeMillis()
     performProjectAuthPut(
-      "tasks/${testData.translateTask.self.number}/close",
+      "tasks/${testData.translateTask.self.number}/cancel",
     ).andIsOk.andAssertThatJson {
-      node("state").isEqualTo("CLOSED")
+      node("state").isEqualTo("CANCELED")
     }
     val timeAfterCreation = System.currentTimeMillis()
 

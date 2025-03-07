@@ -76,11 +76,6 @@ private const val TASK_FILTERS = """
         )
     )
     and (
-        tk.state != 'DONE'
-        or :#{#filters.filterDoneMinClosedAt} is null
-        or tk.closedAt > :#{#filters.filterDoneMinClosedAt}
-    )
-    and (
         :#{#filters.filterNotClosedBefore} is null
         or tk.closedAt is null
         or tk.closedAt > :#{#filters.filterNotClosedBefore}
@@ -129,7 +124,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
   @Query(
     nativeQuery = true,
     value = """
-     select distinct on (l.id, tt.key_id)
+     select distinct on (l.id, tt.key_id, taskAssigned)
         tt.key_id as keyId,
         l.id as languageId,
         l.tag as languageTag,
@@ -146,7 +141,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
         tt.key_id in :keyIds
         and l.deleted_at is null
         and (t.state = 'IN_PROGRESS' or t.state = 'NEW')
-     order by l.id, tt.key_id, t.type desc, t.id desc
+     order by l.id, tt.key_id, taskAssigned, t.type desc, t.id desc
     """,
   )
   fun getByKeyId(

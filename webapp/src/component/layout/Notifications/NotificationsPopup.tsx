@@ -181,9 +181,12 @@ export const NotificationsPopup: React.FC<NotificationsPopupProps> = ({
           </Tooltip>
         </StyledHeaderItem>
         {notifications?.map((notification, i) => {
-          const Component = notificationComponents[notification.type]!;
+          const Component = notificationComponents[notification.type];
+
           return (
-            <Component notification={notification} key={notification.id} />
+            Boolean(Component) && (
+              <Component notification={notification} key={notification.id} />
+            )
           );
         })}
         {notifications?.length === 0 && (

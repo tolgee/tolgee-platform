@@ -90,15 +90,18 @@ describe('notifications', () => {
     );
     targetPageShouldHaveInUrl('/translations?task=');
 
-    generateNotification(userId, 'TASK_COMPLETED');
+    generateNotification(userId, 'TASK_FINISHED');
     assertNewestEmail(
-      'Task has been completed',
-      "you've created has been completed"
+      'Task has been finished',
+      "you've created has been finished"
     );
     targetPageShouldHaveInUrl('/translations?task=');
 
-    generateNotification(userId, 'TASK_CLOSED');
-    assertNewestEmail('Task has been closed', "you've created has been closed");
+    generateNotification(userId, 'TASK_CANCELED');
+    assertNewestEmail(
+      'Task has been canceled',
+      "you've created has been canceled"
+    );
     targetPageShouldHaveInUrl('/translations?task=');
 
     generateNotification(userId, 'MFA_ENABLED');

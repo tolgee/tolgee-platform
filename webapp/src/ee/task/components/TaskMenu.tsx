@@ -41,7 +41,7 @@ export const TaskMenu = ({
   const [taskCreate, setTaskCreate] = useState<Partial<InitialValues>>();
   const [taskDetail, setTaskDetail] = useState<TaskModel>();
   const closeMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/tasks/{taskNumber}/close',
+    url: '/v2/projects/{projectId}/tasks/{taskNumber}/cancel',
     method: 'put',
     invalidatePrefix: [
       '/v2/projects/{projectId}/translations',
@@ -113,7 +113,7 @@ export const TaskMenu = ({
 
   function handleClose() {
     confirmation({
-      title: <T keyName="task_menu_close_confirmation_title" />,
+      title: <T keyName="task_menu_cancel_confirmation_title" />,
       onConfirm() {
         onClose();
         closeMutation.mutate(
@@ -122,7 +122,7 @@ export const TaskMenu = ({
           },
           {
             onSuccess() {
-              messageService.success(<T keyName="task_menu_close_success" />);
+              messageService.success(<T keyName="task_menu_cancel_success" />);
             },
           }
         );
@@ -216,17 +216,26 @@ export const TaskMenu = ({
           <MenuItem
             onClick={handleMarkAsDone}
             disabled={task.doneItems !== task.totalItems || !canMarkAsDone}
+            data-cy="task-menu-item-mark-as-done"
           >
-            {t('task_menu_mark_as_done')}
+            {t('task_menu_mark_as_finished')}
           </MenuItem>
         ) : (
-          <MenuItem onClick={handleReopen} disabled={!canEditTask}>
+          <MenuItem
+            onClick={handleReopen}
+            disabled={!canEditTask}
+            data-cy="task-menu-item-reopen"
+          >
             {t('task_menu_mark_as_in_progress')}
           </MenuItem>
         )}
         {TASK_ACTIVE_STATES.includes(task.state) && (
-          <MenuItem disabled={!canEditTask} onClick={handleClose}>
-            {t('task_menu_close_task')}
+          <MenuItem
+            disabled={!canEditTask}
+            onClick={handleClose}
+            data-cy="task-menu-item-cancel-task"
+          >
+            {t('task_menu_cancel_task')}
           </MenuItem>
         )}
         {!hideTaskDetail && (

@@ -5,15 +5,15 @@ import {
   TaskItemProps,
 } from 'tg.component/layout/Notifications/TaskItem';
 
-type TaskClosedItemProps = TaskItemProps;
+type Props = TaskItemProps;
 
-export const TaskClosedItem: FunctionComponent<TaskClosedItemProps> = ({
+export const TaskCanceledItem: FunctionComponent<Props> = ({
   notification,
   ...props
 }) => {
   return (
     <TaskItem notification={notification} {...props}>
-      <T keyName="notifications-task-closed" />
+      <T keyName="notifications-task-canceled" />
     </TaskItem>
   );
 };

@@ -4167,4 +4167,16 @@
     <changeSet author="stanov (generated)" id="1740659624320-9">
         <addForeignKeyConstraint baseColumnNames="linked_task_id" baseTableName="notification" constraintName="FKm1auuxar5ovwae9fqjp1eo05k" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1740659624320-10">
+        <sql dbms="postgresql">
+            UPDATE task SET state = 'CANCELED' WHERE state = 'CLOSED';
+            UPDATE task SET state = 'FINISHED' WHERE state = 'DONE';
+        </sql>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1740659624320-11">
+        <sql dbms="postgresql">
+            UPDATE notification SET type = 'TASK_CANCELED' WHERE type = 'TASK_CLOSED';
+            UPDATE notification SET type = 'TASK_FINISHED' WHERE type = 'TASK_COMPLETED';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

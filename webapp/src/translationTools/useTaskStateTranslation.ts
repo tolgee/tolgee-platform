@@ -8,10 +8,10 @@ export function useTaskStateTranslation() {
 
   return (code: TaskType) => {
     switch (code) {
-      case 'CLOSED':
-        return t('task_state_closed');
-      case 'DONE':
-        return t('task_state_done');
+      case 'CANCELED':
+        return t('task_state_canceled');
+      case 'FINISHED':
+        return t('task_state_finished');
       case 'IN_PROGRESS':
         return t('task_state_in_progress');
       case 'NEW':

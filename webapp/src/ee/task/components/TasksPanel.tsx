@@ -51,7 +51,6 @@ export const TasksPanel: React.FC<PanelContentProps> = ({
             taskNumber={task.number}
             project={project}
             enterDelay={1000}
-            newTaskActions={false}
           >
             <Box>
               <TaskLabel

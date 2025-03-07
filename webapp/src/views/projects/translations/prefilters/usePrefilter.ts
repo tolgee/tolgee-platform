@@ -17,7 +17,7 @@ const stringToNumber = (input: string | undefined) => {
   return undefined;
 };
 
-export const usePrefilter = (): PrefilterType => {
+export const usePrefilter = (): PrefilterType | undefined => {
   const [activity, setActivity] = useUrlSearchState(
     QUERY.TRANSLATIONS_PREFILTERS_ACTIVITY,
     {
@@ -41,10 +41,9 @@ export const usePrefilter = (): PrefilterType => {
   );
 
   const [taskHideDone, setTaskHideDone] = useUrlSearchState(
-    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE,
+    QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED,
     {
       defaultVal: undefined,
-      history: true,
     }
   );
 
@@ -59,20 +58,23 @@ export const usePrefilter = (): PrefilterType => {
     setTaskHideDone(undefined);
   }
 
-  const result: PrefilterType = {
-    clear,
-  };
-
   if (activityId !== undefined) {
-    result.activity = activityId;
+    return {
+      activity: activityId,
+      clear,
+    };
   } else if (failedJobId !== undefined) {
-    result.failedJob = failedJobId;
+    return {
+      failedJob: failedJobId,
+      clear,
+    };
   } else if (taskNumber !== undefined) {
-    result.task = taskNumber;
-    if (taskHideDone !== undefined) {
-      result.taskFilterNotDone = taskHideDone === 'true';
-    }
+    return {
+      task: taskNumber,
+      taskFilterNotDone: taskHideDone === 'true',
+      clear,
+    };
   }
 
-  return result;
+  return undefined;
 };

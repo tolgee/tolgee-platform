@@ -16,11 +16,7 @@ export const TranslationTaskIndicator: React.FC<
   return (
     <>
       {task && (
-        <TaskTooltip
-          taskNumber={task.number}
-          project={project}
-          newTaskActions={true}
-        >
+        <TaskTooltip taskNumber={task.number} project={project}>
           <StyledTranslationFlagsContainer
             className={clsx({ clickDisabled: true })}
             data-cy="translations-task-indicator"

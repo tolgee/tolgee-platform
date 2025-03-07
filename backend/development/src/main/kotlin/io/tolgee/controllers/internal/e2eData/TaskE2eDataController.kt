@@ -3,6 +3,8 @@ package io.tolgee.controllers.internal.e2eData
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.TaskTestData
+import io.tolgee.model.enums.TaskState
+import io.tolgee.model.enums.TaskType
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,9 +19,13 @@ import org.springframework.web.bind.annotation.RestController
 class TaskE2eDataController() : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
-  fun generateBasicTestData() {
+  fun generateBasicTestData(): StandardTestDataResult {
     val data = TaskTestData()
+    data.addBlockedTask()
+    data.addTaskInState("Canceled review task", TaskState.CANCELED, TaskType.REVIEW, 4)
+    data.addTaskInState("Finished review task", TaskState.FINISHED, TaskType.REVIEW, 5)
     testDataService.saveTestData(data.root)
+    return getStandardResult(data.root)
   }
 
   override val testData: TestDataBuilder

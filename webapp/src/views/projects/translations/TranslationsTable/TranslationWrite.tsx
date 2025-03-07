@@ -13,6 +13,7 @@ import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
+import { TaskInfoMessage } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -23,8 +24,13 @@ const StyledEditor = styled('div')`
 `;
 
 const StyledBottom = styled('div')`
-  display: flex;
+  display: grid;
+  gap: 8px;
   padding: 4px 12px 12px 16px;
+`;
+
+const StyledPlaceholdersAndControls = styled('div')`
+  display: flex;
   flex-wrap: wrap;
   gap: 14px;
   align-items: center;
@@ -67,6 +73,11 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
   const editorRef = useRef<EditorView>(null);
   const baseLanguage = useTranslationsSelector((c) => c.baseLanguage);
   const nested = Boolean(editVal.value.parameter);
+  const prefilteredTask = useTranslationsSelector((c) =>
+    c.prefilteredTask?.language.id === language.id
+      ? c.prefilteredTask
+      : undefined
+  );
 
   const baseTranslation = useBaseTranslation(
     activeVariant,
@@ -80,6 +91,10 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     nested,
     enabled: baseLanguage !== language.tag,
   });
+
+  const translationTasks = keyData.tasks?.filter(
+    (t) => t.languageTag === language.tag
+  );
 
   const handleModeToggle = () => {
     setMode((mode) => (mode === 'syntax' ? 'placeholders' : 'syntax'));
@@ -122,43 +137,52 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
       </StyledEditor>
 
       <StyledBottom>
-        {Boolean(missingPlaceholders.length) && (
-          <MissingPlaceholders
-            placeholders={missingPlaceholders}
-            onPlaceholderClick={handlePlaceholderClick}
-            variant={editVal.value.parameter ? activeVariant : undefined}
-            locale={language.tag}
-            className="placeholders"
+        {editEnabled && (
+          <TaskInfoMessage
+            tasks={translationTasks}
+            currentTask={prefilteredTask}
           />
         )}
+        <StyledPlaceholdersAndControls>
+          {Boolean(missingPlaceholders.length) && (
+            <MissingPlaceholders
+              placeholders={missingPlaceholders}
+              onPlaceholderClick={handlePlaceholderClick}
+              variant={editVal.value.parameter ? activeVariant : undefined}
+              locale={language.tag}
+              className="placeholders"
+            />
+          )}
 
-        <StyledControls>
-          <ControlsEditorSmall
-            controlsProps={{
-              onMouseDown: (e) => e.preventDefault(),
-            }}
-            state={state}
-            mode={mode}
-            isBaseLanguage={language.base}
-            stateChangeEnabled={canChangeState}
-            onInsertBase={editEnabled ? handleInsertBase : undefined}
-            onStateChange={setState}
-            onModeToggle={editEnabled ? handleModeToggle : undefined}
-            tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
-            onTaskStateChange={setAssignedTaskState}
-          />
-          {editEnabled ? (
-            <ControlsEditorMain
-              onSave={handleSave}
-              onCancel={() => handleClose(true)}
+          <StyledControls>
+            <ControlsEditorSmall
+              controlsProps={{
+                onMouseDown: (e) => e.preventDefault(),
+              }}
+              state={state}
+              mode={mode}
+              isBaseLanguage={language.base}
+              stateChangeEnabled={canChangeState}
+              onInsertBase={editEnabled ? handleInsertBase : undefined}
+              onStateChange={setState}
+              onModeToggle={editEnabled ? handleModeToggle : undefined}
               tasks={keyData.tasks?.filter(
                 (t) => t.languageTag === language.tag
               )}
+              onTaskStateChange={setAssignedTaskState}
             />
-          ) : (
-            <ControlsEditorReadOnly onClose={() => handleClose(true)} />
-          )}
-        </StyledControls>
+            {editEnabled ? (
+              <ControlsEditorMain
+                onSave={handleSave}
+                onCancel={() => handleClose(true)}
+                tasks={translationTasks}
+                currentTask={prefilteredTask?.number}
+              />
+            ) : (
+              <ControlsEditorReadOnly onClose={() => handleClose(true)} />
+            )}
+          </StyledControls>
+        </StyledPlaceholdersAndControls>
       </StyledBottom>
     </StyledContainer>
   );

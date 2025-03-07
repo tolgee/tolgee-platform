@@ -35,7 +35,7 @@ export const TaskRedirect = () => {
       task.assignees.find((u) => u.id === user?.id) &&
       (task.state === 'IN_PROGRESS' || task.state === 'NEW')
     ) {
-      url += `&${QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_DONE}=true`;
+      url += `&${QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED}=true`;
     }
 
     url +=

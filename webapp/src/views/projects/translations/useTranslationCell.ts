@@ -148,6 +148,9 @@ export const useTranslationCell = ({
   const translation = langTag ? keyData?.translations[langTag] : undefined;
 
   const firstTask = keyData.tasks?.find((t) => t.languageTag === language.tag);
+  const assignedTask = keyData.tasks?.find(
+    (t) => t.languageTag === language.tag && t.userAssigned
+  );
 
   const setAssignedTaskState = (done: boolean) => {
     if (firstTask) {
@@ -179,12 +182,12 @@ export const useTranslationCell = ({
   }
 
   const canChangeState =
-    (firstTask?.userAssigned && firstTask.type === 'REVIEW') ||
+    (assignedTask?.userAssigned && assignedTask.type === 'REVIEW') ||
     satisfiesLanguageAccess('translations.state-edit', language.id);
 
   const disabled = translation?.state === 'DISABLED';
   const editEnabled =
-    ((firstTask?.userAssigned && firstTask.type === 'TRANSLATE') ||
+    ((assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE') ||
       satisfiesLanguageAccess('translations.edit', language.id)) &&
     !disabled;
 
