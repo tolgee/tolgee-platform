@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping("/v2/auth-provider") // TODO: I should probably use the v2
+@RequestMapping("/v2/auth-provider")
 @AuthenticationTag
 @OpenApiHideFromPublicDocs
 class AuthProviderChangeController(
