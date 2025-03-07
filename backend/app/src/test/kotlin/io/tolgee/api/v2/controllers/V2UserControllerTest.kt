@@ -269,6 +269,18 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     }
   }
 
+  @Test
+  fun `it returns no content for sso info`() {
+    // EE dependant endpoint - without EE always returns no content
+    performAuthGet("/v2/user/sso").andIsNoContent
+  }
+
+  @Test
+  fun `it returns no content for managed by`() {
+    // EE dependant endpoint - without EE always returns no content
+    performAuthGet("/v2/user/managed-by").andIsNoContent
+  }
+
   private fun assertSingleOwned(
     user: UserAccount,
     names: List<String>,

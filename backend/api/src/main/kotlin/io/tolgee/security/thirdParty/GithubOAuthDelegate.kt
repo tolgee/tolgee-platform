@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.model.SsoTenant_.domain
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
@@ -87,8 +88,6 @@ class GithubOAuthDelegate(
 
       val userAccount = findOrCreateAccount(githubEmail, userResponse!!, invitationCode)
 
-      tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
-
       val jwt = jwtService.emitToken(userAccount.id)
       return JwtAuthenticationResponse(jwt)
     }
@@ -103,25 +102,36 @@ class GithubOAuthDelegate(
     throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
   }
 
+  private fun checkNotManagedByOrganization(domain: String?) {
+    if (tenantService.getEnabledConfigByDomainOrNull(domain) != null) {
+      // There is sso configured for the domain - don't allow sign up
+      throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
+    }
+  }
+
   fun findOrCreateAccount(
     githubEmail: String,
     userResponse: GithubUserResponse,
     invitationCode: String?,
   ): UserAccount {
-    userAccountService.findByThirdParty(ThirdPartyAuthType.GITHUB, userResponse.id!!)?.let {
-      return it
+    val userAccount = userAccountService.findByThirdParty(ThirdPartyAuthType.GITHUB, userResponse.id!!)
+
+    authProviderChangeService.tryInitiate(
+      userAccount,
+      githubEmail,
+      AuthProviderChangeData(
+        UserAccount.AccountType.THIRD_PARTY,
+        ThirdPartyAuthType.GITHUB,
+        userResponse.id,
+      ),
+    )
+
+    if (userAccount != null) {
+      return userAccount
     }
 
     userAccountService.findActive(githubEmail)?.let {
-      authProviderChangeService.initiateProviderChange(
-        AuthProviderChangeData(
-          it,
-          UserAccount.AccountType.THIRD_PARTY,
-          ThirdPartyAuthType.GITHUB,
-          userResponse.id,
-        ),
-      )
-      return it
+      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
     }
 
     val newUserAccount = UserAccount()
@@ -131,6 +141,7 @@ class GithubOAuthDelegate(
     newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GITHUB
     newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
 
+    checkNotManagedByOrganization(newUserAccount.domain)
     signUpService.signUp(newUserAccount, invitationCode, null)
 
     return newUserAccount

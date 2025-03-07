@@ -4167,4 +4167,9 @@
     <changeSet author="stanov (generated)" id="1740659624320-9">
         <addForeignKeyConstraint baseColumnNames="linked_task_id" baseTableName="notification" constraintName="FKm1auuxar5ovwae9fqjp1eo05k" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="task" validate="true"/>
     </changeSet>
+    <changeSet author="anty (generated)" id="1741260803979-1">
+        <addColumn tableName="auth_provider_change_request">
+            <column name="identifier" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

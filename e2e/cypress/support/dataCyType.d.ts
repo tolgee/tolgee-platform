@@ -1,6 +1,7 @@
 declare namespace DataCy {
     export type Value = 
         "accept-auth-provider-change-accept" |
+        "accept-auth-provider-change-decline" |
         "accept-auth-provider-change-info-text" |
         "accept-invitation-accept" |
         "accept-invitation-decline" |
@@ -400,8 +401,6 @@ declare namespace DataCy {
         "pat-list-item-last-used" |
         "pat-list-item-new-token-input" |
         "pat-list-item-regenerate-button" |
-        "pending-auth-provider-change-banner" |
-        "pending-auth-provider-change-dismiss" |
         "pending-invitation-banner" |
         "pending-invitation-dismiss" |
         "permissions-advanced-checkbox" |

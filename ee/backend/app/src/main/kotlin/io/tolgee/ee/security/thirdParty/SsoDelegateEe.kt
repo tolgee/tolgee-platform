@@ -72,7 +72,7 @@ class SsoDelegateEe(
 
     val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization?.id,
+      organizationId = tenant.organizationId,
       Feature.SSO,
     )
 
@@ -212,10 +212,6 @@ class SsoDelegateEe(
     refreshToken: String,
   ): Boolean {
     val tenant = tenantService.getEnabledConfigByDomain(domain)
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization?.id,
-      Feature.SSO,
-    )
 
     val response = fetchRefreshToken(tenant, refreshToken)
     if (response?.refresh_token == null) {

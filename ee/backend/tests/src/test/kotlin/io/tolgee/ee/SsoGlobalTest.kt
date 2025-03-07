@@ -4,12 +4,14 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SsoTestData
+import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.security.thirdParty.SsoDelegateEe
 import io.tolgee.ee.utils.SsoMultiTenantsMocks
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.service.TenantService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -67,14 +69,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
     currentDateProvider.forcedDate = currentDateProvider.date
-    tolgeeProperties.authentication.ssoGlobal.apply {
-      enabled = true
-      domain = "domain.com"
-      clientId = "dummy_client_id"
-      clientSecret = "clientSecret"
-      authorizationUri = "https://dummy-url.com"
-      tokenUri = "http://tokenUri"
-    }
+    tolgeeProperties.authentication.ssoGlobal.enabled = true
     testData = SsoTestData()
     testDataService.saveTestData(testData.root)
   }
@@ -82,14 +77,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   @AfterEach
   fun tearDown() {
     testDataService.cleanTestData(testData.root)
-    tolgeeProperties.authentication.ssoGlobal.apply {
-      enabled = false
-      domain = ""
-      clientId = ""
-      clientSecret = ""
-      authorizationUri = ""
-      tokenUri = ""
-    }
+    tolgeeProperties.authentication.ssoGlobal.enabled = false
     currentDateProvider.forcedDate = null
     enabledFeaturesProvider.forceEnabled = null
   }
@@ -136,6 +124,18 @@ class SsoGlobalTest : AuthorizedControllerTest() {
     assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)
     val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
     assertThrows<NotFoundException> { userAccountService.get(userName) }
+  }
+
+  @Test
+  fun `doesn't allow sign up when enabled for domain`() {
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "aaaa@domain.com",
+        organizationName = "Jejda",
+      )
+    performPost("/api/public/sign_up", dto).andIsUnauthorized
   }
 
   @Test

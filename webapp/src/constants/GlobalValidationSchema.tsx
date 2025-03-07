@@ -428,7 +428,7 @@ export class Validation {
     return urlPattern.test(value);
   };
 
-  static readonly SSO_PROVIDER = (t: TranslateFunction) =>
+  static readonly SSO_PROVIDER_ENABLED = (t: TranslateFunction) =>
     Yup.object().shape({
       force: Yup.boolean().required(),
       clientId: Yup.string().required().max(255),
@@ -450,6 +450,16 @@ export class Validation {
           t('sso_invalid_url_format'),
           Validation.validateUrlWithPort
         ),
+    });
+
+  static readonly SSO_PROVIDER_DISABLED = (t: TranslateFunction) =>
+    Yup.object().shape({
+      force: Yup.boolean().required(),
+      clientId: Yup.string().max(255),
+      domain: Yup.string().max(255),
+      clientSecret: Yup.string().max(255),
+      authorizationUri: Yup.string().max(255),
+      tokenUri: Yup.string().max(255),
     });
 
   static readonly TRANSLATION_AGENCY_FORM = () =>

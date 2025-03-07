@@ -3,10 +3,14 @@ package io.tolgee.security.thirdParty
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.AuthProviderChangeService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
@@ -15,9 +19,11 @@ import org.springframework.stereotype.Component
 @Component
 class OAuthUserHandler(
   private val signUpService: SignUpService,
+  private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
   private val authProviderChangeService: AuthProviderChangeService,
+  private val tenantService: TenantService,
 ) {
   fun findOrCreateUser(
     userResponse: OAuthUserDetails,
@@ -28,6 +34,19 @@ class OAuthUserHandler(
     val userAccount =
       getUserAccount(thirdPartyAuthType, userResponse)
 
+    authProviderChangeService.tryInitiate(
+      userAccount,
+      userResponse.email,
+      AuthProviderChangeData(
+        accountType,
+        thirdPartyAuthType,
+        userResponse.sub,
+        ssoDomain = userResponse.tenant?.domain,
+        ssoRefreshToken = userResponse.refreshToken,
+        ssoExpiration = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType),
+      ),
+    )
+
     if (userAccount != null) {
       if (thirdPartyAuthType in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)) {
         userAccountService.updateSsoSession(userAccount, userResponse.refreshToken)
@@ -36,6 +55,40 @@ class OAuthUserHandler(
     }
 
     return createUser(userResponse, invitationCode, thirdPartyAuthType, accountType)
+  }
+
+  private fun getManagingOrganization(userResponse: OAuthUserDetails): Organization? {
+    return userResponse.tenant?.organizationId?.let {
+      organizationService.find(it) ?: throw AuthenticationException(Message.ORGANIZATION_NOT_FOUND)
+    }
+  }
+
+  private fun checkNotManagedByOrganization(domain: String?) {
+    if (tenantService.getEnabledConfigByDomainOrNull(domain)?.organizationId != null) {
+      // There is sso configured for the domain - don't allow sign up without sso
+      throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
+    }
+  }
+
+  private fun checkUserManagingOrganization(
+    userResponse: OAuthUserDetails,
+    user: UserAccount,
+  ) {
+    val org = getManagingOrganization(userResponse)
+    if (org == null) {
+      checkNotManagedByOrganization(user.domain)
+      return
+    }
+
+    if (user.organizationRoles.any { it.organization?.id != org.id }) {
+      // User accepted invitation for different organization
+      throw BadRequestException(Message.INVITATION_ORGANIZATION_MISMATCH)
+    }
+
+    if (!organizationRoleService.isUserMemberOrOwner(user.id, org.id)) {
+      organizationRoleService.grantMemberRoleToUser(user, org)
+    }
+    organizationRoleService.setManaged(user, org, true)
   }
 
   private fun getUserAccount(
@@ -56,31 +109,13 @@ class OAuthUserHandler(
     return userAccountService.findByThirdParty(thirdPartyAuthType, userResponse.sub!!)
   }
 
-  private fun createUser(
+  private fun createUserEntity(
     userResponse: OAuthUserDetails,
-    invitationCode: String?,
     thirdPartyAuthType: ThirdPartyAuthType,
     accountType: UserAccount.AccountType,
   ): UserAccount {
-    var existingUserAccount =
-      userAccountService.findActive(userResponse.email)
-    if (existingUserAccount != null) {
-      authProviderChangeService.initiateProviderChange(
-        AuthProviderChangeData(
-          existingUserAccount,
-          accountType,
-          thirdPartyAuthType,
-          userResponse.sub,
-          ssoDomain = userResponse.tenant?.domain,
-          ssoRefreshToken = userResponse.refreshToken,
-          ssoExpiration = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType),
-        ),
-      )
-      return existingUserAccount
-    }
-
-    val newUserAccount = UserAccount()
-    newUserAccount.username = userResponse.email
+    val user = UserAccount()
+    user.username = userResponse.email
 
     val name =
       userResponse.name ?: run {
@@ -90,20 +125,34 @@ class OAuthUserHandler(
           userResponse.email.split("@")[0]
         }
       }
-    newUserAccount.name = name
-    newUserAccount.thirdPartyAuthId = userResponse.sub
-    newUserAccount.thirdPartyAuthType = thirdPartyAuthType
-    newUserAccount.ssoRefreshToken = userResponse.refreshToken
-    newUserAccount.accountType = accountType
-    newUserAccount.ssoSessionExpiry = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType)
+    user.name = name
+    user.thirdPartyAuthId = userResponse.sub
+    user.thirdPartyAuthType = thirdPartyAuthType
+    user.ssoRefreshToken = userResponse.refreshToken
+    user.accountType = accountType
+    user.ssoSessionExpiry = userAccountService.getCurrentSsoExpiration(thirdPartyAuthType)
+    return user
+  }
 
-    val organization = userResponse.tenant?.organization
-    signUpService.signUp(newUserAccount, invitationCode, null, organizationForced = organization)
-
-    if (organization != null) {
-      organizationRoleService.setManaged(newUserAccount, organization, true)
+  private fun createUser(
+    userResponse: OAuthUserDetails,
+    invitationCode: String?,
+    thirdPartyAuthType: ThirdPartyAuthType,
+    accountType: UserAccount.AccountType,
+  ): UserAccount {
+    userAccountService.findActive(userResponse.email)?.let {
+      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
     }
 
-    return newUserAccount
+    val user =
+      createUserEntity(
+        userResponse,
+        thirdPartyAuthType,
+        accountType,
+      )
+
+    signUpService.signUp(user, invitationCode, null)
+    checkUserManagingOrganization(userResponse, user)
+    return user
   }
 }

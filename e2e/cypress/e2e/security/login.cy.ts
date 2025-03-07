@@ -163,46 +163,42 @@ context('Login third party', () => {
   });
 });
 
-context('Login SSO', () => {
+context('SSO Organizations Login', () => {
   beforeEach(() => {
     disableEmailVerification();
+    ssoOrganizationsLoginTestData.clean();
+    ssoOrganizationsLoginTestData.generate();
+    enableOrganizationsSsoProvider();
+
+    cy.visit(HOST);
   });
 
-  context('SSO Organizations Login', () => {
-    beforeEach(() => {
-      ssoOrganizationsLoginTestData.clean();
-      ssoOrganizationsLoginTestData.generate();
-      enableOrganizationsSsoProvider();
-
-      cy.visit(HOST);
-    });
-
-    it('login with global sso', { retries: { runMode: 5 } }, () => {
-      cy.contains('SSO login').click();
-      cy.xpath("//*[@name='domain']").type('domain.com');
-      loginWithFakeSso();
-    });
-
-    afterEach(() => {
-      logout();
-      disableOrganizationsSsoProvider();
-      ssoOrganizationsLoginTestData.clean();
-    });
+  it('login with global sso', { retries: { runMode: 5 } }, () => {
+    cy.contains('SSO login').click();
+    cy.xpath("//*[@name='domain']").type('domain.com');
+    loginWithFakeSso();
   });
 
-  context('SSO Global Login', () => {
-    beforeEach(() => {
-      enableGlobalSsoProvider();
-      cy.visit(HOST);
-    });
+  afterEach(() => {
+    logout();
+    disableOrganizationsSsoProvider();
+    ssoOrganizationsLoginTestData.clean();
+  });
+});
 
-    it('login with global sso', { retries: { runMode: 5 } }, () => {
-      loginWithFakeSso();
-    });
+context('SSO Global Login', () => {
+  beforeEach(() => {
+    disableEmailVerification();
+    enableGlobalSsoProvider();
+    cy.visit(HOST);
+  });
 
-    afterEach(() => {
-      logout();
-      disableGlobalSsoProvider();
-    });
+  it('login with global sso', { retries: { runMode: 5 } }, () => {
+    loginWithFakeSso();
+  });
+
+  afterEach(() => {
+    logout();
+    disableGlobalSsoProvider();
   });
 });

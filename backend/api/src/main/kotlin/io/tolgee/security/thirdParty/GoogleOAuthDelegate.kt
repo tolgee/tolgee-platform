@@ -89,8 +89,6 @@ class GoogleOAuthDelegate(
 
         val userAccount = findOrCreateAccount(userResponse, invitationCode)
 
-        tenantService.checkSsoNotRequiredOrAuthProviderChangeActive(userAccount)
-
         val jwt = jwtService.emitToken(userAccount.id)
         return JwtAuthenticationResponse(jwt)
       }
@@ -103,7 +101,14 @@ class GoogleOAuthDelegate(
       }
       throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
     } catch (e: HttpClientErrorException) {
-      throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
+      throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR, null, e)
+    }
+  }
+
+  private fun checkNotManagedByOrganization(domain: String?) {
+    if (tenantService.getEnabledConfigByDomainOrNull(domain) != null) {
+      // There is sso configured for the domain - don't allow sign up
+      throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
     }
   }
 
@@ -113,20 +118,24 @@ class GoogleOAuthDelegate(
   ): UserAccount {
     val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-    userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)?.let {
-      return it
+    val userAccount = userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)
+
+    authProviderChangeService.tryInitiate(
+      userAccount,
+      googleEmail,
+      AuthProviderChangeData(
+        UserAccount.AccountType.THIRD_PARTY,
+        ThirdPartyAuthType.GOOGLE,
+        userResponse.sub,
+      ),
+    )
+
+    if (userAccount != null) {
+      return userAccount
     }
 
     userAccountService.findActive(googleEmail)?.let {
-      authProviderChangeService.initiateProviderChange(
-        AuthProviderChangeData(
-          it,
-          UserAccount.AccountType.THIRD_PARTY,
-          ThirdPartyAuthType.GOOGLE,
-          userResponse.sub,
-        ),
-      )
-      return it
+      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
     }
 
     val newUserAccount = UserAccount()
@@ -136,6 +145,8 @@ class GoogleOAuthDelegate(
     newUserAccount.thirdPartyAuthId = userResponse.sub
     newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
     newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
+
+    checkNotManagedByOrganization(newUserAccount.domain)
     signUpService.signUp(newUserAccount, invitationCode, null)
 
     return newUserAccount

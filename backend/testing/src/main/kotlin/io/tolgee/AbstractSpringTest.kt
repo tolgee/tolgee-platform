@@ -266,7 +266,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     )
   }
 
-  open fun setForcedDate(date: Date) {
+  open fun setForcedDate(date: Date = Date()) {
     currentDateProvider.forcedDate = date
   }
 

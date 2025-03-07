@@ -3,7 +3,11 @@ import { IconButton, MenuItem, Popover, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import { usePreferredOrganization, useUser } from 'tg.globalContext/helpers';
+import {
+  useIsSsoMigrationRequired,
+  usePreferredOrganization,
+  useUser,
+} from 'tg.globalContext/helpers';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
@@ -47,6 +51,8 @@ export const UserPresentAvatarMenu: React.FC = () => {
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser()!;
+
+  const isSsoMigrationRequired = useIsSsoMigrationRequired();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -116,7 +122,7 @@ export const UserPresentAvatarMenu: React.FC = () => {
           subtitle={user.username}
         />
         <UserMenuItems onClose={handleClose} />
-        {preferredOrganization && (
+        {!isSsoMigrationRequired && preferredOrganization && (
           <>
             <StyledDivider />
             <MenuHeader
