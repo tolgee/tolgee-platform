@@ -364,7 +364,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `close, reopen and complete task, check notifications`() {
+  fun `cancel, reopen and finish task, check notifications`() {
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/cancel",
     ).andIsOk.andAssertThatJson {

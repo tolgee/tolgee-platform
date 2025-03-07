@@ -90,14 +90,14 @@ describe('notifications', () => {
     );
     targetPageShouldHaveInUrl('/translations?task=');
 
-    generateNotification(userId, 'TASK_COMPLETED');
+    generateNotification(userId, 'TASK_FINISHED');
     assertNewestEmail(
       'Task has been finished',
       "you've created has been finished"
     );
     targetPageShouldHaveInUrl('/translations?task=');
 
-    generateNotification(userId, 'TASK_CLOSED');
+    generateNotification(userId, 'TASK_CANCELED');
     assertNewestEmail(
       'Task has been canceled',
       "you've created has been canceled"
