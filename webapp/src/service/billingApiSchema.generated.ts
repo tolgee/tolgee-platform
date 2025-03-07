@@ -742,7 +742,8 @@ export interface components {
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
-        | "strings_metric_are_not_supported";
+        | "strings_metric_are_not_supported"
+        | "keys_seats_metric_are_not_supported_for_slots_fixed_type";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
