@@ -2990,8 +2990,8 @@ export interface components {
       project?: components["schemas"]["SimpleProjectModel"];
       type:
         | "TASK_ASSIGNED"
-        | "TASK_COMPLETED"
-        | "TASK_CLOSED"
+        | "TASK_FINISHED"
+        | "TASK_CANCELED"
         | "MFA_ENABLED"
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED";

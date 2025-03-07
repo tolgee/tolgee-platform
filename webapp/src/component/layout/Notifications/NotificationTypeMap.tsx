@@ -1,6 +1,6 @@
 import { TaskAssignedItem } from 'tg.component/layout/Notifications/TaskAssignedItem';
-import { TaskCompletedItem } from 'tg.component/layout/Notifications/TaskCompletedItem';
-import { TaskClosedItem } from 'tg.component/layout/Notifications/TaskClosedItem';
+import { TaskFinishedItem } from 'tg.component/layout/Notifications/TaskFinishedItem';
+import { TaskCanceledItem } from 'tg.component/layout/Notifications/TaskCanceledItem';
 import { MfaEnabledItem } from 'tg.component/layout/Notifications/MfaEnabledItem';
 import { MfaDisabledItem } from 'tg.component/layout/Notifications/MfaDisabledItem';
 import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordChangedItem';
@@ -15,8 +15,8 @@ type NotificationsComponentMap = Record<
 
 export const notificationComponents: NotificationsComponentMap = {
   TASK_ASSIGNED: TaskAssignedItem,
-  TASK_COMPLETED: TaskCompletedItem,
-  TASK_CLOSED: TaskClosedItem,
+  TASK_FINISHED: TaskFinishedItem,
+  TASK_CANCELED: TaskCanceledItem,
   MFA_ENABLED: MfaEnabledItem,
   MFA_DISABLED: MfaDisabledItem,
   PASSWORD_CHANGED: PasswordChangedItem,
