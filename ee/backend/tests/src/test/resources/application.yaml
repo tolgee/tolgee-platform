@@ -43,6 +43,12 @@ tolgee:
     native-enabled: true
     registrationsAllowed: true
     create-initial-user: false
+    google:
+      client-id: fake_id
+      client-secret: fake_secret
+    github:
+      client-id: fake_id
+      client-secret: fake_secret
     oauth2:
       client-id: fake_client_id
       client-secret: fake_client_secret
