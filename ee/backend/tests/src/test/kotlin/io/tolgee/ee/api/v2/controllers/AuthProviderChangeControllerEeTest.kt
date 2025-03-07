@@ -22,15 +22,15 @@ class AuthProviderChangeControllerEeTest :
 
   @BeforeEach
   fun setup() {
-    val currDate = currentDateProvider.date
-    currentDateProvider.forcedDate = currDate
+    setForcedDate()
 
     enabledFeaturesProvider.forceEnabled = setOf(Feature.SSO)
     tolgeeProperties.authentication.ssoOrganizations.enabled = true
     tolgeeProperties.authentication.ssoGlobal.enabled = true
 
-    testData = AuthProviderChangeEeTestData(currDate)
+    testData = AuthProviderChangeEeTestData(currentDateProvider.date)
     testDataService.saveTestData(testData.root)
+    userAccount = testData.user
   }
 
   @AfterEach
@@ -40,7 +40,7 @@ class AuthProviderChangeControllerEeTest :
     tolgeeProperties.authentication.ssoGlobal.enabled = false
 
     testDataService.cleanTestData(testData.root)
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
   }
 
   @Test

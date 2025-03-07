@@ -84,6 +84,32 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `doesn't allow organization admin to modify tenant domain`() {
+    performAuthPut(
+      "/v2/organizations/${testData.organization.id}/sso",
+      requestTenant(),
+    ).andIsOk
+
+    loginAsUser(testData.user)
+
+    performAuthPut(
+      "/v2/organizations/${testData.organization.id}/sso",
+      requestTenant0(),
+    ).andIsForbidden
+
+    performAuthGet("/v2/organizations/${testData.organization.id}/sso")
+      .andIsOk
+      .andAssertThatJson {
+        node("domain").isEqualTo("google")
+        node("clientId").isEqualTo("dummy_client_id")
+        node("clientSecret").isEqualTo("clientSecret")
+        node("authorizationUri").isEqualTo("https://dummy-url.com")
+        node("tokenUri").isEqualTo("tokenUri")
+        node("enabled").isEqualTo(true)
+      }
+  }
+
+  @Test
   fun `always creates sso provider when disabled`() {
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/sso",
@@ -154,6 +180,18 @@ class SsoProviderControllerTest : AuthorizedControllerTest() {
       "redirectUri" to "redirectUri",
       "tokenUri" to "tokenUri",
       "enabled" to true,
+    )
+
+  fun requestTenant0() =
+    mapOf(
+      "domain" to "googleModified",
+      "clientId" to "dummy_client_id1",
+      "clientSecret" to "clientSecret1",
+      "authorizationUri" to "https://dummy-url1.com",
+      "redirectUri" to "redirectUri1",
+      "tokenUri" to "tokenUri1",
+      "enabled" to true,
+      "force" to true,
     )
 
   fun requestTenant1() =

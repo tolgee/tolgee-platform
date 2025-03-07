@@ -18,19 +18,17 @@ class AuthProviderChangeControllerTest :
 
   @BeforeEach
   fun setup() {
-    val currDate = currentDateProvider.date
-    currentDateProvider.forcedDate = currDate
-    testData = AuthProviderChangeTestData(currDate)
+    setForcedDate()
+    testData = AuthProviderChangeTestData(currentDateProvider.date)
     testDataService.saveTestData(testData.root)
+    userAccount = testData.user
   }
 
   @AfterEach
   fun tearDown() {
     testDataService.cleanTestData(testData.root)
-    currentDateProvider.forcedDate = null
+    clearForcedDate()
   }
-
-  // TODO AuthProviderServiceTest - create remove; initiate manually; and basically all functions
 
   @Test
   fun `gets current authentication provider`() {

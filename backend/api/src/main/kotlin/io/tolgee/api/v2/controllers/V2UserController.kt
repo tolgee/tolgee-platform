@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
@@ -163,6 +164,10 @@ class V2UserController(
     description = "Returns information about sso configuration affecting the user.",
   )
   @GetMapping("/sso")
+  @ApiResponse(
+    responseCode = "204",
+    description = "No SSO configuration available for this user",
+  )
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   @AllowApiAccess
@@ -177,6 +182,10 @@ class V2UserController(
   @Operation(
     summary = "Get organization which manages user",
     description = "Returns the organization that manages a given user or null",
+  )
+  @ApiResponse(
+    responseCode = "204",
+    description = "No SSO configuration available for this user",
   )
   @BypassEmailVerification
   @BypassForcedSsoAuthentication

@@ -1,6 +1,8 @@
 package io.tolgee.util
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.fixtures.AuthorizedRequestPerformer
+import io.tolgee.model.UserAccount
 import io.tolgee.security.thirdParty.GoogleOAuthDelegate
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -18,6 +20,7 @@ class GoogleAuthUtil(
   private val tolgeeProperties: TolgeeProperties,
   private var authMvc: MockMvc? = null,
   private val restTemplate: RestTemplate? = null,
+  private val authorizedRequestPerformer: AuthorizedRequestPerformer? = null,
 ) {
   private val defaultUserResponse: GoogleOAuthDelegate.GoogleUserResponse
     get() {
@@ -38,6 +41,20 @@ class GoogleAuthUtil(
       tokenResponse["access_token"] = accessToken
       return tokenResponse
     }
+
+  fun authorizeGoogleUser(user: UserAccount): MvcResult {
+    val response =
+      GoogleOAuthDelegate.GoogleUserResponse().apply {
+        email = user.username
+        email_verified = true
+        sub = "fakeId"
+        name = "fakeName"
+        given_name = "fakeGiveName"
+        family_name = "fakeGivenFamilyName"
+      }
+    val entity = ResponseEntity(response, HttpStatus.OK)
+    return authorizeGoogleUser(userResponse = entity)
+  }
 
   fun authorizeGoogleUser(
     tokenResponse: Map<String, String?>? = this.defaultTokenResponse,
@@ -62,8 +79,14 @@ class GoogleAuthUtil(
       ),
     ).thenReturn(userResponse)
 
+    val url = "/api/public/authorize_oauth/google?code=$receivedCode"
+
+    if (authorizedRequestPerformer != null) {
+      return authorizedRequestPerformer.performAuthGet(url).andReturn()
+    }
+
     return authMvc!!.perform(
-      MockMvcRequestBuilders.get("/api/public/authorize_oauth/google?code=$receivedCode")
+      MockMvcRequestBuilders.get(url)
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON),
     )
