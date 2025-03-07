@@ -559,8 +559,8 @@ class TaskService(
   private fun createNotificationIfApplicable(task: Task) {
     val notificationType =
       when (task.state) {
-        TaskState.FINISHED -> NotificationType.TASK_COMPLETED
-        TaskState.CANCELED -> NotificationType.TASK_CLOSED
+        TaskState.FINISHED -> NotificationType.TASK_FINISHED
+        TaskState.CANCELED -> NotificationType.TASK_CANCELED
         else -> return
       }
 

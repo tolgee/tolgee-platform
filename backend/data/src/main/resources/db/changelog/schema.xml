@@ -4173,4 +4173,10 @@
             UPDATE task SET state = 'FINISHED' WHERE state = 'DONE';
         </sql>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1740659624320-11">
+        <sql dbms="postgresql">
+            UPDATE notification SET type = 'TASK_CANCELED' WHERE type = 'TASK_CLOSED';
+            UPDATE notification SET type = 'TASK_FINISHED' WHERE type = 'TASK_COMPLETED';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

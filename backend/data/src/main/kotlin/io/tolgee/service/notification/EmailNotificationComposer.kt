@@ -18,8 +18,8 @@ class EmailNotificationComposer(
   fun composeEmailText(notification: Notification) =
     when (notification.type) {
       NotificationType.TASK_ASSIGNED,
-      NotificationType.TASK_COMPLETED,
-      NotificationType.TASK_CLOSED,
+      NotificationType.TASK_FINISHED,
+      NotificationType.TASK_CANCELED,
       -> taskEmailComposer
       NotificationType.MFA_ENABLED,
       NotificationType.MFA_DISABLED,

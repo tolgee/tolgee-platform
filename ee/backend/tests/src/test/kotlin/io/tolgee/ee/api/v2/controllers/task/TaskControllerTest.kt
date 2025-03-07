@@ -11,8 +11,8 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.TaskType
-import io.tolgee.model.notifications.NotificationType.TASK_CLOSED
-import io.tolgee.model.notifications.NotificationType.TASK_COMPLETED
+import io.tolgee.model.notifications.NotificationType.TASK_CANCELED
+import io.tolgee.model.notifications.NotificationType.TASK_FINISHED
 import io.tolgee.model.task.TaskKey
 import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.testing.NotificationTestUtil
@@ -371,7 +371,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("state").isEqualTo("CANCELED")
     }
     notificationUtil.newestInAppNotification().also {
-      assertThat(it.type).isEqualTo(TASK_CLOSED)
+      assertThat(it.type).isEqualTo(TASK_CANCELED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
     assertThat(notificationUtil.newestEmailNotification()).contains("has been canceled")
@@ -387,7 +387,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("state").isEqualTo("FINISHED")
     }
     notificationUtil.newestInAppNotification().also {
-      assertThat(it.type).isEqualTo(TASK_COMPLETED)
+      assertThat(it.type).isEqualTo(TASK_FINISHED)
       assertThat(it.linkedTask?.id).isEqualTo(testData.translateTask.self.id)
     }
     assertThat(notificationUtil.newestEmailNotification()).contains("has been finished")
