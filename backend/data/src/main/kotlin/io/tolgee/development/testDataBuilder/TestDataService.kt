@@ -81,6 +81,7 @@ class TestDataService(
   fun saveTestData(builder: TestDataBuilder) {
     activityHolder.enableAutoCompletion = false
     languageStatsListener.bypass = true
+    runBeforeMethodsOfAdditionalSavers(builder)
     prepare()
 
     // Projects have to be stored in separate transaction since projectHolder's
@@ -89,8 +90,8 @@ class TestDataService(
     // To be able to save project in its separate transaction,
     // user/organization has to be stored first.
     executeInNewTransaction(transactionManager) {
-      saveOrganizationData(builder)
       saveAllUsers(builder)
+      saveOrganizationData(builder)
     }
 
     executeInNewTransaction(transactionManager) {
@@ -108,6 +109,8 @@ class TestDataService(
     updateLanguageStats(builder)
     activityHolder.enableAutoCompletion = true
     languageStatsListener.bypass = false
+
+    runAfterMethodsOfAdditionalSavers(builder)
   }
 
   @Transactional
@@ -527,5 +530,22 @@ class TestDataService(
 
   companion object {
     private val passwordHashCache = mutableMapOf<String, String>()
+  }
+
+  private fun runBeforeMethodsOfAdditionalSavers(builder: TestDataBuilder) {
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach {
+        it.before(builder)
+      }
+    }
+  }
+
+
+  private fun runAfterMethodsOfAdditionalSavers(builder: TestDataBuilder) {
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach {
+        it.after(builder)
+      }
+    }
   }
 }

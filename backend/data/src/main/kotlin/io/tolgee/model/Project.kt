@@ -141,10 +141,6 @@ class Project(
     return findLanguageOptional(tag).orElse(null)
   }
 
-  fun getLanguage(tag: String): Language {
-    return findLanguage(tag) ?: throw NotFoundException()
-  }
-
   companion object {
     @Configurable
     class ProjectListener {
