@@ -259,7 +259,7 @@ class OrganizationController(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {
-    organizationRoleService.removeUser(organizationId, userId)
+    organizationRoleService.removeUser(userId, organizationId)
   }
 
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

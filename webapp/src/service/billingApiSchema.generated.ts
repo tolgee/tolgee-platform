@@ -222,6 +222,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -354,6 +355,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
@@ -454,7 +456,7 @@ export interface components {
        * @example 1
        */
       languageId: number;
-      name?: string;
+      name: string;
       type: "TRANSLATE" | "REVIEW";
     };
     CreateTranslationAgencyRequest: {
@@ -738,7 +740,10 @@ export interface components {
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
-        | "current_subscription_is_not_trialing";
+        | "current_subscription_is_not_trialing"
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported"
+        | "keys_seats_metric_are_not_supported_for_slots_fixed_type";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -913,6 +918,8 @@ export interface components {
     };
     PlanIncludedUsageModel: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
@@ -923,6 +930,8 @@ export interface components {
     };
     PlanIncludedUsageRequest: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
@@ -931,6 +940,7 @@ export interface components {
     };
     PlanPricesModel: {
       perSeat: number;
+      perThousandKeys: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -938,6 +948,7 @@ export interface components {
     };
     PlanPricesRequest: {
       perSeat?: number;
+      perThousandKeys?: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -1065,6 +1076,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
@@ -2892,7 +2904,7 @@ export interface operations {
     parameters: {
       path: {
         organizationId: number;
-        type: "SEATS" | "TRANSLATIONS";
+        type: "SEATS" | "TRANSLATIONS" | "KEYS";
       };
     };
     responses: {
@@ -3093,7 +3105,7 @@ export interface operations {
       path: {
         organizationId: number;
         invoiceId: number;
-        type: "SEATS" | "TRANSLATIONS";
+        type: "SEATS" | "TRANSLATIONS" | "KEYS";
       };
     };
     responses: {
