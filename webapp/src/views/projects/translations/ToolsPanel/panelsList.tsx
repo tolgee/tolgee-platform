@@ -8,11 +8,13 @@ import {
   ClockRewind,
   Keyboard02,
   MessageTextSquare02,
+  Stars01,
 } from '@untitled-ui/icons-react';
 import { PanelConfig } from './common/types';
 import { KeyboardShortcuts } from './panels/KeyboardShortcuts/KeyboardShortcuts';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { translationPanelAdder } from 'tg.ee';
+import { Prompt } from './panels/Prompt/Prompt';
 
 export const PANELS_WHEN_INACTIVE = [
   {
@@ -50,6 +52,12 @@ const BASE_PANELS = [
     icon: <ClockRewind />,
     name: <T keyName="translation_tools_history" />,
     component: History,
+  },
+  {
+    id: 'prompt',
+    icon: <Stars01 />,
+    name: <T keyName="translation_tools_prompt" />,
+    component: Prompt,
   },
 ] satisfies PanelConfig[];
 
