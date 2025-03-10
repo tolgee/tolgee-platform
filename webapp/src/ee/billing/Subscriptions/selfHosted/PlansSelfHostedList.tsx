@@ -52,6 +52,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
     hasYearlyPrice: false,
     public: true,
     nonCommercial: false,
+    metricType: 'KEYS_SEATS',
   });
 
   const parentForPublic: PlanType[] = [];

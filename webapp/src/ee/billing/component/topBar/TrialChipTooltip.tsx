@@ -122,6 +122,7 @@ export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
                   })}
                 />
                 <IncludedUsage
+                  metricType={plan.metricType}
                   includedUsage={plan.includedUsage}
                   isLegacy={isPlanLegacy(plan)}
                   highlightColor={highlightColor}

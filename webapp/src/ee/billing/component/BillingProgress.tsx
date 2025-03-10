@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { T } from '@tolgee/react';
 
 import { BILLING_CRITICAL_FRACTION } from './constants';
+import { ProgressData, ProgressItem } from './getProgressData';
 
 const DOT_SIZE = 8;
 
@@ -69,40 +70,50 @@ type StatItem = {
 };
 
 type Props = BoxProps & {
-  value: number;
-  maxValue?: number;
+  progressItem: ProgressItem;
   height?: number;
-  canGoOver?: boolean;
+  isPayAsYouGo?: boolean;
   showLabels?: boolean;
 };
 
 export const BillingProgress: React.FC<Props> = ({
-  value,
-  maxValue = 100,
+  progressItem,
   height = 6,
-  canGoOver,
+  isPayAsYouGo,
   showLabels,
   ...boxProps
 }) => {
-  const normalized = value > maxValue ? maxValue : value < 0 ? 0 : value;
+  const normalized =
+    progressItem.used > progressItem.included
+      ? progressItem.included
+      : progressItem.used < 0
+      ? 0
+      : progressItem.used;
   const critical =
-    normalized > BILLING_CRITICAL_FRACTION * maxValue && !canGoOver;
+    normalized > BILLING_CRITICAL_FRACTION * progressItem.included &&
+    !isPayAsYouGo;
   const theme = useTheme();
 
-  const extra = value > maxValue ? value - maxValue : 0;
+  const extra =
+    progressItem.used > progressItem.included
+      ? progressItem.used - progressItem.included
+      : 0;
 
-  const fullLength = value > maxValue ? value : maxValue;
+  const fullLength =
+    progressItem.used > progressItem.included
+      ? progressItem.used
+      : progressItem.included;
   const progressLength = (normalized / fullLength) * 100;
   const extraProgressLength = (extra / fullLength) * 100;
 
   const labels: StatItem[] = [];
 
-  if (maxValue - normalized) {
+  if (progressItem.included - normalized) {
     labels.push({
       label: (
         <T
           keyName="billing-progress-label-unused"
-          params={{ value: maxValue }}
+          params={{ value: progressItem.included }}
         />
       ),
       color: theme.palette.tokens._components.progressbar.background,
@@ -128,7 +139,7 @@ export const BillingProgress: React.FC<Props> = ({
       label: (
         <T keyName="billing-progress-label-over" params={{ value: extra }} />
       ),
-      color: canGoOver
+      color: isPayAsYouGo
         ? theme.palette.tokens._components.progressbar.pricing.over
         : theme.palette.tokens._components.progressbar.pricing.overForbidden,
     });
@@ -162,7 +173,7 @@ export const BillingProgress: React.FC<Props> = ({
         {Boolean(extra) && (
           <StyledExtra
             width={`${extraProgressLength}%`}
-            className={clsx({ canGoOver })}
+            className={clsx({ isPayAsYouGo: isPayAsYouGo })}
           />
         )}
       </StyledContainer>

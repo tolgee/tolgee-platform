@@ -10,9 +10,9 @@ import {
 import { T } from '@tolgee/react';
 
 import { useOrganizationUsage } from 'tg.globalContext/helpers';
-import { USAGE_ELEMENT_ID } from '../component/Usage';
-import { getProgressData } from '../component/utils';
+import { USAGE_ELEMENT_ID } from '../component/CriticalUsageCircle';
 import { SpendingLimitExceededDescription } from 'tg.component/security/SignUp/SpendingLimitExceededDesciption';
+import { getProgressData } from '../component/getProgressData';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -32,7 +32,7 @@ export const SpendingLimitExceededPopover: React.FC<Props> = ({
   const { usage } = useOrganizationUsage();
 
   const anchorEl = document.getElementById(USAGE_ELEMENT_ID);
-  const progressData = usage && getProgressData(usage);
+  const progressData = usage && getProgressData({ usage });
 
   return progressData ? (
     <Popover

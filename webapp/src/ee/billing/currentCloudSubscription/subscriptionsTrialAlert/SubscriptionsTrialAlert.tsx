@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { Alert } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { ProgressData } from '../../component/utils';
 import { TrialAlertContent } from './TrialAlertContent';
+import { ProgressData } from '../../component/getProgressData';
 
 export type SubscriptionsTrialAlertProps = {
   subscription: components['schemas']['CloudSubscriptionModel'];

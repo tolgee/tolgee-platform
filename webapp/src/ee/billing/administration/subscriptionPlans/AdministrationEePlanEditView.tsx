@@ -84,6 +84,7 @@ export const AdministrationEePlanEditView = () => {
                   content: {
                     'application/json': {
                       ...values,
+                      metricType: 'KEYS_SEATS',
                       stripeProductId: values.stripeProductId!,
                       forOrganizationIds: values.public
                         ? []

@@ -2,62 +2,54 @@ import { Box, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { BillingProgress } from './BillingProgress';
-import { ProgressData } from './utils';
+import { ProgressData } from './getProgressData';
 
-type Props = ProgressData;
+export const UsageDetailed: React.FC<ProgressData> = (props) => {
+  const items = [
+    {
+      getLabel: (params: { limit: number; used: number }) => (
+        <T keyName="dashboard_billing_used_translations_v2" params={params} />
+      ),
+      progress: props.translationSlotsProgress,
+    },
+    {
+      getLabel: (params: { limit: number; used: number }) => (
+        <T keyName="dashboard_billing_used_strings_v2" params={params} />
+      ),
+      progress: props.stringsProgress,
+    },
+    {
+      getLabel: (params: { limit: number; used: number }) => (
+        <T keyName="dashboard_billing_used_keys" params={params} />
+      ),
+      progress: props.keysProgress,
+    },
+    {
+      getLabel: (params: { limit: number; used: number }) => (
+        <T keyName="dashboard_billing_used_credit" params={params} />
+      ),
+      progress: props.creditProgress,
+    },
+  ];
 
-export const UsageDetailed: React.FC<Props> = ({
-  translationsUsed,
-  translationsMax,
-  creditUsed,
-  creditMax,
-  isPayAsYouGo,
-  usesSlots,
-}) => {
   return (
     <Box display="grid" gap={1}>
-      <Box>
-        <Typography variant="caption">
-          {usesSlots ? (
-            <T
-              keyName="dashboard_billing_used_translations"
-              params={{
-                available: Math.round(translationsUsed),
-                max: Math.round(translationsMax),
-              }}
+      {items
+        .filter((item) => item.progress.isInUse)
+        .map((item, index) => (
+          <Box key={index}>
+            <Typography variant="caption">
+              {item.getLabel({
+                limit: Math.round(item.progress.included),
+                used: Math.round(item.progress.used),
+              })}
+            </Typography>
+            <BillingProgress
+              progressItem={item.progress}
+              isPayAsYouGo={item.progress.isInUse}
             />
-          ) : (
-            <T
-              keyName="dashboard_billing_used_strings"
-              params={{
-                available: Math.round(translationsUsed),
-                max: Math.round(translationsMax),
-              }}
-            />
-          )}
-        </Typography>
-        <BillingProgress
-          value={translationsUsed}
-          maxValue={translationsMax}
-          canGoOver={isPayAsYouGo}
-        />
-      </Box>
-      <Box>
-        <Typography variant="caption">
-          <T
-            keyName="dashboard_billing_used_credit"
-            params={{
-              available: Math.round(creditUsed),
-              max: Math.round(creditMax),
-            }}
-          />
-        </Typography>
-        <BillingProgress
-          value={creditUsed}
-          maxValue={creditMax}
-          canGoOver={isPayAsYouGo}
-        />
-      </Box>
+          </Box>
+        ))}
     </Box>
   );
 };

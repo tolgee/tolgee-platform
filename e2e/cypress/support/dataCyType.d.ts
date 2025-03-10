@@ -143,6 +143,7 @@ declare namespace DataCy {
         "billing-plan-action-button" |
         "billing-plan-monthly-price" |
         "billing-plan-price-extra-seat" |
+        "billing-plan-price-extra-thousand-keys" |
         "billing-plan-price-extra-thousand-mt-credits" |
         "billing-plan-price-extra-thousand-strings" |
         "billing-plan-subtitle" |

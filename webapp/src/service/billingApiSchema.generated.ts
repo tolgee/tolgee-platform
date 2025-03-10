@@ -323,6 +323,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -456,7 +457,7 @@ export interface components {
        * @example 1
        */
       languageId: number;
-      name: string;
+      name?: string;
       type: "TRANSLATE" | "REVIEW";
     };
     CreateTranslationAgencyRequest: {

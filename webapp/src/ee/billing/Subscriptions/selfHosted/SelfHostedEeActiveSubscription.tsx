@@ -74,6 +74,7 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
           mb={1}
         >
           <IncludedUsage
+            metricType={'KEYS_SEATS'}
             includedUsage={plan.includedUsage}
             isLegacy={isPlanLegacy(plan)}
             highlightColor={highlightColor}

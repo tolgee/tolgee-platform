@@ -170,6 +170,7 @@ class MtCreditBucketService(
       bucketSize = bucket.bucketSize,
       refilledAt = bucket.refilled,
       nextRefillAt = bucket.getNextRefillDate(),
+      usedCredits = bucket.bucketSize - bucket.credits,
     )
   }
 

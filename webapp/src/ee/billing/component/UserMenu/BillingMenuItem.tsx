@@ -10,9 +10,9 @@ import {
   usePreferredOrganization,
   useUser,
 } from 'tg.globalContext/helpers';
-import { getProgressData } from '../utils';
 import { CircularBillingProgress } from '../CircularBillingProgress';
 import { BillingMenuItemsProps } from '../../../../eeSetup/EeModuleType';
+import { getProgressData } from '../getProgressData';
 
 export const BillingMenuItem: FC<BillingMenuItemsProps> = ({ onClose }) => {
   const { t } = useTranslate();
@@ -20,7 +20,7 @@ export const BillingMenuItem: FC<BillingMenuItemsProps> = ({ onClose }) => {
   const { preferredOrganization } = usePreferredOrganization();
 
   const { usage } = useOrganizationUsage();
-  const progressData = usage && getProgressData(usage);
+  const progressData = usage && getProgressData({ usage });
   const config = useConfig();
   const user = useUser()!;
 
@@ -53,9 +53,9 @@ export const BillingMenuItem: FC<BillingMenuItemsProps> = ({ onClose }) => {
         {progressData && (
           <CircularBillingProgress
             size={22}
-            value={progressData.moreCriticalProgress}
+            value={progressData.mostCriticalProgress}
             maxValue={1}
-            canGoOver={progressData.isPayAsYouGo}
+            canGoOver={usage?.isPayAsYouGo}
           />
         )}
       </Box>

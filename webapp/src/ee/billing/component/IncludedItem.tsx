@@ -2,7 +2,7 @@ import { Box, styled, SxProps } from '@mui/material';
 import { T } from '@tolgee/react';
 import { MtHint } from 'tg.component/billing/MtHint';
 import { StringSlotsHint } from './Hints';
-import { StringsHint } from 'tg.component/common/StringsHint';
+import { KeysHint, StringsHint } from 'tg.component/common/StringsHint';
 
 export const IncludedItemContainer = styled(Box)``;
 
@@ -67,7 +67,7 @@ export const IncludedStrings = ({
   );
 };
 
-export const IncludedCreadits = ({
+export const IncludedKeys = ({
   count,
   highlightColor,
   sx,
@@ -77,7 +77,37 @@ export const IncludedCreadits = ({
     <IncludedItemContainer {...{ sx, className }}>
       {count === -1 ? (
         <T
-          keyName="billing_subscription_included_credits_unlimited"
+          keyName="billing_subscription_included_keys_negotiable"
+          params={{
+            highlight: <StyledQuantity color={highlightColor} />,
+            hint: <KeysHint />,
+          }}
+        />
+      ) : (
+        <T
+          keyName="billing_subscription_included_keys"
+          params={{
+            highlight: <StyledQuantity color={highlightColor} />,
+            quantity: count,
+            hint: <KeysHint />,
+          }}
+        />
+      )}
+    </IncludedItemContainer>
+  );
+};
+
+export const IncludedCredits = ({
+  count,
+  highlightColor,
+  sx,
+  className,
+}: IncludedItemProps) => {
+  return (
+    <IncludedItemContainer {...{ sx, className }}>
+      {count === -1 ? (
+        <T
+          keyName="billing_subscription_included_credits_negotiable"
           params={{
             highlight: <StyledQuantity color={highlightColor} />,
             hint: <MtHint />,
@@ -107,7 +137,7 @@ export const IncludedSeats = ({
     <IncludedItemContainer {...{ sx, className }}>
       {count === -1 ? (
         <T
-          keyName="billing_subscription_included_seats_unlimited"
+          keyName="billing_subscription_included_seats_negotiable"
           params={{
             highlight: <StyledQuantity color={highlightColor} />,
             hint: <span />,

@@ -1,7 +1,8 @@
 import { Box, SxProps, Theme } from '@mui/material';
 import { PlanType } from './types';
 import {
-  IncludedCreadits,
+  IncludedCredits,
+  IncludedKeys,
   IncludedSeats,
   IncludedStrings,
   IncludedStringSlots,
@@ -13,11 +14,13 @@ type Props = {
   highlightColor: string;
   sx?: SxProps<Theme>;
   className?: string;
+  metricType: PlanType['metricType'];
 };
 
 export const IncludedUsage = ({
   includedUsage,
   isLegacy,
+  metricType,
   highlightColor,
   sx,
   className,
@@ -36,13 +39,25 @@ export const IncludedUsage = ({
           highlightColor={highlightColor}
         />
       ) : (
-        <IncludedStrings
-          className="strings"
-          count={includedUsage?.translations ?? -1}
-          highlightColor={highlightColor}
-        />
+        <>
+          {metricType == 'STRINGS' && (
+            <IncludedStrings
+              className="strings"
+              count={includedUsage?.translations ?? -1}
+              highlightColor={highlightColor}
+            />
+          )}
+
+          {metricType == 'KEYS_SEATS' && (
+            <IncludedKeys
+              className="strings"
+              count={includedUsage?.keys ?? -1}
+              highlightColor={highlightColor}
+            />
+          )}
+        </>
       )}
-      <IncludedCreadits
+      <IncludedCredits
         className="mt-credits"
         count={includedUsage?.mtCredits ?? -1}
         highlightColor={highlightColor}
