@@ -92,10 +92,7 @@ const SsoMigrationView: React.FC = () => {
         <StyledContent>
           <StyledPaper>
             <Box display="grid" gap="24px" justifyItems="center">
-              <Box
-                textAlign="center"
-                data-cy="accept-auth-provider-change-info-text"
-              >
+              <Box textAlign="center" data-cy="sso-migration-info-text">
                 <T
                   keyName="sso_migration_description"
                   params={{ domain: user?.domain || '', br: <br /> }}
@@ -116,6 +113,8 @@ const SsoMigrationView: React.FC = () => {
                   variant="outlined"
                   style={{ marginBottom: '0.5rem' }}
                   color="inherit"
+                  data-cy="account-security-provider-connect"
+                  data-cy-provider="sso"
                 >
                   <T keyName="connect_sso" />
                 </LoadingButton>

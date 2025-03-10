@@ -114,6 +114,8 @@ export const batchJobs = generateTestDataObject('batch-jobs');
 
 export const notificationTestData = generateTestDataObject('notification');
 
+export const authProviderChange = generateTestDataObject('authProviderChange');
+
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>

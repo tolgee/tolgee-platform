@@ -42,7 +42,8 @@ export function LoginSsoForm(props: LoginViewCredentialsProps) {
               variant="contained"
               color="primary"
               type="submit"
-              data-cy="login-button"
+              data-cy="login-provider"
+              data-cy-provider="sso"
             >
               <T keyName="login_sso_login_button" />
             </LoadingButton>

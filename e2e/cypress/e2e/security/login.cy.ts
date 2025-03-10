@@ -154,12 +154,14 @@ context('Login third party', () => {
     checkAnonymousIdSet();
 
     loginWithFakeGithub();
+    cy.contains('Projects').should('be.visible');
 
     checkAnonymousIdUnset();
     checkAnonymousUserIdentified();
   });
   it('login with oauth2', { retries: { runMode: 5 } }, () => {
     loginWithFakeOAuth2();
+    cy.contains('Projects').should('be.visible');
   });
 });
 
@@ -177,6 +179,7 @@ context('SSO Organizations Login', () => {
     cy.contains('SSO login').click();
     cy.xpath("//*[@name='domain']").type('domain.com');
     loginWithFakeSso();
+    cy.contains('Projects').should('be.visible');
   });
 
   afterEach(() => {
@@ -195,6 +198,7 @@ context('SSO Global Login', () => {
 
   it('login with global sso', { retries: { runMode: 5 } }, () => {
     loginWithFakeSso();
+    cy.contains('Projects').should('be.visible');
   });
 
   afterEach(() => {

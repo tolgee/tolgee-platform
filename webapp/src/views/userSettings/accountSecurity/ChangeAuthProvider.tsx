@@ -80,6 +80,8 @@ export const ChangeAuthProvider: FunctionComponent = () => {
               variant="outlined"
               style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}
               color="inherit"
+              data-cy="account-security-provider-connect"
+              data-cy-provider="sso"
             >
               {/* TODO: Maybe hover hint explaining when is SSO available? */}
               <T keyName="connect_sso" />
@@ -97,6 +99,8 @@ export const ChangeAuthProvider: FunctionComponent = () => {
                   style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}
                   color="success"
                   onClick={handleDisconnect}
+                  data-cy="account-security-provider-disconnect"
+                  data-cy-provider={provider.id}
                 >
                   {provider.disconnectButtonTitle}
                 </Button>
@@ -110,6 +114,8 @@ export const ChangeAuthProvider: FunctionComponent = () => {
                   variant="outlined"
                   style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}
                   color="inherit"
+                  data-cy="account-security-provider-connect"
+                  data-cy-provider={provider.id}
                 >
                   {provider.connectButtonTitle}
                 </Button>
