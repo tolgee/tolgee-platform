@@ -15,9 +15,9 @@ import {
   useOrganizationUsage,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
-import { USAGE_ELEMENT_ID } from '../component/Usage';
+import { USAGE_ELEMENT_ID } from '../component/CriticalUsageCircle';
 import { UsageDetailed } from '../component/UsageDetailed';
-import { getProgressData } from '../component/utils';
+import { getProgressData } from '../component/getProgressData';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -46,7 +46,7 @@ export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
   };
 
   const anchorEl = document.getElementById(USAGE_ELEMENT_ID);
-  const progressData = usage && getProgressData(usage);
+  const progressData = usage && getProgressData({ usage });
 
   return progressData ? (
     <Popover

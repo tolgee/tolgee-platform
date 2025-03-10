@@ -13,12 +13,16 @@ import {
 } from '../BillingSection';
 import { PlanMetric } from './PlanMetric';
 import { MtHint } from 'tg.component/billing/MtHint';
-import { StringsHint } from 'tg.component/common/StringsHint';
-import { getProgressData } from '../component/utils';
+import {
+  KeysHint,
+  SeatsHint,
+  StringsHint,
+} from 'tg.component/common/StringsHint';
 import { BillingPeriodInfo } from './BillingPeriodInfo';
 import { CloudEstimatedCosts } from './CloudEstimatedCosts';
 import { SubscriptionsTrialAlert } from './subscriptionsTrialAlert/SubscriptionsTrialAlert';
 import { TrialInfo } from './TrialInfo';
+import { getProgressData } from '../component/getProgressData';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
@@ -44,16 +48,13 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
-  const progressData = getProgressData(usage);
+  const isPayAsYouGo =
+    activeSubscription.plan.type === 'PAY_AS_YOU_GO' &&
+    activeSubscription.status !== 'TRIALING';
 
-  const {
-    translationsUsed,
-    translationsMax,
-    creditMax,
-    creditUsed,
-    isPayAsYouGo,
-    usesSlots,
-  } = progressData;
+  const progressData = getProgressData({
+    usage: usage,
+  });
 
   const planName =
     activeSubscription.status === 'TRIALING' ? (
@@ -98,23 +99,60 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
               )}
           </Box>
 
-          <PlanMetric
-            name={
-              usesSlots ? (
-                t('billing_actual_used_translations')
-              ) : (
+          {activeSubscription.plan.type === 'SLOTS_FIXED' && (
+            <PlanMetric
+              name={t('billing_actual_used_translations')}
+              progress={progressData.translationSlotsProgress}
+              periodEnd={activeSubscription.currentPeriodEnd}
+              isPayAsYouGo={isPayAsYouGo}
+              data-cy="billing-actual-used-strings"
+            />
+          )}
+
+          {activeSubscription.plan.metricType === 'STRINGS' && (
+            <PlanMetric
+              name={
                 <T
                   keyName="billing_actual_used_strings_with_hint"
                   params={{ hint: <StringsHint /> }}
                 />
-              )
-            }
-            currentQuantity={translationsUsed}
-            totalQuantity={translationsMax}
-            periodEnd={activeSubscription.currentPeriodEnd}
-            isPayAsYouGo={isPayAsYouGo}
-            data-cy="billing-actual-used-strings"
-          />
+              }
+              progress={progressData.stringsProgress}
+              periodEnd={activeSubscription.currentPeriodEnd}
+              isPayAsYouGo={isPayAsYouGo}
+              data-cy="billing-actual-used-strings"
+            />
+          )}
+
+          {activeSubscription.plan.metricType === 'KEYS_SEATS' && (
+            <>
+              <PlanMetric
+                name={
+                  <T
+                    keyName="billing_actual_used_keys_with_hint"
+                    params={{ hint: <KeysHint /> }}
+                  />
+                }
+                progress={progressData.keysProgress}
+                periodEnd={activeSubscription.currentPeriodEnd}
+                isPayAsYouGo={isPayAsYouGo}
+                data-cy="billing-actual-used-strings"
+              />
+              <PlanMetric
+                name={
+                  <T
+                    keyName="billing_actual_used_seats_with_hint"
+                    params={{ hint: <SeatsHint /> }}
+                  />
+                }
+                progress={progressData.seatsProgress}
+                periodEnd={activeSubscription.currentPeriodEnd}
+                isPayAsYouGo={isPayAsYouGo}
+                data-cy="billing-actual-used-strings"
+              />
+            </>
+          )}
+
           <PlanMetric
             name={
               <T
@@ -122,8 +160,7 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
                 params={{ hint: <MtHint /> }}
               />
             }
-            currentQuantity={creditUsed}
-            totalQuantity={creditMax || 0}
+            progress={progressData.creditProgress}
             periodEnd={activeSubscription.currentPeriodEnd}
             isPayAsYouGo={isPayAsYouGo}
             data-cy="billing-actual-used-monthly-credits"
