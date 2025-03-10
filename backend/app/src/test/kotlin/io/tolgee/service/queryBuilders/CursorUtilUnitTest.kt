@@ -9,6 +9,8 @@ import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Sort
+import java.sql.Time
+import java.sql.Timestamp
 import java.util.*
 
 class CursorUtilUnitTest {
@@ -40,6 +42,7 @@ class CursorUtilUnitTest {
                 unresolvedCommentCount = 1,
               ),
           ),
+        createdAt = Timestamp(1000003022),
         contextPresent = false,
       )
     cursor =
