@@ -104,7 +104,10 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
               badgeContent={order === 'keyName' ? 0 : 1}
               overlap="circular"
             >
-              <IconButton onClick={(e) => setAnchorOrderEl(e.currentTarget)}>
+              <IconButton
+                onClick={(e) => setAnchorOrderEl(e.currentTarget)}
+                data-cy="translation-controls-order"
+              >
                 <Sort />
               </IconButton>
             </Badge>
