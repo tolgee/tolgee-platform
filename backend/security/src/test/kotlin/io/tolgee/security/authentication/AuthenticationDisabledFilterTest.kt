@@ -17,6 +17,7 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.UserAccount
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -38,6 +39,8 @@ class AuthenticationDisabledFilterTest {
     const val TEST_INITIAL_USER_NAME = "admin"
   }
 
+  private val tolgeeProperties = mock(TolgeeProperties::class.java)
+
   private val authProperties = mock(AuthenticationProperties::class.java)
 
   private val userAccountService = mock(UserAccountService::class.java)
@@ -45,10 +48,11 @@ class AuthenticationDisabledFilterTest {
   private val userAccount = mock(UserAccount::class.java)
 
   private val authenticationDisabledFilter =
-    AuthenticationFilter(authProperties, mock(), mock(), mock(), userAccountService, mock(), mock(), mock())
+    AuthenticationFilter(tolgeeProperties, mock(), mock(), mock(), userAccountService, mock(), mock(), mock())
 
   @BeforeEach
   fun setupMocksAndSecurityCtx() {
+    Mockito.`when`(tolgeeProperties.authentication).thenReturn(authProperties)
     Mockito.`when`(authProperties.enabled).thenReturn(false)
     Mockito.`when`(authProperties.initialUsername).thenReturn("admin")
 
