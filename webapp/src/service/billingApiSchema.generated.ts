@@ -801,12 +801,6 @@ export interface components {
         | "invalid_path";
       params?: { [key: string]: unknown }[];
     };
-    ExampleItem: {
-      key: string;
-      keyNamespace?: string;
-      source: string;
-      target: string;
-    };
     GetMySubscriptionDto: {
       instanceId: string;
       licenseKey: string;
@@ -878,11 +872,20 @@ export interface components {
       id: number;
       price: number;
     };
+    MtMetadata: {
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      organizationId: number;
+      prompt: string;
+      provider: string;
+    };
     MtResult: {
       contextDescription?: string;
       /** Format: int32 */
       price: number;
       translated?: string;
+      usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
@@ -971,6 +974,8 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "prompts.view"
+        | "prompts.edit"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1040,6 +1045,26 @@ export interface components {
       licenseKey: string;
       /** Format: int64 */
       seats: number;
+    };
+    PromptResponseUsageDto: {
+      /** Format: int64 */
+      cachedTokens?: number;
+      /** Format: int64 */
+      inputTokens?: number;
+      /** Format: int64 */
+      outputTokens?: number;
+    };
+    ProviderTranslateParams: {
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      keyName?: string;
+      metadata?: components["schemas"]["MtMetadata"];
+      pluralFormExamples?: { [key: string]: string };
+      pluralForms?: { [key: string]: string };
+      sourceLanguageTag: string;
+      targetLanguageTag: string;
+      text: string;
+      textRaw: string;
     };
     ReleaseKeyDto: {
       licenseKey: string;
@@ -1311,17 +1336,6 @@ export interface components {
       translationsCount: number;
       /** Format: int64 */
       usersCount: number;
-    };
-    TolgeeTranslateParams: {
-      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-      isBatch: boolean;
-      keyName?: string;
-      metadata?: components["schemas"]["Metadata"];
-      pluralFormExamples?: { [key: string]: string };
-      pluralForms?: { [key: string]: string };
-      sourceTag: string;
-      targetTag: string;
-      text: string;
     };
     TranslationAgencyModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -4787,7 +4801,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["TolgeeTranslateParams"];
+        "application/json": components["schemas"]["ProviderTranslateParams"];
       };
     };
   };

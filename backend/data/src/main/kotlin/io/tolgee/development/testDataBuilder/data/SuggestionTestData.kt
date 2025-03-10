@@ -152,12 +152,12 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
-  fun enableTolgee(formality: Formality = Formality.DEFAULT) {
+  fun enablePrompt(formality: Formality = Formality.DEFAULT) {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.TOLGEE)
-      this.primaryService = MtServiceType.TOLGEE
-      this.tolgeeFormality = formality
+      this.enabledServices = mutableSetOf(MtServiceType.PROMPT)
+      this.primaryService = MtServiceType.PROMPT
+      this.promptFormality = formality
     }
   }
 
@@ -171,7 +171,7 @@ class SuggestionTestData : BaseTestData() {
           MtServiceType.DEEPL,
           MtServiceType.AZURE,
           MtServiceType.BAIDU,
-          MtServiceType.TOLGEE,
+          MtServiceType.PROMPT,
         )
       this.primaryService = MtServiceType.AWS
     }
