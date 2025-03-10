@@ -166,6 +166,12 @@ export const [
         return handleTranslationsReset();
       }
     },
+    async setOrder(value: string) {
+      if (await positionService.confirmUnsavedChanges()) {
+        translationService.setOrder(value);
+        return handleTranslationsReset();
+      }
+    },
     async setEdit(edit: EditorProps | undefined) {
       if (await positionService.confirmUnsavedChanges(edit)) {
         setSidePanelOpen(true);
@@ -297,6 +303,7 @@ export const [
     search: translationService.search as string,
     urlSearch: translationService.urlSearch,
     filters: translationService.filters,
+    order: translationService.order,
     cursor: positionService.position,
     selection: selectionService.data,
     view: view as ViewMode,

@@ -9,6 +9,8 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "keys", itemRelation = "key")
 open class KeyWithTranslationsModel(
+  @Schema(description = "The time when the key was created")
+  val createdAt: Long,
   @Schema(description = "Id of key record")
   val keyId: Long,
   @Schema(description = "Name of key", example = "this_is_super_key")

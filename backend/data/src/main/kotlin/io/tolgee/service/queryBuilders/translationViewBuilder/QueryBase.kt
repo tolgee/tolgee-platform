@@ -31,6 +31,8 @@ import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
 import jakarta.persistence.criteria.Subquery
+import java.util.*
+import kotlin.collections.HashSet
 
 class QueryBase<T>(
   private val cb: CriteriaBuilder,
@@ -45,6 +47,7 @@ class QueryBase<T>(
   val whereConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
   val keyNameExpression: Path<String> = root.get(Key_.name)
+  val keyCreatedAtExpression: Path<Date> = root.get(Key_.createdAt)
   val keyIsPluralExpression: Path<Boolean> = root.get(Key_.isPlural)
   val keyArgNameExpression: Path<String?> = root.get(Key_.pluralArgName)
   val keyIdExpression: Path<Long> = root.get(Key_.id)
@@ -59,6 +62,7 @@ class QueryBase<T>(
 
   init {
     querySelection[KeyWithTranslationsView::keyId.name] = keyIdExpression
+    querySelection[KeyWithTranslationsView::createdAt.name] = keyCreatedAtExpression
     querySelection[KeyWithTranslationsView::keyName.name] = keyNameExpression
     querySelection[KeyWithTranslationsView::keyIsPlural.name] = keyIsPluralExpression
     querySelection[KeyWithTranslationsView::keyPluralArgName.name] = keyArgNameExpression

@@ -6,9 +6,11 @@ import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Tag
 import io.tolgee.service.queryBuilders.Cursorable
+import java.sql.Timestamp
 
 data class KeyWithTranslationsView(
   val keyId: Long,
+  val createdAt: Timestamp,
   val keyName: String,
   val keyIsPlural: Boolean,
   val keyPluralArgName: String?,
@@ -32,6 +34,7 @@ data class KeyWithTranslationsView(
       val result =
         KeyWithTranslationsView(
           keyId = data.removeFirst() as Long,
+          createdAt = data.removeFirst() as Timestamp,
           keyName = data.removeFirst() as String,
           keyIsPlural = data.removeFirst() as Boolean,
           keyPluralArgName = data.removeFirst() as String?,
