@@ -41,7 +41,7 @@ class MtResultStreamer(
 
     return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
       this.outputStream = outputStream
-        writer.writeJson(info)
+      writer.writeJson(info)
       if (!baseBlank) {
         writeServiceResultsAsync()
       }
