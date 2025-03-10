@@ -152,7 +152,7 @@ export const useTranslationsService = (props: Props) => {
     filterTaskNumber:
       props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
-    sort: ['keyNamespace', order],
+    sort: ['keyNamespace', order, 'keyId'],
   };
 
   const translations = useApiInfiniteQuery({
