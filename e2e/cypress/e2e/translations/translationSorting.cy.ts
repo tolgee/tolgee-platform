@@ -1,45 +1,64 @@
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import { visitTranslations } from '../../common/translations';
-
-import { waitForGlobalLoading } from '../../common/loading';
-import { translationsTestData } from '../../common/apiCalls/testData/testData';
-import { login } from '../../common/apiCalls/common';
-
-const TIMEOUT_ONE_MINUTE = 1000 * 60;
+import { createKey } from '../../common/apiCalls/common';
+import {
+  create4Translations,
+  translationsBeforeEach,
+  visitTranslations,
+} from '../../common/translations';
 
 describe('Translations sorting', () => {
   let project: ProjectDTO = null;
 
-  before(() => {
-    translationsTestData.cleanupForFilters();
-    translationsTestData
-      .generateForFilters()
-      .then((p) => {
-        project = p;
-      })
-      .then(() => {
-        login('franta', 'admin');
-        visit();
-      });
-  });
-
   beforeEach(() => {
-    login('franta', 'admin');
-    visit();
-    waitForGlobalLoading();
-    cy.contains('A key', { timeout: TIMEOUT_ONE_MINUTE }).should('be.visible');
-  });
-
-  after(() => {
-    translationsTestData.cleanupForFilters();
+    translationsBeforeEach()
+      .then((p) => (project = p))
+      .then(() => createKey(project.id, 'zzz.first.created', {}))
+      .then(() => create4Translations(project.id))
+      .then(() => createKey(project.id, 'aaa.last.created', {}))
+      .then(() => visitTranslations(project.id));
   });
 
   it('sort by key name', () => {
-    cy.gcy('translation-controls-order-item').click();
-    cy.wait(1000000);
+    cy.gcy('translation-controls-order').click();
+    cy.waitForDom();
+    cy.gcy('translation-controls-order-item')
+      .contains('Key name A to Z')
+      .click();
+    cy.gcy('translations-key-name').eq(0).should('contain', 'aaa.last.created');
+    cy.gcy('translations-key-name').eq(1).should('contain', 'Cool key 01');
   });
 
-  const visit = () => {
-    visitTranslations(project.id);
-  };
+  it('sort by key name', () => {
+    cy.gcy('translation-controls-order').click();
+    cy.waitForDom();
+    cy.gcy('translation-controls-order-item')
+      .contains('Key name Z to A')
+      .click();
+    cy.gcy('translations-key-name')
+      .eq(0)
+      .should('contain', 'zzz.first.created');
+    cy.gcy('translations-key-name').eq(1).should('contain', 'Cool key 04');
+  });
+
+  it('sort from newest keys', () => {
+    cy.gcy('translation-controls-order').click();
+    cy.waitForDom();
+    cy.gcy('translation-controls-order-item')
+      .contains('First key added')
+      .click();
+    cy.gcy('translations-key-name')
+      .eq(0)
+      .should('contain', 'zzz.first.created');
+    cy.gcy('translations-key-name').eq(1).should('contain', 'Cool key 01');
+  });
+
+  it('sort from oldest keys', () => {
+    cy.gcy('translation-controls-order').click();
+    cy.waitForDom();
+    cy.gcy('translation-controls-order-item')
+      .contains('Last key added')
+      .click();
+    cy.gcy('translations-key-name').eq(0).should('contain', 'aaa.last.created');
+    cy.gcy('translations-key-name').eq(1).should('contain', 'Cool key 04');
+  });
 });
