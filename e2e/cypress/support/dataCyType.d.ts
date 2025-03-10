@@ -596,6 +596,7 @@ declare namespace DataCy {
         "topbar-trial-popover-trial-plan-chip" |
         "transfer-project-apply-button" |
         "translation-agency-item" |
+        "translation-controls-order-item" |
         "translation-create-description-input" |
         "translation-create-key-input" |
         "translation-create-namespace-input" |

@@ -188,40 +188,6 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               filtersContent={filtersContent}
               onChange={setFilters}
             />
-          </StyledSpaced>
-
-          <StyledSpaced>
-            <StyledIconButton
-              size="small"
-              onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
-            >
-              <Globe02 />
-            </StyledIconButton>
-
-            <LanguagesMenu
-              anchorEl={anchorLanguagesEl}
-              onClose={() => setAnchorLanguagesEl(null)}
-              onChange={handleLanguageChange}
-              value={selectedLanguages}
-              languages={languages}
-            />
-            <Badge color="primary" badgeContent={activeFilters?.length}>
-              <StyledButtonWrapper>
-                <StyledIconButton
-                  size="small"
-                  onClick={(e) => setAnchorFiltersEl(e.currentTarget)}
-                >
-                  <FilterLines />
-                </StyledIconButton>
-              </StyledButtonWrapper>
-            </Badge>
-            <FiltersMenu
-              filters={filters}
-              anchorEl={anchorFiltersEl}
-              onClose={() => setAnchorFiltersEl(null)}
-              filtersContent={filtersContent}
-              onChange={setFilters}
-            />
             <Tooltip title={t('translation_controls_order_tooltip')}>
               <Badge
                 color="primary"
@@ -247,6 +213,21 @@ export const TranslationControlsCompact: React.FC<Props> = ({
           </StyledSpaced>
 
           <StyledSpaced>
+            <StyledIconButton
+              size="small"
+              onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
+            >
+              <Globe02 />
+            </StyledIconButton>
+
+            <LanguagesMenu
+              anchorEl={anchorLanguagesEl}
+              onClose={() => setAnchorLanguagesEl(null)}
+              onChange={handleLanguageChange}
+              value={selectedLanguages}
+              languages={languages}
+            />
+
             <ButtonGroup>
               <StyledToggleButton
                 color={view === 'LIST' ? 'primary' : 'default'}

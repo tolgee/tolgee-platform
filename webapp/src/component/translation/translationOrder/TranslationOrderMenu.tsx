@@ -34,6 +34,7 @@ export const TranslationOrderMenu = ({
             onClose();
           }}
           selected={o.value === value}
+          data-cy="translation-controls-order-item"
         >
           {o.label}
         </MenuItem>
