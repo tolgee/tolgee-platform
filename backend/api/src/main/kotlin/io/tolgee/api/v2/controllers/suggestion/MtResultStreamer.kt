@@ -41,12 +41,7 @@ class MtResultStreamer(
 
     return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
       this.outputStream = outputStream
-      try {
         writer.writeJson(info)
-      } catch (e: Exception) {
-        throw e
-      }
-
       if (!baseBlank) {
         writeServiceResultsAsync()
       }
@@ -82,6 +77,7 @@ class MtResultStreamer(
         }
       }
     } catch (e: Exception) {
+      logger.debug("Error while streaming machine translation suggestion", e)
       writeException(e, writer, service)
       if (e !is BadRequestException && e !is NotFoundException) {
         Sentry.captureException(e)
