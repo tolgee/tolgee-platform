@@ -14,7 +14,6 @@ import { tokenService } from 'tg.service/TokenService';
 import { PendingInvitationBanner } from './PendingInvitationBanner';
 import { useTranslate } from '@tolgee/react';
 import { Announcement } from './Announcement';
-import { PendingAuthProviderChangeBanner } from 'tg.component/layout/TopBanner/PendingAuthProviderChangeBanner';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -61,12 +60,6 @@ export function TopBanner() {
   const { t } = useTranslate();
   const bannerType = useGlobalContext((c) => c.initialData.announcement?.type);
   const pendingInvitationCode = useGlobalContext((c) => c.auth.invitationCode);
-  const pendingAuthProviderChange = useGlobalContext(
-    (c) => c.auth.authProviderChange
-  );
-  const waitingForLogin = useGlobalContext((c) => !c.auth.allowPrivate);
-  const showPendingAuthProviderChange =
-    pendingAuthProviderChange && waitingForLogin;
   const { setTopBannerHeight, dismissAnnouncement } = useGlobalActions();
   const bannerRef = useRef<HTMLDivElement>(null);
   const isAuthenticated = tokenService.getToken() !== undefined;
@@ -78,9 +71,7 @@ export function TopBanner() {
 
   const announcement = bannerType && getAnnouncement(bannerType);
   const showCloseButton =
-    !showEmailVerificationBanner &&
-    !pendingInvitationCode &&
-    !showPendingAuthProviderChange;
+    !showEmailVerificationBanner && !pendingInvitationCode;
 
   useResizeObserver({
     ref: bannerRef,
@@ -92,19 +83,9 @@ export function TopBanner() {
   useEffect(() => {
     const height = bannerRef.current?.offsetHeight;
     setTopBannerHeight(height ?? 0);
-  }, [
-    announcement,
-    isEmailVerified,
-    pendingInvitationCode,
-    showPendingAuthProviderChange,
-  ]);
+  }, [announcement, isEmailVerified, pendingInvitationCode]);
 
-  if (
-    !announcement &&
-    !showPendingAuthProviderChange &&
-    !pendingInvitationCode &&
-    !showEmailVerificationBanner
-  ) {
+  if (!announcement && !pendingInvitationCode && !showEmailVerificationBanner) {
     return null;
   }
 
@@ -122,8 +103,6 @@ export function TopBanner() {
             title={t('verify_email_account_not_verified_title')}
             icon={<Mail01 />}
           />
-        ) : showPendingAuthProviderChange ? (
-          <PendingAuthProviderChangeBanner />
         ) : pendingInvitationCode ? (
           <PendingInvitationBanner code={pendingInvitationCode} />
         ) : (

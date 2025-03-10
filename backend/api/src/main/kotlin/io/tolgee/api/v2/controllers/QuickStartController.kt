@@ -7,6 +7,8 @@ import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.hateoas.quickStart.QuickStartModel
 import io.tolgee.hateoas.quickStart.QuickStartModelAssembler
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.BypassEmailVerification
+import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.service.QuickStartService
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 import org.springframework.web.bind.annotation.PathVariable
@@ -25,6 +27,8 @@ class QuickStartController(
 ) {
   @PutMapping("/steps/{step}/complete")
   @Operation(summary = "Complete guide step", description = "Marks guide step as completed")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun completeGuideStep(
     @PathVariable("step") step: String,
   ): QuickStartModel {
@@ -42,6 +46,8 @@ class QuickStartController(
 
   @PutMapping("/set-finished/{finished}")
   @Operation(summary = "Set finished state", description = "Sets finished state of the quick start guide")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun setFinishedState(
     @PathVariable finished: Boolean,
   ): QuickStartModel {
@@ -57,6 +63,8 @@ class QuickStartController(
 
   @PutMapping("/set-open/{open}")
   @Operation(summary = "Set open state", description = "Sets open state of the quick start guide")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun setOpenState(
     @PathVariable open: Boolean,
   ): QuickStartModel {

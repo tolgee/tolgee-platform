@@ -17,6 +17,8 @@ class AuthProviderChangeRequest : StandardAuditModel() {
 
   var expirationDate: Date? = null
 
+  var identifier: String? = null
+
   @Enumerated(EnumType.STRING)
   var accountType: UserAccount.AccountType? = null
 

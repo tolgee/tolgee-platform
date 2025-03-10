@@ -6,8 +6,11 @@ import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.hateoas.InitialDataModel
 import io.tolgee.hateoas.ee.IEeSubscriptionModelAssembler
+import io.tolgee.hateoas.sso.PublicSsoTenantModelAssembler
+import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.TenantService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController
 class InitialDataController(
   private val configurationController: ConfigurationController,
   private val authenticationFacade: AuthenticationFacade,
-  private val userController: V2UserController,
   private val userPreferencesService: UserPreferencesService,
   private val preferredOrganizationFacade: PreferredOrganizationFacade,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -34,6 +36,9 @@ class InitialDataController(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val eeSubscriptionProvider: EeSubscriptionProvider?,
   private val announcementController: AnnouncementController,
+  private val tenantService: TenantService,
+  private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
+  private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(summary = "Get initial data", description = "Returns initial data required by the UI to load")
@@ -51,7 +56,10 @@ class InitialDataController(
 
     val userAccount = authenticationFacade.authenticatedUserOrNull
     if (userAccount != null) {
-      data.userInfo = userController.getInfo()
+      val userAccountView = authenticationFacade.authenticatedUserView
+      val tenant = tenantService.getEnabledConfigByDomainOrNull(userAccount.domain)
+      data.userInfo = privateUserAccountModelAssembler.toModel(userAccountView)
+      data.ssoInfo = tenant?.let { publicSsoTenantModelAssembler.toModel(it) }
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()

@@ -10,6 +10,9 @@ tolgee:
     needs-email-verification: true
     registrations-allowed: true
     initial-password: "admin"
+    google:
+      client-id: dummy_client_id
+      client-secret: dummy_client_secret
     github:
       client-id: dummy_client_id
       client-secret: dummy_client_secret
@@ -25,7 +28,6 @@ tolgee:
       user-url: "https://dummy-url.com/userinfo"
     sso-organizations:
       enabled: false
-      allowed-domains: "domain.com"
     sso-global:
       enabled: false
       authorization-uri: "https://dummy-url.com"
@@ -41,8 +43,9 @@ tolgee:
   file-storage-url: http://localhost:8201
   internal:
     controller-enabled: true
-    fake-github-login: true
+    fake-third-party-login: true
     fake-mt-providers: true
+    verify-sso-account-available-bypass: true
   smtp:
     host: localhost
     port: 21025

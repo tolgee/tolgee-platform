@@ -3,11 +3,10 @@ import { GitHub, Google } from 'tg.component/CustomIcons';
 import { LogIn01 } from '@untitled-ui/icons-react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
-import { v4 as uuidv4 } from 'uuid';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const GOOGLE_BASE = 'https://accounts.google.com/o/oauth2/v2/auth';
-const LOCAL_STORAGE_STATE_KEY = 'oauth2State';
 
 export interface OAuthService {
   id: string;
@@ -15,6 +14,8 @@ export interface OAuthService {
   buttonIcon: React.ReactElement;
   loginButtonTitle: React.ReactElement;
   signUpButtonTitle: React.ReactElement;
+  connectButtonTitle: React.ReactElement;
+  disconnectButtonTitle: React.ReactElement;
 }
 
 export const gitHubService = (clientId: string): OAuthService => {
@@ -29,6 +30,8 @@ export const gitHubService = (clientId: string): OAuthService => {
     buttonIcon: <GitHub width={20} height={20} />,
     loginButtonTitle: <T keyName="login_github_login_button" />,
     signUpButtonTitle: <T keyName="login_github_signup_button" />,
+    connectButtonTitle: <T keyName="login_github_connect_button" />,
+    disconnectButtonTitle: <T keyName="login_github_disconnect_button" />,
   };
 };
 
@@ -44,6 +47,8 @@ export const googleService = (clientId: string): OAuthService => {
     buttonIcon: <Google width={20} height={20} />,
     loginButtonTitle: <T keyName="login_google_login_button" />,
     signUpButtonTitle: <T keyName="login_google_signup_button" />,
+    connectButtonTitle: <T keyName="login_google_connect_button" />,
+    disconnectButtonTitle: <T keyName="login_google_disconnect_button" />,
   };
 };
 
@@ -52,9 +57,9 @@ export const oauth2Service = (
   authorizationUrl: string,
   scopes: string[] = []
 ): OAuthService => {
+  const { generateOAuthStateKey } = useGlobalActions();
   const [authenticationUrl] = useState(() => {
-    const state = uuidv4();
-    localStorage.setItem(LOCAL_STORAGE_STATE_KEY, state);
+    const state = generateOAuthStateKey();
     const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
       [PARAMS.SERVICE_TYPE]: 'oauth2',
     });
@@ -73,5 +78,7 @@ export const oauth2Service = (
     buttonIcon: <LogIn01 />,
     loginButtonTitle: <T keyName="login_oauth2_login_button" />,
     signUpButtonTitle: <T keyName="login_oauth2_signup_button" />,
+    connectButtonTitle: <T keyName="login_oauth2_connect_button" />,
+    disconnectButtonTitle: <T keyName="login_oauth2_disconnect_button" />,
   };
 };

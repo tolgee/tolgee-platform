@@ -16,9 +16,9 @@ const LoginRouter: FunctionComponent<LoginRouterProps> = (props) => {
       <PublicOnlyRoute exact path={LINKS.LOGIN.template}>
         <LoginView />
       </PublicOnlyRoute>
-      <PublicOnlyRoute path={LINKS.OAUTH_RESPONSE.template}>
+      <Route path={LINKS.OAUTH_RESPONSE.template}>
         <OAuthRedirectionHandler />
-      </PublicOnlyRoute>
+      </Route>
       <Route path={LINKS.EMAIL_VERIFICATION.template}>
         <EmailVerificationHandler />
       </Route>

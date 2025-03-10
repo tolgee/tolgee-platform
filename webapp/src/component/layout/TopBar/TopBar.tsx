@@ -66,11 +66,12 @@ const StyledTolgeeLink = styled(Link)`
 `;
 
 type Props = {
+  hideQuickStart?: boolean;
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
 };
 
-export const TopBar: FC<Props> = ({ ...announcementProps }) => {
+export const TopBar: FC<Props> = ({ hideQuickStart, ...announcementProps }) => {
   const config = useConfig();
 
   const topBarHidden = useGlobalContext((c) => !c.layout.topBarHeight);
@@ -122,7 +123,7 @@ export const TopBar: FC<Props> = ({ ...announcementProps }) => {
         </Box>
         {user && <NotificationsTopBarButton />}
         <TopBarTestClockInfo />
-        {quickStartEnabled && <QuickStartTopBarButton />}
+        {quickStartEnabled && !hideQuickStart && <QuickStartTopBarButton />}
         {!user && <LanguageMenu />}
         {user && <UserMenu />}
       </StyledToolbar>
