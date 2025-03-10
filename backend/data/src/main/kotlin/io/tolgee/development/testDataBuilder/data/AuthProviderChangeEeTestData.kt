@@ -48,7 +48,7 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
         tenantForced =
           setTenant {
             enabled = true
-            domain = "domain-org-forced.com"
+            domain = "org-forced.com"
             clientId = "dummy_client_id"
             clientSecret = "clientSecret"
             authorizationUri = "https://dummy-url.com"
@@ -58,7 +58,7 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
 
     userNoProviderForcedSsoOrganization =
       root.addUserAccount {
-        username = "userNoProviderForcedSsoOrganization@domain-org-forced.com"
+        username = "userNoProviderForcedSsoOrganization@org-forced.com"
       }.self
 
     userSsoGlobal =

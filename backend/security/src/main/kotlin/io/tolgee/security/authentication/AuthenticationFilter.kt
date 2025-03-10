@@ -39,7 +39,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 @Lazy
 class AuthenticationFilter(
-  tolgeeProperties: TolgeeProperties,
+  private val tolgeeProperties: TolgeeProperties,
   @Lazy
   private val currentDateProvider: CurrentDateProvider,
   @Lazy
@@ -55,8 +55,10 @@ class AuthenticationFilter(
   @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
-  private val authenticationProperties = tolgeeProperties.authentication
-  private val internalProperties = tolgeeProperties.internal
+  private val authenticationProperties
+    get() = tolgeeProperties.authentication
+  private val internalProperties
+    get() = tolgeeProperties.internal
 
   override fun doFilterInternal(
     request: HttpServletRequest,
