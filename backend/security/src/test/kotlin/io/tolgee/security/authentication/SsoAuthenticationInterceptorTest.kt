@@ -1,6 +1,7 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
@@ -26,6 +27,8 @@ class SsoAuthenticationInterceptorTest {
 
   private val authenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
 
+  private val internalProperties = Mockito.mock(InternalProperties::class.java)
+
   private val tenantService = Mockito.mock(TenantService::class.java)
 
   private val ssoAuthenticationInterceptor =
@@ -39,7 +42,9 @@ class SsoAuthenticationInterceptorTest {
   @BeforeEach
   fun setupMocks() {
     Mockito.`when`(tolgeeProperties.authentication).thenReturn(authenticationProperties)
+    Mockito.`when`(tolgeeProperties.internal).thenReturn(internalProperties)
     Mockito.`when`(authenticationProperties.enabled).thenReturn(true)
+    Mockito.`when`(internalProperties.verifySsoAccountAvailableBypass).thenReturn(null)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isAuthenticated).thenReturn(true)
     Mockito.`when`(userAccount.username).thenReturn("user@domain.com")

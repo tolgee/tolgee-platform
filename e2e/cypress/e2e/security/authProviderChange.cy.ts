@@ -97,7 +97,7 @@ describe('Authentication Provider Change', () => {
   describe('Forced SSO Migration', () => {
     beforeEach(() => {
       enableOrganizationsSsoProvider();
-      login('userNoProviderForcedSsoOrganization@domain-org-forced.com');
+      login('userNoProviderForcedSsoOrganization@org-forced.com');
     });
 
     after(() => {
@@ -116,7 +116,7 @@ describe('Authentication Provider Change', () => {
       cy.gcy('sso-migration-info-text').should('be.visible');
 
       loginWithFakeSso(
-        'userNoProviderForcedSsoOrganization@domain-org-forced.com',
+        'userNoProviderForcedSsoOrganization@org-forced.com',
         'account-security-provider-connect'
       );
 
