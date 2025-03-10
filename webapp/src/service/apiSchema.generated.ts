@@ -353,7 +353,7 @@ export interface paths {
     post: operations["create_5"];
   };
   "/v2/projects/{projectId}/content-storages/test": {
-    post: operations["test_1"];
+    post: operations["test_2"];
   };
   "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
     get: operations["get_8"];
@@ -770,6 +770,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/webhook-configs/{id}/test": {
     /** Sends a test request to the webhook */
+    post: operations["test_1"];
+  };
+  "/v2/prompts/test": {
     post: operations["test"];
   };
   "/v2/public/business-events/identify": {
@@ -3763,6 +3766,18 @@ export interface components {
       organizationRole?: "MEMBER" | "OWNER";
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
+    };
+    PromptResponseDto: {
+      prompt: string;
+    };
+    PromptTestDto: {
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      projectId: number;
+      /** Format: int64 */
+      targetLanguageId: number;
+      template: string;
     };
     PropertyModification: {
       new?: { [key: string]: unknown };
@@ -10447,7 +10462,7 @@ export interface operations {
       };
     };
   };
-  test_1: {
+  test_2: {
     parameters: {
       path: {
         projectId: number;
@@ -17565,7 +17580,7 @@ export interface operations {
     };
   };
   /** Sends a test request to the webhook */
-  test: {
+  test_1: {
     parameters: {
       path: {
         id: number;
@@ -17610,6 +17625,53 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  test: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptResponseDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptTestDto"];
       };
     };
   };
