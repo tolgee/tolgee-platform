@@ -100,6 +100,7 @@ export const Plan: FC<Props> = ({
               <ShowAllFeaturesLink sx={{ alignSelf: 'center' }} />
             )}
             <IncludedUsage
+              metricType={plan.metricType}
               includedUsage={plan.includedUsage}
               isLegacy={isPlanLegacy(plan)}
               highlightColor={highlightColor}

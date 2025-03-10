@@ -7,7 +7,7 @@ package io.tolgee.api.v2.controllers.organization
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.mtBucketSizeProvider.PayAsYouGoCreditsProvider
-import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
+import io.tolgee.component.translationsLimitProvider.LimitsProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.organization.OrganizationView
@@ -89,7 +89,7 @@ class OrganizationController(
   private val imageUploadService: ImageUploadService,
   private val mtCreditConsumer: MtCreditsService,
   private val organizationStatsService: OrganizationStatsService,
-  private val translationsLimitProvider: TranslationsLimitProvider,
+  private val limitsProvider: LimitsProvider,
   private val projectService: ProjectService,
   private val payAsYouGoCreditsProvider: PayAsYouGoCreditsProvider,
 ) {
@@ -311,11 +311,16 @@ class OrganizationController(
   ): PublicUsageModel {
     val organization = organizationService.get(organizationId)
     val creditBalances = mtCreditConsumer.getCreditBalances(organization.id)
-    val currentTranslationSlots = organizationStatsService.getCurrentTranslationSlotCount(organizationId)
+    val currentTranslationSlots = organizationStatsService.getTranslationSlotCount(organizationId)
     val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)
-    val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
+    val currentTranslations = organizationStatsService.getTranslationCount(organizationId)
+    val currentSeats = organizationStatsService.getSeatCount(organizationId)
+    val currentKeys = organizationStatsService.getKeyCount(organizationId)
+    val limits = limitsProvider.getLimits(organizationId)
+
     return PublicUsageModel(
+      isPayAsYouGo = limits.isPayAsYouGo,
       organizationId = organizationId,
       creditBalance = creditBalances.creditBalance / 100,
       includedMtCredits = creditBalances.bucketSize / 100,
@@ -325,10 +330,23 @@ class OrganizationController(
       availablePayAsYouGoMtCredits = availablePayAsYouGoMtCredits,
       currentTranslations = currentTranslations,
       currentTranslationSlots = currentTranslationSlots,
-      includedTranslations = translationsLimitProvider.getPlanTranslations(organization),
-      includedTranslationSlots = translationsLimitProvider.getPlanTranslationSlots(organization),
-      translationSlotsLimit = translationsLimitProvider.getTranslationSlotsLimit(organization),
-      translationsLimit = translationsLimitProvider.getTranslationLimit(organization),
+
+      includedTranslations = limits.strings.included,
+      translationsLimit = limits.strings.limit,
+
+      includedTranslationSlots = limits.translationSlots.included,
+      translationSlotsLimit = limits.translationSlots.limit,
+
+      includedKeys = limits.keys.included,
+      keysLimit = limits.keys.limit,
+
+      includedSeats = limits.seats.included,
+      seatsLimit = limits.seats.limit,
+
+      currentKeys = currentKeys,
+      currentSeats = currentSeats,
+
+      usedMtCredits = creditBalances.usedCredits / 100,
     )
   }
 

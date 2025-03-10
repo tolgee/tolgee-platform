@@ -10,3 +10,21 @@ export const StringsHint: React.FC = ({ children }) => {
     </Tooltip>
   );
 };
+
+export const KeysHint: React.FC = ({ children }) => {
+  const { t } = useTranslate();
+  return (
+    <Tooltip disableInteractive title={t('global_keys_hint')}>
+      <StyledBillingHint>{children}</StyledBillingHint>
+    </Tooltip>
+  );
+};
+
+export const SeatsHint: React.FC = ({ children }) => {
+  const { t } = useTranslate();
+  return (
+    <Tooltip disableInteractive title={t('global_seats_hint')}>
+      <StyledBillingHint>{children}</StyledBillingHint>
+    </Tooltip>
+  );
+};

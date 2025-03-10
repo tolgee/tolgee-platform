@@ -53,7 +53,7 @@ import { AdministrationSubscriptionsView } from '../ee/billing/administration/su
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
-export { Usage } from '../ee/billing/component/Usage';
+export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
 export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';
 export { PermissionsAdvancedEe } from '../ee/PermissionsAdvanced/PermissionsAdvancedEe';
 export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDetail';

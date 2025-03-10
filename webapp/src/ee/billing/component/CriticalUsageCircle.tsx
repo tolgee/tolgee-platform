@@ -10,7 +10,7 @@ import {
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { UsageDetailed } from './UsageDetailed';
-import { getProgressData } from './utils';
+import { getProgressData } from './getProgressData';
 
 export const USAGE_ELEMENT_ID = 'billing_organization_usage';
 
@@ -55,7 +55,7 @@ const StyledTitle = styled('div')`
   padding: 8px;
 `;
 
-export const Usage: FC = () => {
+export const CriticalUsageCircle: FC = () => {
   const { preferredOrganization } = usePreferredOrganization();
   const { planLimitErrors } = useOrganizationUsage();
 
@@ -80,7 +80,7 @@ export const Usage: FC = () => {
 
   const { usage } = useOrganizationUsage();
 
-  const progressData = usage && getProgressData(usage);
+  const progressData = usage && getProgressData({ usage });
 
   const showStats = planLimitErrors || progressData?.isCritical;
 
@@ -118,8 +118,8 @@ export const Usage: FC = () => {
         >
           <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
             <CircularBillingProgress
-              canGoOver={progressData.isPayAsYouGo}
-              value={progressData.moreCriticalProgress}
+              canGoOver={usage.isPayAsYouGo}
+              value={progressData.mostCriticalProgress}
               maxValue={1}
             />
           </StyledContent>
