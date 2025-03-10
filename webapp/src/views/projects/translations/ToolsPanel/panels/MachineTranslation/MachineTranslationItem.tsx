@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { styled } from '@mui/material';
+import { styled, SxProps } from '@mui/material';
 
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
@@ -16,7 +16,7 @@ import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 
 const StyledItem = styled('div')`
   padding: ${({ theme }) => theme.spacing(0.5, 0.75)};
-  margin: ${({ theme }) => theme.spacing(0.5, 0.5)};
+  margin: 4px 12px 4px 4px;
   border-radius: 4px;
   display: grid;
   gap: ${({ theme }) => theme.spacing(0, 1)};
@@ -25,7 +25,7 @@ const StyledItem = styled('div')`
   transition-property: background color;
 
   &:hover {
-    background: ${({ theme }) => theme.palette.emphasis[50]};
+    background: ${({ theme }) => theme.palette.tokens.text._states.selected};
   }
   &.clickable {
     cursor: pointer;
@@ -38,6 +38,8 @@ const StyledItem = styled('div')`
 const StyledValue = styled('div')`
   font-size: 15px;
   align-self: center;
+  overflow-wrap: break-word;
+  overflow: hidden;
 `;
 
 const StyledError = styled(StyledValue)`
@@ -62,6 +64,8 @@ type Props = {
   setValue: (val: string) => void;
   languageTag: string;
   pluralVariant: string | undefined;
+  showIcon?: boolean;
+  sx?: SxProps;
 };
 
 export const MachineTranslationItem = ({
@@ -72,8 +76,11 @@ export const MachineTranslationItem = ({
   languageTag,
   setValue,
   pluralVariant,
+  showIcon = true,
+  sx,
 }: Props) => {
   const error = data?.errorMessage?.toLowerCase();
+  const errorParams = data?.errorParams;
   const result = data?.result;
 
   const text = useExtractedPlural(pluralVariant, data?.result?.output);
@@ -96,8 +103,11 @@ export const MachineTranslationItem = ({
       }}
       data-cy="translation-tools-machine-translation-item"
       className={clsx({ clickable })}
+      sx={{ gridTemplateColumns: showIcon ? '20px 1fr' : '1fr', ...sx }}
     >
-      <ProviderLogo provider={provider} contextPresent={contextPresent} />
+      {showIcon && (
+        <ProviderLogo provider={provider} contextPresent={contextPresent} />
+      )}
       {result?.output ? (
         <>
           <StyledValue>
@@ -122,7 +132,7 @@ export const MachineTranslationItem = ({
         </>
       ) : error ? (
         <StyledError>
-          <TranslatedError code={error} />
+          <TranslatedError code={error} params={errorParams} />
         </StyledError>
       ) : !data && isFetching ? (
         <LoadingSkeletonFadingIn variant="text" />

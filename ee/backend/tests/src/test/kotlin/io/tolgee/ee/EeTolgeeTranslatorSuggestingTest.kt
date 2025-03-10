@@ -3,10 +3,10 @@ package io.tolgee.ee
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
+import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
-import io.tolgee.ee.component.contentDelivery.EeTolgeeTranslateApiServiceImpl
+import io.tolgee.ee.component.LLMTranslationProviderEeImpl
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.fixtures.andAssertThatJson
@@ -14,10 +14,8 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +27,7 @@ class EeTolgeeTranslatorSuggestingTest : ProjectAuthControllerTest("/v2/projects
 
   @Autowired
   @MockBean
-  private lateinit var eeTolgeeTranslateApiService: EeTolgeeTranslateApiServiceImpl
+  private lateinit var llmTranslationProviderEeImpl: LLMTranslationProviderEeImpl
 
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
@@ -67,26 +65,27 @@ class EeTolgeeTranslatorSuggestingTest : ProjectAuthControllerTest("/v2/projects
     internalProperties.fakeMtProviders = false
 
     whenever(
-      eeTolgeeTranslateApiService.translate(any()),
+      llmTranslationProviderEeImpl.translate(any()),
     ).thenAnswer {
       MtValueProvider.MtResult(
-        "Translated with Tolgee Translator",
-        ((it.arguments[0] as? TolgeeTranslateParams)?.text?.length ?: 0) * 100,
+        "Translated with LLM Translator",
+        ((it.arguments[0] as? ProviderTranslateParams)?.text?.length ?: 0) * 100,
         "OMG!",
       )
     }
+
+    whenever(llmTranslationProviderEeImpl.isEnabled).thenReturn(true)
+    whenever(llmTranslationProviderEeImpl.isLanguageSupported(any())).thenReturn(true)
 
     performProjectAuthPost(
       "suggest/machine-translations",
       mapOf("baseText" to "Yupee", "targetLanguageId" to testData.germanLanguage.id),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("result") {
-        node("TOLGEE") {
-          node("output").isEqualTo("Translated with Tolgee Translator")
+        node("PROMPT") {
+          node("output").isEqualTo("Translated with LLM Translator")
         }
       }
-
-      Mockito.mockingDetails(eeTolgeeTranslateApiService).invocations.assert.hasSize(1)
     }
   }
 }

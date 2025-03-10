@@ -3,6 +3,7 @@ package io.tolgee.api.publicConfiguration
 import io.tolgee.configuration.PlausibleDto
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.response.PublicBillingConfigurationDTO
+import io.tolgee.dtos.response.PublicLLMConfigurationDTO
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
@@ -35,6 +36,7 @@ class PublicConfigurationDTO(
   val plausible: PlausibleDto,
   val slack: SlackDTO,
   val translationsViewLanguagesLimit: Int,
+  val llm: PublicLLMConfigurationDTO,
 ) {
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,

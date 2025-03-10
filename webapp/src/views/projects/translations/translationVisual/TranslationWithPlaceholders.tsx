@@ -29,7 +29,7 @@ export const TranslationWithPlaceholders = ({
     if (!project.icuPlaceholders) {
       return [];
     }
-    return getPlaceholders(content, nested) || [];
+    return getPlaceholders(content || '', nested) || [];
   }, [content, nested]);
 
   const StyledPlaceholdersWrapper = useMemo(() => {
@@ -44,7 +44,7 @@ export const TranslationWithPlaceholders = ({
   let index = 0;
   for (const placeholder of placeholders) {
     if (placeholder.position.start !== index) {
-      chunks.push(content.substring(index, placeholder.position.start));
+      chunks.push(content?.substring(index, placeholder.position.start) ?? '');
     }
     index = placeholder.position.end;
     chunks.push(
@@ -52,7 +52,7 @@ export const TranslationWithPlaceholders = ({
     );
   }
 
-  if (index < content.length) {
+  if (index < (content || '').length) {
     chunks.push(content.substring(index));
   }
 

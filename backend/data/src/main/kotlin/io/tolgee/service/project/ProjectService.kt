@@ -25,6 +25,7 @@ import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.language.LanguageService
@@ -63,6 +64,54 @@ class ProjectService(
   @Lazy
   private val organizationService: OrganizationService,
 ) : Logging {
+  @set:Autowired
+  @set:Lazy
+  lateinit var keyService: KeyService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var organizationService: OrganizationService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var languageService: LanguageService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var namespaceService: NamespaceService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var translationService: TranslationService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var importService: ImportService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var mtServiceConfigService: MtServiceConfigService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var securityService: SecurityService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var permissionService: PermissionService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var apiKeyService: ApiKeyService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var bigMetaService: BigMetaService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var aiPlaygroundResultService: AiPlaygroundResultService
+
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun findDto(id: Long): ProjectDto? {
@@ -212,6 +261,56 @@ class ProjectService(
     project.deletedAt = currentDate
     save(project)
     applicationContext.publishEvent(OnProjectSoftDeleted(project))
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
+  fun hardDeleteProject(id: Long) {
+    traceLogMeasureTime("deleteProject") {
+      val project = get(id)
+
+      try {
+        projectHolder.project
+      } catch (e: ProjectNotSelectedException) {
+        projectHolder.project = ProjectDto.fromEntity(project)
+      }
+
+      importService.getAllByProject(id).forEach {
+        importService.hardDeleteImport(it)
+      }
+
+      // otherwise we cannot delete the languages
+      project.baseLanguage = null
+      projectRepository.saveAndFlush(project)
+
+      traceLogMeasureTime("deleteProject: delete api keys") {
+        apiKeyService.deleteAllByProject(project.id)
+      }
+
+      traceLogMeasureTime("deleteProject: delete permissions") {
+        permissionService.deleteAllByProject(project.id)
+      }
+
+      traceLogMeasureTime("deleteProject: delete screenshots") {
+        screenshotService.deleteAllByProject(project.id)
+      }
+
+      mtServiceConfigService.deleteAllByProjectId(project.id)
+
+      traceLogMeasureTime("deleteProject: delete languages") {
+        languageService.deleteAllByProject(project.id)
+      }
+
+      traceLogMeasureTime("deleteProject: delete keys") {
+        keyService.deleteAllByProject(project.id)
+      }
+
+      avatarService.unlinkAvatarFiles(project)
+      batchJobService.deleteAllByProjectId(project.id)
+      bigMetaService.deleteAllByProjectId(project.id)
+      aiPlaygroundResultService.deleteResultsByProject(project.id)
+      projectRepository.delete(project)
+    }
   }
 
   /**

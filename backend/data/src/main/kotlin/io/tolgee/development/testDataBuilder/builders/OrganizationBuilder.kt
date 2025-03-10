@@ -1,13 +1,8 @@
 package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
-import io.tolgee.model.MtCreditBucket
-import io.tolgee.model.Organization
-import io.tolgee.model.OrganizationRole
-import io.tolgee.model.Permission
-import io.tolgee.model.SsoTenant
-import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.OrganizationRoleType
+
+import io.tolgee.model.*
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import org.springframework.core.io.ClassPathResource
@@ -20,6 +15,7 @@ class OrganizationBuilder(
     var avatarFile: ClassPathResource? = null
     var slackWorkspaces: MutableList<OrganizationSlackWorkspaceBuilder> = mutableListOf()
     var tenant: SsoTenantBuilder? = null
+    var llmProviders: MutableList<LLMProviderBuilder> = mutableListOf()
   }
 
   var defaultOrganizationOfUser: UserAccount? = null
@@ -69,5 +65,11 @@ class OrganizationBuilder(
     return invitationBuilder
   }
 
+  fun addLLMProvider(ft: FT<LLMProvider>): LLMProviderBuilder {
+    val builder = LLMProviderBuilder(this)
+    data.llmProviders.add(builder)
+    ft(builder.self)
+    return builder
+  }
   val projects get() = testDataBuilder.data.projects.filter { it.self.organizationOwner.id == self.id }
 }
