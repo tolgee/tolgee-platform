@@ -11,6 +11,7 @@ import java.util.Date
 import java.util.UUID
 
 class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestData(currentDate) {
+  var userNoProviderForcedSsoOrganization: UserAccount
   var userSsoGlobal: UserAccount
   var userSsoOrganizations: UserAccount
   var userChangeNoneToSsoGlobal: UserAccount
@@ -24,7 +25,9 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
   lateinit var changeOauth2ToSsoOrganizations: AuthProviderChangeRequest
 
   var organization: Organization
+  var organizationForced: Organization
   var tenant: SsoTenant
+  lateinit var tenantForced: SsoTenant
 
   init {
     organization = userAccountBuilder.defaultOrganizationBuilder.self
@@ -36,6 +39,26 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
         clientSecret = "clientSecret"
         authorizationUri = "https://dummy-url.com"
         tokenUri = "http://tokenUri"
+      }.self
+
+    organizationForced =
+      root.addOrganization {
+        name = "organizationForced"
+      }.build {
+        tenantForced =
+          setTenant {
+            enabled = true
+            domain = "domain-org-forced.com"
+            clientId = "dummy_client_id"
+            clientSecret = "clientSecret"
+            authorizationUri = "https://dummy-url.com"
+            tokenUri = "http://tokenUri"
+          }.self
+      }.self
+
+    userNoProviderForcedSsoOrganization =
+      root.addUserAccount {
+        username = "userNoProviderForcedSsoOrganization@domain-org-forced.com"
       }.self
 
     userSsoGlobal =

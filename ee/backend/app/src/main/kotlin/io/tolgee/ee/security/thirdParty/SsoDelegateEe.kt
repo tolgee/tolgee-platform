@@ -19,8 +19,9 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.SsoDelegate
-import io.tolgee.security.thirdParty.OAuthUserHandler
+import io.tolgee.security.thirdParty.ThirdPartyUserHandler
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
 import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
@@ -50,7 +51,7 @@ class SsoDelegateEe(
   private val tolgeeProperties: TolgeeProperties,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
-  private val oAuthUserHandler: OAuthUserHandler,
+  private val thirdPartyUserHandler: ThirdPartyUserHandler,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
@@ -168,11 +169,13 @@ class SsoDelegateEe(
         tenant = tenant,
       )
     val user =
-      oAuthUserHandler.findOrCreateUser(
-        userData,
-        invitationCode,
-        if (tenant.global) ThirdPartyAuthType.SSO_GLOBAL else ThirdPartyAuthType.SSO,
-        UserAccount.AccountType.MANAGED,
+      thirdPartyUserHandler.findOrCreateUser(
+        ThirdPartyUserDetails.fromOAuth2(
+          userData,
+          if (tenant.global) ThirdPartyAuthType.SSO_GLOBAL else ThirdPartyAuthType.SSO,
+          UserAccount.AccountType.MANAGED,
+          invitationCode,
+        ),
       )
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
@@ -186,8 +189,11 @@ class SsoDelegateEe(
 
   override fun verifyUserSsoAccountAvailable(user: UserAccountDto): Boolean {
     val isSsoUser = user.thirdPartyAuth in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)
+    if (!isSsoUser) {
+      return true
+    }
     val isSessionExpired = user.ssoSessionExpiry?.after(currentDateProvider.date) != true
-    if (!isSsoUser || !isSessionExpired) {
+    if (!isSessionExpired) {
       return true
     }
 

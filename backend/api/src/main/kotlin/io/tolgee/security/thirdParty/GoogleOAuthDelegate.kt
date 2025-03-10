@@ -3,17 +3,13 @@ package io.tolgee.security.thirdParty
 import io.tolgee.configuration.tolgee.GoogleAuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.auth.AuthProviderChangeData
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
-import io.tolgee.service.TenantService
-import io.tolgee.service.security.AuthProviderChangeService
-import io.tolgee.service.security.SignUpService
-import io.tolgee.service.security.UserAccountService
+import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -25,17 +21,20 @@ import org.springframework.web.client.RestTemplate
 @Component
 class GoogleOAuthDelegate(
   private val jwtService: JwtService,
-  private val userAccountService: UserAccountService,
   private val restTemplate: RestTemplate,
   properties: TolgeeProperties,
-  private val signUpService: SignUpService,
-  private val authProviderChangeService: AuthProviderChangeService,
-  private val tenantService: TenantService,
+  private val thirdPartyUserHandler: ThirdPartyUserHandler,
 ) : ThirdPartyAuthDelegate {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
   override val name: String
     get() = "google"
+
+  override val preferredAccountType: UserAccount.AccountType
+    get() = UserAccount.AccountType.THIRD_PARTY
+
+  override val preferredThirdPartyAuthType: ThirdPartyAuthType
+    get() = ThirdPartyAuthType.GOOGLE
 
   override fun getTokenResponse(
     receivedCode: String?,
@@ -87,7 +86,13 @@ class GoogleOAuthDelegate(
           }
         }
 
-        val userAccount = findOrCreateAccount(userResponse, invitationCode)
+        val userAccount =
+          thirdPartyUserHandler.findOrCreateUser(
+            ThirdPartyUserDetails.fromGoogle(
+              userResponse,
+              invitationCode,
+            ),
+          )
 
         val jwt = jwtService.emitToken(userAccount.id)
         return JwtAuthenticationResponse(jwt)
@@ -103,53 +108,6 @@ class GoogleOAuthDelegate(
     } catch (e: HttpClientErrorException) {
       throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR, null, e)
     }
-  }
-
-  private fun checkNotManagedByOrganization(domain: String?) {
-    if (tenantService.getEnabledConfigByDomainOrNull(domain) != null) {
-      // There is sso configured for the domain - don't allow sign up
-      throw AuthenticationException(Message.USE_SSO_FOR_AUTHENTICATION_INSTEAD, listOf(domain))
-    }
-  }
-
-  private fun findOrCreateAccount(
-    userResponse: GoogleUserResponse,
-    invitationCode: String?,
-  ): UserAccount {
-    val googleEmail = userResponse.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
-
-    val userAccount = userAccountService.findByThirdParty(ThirdPartyAuthType.GOOGLE, userResponse.sub!!)
-
-    authProviderChangeService.tryInitiate(
-      userAccount,
-      googleEmail,
-      AuthProviderChangeData(
-        UserAccount.AccountType.THIRD_PARTY,
-        ThirdPartyAuthType.GOOGLE,
-        userResponse.sub,
-      ),
-    )
-
-    if (userAccount != null) {
-      return userAccount
-    }
-
-    userAccountService.findActive(googleEmail)?.let {
-      throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
-    }
-
-    val newUserAccount = UserAccount()
-    newUserAccount.username = userResponse.email
-      ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
-    newUserAccount.name = userResponse.name ?: (userResponse.given_name + " " + userResponse.family_name)
-    newUserAccount.thirdPartyAuthId = userResponse.sub
-    newUserAccount.thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
-    newUserAccount.accountType = UserAccount.AccountType.THIRD_PARTY
-
-    checkNotManagedByOrganization(newUserAccount.domain)
-    signUpService.signUp(newUserAccount, invitationCode, null)
-
-    return newUserAccount
   }
 
   @Suppress("PropertyName")

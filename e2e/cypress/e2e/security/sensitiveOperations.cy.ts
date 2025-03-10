@@ -87,6 +87,7 @@ context('Sensitive operations', { retries: { runMode: 3 } }, () => {
     deleteUserSql('johndoe@doe.com'); // if some test leaves it there
     cy.visit(HOST);
     loginWithFakeGithub();
+    cy.contains('Projects').should('be.visible');
     cy.visit(HOST + '/account/profile');
     gcy('delete-user-button').click();
     confirmHardMode();

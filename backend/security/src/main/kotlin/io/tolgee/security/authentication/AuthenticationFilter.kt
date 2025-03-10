@@ -17,7 +17,7 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
@@ -39,7 +39,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 @Lazy
 class AuthenticationFilter(
-  private val authenticationProperties: AuthenticationProperties,
+  tolgeeProperties: TolgeeProperties,
   @Lazy
   private val currentDateProvider: CurrentDateProvider,
   @Lazy
@@ -55,6 +55,9 @@ class AuthenticationFilter(
   @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
+  private val authenticationProperties = tolgeeProperties.authentication
+  private val internalProperties = tolgeeProperties.internal
+
   override fun doFilterInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -118,8 +121,20 @@ class AuthenticationFilter(
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {
-    if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
-      throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+    when (internalProperties.verifySsoAccountAvailableBypass) {
+      true -> {
+        // Bypass user validity check
+        return
+      }
+      false -> {
+        // Always fail user validity check
+        throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+      }
+      null -> {
+        if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
+          throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+        }
+      }
     }
   }
 

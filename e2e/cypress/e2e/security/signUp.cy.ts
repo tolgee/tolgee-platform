@@ -257,6 +257,7 @@ context('Sign up', () => {
       cy.gcy('pending-invitation-banner').should('be.visible');
       cy.intercept('/api/public/authorize_oauth/github**').as('GithubSignup');
       loginWithFakeGithub();
+      cy.contains('Projects').should('be.visible');
       cy.wait('@GithubSignup').then((interception) => {
         assert.isTrue(interception.request.url.includes('invitationCode'));
       });

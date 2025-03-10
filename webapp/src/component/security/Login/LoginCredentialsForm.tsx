@@ -151,6 +151,8 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                     style={{ marginBottom: '0.5rem' }}
                     color="inherit"
                     onClick={globalSsoLogin}
+                    data-cy="login-provider"
+                    data-cy-provider="sso"
                   >
                     {loginText}
                   </LoadingButton>
@@ -168,6 +170,8 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                   variant="outlined"
                   style={{ marginBottom: '0.5rem' }}
                   color="inherit"
+                  data-cy="login-provider"
+                  data-cy-provider={provider.id}
                 >
                   {provider.loginButtonTitle}
                 </Button>

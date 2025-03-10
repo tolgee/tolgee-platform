@@ -3,7 +3,7 @@ package io.tolgee.security.thirdParty.data
 import io.tolgee.dtos.sso.SsoTenantConfig
 
 data class OAuthUserDetails(
-  var sub: String? = null,
+  var sub: String,
   var name: String? = null,
   var givenName: String? = null,
   var familyName: String? = null,

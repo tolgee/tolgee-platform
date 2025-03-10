@@ -7,6 +7,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.security.LoginRequest
+import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.DisabledFunctionalityException
@@ -14,12 +15,16 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.invitation.PublicInvitationModel
 import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
+import io.tolgee.security.thirdParty.ThirdPartyUserHandler
+import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
 import io.tolgee.service.EmailVerificationService
+import io.tolgee.service.TenantService
 import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.ReCaptchaValidationService
@@ -38,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping("/api/public")
@@ -54,6 +58,8 @@ class PublicController(
   private val userCredentialsService: UserCredentialsService,
   private val authProperties: AuthenticationProperties,
   private val thirdPartyAuthDelegates: List<ThirdPartyAuthDelegate>,
+  private val thirdPartyUserHandler: ThirdPartyUserHandler,
+  private val tenantService: TenantService,
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
   private val invitationService: InvitationService,
 ) {
@@ -132,14 +138,23 @@ class PublicController(
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?,
     @RequestParam(value = "domain", required = false) domain: String?,
   ): JwtAuthenticationResponse {
-    if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
-      val user = getFakeGithubUser()
-      return JwtAuthenticationResponse(jwtService.emitToken(user.id))
+    val delegate =
+      thirdPartyAuthDelegates.find { it.name == serviceType }
+        ?: throw NotFoundException(Message.SERVICE_NOT_FOUND)
+
+    if (properties.internal.fakeThirdPartyLogin && code?.startsWith(DUMMY_CODE_PREFIX) == true) {
+      val username = code.removePrefix(DUMMY_CODE_PREFIX)
+      val data =
+        DummyThirdPartyUserDetails(
+          username = username,
+          name = username,
+          thirdPartyAuthType = delegate.preferredThirdPartyAuthType,
+          accountType = delegate.preferredAccountType,
+        )
+      return fakeThirdPartyLogin(data, invitationCode, domain)
     }
 
-    return thirdPartyAuthDelegates.find { it.name == serviceType }
-      ?.getTokenResponse(code, invitationCode, redirectUri, domain)
-      ?: throw NotFoundException(Message.SERVICE_NOT_FOUND)
+    return delegate.getTokenResponse(code, invitationCode, redirectUri, domain)
   }
 
   @GetMapping("/invitation_info/{code}")
@@ -151,17 +166,44 @@ class PublicController(
     return publicInvitationModelAssembler.toModel(invitation)
   }
 
-  private fun getFakeGithubUser(): UserAccount {
-    val username = "johndoe@doe.com"
-    val user =
-      userAccountService.findActive(username) ?: let {
-        UserAccount().apply {
-          this.username = username
-          name = "john"
-          accountType = UserAccount.AccountType.THIRD_PARTY
-          userAccountService.save(this)
-        }
+  private fun fakeThirdPartyLogin(
+    data: DummyThirdPartyUserDetails,
+    invitationCode: String?,
+    domain: String?,
+  ): JwtAuthenticationResponse {
+    var tenant: SsoTenantConfig? = null
+    if (data.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
+      tenant = tenantService.getEnabledConfigByDomain(domain)
+      if (tenant.global) {
+        // We have found global tenant - fix the auth type accordingly
+        data.thirdPartyAuthType = ThirdPartyAuthType.SSO_GLOBAL
       }
-    return user
+    }
+    val user =
+      thirdPartyUserHandler.findOrCreateUser(
+        ThirdPartyUserDetails(
+          authId = "dummy_auth_id",
+          username = data.username,
+          name = data.name,
+          thirdPartyAuthType = data.thirdPartyAuthType,
+          accountType = data.accountType,
+          invitationCode = invitationCode,
+          refreshToken = null,
+          tenant = tenant,
+        ),
+      )
+    val jwt = jwtService.emitToken(user.id)
+    return JwtAuthenticationResponse(jwt)
+  }
+
+  data class DummyThirdPartyUserDetails(
+    var username: String,
+    var name: String,
+    var thirdPartyAuthType: ThirdPartyAuthType,
+    var accountType: UserAccount.AccountType,
+  )
+
+  companion object {
+    const val DUMMY_CODE_PREFIX = "this_is_dummy_code_"
   }
 }

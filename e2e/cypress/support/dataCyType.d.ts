@@ -7,6 +7,8 @@ declare namespace DataCy {
         "accept-invitation-decline" |
         "accept-invitation-info-text" |
         "account-security-initial-password-set" |
+        "account-security-provider-connect" |
+        "account-security-provider-disconnect" |
         "account-security-set-password-instructions-sent" |
         "active-plan-license-key-input" |
         "activity-compact" |
@@ -317,6 +319,7 @@ declare namespace DataCy {
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
         "login-button" |
+        "login-provider" |
         "machine-translations-settings-language-enabled-service" |
         "machine-translations-settings-language-options" |
         "machine-translations-settings-language-primary-service" |
@@ -514,6 +517,7 @@ declare namespace DataCy {
         "settings-menu-item" |
         "sign-up-submit-button" |
         "spending-limit-exceeded-popover" |
+        "sso-migration-info-text" |
         "storage-add-item-button" |
         "storage-form-azure-connection-string" |
         "storage-form-azure-container-name" |
