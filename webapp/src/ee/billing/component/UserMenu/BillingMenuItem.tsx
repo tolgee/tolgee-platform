@@ -55,7 +55,7 @@ export const BillingMenuItem: FC<BillingMenuItemsProps> = ({ onClose }) => {
             size={22}
             value={progressData.mostCriticalProgress}
             maxValue={1}
-            canGoOver={usage?.isPayAsYouGo}
+            isPayAsYouGo={usage?.isPayAsYouGo}
           />
         )}
       </Box>

@@ -10,13 +10,13 @@ import {
 } from '../../common/batchOperations';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
 import { enableNamespaces, login } from '../../common/apiCalls/common';
-import { selectNamespace } from '../../common/namespace';
 import { assertHasState } from '../../common/state';
 import {
   assertExportLanguagesSelected,
   checkZipContent,
   getFileName,
 } from '../../common/export';
+import { selectNamespace } from '../../compounds/NamespaceSelector';
 
 describe('Batch jobs', { scrollBehavior: false }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');

@@ -14,6 +14,7 @@ import {
   getClosestContainingText,
 } from '../../common/xPath';
 import { visitProjectLanguages } from '../../common/shared';
+import { TranslationsView } from '../../compounds/TranslationsView';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
@@ -49,11 +50,15 @@ describe('Translations Base', () => {
     () => {
       cy.wait(100);
       cy.gcy('global-empty-state').should('be.visible');
-      createTranslation({
+
+      const translationsView = new TranslationsView();
+      const keyCreateDialog = translationsView.openKeyCreateDialog();
+      keyCreateDialog.getNamespaceSelectElement().should('not.exist');
+      keyCreateDialog.fillAndSave({
         key: 'Test key',
         translation: 'Translated test key',
-        assertPresenceOfNamespaceSelectBox: false,
       });
+
       cy.contains('Key created').should('be.visible');
       cy.wait(100);
       cy.xpath(getAnyContainingText('Key', 'a'))
@@ -83,7 +88,9 @@ describe('Translations Base', () => {
     cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'test-key',
-      translation: { one: '# key', other: '# keys' },
+      plural: {
+        formValues: { one: '# key', other: '# keys' },
+      },
     });
     getTranslationCell('test-key', 'en')
       .findDcy('translation-plural-parameter')
@@ -99,8 +106,10 @@ describe('Translations Base', () => {
     cy.gcy('global-empty-state').should('be.visible');
     createTranslation({
       key: 'test-key',
-      translation: { one: '# key', other: '# keys' },
-      variableName: 'testVariable',
+      plural: {
+        variableName: 'testVariable',
+        formValues: { one: '# key', other: '# keys' },
+      },
     });
     getTranslationCell('test-key', 'en')
       .findDcy('translation-plural-parameter')
@@ -116,11 +125,14 @@ describe('Translations Base', () => {
     enableNamespaces(project.id);
     cy.wait(100);
     cy.gcy('global-empty-state').should('be.visible');
-    createTranslation({
+
+    const translationsView = new TranslationsView();
+    const keyCreateDialog = translationsView.openKeyCreateDialog();
+    keyCreateDialog.getNamespaceSelectElement().should('exist');
+    keyCreateDialog.fillAndSave({
       key: 'Test key',
       translation: 'Translated test key',
       namespace: 'test-ns',
-      assertPresenceOfNamespaceSelectBox: true,
     });
 
     cy.gcy('translations-namespace-banner')

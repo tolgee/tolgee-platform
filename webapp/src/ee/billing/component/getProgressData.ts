@@ -6,8 +6,6 @@ type UsageModel = components['schemas']['PublicUsageModel'];
 export const getProgressData = ({ usage }: { usage: UsageModel }) => {
   const usesSlots = usage.translationSlotsLimit !== -1;
 
-  console.log(usage);
-
   const translationSlotsProgress = new ProgressItem(
     usage.includedTranslationSlots,
     usage.currentTranslationSlots

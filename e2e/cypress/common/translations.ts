@@ -8,9 +8,13 @@ import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
 import { assertMessage, dismissMenu, gcy, gcyAdvanced } from './shared';
-import { selectNamespace } from './namespace';
 import { buildXpath } from './XpathBuilder';
 import Chainable = Cypress.Chainable;
+import {
+  KeyCreateDialog,
+  KeyDialogFillProps,
+} from '../compounds/KeyCreateDialog';
+import { TranslationsView } from '../compounds/TranslationsView';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -34,60 +38,11 @@ export const getPluralEditor = (variant: string) => {
   );
 };
 
-type Props = {
-  key: string;
-  translation?: string | Record<string, string>;
-  tag?: string;
-  namespace?: string;
-  description?: string;
-  variableName?: string;
-  assertPresenceOfNamespaceSelectBox?: boolean;
-};
-
-export function createTranslation({
-  key,
-  translation,
-  tag,
-  namespace,
-  description,
-  variableName,
-  assertPresenceOfNamespaceSelectBox,
-}: Props) {
+export function createTranslation(props: KeyDialogFillProps) {
   waitForGlobalLoading();
-  cy.gcy('translations-add-button').click();
-  if (assertPresenceOfNamespaceSelectBox != undefined) {
-    cy.gcy('namespaces-selector').should(
-      assertPresenceOfNamespaceSelectBox ? 'exist' : 'not.exist'
-    );
-  }
-  cy.gcy('translation-create-key-input').type(key);
-  if (namespace) {
-    selectNamespace(namespace);
-  }
-  if (description) {
-    cy.gcy('translation-create-description-input').type(description);
-  }
-  if (tag) {
-    cy.gcy('translations-tag-input').type(tag);
-    cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
-  }
-  if (typeof translation === 'string') {
-    cy.gcy('translation-editor').first().type(translation);
-  } else if (typeof translation === 'object') {
-    cy.gcy('key-plural-checkbox').click();
-    if (variableName) {
-      cy.gcy('key-plural-checkbox-expand').click();
-      cy.gcy('key-plural-variable-name').type(variableName);
-    }
-    Object.entries(translation).forEach(([key, value]) => {
-      gcyAdvanced({ value: 'translation-editor', variant: key })
-        .find('[contenteditable]')
-        .type(value);
-    });
-  }
-
-  cy.gcy('global-form-save-button').click();
-  assertMessage('Key created');
+  const translationsView = new TranslationsView();
+  const keyCreateDialog = translationsView.openKeyCreateDialog();
+  keyCreateDialog.fillAndSave(props);
 }
 
 export function selectLangsInLocalstorage(projectId: number, langs: string[]) {
