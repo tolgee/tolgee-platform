@@ -1,5 +1,7 @@
 import { Menu, MenuItem, MenuProps } from '@mui/material';
 import { useSortOptions } from './useSortOptions';
+import { CompactListSubheader } from 'tg.component/ListComponents';
+import { useTranslate } from '@tolgee/react';
 
 type Props = {
   value: string;
@@ -15,6 +17,7 @@ export const TranslationSortMenu = ({
   onClose,
 }: Props) => {
   const options = useSortOptions();
+  const { t } = useTranslate();
   return (
     <Menu
       anchorEl={anchorEl}
@@ -25,6 +28,9 @@ export const TranslationSortMenu = ({
         horizontal: 'left',
       }}
     >
+      <CompactListSubheader sx={{ pt: 0 }}>
+        {t('translation_sort_menu_label')}
+      </CompactListSubheader>
       {options.map((o) => (
         <MenuItem
           value={o.value}
