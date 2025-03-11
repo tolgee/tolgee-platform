@@ -15,7 +15,8 @@ import {
   enableGlobalSsoProvider,
   disableGlobalSsoProvider,
   userDisableMfa,
-  userEnableMfa, deleteUserSql,
+  userEnableMfa,
+  deleteUserSql,
 } from '../../common/apiCalls/common';
 import { assertMessage, getPopover } from '../../common/shared';
 import {
@@ -23,7 +24,8 @@ import {
   checkAnonymousIdUnset,
   checkAnonymousUserIdentified,
   loginViaForm,
-  loginWithFakeGithub, loginWithFakeGoogle,
+  loginWithFakeGithub,
+  loginWithFakeGoogle,
   loginWithFakeOAuth2,
   loginWithFakeSso,
 } from '../../common/login';

@@ -39,6 +39,14 @@ data class UserAccount(
   var name: String = "",
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
+  /**
+   * This property is redundant; kept for legacy reasons.
+   *
+   * It's value should follow these rules, but there are some edge cases related to old accounts:
+   * - NATIVE ->      password != null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH | null
+   * - THIRD_PARTY -> password == null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH
+   * - MANAGED ->     password == null && thirdPartyAuthType == SSO | SSO_GLOBAL
+   */
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   override var accountType: AccountType? = AccountType.LOCAL,
