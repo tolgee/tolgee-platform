@@ -20,8 +20,7 @@ class AuthenticationInterceptorTest {
 
   private val authenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
 
-  private val authenticationInterceptor =
-    AuthenticationInterceptor(authenticationFacade, authenticationProperties)
+  private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade, authenticationProperties)
 
   private val mockMvc =
     MockMvcBuilders.standaloneSetup(TestController::class.java)

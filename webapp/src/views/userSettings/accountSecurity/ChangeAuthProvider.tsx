@@ -54,7 +54,6 @@ export const ChangeAuthProvider: FunctionComponent = () => {
       <Typography variant="h6" mt={4}>
         <T keyName="third-party-authentication-options" />
       </Typography>
-      {/* TODO: Show info card when user is managed explaining why no third-party provider changes are available */}
       <Box
         display="flex"
         justifyContent="space-between"

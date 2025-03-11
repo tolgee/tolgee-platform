@@ -61,7 +61,7 @@ export const handleApiError = (
         if (alreadyCorrectPath) {
           // Safety net check: Don't redirect if user is already on one of the SSO migration pages
           // This shouldn't happen; It means frontend is trying to load one of the disabled
-          // endpoints in the background and should be fixed
+          // endpoints in the background and it should be fixed
           // TODO: log warning into sentry
           return;
         }
