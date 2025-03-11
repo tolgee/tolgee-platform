@@ -198,6 +198,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 <StyledIconButton
                   size="small"
                   onClick={(e) => setAnchorOrderEl(e.currentTarget)}
+                  data-cy="translation-controls-order"
                 >
                   <Sort />
                 </StyledIconButton>
