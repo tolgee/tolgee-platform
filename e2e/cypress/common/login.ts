@@ -18,11 +18,13 @@ const loginWithFakeThirdPartyService = (
   scope: string,
   state: boolean
 ) => {
+  waitForGlobalLoading();
   cy.intercept(redirectUrlPattern, {
     statusCode: 200,
     body: 'Fake third party auth',
   }).as('authRedirect');
-  gcyAdvanced({ value: loginButtonGcy, provider: service }, { timeout: 30000 })
+  cy.gcy(loginButtonGcy).should('be.visible');
+  gcyAdvanced({ value: loginButtonGcy, provider: service })
     .should('be.visible')
     .click();
 
