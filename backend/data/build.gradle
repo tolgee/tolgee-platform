@@ -187,6 +187,7 @@ dependencies {
      */
     implementation libs.amazonS3
     implementation libs.amazonTranslate
+    implementation libs.cloudfront
 
     /**
      * MISC MODULE
