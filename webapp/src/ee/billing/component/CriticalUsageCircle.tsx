@@ -112,13 +112,16 @@ export const CriticalUsageCircle: FC = () => {
         <Tooltip
           title={
             <StyledTitle>
-              <UsageDetailed {...progressData} />
+              <UsageDetailed
+                {...progressData}
+                isPayAsYouGo={usage?.isPayAsYouGo}
+              />
             </StyledTitle>
           }
         >
           <StyledContent className={clsx({ triggered: Boolean(trigger) })}>
             <CircularBillingProgress
-              canGoOver={usage.isPayAsYouGo}
+              isPayAsYouGo={usage.isPayAsYouGo}
               value={progressData.mostCriticalProgress}
               maxValue={1}
             />

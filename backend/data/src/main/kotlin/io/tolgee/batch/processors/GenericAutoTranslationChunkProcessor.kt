@@ -10,8 +10,8 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
-import io.tolgee.exceptions.PlanTranslationLimitExceeded
-import io.tolgee.exceptions.TranslationSpendingLimitExceeded
+import io.tolgee.exceptions.limits.PlanTranslationLimitExceeded
+import io.tolgee.exceptions.limits.TranslationSpendingLimitExceeded
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.AutoTranslationService
