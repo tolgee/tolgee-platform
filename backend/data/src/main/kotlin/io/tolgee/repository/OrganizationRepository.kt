@@ -228,4 +228,33 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     id: Long,
     currentUserId: Long,
   ): OrganizationView?
+
+
+  @Query(
+    """
+      select distinct o.id from Organization o
+        left join o.memberRoles orl
+        left join o.projects pr
+        left join pr.permissions perm
+        where orl.user.id = :userId or perm.user.id = :userId
+  """
+  )
+  fun getAllUsersOrganizations(userId: Long): Set<Long>
+
+  @Query(
+    """
+      select ua.id $ALL_USERS_IN_ORGANIZATION_QUERY
+    """
+  )
+  fun getAllUserIdsInOrganization(organizationId: Long): Set<Long>
+
+  companion object {
+    const val ALL_USERS_IN_ORGANIZATION_QUERY = """from UserAccount ua
+      left join ua.organizationRoles orl
+      left join orl.organization o on o.deletedAt is null and o.id = :organizationId
+      left join ua.permissions p 
+      left join p.project pr on pr.deletedAt is null and pr.organizationOwner.id = :organizationId 
+      where ua.deletedAt is null and ua.disabledAt is null
+      and (pr is not null or o is not null)"""
+  }
 }
