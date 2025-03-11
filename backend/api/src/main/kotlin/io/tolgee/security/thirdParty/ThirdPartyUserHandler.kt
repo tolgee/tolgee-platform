@@ -6,6 +6,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
+import io.tolgee.model.UserAccount.AccountType
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
 import io.tolgee.service.TenantService
@@ -32,7 +33,6 @@ class ThirdPartyUserHandler(
       userAccount,
       data.username,
       AuthProviderChangeData(
-        data.accountType,
         data.thirdPartyAuthType,
         data.authId,
         ssoDomain = data.tenant?.domain,
@@ -103,9 +103,16 @@ class ThirdPartyUserHandler(
     user.thirdPartyAuthId = data.authId
     user.thirdPartyAuthType = data.thirdPartyAuthType
     user.ssoRefreshToken = data.refreshToken
-    user.accountType = data.accountType
+    user.accountType = guessAccountType(data)
     user.ssoSessionExpiry = userAccountService.getCurrentSsoExpiration(data.thirdPartyAuthType)
     return user
+  }
+
+  private fun guessAccountType(data: ThirdPartyUserDetails): AccountType {
+    return when (data.thirdPartyAuthType) {
+      ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL -> AccountType.MANAGED
+      ThirdPartyAuthType.GITHUB, ThirdPartyAuthType.OAUTH2, ThirdPartyAuthType.GOOGLE -> AccountType.THIRD_PARTY
+    }
   }
 
   private fun createUser(data: ThirdPartyUserDetails): UserAccount {

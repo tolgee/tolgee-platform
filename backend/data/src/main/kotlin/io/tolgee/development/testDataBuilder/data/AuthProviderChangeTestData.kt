@@ -32,7 +32,6 @@ open class AuthProviderChangeTestData(currentDate: Date) : BaseTestData() {
     userGithub =
       root.addUserAccount {
         username = "userGithub@domain.com"
-        accountType = AccountType.THIRD_PARTY
         thirdPartyAuthType = ThirdPartyAuthType.GITHUB
         thirdPartyAuthId = "aaa1"
       }.self
@@ -43,7 +42,6 @@ open class AuthProviderChangeTestData(currentDate: Date) : BaseTestData() {
         changeNoneToGithub =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.THIRD_PARTY
             authType = ThirdPartyAuthType.GITHUB
             authId = "aaa2"
             expirationDate = validExpirationDate
@@ -52,14 +50,12 @@ open class AuthProviderChangeTestData(currentDate: Date) : BaseTestData() {
     userChangeGithubToNone =
       root.addUserAccount {
         username = "userChangeGithubToNone@domain.com"
-        accountType = AccountType.THIRD_PARTY
         thirdPartyAuthType = ThirdPartyAuthType.GITHUB
         thirdPartyAuthId = "aaa3"
       }.build {
         changeGithubToNone =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.LOCAL
             authType = null
             expirationDate = validExpirationDate
           }.self
@@ -75,7 +71,6 @@ open class AuthProviderChangeTestData(currentDate: Date) : BaseTestData() {
         changeGithubToNoneNoPassword =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.LOCAL
             authType = null
             expirationDate = validExpirationDate
           }.self
@@ -87,7 +82,6 @@ open class AuthProviderChangeTestData(currentDate: Date) : BaseTestData() {
         changeExpired =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.THIRD_PARTY
             authType = ThirdPartyAuthType.GITHUB
             authId = "aaa5"
             expirationDate = expiredExpirationDate

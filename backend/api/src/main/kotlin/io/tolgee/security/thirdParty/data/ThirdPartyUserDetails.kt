@@ -3,7 +3,6 @@ package io.tolgee.security.thirdParty.data
 import io.tolgee.constants.Message
 import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.thirdParty.GithubOAuthDelegate.GithubUserResponse
 import io.tolgee.security.thirdParty.GoogleOAuthDelegate.GoogleUserResponse
@@ -13,7 +12,6 @@ data class ThirdPartyUserDetails(
   val username: String,
   val name: String,
   val thirdPartyAuthType: ThirdPartyAuthType,
-  val accountType: UserAccount.AccountType,
   val invitationCode: String? = null,
   val refreshToken: String? = null,
   val tenant: SsoTenantConfig? = null,
@@ -22,7 +20,6 @@ data class ThirdPartyUserDetails(
     fun fromOAuth2(
       data: OAuthUserDetails,
       authType: ThirdPartyAuthType,
-      accountType: UserAccount.AccountType,
       invitationCode: String?,
     ): ThirdPartyUserDetails {
       return ThirdPartyUserDetails(
@@ -37,7 +34,6 @@ data class ThirdPartyUserDetails(
             }
           },
         thirdPartyAuthType = authType,
-        accountType = accountType,
         invitationCode = invitationCode,
         refreshToken = data.refreshToken,
         tenant = data.tenant,
@@ -54,7 +50,6 @@ data class ThirdPartyUserDetails(
         username = email,
         name = data.name ?: data.login,
         thirdPartyAuthType = ThirdPartyAuthType.GITHUB,
-        accountType = UserAccount.AccountType.THIRD_PARTY,
         invitationCode = invitationCode,
       )
     }
@@ -68,7 +63,6 @@ data class ThirdPartyUserDetails(
         username = data.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL),
         name = data.name ?: (data.given_name + " " + data.family_name),
         thirdPartyAuthType = ThirdPartyAuthType.GOOGLE,
-        accountType = UserAccount.AccountType.THIRD_PARTY,
         invitationCode = invitationCode,
       )
     }

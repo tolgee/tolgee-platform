@@ -105,11 +105,7 @@ class AuthProviderChangeService(
   }
 
   fun initiateRemove(user: UserAccount) {
-    val data =
-      AuthProviderChangeData(
-        UserAccount.AccountType.LOCAL,
-        null,
-      )
+    val data = AuthProviderChangeData(null)
     self.save(user, data)
   }
 
@@ -134,7 +130,7 @@ class AuthProviderChangeService(
       throw BadRequestException(Message.OPERATION_UNAVAILABLE_FOR_ACCOUNT_TYPE)
     }
 
-    if (req.accountType == UserAccount.AccountType.LOCAL && userAccount.password == null) {
+    if (req.authType == null && userAccount.password == null) {
       throw BadRequestException(Message.USER_MISSING_PASSWORD)
     }
 
@@ -161,13 +157,48 @@ class AuthProviderChangeService(
   }
 
   private fun UserAccount.applyRequest(req: AuthProviderChangeRequest) {
-    accountType = req.accountType
+    accountType = accountType.transformWith(req)
     thirdPartyAuthType = req.authType
     thirdPartyAuthId = req.authId
     ssoRefreshToken = req.ssoRefreshToken
     ssoSessionExpiry = req.ssoExpiration
     userAccountService.save(this)
+
+    resetEmailVerification()
+    resetNativeAuth()
     applyDomain(req)
+  }
+
+  private fun UserAccount.AccountType?.transformWith(req: AuthProviderChangeRequest): UserAccount.AccountType? {
+    return when (req.authType) {
+      ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL -> UserAccount.AccountType.MANAGED
+      ThirdPartyAuthType.GOOGLE, ThirdPartyAuthType.GITHUB, ThirdPartyAuthType.OAUTH2 -> this
+      null -> UserAccount.AccountType.LOCAL
+    }
+  }
+
+  private fun UserAccount.resetEmailVerification() {
+    if (thirdPartyAuthType == null) {
+      return
+    }
+
+    // User authenticated using current email - it is verified
+    emailVerification = null
+  }
+
+  private fun UserAccount.resetNativeAuth() {
+    if (accountType != UserAccount.AccountType.MANAGED) {
+      return
+    }
+
+    // When switching user to MANAGED mode
+    // we clear all the native authentication details
+    // this way user can no longer use them with API endpoints
+    // that doesn't check if user is MANAGED
+    password = null
+    totpKey = null
+    mfaRecoveryCodes = emptyList()
+    userAccountService.save(this)
   }
 
   private fun UserAccount.applyDomain(req: AuthProviderChangeRequest) {
@@ -233,7 +264,6 @@ class AuthProviderChangeService(
     userAccount = user
     expirationDate = DateUtils.truncate(expiration, Calendar.SECOND)
     identifier = UUID.randomUUID().toString()
-    accountType = data.accountType
     authType = data.authType
     authId = data.authId
     ssoDomain = data.ssoDomain

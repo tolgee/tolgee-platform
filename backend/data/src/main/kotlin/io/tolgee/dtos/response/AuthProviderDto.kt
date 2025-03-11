@@ -7,7 +7,6 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 
 data class AuthProviderDto(
   var id: String? = null,
-  var accountType: UserAccount.AccountType? = null,
   var authType: ThirdPartyAuthType? = null,
   var ssoDomain: String? = null,
 ) {
@@ -24,7 +23,6 @@ data class AuthProviderDto(
 
       return AuthProviderDto(
         null,
-        accountType,
         type,
         ssoDomain,
       )
@@ -33,7 +31,6 @@ data class AuthProviderDto(
     fun AuthProviderChangeRequest.asAuthProviderDto(): AuthProviderDto? {
       return AuthProviderDto(
         identifier,
-        accountType,
         authType,
         ssoDomain,
       )

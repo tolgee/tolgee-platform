@@ -1,6 +1,8 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityHolder
@@ -20,12 +22,7 @@ import io.tolgee.hateoas.userAccount.PrivateUserAccountModel
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
-import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.authentication.BypassEmailVerification
-import io.tolgee.security.authentication.BypassForcedSsoAuthentication
-import io.tolgee.security.authentication.JwtService
-import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authentication.*
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
@@ -165,8 +162,28 @@ class V2UserController(
   )
   @GetMapping("/sso")
   @ApiResponse(
+    responseCode = "200",
+    content = [
+      Content(
+        mediaType = "application/json",
+        schema =
+          Schema(
+            implementation = PublicSsoTenantModel::class,
+          ),
+      ),
+    ],
+  )
+  @ApiResponse(
     responseCode = "204",
     description = "No SSO configuration available for this user",
+    content = [
+      Content(
+        schema =
+          Schema(
+            implementation = Void::class,
+          ),
+      ),
+    ],
   )
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
@@ -184,8 +201,28 @@ class V2UserController(
     description = "Returns the organization that manages a given user or null",
   )
   @ApiResponse(
+    responseCode = "200",
+    content = [
+      Content(
+        mediaType = "application/json",
+        schema =
+          Schema(
+            implementation = PrivateOrganizationModel::class,
+          ),
+      ),
+    ],
+  )
+  @ApiResponse(
     responseCode = "204",
     description = "No SSO configuration available for this user",
+    content = [
+      Content(
+        schema =
+          Schema(
+            implementation = Void::class,
+          ),
+      ),
+    ],
   )
   @BypassEmailVerification
   @BypassForcedSsoAuthentication

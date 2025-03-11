@@ -4184,4 +4184,7 @@
             <column name="identifier" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="anty (generated)" id="1741689879651-1">
+        <dropColumn columnName="account_type" tableName="auth_provider_change_request"/>
+    </changeSet>
 </databaseChangeLog>

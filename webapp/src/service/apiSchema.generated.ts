@@ -991,7 +991,6 @@ export interface components {
       ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
     };
     AuthProviderDto: {
-      accountType?: "LOCAL" | "MANAGED" | "THIRD_PARTY";
       authType?: "GOOGLE" | "GITHUB" | "OAUTH2" | "SSO" | "SSO_GLOBAL";
       id?: string;
       ssoDomain?: string;
@@ -1022,6 +1021,7 @@ export interface components {
       /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
       usingTranslationMemory: boolean;
     };
+    /** @example Links to avatar images */
     Avatar: {
       large: string;
       thumbnail: string;
@@ -3324,10 +3324,6 @@ export interface components {
       updatedAt: number;
       user: components["schemas"]["SimpleUserAccountModel"];
     };
-    /**
-     * @description Current user's direct permission
-     * @example MANAGE
-     */
     PermissionModel: {
       /**
        * @deprecated
@@ -3917,6 +3913,7 @@ export interface components {
        */
       translationsLimit: number;
     };
+    /** @example Quick start data for current user */
     QuickStartModel: {
       completedSteps: string[];
       finished: boolean;
@@ -19052,6 +19049,8 @@ export interface operations {
           "application/json": components["schemas"]["PrivateOrganizationModel"];
         };
       };
+      /** No SSO configuration available for this user */
+      204: never;
       /** Bad Request */
       400: {
         content: {
@@ -19369,6 +19368,8 @@ export interface operations {
           "application/json": components["schemas"]["PublicSsoTenantModel"];
         };
       };
+      /** No SSO configuration available for this user */
+      204: never;
       /** Bad Request */
       400: {
         content: {

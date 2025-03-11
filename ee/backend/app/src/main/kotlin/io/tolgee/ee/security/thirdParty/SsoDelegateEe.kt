@@ -14,7 +14,6 @@ import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.SsoAuthorizationException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -173,7 +172,6 @@ class SsoDelegateEe(
         ThirdPartyUserDetails.fromOAuth2(
           userData,
           if (tenant.global) ThirdPartyAuthType.SSO_GLOBAL else ThirdPartyAuthType.SSO,
-          UserAccount.AccountType.MANAGED,
           invitationCode,
         ),
       )

@@ -7,7 +7,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.UserAccount.AccountType
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ThirdPartyAuthType
-import jodd.bean.BeanUtil.forced
 import java.util.Date
 import java.util.UUID
 
@@ -95,7 +94,6 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
         changeNoneToSsoGlobal =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.MANAGED
             authType = ThirdPartyAuthType.SSO_GLOBAL
             authId = "aaa8"
 
@@ -112,7 +110,6 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
         changeNoneToSsoOrganizations =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.MANAGED
             authType = ThirdPartyAuthType.SSO
             authId = "aaa9"
 
@@ -126,14 +123,12 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
     userChangeGoogleToSsoGlobal =
       root.addUserAccount {
         username = "userChangeGoogleToSsoGlobal@domain.com"
-        accountType = AccountType.THIRD_PARTY
         thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
         thirdPartyAuthId = "aaa10"
       }.build {
         changeGoogleToSsoGlobal =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.MANAGED
             authType = ThirdPartyAuthType.SSO_GLOBAL
             authId = "aaa11"
 
@@ -150,10 +145,10 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
         thirdPartyAuthType = ThirdPartyAuthType.OAUTH2
         thirdPartyAuthId = "aaa12"
       }.build {
+        rawPassword = null
         changeOauth2ToSsoOrganizations =
           setAuthProviderChangeRequest {
             identifier = UUID.randomUUID().toString()
-            accountType = AccountType.MANAGED
             authType = ThirdPartyAuthType.SSO
             authId = "aaa13"
 

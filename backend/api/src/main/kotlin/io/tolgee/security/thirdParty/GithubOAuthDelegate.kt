@@ -4,7 +4,6 @@ import io.tolgee.configuration.tolgee.GithubAuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
@@ -31,10 +30,7 @@ class GithubOAuthDelegate(
   override val name: String
     get() = "github"
 
-  override val preferredAccountType: UserAccount.AccountType
-    get() = UserAccount.AccountType.THIRD_PARTY
-
-  override val preferredThirdPartyAuthType: ThirdPartyAuthType
+  override val preferredAuthType: ThirdPartyAuthType
     get() = ThirdPartyAuthType.GITHUB
 
   override fun getTokenResponse(

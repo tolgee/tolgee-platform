@@ -14,7 +14,6 @@ import io.tolgee.exceptions.DisabledFunctionalityException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.invitation.PublicInvitationModel
 import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.JwtService
@@ -148,8 +147,7 @@ class PublicController(
         DummyThirdPartyUserDetails(
           username = username,
           name = username,
-          thirdPartyAuthType = delegate.preferredThirdPartyAuthType,
-          accountType = delegate.preferredAccountType,
+          thirdPartyAuthType = delegate.preferredAuthType,
         )
       return fakeThirdPartyLogin(data, invitationCode, domain)
     }
@@ -186,7 +184,6 @@ class PublicController(
           username = data.username,
           name = data.name,
           thirdPartyAuthType = data.thirdPartyAuthType,
-          accountType = data.accountType,
           invitationCode = invitationCode,
           refreshToken = null,
           tenant = tenant,
@@ -200,7 +197,6 @@ class PublicController(
     var username: String,
     var name: String,
     var thirdPartyAuthType: ThirdPartyAuthType,
-    var accountType: UserAccount.AccountType,
   )
 
   companion object {

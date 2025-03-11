@@ -122,8 +122,8 @@ const AcceptAuthProviderChangeView: React.FC = () => {
     );
   }
 
-  const accountType = authProviderChangeInfo.data?.accountType;
-  const willBeManaged = accountType === 'MANAGED';
+  const authType = authProviderChangeInfo.data?.authType;
+  const willBeManaged = authType === 'SSO' || authType === 'SSO_GLOBAL';
 
   const [autoAccepted, setAutoAccepted] = useState(false);
   useEffect(() => {
@@ -180,7 +180,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
         <StyledContent>
           <AuthProviderChangeBody
             willBeManaged={willBeManaged}
-            authType={authProviderChangeInfo.data?.authType ?? 'NONE'}
+            authType={authType ?? 'NONE'}
             authTypeOld={authProviderCurrentInfo.data?.authType ?? 'NONE'}
             ssoDomain={authProviderChangeInfo.data?.ssoDomain ?? ''}
           >

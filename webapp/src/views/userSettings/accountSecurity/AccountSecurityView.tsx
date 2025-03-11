@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { Fragment, FunctionComponent } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
@@ -108,9 +108,13 @@ export const AccountSecurityView: FunctionComponent = () => {
           )}
         </Alert>
       )}
-      {!isManaged && <ChangePassword />}
-      <MfaSettings />
-      {!isManaged && <ChangeAuthProvider />}
+      {!isManaged && (
+        <Fragment>
+          <ChangePassword />
+          <MfaSettings />
+          <ChangeAuthProvider />
+        </Fragment>
+      )}
 
       <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
         <EnableMfaDialog />
