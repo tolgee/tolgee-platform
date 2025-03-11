@@ -66,7 +66,7 @@ export const ChangeAuthProvider: FunctionComponent = () => {
           alignItems="stretch"
           minWidth={345}
         >
-          {ssoEnabled && (
+          {ssoEnabled && (ssoUrl.isLoading || ssoUrl.data?.redirectUrl) && (
             <LoadingButton
               loading={ssoUrl.isLoading}
               href={ssoUrl.data?.redirectUrl || ''}
@@ -82,7 +82,6 @@ export const ChangeAuthProvider: FunctionComponent = () => {
               data-cy="account-security-provider-connect"
               data-cy-provider="sso"
             >
-              {/* TODO: Maybe hover hint explaining when is SSO available? */}
               <T keyName="connect_sso" />
             </LoadingButton>
           )}

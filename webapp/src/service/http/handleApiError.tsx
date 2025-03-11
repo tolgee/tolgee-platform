@@ -62,7 +62,7 @@ export const handleApiError = (
           // Safety net check: Don't redirect if user is already on one of the SSO migration pages
           // This shouldn't happen; It means frontend is trying to load one of the disabled
           // endpoints in the background and it should be fixed
-          // TODO: log warning into sentry
+          messageService.error(<TranslatedError code={resObject?.code} />);
           return;
         }
         globalContext.actions?.redirectTo(LINKS.SSO_MIGRATION.build());

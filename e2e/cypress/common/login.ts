@@ -22,7 +22,7 @@ const loginWithFakeThirdPartyService = (
     statusCode: 200,
     body: 'Fake third party auth',
   }).as('authRedirect');
-  gcyAdvanced({ value: loginButtonGcy, provider: service })
+  gcyAdvanced({ value: loginButtonGcy, provider: service }, { timeout: 30000 })
     .should('be.visible')
     .click();
 

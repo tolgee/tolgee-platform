@@ -359,11 +359,13 @@ export const useAuthService = (
       setAdminToken(jwtToken);
     },
     exitDebugCustomerAccount() {
+      if (adminToken === undefined) {
+        return;
+      }
       setJwtToken(adminToken);
       setAdminToken(undefined);
     },
     exitDebugCustomerAccountOrLogout() {
-      // TODO: This is basically duplicate of exitDebugCustomerAccount; better solution?
       setJwtToken(adminToken);
       setAdminToken(undefined);
     },
