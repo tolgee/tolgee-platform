@@ -17,8 +17,8 @@ import {
   visitTranslations,
 } from '../../../common/translations';
 import { gcy } from '../../../common/shared';
-import { selectNamespace } from '../../../common/namespace';
 import { enableNamespaces } from '../../../common/apiCalls/common';
+import { selectNamespace } from '../../../compounds/NamespaceSelector';
 
 describe('Views with 5 Translations', () => {
   let project: ProjectDTO = null;
@@ -44,7 +44,7 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool key 04').should('be.visible');
       });
 
-      it('insert base into translation', () => {
+      it('inserts base into translation', () => {
         selectLangsInLocalstorage(project.id, ['en', 'cs']);
         visitTranslations(project.id);
 

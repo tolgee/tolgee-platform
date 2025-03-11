@@ -4,7 +4,9 @@ import { T } from '@tolgee/react';
 import { BillingProgress } from './BillingProgress';
 import { ProgressData } from './getProgressData';
 
-export const UsageDetailed: React.FC<ProgressData> = (props) => {
+export const UsageDetailed: React.FC<
+  ProgressData & { isPayAsYouGo: boolean }
+> = (props) => {
   const items = [
     {
       getLabel: (params: { limit: number; used: number }) => (
@@ -26,7 +28,7 @@ export const UsageDetailed: React.FC<ProgressData> = (props) => {
     },
     {
       getLabel: (params: { limit: number; used: number }) => (
-        <T keyName="dashboard_billing_used_credit" params={params} />
+        <T keyName="dashboard_billing_used_credit_v2" params={params} />
       ),
       progress: props.creditProgress,
     },
@@ -46,7 +48,7 @@ export const UsageDetailed: React.FC<ProgressData> = (props) => {
             </Typography>
             <BillingProgress
               progressItem={item.progress}
-              isPayAsYouGo={item.progress.isInUse}
+              isPayAsYouGo={props.isPayAsYouGo}
             />
           </Box>
         ))}

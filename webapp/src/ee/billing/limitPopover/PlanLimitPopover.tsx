@@ -73,7 +73,7 @@ export const PlanLimitPopover: React.FC<Props> = ({ open, onClose }) => {
         <DialogContentText id="alert-dialog-description">
           <T keyName="plan_limit_dialog_description" />
         </DialogContentText>
-        <UsageDetailed {...progressData} />
+        <UsageDetailed {...progressData} isPayAsYouGo={usage?.isPayAsYouGo} />
       </StyledDialogContent>
 
       <DialogActions>

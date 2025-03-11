@@ -92,6 +92,9 @@ export const BillingProgress: React.FC<Props> = ({
   const critical =
     normalized > BILLING_CRITICAL_FRACTION * progressItem.included &&
     !isPayAsYouGo;
+
+  console.log({ normalized, critical, progressItem, isPayAsYouGo });
+
   const theme = useTheme();
 
   const extra =
