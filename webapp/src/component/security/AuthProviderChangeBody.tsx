@@ -106,7 +106,10 @@ function resolveTitleAndText(
           <T keyName="accept_auth_provider_change_title" params={params} />
         ),
         text: (
-          <T keyName="accept_auth_provider_change_description" params={params} />
+          <T
+            keyName="accept_auth_provider_change_description"
+            params={params}
+          />
         ),
       } as const;
   }
