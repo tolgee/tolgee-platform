@@ -87,7 +87,6 @@ data class ExportParams(
     description = SUPPORT_ARRAYS_DESCRIPTION,
   )
   override var supportArrays: Boolean = false,
-
   /**
    * Enabling or disabling HTML escaping for XLIFF format. Some tools expect the XML/HTML tags escaped and don't accept raw unescaped tags.
    */
