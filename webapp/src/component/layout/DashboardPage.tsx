@@ -49,9 +49,9 @@ export const DashboardPage: FunctionComponent<Props> = ({
     (c) => Boolean(c.auth.jwtToken) && Boolean(c.auth.adminToken)
   );
 
-  const rightPanelWidth = !hideQuickStart
-    ? useGlobalContext((c) => c.layout.rightPanelWidth)
-    : 0;
+  const rightPanelWidth = useGlobalContext((c) =>
+    hideQuickStart ? 0 : c.layout.rightPanelWidth
+  );
 
   return (
     <>

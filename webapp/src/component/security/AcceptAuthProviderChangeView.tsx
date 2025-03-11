@@ -149,7 +149,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
   }
 
   const buttons = (
-    <Fragment>
+    <>
       <LoadingButton
         loading={acceptChange.isLoading || rejectChange.isLoading}
         variant="contained"
@@ -171,7 +171,7 @@ const AcceptAuthProviderChangeView: React.FC = () => {
           {t('accept_auth_provider_change_decline')}
         </LoadingButton>
       )}
-    </Fragment>
+    </>
   );
 
   return (

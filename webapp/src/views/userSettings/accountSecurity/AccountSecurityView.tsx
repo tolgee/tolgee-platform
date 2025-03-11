@@ -109,11 +109,11 @@ export const AccountSecurityView: FunctionComponent = () => {
         </Alert>
       )}
       {!isManaged && (
-        <Fragment>
+        <>
           <ChangePassword />
           <MfaSettings />
           <ChangeAuthProvider />
-        </Fragment>
+        </>
       )}
 
       <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
