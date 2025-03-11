@@ -173,6 +173,8 @@ export function useErrorTranslation() {
         return t('user_missing_password');
       case 'invalid_jwt_token':
         return t('expired_jwt_token');
+      case 'free_self_hosted_seat_limit_exceeded':
+        return t('free_self_hosted_seat_limit_exceeded');
       default:
         return code;
     }

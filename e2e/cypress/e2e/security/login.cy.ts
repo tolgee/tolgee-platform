@@ -15,7 +15,7 @@ import {
   enableGlobalSsoProvider,
   disableGlobalSsoProvider,
   userDisableMfa,
-  userEnableMfa,
+  userEnableMfa, deleteUserSql,
 } from '../../common/apiCalls/common';
 import { assertMessage, getPopover } from '../../common/shared';
 import {
@@ -23,11 +23,14 @@ import {
   checkAnonymousIdUnset,
   checkAnonymousUserIdentified,
   loginViaForm,
-  loginWithFakeGithub,
+  loginWithFakeGithub, loginWithFakeGoogle,
   loginWithFakeOAuth2,
   loginWithFakeSso,
 } from '../../common/login';
 import { waitForGlobalLoading } from '../../common/loading';
+
+const TEST_USERNAME = 'johndoe@doe.com';
+const TEST_USERNAME_SSO = 'johndoe@domain.com';
 
 context('Login', () => {
   beforeEach(() => {
@@ -146,27 +149,42 @@ context('Login', () => {
 
 context('Login third party', () => {
   beforeEach(() => {
+    deleteUserSql(TEST_USERNAME);
     disableEmailVerification();
     cy.visit(HOST);
+  });
+
+  afterEach(() => {
+    deleteUserSql(TEST_USERNAME);
   });
 
   it('login with github', () => {
     checkAnonymousIdSet();
 
-    loginWithFakeGithub();
+    loginWithFakeGithub(TEST_USERNAME);
+    cy.contains('Projects').should('be.visible');
+
+    checkAnonymousIdUnset();
+    checkAnonymousUserIdentified();
+  });
+  it('login with google', () => {
+    checkAnonymousIdSet();
+
+    loginWithFakeGoogle(TEST_USERNAME);
     cy.contains('Projects').should('be.visible');
 
     checkAnonymousIdUnset();
     checkAnonymousUserIdentified();
   });
   it('login with oauth2', { retries: { runMode: 5 } }, () => {
-    loginWithFakeOAuth2();
+    loginWithFakeOAuth2(TEST_USERNAME);
     cy.contains('Projects').should('be.visible');
   });
 });
 
 context('SSO Organizations Login', () => {
   beforeEach(() => {
+    deleteUserSql(TEST_USERNAME_SSO);
     disableEmailVerification();
     ssoOrganizationsLoginTestData.clean();
     ssoOrganizationsLoginTestData.generate();
@@ -175,10 +193,10 @@ context('SSO Organizations Login', () => {
     cy.visit(HOST);
   });
 
-  it('login with global sso', { retries: { runMode: 5 } }, () => {
+  it('login with organizations sso', { retries: { runMode: 5 } }, () => {
     cy.contains('SSO login').click();
     cy.xpath("//*[@name='domain']").type('domain.com');
-    loginWithFakeSso();
+    loginWithFakeSso(TEST_USERNAME_SSO);
     cy.contains('Projects').should('be.visible');
   });
 
@@ -186,23 +204,26 @@ context('SSO Organizations Login', () => {
     logout();
     disableOrganizationsSsoProvider();
     ssoOrganizationsLoginTestData.clean();
+    deleteUserSql(TEST_USERNAME_SSO);
   });
 });
 
 context('SSO Global Login', () => {
   beforeEach(() => {
+    deleteUserSql(TEST_USERNAME_SSO);
     disableEmailVerification();
     enableGlobalSsoProvider();
     cy.visit(HOST);
   });
 
   it('login with global sso', { retries: { runMode: 5 } }, () => {
-    loginWithFakeSso();
+    loginWithFakeSso(TEST_USERNAME_SSO);
     cy.contains('Projects').should('be.visible');
   });
 
   afterEach(() => {
     logout();
     disableGlobalSsoProvider();
+    deleteUserSql(TEST_USERNAME_SSO);
   });
 });

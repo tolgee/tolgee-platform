@@ -1,3 +1,4 @@
+import { HOST } from '../../common/constants';
 import { loginWithFake, loginWithFakeSso } from '../../common/login';
 import { assertMessage, gcyAdvanced } from '../../common/shared';
 import { authProviderChange } from '../../common/apiCalls/testData/testData';
@@ -41,7 +42,7 @@ describe('Authentication Provider Change', () => {
       beforeEach(() => {
         enableGlobalSsoProvider();
         login(user);
-        cy.visit('/account/security');
+        cy.visit(HOST + '/account/security');
       });
 
       afterEach(() => {
@@ -71,11 +72,9 @@ describe('Authentication Provider Change', () => {
           cy.gcy('accept-auth-provider-change-accept').click();
 
           assertMessage('Authentication provider changed sucessfully');
-          cy.gcy('accept-auth-provider-change-info-text').should(
-            'not.be.visible'
-          );
+          cy.gcy('accept-auth-provider-change-info-text').should('not.exist');
 
-          cy.url().should('eq', '/account/security');
+          cy.url().should('eq', HOST + '/account/security');
         });
 
         it(`should handle rejecting switch to ${newProvider} provider`, () => {
@@ -84,11 +83,9 @@ describe('Authentication Provider Change', () => {
           cy.gcy('accept-auth-provider-change-decline').click();
 
           assertMessage('Authentication provider change rejected');
-          cy.gcy('accept-auth-provider-change-info-text').should(
-            'not.be.visible'
-          );
+          cy.gcy('accept-auth-provider-change-info-text').should('not.exist');
 
-          cy.url().should('eq', '/account/security');
+          cy.url().should('eq', HOST + '/account/security');
         });
       });
     });
@@ -105,14 +102,14 @@ describe('Authentication Provider Change', () => {
     });
 
     it('redirects user to provider switch dialog on homepage and does not redirect away', () => {
-      cy.visit('/');
+      cy.visit(HOST);
       cy.gcy('sso-migration-info-text').should('be.visible');
       cy.wait(100);
       cy.gcy('sso-migration-info-text').should('be.visible');
     });
 
     it('completes SSO provider switch flow and auto-accepts final confirmation', () => {
-      cy.visit('/');
+      cy.visit(HOST);
       cy.gcy('sso-migration-info-text').should('be.visible');
 
       loginWithFakeSso(
@@ -121,21 +118,21 @@ describe('Authentication Provider Change', () => {
       );
 
       assertMessage('Authentication provider changed sucessfully');
-      cy.gcy('accept-auth-provider-change-info-text').should('not.be.visible');
+      cy.gcy('accept-auth-provider-change-info-text').should('not.exist');
 
-      cy.visit('/');
+      cy.visit(HOST);
       cy.contains('Projects').should('be.visible');
     });
 
     it('allows access to profile and security settings pages during SSO migration', () => {
-      cy.visit('/account/profile');
+      cy.visit(HOST + '/account/profile');
       cy.contains('User profile').should('be.visible');
       cy.wait(100);
-      cy.url().should('eq', '/account/profile');
-      cy.visit('/account/security');
+      cy.url().should('eq', HOST + '/account/profile');
+      cy.visit(HOST + '/account/security');
       cy.contains('Account security').should('be.visible');
       cy.wait(100);
-      cy.url().should('eq', '/account/security');
+      cy.url().should('eq', HOST + '/account/security');
     });
   });
 });

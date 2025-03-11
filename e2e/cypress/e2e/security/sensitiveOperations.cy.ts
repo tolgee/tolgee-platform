@@ -20,6 +20,7 @@ context('Sensitive operations', { retries: { runMode: 3 } }, () => {
 
   beforeEach(() => {
     sensitiveOperationProtectionTestData.clean();
+    deleteUserSql('johndoe@doe.com');
     sensitiveOperationProtectionTestData.generate().then((r) => {
       data = r.body;
     });
@@ -27,6 +28,7 @@ context('Sensitive operations', { retries: { runMode: 3 } }, () => {
 
   afterEach(() => {
     sensitiveOperationProtectionTestData.clean();
+    deleteUserSql('johndoe@doe.com');
   });
 
   it('Asks for password before operation', () => {
@@ -84,9 +86,8 @@ context('Sensitive operations', { retries: { runMode: 3 } }, () => {
   });
 
   it("Doesn't ask when third party", () => {
-    deleteUserSql('johndoe@doe.com'); // if some test leaves it there
     cy.visit(HOST);
-    loginWithFakeGithub();
+    loginWithFakeGithub('johndoe@doe.com');
     cy.contains('Projects').should('be.visible');
     cy.visit(HOST + '/account/profile');
     gcy('delete-user-button').click();

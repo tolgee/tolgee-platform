@@ -7,6 +7,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.UserAccount.AccountType
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ThirdPartyAuthType
+import jodd.bean.BeanUtil.forced
 import java.util.Date
 import java.util.UUID
 
@@ -48,6 +49,7 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
         tenantForced =
           setTenant {
             enabled = true
+            force = true
             domain = "org-forced.com"
             clientId = "dummy_client_id"
             clientSecret = "clientSecret"
