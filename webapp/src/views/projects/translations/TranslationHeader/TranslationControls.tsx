@@ -20,7 +20,7 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { Sort } from 'tg.component/CustomIcons';
-import { TranslationOrderMenu } from 'tg.component/translation/translationOrder/TranslationOrderMenu';
+import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { useState } from 'react';
 
 const StyledContainer = styled('div')`
@@ -53,7 +53,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
   const { t } = useTranslate();
-  const [anchorOrderEl, setAnchorOrderEl] = useState<HTMLButtonElement | null>(
+  const [anchorSortEl, setAnchorSortEl] = useState<HTMLButtonElement | null>(
     null
   );
 
@@ -88,7 +88,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           onChange={setFilters}
         />
 
-        <Tooltip title={t('translation_controls_order_tooltip')}>
+        <Tooltip title={t('translation_controls_sort_tooltip')}>
           <Badge
             color="primary"
             variant="dot"
@@ -96,17 +96,17 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             overlap="circular"
           >
             <IconButton
-              onClick={(e) => setAnchorOrderEl(e.currentTarget)}
-              data-cy="translation-controls-order"
+              onClick={(e) => setAnchorSortEl(e.currentTarget)}
+              data-cy="translation-controls-sort"
             >
               <Sort />
             </IconButton>
           </Badge>
         </Tooltip>
 
-        <TranslationOrderMenu
-          anchorEl={anchorOrderEl}
-          onClose={() => setAnchorOrderEl(null)}
+        <TranslationSortMenu
+          anchorEl={anchorSortEl}
+          onClose={() => setAnchorSortEl(null)}
           onChange={setOrder}
           value={order}
         />

@@ -31,7 +31,7 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
-import { TranslationOrderMenu } from 'tg.component/translation/translationOrder/TranslationOrderMenu';
+import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { Sort } from 'tg.component/CustomIcons';
 
 const StyledContainer = styled('div')`
@@ -107,7 +107,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
     useState<HTMLButtonElement | null>(null);
   const [anchorLanguagesEl, setAnchorLanguagesEl] =
     useState<HTMLButtonElement | null>(null);
-  const [anchorOrderEl, setAnchorOrderEl] = useState<HTMLButtonElement | null>(
+  const [anchorSortEl, setAnchorSortEl] = useState<HTMLButtonElement | null>(
     null
   );
 
@@ -188,7 +188,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               filtersContent={filtersContent}
               onChange={setFilters}
             />
-            <Tooltip title={t('translation_controls_order_tooltip')}>
+            <Tooltip title={t('translation_controls_sort_tooltip')}>
               <Badge
                 color="primary"
                 variant="dot"
@@ -197,17 +197,17 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               >
                 <StyledIconButton
                   size="small"
-                  onClick={(e) => setAnchorOrderEl(e.currentTarget)}
-                  data-cy="translation-controls-order"
+                  onClick={(e) => setAnchorSortEl(e.currentTarget)}
+                  data-cy="translation-controls-sort"
                 >
                   <Sort />
                 </StyledIconButton>
               </Badge>
             </Tooltip>
 
-            <TranslationOrderMenu
-              anchorEl={anchorOrderEl}
-              onClose={() => setAnchorOrderEl(null)}
+            <TranslationSortMenu
+              anchorEl={anchorSortEl}
+              onClose={() => setAnchorSortEl(null)}
               onChange={setOrder}
               value={order}
             />

@@ -20,9 +20,9 @@ describe('Translations sorting', () => {
   });
 
   it('sort by key name a to z', () => {
-    cy.gcy('translation-controls-order').click();
+    cy.gcy('translation-controls-sort').click();
     cy.waitForDom();
-    cy.gcy('translation-controls-order-item')
+    cy.gcy('translation-controls-sort-item')
       .contains('Key name A to Z')
       .click();
     waitForGlobalLoading();
@@ -31,9 +31,9 @@ describe('Translations sorting', () => {
   });
 
   it('sort by key name z to a', () => {
-    cy.gcy('translation-controls-order').click();
+    cy.gcy('translation-controls-sort').click();
     cy.waitForDom();
-    cy.gcy('translation-controls-order-item')
+    cy.gcy('translation-controls-sort-item')
       .contains('Key name Z to A')
       .click();
 
@@ -42,9 +42,9 @@ describe('Translations sorting', () => {
   });
 
   it('sort from newest keys', () => {
-    cy.gcy('translation-controls-order').click();
+    cy.gcy('translation-controls-sort').click();
     cy.waitForDom();
-    cy.gcy('translation-controls-order-item')
+    cy.gcy('translation-controls-sort-item')
       .contains('First key added')
       .click();
     waitForGlobalLoading();
@@ -53,11 +53,9 @@ describe('Translations sorting', () => {
   });
 
   it('sort from oldest keys', () => {
-    cy.gcy('translation-controls-order').click();
+    cy.gcy('translation-controls-sort').click();
     cy.waitForDom();
-    cy.gcy('translation-controls-order-item')
-      .contains('Last key added')
-      .click();
+    cy.gcy('translation-controls-sort-item').contains('Last key added').click();
     waitForGlobalLoading();
     cy.gcy('translations-key-name').eq(0).should('contain', 'a.last.created');
     cy.gcy('translations-key-name').eq(1).should('contain', 'c.third.created');

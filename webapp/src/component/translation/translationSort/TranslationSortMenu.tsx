@@ -1,5 +1,5 @@
 import { Menu, MenuItem, MenuProps } from '@mui/material';
-import { useOrderOptions } from './useOrderOptions';
+import { useSortOptions } from './useSortOptions';
 
 type Props = {
   value: string;
@@ -8,13 +8,13 @@ type Props = {
   onClose: () => void;
 };
 
-export const TranslationOrderMenu = ({
+export const TranslationSortMenu = ({
   value,
   onChange,
   anchorEl,
   onClose,
 }: Props) => {
-  const options = useOrderOptions();
+  const options = useSortOptions();
   return (
     <Menu
       anchorEl={anchorEl}
@@ -34,7 +34,7 @@ export const TranslationOrderMenu = ({
             onClose();
           }}
           selected={o.value === value}
-          data-cy="translation-controls-order-item"
+          data-cy="translation-controls-sort-item"
         >
           {o.label}
         </MenuItem>
