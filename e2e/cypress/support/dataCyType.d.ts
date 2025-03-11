@@ -130,7 +130,9 @@ declare namespace DataCy {
         "batch-select-item" |
         "billing-actual-period" |
         "billing-actual-period-end" |
+        "billing-actual-used-keys" |
         "billing-actual-used-monthly-credits" |
+        "billing-actual-used-seats" |
         "billing-actual-used-strings" |
         "billing-estimated-costs" |
         "billing-estimated-costs-open-button" |
@@ -141,6 +143,11 @@ declare namespace DataCy {
         "billing-period-switch" |
         "billing-plan" |
         "billing-plan-action-button" |
+        "billing-plan-included-credits" |
+        "billing-plan-included-keys" |
+        "billing-plan-included-seats" |
+        "billing-plan-included-strings" |
+        "billing-plan-included-translation-slots" |
         "billing-plan-monthly-price" |
         "billing-plan-price-extra-seat" |
         "billing-plan-price-extra-thousand-keys" |

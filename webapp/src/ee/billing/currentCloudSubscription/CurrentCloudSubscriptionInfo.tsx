@@ -136,7 +136,7 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
                 progress={progressData.keysProgress}
                 periodEnd={activeSubscription.currentPeriodEnd}
                 isPayAsYouGo={isPayAsYouGo}
-                data-cy="billing-actual-used-strings"
+                data-cy="billing-actual-used-keys"
               />
               <PlanMetric
                 name={
@@ -148,7 +148,7 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
                 progress={progressData.seatsProgress}
                 periodEnd={activeSubscription.currentPeriodEnd}
                 isPayAsYouGo={isPayAsYouGo}
-                data-cy="billing-actual-used-strings"
+                data-cy="billing-actual-used-seats"
               />
             </>
           )}
