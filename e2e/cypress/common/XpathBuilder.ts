@@ -1,44 +1,36 @@
 export function XPathBuilder(initialXpath = '') {
-  let xpath = initialXpath;
+  const xpath = initialXpath;
 
   function descendant(tag = '*') {
-    xpath += `//${tag}`;
-    return builder;
+    return XPathBuilder(`${xpath}//${tag}`);
   }
 
   function attributeEquals(attribute: string, value: string) {
-    xpath += `[@${attribute}='${value}']`;
-    return builder;
+    return XPathBuilder(`${xpath}[@${attribute}='${value}']`);
   }
 
   function withAttribute(attribute: string) {
-    xpath += `[@${attribute}]`;
-    return builder;
+    return XPathBuilder(`${xpath}[@${attribute}]`);
   }
 
   function closestAncestor(tag = '*') {
-    xpath += `/ancestor::${tag}`;
-    return builder;
+    return XPathBuilder(`${xpath}/ancestor::${tag}`);
   }
 
   function descendantOrSelf(tag = '*') {
-    xpath += `/descendant-or-self::${tag}`;
-    return builder;
+    return XPathBuilder(`${xpath}/descendant-or-self::${tag}`);
   }
 
   function containsText(text: string) {
-    xpath += `[contains(text(), '${text}')]`;
-    return builder;
+    return XPathBuilder(`${xpath}[contains(text(), '${text}')]`);
   }
 
   function hasText(text: string) {
-    xpath += `[text()='${text}']`;
-    return builder;
+    return XPathBuilder(`${xpath}[text()='${text}']`);
   }
 
   function withDataCy(dataCy: DataCy.Value) {
-    attributeEquals('data-cy', dataCy);
-    return builder;
+    return attributeEquals('data-cy', dataCy);
   }
 
   function getElement() {
@@ -46,11 +38,7 @@ export function XPathBuilder(initialXpath = '') {
   }
 
   function getInputUnderDataCy(dataCy: DataCy.Value) {
-    return builder
-      .descendant()
-      .withDataCy(dataCy)
-      .descendant('input')
-      .getElement();
+    return descendant().withDataCy(dataCy).descendant('input').getElement();
   }
 
   const builder = {
@@ -73,3 +61,5 @@ export function XPathBuilder(initialXpath = '') {
 export function buildXpath(initialXpath = '') {
   return XPathBuilder(initialXpath);
 }
+
+export type XpathBuilderType = ReturnType<typeof XPathBuilder>;
