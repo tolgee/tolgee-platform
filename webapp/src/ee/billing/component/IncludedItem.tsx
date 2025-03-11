@@ -15,16 +15,16 @@ type IncludedItemProps = {
   sx?: SxProps;
   className?: string;
   highlightColor: string;
+  'data-cy'?: string;
 };
 
 export const IncludedStringSlots = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       <T
         keyName="billing_subscription_included_slots_strings"
         params={{
@@ -40,11 +40,10 @@ export const IncludedStringSlots = ({
 export const IncludedStrings = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       {count === -1 ? (
         <T
           keyName="billing_subscription_included_strings_unlimited"
@@ -70,11 +69,10 @@ export const IncludedStrings = ({
 export const IncludedKeys = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       {count === -1 ? (
         <T
           keyName="billing_subscription_included_keys_negotiable"
@@ -100,11 +98,10 @@ export const IncludedKeys = ({
 export const IncludedCredits = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       {count === -1 ? (
         <T
           keyName="billing_subscription_included_credits_negotiable"
@@ -130,11 +127,10 @@ export const IncludedCredits = ({
 export const IncludedSeats = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       {count === -1 ? (
         <T
           keyName="billing_subscription_included_seats_negotiable"
