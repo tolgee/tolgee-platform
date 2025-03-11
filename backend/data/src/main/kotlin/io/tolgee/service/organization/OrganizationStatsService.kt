@@ -1,5 +1,6 @@
 package io.tolgee.service.organization
 
+import io.tolgee.repository.OrganizationRepository.Companion.ALL_USERS_IN_ORGANIZATION_QUERY
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -56,13 +57,7 @@ class OrganizationStatsService(
   fun getSeatCount(organizationId: Long): Long {
     return entityManager.createQuery(
       """
-      select count(distinct ua.id) from UserAccount ua
-      left join ua.organizationRoles orl
-      left join orl.organization o on o.deletedAt is null and o.id = :organizationId
-      left join ua.permissions p 
-      left join p.project pr on pr.deletedAt is null and pr.organizationOwner.id = :organizationId 
-      where ua.deletedAt is null and ua.disabledAt is null
-        and (pr is not null or o is not null)
+      select count(distinct ua.id) $ALL_USERS_IN_ORGANIZATION_QUERY
       """.trimIndent(),
     ).setParameter("organizationId", organizationId).singleResult as Long
   }
