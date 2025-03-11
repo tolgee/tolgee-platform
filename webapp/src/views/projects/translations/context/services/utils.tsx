@@ -9,6 +9,9 @@ import {
   Edit,
   EditorProps,
 } from '../types';
+import { components } from 'tg.service/apiSchema.generated';
+
+type KeyTaskViewModel = components['schemas']['KeyTaskViewModel'];
 
 export function generateCurrentValue(
   position: EditorProps,
@@ -73,4 +76,22 @@ export function updateReactListSizes(list: ReactList, currentIndex: number) {
     list.updateFrameAndClearCache();
     list.setState((state) => ({ ...state }));
   }
+}
+
+export function taskEditControlsShouldBeVisible(firstTask: KeyTaskViewModel) {
+  return (
+    firstTask &&
+    !firstTask.done &&
+    firstTask.userAssigned &&
+    firstTask.type === 'TRANSLATE'
+  );
+}
+
+export function taskReviewControlsShouldBeVisible(firstTask: KeyTaskViewModel) {
+  return (
+    firstTask &&
+    !firstTask.done &&
+    firstTask.userAssigned &&
+    firstTask.type === 'REVIEW'
+  );
 }

@@ -15,8 +15,7 @@ import { useTranslationsService } from './useTranslationsService';
 import { useRefsService } from './useRefsService';
 import { AfterCommand, ChangeValue, SetEdit } from '../types';
 import { useTaskService } from './useTaskService';
-import { PrefilterType } from '../../prefilters/usePrefilter';
-import { composeValue } from './utils';
+import { composeValue, taskEditControlsShouldBeVisible } from './utils';
 import { usePositionService } from './usePositionService';
 
 type Props = {
@@ -24,14 +23,12 @@ type Props = {
   translationService: ReturnType<typeof useTranslationsService>;
   viewRefs: ReturnType<typeof useRefsService>;
   taskService: ReturnType<typeof useTaskService>;
-  prefilter: PrefilterType | undefined;
 };
 
 export const useEditService = ({
   positionService,
   translationService,
   taskService,
-  prefilter,
 }: Props) => {
   const {
     position,
@@ -131,22 +128,16 @@ export const useEditService = ({
       ]);
     }
 
-    if (language && !data.preventTaskResolution && prefilter?.task) {
+    if (language && !data.preventTaskResolution) {
       const key = translationService.fixedTranslations?.find(
         (k) => k.keyId === keyId
       );
-      const task = key?.tasks?.find((t) => t.languageTag === language);
+      const firstTask = key?.tasks?.find((t) => t.languageTag === language);
 
-      if (
-        task &&
-        prefilter.task === task.number &&
-        !task.done &&
-        task.userAssigned &&
-        task.type === 'TRANSLATE'
-      ) {
+      if (firstTask && taskEditControlsShouldBeVisible(firstTask)) {
         await taskService.setTaskTranslationState({
           keyId: position.keyId,
-          taskNumber: task.number,
+          taskNumber: firstTask.number,
           done: true,
         });
       }

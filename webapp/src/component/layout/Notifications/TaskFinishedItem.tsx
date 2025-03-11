@@ -5,15 +5,15 @@ import {
   TaskItemProps,
 } from 'tg.component/layout/Notifications/TaskItem';
 
-type TaskCompletedItemProps = TaskItemProps;
+type Props = TaskItemProps;
 
-export const TaskCompletedItem: FunctionComponent<TaskCompletedItemProps> = ({
+export const TaskFinishedItem: FunctionComponent<Props> = ({
   notification,
   ...props
 }) => {
   return (
     <TaskItem notification={notification} {...props}>
-      <T keyName="notifications-task-completed" />
+      <T keyName="notifications-task-finished" />
     </TaskItem>
   );
 };

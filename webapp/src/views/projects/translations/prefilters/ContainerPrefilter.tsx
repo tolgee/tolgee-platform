@@ -1,5 +1,5 @@
 import { FilterLines } from '@untitled-ui/icons-react';
-import { Button, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, styled, useMediaQuery } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { usePrefilter } from './usePrefilter';
@@ -7,8 +7,6 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import React from 'react';
 
 const StyledContainer = styled('div')`
-  margin-top: -4px;
-  margin-bottom: 12px;
   background: ${({ theme }) => theme.palette.revisionFilterBanner.background};
   padding: 0px 4px 0px 14px;
   border-radius: 4px;
@@ -48,6 +46,8 @@ type Props = {
   content: React.ReactNode;
   icon?: React.ReactNode;
   closeButton?: React.ReactNode;
+  controls?: React.ReactNode;
+  alert?: React.ReactNode;
 };
 
 export const PrefilterContainer = ({
@@ -55,8 +55,10 @@ export const PrefilterContainer = ({
   content,
   icon,
   closeButton,
+  controls,
+  alert,
 }: Props) => {
-  const { clear } = usePrefilter();
+  const prefilter = usePrefilter();
 
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const isSmall = useMediaQuery(
@@ -69,10 +71,14 @@ export const PrefilterContainer = ({
         {icon ?? <FilterLines />}
         <StyledLabelText>{title}</StyledLabelText>
       </StyledLabel>
-      {!isSmall && content}
+      <Box display="flex" gap={0.5}>
+        {!isSmall && content}
+        {controls}
+        {!isSmall && alert}
+      </Box>
       <StyledClear>
         {closeButton ?? (
-          <Button size="small" onClick={clear} color="inherit">
+          <Button size="small" onClick={prefilter?.clear} color="inherit">
             <T keyName="activity_filter_indicator_clear" />
           </Button>
         )}

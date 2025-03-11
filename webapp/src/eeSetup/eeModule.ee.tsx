@@ -67,6 +67,7 @@ export { TaskFilterPopover } from '../ee/task/components/taskFilter/TaskFilterPo
 export type { TaskFilterType } from '../ee/task/components/taskFilter/TaskFilterPopover';
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
+export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
 
 export const billingMenuItems = [
   BillingMenuItem,

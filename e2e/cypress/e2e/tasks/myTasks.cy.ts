@@ -69,7 +69,7 @@ describe('my tasks', () => {
       .contains('Translate task')
       .closestDcy('task-item')
       .findDcy('task-state')
-      .should('contain', 'Done');
+      .should('contain', 'Finished');
   });
 
   it("Organization member can finish Review task (permissions elevated because he's assigned)", () => {
@@ -87,7 +87,7 @@ describe('my tasks', () => {
       .contains('Review task')
       .closestDcy('task-item')
       .findDcy('task-state')
-      .should('contain', 'Done');
+      .should('contain', 'Finished');
   });
 
   it("Organization member can add comments (permissions elevated because he's assigned)", () => {

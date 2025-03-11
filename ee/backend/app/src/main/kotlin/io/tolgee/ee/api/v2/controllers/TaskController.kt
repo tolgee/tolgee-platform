@@ -176,12 +176,12 @@ class TaskController(
   ): TaskModel {
     // users can only finish tasks assigned to them
     securityService.hasTaskEditScopeOrIsAssigned(projectHolder.project.id, taskNumber)
-    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.DONE)
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.FINISHED)
     return taskModelAssembler.toModel(task)
   }
 
   @PutMapping("/{taskNumber}/close")
-  @Operation(summary = "Close task")
+  @Operation(summary = "Close task", deprecated = true)
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
   @RequestActivity(ActivityType.TASK_CLOSE)
@@ -190,7 +190,21 @@ class TaskController(
     @PathVariable
     taskNumber: Long,
   ): TaskModel {
-    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.CLOSED)
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.CANCELED)
+    return taskModelAssembler.toModel(task)
+  }
+
+  @PutMapping("/{taskNumber}/cancel")
+  @Operation(summary = "Close task")
+  @RequiresProjectPermissions([Scope.TASKS_EDIT])
+  @AllowApiAccess
+  @RequestActivity(ActivityType.TASK_CLOSE)
+  @OpenApiOrderExtension(7)
+  fun cancelTask(
+    @PathVariable
+    taskNumber: Long,
+  ): TaskModel {
+    val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.CANCELED)
     return taskModelAssembler.toModel(task)
   }
 

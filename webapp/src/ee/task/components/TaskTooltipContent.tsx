@@ -20,7 +20,7 @@ type TaskModel = components['schemas']['TaskModel'];
 
 const StyledProgress = styled(Box)`
   display: flex;
-  justify-content: space-between
+  justify-content: space-between;
   align-items: center;
   gap: 24px;
 `;
