@@ -45,7 +45,7 @@ describe('Translations sorting', () => {
     cy.gcy('translation-controls-sort').click();
     cy.waitForDom();
     cy.gcy('translation-controls-sort-item')
-      .contains('First key added')
+      .contains('Newest keys on top')
       .click();
     waitForGlobalLoading();
     cy.gcy('translations-key-name').eq(0).should('contain', 'z.first.created');
@@ -55,7 +55,9 @@ describe('Translations sorting', () => {
   it('sort from oldest keys', () => {
     cy.gcy('translation-controls-sort').click();
     cy.waitForDom();
-    cy.gcy('translation-controls-sort-item').contains('Last key added').click();
+    cy.gcy('translation-controls-sort-item')
+      .contains('Oldest keys on top')
+      .click();
     waitForGlobalLoading();
     cy.gcy('translations-key-name').eq(0).should('contain', 'a.last.created');
     cy.gcy('translations-key-name').eq(1).should('contain', 'c.third.created');
