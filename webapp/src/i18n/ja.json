@@ -1485,6 +1485,7 @@
   "storage_subtitle": "プロジェクトコンテンツストレージ",
   "storage_update_success": "コンテンツストレージが正常に更新されました！",
   "storage_update_title": "コンテンツストレージを編集",
+  "subfilter_without_tags": "タグなし",
   "subscription_already_canceled": "サブスクリプションはすでにキャンセルされています",
   "subscription_not_active": "サブスクリプションは有効ではありません",
   "subscriptions-actual-plan-trial-badge": "トライアル",

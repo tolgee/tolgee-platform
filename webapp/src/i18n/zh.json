@@ -1465,6 +1465,7 @@
   "storage_subtitle": "项目内容存储",
   "storage_update_success": "内容存储已成功更新！",
   "storage_update_title": "编辑内容存储",
+  "subfilter_without_tags": "没有标签",
   "subscription_already_canceled": "订阅已取消",
   "subscription_not_active": "订阅未激活",
   "subscriptions-actual-plan-trial-badge": "试用",

@@ -1485,6 +1485,7 @@
   "storage_subtitle": "Project Content Storage",
   "storage_update_success": "Content storage successfully updated!",
   "storage_update_title": "Edit content storage",
+  "subfilter_without_tags": "without tags",
   "subscription_already_canceled": "Subscription already canceled",
   "subscription_not_active": "Subscription not active",
   "subscriptions-actual-plan-trial-badge": "Trial",

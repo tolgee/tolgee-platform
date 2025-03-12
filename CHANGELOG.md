@@ -1,3 +1,10 @@
+## [3.109.2](https://github.com/tolgee/tolgee-platform/compare/v3.109.1...v3.109.2) (2025-03-12)
+
+
+### Bug Fixes
+
+* add XML parsing error fallback ([#2984](https://github.com/tolgee/tolgee-platform/issues/2984)) ([2bcd79c](https://github.com/tolgee/tolgee-platform/commit/2bcd79c4a6b89b1214a52b495fdc2f3ae2a5daf1)), closes [#2967](https://github.com/tolgee/tolgee-platform/issues/2967)
+
 ## [3.109.1](https://github.com/tolgee/tolgee-platform/compare/v3.109.0...v3.109.1) (2025-03-12)
 
 
