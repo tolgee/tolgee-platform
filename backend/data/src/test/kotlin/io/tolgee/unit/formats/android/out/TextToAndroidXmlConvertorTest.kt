@@ -121,6 +121,27 @@ class TextToAndroidXmlConvertorTest {
     "a\n\na".assertSingleTextNode("a\\n\\na")
   }
 
+  @Test
+  fun `handles malformed XML with fallback`() {
+    "<unclosed>tag & special chars".assertSingleTextNode().isEqualTo("<unclosed>tag & special chars")
+  }
+
+  @Test
+  fun `recovers from invalid XML and creates text node`() {
+    "<tag>with & unescaped ampersand</tag>".assertSingleTextNode().isEqualTo("<tag>with & unescaped ampersand</tag>")
+  }
+
+  @Test
+  fun `escapes apostrophes and quotes in malformed XML for Android`() {
+    "<tag attr='value\">text with ' and \" characters</tag".assertSingleTextNode()
+      .isEqualTo("<tag attr=\\'value\\\">text with \\' and \\\" characters</tag")
+  }
+
+  @Test
+  fun `escapes percent signs in malformed XML`() {
+    "<unclosed>text with % and %% signs".assertSingleTextNode().isEqualTo("<unclosed>text with % and %% signs")
+  }
+
   private fun Node.assertTextContent(text: String) {
     this.nodeType.assert.isEqualTo(Node.TEXT_NODE)
     this.textContent.assert.isEqualTo(text)

@@ -44,7 +44,7 @@ class TextToXmlResourcesConvertor(
         children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
       )
     } catch (ex: Exception) {
-      logger.debug("Cannot value '$string'", ex)
+      logger.debug("Cannot process value '$string'", ex)
       return ContentToAppend(text = string)
     }
   }
@@ -99,8 +99,20 @@ class TextToXmlResourcesConvertor(
     }
   }
 
-  private fun parseString(contentNotNull: String): Document =
-    documentBuilder.parse(InputSource(StringReader("<root>$contentNotNull</root>")))
+  private fun parseString(contentNotNull: String): Document {
+    try {
+      return documentBuilder.parse(InputSource(StringReader("<root>$contentNotNull</root>")))
+    } catch (e: Exception) {
+      logger.debug("Cannot process XML value '$string'", e)
+
+      // Fallback - all the text as a single text node
+      val doc = documentBuilder.newDocument()
+      val rootElement = doc.createElement("root")
+      doc.appendChild(rootElement)
+      rootElement.appendChild(doc.createTextNode(contentNotNull))
+      return doc
+    }
+  }
 
   private fun Node.writeToString(): String {
     val source = DOMSource(this)
