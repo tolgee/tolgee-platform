@@ -122,10 +122,6 @@ class Permission(
   @ManyToOne
   var project: Project? = null
 
-  val userId: Long?
-    get() = this.user?.id
-  val invitationId: Long?
-    get() = this.invitation?.id
   override val projectId: Long?
     get() = this.project?.id
   override val organizationId: Long?

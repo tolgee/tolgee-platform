@@ -15,7 +15,7 @@ import org.hibernate.annotations.ColumnDefault
   ],
 )
 class OrganizationRole(
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
   @Enumerated(EnumType.ORDINAL)
   var type: OrganizationRoleType,

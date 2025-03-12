@@ -62,17 +62,10 @@ export class ApiHttpService {
               const responseData = await ApiHttpService.getResObject(r);
               const resultError = new ApiError('Api error', responseData);
 
-              let handled = false;
+              resultError.setErrorHandler(() =>
+                handleApiError(r, responseData, init, options)
+              );
 
-              if (r.status === 400) {
-                handled = errorAction(responseData.code);
-              }
-
-              if (!handled) {
-                resultError.setErrorHandler(() =>
-                  handleApiError(r, responseData, init, options)
-                );
-              }
               if (
                 r.status == 403 &&
                 responseData.code === 'expired_super_jwt_token'

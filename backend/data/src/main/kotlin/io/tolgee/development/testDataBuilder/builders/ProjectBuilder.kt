@@ -9,6 +9,7 @@ import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportSettings
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
@@ -76,6 +77,20 @@ class ProjectBuilder(
   fun addTask(ft: FT<Task>) = addOperation(data.tasks, ft)
 
   fun addTaskKey(ft: FT<TaskKey>) = addOperation(data.taskKeys, ft)
+
+  fun inviteUser(buildPermission: PermissionBuilder.() -> Unit = {}): InvitationBuilder {
+    val invitationBuilder = InvitationBuilder()
+    testDataBuilder.data.invitations.add(invitationBuilder)
+    addPermission {
+      this.project = this@ProjectBuilder.self
+      this.invitation = invitationBuilder.self
+      this.type = ProjectPermissionType.MANAGE
+      invitationBuilder.self.permission = this
+      this.user = null
+    }.build(buildPermission)
+    return invitationBuilder
+
+  }
 
   fun addKey(
     namespace: String? = null,
