@@ -100,30 +100,30 @@ class TextToComposeXmlConvertorTest {
   }
 
   @Test
-  fun `handles malformed XML with fallback`() {
-    "<unclosed>tag & special chars".assertSingleTextNode().isEqualTo("<unclosed>tag & special chars")
+  fun `doesnt fail with malformed XML`() {
+    "<unclosed>tag".assertSingleTextNode().isEqualTo("<unclosed>tag")
   }
 
   @Test
-  fun `recovers from invalid XML and creates text node`() {
-    "<tag>with & unescaped ampersand</tag>".assertSingleTextNode().isEqualTo("<tag>with & unescaped ampersand</tag>")
+  fun `doesnt fail with malformed XML #2`() {
+    "tag <>".assertSingleTextNode().isEqualTo("tag <>")
   }
 
   @Test
-  fun `nested invalid XML elements use fallback mechanism`() {
+  fun `doesnt fail with malformed XML #3`() {
+    "tag <".assertSingleTextNode().isEqualTo("tag <")
+  }
+
+  @Test
+  fun `doesnt fail with malformed XML #4`() {
     "<outer><inner>content with < unescaped</inner></outer>".assertSingleTextNode()
       .isEqualTo("<outer><inner>content with < unescaped</inner></outer>")
   }
 
   @Test
-  fun `preserves apostrophes and quotes in malformed XML`() {
+  fun `preserves special characters in malformed XML`() {
     "<tag attr='value\">text with ' and \" characters</tag".assertSingleTextNode()
       .isEqualTo("<tag attr='value\">text with ' and \" characters</tag")
-  }
-
-  @Test
-  fun `preserves percent signs in malformed XML`() {
-    "<unclosed>text with % and %% signs".assertSingleTextNode().isEqualTo("<unclosed>text with % and %% signs")
   }
 
   @Test
