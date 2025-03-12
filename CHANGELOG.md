@@ -1,3 +1,10 @@
+## [3.109.1](https://github.com/tolgee/tolgee-platform/compare/v3.109.0...v3.109.1) (2025-03-12)
+
+
+### Bug Fixes
+
+* Permission error on trial plans ([#2982](https://github.com/tolgee/tolgee-platform/issues/2982)) ([f451fec](https://github.com/tolgee/tolgee-platform/commit/f451fec8eec4632275a7f32518cc671df95fe9e4))
+
 # [3.109.0](https://github.com/tolgee/tolgee-platform/compare/v3.108.0...v3.109.0) (2025-03-11)
 
 
