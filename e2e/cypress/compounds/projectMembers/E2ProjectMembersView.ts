@@ -1,13 +1,13 @@
 import { HOST } from '../../common/constants';
-import { ProjectMembersInvitationDialog } from './ProjectMembersInvitationDialog';
+import { E2ProjectMembersInvitationDialog } from './E2ProjectMembersInvitationDialog';
 
-export class ProjectMembersView {
+export class E2ProjectMembersView {
   visit(projectId: number) {
     cy.visit(`${HOST}/projects/${projectId}/manage/permissions`);
   }
 
   openInvitationDialog() {
     cy.gcy('invite-generate-button').click();
-    return new ProjectMembersInvitationDialog();
+    return new E2ProjectMembersInvitationDialog();
   }
 }

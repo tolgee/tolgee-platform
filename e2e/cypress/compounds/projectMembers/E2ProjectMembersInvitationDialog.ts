@@ -1,4 +1,4 @@
-export class ProjectMembersInvitationDialog {
+export class E2ProjectMembersInvitationDialog {
   getEmailField() {
     return cy.gcy('invitation-dialog-input-field');
   }

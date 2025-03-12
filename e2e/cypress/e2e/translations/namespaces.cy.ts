@@ -11,7 +11,7 @@ import {
   getPopover,
   selectInSelect,
 } from '../../common/shared';
-import { selectNamespace } from '../../compounds/NamespaceSelector';
+import { selectNamespace } from '../../compounds/E2NamespaceSelector';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {

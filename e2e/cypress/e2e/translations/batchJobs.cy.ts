@@ -16,7 +16,7 @@ import {
   checkZipContent,
   getFileName,
 } from '../../common/export';
-import { selectNamespace } from '../../compounds/NamespaceSelector';
+import { selectNamespace } from '../../compounds/E2NamespaceSelector';
 
 describe('Batch jobs', { scrollBehavior: false }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');

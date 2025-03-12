@@ -1,7 +1,7 @@
 import { assertMessage, gcyAdvanced } from '../common/shared';
-import { NamespaceSelector } from './NamespaceSelector';
+import { E2NamespaceSelector } from './E2NamespaceSelector';
 
-export class KeyCreateDialog {
+export class E2KeyCreateDialog {
   fill({
     key,
     translation,
@@ -84,11 +84,11 @@ export class KeyCreateDialog {
   }
 
   selectNamespace(namespace: string) {
-    new NamespaceSelector().selectNamespace(namespace);
+    new E2NamespaceSelector().selectNamespace(namespace);
   }
 
   getNamespaceSelectElement() {
-    return new NamespaceSelector().getNamespaceSelect();
+    return new E2NamespaceSelector().getNamespaceSelect();
   }
 }
 
