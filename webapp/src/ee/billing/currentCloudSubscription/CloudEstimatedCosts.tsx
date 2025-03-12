@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { EstimatedCosts } from '../common/usage/EstimatedCosts';
+import { ExpectedUsage } from '../common/usage/ExpectedUsage';
 
 export const CloudEstimatedCosts: FC<{ estimatedCosts: number }> = (props) => {
   const organization = useOrganization();
@@ -18,5 +18,5 @@ export const CloudEstimatedCosts: FC<{ estimatedCosts: number }> = (props) => {
       },
     });
 
-  return <EstimatedCosts {...props} useUsage={useUsage} />;
+  return <ExpectedUsage {...props} useUsage={useUsage} />;
 };
