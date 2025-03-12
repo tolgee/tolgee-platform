@@ -16,21 +16,14 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.keyBigMeta.KeysDistance_
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.TranslationComment
 import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
-import jakarta.persistence.criteria.CriteriaBuilder
-import jakarta.persistence.criteria.CriteriaQuery
-import jakarta.persistence.criteria.Expression
-import jakarta.persistence.criteria.JoinType
-import jakarta.persistence.criteria.ListJoin
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Predicate
-import jakarta.persistence.criteria.Root
-import jakarta.persistence.criteria.Subquery
+import jakarta.persistence.criteria.*
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -40,11 +33,11 @@ class QueryBase<T>(
   val query: CriteriaQuery<T>,
   private val languages: Set<LanguageDto>,
   params: TranslationFilters,
-  private var isKeyIdsQuery: Boolean = false,
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
+  val translationConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
   val keyNameExpression: Path<String> = root.get(Key_.name)
   val keyCreatedAtExpression: Path<Date> = root.get(Key_.createdAt)
@@ -90,13 +83,22 @@ class QueryBase<T>(
       translationsTextFields.add(translationTextField)
 
       val translationStateField = addTranslationStateField(translation, language)
-      queryTranslationFiltering.apply(language, translationTextField, translationStateField)
 
       val outdatedField = addTranslationOutdatedField(translation, language)
       outdatedFieldMap[language.tag] = outdatedField
 
-      addNotFilteringTranslationFields(language, translation)
-      addComments(translation, language)
+      val autoTranslatedField = addAutoTranslatedField(translation, language)
+      queryTranslationFiltering.apply(language, translationTextField, translationStateField, autoTranslatedField)
+
+      this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
+      val resolvedCommentsExpression = addComments(translation, language)
+      val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
+
+      queryTranslationFiltering.apply(
+        language,
+        resolvedCommentsExpression,
+        unresolvedCommentsExpression,
+      )
     }
 
     queryTranslationFiltering.apply(outdatedFieldMap)
@@ -111,21 +113,50 @@ class QueryBase<T>(
     return translationOutdated
   }
 
+  private fun addAutoTranslatedField(
+    translation: ListJoin<Key, Translation>,
+    language: LanguageDto,
+  ): Path<Boolean> {
+    val autoTranslated = translation.get(Translation_.auto)
+    this.querySelection[language to TranslationView::auto] = autoTranslated
+    return autoTranslated
+  }
+
   private fun addComments(
     translation: ListJoin<Key, Translation>,
     language: LanguageDto,
-  ) {
-    val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
-    val commentsExpression = cb.countDistinct(commentsJoin)
-    this.querySelection[language to TranslationView::commentCount] = commentsExpression
+  ): Expression<Long> {
+    val subquery = this.query.subquery(Long::class.java)
+    val subqueryRoot = subquery.from(TranslationComment::class.java)
 
-    val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
-    unresolvedCommentsJoin.on(
-      cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION),
+    subquery.select(cb.count(subqueryRoot.get(TranslationComment_.id)))
+    subquery.where(
+      cb.equal(
+        subqueryRoot.get(TranslationComment_.translation).get(Translation_.id),
+        translation.get(Translation_.id),
+      ),
     )
+    this.querySelection[language to TranslationView::commentCount] = subquery
+    return subquery
+  }
 
-    val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)
-    this.querySelection[language to TranslationView::unresolvedCommentCount] = unresolvedCommentsExpression
+  private fun addUnresolvedComments(
+    translation: ListJoin<Key, Translation>,
+    language: LanguageDto,
+  ): Expression<Long> {
+    val subquery = this.query.subquery(Long::class.java)
+    val subqueryRoot = subquery.from(TranslationComment::class.java)
+
+    subquery.select(cb.count(subqueryRoot.get(TranslationComment_.id)))
+    subquery.where(
+      cb.equal(
+        subqueryRoot.get(TranslationComment_.translation).get(Translation_.id),
+        translation.get(Translation_.id),
+      ),
+      cb.equal(subqueryRoot.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION),
+    )
+    this.querySelection[language to TranslationView::unresolvedCommentCount] = subquery
+    return subquery
   }
 
   private fun addTranslationStateField(
@@ -171,16 +202,6 @@ class QueryBase<T>(
     val keyScreenshotReference = subQueryRoot.join(Key_.keyScreenshotReferences)
     subquery.where(cb.equal(subQueryRoot.get(Key_.id), this.root.get(Key_.id)))
     return subquery.select(keyScreenshotReference.get(KeyScreenshotReference_.screenshot).get(Screenshot_.id))
-  }
-
-  private fun addNotFilteringTranslationFields(
-    language: LanguageDto,
-    translation: ListJoin<Key, Translation>,
-  ) {
-    if (!isKeyIdsQuery) {
-      this.querySelection[language to TranslationView::auto] = translation.get(Translation_.auto)
-      this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
-    }
   }
 
   private fun addNamespace() {

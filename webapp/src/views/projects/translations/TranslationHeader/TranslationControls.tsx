@@ -22,6 +22,7 @@ import {
 import { Sort } from 'tg.component/CustomIcons';
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { useState } from 'react';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -49,6 +50,7 @@ type Props = {
 
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { satisfiesPermission } = useProjectPermissions();
+  const project = useProject();
   const canCreateKeys = satisfiesPermission('keys.create');
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
@@ -64,7 +66,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const allLanguages = useTranslationsSelector((c) => c.languages);
   const filters = useTranslationsSelector((c) => c.filters);
   const order = useTranslationsSelector((c) => c.order);
-  const { setFilters } = useTranslationsActions();
+  const { setFilters, removeFilter, addFilter } = useTranslationsActions();
   const selectedLanguagesMapped =
     allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
 
@@ -83,9 +85,10 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           placeholder={t('standard_search_label')}
         />
         <TranslationFilters
+          projectId={project.id}
           selectedLanguages={selectedLanguagesMapped}
           value={filters}
-          onChange={setFilters}
+          actions={{ setFilters, removeFilter, addFilter }}
         />
 
         <Tooltip title={t('translation_controls_sort_tooltip')}>

@@ -54,6 +54,7 @@ class TranslationsE2eDataController(
     val testData = TranslationsTestData()
     testData.addKeysWithScreenshots()
     testData.addTranslationsWithStates()
+    testData.addCommentStatesData()
     testDataService.saveTestData(testData.root)
     return mapOf("id" to testData.project.id)
   }

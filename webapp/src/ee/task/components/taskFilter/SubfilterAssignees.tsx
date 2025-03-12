@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
+import { SubmenuItem } from 'tg.component/SubmenuItem';
 
-import { SubmenuItem } from './SubmenuItem';
 import { AssigneeSearchSelectPopover } from '../assigneeSelect/AssigneeSearchSelectPopover';
 
 type Props = {

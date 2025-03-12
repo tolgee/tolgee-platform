@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Plus,
   XClose,
@@ -21,18 +21,18 @@ import { useTranslate } from '@tolgee/react';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { getActiveFilters } from 'tg.component/translation/translationFilters/getActiveFilters';
-import { FiltersMenu } from 'tg.component/translation/translationFilters/FiltersMenu';
-import { useFiltersContent } from 'tg.component/translation/translationFilters/useFiltersContent';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
+import { TranslationFiltersPopup } from 'tg.component/translation/translationFilters/TranslationFiltersPopup';
+import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
+import { Sort } from 'tg.component/CustomIcons';
+import { useProject } from 'tg.hooks/useProject';
+import { countFilters } from 'tg.component/translation/translationFilters/summary';
 
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
-import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
-import { Sort } from 'tg.component/CustomIcons';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -98,32 +98,29 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const languages = useTranslationsSelector((v) => v.languages);
   const order = useTranslationsSelector((v) => v.order);
   const { t } = useTranslate();
+  const project = useProject();
+  const allLanguages = useTranslationsSelector((c) => c.languages);
 
   const { setSearch, changeView, selectLanguages, setOrder } =
     useTranslationsActions();
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
-  const [anchorFiltersEl, setAnchorFiltersEl] =
-    useState<HTMLButtonElement | null>(null);
+  const selectedLanguagesMapped =
+    allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
+
   const [anchorLanguagesEl, setAnchorLanguagesEl] =
     useState<HTMLButtonElement | null>(null);
   const [anchorSortEl, setAnchorSortEl] = useState<HTMLButtonElement | null>(
     null
   );
+  const anchorFilters = useRef<HTMLButtonElement>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
   const filters = useTranslationsSelector((c) => c.filters);
-  const activeFilters = getActiveFilters(filters);
-  const { setFilters } = useTranslationsActions();
-  const selectedLanguagesMapped =
-    languages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
-  const filtersContent = useFiltersContent(
-    filters,
-    setFilters,
-    selectedLanguagesMapped
-  );
+  const { setFilters, addFilter, removeFilter } = useTranslationsActions();
 
   const handleLanguageChange = (languages: string[]) => {
     selectLanguages(languages);
@@ -171,23 +168,28 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               </StyledButtonWrapper>
             </Badge>
 
-            <Badge color="primary" badgeContent={activeFilters?.length}>
+            <Badge color="primary" badgeContent={countFilters(filters)}>
               <StyledButtonWrapper>
                 <StyledIconButton
                   size="small"
-                  onClick={(e) => setAnchorFiltersEl(e.currentTarget)}
+                  onClick={() => setFiltersOpen(true)}
+                  ref={anchorFilters}
                 >
                   <FilterLines />
                 </StyledIconButton>
               </StyledButtonWrapper>
             </Badge>
-            <FiltersMenu
-              filters={filters}
-              anchorEl={anchorFiltersEl}
-              onClose={() => setAnchorFiltersEl(null)}
-              filtersContent={filtersContent}
-              onChange={setFilters}
-            />
+            {filtersOpen && (
+              <TranslationFiltersPopup
+                value={filters}
+                anchorEl={anchorFilters.current!}
+                onClose={() => setFiltersOpen(false)}
+                actions={{ setFilters, removeFilter, addFilter }}
+                projectId={project.id}
+                selectedLanguages={selectedLanguagesMapped}
+                showClearButton
+              />
+            )}
             <Tooltip title={t('translation_controls_sort_tooltip')}>
               <Badge
                 color="primary"

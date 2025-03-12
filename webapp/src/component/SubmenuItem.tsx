@@ -16,7 +16,7 @@ export const SubmenuItem = React.forwardRef(function SubmenuItem(
   ref
 ) {
   return (
-    <StyledMenuItem ref={ref as any} {...other}>
+    <StyledMenuItem ref={ref as any} data-cy="submenu-item" {...other}>
       <ListItemText primary={label} />
       <ArrowRight style={{ position: 'relative', left: '6px' }} />
     </StyledMenuItem>

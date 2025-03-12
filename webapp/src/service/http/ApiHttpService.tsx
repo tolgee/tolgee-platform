@@ -211,12 +211,7 @@ export class ApiHttpService {
       .map((k) => {
         if (Array.isArray(object[k])) {
           return object[k]
-            .map(
-              (v) =>
-                encodeURIComponent(k) +
-                '=' +
-                (v === '' ? '%02%03' : encodeURIComponent(v))
-            )
+            .map((v) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
             .join('&');
         } else {
           return encodeURIComponent(k) + '=' + encodeURIComponent(object[k]);

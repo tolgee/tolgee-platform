@@ -6,8 +6,10 @@ import io.tolgee.model.activity.ActivityDescribingEntity_
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision_
+import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
+import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.Tag_
 import io.tolgee.model.task.TaskKey_
 import io.tolgee.model.task.Task_
@@ -28,7 +30,9 @@ class QueryGlobalFiltering(
 ) {
   fun apply() {
     filterTag()
+    filterNoTag()
     filterNamespace()
+    filterNoNamespace()
     filterKeyName()
     filterKeyId()
     filterUntranslatedAny()
@@ -113,7 +117,7 @@ class QueryGlobalFiltering(
   }
 
   private fun filterNamespace() {
-    val filterNamespace = getFilterNamespace()
+    val filterNamespace = distinguishEmptyValue(params.filterNamespace)
     if (filterNamespace != null) {
       val inCondition = queryBase.namespaceNameExpression.`in`(filterNamespace)
       val hasDefaultNamespace = filterNamespace.contains("")
@@ -127,19 +131,83 @@ class QueryGlobalFiltering(
     }
   }
 
-  private fun getFilterNamespace(): List<String>? {
-    val filterNamespace = params.filterNamespace
-    if (filterNamespace != null && filterNamespace.isEmpty()) {
+  private fun filterNoNamespace() {
+    val filterNoNamespace = distinguishEmptyValue(params.filterNoNamespace)
+    if (filterNoNamespace != null) {
+      val query = queryBase.query
+      val root = queryBase.root
+
+      val subquery = query.subquery(Long::class.java)
+      val subRoot = subquery.from(Key::class.java)
+      val subJoin = subRoot.join(Key_.namespace)
+      val subquerySelect = subquery.select(subRoot.get(Key_.id))
+      val hasDefaultNamespace = filterNoNamespace.contains("")
+
+      subquerySelect.where(
+        cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
+        subJoin.get(Namespace_.name).`in`(filterNoNamespace),
+      )
+      queryBase.whereConditions.add(cb.not(cb.exists(subquery)))
+      if (hasDefaultNamespace) {
+        queryBase.whereConditions.add(
+          queryBase.namespaceNameExpression.isNotNull,
+        )
+      }
+    }
+  }
+
+  private fun distinguishEmptyValue(list: List<String>?): List<String>? {
+    if (list != null && list.isEmpty()) {
       return listOf("")
     }
-    return filterNamespace
+    return list
   }
 
   private fun filterTag() {
-    if (params.filterTag != null) {
+    val filterTag = distinguishEmptyValue(params.filterTag)
+    if (filterTag != null) {
       val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
-      queryBase.whereConditions.add(tagsJoin.get(Tag_.name).`in`(params.filterTag))
+      val hasEmptyTag = filterTag.contains("")
+      val inCondition = tagsJoin.get(Tag_.name).`in`(filterTag)
+      val condition =
+        if (hasEmptyTag) {
+          cb.or(inCondition, tagsJoin.get(Tag_.name).isNull)
+        } else {
+          inCondition
+        }
+      queryBase.whereConditions.add(condition)
+    }
+  }
+
+  private fun filterNoTag() {
+    val filterNoTag = distinguishEmptyValue(params.filterNoTag)
+    if (filterNoTag != null) {
+      // Build a subquery that finds any Key that has a tag in filterNoTag
+      val query = queryBase.query // The main CriteriaQuery
+      val root = queryBase.root // The root for Key in the main query
+      val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
+      val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
+
+      val subquery = query.subquery(Long::class.java)
+      val subRoot = subquery.from(Key::class.java)
+      val subJoin = subRoot.join(Key_.keyMeta).join(KeyMeta_.tags)
+      val hasEmptyTag = filterNoTag.contains("")
+
+      // subquery: SELECT subRoot.id FROM Key subRoot ... WHERE subRoot.id = root.id AND tag in filterNoTag
+      subquery.select(subRoot.get(Key_.id))
+        .where(
+          cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
+          subJoin.get(Tag_.name).`in`(filterNoTag),
+        )
+
+      // main query excludes if such a subquery exists
+      queryBase.whereConditions.add(
+        cb.not(cb.exists(subquery)),
+      )
+      if (hasEmptyTag) {
+        queryBase.whereConditions.add(tagsJoin.get(Tag_.name).isNotNull)
+      }
     }
   }
 

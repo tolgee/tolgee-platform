@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, styled } from '@mui/material';
+import { Box, Menu, MenuItem, styled } from '@mui/material';
 import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { useTranslate } from '@tolgee/react';
 
@@ -8,7 +8,7 @@ import { NamespaceRenameDialog } from './NamespaceRenameDialog';
 import { NsBannerRecord } from '../context/useNsBanners';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
-const StyledNamespace = styled('div')`
+export const StyledNamespace = styled(Box)`
   display: flex;
   align-items: center;
   cursor: pointer;

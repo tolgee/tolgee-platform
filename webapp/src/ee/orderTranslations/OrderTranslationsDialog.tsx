@@ -286,7 +286,9 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
               {
                 path: { projectId },
                 query: {
-                  filterState: stateFilters.filter((i) => i !== 'OUTDATED'),
+                  filterState: stateFilters.filter(
+                    (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
+                  ),
                   filterOutdated: stateFilters.includes('OUTDATED'),
                 },
                 content: {

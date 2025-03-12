@@ -2678,6 +2678,11 @@ export interface components {
       /** @description There is a context available for this key */
       contextPresent: boolean;
       /**
+       * Format: int64
+       * @description The time when the key was created
+       */
+      createdAt: number;
+      /**
        * @description The namespace of the key
        * @example homepage
        */
@@ -12461,18 +12466,28 @@ export interface operations {
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
         /**
-         * Filter namespaces.
+         * Selects only keys with provided namespaces.
          *
          * To filter default namespace, set to empty string.
          */
         filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
         /** Selects only keys, where translation in provided langs is in outdated state */
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
@@ -12487,6 +12502,10 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterHasUnresolvedCommentsInLang?: string[];
+        /** Filter keys with any comments in lang */
+        filterHasCommentsInLang?: string[];
       };
       path: {
         projectId: number;
@@ -16033,18 +16052,28 @@ export interface operations {
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
         /**
-         * Filter namespaces.
+         * Selects only keys with provided namespaces.
          *
          * To filter default namespace, set to empty string.
          */
         filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
         /** Selects only keys, where translation in provided langs is in outdated state */
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
@@ -16059,6 +16088,10 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterHasUnresolvedCommentsInLang?: string[];
+        /** Filter keys with any comments in lang */
+        filterHasCommentsInLang?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -16302,18 +16335,28 @@ export interface operations {
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
         /**
-         * Filter namespaces.
+         * Selects only keys with provided namespaces.
          *
          * To filter default namespace, set to empty string.
          */
         filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
         /** Selects only keys, where translation in provided langs is in outdated state */
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
@@ -16328,6 +16371,10 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterHasUnresolvedCommentsInLang?: string[];
+        /** Filter keys with any comments in lang */
+        filterHasCommentsInLang?: string[];
       };
       path: {
         projectId: number;

@@ -41,6 +41,7 @@ declare module '@mui/material/styles/createPalette' {
     tile: Tile;
     cell: Cell;
     default: PaletteColor;
+    contrast: PaletteColor;
     navbar: Navbar;
     emphasis: Emphasis;
     activity: Activity;
@@ -69,6 +70,7 @@ declare module '@mui/material/styles/createPalette' {
     tile: Tile;
     cell: Cell;
     default: PaletteColor;
+    contrast: PaletteColor;
     navbar: Navbar;
     emphasis: Emphasis;
     activity: Activity;

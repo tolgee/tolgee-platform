@@ -76,6 +76,7 @@ class TranslationsTestData {
             addComment {
               author = user
               text = "Comment"
+              state = TranslationCommentState.RESOLVED
             }
           }
           addTag("Cool tag")
@@ -171,6 +172,15 @@ class TranslationsTestData {
           language = englishLanguage
           text = "aa"
           auto = true
+        }
+      }
+      addKey {
+        name = "state test key 6"
+      }.build {
+        addTranslation {
+          language = germanLanguage
+          text = null
+          state = TranslationState.DISABLED
         }
       }
     }

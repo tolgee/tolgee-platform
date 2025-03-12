@@ -1,173 +1,128 @@
 import { T, useTranslate } from '@tolgee/react';
 import { XClose } from '@untitled-ui/icons-react';
-import {
-  Select,
-  Typography,
-  IconButton,
-  Tooltip,
-  styled,
-  SxProps,
-} from '@mui/material';
-import { useState, useEffect } from 'react';
+import { IconButton, styled, SxProps, Box } from '@mui/material';
+import { useState, useRef } from 'react';
 
-import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 import { FiltersType, LanguageModel } from './tools';
-import { FilterOptions, useAvailableFilters } from './useAvailableFilters';
-import { FilterType } from './tools';
-import { getActiveFilters } from './getActiveFilters';
-import { useFiltersContent } from './useFiltersContent';
+import { TextField } from 'tg.component/common/TextField';
+import { FakeInput } from 'tg.component/FakeInput';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
+import { TranslationFiltersPopup } from './TranslationFiltersPopup';
+import { type FilterActions } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
+import { countFilters, getFilterName } from './summary';
 
-const StyledSelect = styled(Select)`
-  height: 40px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  display: flex;
-  align-items: stretch;
-  width: 200px;
-  & div:focus {
-    background-color: transparent;
-  }
-  & .MuiSelect-select {
-    padding-top: 0px;
-    padding-bottom: 0px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
-  }
-`;
-
-const StyledInputContent = styled('div')`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-`;
-
-const StyledInputText = styled(Typography)`
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  flex-grow: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const StyledClearButton = styled(IconButton)`
+const StyledInputButton = styled(IconButton)`
   margin: ${({ theme }) => theme.spacing(-1, -0.5, -1, -0.25)};
 `;
 
 type Props = {
-  onChange: (value: FiltersType) => void;
+  actions: FilterActions;
   value: FiltersType;
   selectedLanguages: LanguageModel[];
   placeholder?: React.ReactNode;
-  filterOptions?: FilterOptions;
+  projectId: number;
   sx?: SxProps;
   className?: string;
 };
 
 export const TranslationFilters = ({
   value,
-  onChange,
+  actions,
   selectedLanguages,
-  placeholder,
-  filterOptions,
+  projectId,
   sx,
   className,
 }: Props) => {
+  const anchorEl = useRef(null);
   const { t } = useTranslate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      filtersContent.refresh();
-    }
-  }, [isOpen]);
+  const numberOfFilters = countFilters(value);
 
-  const activeFilters = getActiveFilters(value);
-
-  const { availableFilters } = useAvailableFilters(
-    selectedLanguages,
-    filterOptions
-  );
-
-  const findOption = (value: string) =>
-    availableFilters
-      .map((g) => g.options?.find((o) => o.value === value))
-      .filter(Boolean)[0];
-
-  const filtersContent = useFiltersContent(
-    value,
-    onChange,
-    selectedLanguages,
-    filterOptions
-  );
-
-  const handleClearFilters = (e) => {
-    onChange({});
-  };
-
-  function getFilterName(value) {
-    const option = findOption(value);
-    if (option?.label) {
-      return option.label;
-    }
-
-    const parsed = JSON.parse(value) as FilterType;
-    if (parsed.filter === 'filterNamespace') {
-      return (parsed.value as string) || t('namespace_default');
-    }
+  function handleClick() {
+    setOpen(true);
   }
 
   return (
-    <StyledSelect
-      onOpen={() => setIsOpen(true)}
-      onClose={() => setIsOpen(false)}
-      variant="outlined"
-      value={activeFilters}
-      data-cy="translations-filter-select"
-      renderValue={(value: any) => (
-        <StyledInputContent>
-          <StyledInputText
-            style={{
-              opacity: value.length === 0 ? 0.5 : 1,
-            }}
-            variant="body2"
-          >
-            {value.length === 0
-              ? placeholder ?? <T keyName="translations_filter_placeholder" />
-              : (value.length === 1 && getFilterName(value[0])) || (
-                  <T
-                    keyName="translations_filters_text"
-                    params={{ filtersNum: String(activeFilters.length) }}
-                  />
-                )}
-          </StyledInputText>
-          {Boolean(activeFilters.length) && (
-            <Tooltip title={<T keyName="translations_filters_heading_clear" />}>
-              <StyledClearButton
-                size="small"
-                onClick={stopAndPrevent(handleClearFilters)}
-                onMouseDown={stopAndPrevent()}
-                data-cy="translations-filter-clear-all"
+    <>
+      <TextField
+        variant="outlined"
+        // value={getFilterValue(value)}
+        data-cy="translations-filter-select"
+        minHeight={false}
+        placeholder={t('task_filter_placeholder')}
+        InputProps={{
+          onClick: handleClick,
+          ref: anchorEl,
+          fullWidth: true,
+          sx: {
+            cursor: 'pointer',
+            minWidth: 200,
+          },
+          readOnly: true,
+          inputComponent: FakeInput,
+          inputProps: {
+            style: {
+              contain: 'size',
+              display: 'flex',
+              alignItems: 'center',
+            },
+          },
+          margin: 'dense',
+          value:
+            numberOfFilters === 1 ? (
+              <Box
+                display="block"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
               >
-                <XClose width={20} height={20} />
-              </StyledClearButton>
-            </Tooltip>
-          )}
-        </StyledInputContent>
+                {getFilterName(value)}
+              </Box>
+            ) : numberOfFilters > 0 ? (
+              <T
+                keyName="translations_filters_text"
+                params={{ filtersNum: numberOfFilters }}
+              />
+            ) : null,
+          endAdornment: (
+            <Box
+              sx={{ display: 'flex', marginRight: -0.5, alignItems: 'center' }}
+            >
+              {Boolean(numberOfFilters) && (
+                <StyledInputButton
+                  size="small"
+                  onClick={stopBubble(() => actions.setFilters({}))}
+                  tabIndex={-1}
+                  data-cy="translations-filter-select-clear"
+                >
+                  <XClose width={20} height={20} />
+                </StyledInputButton>
+              )}
+              <StyledInputButton
+                size="small"
+                onClick={handleClick}
+                tabIndex={-1}
+                sx={{ pointerEvents: 'none' }}
+              >
+                <ArrowDropDown />
+              </StyledInputButton>
+            </Box>
+          ),
+        }}
+        {...{ sx, className }}
+      />
+      {open && (
+        <TranslationFiltersPopup
+          onClose={() => setOpen(false)}
+          value={value}
+          actions={actions}
+          anchorEl={anchorEl.current!}
+          projectId={projectId}
+          selectedLanguages={selectedLanguages}
+        />
       )}
-      MenuProps={{
-        variant: 'menu',
-      }}
-      margin="dense"
-      displayEmpty
-      multiple
-      {...{ sx, className }}
-    >
-      {filtersContent.options}
-    </StyledSelect>
+    </>
   );
 };

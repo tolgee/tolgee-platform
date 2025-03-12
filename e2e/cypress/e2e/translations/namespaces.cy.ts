@@ -12,6 +12,7 @@ import {
   selectInSelect,
 } from '../../common/shared';
 import { selectNamespace } from '../../common/namespace';
+import { assertFilter } from '../../common/filters';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {
@@ -35,7 +36,7 @@ describe('namespaces in translations', () => {
     gcy('translations-namespace-banner').contains('ns-2').should('be.visible');
   });
 
-  it('displays <none>', () => {
+  it('displays Without namespace', () => {
     createTranslation({ key: 'new-key', namespace: 'new-ns' });
     gcy('translations-namespace-banner')
       .contains('new-ns')
@@ -58,10 +59,26 @@ describe('namespaces in translations', () => {
   it('filters by empty namespace', () => {
     gcy('translations-key-count').contains('5').should('be.visible');
     selectInSelect(gcy('translations-filter-select'), 'Namespaces');
-    getPopover().contains('<none>').click();
+    getPopover().contains('Without namespace').click();
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
     gcy('translations-key-count').contains('2').should('be.visible');
+  });
+
+  it('excludes empty namespace', () => {
+    assertFilter({
+      submenu: 'Namespace',
+      excludeOption: ['Without namespace'],
+      toSeeAfter: ['key', 'key2', 'key'],
+    });
+  });
+
+  it('excludes multiple namespaces', () => {
+    assertFilter({
+      submenu: 'Namespace',
+      excludeOption: ['ns-1', 'ns-2'],
+      toSeeAfter: ['key', 'key2'],
+    });
   });
 
   it('edits namespaced translation correctly', () => {
