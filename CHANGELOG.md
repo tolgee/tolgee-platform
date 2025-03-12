@@ -1,3 +1,10 @@
+## [3.109.3](https://github.com/tolgee/tolgee-platform/compare/v3.109.2...v3.109.3) (2025-03-12)
+
+
+### Bug Fixes
+
+* avoid subscribing to ws channel while ws is disconnecting ([#2985](https://github.com/tolgee/tolgee-platform/issues/2985)) ([7e913cf](https://github.com/tolgee/tolgee-platform/commit/7e913cf6a1bf1fb28accc71c63430aba086b54ed)), closes [#2980](https://github.com/tolgee/tolgee-platform/issues/2980)
+
 ## [3.109.2](https://github.com/tolgee/tolgee-platform/compare/v3.109.1...v3.109.2) (2025-03-12)
 
 

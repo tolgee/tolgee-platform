@@ -855,6 +855,7 @@
   "invoice_usage_dialog_table_applied_stripe_credits_item": "Použité kredity",
   "invoice_usage_dialog_table_count": "Množství",
   "invoice_usage_dialog_table_item": "Položka",
+  "invoice_usage_dialog_table_keys_item": "Klíče",
   "invoice_usage_dialog_table_mt_credits_item": "MT kredity",
   "invoice_usage_dialog_table_no_value": "-",
   "invoice_usage_dialog_table_over_plan": "Nad plán",
