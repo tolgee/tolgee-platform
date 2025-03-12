@@ -8,4 +8,5 @@ interface PublicCloudSubscriptionModel {
   val cancelAtPeriodEnd: Boolean
   val trialEnd: Long?
   val status: SubscriptionStatus
+  val plan: PublicCloudPlanModel
 }

@@ -14,7 +14,6 @@ import { T } from '@tolgee/react';
 import { useTrialInfo } from 'tg.component/layout/TopBar/announcements/useTrialInfo';
 import { PlanFeaturesBox, PlanTitle } from '../Plan/PlanStyles';
 import { getHighlightColor } from '../Plan/Plan';
-import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { IncludedFeatures } from '../Plan/IncludedFeatures';
 import { IncludedUsage } from '../Plan/IncludedUsage';
@@ -47,28 +46,19 @@ export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
 }) => {
   const { preferredOrganization: organization } = usePreferredOrganization();
 
-  const activeSubscription = useBillingApiQuery({
-    url: '/v2/organizations/{organizationId}/billing/subscription',
-    method: 'get',
-    path: {
-      organizationId: organization!.id,
-    },
-  });
+  const activeSubscription = organization?.activeCloudSubscription;
 
   const { subscriptionsLink } = useTrialInfo();
 
   const theme = useTheme();
 
-  if (!activeSubscription?.data?.plan) {
+  const plan = activeSubscription?.plan;
+
+  if (!plan) {
     return null;
   }
 
-  const plan = activeSubscription.data.plan;
-
-  const highlightColor = getHighlightColor(
-    theme,
-    activeSubscription?.data?.plan.public == false
-  );
+  const highlightColor = getHighlightColor(theme, !plan.public);
 
   const importantFeatures: components['schemas']['CloudPlanModel']['enabledFeatures'] =
     [
