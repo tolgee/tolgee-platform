@@ -27,6 +27,7 @@ describe('Debug customer account', () => {
     assertDebugFrameVisible();
     gcy('administration-debug-customer-exit-button').click();
     assertDebugFrameNotVisible();
+    cy.contains('Server administration').should('be.visible');
   });
 
   it('can create project in users organization', () => {
