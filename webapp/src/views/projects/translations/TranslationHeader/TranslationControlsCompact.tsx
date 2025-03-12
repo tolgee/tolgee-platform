@@ -21,10 +21,9 @@ import { useTranslate } from '@tolgee/react';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
-import { getActiveFilters } from 'tg.component/translation/translationFilters/getActiveFilters';
-import { FiltersMenu } from 'tg.component/translation/translationFilters/FiltersMenu';
-import { useFiltersContent } from 'tg.component/translation/translationFilters/useFiltersContent';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
+import { TranslationFiltersPopup } from 'tg.component/translation/translationFilters/TranslationFiltersPopup';
+import { isFilterEmpty } from 'tg.component/translation/translationFilters/tools';
 
 import {
   useTranslationsActions,
@@ -33,6 +32,7 @@ import {
 import { ViewMode } from '../context/types';
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { Sort } from 'tg.component/CustomIcons';
+import { useProject } from 'tg.hooks/useProject';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -98,6 +98,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const languages = useTranslationsSelector((v) => v.languages);
   const order = useTranslationsSelector((v) => v.order);
   const { t } = useTranslate();
+  const project = useProject();
 
   const { setSearch, changeView, selectLanguages, setOrder } =
     useTranslationsActions();
@@ -115,15 +116,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
     setSearch(value);
   };
   const filters = useTranslationsSelector((c) => c.filters);
-  const activeFilters = getActiveFilters(filters);
-  const { setFilters } = useTranslationsActions();
-  const selectedLanguagesMapped =
-    languages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
-  const filtersContent = useFiltersContent(
-    filters,
-    setFilters,
-    selectedLanguagesMapped
-  );
+  const { setFilters, addFilter, removeFilter } = useTranslationsActions();
 
   const handleLanguageChange = (languages: string[]) => {
     selectLanguages(languages);
@@ -171,7 +164,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               </StyledButtonWrapper>
             </Badge>
 
-            <Badge color="primary" badgeContent={activeFilters?.length}>
+            <Badge color="primary" badgeContent={isFilterEmpty(filters)}>
               <StyledButtonWrapper>
                 <StyledIconButton
                   size="small"
@@ -181,12 +174,12 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 </StyledIconButton>
               </StyledButtonWrapper>
             </Badge>
-            <FiltersMenu
-              filters={filters}
-              anchorEl={anchorFiltersEl}
+            <TranslationFiltersPopup
+              value={filters}
+              anchorEl={anchorFiltersEl as HTMLElement}
               onClose={() => setAnchorFiltersEl(null)}
-              filtersContent={filtersContent}
-              onChange={setFilters}
+              actions={{ setFilters, removeFilter, addFilter }}
+              projectId={project.id}
             />
             <Tooltip title={t('translation_controls_sort_tooltip')}>
               <Badge

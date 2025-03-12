@@ -630,10 +630,6 @@ declare namespace DataCy {
         "translations-cell-task-button" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
-        "translations-filter-clear-all" |
-        "translations-filter-option" |
-        "translations-filter-select" |
-        "translations-filters-subheader" |
         "translations-history-load-more-button" |
         "translations-key-cell-description" |
         "translations-key-count" |

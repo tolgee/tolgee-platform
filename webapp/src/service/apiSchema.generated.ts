@@ -12370,13 +12370,21 @@ export interface operations {
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
         /**
-         * Filter namespaces.
+         * Selects only keys with provided namespaces.
          *
          * To filter default namespace, set to empty string.
          */
         filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
         /** Selects only keys, where translation in provided langs is in outdated state */
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
@@ -15942,13 +15950,21 @@ export interface operations {
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
         /**
-         * Filter namespaces.
+         * Selects only keys with provided namespaces.
          *
          * To filter default namespace, set to empty string.
          */
         filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
         /** Selects only keys, where translation in provided langs is in outdated state */
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */
@@ -16211,13 +16227,21 @@ export interface operations {
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
         /**
-         * Filter namespaces.
+         * Selects only keys with provided namespaces.
          *
          * To filter default namespace, set to empty string.
          */
         filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
         /** Selects only keys, where translation in provided langs is in outdated state */
         filterOutdatedLanguage?: string[];
         /** Selects only keys, where translation in provided langs is not in outdated state */

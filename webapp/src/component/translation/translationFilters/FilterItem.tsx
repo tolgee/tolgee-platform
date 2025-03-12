@@ -1,0 +1,91 @@
+import {
+  Button,
+  Checkbox,
+  ListItemText,
+  MenuItemProps,
+  styled,
+} from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+import clsx from 'clsx';
+import React from 'react';
+import { CompactMenuItem } from 'tg.component/ListComponents';
+
+const StyledMenuItem = styled(CompactMenuItem)`
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding-left: 4px !important;
+  & .exclude {
+    opacity: 0;
+  }
+  &:hover .exclude,
+  &:focus-within .exclude {
+    opacity: 1;
+  }
+  gap: 8px;
+`;
+
+const StyledExcludeButton = styled(Button)`
+  padding: 2px 8px;
+  font-size: 13px;
+  align-self: center;
+  min-height: 0px !important;
+  text-transform: none;
+  font-style: normal;
+  font-weight: 500;
+  transition: opacity ease-in 0.1s;
+`;
+
+const StyledListItemText = styled(ListItemText)`
+  overflow: hidden;
+`;
+
+const StyledCheckbox = styled(Checkbox)`
+  margin: -8px -8px -8px 0px;
+  &.excluded {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+`;
+
+type Props = MenuItemProps & {
+  label: React.ReactNode;
+  selected: boolean;
+  excluded?: boolean;
+  onExclude?: () => void;
+};
+
+export const FilterItem = React.forwardRef(function FilterItem(
+  { label, excluded, selected, onExclude, ...other }: Props,
+  ref
+) {
+  const { t } = useTranslate();
+  return (
+    <StyledMenuItem ref={ref as any} {...other}>
+      <StyledCheckbox
+        checked={Boolean(selected || excluded)}
+        size="small"
+        className={clsx({ excluded })}
+      />
+      <StyledListItemText primary={label} />
+      {onExclude && (
+        <StyledExcludeButton
+          variant="contained"
+          size="small"
+          className={clsx({ exclude: !excluded })}
+          color={excluded ? 'default' : 'inherit'}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onExclude?.();
+          }}
+        >
+          {excluded
+            ? t('translation_filter_item_excluded')
+            : t('translation_filter_item_exclude')}
+        </StyledExcludeButton>
+      )}
+    </StyledMenuItem>
+  );
+});

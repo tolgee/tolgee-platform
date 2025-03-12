@@ -13,7 +13,6 @@ import { Select as FormSelect } from 'tg.component/common/form/fields/Select';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { TaskDatePicker } from '../TaskDatePicker';
-import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
 import { TranslationStateFilter } from './TranslationStateFilter';
 import { TaskPreview } from './TaskPreview';
 import { Field, useFormikContext } from 'formik';
@@ -229,7 +228,7 @@ export const TaskCreateForm = ({
               : t('create_task_tasks_and_assignees_title')}
           </Typography>
           <StyledFilters my={1}>
-            {setFilters && (
+            {/* {setFilters && (
               <TranslationFilters
                 value={filters}
                 onChange={setFilters}
@@ -240,7 +239,7 @@ export const TaskCreateForm = ({
                 filterOptions={{ keyRelatedOnly: true }}
                 sx={{ width: '100%', maxWidth: '270px' }}
               />
-            )}
+            )} */}
             <TranslationStateFilter
               value={stateFilters}
               placeholder={t(

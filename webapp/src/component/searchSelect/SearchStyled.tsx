@@ -10,7 +10,7 @@ export const StyledInputWrapper = styled(Box)`
   display: flex;
   align-items: center;
   border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
-  margin-top: -1px;
+  margin-top: -7px;
   padding-right: 4px;
   position: relative;
 `;

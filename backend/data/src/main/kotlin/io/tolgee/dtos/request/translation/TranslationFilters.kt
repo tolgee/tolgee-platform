@@ -67,15 +67,26 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   var filterHasNoScreenshot: Boolean = false
 
   @field:Parameter(
-    description = """Filter namespaces. 
+    description = """Selects only keys with provided namespaces. 
 
 To filter default namespace, set to empty string.
   """,
   )
   var filterNamespace: List<String>? = null
 
+  @field:Parameter(
+    description = """Selects only keys without provided namespaces. 
+
+To filter default namespace, set to empty string.
+  """,
+  )
+  var filterNoNamespace: List<String>? = null
+
   @field:Parameter(description = "Selects only keys with provided tag")
   var filterTag: List<String>? = null
+
+  @field:Parameter(description = "Selects only keys without provided tag")
+  var filterNoTag: List<String>? = null
 
   @field:Parameter(
     description = "Selects only keys, where translation in provided langs is in outdated state",

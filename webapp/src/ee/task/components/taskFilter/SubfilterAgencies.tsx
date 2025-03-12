@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Checkbox, Menu, MenuItem } from '@mui/material';
 
-import { SubmenuItem } from './SubmenuItem';
+import { SubmenuItem } from '../../../../component/SubmenuItem';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { AgencyLabel } from 'tg.ee';
 

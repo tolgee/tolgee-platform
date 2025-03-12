@@ -2,10 +2,6 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import {
-  encodeFilter,
-  toggleFilter,
-} from 'tg.component/translation/translationFilters/tools';
 
 export function useNamespaceFilter(namespace: string | undefined) {
   const filters = useTranslationsSelector((c) => c.filters);
@@ -19,13 +15,13 @@ export function useNamespaceFilter(namespace: string | undefined) {
   }
 
   const isActive = filters['filterNamespace']?.includes(namespace);
-  const rawFilter = encodeFilter({
-    filter: 'filterNamespace',
-    value: namespace,
-  });
+  // const rawFilter = encodeFilter({
+  //   filter: 'filterNamespace',
+  //   value: namespace,
+  // });
   const toggle = () => {
-    const newFilters = toggleFilter(filters, [], rawFilter);
-    setFilters(newFilters);
+    // const newFilters = toggleFilter(filters, [], rawFilter);
+    // setFilters(newFilters);
   };
   return { isActive, toggle };
 }
