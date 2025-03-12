@@ -99,6 +99,39 @@ class TextToComposeXmlConvertorTest {
     "a\n\na".assertSingleTextNode("a\n\na")
   }
 
+  @Test
+  fun `doesnt fail with malformed XML`() {
+    "<unclosed>tag".assertSingleTextNode().isEqualTo("<unclosed>tag")
+  }
+
+  @Test
+  fun `doesnt fail with malformed XML #2`() {
+    "tag <>".assertSingleTextNode().isEqualTo("tag <>")
+  }
+
+  @Test
+  fun `doesnt fail with malformed XML #3`() {
+    "tag <".assertSingleTextNode().isEqualTo("tag <")
+  }
+
+  @Test
+  fun `doesnt fail with malformed XML #4`() {
+    "<outer><inner>content with < unescaped</inner></outer>".assertSingleTextNode()
+      .isEqualTo("<outer><inner>content with < unescaped</inner></outer>")
+  }
+
+  @Test
+  fun `preserves special characters in malformed XML`() {
+    "<tag attr='value\">text with ' and \" characters</tag".assertSingleTextNode()
+      .isEqualTo("<tag attr='value\">text with ' and \" characters</tag")
+  }
+
+  @Test
+  fun `preserves whitespace in malformed XML`() {
+    "<tag>   text with \n newlines and \t tabs   </tag".assertSingleTextNode()
+      .isEqualTo("<tag>   text with \n newlines and \t tabs   </tag")
+  }
+
   private fun Node.assertTextContent(text: String) {
     this.nodeType.assert.isEqualTo(Node.TEXT_NODE)
     this.textContent.assert.isEqualTo(text)
