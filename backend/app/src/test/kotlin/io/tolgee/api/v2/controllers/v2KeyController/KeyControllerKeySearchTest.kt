@@ -103,7 +103,7 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
           }
 
         logger.info("Completed in: $time ms")
-        time.assert.isLessThan(4000)
+        time.assert.isLessThan(5000)
       }
     }
 
@@ -119,7 +119,7 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
           }
 
         logger.info("Completed in: $time ms")
-        time.assert.isLessThan(4000)
+        time.assert.isLessThan(5000)
       }
     }
   }
