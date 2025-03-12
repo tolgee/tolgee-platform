@@ -48,6 +48,7 @@ import kotlin.system.measureTimeMillis
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   var testData: TranslationsTestData? = null
   var namespacesTestData: NamespacesTestData? = null
+  var languagePermissionsTestData: LanguagePermissionsTestData? = null
 
   @MockBean
   @Autowired
@@ -101,7 +102,6 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         }
       } finally {
         Mockito.reset(postHog)
-        testDataService.cleanTestData(testData!!.root)
       }
     }
   }
@@ -259,10 +259,10 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it exports only allowed languages`() {
     retryingOnCommonIssues {
-      val testData = LanguagePermissionsTestData()
-      testDataService.saveTestData(testData.root)
-      projectSupplier = { testData.projectBuilder.self }
-      userAccount = testData.viewEnOnlyUser
+      languagePermissionsTestData = LanguagePermissionsTestData()
+      testDataService.saveTestData(languagePermissionsTestData!!.root)
+      projectSupplier = { languagePermissionsTestData!!.projectBuilder.self }
+      userAccount = languagePermissionsTestData!!.viewEnOnlyUser
 
       val parsed = performExport()
       val files = parsed.keys
@@ -305,12 +305,16 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
       testDataService.saveTestData(testData)
 
-      projectSupplier = { projectBuilder.self }
-      userAccount = user.self
+      try {
+        projectSupplier = { projectBuilder.self }
+        userAccount = user.self
 
-      val parsed = performExport()
-      val files = parsed.keys
-      files.assert.containsExactlyInAnyOrder(*langs.map { "${it.self.tag}.json" }.toTypedArray())
+        val parsed = performExport()
+        val files = parsed.keys
+        files.assert.containsExactlyInAnyOrder(*langs.map { "${it.self.tag}.json" }.toTypedArray())
+      } finally {
+        testDataService.cleanTestData(testData)
+      }
     }
   }
 
@@ -345,12 +349,12 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ) {
       try {
         fn()
-      } catch (e: Throwable) {
+      } finally {
         executeInNewTransaction {
           testData?.let { testDataService.cleanTestData(it.root) }
           namespacesTestData?.let { testDataService.cleanTestData(it.root) }
+          languagePermissionsTestData?.let { testDataService.cleanTestData(it.root) }
         }
-        throw e
       }
     }
   }
