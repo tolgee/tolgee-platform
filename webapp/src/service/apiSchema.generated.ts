@@ -3730,10 +3730,41 @@ export interface components {
     PublicBillingConfigurationDTO: {
       enabled: boolean;
     };
+    PublicCloudPlanModel: {
+      enabledFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+      )[];
+      free: boolean;
+      /** Format: int64 */
+      id: number;
+      includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      name: string;
+      nonCommercial: boolean;
+      public: boolean;
+      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+    };
     /** @example Current active subscription info */
     PublicCloudSubscriptionModel: {
       cancelAtPeriodEnd: boolean;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      plan: components["schemas"]["PublicCloudPlanModel"];
       status:
         | "ACTIVE"
         | "CANCELED"

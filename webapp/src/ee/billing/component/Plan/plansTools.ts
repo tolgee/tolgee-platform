@@ -1,4 +1,5 @@
 import { PlanType } from './types';
+import { components } from 'tg.service/apiSchema.generated';
 
 export function isSubset<T>(set: T[], subset: T[]): boolean {
   return subset.every((i) => set.includes(i));
@@ -29,7 +30,9 @@ export function excludePreviousPlanFeatures(
   }
 }
 
-export function isPlanLegacy(plan: PlanType) {
+export function isPlanLegacy(plan: {
+  includedUsage?: components['schemas']['PublicCloudPlanModel']['includedUsage'];
+}) {
   const slots = plan.includedUsage?.translationSlots;
   return slots !== undefined && slots !== -1;
 }
