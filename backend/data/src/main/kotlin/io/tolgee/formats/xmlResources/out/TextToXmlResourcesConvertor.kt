@@ -32,21 +32,16 @@ class TextToXmlResourcesConvertor(
   val string = value.string
 
   fun convert(): ContentToAppend {
-    try {
-      if (value.isWrappedCdata || containsXmlAndPlaceholders) {
-        return contentWrappedInCdata
-      }
-
-      wrapUnsupportedTagsWithCdata(analysisResult, parsed)
-      escapeTextNodes()
-
-      return ContentToAppend(
-        children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
-      )
-    } catch (ex: Exception) {
-      logger.debug("Cannot process value '$string'", ex)
-      return ContentToAppend(text = string)
+    if (value.isWrappedCdata || containsXmlAndPlaceholders) {
+      return contentWrappedInCdata
     }
+
+    wrapUnsupportedTagsWithCdata(analysisResult, parsed)
+    escapeTextNodes()
+
+    return ContentToAppend(
+      children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
+    )
   }
 
   private val parsed by lazy {
