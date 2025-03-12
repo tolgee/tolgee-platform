@@ -18,7 +18,7 @@ import {
 } from '../../../common/translations';
 import { gcy } from '../../../common/shared';
 import { enableNamespaces } from '../../../common/apiCalls/common';
-import { selectNamespace } from '../../../compounds/NamespaceSelector';
+import { selectNamespace } from '../../../compounds/E2NamespaceSelector';
 
 describe('Views with 5 Translations', () => {
   let project: ProjectDTO = null;
