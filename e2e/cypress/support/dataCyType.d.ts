@@ -134,8 +134,8 @@ declare namespace DataCy {
         "billing-actual-used-monthly-credits" |
         "billing-actual-used-seats" |
         "billing-actual-used-strings" |
-        "billing-estimated-costs" |
-        "billing-estimated-costs-open-button" |
+        "billing-expected-usage" |
+        "billing-expected-usage-open-button" |
         "billing-invoice-item-number" |
         "billing-invoice-usage-button" |
         "billing-invoices-list" |
@@ -160,6 +160,10 @@ declare namespace DataCy {
         "billing-subscriptions-self-hosted-ee-button" |
         "billing-upgrade-preview-confirm-button" |
         "billing-usage-table" |
+        "billing-usage-table-credits" |
+        "billing-usage-table-keys" |
+        "billing-usage-table-seats" |
+        "billing-usage-table-translations" |
         "billing_period_annual" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
@@ -205,6 +209,7 @@ declare namespace DataCy {
         "edit-pat-dialog-description-input" |
         "edit-pat-dialog-title" |
         "empty-scope-dialog" |
+        "expected-usage-dialog" |
         "expiration-date-field" |
         "expiration-date-picker" |
         "expiration-select" |
