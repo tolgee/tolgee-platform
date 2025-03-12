@@ -70,7 +70,7 @@ export const translationsTestData = {
   generateExampleKeys: (projectId: number, numberOfExamples: number) =>
     internalFetch(
       `e2e-data/translations/generate/${projectId}/${numberOfExamples}`
-    ),
+    ).then((r) => r.body as ProjectDTO),
 
   cleanupForFilters: () =>
     internalFetch('e2e-data/translations/cleanup-for-filters'),
@@ -84,6 +84,8 @@ export const translationsTestData = {
 export const translationsDisabled = generateTestDataObject(
   'translation-disabled'
 );
+
+export const emptyProject = generateTestDataObject('empty-project');
 
 export const translationsNsAndTagsTestData =
   generateTestDataObject('ns-and-tags');
