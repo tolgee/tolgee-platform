@@ -1,8 +1,9 @@
 import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { PlanUsageEstimatedCosts } from 'tg.ee.module/billing/common/usage/PlanUsageEstimatedCosts';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { ExpectedUsage } from '../../common/usage/ExpectedUsage';
+import { Box } from '@mui/material';
 
 export const SelfHostedEeEstimatedCosts: FC<{
   subscription: components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -23,9 +24,8 @@ export const SelfHostedEeEstimatedCosts: FC<{
     });
 
   return (
-    <PlanUsageEstimatedCosts
-      useUsage={useUsage}
-      estimatedCosts={subscription.estimatedCosts}
-    />
+    <Box>
+      <ExpectedUsage useUsage={useUsage} />
+    </Box>
   );
 };

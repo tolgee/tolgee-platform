@@ -7,7 +7,7 @@ import Dialog from '@mui/material/Dialog';
 import { UsageTable } from './UsageTable';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
-export const UsageDialogButton: FC<{
+export const ExpectedUsageDialogButton: FC<{
   usageData?: components['schemas']['UsageModel'];
   loading: boolean;
   onOpen: () => void;
@@ -25,12 +25,17 @@ export const UsageDialogButton: FC<{
         <IconButton
           size="small"
           onClick={onOpen}
-          data-cy="billing-estimated-costs-open-button"
+          data-cy="billing-expected-usage-open-button"
         >
           <PieChart01 width={18} height={18} />
         </IconButton>
       </Tooltip>
-      <Dialog open={open} onClose={onClose} maxWidth="md">
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        data-cy="expected-usage-dialog"
+      >
         <DialogTitle>{t('invoice_usage_dialog_title')}</DialogTitle>
         <DialogContent>
           {usageData ? (
