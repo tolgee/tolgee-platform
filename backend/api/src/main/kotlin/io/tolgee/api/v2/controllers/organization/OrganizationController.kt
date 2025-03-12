@@ -315,7 +315,7 @@ class OrganizationController(
     val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)
     val currentTranslations = organizationStatsService.getTranslationCount(organizationId)
-    val currentSeats = organizationStatsService.getSeatCount(organizationId)
+    val currentSeats = organizationStatsService.getSeatCountToCountSeats(organizationId)
     val currentKeys = organizationStatsService.getKeyCount(organizationId)
     val limits = limitsProvider.getLimits(organizationId)
 
