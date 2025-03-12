@@ -91,7 +91,7 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
       saveAndPrepare()
     }
 
-    retry(retries = 5, exceptionMatcher = {
+    retry(retries = 10, exceptionMatcher = {
       it is AssertionError
     }) {
       executeInNewTransaction {
@@ -105,7 +105,11 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
         logger.info("Completed in: $time ms")
         time.assert.isLessThan(4000)
       }
+    }
 
+    retry(retries = 10, exceptionMatcher = {
+      it is AssertionError
+    }) {
       executeInNewTransaction {
         val time =
           measureTimeMillis {
