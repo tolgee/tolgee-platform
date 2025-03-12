@@ -4,6 +4,7 @@ data class StandardTestDataResult(
   val projects: List<ProjectModel>,
   val users: List<UserModel>,
   val organizations: List<OrganizationModel>,
+  val invitations: List<InvitationModel>
 ) {
   data class UserModel(
     val name: String,
@@ -20,5 +21,11 @@ data class StandardTestDataResult(
     val id: Long,
     val slug: String,
     val name: String,
+  )
+
+  data class InvitationModel(
+    val projectId: Long?,
+    val organizationId: Long?,
+    val code: String,
   )
 }

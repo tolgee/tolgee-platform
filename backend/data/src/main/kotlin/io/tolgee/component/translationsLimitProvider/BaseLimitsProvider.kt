@@ -24,7 +24,8 @@ class BaseLimitsProvider : LimitsProvider {
       translationSlots = UsageLimits.Limit(
         included = -1,
         limit = -1
-      )
+      ),
+      isTrial = false
     )
   }
 }

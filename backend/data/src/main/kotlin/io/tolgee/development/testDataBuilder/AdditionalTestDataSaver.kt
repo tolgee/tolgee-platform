@@ -7,7 +7,11 @@ interface AdditionalTestDataSaver {
 
   fun clean(builder: TestDataBuilder)
 
-  fun before(builder: TestDataBuilder) {}
+  fun beforeSave(builder: TestDataBuilder) {}
 
-  fun after(builder: TestDataBuilder) {}
+  fun afterSave(builder: TestDataBuilder) {}
+
+  fun beforeClean(builder: TestDataBuilder) {}
+
+  fun afterClean(builder: TestDataBuilder) {}
 }

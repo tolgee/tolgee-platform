@@ -34,6 +34,13 @@ class TestDataGeneratingService(
       data.data.organizations.map {
         StandardTestDataResult.OrganizationModel(id = it.self.id, name = it.self.name, slug = it.self.slug)
       },
+      invitations = data.data.invitations.map {
+        StandardTestDataResult.InvitationModel(
+          projectId = it.self.permission?.project?.id,
+          organizationId = it.self.permission?.organization?.id,
+          code = it.self.code
+        )
+      }
     )
   }
 }

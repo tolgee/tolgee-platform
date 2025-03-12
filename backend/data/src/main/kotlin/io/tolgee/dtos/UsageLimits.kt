@@ -7,6 +7,7 @@ package io.tolgee.dtos
  */
 data class UsageLimits(
   val isPayAsYouGo: Boolean,
+  val isTrial: Boolean,
   val strings: Limit,
   val keys: Limit,
   val seats: Limit,
