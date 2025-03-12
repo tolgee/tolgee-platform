@@ -54,7 +54,7 @@ class Task : StandardAuditModel() {
   @ActivityDescribingProp
   @field:Size(max = 255)
   @Column(length = 255)
-  var name: String = ""
+  var name: String? = null
 
   @ActivityLoggedProp
   @field:Size(max = 2000)

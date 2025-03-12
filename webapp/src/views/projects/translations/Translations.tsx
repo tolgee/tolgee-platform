@@ -25,7 +25,6 @@ import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
-import { Prefilter } from './prefilters/Prefilter';
 import { TranslationsTaskDetail } from 'tg.ee';
 import { TaskAllDonePlaceholder } from 'tg.ee';
 import { EmptyState } from 'tg.component/common/EmptyState';
@@ -159,10 +158,9 @@ export const Translations = () => {
           }),
         ],
       ]}
-      wrapperProps={{ pb: 0 }}
+      wrapperProps={{ style: { paddingBottom: 0, paddingTop: '3px' } }}
     >
       <BatchOperationsChangeIndicator />
-      {prefilter && <Prefilter prefilter={prefilter} />}
       <TranslationsHeader />
       <StyledContainer>
         {translationsEmpty ? (

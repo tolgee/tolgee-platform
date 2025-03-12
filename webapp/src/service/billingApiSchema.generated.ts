@@ -454,7 +454,7 @@ export interface components {
        * @example 1
        */
       languageId: number;
-      name: string;
+      name?: string;
       type: "TRANSLATE" | "REVIEW";
     };
     CreateTranslationAgencyRequest: {
@@ -738,7 +738,8 @@ export interface components {
         | "subscription_not_scheduled_for_cancellation"
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
-        | "current_subscription_is_not_trialing";
+        | "current_subscription_is_not_trialing"
+        | "sorting_and_paging_is_not_supported_when_using_cursor";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Formik } from 'formik';
 import { T, useTranslate } from '@tolgee/react';
 import {
@@ -10,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { DotsVertical } from '@untitled-ui/icons-react';
+import { X } from '@untitled-ui/icons-react';
 
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -20,7 +19,6 @@ import { messageService } from 'tg.service/MessageService';
 import { UserAccount } from 'tg.component/UserAccount';
 import { ProjectWithAvatar } from 'tg.component/ProjectWithAvatar';
 import { useDateFormatter } from 'tg.hooks/useLocale';
-import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 
 import { TaskDatePicker } from './TaskDatePicker';
@@ -28,9 +26,9 @@ import { AssigneeSearchSelect } from './assigneeSelect/AssigneeSearchSelect';
 import { TaskLabel } from './TaskLabel';
 import { TaskInfoItem } from './TaskInfoItem';
 import { TaskScope } from './TaskScope';
-import { TaskMenu } from './TaskMenu';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { getTaskUrl } from 'tg.constants/links';
+import { TaskDetailActions } from './TaskDetailActions';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -77,9 +75,16 @@ const StyledTopPart = styled('div')`
 
 const StyledActions = styled('div')`
   display: flex;
-  gap: 8px;
+  gap: 32px;
   padding-top: 24px;
-  justify-content: end;
+  justify-content: space-between;
+`;
+
+const StyledActionGroup = styled('div')`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: end;
 `;
 
 type Props = {
@@ -92,7 +97,6 @@ type Props = {
 export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const taskLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}',
@@ -127,10 +131,6 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
 
   const canEditTask = scopes.includes('tasks.edit');
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const data = taskLoadable.data ?? task;
 
   if (!data && taskLoadable.isLoading) {
@@ -154,21 +154,12 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
             </StyledSubtitle>
             <StyledMenu>
               <IconButton
-                size="small"
-                onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
-                data-cy="task-item-menu"
+                onClick={onClose}
+                data-cy="task-detail-close"
+                size="medium"
               >
-                <DotsVertical />
+                <X width={26} height={26} />
               </IconButton>
-              <TaskMenu
-                task={data}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                project={projectLoadable.data}
-                projectScopes={projectLoadable.data.computedPermission.scopes}
-                newTaskActions={false}
-                hideTaskDetail={true}
-              />
             </StyledMenu>
           </>
         )}
@@ -177,7 +168,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
         <>
           <Formik
             initialValues={{
-              name: data.name,
+              name: data.name || '',
               description: data.description,
               dueDate: data.dueDate,
               assignees: data.assignees,
@@ -190,7 +181,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                   path: { projectId, taskNumber },
                   content: {
                     'application/json': {
-                      name: values.name,
+                      name: values.name || undefined,
                       description: values.description,
                       dueDate: values.dueDate,
                       assignees: values.assignees.map((u) => u.id),
@@ -213,7 +204,10 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                 <StyledTopPart>
                   <TextField
                     name="name"
-                    label={t('task_detail_field_name')}
+                    label={t('form_field_optional', {
+                      label: t('task_detail_field_name'),
+                    })}
+                    placeholder={t('task_default_name')}
                     data-cy="task-detail-field-name"
                     fullWidth
                     disabled={!canEditTask}
@@ -298,22 +292,30 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                     data-cy="task-detail-project"
                   />
                 </Box>
-
                 <StyledActions>
-                  <Button onClick={onClose}>{t('global_close_button')}</Button>
-                  {canEditTask && (
-                    <LoadingButton
-                      color="primary"
-                      variant="contained"
-                      loading={isSubmitting}
-                      disabled={!dirty}
-                      type="submit"
-                      data-cy="task-detail-submit"
-                      onClick={() => submitForm()}
-                    >
-                      {t('task_detail_submit_button')}
-                    </LoadingButton>
-                  )}
+                  <StyledActionGroup>
+                    <TaskDetailActions
+                      task={data}
+                      projectId={projectId}
+                      projectScopes={scopes}
+                    />
+                  </StyledActionGroup>
+                  <StyledActionGroup>
+                    {canEditTask && (
+                      <LoadingButton
+                        size="small"
+                        color="primary"
+                        variant="contained"
+                        loading={isSubmitting}
+                        disabled={!dirty}
+                        type="submit"
+                        data-cy="task-detail-submit"
+                        onClick={() => submitForm()}
+                      >
+                        {t('task_detail_submit_button')}
+                      </LoadingButton>
+                    )}
+                  </StyledActionGroup>
                 </StyledActions>
               </StyledContainer>
             )}

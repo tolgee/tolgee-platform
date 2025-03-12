@@ -97,7 +97,7 @@ export const TaskItem = ({
         {t('task_word_count', { value: task.baseWordCount })}
       </StyledItem>
       <StyledProgress {...linkProps}>
-        {task.state === 'IN_PROGRESS' ? (
+        {['IN_PROGRESS', 'NEW'].includes(task.state) ? (
           <BatchProgress progress={task.doneItems} max={task.totalItems} />
         ) : (
           <TaskState state={task.state} />

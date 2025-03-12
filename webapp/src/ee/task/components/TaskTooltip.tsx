@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, IconButton, Tooltip } from '@mui/material';
-import { Translate01 } from '@untitled-ui/icons-react';
-import { TaskDetail as TaskDetailIcon } from 'tg.component/CustomIcons';
+import { InfoCircle, Translate01 } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -21,7 +20,6 @@ type Props = {
   project: SimpleProjectModel;
   children: React.ReactElement<any, any>;
   actions?: Action[] | React.ReactNode | ((task: TaskModel) => React.ReactNode);
-  newTaskActions: boolean;
 } & Omit<React.ComponentProps<typeof Tooltip>, 'title'>;
 
 export const TaskTooltip = ({
@@ -29,7 +27,6 @@ export const TaskTooltip = ({
   project,
   children,
   actions = ['open', 'detail'],
-  newTaskActions,
   ...tooltipProps
 }: Props) => {
   const [taskDetailData, setTaskDetailData] = useState<TaskModel>();
@@ -66,7 +63,7 @@ export const TaskTooltip = ({
                 size="small"
                 onClick={() => setTaskDetailData(task)}
               >
-                <TaskDetailIcon width={20} height={20} />
+                <InfoCircle width={20} height={20} />
               </IconButton>
             </Tooltip>
           )}

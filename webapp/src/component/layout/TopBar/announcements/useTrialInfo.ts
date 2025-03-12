@@ -21,6 +21,7 @@ export const useTrialInfo = () => {
 
   const activeCloudSubscription =
     preferredOrganization?.activeCloudSubscription;
+
   const trialEnd = activeCloudSubscription?.trialEnd;
 
   const shouldShowChip =

@@ -39,7 +39,7 @@ export const MyTasksBoard = ({
   const doneTasks = useMyBoardTask({
     query: {
       ...query,
-      filterState: ['DONE', 'CLOSED'],
+      filterState: ['FINISHED', 'CANCELED'],
       filterNotClosedBefore: filter.filterNotClosedBefore,
       filterAgency: filter.agencies,
     },

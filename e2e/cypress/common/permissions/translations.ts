@@ -38,9 +38,15 @@ export function testTranslations({ project, languages }: ProjectInfo) {
       .findDcy('translations-task-indicator')
       .should('be.visible')
       .trigger('mouseover');
-    cy.gcy('task-tooltip-content')
-      .contains('Assigned translate task')
-      .should('be.visible');
+    if (scopes.includes('tasks.view')) {
+      cy.gcy('task-tooltip-content')
+        .contains('Unassigned review task')
+        .should('be.visible');
+    } else {
+      cy.gcy('task-tooltip-content')
+        .contains('You have no access to view this task')
+        .should('be.visible');
+    }
     getCell('English text 1')
       .findDcy('translations-task-indicator')
       .trigger('mouseout');

@@ -543,6 +543,7 @@ declare namespace DataCy {
         "task-detail" |
         "task-detail-author" |
         "task-detail-characters" |
+        "task-detail-close" |
         "task-detail-closed-at" |
         "task-detail-created-at" |
         "task-detail-download-report" |
@@ -555,10 +556,15 @@ declare namespace DataCy {
         "task-detail-user-keys" |
         "task-detail-user-words" |
         "task-detail-words" |
+        "task-info-message" |
         "task-item" |
         "task-item-detail" |
         "task-item-menu" |
         "task-label-name" |
+        "task-menu-item-cancel-task" |
+        "task-menu-item-mark-as-done" |
+        "task-menu-item-reopen" |
+        "task-number" |
         "task-preview" |
         "task-preview-alert" |
         "task-preview-characters" |

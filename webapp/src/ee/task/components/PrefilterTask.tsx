@@ -15,12 +15,12 @@ import { PrefilterContainer } from 'tg.views/projects/translations/prefilters/Co
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useUser } from 'tg.globalContext/helpers';
 import { usePrefilter } from 'tg.views/projects/translations/prefilters/usePrefilter';
-import { TaskState } from 'tg.component/task/TaskState';
 import { TaskTooltip } from './TaskTooltip';
 import { TaskLabel } from './TaskLabel';
 import { PrefilterTaskProps } from '../../../eeSetup/EeModuleType';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 import { QUERY } from 'tg.constants/links';
+import { PrefilterTaskHideDoneSwitch } from './PrefilterTaskHideDoneSwitch';
 
 const StyledWarning = styled('div')`
   display: flex;
@@ -57,7 +57,7 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
 
   const [_, setTaskDetail] = useUrlSearchState(QUERY.TRANSLATIONS_TASK_DETAIL);
 
-  const { clear } = usePrefilter();
+  const prefilter = usePrefilter();
 
   function handleShowDetails() {
     setTaskDetail(String(taskNumber));
@@ -80,11 +80,7 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
           <T keyName="task_filter_indicator_blocking_warning" />{' '}
           {blockingTasksLoadable.data.map((taskNumber, i) => (
             <React.Fragment key={taskNumber}>
-              <TaskTooltip
-                taskNumber={taskNumber}
-                project={project}
-                newTaskActions={true}
-              >
+              <TaskTooltip taskNumber={taskNumber} project={project}>
                 <StyledTaskId>#{taskNumber}</StyledTaskId>
               </TaskTooltip>
               {i !== blockingTasksLoadable.data.length - 1 && ', '}
@@ -99,10 +95,12 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
     <>
       <PrefilterContainer
         icon={<ClipboardCheck />}
-        title={<T keyName="task_filter_indicator_label" />}
+        title={
+          data && data.name ? <T keyName="task_filter_indicator_label" /> : ''
+        }
         closeButton={
           <Tooltip title={t('task_filter_close_tooltip')} disableInteractive>
-            <IconButton size="small" onClick={clear}>
+            <IconButton size="small" onClick={prefilter?.clear}>
               <X />
             </IconButton>
           </Tooltip>
@@ -121,14 +119,16 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
                 <InfoCircle width={20} height={20} />
               </IconButton>
             </Tooltip>
-            {!isActive && <TaskState state={data.state} />}
-            {alert ? (
-              <StyledWarning>
-                <AlertCircle width={20} height={20} />
-                <Box>{alert}</Box>
-              </StyledWarning>
-            ) : null}
           </Box>
+        }
+        controls={<PrefilterTaskHideDoneSwitch />}
+        alert={
+          Boolean(alert) && (
+            <StyledWarning>
+              <AlertCircle width={20} height={20} />
+              <Box>{alert}</Box>
+            </StyledWarning>
+          )
         }
       />
     </>

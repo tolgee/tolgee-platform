@@ -142,7 +142,7 @@ export const TaskCreateDialog = ({
       <Formik
         initialValues={{
           type: initialValues?.type ?? 'TRANSLATE',
-          name: initialValues?.name ?? '',
+          name: initialValues?.name || undefined,
           description: initialValues?.description ?? '',
           dueDate: initialValues?.dueDate ?? undefined,
           assignees: initialValues?.languageAssignees ?? {},
@@ -160,7 +160,7 @@ export const TaskCreateDialog = ({
 
           const data = languages.map((languageId) => ({
             type: values.type,
-            name: values.name,
+            name: values.name || undefined,
             description: values.description,
             languageId: languageId,
             dueDate: values.dueDate,

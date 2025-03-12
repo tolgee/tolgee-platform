@@ -1,3 +1,24 @@
+## [3.109.1](https://github.com/tolgee/tolgee-platform/compare/v3.109.0...v3.109.1) (2025-03-12)
+
+
+### Bug Fixes
+
+* Permission error on trial plans ([#2982](https://github.com/tolgee/tolgee-platform/issues/2982)) ([f451fec](https://github.com/tolgee/tolgee-platform/commit/f451fec8eec4632275a7f32518cc671df95fe9e4))
+
+# [3.109.0](https://github.com/tolgee/tolgee-platform/compare/v3.108.0...v3.109.0) (2025-03-11)
+
+
+### Features
+
+* task improvements ([#2956](https://github.com/tolgee/tolgee-platform/issues/2956)) ([279da6c](https://github.com/tolgee/tolgee-platform/commit/279da6c25df1bdaf3fca4ebd69982b0bda2bd636))
+
+# [3.108.0](https://github.com/tolgee/tolgee-platform/compare/v3.107.0...v3.108.0) (2025-03-04)
+
+
+### Features
+
+* make task name optional ([#2948](https://github.com/tolgee/tolgee-platform/issues/2948)) ([2dcac95](https://github.com/tolgee/tolgee-platform/commit/2dcac955715951aaf61b3625f16e6d2ffccf2a4f))
+
 # [3.107.0](https://github.com/tolgee/tolgee-platform/compare/v3.106.1...v3.107.0) (2025-03-03)
 
 

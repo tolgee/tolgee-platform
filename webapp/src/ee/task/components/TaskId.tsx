@@ -17,7 +17,11 @@ type TaskNumberProps = {
 };
 
 export const TaskNumber = ({ sx, className, taskNumber }: TaskNumberProps) => {
-  return <Container {...{ sx, className }}>#{taskNumber}</Container>;
+  return (
+    <Container data-cy="task-number" {...{ sx, className }}>
+      #{taskNumber}
+    </Container>
+  );
 };
 
 type TaskNumberWithLinkProps = {

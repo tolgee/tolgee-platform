@@ -200,6 +200,25 @@ describe('project tasks', () => {
     cy.gcy('empty-scope-dialog').should('be.visible');
   });
 
+  it('task name can be empty', () => {
+    cy.gcy('tasks-header-add-task').click();
+    cy.waitForDom();
+    cy.gcy('create-task-field-languages').click();
+    cy.gcy('create-task-field-languages-item').contains('Czech').click();
+    dismissMenu();
+
+    cy.gcy('create-task-submit').click();
+    assertMessage('1 task created');
+
+    getTaskByNumber(3).findDcy('task-label-name').should('contain', 'Task');
+    getTaskByNumber(3).findDcy('task-item-detail').click();
+
+    cy.gcy('task-detail-field-description').type('Test description');
+
+    cy.gcy('task-detail-submit').click();
+    assertMessage('Task updated successfully');
+  });
+
   it('uses default state filters', () => {
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('translations-state-filter').contains('Untranslated');
@@ -208,4 +227,12 @@ describe('project tasks', () => {
 
     cy.gcy('translations-state-filter').contains('Translated');
   });
+
+  function getTaskByNumber(number: number) {
+    return cy
+      .gcy('task-number')
+      .contains('#' + number)
+      .should('be.visible')
+      .closestDcy('task-item');
+  }
 });
