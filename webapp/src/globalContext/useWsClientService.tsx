@@ -18,7 +18,7 @@ export const useWebsocketService = (
       });
       setClient(newClient);
       return () => {
-        newClient.disconnect();
+        newClient.deactivate();
       };
     }
   }, [jwtToken, allowPrivate]);
