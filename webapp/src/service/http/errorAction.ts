@@ -16,6 +16,9 @@ export const errorAction = (code: string) => {
     case 'seats_spending_limit_exceeded':
       globalContext.actions?.incrementSpendingLimitErrors();
       return true;
+    case 'plan_seat_limit_exceeded':
+      globalContext.actions?.incrementPlanLimitErrors();
+      return true;
     case 'keys_spending_limit_exceeded':
       globalContext.actions?.incrementSpendingLimitErrors();
       return true;

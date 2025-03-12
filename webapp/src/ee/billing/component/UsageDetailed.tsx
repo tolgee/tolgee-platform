@@ -10,15 +10,15 @@ export const UsageDetailed: React.FC<
   const items = [
     {
       getLabel: (params: { limit: number; used: number }) => (
-        <T keyName="dashboard_billing_used_translations_v2" params={params} />
-      ),
-      progress: props.translationSlotsProgress,
-    },
-    {
-      getLabel: (params: { limit: number; used: number }) => (
         <T keyName="dashboard_billing_used_strings_v2" params={params} />
       ),
       progress: props.stringsProgress,
+    },
+    {
+      getLabel: (params: { limit: number; used: number }) => (
+        <T keyName="dashboard_billing_used_seats" params={params} />
+      ),
+      progress: props.seatsProgress,
     },
     {
       getLabel: (params: { limit: number; used: number }) => (
