@@ -1,4 +1,4 @@
-export class NamespaceSelector {
+export class E2NamespaceSelector {
   getNamespaceSelect() {
     return cy.gcy('search-select');
   }
@@ -12,5 +12,5 @@ export class NamespaceSelector {
 }
 
 export const selectNamespace = (namespace: string) => {
-  new NamespaceSelector().selectNamespace(namespace);
+  new E2NamespaceSelector().selectNamespace(namespace);
 };

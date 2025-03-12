@@ -14,7 +14,7 @@ import {
   getClosestContainingText,
 } from '../../common/xPath';
 import { visitProjectLanguages } from '../../common/shared';
-import { TranslationsView } from '../../compounds/TranslationsView';
+import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
@@ -51,7 +51,7 @@ describe('Translations Base', () => {
       cy.wait(100);
       cy.gcy('global-empty-state').should('be.visible');
 
-      const translationsView = new TranslationsView();
+      const translationsView = new E2TranslationsView();
       const keyCreateDialog = translationsView.openKeyCreateDialog();
       keyCreateDialog.getNamespaceSelectElement().should('not.exist');
       keyCreateDialog.fillAndSave({
@@ -126,7 +126,7 @@ describe('Translations Base', () => {
     cy.wait(100);
     cy.gcy('global-empty-state').should('be.visible');
 
-    const translationsView = new TranslationsView();
+    const translationsView = new E2TranslationsView();
     const keyCreateDialog = translationsView.openKeyCreateDialog();
     keyCreateDialog.getNamespaceSelectElement().should('exist');
     keyCreateDialog.fillAndSave({

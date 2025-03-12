@@ -11,10 +11,10 @@ import { assertMessage, dismissMenu, gcy, gcyAdvanced } from './shared';
 import { buildXpath } from './XpathBuilder';
 import Chainable = Cypress.Chainable;
 import {
-  KeyCreateDialog,
+  E2KeyCreateDialog,
   KeyDialogFillProps,
-} from '../compounds/KeyCreateDialog';
-import { TranslationsView } from '../compounds/TranslationsView';
+} from '../compounds/E2KeyCreateDialog';
+import { E2TranslationsView } from '../compounds/E2TranslationsView';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -40,7 +40,7 @@ export const getPluralEditor = (variant: string) => {
 
 export function createTranslation(props: KeyDialogFillProps) {
   waitForGlobalLoading();
-  const translationsView = new TranslationsView();
+  const translationsView = new E2TranslationsView();
   const keyCreateDialog = translationsView.openKeyCreateDialog();
   keyCreateDialog.fillAndSave(props);
 }

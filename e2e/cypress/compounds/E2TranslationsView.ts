@@ -1,7 +1,7 @@
 import { HOST } from '../common/constants';
-import { KeyCreateDialog, KeyDialogFillProps } from './KeyCreateDialog';
+import { E2KeyCreateDialog, KeyDialogFillProps } from './E2KeyCreateDialog';
 
-export class TranslationsView {
+export class E2TranslationsView {
   visit(projectId: number) {
     return cy.visit(`${HOST}/projects/${projectId}/translations`);
   }
@@ -12,7 +12,7 @@ export class TranslationsView {
 
   openKeyCreateDialog() {
     this.getAddButton().click();
-    return new KeyCreateDialog();
+    return new E2KeyCreateDialog();
   }
 
   createKey(props: KeyDialogFillProps) {
