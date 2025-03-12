@@ -1,6 +1,6 @@
 package io.tolgee.service.organization
 
-import io.tolgee.repository.OrganizationRepository.Companion.ALL_USERS_IN_ORGANIZATION_QUERY
+import io.tolgee.repository.OrganizationRepository.Companion.ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -54,10 +54,10 @@ class OrganizationStatsService(
     return result.toLong()
   }
 
-  fun getSeatCount(organizationId: Long): Long {
+  fun getSeatCountToCountSeats(organizationId: Long): Long {
     return entityManager.createQuery(
       """
-      select count(distinct ua.id) $ALL_USERS_IN_ORGANIZATION_QUERY
+      select count(distinct ua.id) $ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
       """.trimIndent(),
     ).setParameter("organizationId", organizationId).singleResult as Long
   }

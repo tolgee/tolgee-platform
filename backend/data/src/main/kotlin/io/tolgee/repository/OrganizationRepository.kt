@@ -230,29 +230,36 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   ): OrganizationView?
 
 
+  /**
+   * Returns all organizations where user is counted as seat
+   * For translation agencies, we don't count them as seats
+   */
   @Query(
     """
       select distinct o.id from Organization o
         left join o.memberRoles orl
         left join o.projects pr
-        left join pr.permissions perm
+        left join pr.permissions perm on perm.agency is null
         where orl.user.id = :userId or perm.user.id = :userId
   """
   )
-  fun getAllUsersOrganizations(userId: Long): Set<Long>
+  fun getAllUsersOrganizationsToCountUsageFor(userId: Long): Set<Long>
 
   @Query(
     """
-      select ua.id $ALL_USERS_IN_ORGANIZATION_QUERY
+      select ua.id $ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
     """
   )
-  fun getAllUserIdsInOrganization(organizationId: Long): Set<Long>
+  fun getAllUserIdsInOrganizationToCountSeats(organizationId: Long): Set<Long>
 
   companion object {
-    const val ALL_USERS_IN_ORGANIZATION_QUERY = """from UserAccount ua
+    /**
+     * Query to count all users in organization to count seats
+     */
+    const val ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR = """from UserAccount ua
       left join ua.organizationRoles orl
       left join orl.organization o on o.deletedAt is null and o.id = :organizationId
-      left join ua.permissions p 
+      left join ua.permissions p on p.agency is null
       left join p.project pr on pr.deletedAt is null and pr.organizationOwner.id = :organizationId 
       where ua.deletedAt is null and ua.disabledAt is null
       and (pr is not null or o is not null)"""
