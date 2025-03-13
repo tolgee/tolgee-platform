@@ -13,13 +13,14 @@ import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Selection
 import org.springframework.data.domain.Sort
+import java.time.Instant
 
 class CursorPredicateProvider(
   private val cb: CriteriaBuilder,
   private val cursor: Map<String, CursorValue>? = null,
   private var selection: LinkedHashMap<String, Selection<*>> = LinkedHashMap(),
 ) {
-  @Suppress("UNCHECKED_CAST", "TYPE_MISMATCH_WARNING")
+  @Suppress("UNCHECKED_CAST")
   /**
    * This function body is inspired by this thread
    * https://stackoverflow.com/questions/38017054/mysql-cursor-based-pagination-with-multiple-columns
@@ -28,33 +29,56 @@ class CursorPredicateProvider(
     var result: Predicate? = null
     cursor?.entries?.reversed()?.forEach { (property, value) ->
       val isUnique = property === KeyWithTranslationsView::keyId.name
-      val expression =
-        selection[property] as? Expression<String>
-          ?: throw BadRequestException(Message.CANNOT_SORT_BY_THIS_COLUMN)
+      val selected = selection[property]
+        ?: throw BadRequestException(Message.CANNOT_SORT_BY_THIS_COLUMN)
+
+      // We need the runtime type of the column
+      val colType = selected.javaType
+      // parse the raw string from cursor into correct type for comparison
+      val typedValue = parseValue(colType, value.value)
+
+      @Suppress("UNCHECKED_CAST")
+      val expression = selected as Expression<Comparable<Any>>
 
       val strongCondition: Predicate
       val condition: Predicate
+
       if (value.direction == Sort.Direction.ASC) {
         condition =
           if (isUnique) {
-            cb.greaterThan(expression, value.value!!)
+            cb.greaterThan(expression, typedValue!!)
           } else {
-            cb.greaterThanOrEqualToNullable(expression, value.value)
+            cb.greaterThanOrEqualToNullable(expression, typedValue)
           }
-        strongCondition = cb.greaterThanNullable(expression, value.value)
+        strongCondition = cb.greaterThanNullable(expression, typedValue)
       } else {
         condition =
           if (isUnique) {
-            cb.lessThan(expression, value.value!!)
+            cb.lessThan(expression, typedValue!!)
           } else {
-            cb.lessThanOrEqualToNullable(expression, value.value)
+            cb.lessThanOrEqualToNullable(expression, typedValue)
           }
-        strongCondition = cb.lessThanNullable(expression, value.value)
+        strongCondition = cb.lessThanNullable(expression, typedValue)
       }
       result = result?.let {
         cb.and(condition, cb.or(strongCondition, result))
       } ?: condition
     }
     return result
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun parseValue(javaType: Class<*>, raw: String?): Comparable<Any>? {
+    if (raw == null) return null
+
+    return when (javaType) {
+      String::class.java -> raw as Comparable<Any>
+      java.lang.Long::class.java -> raw.toLong() as Comparable<Any>
+      java.sql.Timestamp::class.java -> java.sql.Timestamp(raw.toLong()) as Comparable<Any>
+      // If you use LocalDateTime, do:
+      // LocalDateTime::class.java -> LocalDateTime.parse(raw)
+      // or any other date/time you use
+      else -> throw Error("Cannot parse value for type $javaType")
+    }
   }
 }

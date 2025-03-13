@@ -71,6 +71,7 @@ data class KeyWithTranslationsView(
     val path = property.split(".")
     return when (path[0]) {
       KeyWithTranslationsView::keyId.name -> keyId.toString()
+      KeyWithTranslationsView::createdAt.name -> createdAt.time.toString()
       KeyWithTranslationsView::keyNamespace.name -> keyNamespace
       KeyWithTranslationsView::keyName.name -> keyName
       KeyWithTranslationsView::screenshotCount.name -> screenshotCount.toString()
