@@ -99,6 +99,9 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const order = useTranslationsSelector((v) => v.order);
   const { t } = useTranslate();
   const project = useProject();
+  const allLanguages = useTranslationsSelector((c) => c.languages);
+  const selectedLanguagesMapped =
+    allLanguages?.filter((l) => selectedLanguages?.includes(l.tag)) ?? [];
 
   const { setSearch, changeView, selectLanguages, setOrder } =
     useTranslationsActions();
@@ -180,6 +183,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               onClose={() => setAnchorFiltersEl(null)}
               actions={{ setFilters, removeFilter, addFilter }}
               projectId={project.id}
+              selectedLanguages={selectedLanguagesMapped}
             />
             <Tooltip title={t('translation_controls_sort_tooltip')}>
               <Badge

@@ -104,7 +104,9 @@ export const TaskCreateForm = ({
         query: {
           // @ts-ignore
           hash: stringHash(JSON.stringify(content)),
-          filterState: stateFilters.filter((i) => i !== 'OUTDATED'),
+          filterState: stateFilters.filter(
+            (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
+          ),
           filterOutdated: stateFilters.includes('OUTDATED'),
         },
       };

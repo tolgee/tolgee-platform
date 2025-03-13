@@ -12365,6 +12365,8 @@ export interface operations {
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
@@ -15945,6 +15947,8 @@ export interface operations {
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
@@ -16222,6 +16226,8 @@ export interface operations {
         filterUntranslatedInLang?: string;
         /** Selects only keys, where translation is provided in specified language */
         filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */

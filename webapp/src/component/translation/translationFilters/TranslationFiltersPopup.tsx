@@ -1,5 +1,5 @@
 import { Menu } from '@mui/material';
-import { FiltersType } from './tools';
+import { FiltersType, LanguageModel } from './tools';
 import { type FilterActions } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
 import { SubfilterTags } from './SubfilterTags';
 import { SubfilterNamespaces } from './SubfilterNamespaces';
@@ -12,6 +12,7 @@ type Props = {
   onClose: () => void;
   anchorEl: HTMLElement;
   projectId: number;
+  selectedLanguages: LanguageModel[];
 };
 
 export const TranslationFiltersPopup = ({
@@ -20,6 +21,7 @@ export const TranslationFiltersPopup = ({
   onClose,
   anchorEl,
   projectId,
+  selectedLanguages,
 }: Props) => {
   return (
     <Menu
@@ -42,6 +44,7 @@ export const TranslationFiltersPopup = ({
         value={value}
         actions={actions}
         projectId={projectId}
+        selectedLanguages={selectedLanguages}
       />
       <SubfilterScreenshots
         value={value}

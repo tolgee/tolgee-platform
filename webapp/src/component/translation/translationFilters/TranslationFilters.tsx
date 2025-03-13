@@ -94,6 +94,7 @@ export const TranslationFilters = ({
           actions={actions}
           anchorEl={anchorEl.current!}
           projectId={projectId}
+          selectedLanguages={selectedLanguages}
         />
       )}
     </>

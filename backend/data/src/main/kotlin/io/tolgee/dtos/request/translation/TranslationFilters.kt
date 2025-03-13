@@ -60,6 +60,12 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   )
   var filterTranslatedInLang: String? = null
 
+  @field:Parameter(
+    description = "Selects only keys, where translation was auto translated for specified languages.",
+    example = "en-US",
+  )
+  var filterAutoTranslatedInLang: List<String>? = null
+
   @field:Parameter(description = "Selects only keys with screenshots")
   var filterHasScreenshot: Boolean = false
 

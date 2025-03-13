@@ -3,6 +3,7 @@ import {
   Checkbox,
   ListItemText,
   MenuItemProps,
+  Radio,
   styled,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
@@ -47,25 +48,41 @@ const StyledCheckbox = styled(Checkbox)`
   }
 `;
 
+const StyledRadio = styled(Radio)`
+  margin: -8px -8px -8px 0px;
+  &.excluded {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+`;
+
 type Props = MenuItemProps & {
   label: React.ReactNode;
   selected: boolean;
   excluded?: boolean;
   onExclude?: () => void;
+  exclusive?: boolean;
 };
 
 export const FilterItem = React.forwardRef(function FilterItem(
-  { label, excluded, selected, onExclude, ...other }: Props,
+  { label, excluded, selected, onExclude, exclusive, ...other }: Props,
   ref
 ) {
   const { t } = useTranslate();
   return (
     <StyledMenuItem ref={ref as any} {...other}>
-      <StyledCheckbox
-        checked={Boolean(selected || excluded)}
-        size="small"
-        className={clsx({ excluded })}
-      />
+      {exclusive ? (
+        <StyledRadio
+          checked={Boolean(selected || excluded)}
+          size="small"
+          className={clsx({ excluded })}
+        />
+      ) : (
+        <StyledCheckbox
+          checked={Boolean(selected || excluded)}
+          size="small"
+          className={clsx({ excluded })}
+        />
+      )}
       <StyledListItemText primary={label} />
       {onExclude && (
         <StyledExcludeButton

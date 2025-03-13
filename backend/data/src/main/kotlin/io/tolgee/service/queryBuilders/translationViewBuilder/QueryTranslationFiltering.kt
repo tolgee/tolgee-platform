@@ -4,6 +4,8 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.translation.Translation_
+import io.tolgee.model.views.TranslationView
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.Path
@@ -18,6 +20,7 @@ class QueryTranslationFiltering(
     language: LanguageDto,
     translationTextField: Path<String>,
     translationStateField: Path<TranslationState>,
+    autoTranslatedField: Path<Boolean>,
   ) {
     filterByStateMap?.get(language.tag)?.let { states ->
       val languageStateConditions = mutableListOf<Predicate>()
@@ -28,15 +31,19 @@ class QueryTranslationFiltering(
         }
         languageStateConditions.add(condition)
       }
-      queryBase.whereConditions.add(cb.or(*languageStateConditions.toTypedArray()))
+      queryBase.translationConditions.add(cb.or(*languageStateConditions.toTypedArray()))
+    }
+
+    if (params.filterAutoTranslatedInLang?.contains(language.tag) == true) {
+      queryBase.translationConditions.add(cb.equal(autoTranslatedField, true))
     }
 
     if (params.filterUntranslatedInLang == language.tag) {
-      queryBase.whereConditions.add(with(queryBase) { translationTextField.isNullOrBlank })
+      queryBase.translationConditions.add(with(queryBase) { translationTextField.isNullOrBlank })
     }
 
     if (params.filterTranslatedInLang == language.tag) {
-      queryBase.whereConditions.add(with(queryBase) { translationTextField.isNotNullOrBlank })
+      queryBase.translationConditions.add(with(queryBase) { translationTextField.isNotNullOrBlank })
     }
   }
 

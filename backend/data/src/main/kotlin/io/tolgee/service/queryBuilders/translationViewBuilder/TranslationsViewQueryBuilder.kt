@@ -45,7 +45,11 @@ class TranslationsViewQueryBuilder(
       val paths = queryBase.querySelection.values.toTypedArray()
       query.multiselect(*paths)
       val orderList = getOrderList(queryBase)
+      val translationConditions = queryBase.translationConditions.toMutableList()
       val where = queryBase.whereConditions.toMutableList()
+      if (translationConditions.isNotEmpty()) {
+        where.add(cb.or(*translationConditions.toTypedArray()))
+      }
 
       val cursorPredicateProvider = CursorPredicateProvider(cb, cursor, queryBase.querySelection)
       cursorPredicateProvider()?.let {
@@ -53,6 +57,7 @@ class TranslationsViewQueryBuilder(
       }
       val groupBy = listOf(queryBase.keyIdExpression, *queryBase.groupByExpressions.toTypedArray())
       query.where(*where.toTypedArray())
+
       query.groupBy(groupBy)
       query.orderBy(orderList)
       return query

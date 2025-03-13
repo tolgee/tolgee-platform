@@ -1,33 +1,65 @@
 import { useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box, Divider, Menu } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
-import { FilterItem } from './FilterItem';
 import {
   type FiltersInternal,
   type TranslationStateType,
   type FilterActions,
 } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
-import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
+import { FilterItem } from './FilterItem';
+import { LanguageModel } from './tools';
+import { CompactListSubheader } from 'tg.component/ListComponents';
+import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 type Props = {
   projectId: number;
   value: FiltersInternal;
   actions: FilterActions;
+  selectedLanguages: LanguageModel[];
 };
 
 const states: TranslationStateType[] = [
+  'REVIEWED',
+  'TRANSLATED',
+  'AUTO_TRANSLATED',
+  'UNTRANSLATED',
   'OUTDATED',
-  ...(Object.keys(TRANSLATION_STATES) as TranslationStateType[]),
+  'DISABLED',
 ];
 
-export const SubfilterTranslations = ({ value, actions, projectId }: Props) => {
+export const SubfilterTranslations = ({
+  value,
+  actions,
+  selectedLanguages,
+}: Props) => {
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
   const translateState = useStateTranslation();
+  const [expanded, setExpanded] = useState(
+    value.filterTranslationLanguage !== undefined
+  );
+
+  function toggleFilterLanguage(
+    newValue: FiltersInternal['filterTranslationLanguage']
+  ) {
+    actions.setFilters({
+      ...value,
+      filterTranslationLanguage:
+        newValue === value.filterTranslationLanguage ? undefined : newValue,
+    });
+  }
+
+  function toggleFilterState(newValue: TranslationStateType) {
+    if (value.filterTranslationState?.includes(newValue)) {
+      actions.removeFilter('filterTranslationState', newValue);
+    } else {
+      actions.addFilter('filterTranslationState', newValue);
+    }
+  }
 
   return (
     <>
@@ -63,34 +95,52 @@ export const SubfilterTranslations = ({ value, actions, projectId }: Props) => {
                   selected={Boolean(
                     value.filterTranslationState?.includes(state)
                   )}
-                  onClick={() => {
-                    if (value.filterTranslationState?.includes(state)) {
-                      actions.removeFilter('filterTranslationState', state);
-                    } else if (
-                      value.filterNoTranslationState?.includes(state)
-                    ) {
-                      actions.removeFilter('filterNoTranslationState', state);
-                    } else {
-                      actions.addFilter('filterTranslationState', state);
-                    }
-                  }}
+                  onClick={() => toggleFilterState(state)}
                 />
               );
             })}
-
-            <Divider />
-
+            <CompactListSubheader sx={{ background: 'transparent' }}>
+              <Box display="flex" justifyContent="space-between">
+                <Box>{t('translations_filter_languages_select_title')}</Box>
+              </Box>
+            </CompactListSubheader>
             <FilterItem
-              label={t('translations_filter_ignore_base_language')}
-              selected={!value.filterTranslationStateApplyBaseLang}
-              onClick={() => {
-                actions.setFilters({
-                  ...value,
-                  filterTranslationStateApplyBaseLang:
-                    !value.filterTranslationStateApplyBaseLang || undefined,
-                });
-              }}
+              label={t('translations_filter_languages_no_base')}
+              selected={value.filterTranslationLanguage === undefined}
+              onClick={() => toggleFilterLanguage(undefined)}
+              exclusive
             />
+            {expanded && (
+              <>
+                <FilterItem
+                  label={t('translations_filter_languages_all')}
+                  selected={value.filterTranslationLanguage === true}
+                  onClick={() => toggleFilterLanguage(true)}
+                  exclusive
+                />
+                {selectedLanguages?.map((lang) => {
+                  return (
+                    <FilterItem
+                      key={lang.id}
+                      label={lang.name}
+                      selected={value.filterTranslationLanguage === lang.tag}
+                      onClick={() => toggleFilterLanguage(lang.tag)}
+                      exclusive
+                    />
+                  );
+                })}
+              </>
+            )}
+            <MenuItem
+              role="button"
+              onClick={() => setExpanded((value) => !value)}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              {expanded ? <ChevronUp /> : <ChevronDown />}
+            </MenuItem>
           </Box>
         </Menu>
       )}

@@ -3,18 +3,24 @@ import { FiltersType } from 'tg.component/translation/translationFilters/tools';
 import { StateType } from 'tg.constants/translationStates';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
-export type TranslationStateType = StateType | 'OUTDATED';
+export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
 
 export type FiltersInternal = {
   filterTag?: string[];
   filterNoTag?: string[];
   filterNamespace?: string[];
   filterNoNamespace?: string[];
-  filterTranslationState?: TranslationStateType[];
-  filterNoTranslationState?: TranslationStateType[];
-  filterTranslationStateApplyBaseLang?: boolean;
   filterHasScreenshot?: boolean;
   filterHasNoScreenshot?: boolean;
+
+  /* Specifies which languages will be considered when filtering by translation state
+   *  - undefined = all but base
+   *  - true = all
+   *  - string = one language tag
+   */
+  filterTranslationLanguage?: true | string;
+  filterTranslationState?: TranslationStateType[];
+  filterNoTranslationState?: TranslationStateType[];
 };
 
 export type AddParams =
@@ -189,12 +195,24 @@ export function useTranslationFiltersService({
   if (filters.filterTranslationState?.length && selectedLanguages?.length) {
     selectedLanguages
       .filter((tag) => {
-        return filters.filterTranslationStateApplyBaseLang || tag !== baseLang;
+        switch (filters.filterTranslationLanguage) {
+          case undefined:
+            return tag !== baseLang;
+          case true:
+            return true;
+          default:
+            return tag === filters.filterTranslationLanguage;
+        }
       })
       .forEach((tag) => {
         filters.filterTranslationState?.forEach((state) => {
           if (state === 'OUTDATED') {
             filtersQuery.filterOutdatedLanguage = add(
+              filtersQuery.filterOutdatedLanguage,
+              tag
+            );
+          } else if (state === 'AUTO_TRANSLATED') {
+            filtersQuery.filterAutoTranslatedInLang = add(
               filtersQuery.filterOutdatedLanguage,
               tag
             );

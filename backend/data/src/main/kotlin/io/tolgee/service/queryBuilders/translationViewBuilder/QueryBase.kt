@@ -45,6 +45,7 @@ class QueryBase<T>(
   private val authenticationFacade: AuthenticationFacade,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
+  val translationConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
   val keyNameExpression: Path<String> = root.get(Key_.name)
   val keyCreatedAtExpression: Path<Date> = root.get(Key_.createdAt)
@@ -90,12 +91,15 @@ class QueryBase<T>(
       translationsTextFields.add(translationTextField)
 
       val translationStateField = addTranslationStateField(translation, language)
-      queryTranslationFiltering.apply(language, translationTextField, translationStateField)
 
       val outdatedField = addTranslationOutdatedField(translation, language)
       outdatedFieldMap[language.tag] = outdatedField
 
-      addNotFilteringTranslationFields(language, translation)
+      val autoTranslatedField = addAutoTranslatedField(translation, language)
+      queryTranslationFiltering.apply(language, translationTextField, translationStateField, autoTranslatedField)
+
+      this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
+
       addComments(translation, language)
     }
 
@@ -109,6 +113,12 @@ class QueryBase<T>(
     val translationOutdated = translation.get(Translation_.outdated)
     this.querySelection[language to TranslationView::outdated] = translationOutdated
     return translationOutdated
+  }
+
+  private fun addAutoTranslatedField(translation: ListJoin<Key, Translation>, language: LanguageDto): Path<Boolean> {
+    val autoTranslated = translation.get(Translation_.auto)
+    this.querySelection[language to TranslationView::auto] = autoTranslated
+    return autoTranslated
   }
 
   private fun addComments(
@@ -171,16 +181,6 @@ class QueryBase<T>(
     val keyScreenshotReference = subQueryRoot.join(Key_.keyScreenshotReferences)
     subquery.where(cb.equal(subQueryRoot.get(Key_.id), this.root.get(Key_.id)))
     return subquery.select(keyScreenshotReference.get(KeyScreenshotReference_.screenshot).get(Screenshot_.id))
-  }
-
-  private fun addNotFilteringTranslationFields(
-    language: LanguageDto,
-    translation: ListJoin<Key, Translation>,
-  ) {
-    if (!isKeyIdsQuery) {
-      this.querySelection[language to TranslationView::auto] = translation.get(Translation_.auto)
-      this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
-    }
   }
 
   private fun addNamespace() {
