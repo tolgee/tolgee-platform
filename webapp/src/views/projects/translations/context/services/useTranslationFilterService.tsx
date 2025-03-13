@@ -213,7 +213,7 @@ export function useTranslationFiltersService({
             );
           } else if (state === 'AUTO_TRANSLATED') {
             filtersQuery.filterAutoTranslatedInLang = add(
-              filtersQuery.filterOutdatedLanguage,
+              filtersQuery.filterAutoTranslatedInLang,
               tag
             );
           } else {
