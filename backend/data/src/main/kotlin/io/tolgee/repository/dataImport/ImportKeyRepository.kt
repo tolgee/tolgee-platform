@@ -17,7 +17,7 @@ interface ImportKeyRepository : JpaRepository<ImportKey, Long> {
         select distinct ik from ImportKey ik 
           left join fetch ik.keyMeta km
           join fetch ik.file if 
-          join fetch if.import im where im.id = :importId
+          join fetch if.importEntity im where im.id = :importId
         """,
   )
   fun findAllByImport(importId: Long): List<ImportKey>
@@ -27,6 +27,6 @@ interface ImportKeyRepository : JpaRepository<ImportKey, Long> {
   @Query("""delete from ImportKey ik where ik.id in :ids""")
   fun deleteByIdIn(ids: List<Long>)
 
-  @Query("""select iik.id from ImportKey iik join iik.file if where if.import = :import""")
+  @Query("""select iik.id from ImportKey iik join iik.file if where if.importEntity = :import""")
   fun getAllIdsByImport(import: Import): List<Long>
 }
