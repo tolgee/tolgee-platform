@@ -22,10 +22,10 @@ type Props = {
 };
 
 const states: TranslationStateType[] = [
-  'REVIEWED',
-  'TRANSLATED',
-  'AUTO_TRANSLATED',
   'UNTRANSLATED',
+  'TRANSLATED',
+  'REVIEWED',
+  'AUTO_TRANSLATED',
   'OUTDATED',
   'DISABLED',
 ];

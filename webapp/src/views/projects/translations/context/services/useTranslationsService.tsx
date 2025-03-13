@@ -306,7 +306,7 @@ export const useTranslationsService = (props: Props) => {
   const updateQuery = (q: Partial<typeof query>) => {
     refetchTranslations(() => {
       const combined = { ...query, ...q };
-      updateSelectedLanguages(combined.languages || []);
+      updateSelectedLanguages(combined.languages);
       setQuery(combined);
     });
   };

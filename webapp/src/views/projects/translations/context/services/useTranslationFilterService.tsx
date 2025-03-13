@@ -76,9 +76,10 @@ export function useTranslationFiltersService({
 
   // adjusts filters to newly incoming languages
   // so in next render it's already correct
-  function updateSelectedLanguages(newLanguages: string[]) {
+  function updateSelectedLanguages(newLanguages: string[] | undefined) {
     if (
       typeof filters.filterTranslationLanguage === 'string' &&
+      newLanguages &&
       newLanguages.includes(filters.filterTranslationLanguage)
     ) {
       setFilters({ filterTranslationLanguage: undefined });
