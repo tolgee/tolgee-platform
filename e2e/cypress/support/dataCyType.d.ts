@@ -316,6 +316,7 @@ declare namespace DataCy {
         "invitation-dialog-type-email-button" |
         "invitation-dialog-type-link-button" |
         "invite-generate-button" |
+        "invoice-details-dialog" |
         "key-edit-tab-advanced" |
         "key-edit-tab-context" |
         "key-edit-tab-custom-properties" |

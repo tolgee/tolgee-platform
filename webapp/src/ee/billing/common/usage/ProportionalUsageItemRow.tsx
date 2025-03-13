@@ -2,6 +2,7 @@ import { components, operations } from 'tg.service/billingApiSchema.generated';
 import { ItemRow } from './ItemRow';
 import { useTranslate } from '@tolgee/react';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 
 export type ProportionalUsageType =
   operations['getUsageDetail']['parameters']['path']['type'];
@@ -18,13 +19,15 @@ export const ProportionalUsageItemRow = (props: {
     fetchOptions: { rawResponse: true },
   });
 
+  const organization = useOrganization();
+
   const onDownload =
     (props.invoiceId !== undefined &&
       (() => {
         downloadReport.mutate(
           {
             path: {
-              organizationId: 1,
+              organizationId: organization!.id,
               invoiceId: props.invoiceId!,
               type: props.type,
             },
