@@ -1,8 +1,7 @@
 import React from 'react';
 import { Switch, Box, Tooltip } from '@mui/material';
 import { useFormikContext } from 'formik';
-import { T } from '@tolgee/react';
-import { useTranslate } from 'tg.hooks/useTranslate';
+import { T, useTranslate } from '@tolgee/react';
 import { styled } from '@mui/material';
 
 const StyledContainer = styled(Box)`
