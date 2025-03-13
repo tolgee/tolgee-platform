@@ -86,5 +86,5 @@ data class ExportParams(
   @field:Parameter(description = SUPPORT_ARRAYS_DESCRIPTION)
   override var supportArrays: Boolean = false,
   @field:Parameter(description = ExportParamsDocs.PRESERVE_FORMAT_SPECIFIERS_DESCRIPTION)
-  override var preserveFormatSpecifiers: Boolean? = null
+  override var preserveFormatSpecifiers: Boolean? = null,
 ) : IExportParams

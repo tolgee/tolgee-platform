@@ -63,10 +63,10 @@ class AppleStringsStringsdictExporter(
 
     val converted =
       IcuToAppleMessageConvertor(
-        message = text, 
-        forceIsPlural = it.key.isPlural, 
+        message = text,
+        forceIsPlural = it.key.isPlural,
         isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-        preserveFormatSpecifiers = preserveFormatSpecifiers
+        preserveFormatSpecifiers = preserveFormatSpecifiers,
       ).convert()
 
     if (converted.isPlural()) {

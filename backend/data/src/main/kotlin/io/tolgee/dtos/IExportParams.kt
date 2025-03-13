@@ -93,7 +93,7 @@ interface IExportParams {
     description = FILE_STRUCTURE_TEMPLATE_DESCRIPTION,
   )
   var fileStructureTemplate: String?
-  
+
   @get:Schema(
     description = "When true, common format specifiers in Apple strings formats like %d, %i, %@, etc. won't be escaped",
   )

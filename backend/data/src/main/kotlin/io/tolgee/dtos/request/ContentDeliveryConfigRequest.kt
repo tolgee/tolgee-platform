@@ -71,6 +71,6 @@ class ContentDeliveryConfigRequest() : IExportParams {
   override var messageFormat: ExportMessageFormat? = null
 
   override var fileStructureTemplate: String? = null
-  
+
   override var preserveFormatSpecifiers: Boolean? = null
 }
