@@ -1,13 +1,14 @@
 package io.tolgee.component.contentDelivery.cachePurging.awsCloudFront
+
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.services.cloudfront.CloudFrontClient
 import software.amazon.awssdk.services.cloudfront.model.CreateInvalidationRequest
+import software.amazon.awssdk.services.cloudfront.model.CreateInvalidationResponse
 import software.amazon.awssdk.services.cloudfront.model.Paths
 import software.amazon.awssdk.regions.Region
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurging
 import io.tolgee.model.contentDelivery.AWSCloudFrontConfig
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
-
 
 class AWSCloudFrontContentDeliveryCachePurging(
   private val config: AWSCloudFrontConfig,
@@ -21,24 +22,43 @@ class AWSCloudFrontContentDeliveryCachePurging(
     invalidateCloudFrontCache(credentialProvider, config.distributionId, paths)
   }
 
-  private fun invalidateCloudFrontCache(credentialsProvider: StaticCredentialsProvider, distributionId: String?, pathsToInvalidate: Set<String>) {
-    val cloudFrontClient = CloudFrontClient.builder()
+  private fun createClient(credentialsProvider: StaticCredentialsProvider): CloudFrontClient {
+    return CloudFrontClient.builder()
         .region(Region.AWS_GLOBAL) // CloudFront is a global service
         .credentialsProvider(credentialsProvider)
         .build()
+  }
 
-    val paths = Paths.builder()
+  private fun buildPaths(pathsToInvalidate: Set<String>): Paths {
+    return Paths.builder()
         .quantity(pathsToInvalidate.size)
         .items(pathsToInvalidate)
         .build()
+  }
 
-    val invalidationRequest = CreateInvalidationRequest.builder()
+  private fun createInvalidationRequest(distributionId: String?, paths: Paths): CreateInvalidationRequest {
+    return CreateInvalidationRequest.builder()
         .distributionId(distributionId)
         .invalidationBatch { batch ->
             batch.paths(paths)
                 .callerReference(System.currentTimeMillis().toString()) // Unique identifier for request
         }
         .build()
+  }
 
-    cloudFrontClient.createInvalidation(invalidationRequest)}
+  private fun createInvalidation(client: CloudFrontClient, invalidationRequest: CreateInvalidationRequest): CreateInvalidationResponse {
+    return client.createInvalidation(invalidationRequest)
+  }
+  
+  private fun invalidateCloudFrontCache(credentialsProvider: StaticCredentialsProvider, distributionId: String?, pathsToInvalidate: Set<String>) {
+    val cloudFrontClient = createClient(credentialsProvider)
+
+    val paths = buildPaths(pathsToInvalidate)
+
+    val invalidationRequest = createInvalidationRequest(distributionId, paths)
+
+    createInvalidation(cloudFrontClient, invalidationRequest)
+
+    cloudFrontClient.close()
+  }
 }

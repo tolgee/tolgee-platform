@@ -1,7 +1,6 @@
 package io.tolgee.component.contentDelivery.cachePurging.awsCloudFront
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import io.tolgee.model.contentDelivery.AWSCloudFrontConfig
 
