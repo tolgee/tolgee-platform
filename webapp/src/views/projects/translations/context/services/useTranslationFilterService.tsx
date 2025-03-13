@@ -1,16 +1,20 @@
 import { useMemo } from 'react';
 import { FiltersType } from 'tg.component/translation/translationFilters/tools';
+import { StateType } from 'tg.constants/translationStates';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+
+export type TranslationStateType = StateType | 'OUTDATED';
 
 export type FiltersInternal = {
   filterTag?: string[];
   filterNoTag?: string[];
   filterNamespace?: string[];
   filterNoNamespace?: string[];
-  filterTranslationState?: string[];
-  filterNoTranslationState?: string[];
+  filterTranslationState?: TranslationStateType[];
+  filterNoTranslationState?: TranslationStateType[];
   filterTranslationStateApplyBaseLang?: boolean;
-  filterOutdated?: boolean;
+  filterHasScreenshot?: boolean;
+  filterHasNoScreenshot?: boolean;
 };
 
 export type AddParams =
@@ -18,9 +22,10 @@ export type AddParams =
   | ['filterNoTag', string]
   | ['filterNamespace', string]
   | ['filterNoNamespace', string]
-  | ['filterTranslationState', string]
-  | ['filterNoTranslationState', string]
-  | ['filterOutdated', boolean | undefined];
+  | ['filterTranslationState', TranslationStateType]
+  | ['filterNoTranslationState', TranslationStateType]
+  | ['filterHasScreenshot']
+  | ['filterHasNoScreenshot'];
 
 export type FilterActions = {
   addFilter: (...params: AddParams) => void;
@@ -32,12 +37,12 @@ export const isFilterEmpty = (filter: FiltersType) => {
   return Object.values(filter).filter(Boolean).length === 0;
 };
 
-function remove(list: string[] | undefined, value: string) {
+function remove<T extends string>(list: T[] | undefined, value: T) {
   const result = list?.filter((i) => i !== value) || [];
   return result.length ? result : undefined;
 }
 
-function add(list: string[] | undefined, value: string) {
+function add<T extends string>(list: T[] | undefined, value: T) {
   return [...(remove(list, value) || []), value];
 }
 
@@ -108,6 +113,18 @@ export function useTranslationFiltersService({
           ),
           filterTranslationState: remove(filters.filterTranslationState, value),
         });
+      case 'filterHasScreenshot':
+        return setFilters({
+          ...filters,
+          filterHasScreenshot: true,
+          filterHasNoScreenshot: undefined,
+        });
+      case 'filterHasNoScreenshot':
+        return setFilters({
+          ...filters,
+          filterHasNoScreenshot: true,
+          filterHasScreenshot: undefined,
+        });
     }
   }
 
@@ -147,6 +164,16 @@ export function useTranslationFiltersService({
             value
           ),
         });
+      case 'filterHasScreenshot':
+        return setFilters({
+          ...filters,
+          filterHasScreenshot: undefined,
+        });
+      case 'filterHasNoScreenshot':
+        return setFilters({
+          ...filters,
+          filterHasNoScreenshot: undefined,
+        });
     }
   }
 
@@ -155,33 +182,30 @@ export function useTranslationFiltersService({
     filterNoTag: filters.filterNoTag,
     filterNamespace: filters.filterNamespace,
     filterNoNamespace: filters.filterNoNamespace,
+    filterHasScreenshot: filters.filterHasScreenshot,
+    filterHasNoScreenshot: filters.filterHasNoScreenshot,
   };
 
   if (filters.filterTranslationState?.length && selectedLanguages?.length) {
-    filtersQuery.filterState = [];
     selectedLanguages
       .filter((tag) => {
         return filters.filterTranslationStateApplyBaseLang || tag !== baseLang;
       })
       .forEach((tag) => {
         filters.filterTranslationState?.forEach((state) => {
-          filtersQuery.filterState?.push(`${tag},${state}`);
+          if (state === 'OUTDATED') {
+            filtersQuery.filterOutdatedLanguage = add(
+              filtersQuery.filterOutdatedLanguage,
+              tag
+            );
+          } else {
+            filtersQuery.filterState = add(
+              filtersQuery.filterState,
+              `${tag},${state}`
+            );
+          }
         });
       });
-  }
-
-  if (filters.filterOutdated === true && selectedLanguages?.length) {
-    filtersQuery.filterOutdatedLanguage = [];
-    selectedLanguages.forEach((tag) => {
-      filtersQuery.filterOutdatedLanguage?.push(tag);
-    });
-  }
-
-  if (filters.filterOutdated === true && selectedLanguages?.length) {
-    filtersQuery.filterNotOutdatedLanguage = [];
-    selectedLanguages.forEach((tag) => {
-      filtersQuery.filterNotOutdatedLanguage?.push(tag);
-    });
   }
 
   return { filters, filtersQuery, addFilter, removeFilter, setFilters };

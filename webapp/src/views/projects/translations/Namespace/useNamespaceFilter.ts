@@ -5,7 +5,7 @@ import {
 
 export function useNamespaceFilter(namespace: string | undefined) {
   const filters = useTranslationsSelector((c) => c.filters);
-  const { setFilters } = useTranslationsActions();
+  const { addFilter, removeFilter } = useTranslationsActions();
 
   if (namespace === undefined) {
     return {
@@ -15,13 +15,12 @@ export function useNamespaceFilter(namespace: string | undefined) {
   }
 
   const isActive = filters['filterNamespace']?.includes(namespace);
-  // const rawFilter = encodeFilter({
-  //   filter: 'filterNamespace',
-  //   value: namespace,
-  // });
   const toggle = () => {
-    // const newFilters = toggleFilter(filters, [], rawFilter);
-    // setFilters(newFilters);
+    if (isActive) {
+      removeFilter('filterNamespace', namespace);
+    } else {
+      addFilter('filterNamespace', namespace);
+    }
   };
   return { isActive, toggle };
 }

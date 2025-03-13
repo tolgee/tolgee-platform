@@ -1,10 +1,10 @@
 import { Menu } from '@mui/material';
 import { FiltersType } from './tools';
-import { useTranslate } from '@tolgee/react';
-import { SubfilterTags } from './SubfilterTags';
 import { type FilterActions } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
+import { SubfilterTags } from './SubfilterTags';
 import { SubfilterNamespaces } from './SubfilterNamespaces';
 import { SubfilterTranslations } from './SubfilterTranslations';
+import { SubfilterScreenshots } from './SubfilterScreenshots';
 
 type Props = {
   value: FiltersType;
@@ -21,7 +21,6 @@ export const TranslationFiltersPopup = ({
   anchorEl,
   projectId,
 }: Props) => {
-  const { t } = useTranslate();
   return (
     <Menu
       open={true}
@@ -40,6 +39,11 @@ export const TranslationFiltersPopup = ({
         projectId={projectId}
       />
       <SubfilterTranslations
+        value={value}
+        actions={actions}
+        projectId={projectId}
+      />
+      <SubfilterScreenshots
         value={value}
         actions={actions}
         projectId={projectId}

@@ -5,10 +5,12 @@ import { Box, Divider, Menu } from '@mui/material';
 import { SubmenuItem } from 'tg.component/SubmenuItem';
 import { FilterItem } from './FilterItem';
 import {
-  FiltersInternal,
+  type FiltersInternal,
+  type TranslationStateType,
   type FilterActions,
 } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
 import { TRANSLATION_STATES } from 'tg.constants/translationStates';
+import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
 
 type Props = {
   projectId: number;
@@ -16,10 +18,16 @@ type Props = {
   actions: FilterActions;
 };
 
+const states: TranslationStateType[] = [
+  'OUTDATED',
+  ...(Object.keys(TRANSLATION_STATES) as TranslationStateType[]),
+];
+
 export const SubfilterTranslations = ({ value, actions, projectId }: Props) => {
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
+  const translateState = useStateTranslation();
 
   return (
     <>
@@ -47,11 +55,11 @@ export const SubfilterTranslations = ({ value, actions, projectId }: Props) => {
           slotProps={{ paper: { style: { minWidth: 250 } } }}
         >
           <Box display="grid">
-            {Object.entries(TRANSLATION_STATES).map(([state, params]) => {
+            {states.map((state) => {
               return (
                 <FilterItem
                   key={state}
-                  label={params.translation}
+                  label={translateState(state)}
                   selected={Boolean(
                     value.filterTranslationState?.includes(state)
                   )}
