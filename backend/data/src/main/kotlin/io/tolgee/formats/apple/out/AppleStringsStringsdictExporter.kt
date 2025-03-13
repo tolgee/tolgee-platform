@@ -11,6 +11,8 @@ class AppleStringsStringsdictExporter(
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) : FileExporter {
+  // Whether to preserve format specifiers in placeholders (like %d, %i, etc.)
+  private val preserveFormatSpecifiers = exportParams.preserveFormatSpecifiers ?: false
   private val preparedFiles = mutableMapOf<String, PreparedFile>()
 
   override fun produceFiles(): Map<String, InputStream> {
@@ -60,7 +62,12 @@ class AppleStringsStringsdictExporter(
     }
 
     val converted =
-      IcuToAppleMessageConvertor(message = text, it.key.isPlural, isProjectIcuPlaceholdersEnabled).convert()
+      IcuToAppleMessageConvertor(
+        message = text, 
+        forceIsPlural = it.key.isPlural, 
+        isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+        preserveFormatSpecifiers = preserveFormatSpecifiers
+      ).convert()
 
     if (converted.isPlural()) {
       handlePlural(it, converted.formsResult ?: return)

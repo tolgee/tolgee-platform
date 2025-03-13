@@ -284,6 +284,44 @@ class StringsStringsdictFileExporterTest {
       """.trimMargin(),
     )
   }
+  
+  @Test
+  fun `preserves integer placeholders when preserveFormatSpecifiers is enabled`() {
+    val exporter = getExporterWithIntegerPlaceholders()
+    val data = getExported(exporter)
+    
+    data.assertFile(
+      "en.lproj/Localizable.strings",
+      """
+    |"test_placeholder_i" = "placeholder i: %i";
+    |
+    |"test_placeholder_d" = "placeholder d: %d";
+    |
+    |"test_combined" = "This combines %d and %i with 100%% certainty";
+    |
+    |
+      """.trimMargin(),
+    )
+  }
+  
+  @Test
+  fun `escapes integer placeholders when preserveFormatSpecifiers is disabled`() {
+    val exporter = getExporterWithIntegerPlaceholders(preserveFormatSpecifiers = false)
+    val data = getExported(exporter)
+    
+    data.assertFile(
+      "en.lproj/Localizable.strings",
+      """
+    |"test_placeholder_i" = "placeholder i: %%i";
+    |
+    |"test_placeholder_d" = "placeholder d: %%d";
+    |
+    |"test_combined" = "This combines %%d and %%i with 100%% certainty";
+    |
+    |
+      """.trimMargin(),
+    )
+  }
 
   private fun getIcuPlaceholdersDisabledExporter(): AppleStringsStringsdictExporter {
     val built =
@@ -389,4 +427,38 @@ class StringsStringsdictFileExporterTest {
   }
 
   private fun getExportParams() = ExportParams().also { it.format = ExportFormat.APPLE_STRINGS_STRINGSDICT }
+  
+  private fun getExporterWithIntegerPlaceholders(preserveFormatSpecifiers: Boolean = true): AppleStringsStringsdictExporter {
+    val translations = listOf(
+      ExportTranslationView(
+        1,
+        "placeholder i: %i",
+        TranslationState.TRANSLATED,
+        ExportKeyView(1, "test_placeholder_i"),
+        "en",
+      ),
+      ExportTranslationView(
+        2,
+        "placeholder d: %d",
+        TranslationState.TRANSLATED,
+        ExportKeyView(2, "test_placeholder_d"),
+        "en",
+      ),
+      ExportTranslationView(
+        3,
+        "This combines %d and %i with 100% certainty",
+        TranslationState.TRANSLATED,
+        ExportKeyView(3, "test_combined"),
+        "en",
+      ),
+    )
+    
+    val params = getExportParams()
+    params.preserveFormatSpecifiers = preserveFormatSpecifiers
+    
+    return AppleStringsStringsdictExporter(
+      translations = translations,
+      exportParams = params,
+    )
+  }
 }

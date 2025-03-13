@@ -129,4 +129,7 @@ class ContentDeliveryConfig(
 
   @ActivityLoggedProp
   override var fileStructureTemplate: String? = null
+  
+  @ActivityLoggedProp
+  override var preserveFormatSpecifiers: Boolean? = null
 }

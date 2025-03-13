@@ -66,4 +66,9 @@ The `{snakeLanguageTag}` placeholder is the same as `{languageTag}` but in snake
 The Android specific `{androidLanguageTag}` placeholder is the same as `{languageTag}` 
 but in Android format. (e.g., en-rUS)
 """
+
+  const val PRESERVE_FORMAT_SPECIFIERS_DESCRIPTION = """When true, common format specifiers in Apple strings formats like %d, %i, %@, etc. won't be escaped.
+
+This is useful for keeping integer placeholders (%d, %i) working correctly in Apple strings format.
+By default, all percent signs are escaped as %%, which can cause issues with certain placeholders."""
 }

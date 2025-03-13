@@ -8,10 +8,11 @@ class IcuToAppleMessageConvertor(
   private val message: String,
   private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val preserveFormatSpecifiers: Boolean = false,
 ) {
   fun convert(): PossiblePluralConversionResult {
     return MessageConvertorFactory(message, forceIsPlural, isProjectIcuPlaceholdersEnabled) {
-      IcuToApplePlaceholderConvertor()
+      IcuToApplePlaceholderConvertor(preserveFormatSpecifiers)
     }.create().convert()
   }
 }
