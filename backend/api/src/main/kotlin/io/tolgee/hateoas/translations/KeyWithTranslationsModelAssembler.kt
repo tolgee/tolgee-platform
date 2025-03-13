@@ -20,6 +20,7 @@ class KeyWithTranslationsModelAssembler(
   override fun toModel(view: KeyWithTranslationsView) =
     KeyWithTranslationsModel(
       keyId = view.keyId,
+      createdAt = view.createdAt.time,
       keyName = view.keyName,
       keyNamespaceId = view.keyNamespaceId,
       keyIsPlural = view.keyIsPlural,

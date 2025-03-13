@@ -8,7 +8,14 @@ import {
   LayoutGrid02,
   LayoutLeft,
 } from '@untitled-ui/icons-react';
-import { Badge, Button, ButtonGroup, IconButton, styled } from '@mui/material';
+import {
+  Badge,
+  Button,
+  ButtonGroup,
+  IconButton,
+  styled,
+  Tooltip,
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -24,6 +31,8 @@ import {
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
+import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
+import { Sort } from 'tg.component/CustomIcons';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -87,15 +96,20 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
+  const order = useTranslationsSelector((v) => v.order);
   const { t } = useTranslate();
 
-  const { setSearch, changeView, selectLanguages } = useTranslationsActions();
+  const { setSearch, changeView, selectLanguages, setOrder } =
+    useTranslationsActions();
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const [anchorFiltersEl, setAnchorFiltersEl] =
     useState<HTMLButtonElement | null>(null);
   const [anchorLanguagesEl, setAnchorLanguagesEl] =
     useState<HTMLButtonElement | null>(null);
+  const [anchorSortEl, setAnchorSortEl] = useState<HTMLButtonElement | null>(
+    null
+  );
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -173,6 +187,29 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               onClose={() => setAnchorFiltersEl(null)}
               filtersContent={filtersContent}
               onChange={setFilters}
+            />
+            <Tooltip title={t('translation_controls_sort_tooltip')}>
+              <Badge
+                color="primary"
+                variant="dot"
+                badgeContent={order === 'keyName' ? 0 : 1}
+                overlap="circular"
+              >
+                <StyledIconButton
+                  size="small"
+                  onClick={(e) => setAnchorSortEl(e.currentTarget)}
+                  data-cy="translation-controls-sort"
+                >
+                  <Sort />
+                </StyledIconButton>
+              </Badge>
+            </Tooltip>
+
+            <TranslationSortMenu
+              anchorEl={anchorSortEl}
+              onClose={() => setAnchorSortEl(null)}
+              onChange={setOrder}
+              value={order}
             />
           </StyledSpaced>
 

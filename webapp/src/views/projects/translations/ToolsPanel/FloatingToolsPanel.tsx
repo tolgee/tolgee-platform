@@ -34,7 +34,7 @@ export const FloatingToolsPanel = ({ width }: Props) => {
   const languages = useTranslationsSelector((c) => c.languages);
   const [fixedTopDistance, setFixedTopDistance] = useState(0);
   const needsNamespaceMargin = useTranslationsSelector(
-    (c) => Boolean(c.translations?.[0].keyNamespace) && c.view === 'LIST'
+    (c) => Boolean(c.translations?.[0]?.keyNamespace) && c.view === 'LIST'
   );
 
   useEffect(() => {

@@ -84,6 +84,9 @@ export const useTranslationsService = (props: Props) => {
   const [filters, _setFilters] = useUrlSearchState('filters', {
     defaultVal: JSON.stringify({}),
   });
+  const [order, setOrder] = useUrlSearchState('order', {
+    defaultVal: 'keyName',
+  });
   const parsedFilters = useMemo(
     () => (filters ? JSON.parse(filters as string) : {}) as FiltersType,
     [filters]
@@ -106,7 +109,6 @@ export const useTranslationsService = (props: Props) => {
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: props.pageSize || PAGE_SIZE,
-    sort: ['keyNamespace', 'keyName'],
     languages: props.initialLangs || [],
   });
 
@@ -150,6 +152,7 @@ export const useTranslationsService = (props: Props) => {
     filterTaskNumber:
       props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
+    sort: ['keyNamespace', order, 'keyId'],
   };
 
   const translations = useApiInfiniteQuery({
@@ -398,6 +401,7 @@ export const useTranslationsService = (props: Props) => {
     hasNextPage: translations.hasNextPage,
     query,
     filters: parsedFilters,
+    order,
     fetchNextPage: translations.fetchNextPage,
     selectedLanguages,
     translationsLanguages,
@@ -413,6 +417,7 @@ export const useTranslationsService = (props: Props) => {
     setLanguages,
     setUrlSearch,
     setFilters,
+    setOrder,
     updateTranslationKeys,
     updateTranslation,
     insertAsFirst,
