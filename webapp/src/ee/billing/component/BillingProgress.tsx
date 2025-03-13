@@ -40,7 +40,7 @@ const StyledExtra = styled(Box)`
   bottom: 0px;
   background: ${({ theme }) =>
     theme.palette.tokens._components.progressbar.pricing.overForbidden};
-  &.canGoOver {
+  &.isPayAsYouGo {
     background: ${({ theme }) =>
       theme.palette.tokens._components.progressbar.pricing.over};
   }
@@ -176,7 +176,7 @@ export const BillingProgress: React.FC<Props> = ({
         {Boolean(extra) && (
           <StyledExtra
             width={`${extraProgressLength}%`}
-            className={clsx({ isPayAsYouGo: isPayAsYouGo })}
+            className={clsx({ isPayAsYouGo })}
           />
         )}
       </StyledContainer>
