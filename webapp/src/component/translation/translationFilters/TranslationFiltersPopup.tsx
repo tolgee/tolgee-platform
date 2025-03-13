@@ -28,7 +28,9 @@ export const TranslationFiltersPopup = ({
       anchorEl={anchorEl}
       onClose={() => onClose()}
       slotProps={{
-        paper: { style: { minWidth: anchorEl.offsetWidth, maxWidth: 'unset' } },
+        paper: {
+          style: { minWidth: anchorEl.offsetWidth, maxWidth: 'unset' },
+        },
       }}
     >
       <SubfilterTags value={value} actions={actions} projectId={projectId} />

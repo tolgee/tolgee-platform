@@ -10,6 +10,7 @@ export type FiltersInternal = {
   filterTranslationState?: string[];
   filterNoTranslationState?: string[];
   filterTranslationStateApplyBaseLang?: boolean;
+  filterOutdated?: boolean;
 };
 
 export type AddParams =
@@ -18,7 +19,8 @@ export type AddParams =
   | ['filterNamespace', string]
   | ['filterNoNamespace', string]
   | ['filterTranslationState', string]
-  | ['filterNoTranslationState', string];
+  | ['filterNoTranslationState', string]
+  | ['filterOutdated', boolean | undefined];
 
 export type FilterActions = {
   addFilter: (...params: AddParams) => void;
@@ -166,6 +168,20 @@ export function useTranslationFiltersService({
           filtersQuery.filterState?.push(`${tag},${state}`);
         });
       });
+  }
+
+  if (filters.filterOutdated === true && selectedLanguages?.length) {
+    filtersQuery.filterOutdatedLanguage = [];
+    selectedLanguages.forEach((tag) => {
+      filtersQuery.filterOutdatedLanguage?.push(tag);
+    });
+  }
+
+  if (filters.filterOutdated === true && selectedLanguages?.length) {
+    filtersQuery.filterNotOutdatedLanguage = [];
+    selectedLanguages.forEach((tag) => {
+      filtersQuery.filterNotOutdatedLanguage?.push(tag);
+    });
   }
 
   return { filters, filtersQuery, addFilter, removeFilter, setFilters };

@@ -132,6 +132,7 @@ const getTheme = (mode: PaletteMode) => {
       info: fromFigmaColor(tPalette.info),
       warning: fromFigmaColor(tPalette.warning),
       error: fromFigmaColor(tPalette.error),
+      contrast: createColor(c.text),
       common: {
         white: c.white,
       },
@@ -294,6 +295,12 @@ const getTheme = (mode: PaletteMode) => {
     },
   });
 };
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    contrast: true;
+  }
+}
 
 const ThemeContext = React.createContext({
   mode: undefined as PaletteMode | undefined,

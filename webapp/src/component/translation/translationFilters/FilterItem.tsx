@@ -72,7 +72,7 @@ export const FilterItem = React.forwardRef(function FilterItem(
           variant="contained"
           size="small"
           className={clsx({ exclude: !excluded })}
-          color={excluded ? 'default' : 'inherit'}
+          color={excluded ? 'contrast' : 'inherit'}
           onMouseDown={(e) => {
             e.stopPropagation();
           }}
