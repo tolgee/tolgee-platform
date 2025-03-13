@@ -1,3 +1,10 @@
+# [3.110.0](https://github.com/tolgee/tolgee-platform/compare/v3.109.3...v3.110.0) (2025-03-13)
+
+
+### Features
+
+* ability to sort keys ([#2978](https://github.com/tolgee/tolgee-platform/issues/2978)) ([9182bec](https://github.com/tolgee/tolgee-platform/commit/9182bece54b0e62d1fd640dc2990f3e4f4698a14))
+
 ## [3.109.3](https://github.com/tolgee/tolgee-platform/compare/v3.109.2...v3.109.3) (2025-03-12)
 
 
