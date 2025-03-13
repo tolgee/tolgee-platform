@@ -54,8 +54,8 @@ describe('Translations sorting', () => {
       .contains('Newest keys on top')
       .click();
     waitForGlobalLoading();
-    cy.gcy('translations-key-name').eq(0).should('contain', 'z.first.created');
-    cy.gcy('translations-key-name').eq(1).should('contain', 'b.second.created');
+    cy.gcy('translations-key-name').eq(0).should('contain', 'a.last.created');
+    cy.gcy('translations-key-name').eq(1).should('contain', 'c.third.created');
   });
 
   it('sort from oldest keys', () => {
@@ -65,7 +65,7 @@ describe('Translations sorting', () => {
       .contains('Oldest keys on top')
       .click();
     waitForGlobalLoading();
-    cy.gcy('translations-key-name').eq(0).should('contain', 'a.last.created');
-    cy.gcy('translations-key-name').eq(1).should('contain', 'c.third.created');
+    cy.gcy('translations-key-name').eq(0).should('contain', 'z.first.created');
+    cy.gcy('translations-key-name').eq(1).should('contain', 'b.second.created');
   });
 });
