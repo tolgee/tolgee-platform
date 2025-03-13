@@ -51,13 +51,23 @@ export const PlanMetric: React.FC<Props> = ({
 }) => {
   const formatNumber = useNumberFormatter();
   const showProgress = progress.included !== undefined;
-  const valueClass = isPayAsYouGo
-    ? progress?.included && progress.used > progress.included
-      ? 'over'
-      : 'sufficient'
-    : progress?.progress ?? 0 > BILLING_CRITICAL_FRACTION
-    ? 'low'
-    : 'sufficient';
+
+  function getValueClass() {
+    if (isPayAsYouGo) {
+      if (progress?.included && progress.used > progress.included) {
+        return 'over';
+      }
+      return 'sufficient';
+    }
+
+    if (progress.progress > BILLING_CRITICAL_FRACTION) {
+      return 'low';
+    }
+
+    return 'sufficient';
+  }
+
+  const valueClass = getValueClass();
 
   return (
     <>
