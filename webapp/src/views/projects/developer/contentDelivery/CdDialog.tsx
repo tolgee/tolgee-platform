@@ -28,6 +28,7 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { getFormatById } from '../../export/components/formatGroups';
 import { SupportArraysSelector } from '../../export/components/SupportArraysSelector';
 import { MessageFormatSelector } from '../../export/components/MessageFormatSelector';
+import { PreserveFormatSpecifiersSelector } from '../../export/components/PreserveFormatSpecifiersSelector';
 import {
   ContentDeliveryConfigModel,
   getCdEditInitialValues,
@@ -167,6 +168,9 @@ export const CdDialog = ({ onClose, data }: Props) => {
                   <StyledOptions>
                     {getFormatById(values.format).showSupportArrays && (
                       <SupportArraysSelector />
+                    )}
+                    {getFormatById(values.format).showPreserveFormatSpecifiers && (
+                      <PreserveFormatSpecifiersSelector />
                     )}
                     <CdAutoPublish />
                     <CdPruneBeforePublish />
