@@ -6,7 +6,6 @@ interface AWSCloudFrontConfig : ContentDeliveryPurgingConfig {
   val distributionId: String?
   val contentRoot: String?
 
-
   override val contentDeliveryCachePurgingType: ContentDeliveryCachePurgingType
     get() = ContentDeliveryCachePurgingType.AWS_CLOUD_FRONT
 
