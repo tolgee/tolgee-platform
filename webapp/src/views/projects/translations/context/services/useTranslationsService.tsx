@@ -120,11 +120,17 @@ export const useTranslationsService = (props: Props) => {
   //     ? [props.keyNamespace]
   //     : parsedFilters.filterNamespace;
 
-  const { filters, filtersQuery, addFilter, removeFilter, setFilters } =
-    useTranslationFiltersService({
-      selectedLanguages: languages,
-      baseLang: props.baseLang,
-    });
+  const {
+    filters,
+    filtersQuery,
+    addFilter,
+    removeFilter,
+    setFilters,
+    updateSelectedLanguages,
+  } = useTranslationFiltersService({
+    selectedLanguages: query.languages,
+    baseLang: props.baseLang,
+  });
 
   const requestQuery: TranslationsQueryType = {
     ...query,
@@ -299,7 +305,9 @@ export const useTranslationsService = (props: Props) => {
 
   const updateQuery = (q: Partial<typeof query>) => {
     refetchTranslations(() => {
-      setQuery({ ...query, ...q });
+      const combined = { ...query, ...q };
+      updateSelectedLanguages(combined.languages || []);
+      setQuery(combined);
     });
   };
 

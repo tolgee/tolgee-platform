@@ -74,6 +74,17 @@ export function useTranslationFiltersService({
     _setFilters(JSON.stringify(value));
   }
 
+  // adjusts filters to newly incoming languages
+  // so in next render it's already correct
+  function updateSelectedLanguages(newLanguages: string[]) {
+    if (
+      typeof filters.filterTranslationLanguage === 'string' &&
+      newLanguages.includes(filters.filterTranslationLanguage)
+    ) {
+      setFilters({ filterTranslationLanguage: undefined });
+    }
+  }
+
   function addFilter(...params: AddParams) {
     const [type, value] = params;
     switch (type) {
@@ -226,5 +237,12 @@ export function useTranslationFiltersService({
       });
   }
 
-  return { filters, filtersQuery, addFilter, removeFilter, setFilters };
+  return {
+    filters,
+    filtersQuery,
+    updateSelectedLanguages,
+    addFilter,
+    removeFilter,
+    setFilters,
+  };
 }
