@@ -13,7 +13,6 @@ import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Selection
 import org.springframework.data.domain.Sort
-import java.time.Instant
 
 class CursorPredicateProvider(
   private val cb: CriteriaBuilder,
@@ -29,8 +28,9 @@ class CursorPredicateProvider(
     var result: Predicate? = null
     cursor?.entries?.reversed()?.forEach { (property, value) ->
       val isUnique = property === KeyWithTranslationsView::keyId.name
-      val selected = selection[property]
-        ?: throw BadRequestException(Message.CANNOT_SORT_BY_THIS_COLUMN)
+      val selected =
+        selection[property]
+          ?: throw BadRequestException(Message.CANNOT_SORT_BY_THIS_COLUMN)
 
       // We need the runtime type of the column
       val colType = selected.javaType
@@ -68,7 +68,10 @@ class CursorPredicateProvider(
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun parseValue(javaType: Class<*>, raw: String?): Comparable<Any>? {
+  private fun parseValue(
+    javaType: Class<*>,
+    raw: String?,
+  ): Comparable<Any>? {
     if (raw == null) return null
 
     return when (javaType) {

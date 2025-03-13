@@ -10,7 +10,7 @@ import jakarta.persistence.criteria.Root
 
 fun <Y : Comparable<Y>> CriteriaBuilder.greaterThanNullable(
   expression: Expression<out Y>,
-  value: Y?
+  value: Y?,
 ): Predicate {
   return if (value == null) {
     expression.isNotNull
@@ -21,7 +21,7 @@ fun <Y : Comparable<Y>> CriteriaBuilder.greaterThanNullable(
 
 fun <Y : Comparable<Y>> CriteriaBuilder.lessThanNullable(
   expression: Expression<out Y>,
-  value: Y?
+  value: Y?,
 ): Predicate {
   return if (value == null) {
     this.isTrue(this.literal(false))
@@ -32,7 +32,7 @@ fun <Y : Comparable<Y>> CriteriaBuilder.lessThanNullable(
 
 fun <Y : Comparable<Y>> CriteriaBuilder.greaterThanOrEqualToNullable(
   expression: Expression<out Y>,
-  value: Y?
+  value: Y?,
 ): Predicate {
   return if (value == null) {
     this.isTrue(this.literal(true))
@@ -43,7 +43,7 @@ fun <Y : Comparable<Y>> CriteriaBuilder.greaterThanOrEqualToNullable(
 
 fun <Y : Comparable<Y>> CriteriaBuilder.lessThanOrEqualToNullable(
   expression: Expression<out Y>,
-  value: Y?
+  value: Y?,
 ): Predicate {
   return if (value == null) {
     this.isNull(expression)
@@ -54,7 +54,7 @@ fun <Y : Comparable<Y>> CriteriaBuilder.lessThanOrEqualToNullable(
 
 fun <Y> CriteriaBuilder.equalNullable(
   expression: Expression<out Y>,
-  value: Y?
+  value: Y?,
 ): Predicate {
   return if (value == null) {
     this.isNull(expression)
