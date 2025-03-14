@@ -18,8 +18,13 @@ class AWSCloudFrontContentDeliveryCachePurging(
     contentDeliveryConfig: ContentDeliveryConfig,
     paths: Set<String>,
   ) {
+    var contentRoot = config.contentRoot?.removeSuffix("/") ?: ""
+    if (!contentRoot.startsWith("/")) {
+      contentRoot = "/$contentRoot"
+    }
+    val contentPaths = paths.map { "$contentRoot/${contentDeliveryConfig.slug}/$it" }.toSet()
     val credentialProvider = AWSCredentialProvider.get(config)
-    invalidateCloudFrontCache(credentialProvider, config.distributionId, paths)
+    invalidateCloudFrontCache(credentialProvider, config.distributionId, contentPaths)
   }
 
   private fun createClient(credentialsProvider: StaticCredentialsProvider): CloudFrontClient {
