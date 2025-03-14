@@ -45,6 +45,12 @@ class QueryTranslationFiltering(
     }
   }
 
+  fun apply(language: LanguageDto, commentsExpression: Expression<Long>) {
+    if (params.filterUnresolvedCommentsInLang?.contains(language.tag) == true) {
+      // queryBase.havingConditions.add(cb.greaterThan(commentsExpression, cb.literal(0L)))
+    }
+  }
+
   fun apply(languageSourceChangeMap: MutableMap<String, Expression<Boolean>>) {
     val conditions =
       (

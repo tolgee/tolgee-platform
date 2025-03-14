@@ -131,4 +131,14 @@ To filter default namespace, set to empty string.
     description = "Filter task keys which are `done`",
   )
   var filterTaskKeysDone: Boolean? = null
+
+  @field:Parameter(
+    description = "Filter keys with unresolved comments in lang",
+  )
+  var filterUnresolvedCommentsInLang: List<String>? = null
+
+  @field:Parameter(
+    description = "Filter keys without unresolved comments in lang",
+  )
+  var filterNoUnresolvedCommentsInLang: List<String>? = null
 }

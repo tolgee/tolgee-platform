@@ -22,15 +22,7 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
-import jakarta.persistence.criteria.CriteriaBuilder
-import jakarta.persistence.criteria.CriteriaQuery
-import jakarta.persistence.criteria.Expression
-import jakarta.persistence.criteria.JoinType
-import jakarta.persistence.criteria.ListJoin
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Predicate
-import jakarta.persistence.criteria.Root
-import jakarta.persistence.criteria.Subquery
+import jakarta.persistence.criteria.*
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -40,7 +32,6 @@ class QueryBase<T>(
   val query: CriteriaQuery<T>,
   private val languages: Set<LanguageDto>,
   params: TranslationFilters,
-  private var isKeyIdsQuery: Boolean = false,
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
 ) {
@@ -94,13 +85,15 @@ class QueryBase<T>(
 
       val outdatedField = addTranslationOutdatedField(translation, language)
       outdatedFieldMap[language.tag] = outdatedField
-
+      
       val autoTranslatedField = addAutoTranslatedField(translation, language)
       queryTranslationFiltering.apply(language, translationTextField, translationStateField, autoTranslatedField)
-
+      
       this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
-
       addComments(translation, language)
+      val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
+
+      queryTranslationFiltering.apply(language, unresolvedCommentsExpression)
     }
 
     queryTranslationFiltering.apply(outdatedFieldMap)
@@ -131,7 +124,12 @@ class QueryBase<T>(
     val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
     val commentsExpression = cb.countDistinct(commentsJoin)
     this.querySelection[language to TranslationView::commentCount] = commentsExpression
+  }
 
+  private fun addUnresolvedComments(
+    translation: ListJoin<Key, Translation>,
+    language: LanguageDto,
+  ): Expression<Long> {
     val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
     unresolvedCommentsJoin.on(
       cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION),
@@ -139,6 +137,7 @@ class QueryBase<T>(
 
     val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)
     this.querySelection[language to TranslationView::unresolvedCommentCount] = unresolvedCommentsExpression
+    return unresolvedCommentsExpression
   }
 
   private fun addTranslationStateField(

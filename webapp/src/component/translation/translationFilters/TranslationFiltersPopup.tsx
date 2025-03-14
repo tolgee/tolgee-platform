@@ -5,6 +5,7 @@ import { SubfilterTags } from './SubfilterTags';
 import { SubfilterNamespaces } from './SubfilterNamespaces';
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
+import { SubfilterComments } from './SubfilterComments';
 
 type Props = {
   value: FiltersType;
@@ -47,6 +48,11 @@ export const TranslationFiltersPopup = ({
         selectedLanguages={selectedLanguages}
       />
       <SubfilterScreenshots
+        value={value}
+        actions={actions}
+        projectId={projectId}
+      />
+      <SubfilterComments
         value={value}
         actions={actions}
         projectId={projectId}

@@ -12406,6 +12406,10 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterUnresolvedCommentsInLang?: string[];
+        /** Filter keys without unresolved comments in lang */
+        filterNoUnresolvedCommentsInLang?: string[];
       };
       path: {
         projectId: number;
@@ -15988,6 +15992,10 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterUnresolvedCommentsInLang?: string[];
+        /** Filter keys without unresolved comments in lang */
+        filterNoUnresolvedCommentsInLang?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -16267,6 +16275,10 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterUnresolvedCommentsInLang?: string[];
+        /** Filter keys without unresolved comments in lang */
+        filterNoUnresolvedCommentsInLang?: string[];
       };
       path: {
         projectId: number;

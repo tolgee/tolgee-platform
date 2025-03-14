@@ -15,6 +15,7 @@ import io.tolgee.model.task.TaskKey_
 import io.tolgee.model.task.Task_
 import io.tolgee.model.temp.UnsuccessfulJobKey
 import io.tolgee.model.temp.UnsuccessfulJobKey_
+import io.tolgee.model.views.TranslationView
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.JoinType

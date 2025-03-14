@@ -12,6 +12,7 @@ export type FiltersInternal = {
   filterNoNamespace?: string[];
   filterHasScreenshot?: boolean;
   filterHasNoScreenshot?: boolean;
+  filterUnresolvedComments?: boolean;
 
   /* Specifies which languages will be considered when filtering by translation state
    *  - undefined = all but base
@@ -20,7 +21,6 @@ export type FiltersInternal = {
    */
   filterTranslationLanguage?: true | string;
   filterTranslationState?: TranslationStateType[];
-  filterNoTranslationState?: TranslationStateType[];
 };
 
 export type AddParams =
@@ -29,7 +29,6 @@ export type AddParams =
   | ['filterNamespace', string]
   | ['filterNoNamespace', string]
   | ['filterTranslationState', TranslationStateType]
-  | ['filterNoTranslationState', TranslationStateType]
   | ['filterHasScreenshot']
   | ['filterHasNoScreenshot'];
 
@@ -117,19 +116,6 @@ export function useTranslationFiltersService({
         return setFilters({
           ...filters,
           filterTranslationState: add(filters.filterTranslationState, value),
-          filterNoTranslationState: remove(
-            filters.filterNoTranslationState,
-            value
-          ),
-        });
-      case 'filterNoTranslationState':
-        return setFilters({
-          ...filters,
-          filterNoTranslationState: add(
-            filters.filterNoTranslationState,
-            value
-          ),
-          filterTranslationState: remove(filters.filterTranslationState, value),
         });
       case 'filterHasScreenshot':
         return setFilters({
@@ -174,14 +160,6 @@ export function useTranslationFiltersService({
           ...filters,
           filterTranslationState: remove(filters.filterTranslationState, value),
         });
-      case 'filterNoTranslationState':
-        return setFilters({
-          ...filters,
-          filterNoTranslationState: remove(
-            filters.filterNoTranslationState,
-            value
-          ),
-        });
       case 'filterHasScreenshot':
         return setFilters({
           ...filters,
@@ -204,7 +182,7 @@ export function useTranslationFiltersService({
     filterHasNoScreenshot: filters.filterHasNoScreenshot,
   };
 
-  if (filters.filterTranslationState?.length && selectedLanguages?.length) {
+  if (selectedLanguages?.length) {
     selectedLanguages
       .filter((tag) => {
         switch (filters.filterTranslationLanguage) {
@@ -217,6 +195,12 @@ export function useTranslationFiltersService({
         }
       })
       .forEach((tag) => {
+        if (filters.filterUnresolvedComments) {
+          filtersQuery.filterUnresolvedCommentsInLang = add(
+            filtersQuery.filterUnresolvedCommentsInLang,
+            tag
+          );
+        }
         filters.filterTranslationState?.forEach((state) => {
           if (state === 'OUTDATED') {
             filtersQuery.filterOutdatedLanguage = add(

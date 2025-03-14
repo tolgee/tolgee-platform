@@ -149,8 +149,5 @@ export const SubfilterTranslations = ({
 };
 
 export function getTranslationFiltersLength(value: FiltersInternal) {
-  return (
-    (value.filterTranslationState?.length ?? 0) +
-    (value.filterNoTranslationState?.length ?? 0)
-  );
+  return value.filterTranslationState?.length ?? 0;
 }
