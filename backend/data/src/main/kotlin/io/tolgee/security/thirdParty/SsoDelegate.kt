@@ -1,4 +1,4 @@
-package io.tolgee.security.service.thirdParty
+package io.tolgee.security.thirdParty
 
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.enums.ThirdPartyAuthType

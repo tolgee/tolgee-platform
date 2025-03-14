@@ -7,7 +7,6 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -16,6 +15,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import kotlin.collections.get
 
 @Component
 class GoogleOAuthDelegate(

@@ -24,7 +24,7 @@ import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
-import io.tolgee.security.service.thirdParty.SsoDelegate
+import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService

@@ -1,4 +1,4 @@
-package io.tolgee.security.service.thirdParty
+package io.tolgee.security.thirdParty
 
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.payload.JwtAuthenticationResponse

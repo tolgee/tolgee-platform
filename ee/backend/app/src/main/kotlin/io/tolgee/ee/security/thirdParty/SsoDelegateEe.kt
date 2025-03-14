@@ -17,7 +17,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.security.service.thirdParty.SsoDelegate
+import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.security.thirdParty.ThirdPartyUserHandler
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails

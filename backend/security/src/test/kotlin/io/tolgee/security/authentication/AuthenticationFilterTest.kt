@@ -29,7 +29,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
-import io.tolgee.security.service.thirdParty.SsoDelegate
+import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService

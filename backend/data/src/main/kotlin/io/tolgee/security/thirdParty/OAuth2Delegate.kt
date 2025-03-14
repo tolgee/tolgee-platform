@@ -7,7 +7,6 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
 import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
 import org.slf4j.LoggerFactory
@@ -21,6 +20,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import kotlin.collections.get
 
 @Component
 class OAuth2Delegate(
