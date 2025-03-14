@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Autocomplete, Box, FormControl } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
@@ -8,6 +8,8 @@ import {
   StyledInput,
   StyledInputWrapper,
 } from 'tg.component/searchSelect/SearchStyled';
+
+const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
 function PopperComponent(props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,13 +27,16 @@ type Props<T extends { id: React.Key }> = {
   open: boolean;
   onClose?: () => void;
   anchorEl?: HTMLElement;
-  items: T[];
+  items: T[] | undefined;
   displaySearch?: boolean;
   searchPlaceholder?: string;
+  search?: string;
+  onSearch?: (value: string) => void;
   title?: string;
   minWidth?: number;
   maxWidth?: number;
-  compareFunction: (prompt: string, item: T) => boolean;
+  onGetMoreData?: () => void;
+  compareFunction?: (prompt: string, item: T) => boolean;
   renderOption: (
     props: React.HTMLAttributes<HTMLLIElement> & {
       key: any;
@@ -39,6 +44,7 @@ type Props<T extends { id: React.Key }> = {
     option: T
   ) => React.ReactNode;
   getOptionLabel: (item: T) => string;
+  ListboxProps?: React.HTMLAttributes<HTMLUListElement>;
 };
 
 export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
@@ -48,15 +54,20 @@ export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
   items,
   displaySearch,
   searchPlaceholder,
+  search,
+  onSearch,
   title,
   minWidth = 250,
   maxWidth,
   compareFunction,
   renderOption,
   getOptionLabel,
+  ListboxProps,
+  onGetMoreData,
 }: Props<T>) {
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslate();
+  const listboxEl = useRef<HTMLDivElement>(null);
 
   const width =
     !anchorEl || anchorEl.offsetWidth < minWidth
@@ -69,18 +80,24 @@ export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
         <Autocomplete
           open
           filterOptions={(options, state) => {
-            return options.filter((o) =>
-              compareFunction(state.inputValue || '', o)
-            );
+            if (compareFunction) {
+              return options.filter((o) =>
+                compareFunction(state.inputValue || '', o)
+              );
+            } else {
+              return options;
+            }
           }}
           options={items || []}
-          inputValue={inputValue}
+          inputValue={onSearch ? search : inputValue}
           onClose={(_, reason) => reason === 'escape' && onClose?.()}
           clearOnEscape={false}
           noOptionsText={t('global_nothing_found')}
           loadingText={t('global_loading_text')}
           onInputChange={(_, value, reason) => {
-            reason === 'input' && setInputValue(value);
+            reason === 'input' && onSearch
+              ? onSearch(value)
+              : setInputValue(value);
           }}
           getOptionLabel={getOptionLabel}
           PopperComponent={PopperComponent}
@@ -90,7 +107,26 @@ export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
               {renderOption(props, item)}
             </React.Fragment>
           )}
-          ListboxProps={{ style: { padding: 0 } }}
+          ListboxProps={{
+            style: {
+              padding: 0,
+              minHeight: 400,
+              overflow: 'auto',
+              ...ListboxProps?.style,
+            },
+            onScroll: (event) => {
+              const target = event.target as HTMLDivElement;
+              if (
+                target.scrollHeight - target.clientHeight - target.scrollTop <
+                FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS
+              ) {
+                onGetMoreData?.();
+              }
+            },
+            ...ListboxProps,
+            ref: listboxEl,
+          }}
+          onKeyDown={(e) => e.stopPropagation()}
           renderInput={(params) => (
             <StyledInputWrapper
               sx={{ display: !displaySearch && !title ? 'none' : undefined }}
