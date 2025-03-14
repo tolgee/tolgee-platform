@@ -8,14 +8,7 @@ import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.FileStoreException
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andHasErrorMessage
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
@@ -448,6 +441,19 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
     }
   }
 
+  @ProjectApiKeyAuthTestMethod
+  @Test
+  fun `updates correctly guesses pluralArgName`() {
+    performIsPluralModification(
+      translations = mapOf(
+        "en" to "{this_should_be_guessed, plural, one {one} other {other}}",
+      )
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("isPlural").isEqualTo(true)
+      node("pluralArgName").isEqualTo("this_should_be_guessed")
+    }
+  }
+
   @ProjectApiKeyAuthTestMethod(
     scopes = [
       Scope.TRANSLATIONS_EDIT,
@@ -512,7 +518,7 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
     ).andIsBadRequest.andHasErrorMessage(Message.CUSTOM_VALUES_JSON_TOO_LONG)
   }
 
-  private fun performIsPluralModification(): ResultActions {
+  private fun performIsPluralModification(translations: Map<String, String> = emptyMap()): ResultActions {
     val keyName = "super_key"
 
     return performProjectAuthPut(
@@ -520,6 +526,7 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
       ComplexEditKeyDto(
         name = keyName,
         isPlural = true,
+        translations = translations,
       ),
     )
   }

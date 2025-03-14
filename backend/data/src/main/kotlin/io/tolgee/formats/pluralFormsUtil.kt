@@ -208,13 +208,22 @@ data class ConvertToIcuPluralResult<T>(
   val argName: String,
 )
 
+
+data class PossibleConvertToIcuPluralResult<T>(
+  val convertedStrings: Map<T, String?>,
+  /** If null, it was not converted */
+  val argName: String?,
+) {
+  val converted: Boolean = argName != null
+}
+
 /**
  * Normalizes list of plurals. Uses provided argument name if any, otherwise it tries to find the most common one
  */
 fun <T> normalizePlurals(
   strings: Map<T, String?>,
   pluralArgName: String? = null,
-): Map<T, String?> {
+): ConvertToIcuPluralResult<T> {
   val invalidStrings = mutableListOf<String>()
   val formResults =
     strings.map {
@@ -238,7 +247,7 @@ fun <T> normalizePlurals(
     throw StringIsNotPluralException(invalidStrings)
   }
 
-  return pluralFormsToSameArgName(formResults, pluralArgName).convertedStrings
+  return pluralFormsToSameArgName(formResults, pluralArgName)
 }
 
 /**
