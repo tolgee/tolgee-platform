@@ -8,7 +8,10 @@ export const useSortOptions = () => {
       value: 'keyName,desc',
       label: t('translation_sort_item_key_name_z_to_a'),
     },
-    { value: 'createdAt', label: t('translation_sort_item_first_added') },
-    { value: 'createdAt,desc', label: t('translation_sort_item_last_added') },
+    {
+      value: 'createdAt,desc',
+      label: t('translation_sort_item_newest_on_top'),
+    },
+    { value: 'createdAt', label: t('translation_sort_item_oldest_on_top') },
   ];
 };
