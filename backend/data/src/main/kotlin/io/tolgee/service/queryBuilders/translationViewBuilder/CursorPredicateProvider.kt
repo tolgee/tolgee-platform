@@ -43,6 +43,12 @@ class CursorPredicateProvider(
       val strongCondition: Predicate
       val condition: Predicate
 
+      if (isUnique && typedValue == null) {
+        throw IllegalArgumentException(
+          "Unique in the cursor cannot be null. This is bug in cursor creation.",
+        )
+      }
+
       if (value.direction == Sort.Direction.ASC) {
         condition =
           if (isUnique) {
@@ -78,10 +84,7 @@ class CursorPredicateProvider(
       String::class.java -> raw as Comparable<Any>
       java.lang.Long::class.java -> raw.toLong() as Comparable<Any>
       java.sql.Timestamp::class.java -> java.sql.Timestamp(raw.toLong()) as Comparable<Any>
-      // If you use LocalDateTime, do:
-      // LocalDateTime::class.java -> LocalDateTime.parse(raw)
-      // or any other date/time you use
-      else -> throw Error("Cannot parse value for type $javaType")
+      else -> throw IllegalArgumentException("Cannot parse value for type $javaType")
     }
   }
 }
