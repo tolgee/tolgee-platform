@@ -75,7 +75,7 @@ class AuthProviderChangeService(
       }
       matchingUser == null -> {
         // Non-matching e-mail and no account with this email exists
-        throw BadRequestException(Message.THIRD_PARTY_SWITCH_CONFLICT)
+        throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
       }
       matchingUser.id != currentUser.id -> {
         // Non-matching e-mail and account with this e-mail already exists
