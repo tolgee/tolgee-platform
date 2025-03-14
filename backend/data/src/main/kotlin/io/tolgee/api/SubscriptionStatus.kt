@@ -5,7 +5,7 @@ enum class SubscriptionStatus(
 ) {
   ACTIVE(true),
   CANCELED(false),
-  PAST_DUE(false),
+  PAST_DUE(true),
   UNPAID(false),
   ERROR(false),
   TRIALING(true),
