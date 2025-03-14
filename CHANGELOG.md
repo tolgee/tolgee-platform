@@ -1,3 +1,10 @@
+## [3.110.2](https://github.com/tolgee/tolgee-platform/compare/v3.110.1...v3.110.2) (2025-03-14)
+
+
+### Bug Fixes
+
+* Make past due active status ([5d74421](https://github.com/tolgee/tolgee-platform/commit/5d7442199f98163e23151e4750885cbc5cf81a94))
+
 ## [3.110.1](https://github.com/tolgee/tolgee-platform/compare/v3.110.0...v3.110.1) (2025-03-14)
 
 
