@@ -1,3 +1,10 @@
+# [3.111.0](https://github.com/tolgee/tolgee-platform/compare/v3.110.2...v3.111.0) (2025-03-14)
+
+
+### Features
+
+* third party authentication provider change ([#2929](https://github.com/tolgee/tolgee-platform/issues/2929)) ([5b6c80f](https://github.com/tolgee/tolgee-platform/commit/5b6c80faab6a6568e59125ffc0a0a0143d2335d6)), closes [#2913](https://github.com/tolgee/tolgee-platform/issues/2913)
+
 ## [3.110.2](https://github.com/tolgee/tolgee-platform/compare/v3.110.1...v3.110.2) (2025-03-14)
 
 

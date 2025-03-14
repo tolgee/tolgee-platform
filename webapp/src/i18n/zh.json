@@ -1611,6 +1611,7 @@
   "translation_failed": "翻译失败",
   "translation_filter_item_exclude": "排除",
   "translation_filter_item_excluded": "已排除",
+  "translation_filters_comments_resolved": "已解决评论",
   "translation_format_help": "如何格式化翻译",
   "translation_grid_key_text": "词条",
   "Translation grid - Successfully deleted!": "译文已删除!",

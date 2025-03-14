@@ -1633,6 +1633,8 @@
   "translation_failed": "Translation failed",
   "translation_filter_item_exclude": "Exclude",
   "translation_filter_item_excluded": "Excluded",
+  "translation_filters_comments_resolved": "Resolved comments",
+  "translation_filters_comments_unresolved": "Unresolved comments",
   "translation_format_help": "How to format the translation",
   "translation_grid_key_text": "Key",
   "Translation grid - Successfully deleted!": "Translations deleted!",
