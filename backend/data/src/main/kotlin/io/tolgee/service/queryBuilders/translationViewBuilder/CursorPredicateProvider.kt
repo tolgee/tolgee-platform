@@ -46,9 +46,10 @@ class CursorPredicateProvider(
       if (value.direction == Sort.Direction.ASC) {
         condition =
           if (isUnique) {
-            val nonNullVal = typedValue ?: throw IllegalArgumentException(
-              "Unique in the cursor cannot be null. This is bug in cursor creation.",
-            )
+            val nonNullVal =
+              typedValue ?: throw IllegalArgumentException(
+                "Unique in the cursor cannot be null. This is bug in cursor creation.",
+              )
             cb.greaterThan(expression, nonNullVal)
           } else {
             cb.greaterThanOrEqualToNullable(expression, typedValue)
@@ -57,9 +58,10 @@ class CursorPredicateProvider(
       } else {
         condition =
           if (isUnique) {
-            val nonNullVal = typedValue ?: throw IllegalArgumentException(
-              "Unique in the cursor cannot be null. This is bug in cursor creation.",
-            )
+            val nonNullVal =
+              typedValue ?: throw IllegalArgumentException(
+                "Unique in the cursor cannot be null. This is bug in cursor creation.",
+              )
             cb.lessThan(expression, nonNullVal)
           } else {
             cb.lessThanOrEqualToNullable(expression, typedValue)
