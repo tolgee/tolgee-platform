@@ -47,32 +47,45 @@ class AuthProviderChangeService(
     return getActiveAuthProviderChangeRequest(userAccount)?.asAuthProviderDto()
   }
 
+  /**
+   * Alters authentication flow of third party authentication to allow initiating third party provider change
+   * for already authenticated user
+   */
   fun tryInitiate(
-    resolvedUser: UserAccount?,
+    authenticatingUser: UserAccount?,
     userEmail: String,
     data: AuthProviderChangeData,
   ) {
     val currentUser = authenticationFacade.authenticatedUserOrNull
+    val matchingUser = userAccountService.findActive(userEmail)
 
-    if (currentUser == null) {
-      // Provider change can be only initiated for already signed-in user
-      return
+    when {
+      currentUser == null -> {
+        // Nobody to initiate the change for
+      }
+      authenticatingUser?.id == currentUser.id -> {
+        // Nothing to change
+        // User used the same method for authentication as they already use - we can initiate
+        // provider change but there is nothing to change
+      }
+      authenticatingUser != null -> {
+        // Non-matching e-mail
+        // Account with this e-mail already exists and would be authenticated otherwise
+        throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
+      }
+      matchingUser == null -> {
+        // Non-matching e-mail and no account with this email exists
+        throw BadRequestException(Message.THIRD_PARTY_SWITCH_CONFLICT)
+      }
+      matchingUser.id != currentUser.id -> {
+        // Non-matching e-mail and account with this e-mail already exists
+        throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
+      }
+      else -> {
+        self.forceSave(matchingUser, data)
+        throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
+      }
     }
-
-    if (resolvedUser?.id == currentUser.id) {
-      // Trying to log-in as already logged-in user??
-      return
-    }
-
-    val targetUser = resolvedUser ?: userAccountService.findActive(userEmail)
-    if (targetUser?.id != currentUser.id) {
-      // User is trying to switch third party authentication provider, but
-      // the account e-mail does not match the email of the third party account
-      throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
-    }
-
-    self.forceSave(targetUser, data)
-    throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
