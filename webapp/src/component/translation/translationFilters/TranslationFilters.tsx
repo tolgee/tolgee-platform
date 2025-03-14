@@ -29,7 +29,6 @@ export const TranslationFilters = ({
   value,
   actions,
   selectedLanguages,
-  placeholder,
   projectId,
   sx,
   className,

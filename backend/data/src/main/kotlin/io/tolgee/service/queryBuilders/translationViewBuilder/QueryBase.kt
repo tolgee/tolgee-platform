@@ -115,7 +115,10 @@ class QueryBase<T>(
     return translationOutdated
   }
 
-  private fun addAutoTranslatedField(translation: ListJoin<Key, Translation>, language: LanguageDto): Path<Boolean> {
+  private fun addAutoTranslatedField(
+    translation: ListJoin<Key, Translation>,
+    language: LanguageDto,
+  ): Path<Boolean> {
     val autoTranslated = translation.get(Translation_.auto)
     this.querySelection[language to TranslationView::auto] = autoTranslated
     return autoTranslated

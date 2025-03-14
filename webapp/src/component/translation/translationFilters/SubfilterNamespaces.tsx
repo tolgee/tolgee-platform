@@ -147,7 +147,7 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
                 getOptionLabel={(o) => o.name}
                 ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
                 searchPlaceholder={t(
-                  'translations_filters_tags_search_placeholder'
+                  'translations_filters_namespaces_search_placeholder'
                 )}
                 onGetMoreData={handleFetchMore}
               />

@@ -4,8 +4,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.translation.Translation_
-import io.tolgee.model.views.TranslationView
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.Path

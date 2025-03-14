@@ -138,19 +138,19 @@ class QueryGlobalFiltering(
       val root = queryBase.root
 
       val subquery = query.subquery(Long::class.java)
-      val subRoot  = subquery.from(Key::class.java)
-      val subJoin  = subRoot.join(Key_.namespace)
+      val subRoot = subquery.from(Key::class.java)
+      val subJoin = subRoot.join(Key_.namespace)
       val subquerySelect = subquery.select(subRoot.get(Key_.id))
       val hasDefaultNamespace = filterNoNamespace.contains("")
 
       subquerySelect.where(
         cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
-        subJoin.get(Namespace_.name).`in`(filterNoNamespace)
+        subJoin.get(Namespace_.name).`in`(filterNoNamespace),
       )
       queryBase.whereConditions.add(cb.not(cb.exists(subquery)))
       if (hasDefaultNamespace) {
         queryBase.whereConditions.add(
-          queryBase.namespaceNameExpression.isNotNull
+          queryBase.namespaceNameExpression.isNotNull,
         )
       }
     }
@@ -170,11 +170,12 @@ class QueryGlobalFiltering(
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
       val hasEmptyTag = filterTag.contains("")
       val inCondition = tagsJoin.get(Tag_.name).`in`(filterTag)
-      val condition = if (hasEmptyTag) {
-        cb.or(inCondition, tagsJoin.get(Tag_.name).isNull)
-      } else {
-        inCondition
-      }
+      val condition =
+        if (hasEmptyTag) {
+          cb.or(inCondition, tagsJoin.get(Tag_.name).isNull)
+        } else {
+          inCondition
+        }
       queryBase.whereConditions.add(condition)
     }
   }
@@ -183,26 +184,26 @@ class QueryGlobalFiltering(
     val filterNoTag = distinguishEmptyValue(params.filterNoTag)
     if (filterNoTag != null) {
       // Build a subquery that finds any Key that has a tag in filterNoTag
-      val query = queryBase.query          // The main CriteriaQuery
-      val root = queryBase.root           // The root for Key in the main query
+      val query = queryBase.query // The main CriteriaQuery
+      val root = queryBase.root // The root for Key in the main query
       val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
 
       val subquery = query.subquery(Long::class.java)
-      val subRoot  = subquery.from(Key::class.java)
-      val subJoin  = subRoot.join(Key_.keyMeta).join(KeyMeta_.tags)
+      val subRoot = subquery.from(Key::class.java)
+      val subJoin = subRoot.join(Key_.keyMeta).join(KeyMeta_.tags)
       val hasEmptyTag = filterNoTag.contains("")
 
       // subquery: SELECT subRoot.id FROM Key subRoot ... WHERE subRoot.id = root.id AND tag in filterNoTag
       subquery.select(subRoot.get(Key_.id))
         .where(
           cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
-          subJoin.get(Tag_.name).`in`(filterNoTag)
+          subJoin.get(Tag_.name).`in`(filterNoTag),
         )
 
       // main query excludes if such a subquery exists
       queryBase.whereConditions.add(
-        cb.not(cb.exists(subquery))
+        cb.not(cb.exists(subquery)),
       )
       if (hasEmptyTag) {
         queryBase.whereConditions.add(tagsJoin.get(Tag_.name).isNotNull)

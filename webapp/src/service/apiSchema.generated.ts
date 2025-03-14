@@ -2645,6 +2645,11 @@ export interface components {
       /** @description There is a context available for this key */
       contextPresent: boolean;
       /**
+       * Format: int64
+       * @description The time when the key was created
+       */
+      createdAt: number;
+      /**
        * @description The namespace of the key
        * @example homepage
        */
