@@ -9,6 +9,7 @@ import org.mockito.MockedStatic
 import org.mockito.Mockito.mockStatic
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -63,6 +64,11 @@ class AWSCloudFrontStorageConfigCachePurgingTest {
         contentDeliveryConfig,
         setOf("fake-path"),
       )
+
+      verify(awsCredentialProviderMock).get(any())
+      verify(cloudFrontClientMock).createInvalidation(any<CreateInvalidationRequest>())
+      verify(cloudFrontClientBuilderMock).build()
+      verify(cloudFrontClientMock).close()
     }
   }
 }
