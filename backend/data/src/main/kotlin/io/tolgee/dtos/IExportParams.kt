@@ -94,6 +94,11 @@ interface IExportParams {
   )
   var fileStructureTemplate: String?
 
+  @get:Schema(
+    description = "When true, common format specifiers in Apple strings formats like %d, %i, %@, etc. won't be escaped",
+  )
+  var preserveFormatSpecifiers: Boolean?
+
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages
     this.format = other.format
@@ -109,6 +114,7 @@ interface IExportParams {
     this.messageFormat = other.messageFormat
     this.supportArrays = other.supportArrays
     this.fileStructureTemplate = other.fileStructureTemplate
+    this.preserveFormatSpecifiers = other.preserveFormatSpecifiers
   }
 
   @get:Hidden

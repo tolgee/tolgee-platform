@@ -36,4 +36,5 @@ class ContentDeliveryConfigModel(
   override var messageFormat: ExportMessageFormat? = null
   override var supportArrays: Boolean = false
   override var fileStructureTemplate: String? = null
+  override var preserveFormatSpecifiers: Boolean? = null
 }

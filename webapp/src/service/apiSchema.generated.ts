@@ -1410,6 +1410,8 @@ export interface components {
         | "ICU"
         | "PYTHON_PERCENT";
       name: string;
+      /** @description When true, common format specifiers in Apple strings formats like %d, %i, %@, etc. won't be escaped */
+      preserveFormatSpecifiers?: boolean;
       pruneBeforePublish: boolean;
       publicUrl?: string;
       slug: string;
@@ -1517,6 +1519,8 @@ export interface components {
         | "ICU"
         | "PYTHON_PERCENT";
       name: string;
+      /** @description When true, common format specifiers in Apple strings formats like %d, %i, %@, etc. won't be escaped */
+      preserveFormatSpecifiers?: boolean;
       /**
        * @description Whether the data in the CDN should be pruned before publishing new data.
        *
@@ -2140,6 +2144,8 @@ export interface components {
         | "I18NEXT"
         | "ICU"
         | "PYTHON_PERCENT";
+      /** @description When true, common format specifiers in Apple strings formats like %d, %i, %@, etc. won't be escaped */
+      preserveFormatSpecifiers?: boolean;
       /**
        * @description Delimiter to structure file content.
        *
@@ -2644,6 +2650,11 @@ export interface components {
     KeyWithTranslationsModel: {
       /** @description There is a context available for this key */
       contextPresent: boolean;
+      /**
+       * Format: int64
+       * @description The time when the key was created
+       */
+      createdAt: number;
       /**
        * @description The namespace of the key
        * @example homepage
@@ -10757,6 +10768,13 @@ export interface operations {
          * e.g. Key hello[0] will be exported as {"hello": ["..."]}
          */
         supportArrays?: boolean;
+        /**
+         * When true, common format specifiers in Apple strings formats like %d, %i, %@, etc. won't be escaped.
+         *
+         * This is useful for keeping integer placeholders (%d, %i) working correctly in Apple strings format.
+         * By default, all percent signs are escaped as %%, which can cause issues with certain placeholders.
+         */
+        preserveFormatSpecifiers?: boolean;
       };
       path: {
         projectId: number;

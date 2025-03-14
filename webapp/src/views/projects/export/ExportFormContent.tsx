@@ -9,6 +9,7 @@ import { FormatSelector } from './components/FormatSelector';
 import { SupportArraysSelector } from './components/SupportArraysSelector';
 import { MessageFormatSelector } from './components/MessageFormatSelector';
 import { NsSelector } from './components/NsSelector';
+import { PreserveFormatSpecifiersSelector } from './components/PreserveFormatSpecifiersSelector';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -24,6 +25,7 @@ type FormValues = {
   nested: boolean;
   supportArrays: boolean;
   messageFormat: MessageFormat | undefined;
+  preserveFormatSpecifiers?: boolean;
 };
 
 type Props = {
@@ -46,6 +48,13 @@ export const ExportFormContent = ({
         <>
           <StyledOptions className="options">
             <SupportArraysSelector />
+          </StyledOptions>
+        </>
+      )}
+      {getFormatById(values.format).showPreserveFormatSpecifiers && (
+        <>
+          <StyledOptions className="options">
+            <PreserveFormatSpecifiersSelector />
           </StyledOptions>
         </>
       )}
