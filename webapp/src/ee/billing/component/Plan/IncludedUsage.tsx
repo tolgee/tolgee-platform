@@ -51,21 +51,23 @@ export const IncludedUsage = ({
           )}
 
           {metricType == 'KEYS_SEATS' && (
-            <IncludedKeys
-              data-cy={'billing-plan-included-keys'}
-              className="strings"
-              count={includedUsage?.keys ?? -1}
-              highlightColor={highlightColor}
-            />
+            <>
+              <IncludedKeys
+                data-cy={'billing-plan-included-keys'}
+                className="strings"
+                count={includedUsage?.keys ?? -1}
+                highlightColor={highlightColor}
+              />
+              <IncludedSeats
+                data-cy={'billing-plan-included-seats'}
+                className="seats"
+                count={includedUsage?.seats ?? -1}
+                highlightColor={highlightColor}
+              />
+            </>
           )}
         </>
       )}
-      <IncludedSeats
-        data-cy={'billing-plan-included-seats'}
-        className="seats"
-        count={includedUsage?.seats ?? -1}
-        highlightColor={highlightColor}
-      />
 
       <IncludedCredits
         data-cy={'billing-plan-included-credits'}
