@@ -1,3 +1,10 @@
+## [3.110.1](https://github.com/tolgee/tolgee-platform/compare/v3.110.0...v3.110.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* translation sorting ([#2991](https://github.com/tolgee/tolgee-platform/issues/2991)) ([943ec53](https://github.com/tolgee/tolgee-platform/commit/943ec5374c73f239908fef036ae2edb57e22f64c))
+
 # [3.110.0](https://github.com/tolgee/tolgee-platform/compare/v3.109.3...v3.110.0) (2025-03-13)
 
 
