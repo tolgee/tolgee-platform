@@ -40,9 +40,10 @@ data class UserAccount(
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
   /**
-   * This property is redundant; kept for legacy reasons.
+   * This property is redundant - it's value can be derived from other existing properties.
+   * Kept for legacy reasons.
    *
-   * It's value should follow these rules, but there are some edge cases related to old accounts:
+   * It's value follows these rules, but there are some edge cases related to old accounts:
    * - NATIVE ->      password != null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH | null
    * - THIRD_PARTY -> password == null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH
    * - MANAGED ->     password == null && thirdPartyAuthType == SSO | SSO_GLOBAL

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @Hidden
-@RequestMapping(value = ["internal/e2e-data/authProviderChange"])
+@RequestMapping(value = ["internal/e2e-data/auth-provider-change"])
 @Transactional
 class AuthProviderChangeE2eDataController : AbstractE2eDataController() {
   @Autowired

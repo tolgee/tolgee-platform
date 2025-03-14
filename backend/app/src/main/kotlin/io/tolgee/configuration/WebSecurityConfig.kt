@@ -20,7 +20,7 @@ import io.tolgee.component.ExceptionHandlerFilter
 import io.tolgee.component.TransferEncodingHeaderDebugFilter
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
-import io.tolgee.security.authentication.EmailValidInterceptor
+import io.tolgee.security.authentication.EmailValidationInterceptor
 import io.tolgee.security.authentication.SsoAuthenticationInterceptor
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.ProjectAuthorizationInterceptor
@@ -60,7 +60,7 @@ class WebSecurityConfig(
   @Lazy
   private val authenticationInterceptor: AuthenticationInterceptor,
   @Lazy
-  private val emailValidInterceptor: EmailValidInterceptor,
+  private val emailValidationInterceptor: EmailValidationInterceptor,
   @Lazy
   private val ssoAuthenticationInterceptor: SsoAuthenticationInterceptor,
   @Lazy
@@ -122,7 +122,7 @@ class WebSecurityConfig(
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(rateLimitInterceptor)
     registry.addInterceptor(authenticationInterceptor)
-    registry.addInterceptor(emailValidInterceptor)
+    registry.addInterceptor(emailValidationInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
     registry.addInterceptor(ssoAuthenticationInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)

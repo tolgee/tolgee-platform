@@ -14,19 +14,19 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
-class EmailValidInterceptorTest {
+class EmailValidationInterceptorTest {
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
   private val emailVerificationService = Mockito.mock(EmailVerificationService::class.java)
 
-  private val emailValidInterceptor =
-    EmailValidInterceptor(authenticationFacade, emailVerificationService)
+  private val emailValidationInterceptor =
+    EmailValidationInterceptor(authenticationFacade, emailVerificationService)
 
   private val mockMvc =
     MockMvcBuilders.standaloneSetup(TestController::class.java)
-      .addInterceptors(emailValidInterceptor)
+      .addInterceptors(emailValidationInterceptor)
       .build()
 
   @BeforeEach

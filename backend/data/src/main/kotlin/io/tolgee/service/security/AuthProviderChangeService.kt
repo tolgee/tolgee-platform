@@ -82,14 +82,17 @@ class AuthProviderChangeService(
         throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
       }
       else -> {
-        self.forceSave(matchingUser, data)
+        self.saveInNewTransaction(matchingUser, data)
         throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)
       }
     }
   }
 
+  /**
+   * Force save the change request - will not roll back with parent transaction
+   */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  protected fun forceSave(
+  protected fun saveInNewTransaction(
     user: UserAccount,
     data: AuthProviderChangeData,
   ) {

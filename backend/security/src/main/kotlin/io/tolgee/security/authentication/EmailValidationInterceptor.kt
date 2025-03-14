@@ -14,7 +14,7 @@ import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 
 @Component
-class EmailValidInterceptor(
+class EmailValidationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   @Lazy
   private val emailVerificationService: EmailVerificationService,
