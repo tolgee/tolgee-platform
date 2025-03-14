@@ -132,6 +132,7 @@ export const testExportFormats = (
       format: 'XLIFF',
       expectedParams: {
         format: 'XLIFF',
+        escapeHtml: false,
       },
     }
   );
@@ -301,6 +302,7 @@ export type FormatTest = {
     format: string;
     structureDelimiter?: string;
     supportArrays?: boolean;
+    escapeHtml?: boolean;
   };
 };
 

@@ -129,4 +129,8 @@ class ContentDeliveryConfig(
 
   @ActivityLoggedProp
   override var fileStructureTemplate: String? = null
+
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  override var escapeHtml: Boolean = false
 }
