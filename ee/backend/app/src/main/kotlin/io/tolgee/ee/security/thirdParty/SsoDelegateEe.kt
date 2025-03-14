@@ -14,13 +14,13 @@ import io.tolgee.ee.data.OAuth2TokenResponse
 import io.tolgee.ee.exceptions.SsoAuthorizationException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.security.service.thirdParty.SsoDelegate
-import io.tolgee.security.thirdParty.OAuthUserHandler
+import io.tolgee.security.thirdParty.SsoDelegate
+import io.tolgee.security.thirdParty.ThirdPartyUserHandler
 import io.tolgee.security.thirdParty.data.OAuthUserDetails
+import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
 import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
@@ -50,7 +50,7 @@ class SsoDelegateEe(
   private val tolgeeProperties: TolgeeProperties,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
-  private val oAuthUserHandler: OAuthUserHandler,
+  private val thirdPartyUserHandler: ThirdPartyUserHandler,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
@@ -72,7 +72,7 @@ class SsoDelegateEe(
 
     val tenant = tenantService.getEnabledConfigByDomain(domain)
     enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization?.id,
+      organizationId = tenant.organizationId,
       Feature.SSO,
     )
 
@@ -168,11 +168,12 @@ class SsoDelegateEe(
         tenant = tenant,
       )
     val user =
-      oAuthUserHandler.findOrCreateUser(
-        userData,
-        invitationCode,
-        if (tenant.global) ThirdPartyAuthType.SSO_GLOBAL else ThirdPartyAuthType.SSO,
-        UserAccount.AccountType.MANAGED,
+      thirdPartyUserHandler.findOrCreateUser(
+        ThirdPartyUserDetails.fromOAuth2(
+          userData,
+          if (tenant.global) ThirdPartyAuthType.SSO_GLOBAL else ThirdPartyAuthType.SSO,
+          invitationCode,
+        ),
       )
     val jwt = jwtService.emitToken(user.id)
     return JwtAuthenticationResponse(jwt)
@@ -186,8 +187,11 @@ class SsoDelegateEe(
 
   override fun verifyUserSsoAccountAvailable(user: UserAccountDto): Boolean {
     val isSsoUser = user.thirdPartyAuth in arrayOf(ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL)
+    if (!isSsoUser) {
+      return true
+    }
     val isSessionExpired = user.ssoSessionExpiry?.after(currentDateProvider.date) != true
-    if (!isSsoUser || !isSessionExpired) {
+    if (!isSessionExpired) {
       return true
     }
 
@@ -212,10 +216,6 @@ class SsoDelegateEe(
     refreshToken: String,
   ): Boolean {
     val tenant = tenantService.getEnabledConfigByDomain(domain)
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = tenant.organization?.id,
-      Feature.SSO,
-    )
 
     val response = fetchRefreshToken(tenant, refreshToken)
     if (response?.refresh_token == null) {

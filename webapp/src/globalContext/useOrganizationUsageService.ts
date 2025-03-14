@@ -30,6 +30,11 @@ export const useOrganizationUsageService = ({
     path: {
       organizationId: organization?.id || 0,
     },
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+    },
     options: {
       refetchOnMount: false,
       cacheTime: Infinity,

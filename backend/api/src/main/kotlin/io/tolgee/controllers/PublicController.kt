@@ -3,23 +3,18 @@ package io.tolgee.controllers
 import com.fasterxml.jackson.databind.node.TextNode
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.configuration.tolgee.AuthenticationProperties
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.security.LoginRequest
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.DisabledFunctionalityException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.invitation.PublicInvitationModel
 import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
-import io.tolgee.model.UserAccount
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.JwtService
-import io.tolgee.security.authorization.BypassEmailVerification
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
-import io.tolgee.security.service.thirdParty.ThirdPartyAuthDelegate
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.security.MfaService
@@ -27,6 +22,7 @@ import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.SignUpService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserCredentialsService
+import io.tolgee.service.security.thirdParty.ThirdPartyAuthenticationService
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -39,14 +35,12 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping("/api/public")
 @AuthenticationTag
 class PublicController(
   private val jwtService: JwtService,
-  private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val emailVerificationService: EmailVerificationService,
   private val reCaptchaValidationService: ReCaptchaValidationService,
@@ -54,7 +48,7 @@ class PublicController(
   private val mfaService: MfaService,
   private val userCredentialsService: UserCredentialsService,
   private val authProperties: AuthenticationProperties,
-  private val thirdPartyAuthDelegates: List<ThirdPartyAuthDelegate>,
+  private val thirdPartyAuthenticationService: ThirdPartyAuthenticationService,
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
   private val invitationService: InvitationService,
 ) {
@@ -103,7 +97,6 @@ class PublicController(
     description = "It checks whether the code from email is valid",
   )
   @OpenApiHideFromPublicDocs
-  @BypassEmailVerification
   fun verifyEmail(
     @PathVariable("userId") @NotNull userId: Long,
     @PathVariable("code") @NotBlank code: String,
@@ -134,14 +127,13 @@ class PublicController(
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?,
     @RequestParam(value = "domain", required = false) domain: String?,
   ): JwtAuthenticationResponse {
-    if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
-      val user = getFakeGithubUser()
-      return JwtAuthenticationResponse(jwtService.emitToken(user.id))
-    }
-
-    return thirdPartyAuthDelegates.find { it.name == serviceType }
-      ?.getTokenResponse(code, invitationCode, redirectUri, domain)
-      ?: throw NotFoundException(Message.SERVICE_NOT_FOUND)
+    return thirdPartyAuthenticationService.authenticate(
+      serviceType = serviceType,
+      code = code,
+      redirectUri = redirectUri,
+      invitationCode = invitationCode,
+      domain = domain,
+    )
   }
 
   @GetMapping("/invitation_info/{code}")
@@ -151,19 +143,5 @@ class PublicController(
   ): PublicInvitationModel {
     val invitation = invitationService.getInvitation(code)
     return publicInvitationModelAssembler.toModel(invitation)
-  }
-
-  private fun getFakeGithubUser(): UserAccount {
-    val username = "johndoe@doe.com"
-    val user =
-      userAccountService.findActive(username) ?: let {
-        UserAccount().apply {
-          this.username = username
-          name = "john"
-          accountType = UserAccount.AccountType.THIRD_PARTY
-          userAccountService.save(this)
-        }
-      }
-    return user
   }
 }

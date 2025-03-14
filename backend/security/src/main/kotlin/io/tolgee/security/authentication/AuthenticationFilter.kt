@@ -17,14 +17,14 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
-import io.tolgee.security.service.thirdParty.SsoDelegate
+import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -39,7 +39,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 @Lazy
 class AuthenticationFilter(
-  private val authenticationProperties: AuthenticationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   @Lazy
   private val currentDateProvider: CurrentDateProvider,
   @Lazy
@@ -55,6 +55,11 @@ class AuthenticationFilter(
   @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
+  private val authenticationProperties
+    get() = tolgeeProperties.authentication
+  private val internalProperties
+    get() = tolgeeProperties.internal
+
   override fun doFilterInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -118,8 +123,20 @@ class AuthenticationFilter(
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {
-    if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
-      throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+    when (internalProperties.verifySsoAccountAvailableBypass) {
+      true -> {
+        // Bypass user validity check
+        return
+      }
+      false -> {
+        // Always fail user validity check
+        throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+      }
+      null -> {
+        if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
+          throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
+        }
+      }
     }
   }
 

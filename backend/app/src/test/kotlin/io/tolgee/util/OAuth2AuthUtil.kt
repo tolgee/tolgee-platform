@@ -1,6 +1,8 @@
 package io.tolgee.util
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.fixtures.AuthorizedRequestPerformer
+import io.tolgee.model.UserAccount
 import io.tolgee.security.thirdParty.OAuth2Delegate
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -18,6 +20,7 @@ class OAuth2AuthUtil(
   private val tolgeeProperties: TolgeeProperties,
   private var authMvc: MockMvc? = null,
   private val restTemplate: RestTemplate? = null,
+  private val authorizedRequestPerformer: AuthorizedRequestPerformer? = null,
 ) {
   private val defaultUserResponse: OAuth2Delegate.GenericUserResponse
     get() {
@@ -36,6 +39,18 @@ class OAuth2AuthUtil(
       tokenResponse["access_token"] = accessToken
       return tokenResponse
     }
+
+  fun authorizeOAuth2User(user: UserAccount): MvcResult {
+    val response =
+      OAuth2Delegate.GenericUserResponse().apply {
+        email = user.username
+        sub = "fakeId"
+        given_name = "fakeGiveName"
+        family_name = "fakeGivenFamilyName"
+      }
+    val entity = ResponseEntity(response, HttpStatus.OK)
+    return authorizeOAuth2User(userResponse = entity)
+  }
 
   fun authorizeOAuth2User(
     tokenResponse: Map<String, String?>? = this.defaultTokenResponse,
@@ -64,8 +79,14 @@ class OAuth2AuthUtil(
       ).thenReturn(userResponse)
     }
 
+    val url = "/api/public/authorize_oauth/oauth2?code=$receivedCode"
+
+    if (authorizedRequestPerformer != null) {
+      return authorizedRequestPerformer.performAuthGet(url).andReturn()
+    }
+
     return authMvc!!.perform(
-      MockMvcRequestBuilders.get("/api/public/authorize_oauth/oauth2?code=$receivedCode")
+      MockMvcRequestBuilders.get(url)
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON),
     )

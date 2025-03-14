@@ -1,26 +1,33 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.hateoas.organization.PrivateOrganizationModel
+import io.tolgee.hateoas.organization.PrivateOrganizationModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
+import io.tolgee.hateoas.sso.PublicSsoTenantModel
+import io.tolgee.hateoas.sso.PublicSsoTenantModelAssembler
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModel
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
-import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.authentication.JwtService
-import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authentication.*
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
+import io.tolgee.service.TenantService
+import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.UserAccountService
@@ -42,12 +49,17 @@ class V2UserController(
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
   private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
+  private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
   private val imageUploadService: ImageUploadService,
   private val organizationService: OrganizationService,
+  private val organizationRoleService: OrganizationRoleService,
+  private val privateOrganizationModelAssembler: PrivateOrganizationModelAssembler,
+  private val tenantService: TenantService,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
   private val passwordEncoder: PasswordEncoder,
   private val jwtService: JwtService,
   private val mfaService: MfaService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val emailVerificationService: EmailVerificationService,
   @Qualifier("requestActivityHolder") private val request: ActivityHolder,
 ) {
@@ -56,6 +68,7 @@ class V2UserController(
     description = "Resends email verification email to currently authenticated user.",
   )
   @PostMapping("/send-email-verification")
+  @BypassEmailVerification
   fun sendEmailVerification(request: HttpServletRequest) {
     val user = authenticationFacade.authenticatedUserEntity
     emailVerificationService.resendEmailVerification(user, request)
@@ -66,6 +79,8 @@ class V2UserController(
     description = "Returns information about currently authenticated user.",
   )
   @GetMapping("")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   @AllowApiAccess
   @OpenApiOrderExtension(1)
   fun getInfo(): PrivateUserAccountModel {
@@ -141,6 +156,91 @@ class V2UserController(
     userAccountService.delete(authenticationFacade.authenticatedUserEntity)
   }
 
+  @Operation(
+    summary = "Get information about SSO configuration",
+    description = "Returns information about sso configuration affecting the user.",
+  )
+  @GetMapping("/sso")
+  @ApiResponse(
+    responseCode = "200",
+    content = [
+      Content(
+        mediaType = "application/json",
+        schema =
+          Schema(
+            implementation = PublicSsoTenantModel::class,
+          ),
+      ),
+    ],
+  )
+  @ApiResponse(
+    responseCode = "204",
+    description = "No SSO configuration available for this user",
+    content = [
+      Content(
+        schema =
+          Schema(
+            implementation = Void::class,
+          ),
+      ),
+    ],
+  )
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
+  @AllowApiAccess
+  fun getSso(): ResponseEntity<PublicSsoTenantModel> {
+    val userAccount = authenticationFacade.authenticatedUser
+    val domain = userAccount.domain ?: return ResponseEntity.noContent().build()
+    val tenant = tenantService.getEnabledConfigByDomainOrNull(domain) ?: return ResponseEntity.noContent().build()
+    return ResponseEntity.ok(publicSsoTenantModelAssembler.toModel(tenant))
+  }
+
+  @GetMapping("/managed-by")
+  @Operation(
+    summary = "Get organization which manages user",
+    description = "Returns the organization that manages a given user or null",
+  )
+  @ApiResponse(
+    responseCode = "200",
+    content = [
+      Content(
+        mediaType = "application/json",
+        schema =
+          Schema(
+            implementation = PrivateOrganizationModel::class,
+          ),
+      ),
+    ],
+  )
+  @ApiResponse(
+    responseCode = "204",
+    description = "No SSO configuration available for this user",
+    content = [
+      Content(
+        schema =
+          Schema(
+            implementation = Void::class,
+          ),
+      ),
+    ],
+  )
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
+  @OpenApiHideFromPublicDocs
+  fun getManagedBy(): ResponseEntity<PrivateOrganizationModel> {
+    val userAccount = authenticationFacade.authenticatedUser
+    val org = organizationRoleService.getManagedBy(userId = userAccount.id) ?: return ResponseEntity.noContent().build()
+    val view =
+      organizationService.findPrivateView(org.id, authenticationFacade.authenticatedUser.id)
+        ?: return ResponseEntity.noContent().build()
+    return ResponseEntity.ok(
+      privateOrganizationModelAssembler.toModel(
+        view,
+        enabledFeaturesProvider.get(view.organization.id),
+      ),
+    )
+  }
+
   @PostMapping("")
   @Operation(summary = "Updates current user's data.", deprecated = true)
   @OpenApiHideFromPublicDocs
@@ -163,6 +263,8 @@ class V2UserController(
 
   @PostMapping("/generate-super-token")
   @Operation(summary = "Get super JWT", description = "Generates new JWT token permitted to sensitive operations")
+  @BypassEmailVerification
+  @BypassForcedSsoAuthentication
   fun getSuperToken(
     @RequestBody @Valid
     req: SuperTokenRequest,

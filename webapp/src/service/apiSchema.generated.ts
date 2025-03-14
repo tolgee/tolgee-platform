@@ -9,6 +9,7 @@ export interface paths {
     get: operations["doExportJsonZip"];
   };
   "/api/public/authorize_oauth/sso/authentication-url": {
+    /** Returns URL which can be used to authenticate user using third party SSO service */
     post: operations["getAuthenticationUrl"];
   };
   "/api/public/authorize_oauth/{serviceType}": {
@@ -101,17 +102,14 @@ export interface paths {
     /** Returns specific API key info */
     get: operations["get_21"];
   };
-  "/v2/auth-provider/changed": {
-    get: operations["getChangedAuthProvider"];
-  };
-  "/v2/auth-provider/changed/accept": {
-    post: operations["acceptChangeAuthProvider"];
-  };
-  "/v2/auth-provider/changed/reject": {
-    post: operations["rejectChangeAuthProvider"];
-  };
-  "/v2/auth-provider/current": {
+  "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
+    delete: operations["deleteCurrentAuthProvider"];
+  };
+  "/v2/auth-provider/change": {
+    get: operations["getChangedAuthProvider"];
+    post: operations["acceptChangeAuthProvider"];
+    delete: operations["rejectChangeAuthProvider"];
   };
   "/v2/ee-license/info": {
     get: operations["getInfo_5"];
@@ -882,6 +880,10 @@ export interface paths {
     /** Generates new JWT token permitted to sensitive operations */
     post: operations["getSuperToken"];
   };
+  "/v2/user/managed-by": {
+    /** Returns the organization that manages a given user or null */
+    get: operations["getManagedBy"];
+  };
   "/v2/user/mfa/recovery": {
     /** Regenerates multi-factor authentication recovery codes */
     put: operations["regenerateRecoveryCodes"];
@@ -904,10 +906,17 @@ export interface paths {
     /** Returns all organizations owned only by current user */
     get: operations["getAllSingleOwnedOrganizations"];
   };
+  "/v2/user/sso": {
+    /** Returns information about sso configuration affecting the user. */
+    get: operations["getSso"];
+  };
 }
 
 export interface components {
   schemas: {
+    AcceptAuthProviderChangeRequest: {
+      id: string;
+    };
     AnnouncementDto: {
       type:
         | "FEATURE_BATCH_OPERATIONS"
@@ -982,8 +991,8 @@ export interface components {
       ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
     };
     AuthProviderDto: {
-      accountType?: "LOCAL" | "MANAGED" | "THIRD_PARTY";
       authType?: "GOOGLE" | "GITHUB" | "OAUTH2" | "SSO" | "SSO_GLOBAL";
+      id?: string;
       ssoDomain?: string;
     };
     AutoTranslationConfigModel: {
@@ -1012,6 +1021,7 @@ export interface components {
       /** @description If true, new keys will be automatically translated via batch operation using translation memory when 100% match is found */
       usingTranslationMemory: boolean;
     };
+    /** @example Links to avatar images */
     Avatar: {
       large: string;
       thumbnail: string;
@@ -1794,6 +1804,7 @@ export interface components {
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "third_party_switch_initiated"
+        | "third_party_switch_conflict"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -1875,6 +1886,7 @@ export interface components {
         | "cannot_create_organization"
         | "wrong_current_password"
         | "wrong_param_type"
+        | "user_missing_password"
         | "expired_super_jwt_token"
         | "cannot_delete_your_own_account"
         | "cannot_sort_by_this_column"
@@ -2008,6 +2020,7 @@ export interface components {
         | "sso_cant_verify_user"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
+        | "authentication_method_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
@@ -2016,6 +2029,7 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
         | "sso_login_forced_for_this_account"
+        | "use_sso_for_authentication_instead"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -2438,6 +2452,7 @@ export interface components {
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
+      ssoInfo?: components["schemas"]["PublicSsoTenantModel"];
       userInfo?: components["schemas"]["PrivateUserAccountModel"];
     };
     JwtAuthenticationResponse: {
@@ -3309,10 +3324,6 @@ export interface components {
       updatedAt: number;
       user: components["schemas"]["SimpleUserAccountModel"];
     };
-    /**
-     * @description Current user's direct permission
-     * @example MANAGE
-     */
     PermissionModel: {
       /**
        * @deprecated
@@ -3512,6 +3523,7 @@ export interface components {
       accountType: "LOCAL" | "MANAGED" | "THIRD_PARTY";
       avatar?: components["schemas"]["Avatar"];
       deletable: boolean;
+      domain?: string;
       emailAwaitingVerification?: string;
       globalServerRole: "USER" | "ADMIN";
       /** Format: int64 */
@@ -3519,6 +3531,12 @@ export interface components {
       mfaEnabled: boolean;
       name?: string;
       needsSuperJwtToken: boolean;
+      thirdPartyAuthType?:
+        | "GOOGLE"
+        | "GITHUB"
+        | "OAUTH2"
+        | "SSO"
+        | "SSO_GLOBAL";
       username: string;
     };
     ProjectActivityAuthorModel: {
@@ -3818,6 +3836,11 @@ export interface components {
       organizationName?: string;
       projectName?: string;
     };
+    PublicSsoTenantModel: {
+      domain: string;
+      force: boolean;
+      global: boolean;
+    };
     PublicUsageModel: {
       /**
        * Format: int64
@@ -3890,6 +3913,7 @@ export interface components {
        */
       translationsLimit: number;
     };
+    /** @example Quick start data for current user */
     QuickStartModel: {
       completedSteps: string[];
       finished: boolean;
@@ -4284,6 +4308,7 @@ export interface components {
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "third_party_switch_initiated"
+        | "third_party_switch_conflict"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -4365,6 +4390,7 @@ export interface components {
         | "cannot_create_organization"
         | "wrong_current_password"
         | "wrong_param_type"
+        | "user_missing_password"
         | "expired_super_jwt_token"
         | "cannot_delete_your_own_account"
         | "cannot_sort_by_this_column"
@@ -4498,6 +4524,7 @@ export interface components {
         | "sso_cant_verify_user"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
+        | "authentication_method_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
@@ -4506,6 +4533,7 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
         | "sso_login_forced_for_this_account"
+        | "use_sso_for_authentication_instead"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -4995,6 +5023,7 @@ export interface operations {
       };
     };
   };
+  /** Returns URL which can be used to authenticate user using third party SSO service */
   getAuthenticationUrl: {
     responses: {
       /** OK */
@@ -6295,6 +6324,86 @@ export interface operations {
       };
     };
   };
+  getCurrentAuthProvider: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AuthProviderDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  deleteCurrentAuthProvider: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getChangedAuthProvider: {
     responses: {
       /** OK */
@@ -6378,53 +6487,16 @@ export interface operations {
         };
       };
     };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AcceptAuthProviderChangeRequest"];
+      };
+    };
   };
   rejectChangeAuthProvider: {
     responses: {
       /** OK */
       200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  getCurrentAuthProvider: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["AuthProviderDto"];
-        };
-      };
       /** Bad Request */
       400: {
         content: {
@@ -18968,6 +19040,51 @@ export interface operations {
       };
     };
   };
+  /** Returns the organization that manages a given user or null */
+  getManagedBy: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrivateOrganizationModel"];
+        };
+      };
+      /** No SSO configuration available for this user */
+      204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Regenerates multi-factor authentication recovery codes */
   regenerateRecoveryCodes: {
     responses: {
@@ -19208,6 +19325,51 @@ export interface operations {
           "application/json": components["schemas"]["CollectionModelSimpleOrganizationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns information about sso configuration affecting the user. */
+  getSso: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PublicSsoTenantModel"];
+        };
+      };
+      /** No SSO configuration available for this user */
+      204: never;
       /** Bad Request */
       400: {
         content: {

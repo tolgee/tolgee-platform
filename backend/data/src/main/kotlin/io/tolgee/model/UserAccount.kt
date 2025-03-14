@@ -34,11 +34,20 @@ data class UserAccount(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
   @field:NotBlank
-  var username: String = "",
+  override var username: String = "",
   var password: String? = null,
   var name: String = "",
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER,
+  /**
+   * This property is redundant - it's value can be derived from other existing properties.
+   * Kept for legacy reasons.
+   *
+   * It's value follows these rules, but there are some edge cases related to old accounts:
+   * - NATIVE ->      password != null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH | null
+   * - THIRD_PARTY -> password == null && thirdPartyAuthType == GITHUB | GOOGLE | OAUTH
+   * - MANAGED ->     password == null && thirdPartyAuthType == SSO | SSO_GLOBAL
+   */
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   override var accountType: AccountType? = AccountType.LOCAL,

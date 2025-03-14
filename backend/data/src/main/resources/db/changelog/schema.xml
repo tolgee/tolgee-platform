@@ -4179,4 +4179,12 @@
             UPDATE notification SET type = 'TASK_FINISHED' WHERE type = 'TASK_COMPLETED';
         </sql>
     </changeSet>
+    <changeSet author="anty (generated)" id="1741260803979-1">
+        <addColumn tableName="auth_provider_change_request">
+            <column name="identifier" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1741689879651-1">
+        <dropColumn columnName="account_type" tableName="auth_provider_change_request"/>
+    </changeSet>
 </databaseChangeLog>

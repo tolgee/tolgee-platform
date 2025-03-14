@@ -18,6 +18,8 @@ package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.PatDto
@@ -27,7 +29,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
-import io.tolgee.security.service.thirdParty.SsoDelegate
+import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -61,7 +63,11 @@ class AuthenticationFilterTest {
 
   private val currentDateProvider = Mockito.mock(CurrentDateProvider::class.java)
 
+  private val tolgeeProperties = Mockito.mock(TolgeeProperties::class.java)
+
   private val authProperties = Mockito.mock(AuthenticationProperties::class.java)
+
+  private val internalProperties = Mockito.mock(InternalProperties::class.java)
 
   private val rateLimitService = Mockito.mock(RateLimitService::class.java)
 
@@ -85,7 +91,7 @@ class AuthenticationFilterTest {
 
   private val authenticationFilter =
     AuthenticationFilter(
-      authProperties,
+      tolgeeProperties,
       currentDateProvider,
       rateLimitService,
       jwtService,
@@ -107,7 +113,10 @@ class AuthenticationFilterTest {
     val now = Date()
     Mockito.`when`(currentDateProvider.date).thenReturn(now)
 
+    Mockito.`when`(tolgeeProperties.authentication).thenReturn(authProperties)
+    Mockito.`when`(tolgeeProperties.internal).thenReturn(internalProperties)
     Mockito.`when`(authProperties.enabled).thenReturn(true)
+    Mockito.`when`(internalProperties.verifySsoAccountAvailableBypass).thenReturn(null)
 
     Mockito.`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
       .thenReturn(
@@ -168,7 +177,9 @@ class AuthenticationFilterTest {
   fun resetMocks() {
     Mockito.reset(
       currentDateProvider,
+      tolgeeProperties,
       authProperties,
+      internalProperties,
       rateLimitService,
       jwtService,
       pakService,

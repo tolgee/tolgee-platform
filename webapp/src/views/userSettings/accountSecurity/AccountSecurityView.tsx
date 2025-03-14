@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { Fragment, FunctionComponent } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
@@ -7,7 +7,7 @@ import { LINKS } from 'tg.constants/links';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { Alert } from 'tg.component/common/Alert';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { ChangePassword } from './ChangePassword';
@@ -15,6 +15,7 @@ import { MfaSettings } from './MfaSettings';
 import { EnableMfaDialog } from './EnableMfaDialog';
 import { MfaRecoveryCodesDialog } from './MfaRecoveryCodesDialog';
 import { DisableMfaDialog } from './DisableMfaDialog';
+import { ChangeAuthProvider } from './ChangeAuthProvider';
 
 export const AccountSecurityView: FunctionComponent = () => {
   const { t } = useTranslate();
@@ -23,6 +24,10 @@ export const AccountSecurityView: FunctionComponent = () => {
   const resetResetLoadable = useApiMutation({
     url: '/api/public/reset_password_request',
     method: 'post',
+  });
+  const managedBy = useApiQuery({
+    url: `/v2/user/managed-by`,
+    method: 'get',
   });
 
   const isManaged = user?.accountType === 'MANAGED';
@@ -93,11 +98,23 @@ export const AccountSecurityView: FunctionComponent = () => {
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          <T keyName="managed-account-notice" />
+          {managedBy.isLoading || !managedBy.data ? (
+            <T keyName="managed-account-notice" />
+          ) : (
+            <T
+              keyName="managed-account-notice-organization"
+              params={{ organization: managedBy.data?.name }}
+            />
+          )}
         </Alert>
       )}
-      {!isManaged && <ChangePassword />}
-      <MfaSettings />
+      {!isManaged && (
+        <>
+          <ChangePassword />
+          <MfaSettings />
+          <ChangeAuthProvider />
+        </>
+      )}
 
       <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
         <EnableMfaDialog />

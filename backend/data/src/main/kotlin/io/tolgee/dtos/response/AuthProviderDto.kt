@@ -1,25 +1,28 @@
 package io.tolgee.dtos.response
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.AuthProviderChangeRequest
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 
 data class AuthProviderDto(
-  var accountType: UserAccount.AccountType? = null,
+  var id: String? = null,
   var authType: ThirdPartyAuthType? = null,
   var ssoDomain: String? = null,
 ) {
   companion object {
-    fun UserAccount.asAuthProviderDto(): AuthProviderDto? {
+    fun UserAccount.asAuthProviderDto(properties: TolgeeProperties): AuthProviderDto? {
       val type = thirdPartyAuthType ?: return null
 
-      var ssoDomain: String? = null
-      if (type == ThirdPartyAuthType.SSO) {
-        ssoDomain = organizationRoles.find { it.managed }!!.organization!!.ssoTenant!!.domain
-      }
+      var ssoDomain: String? =
+        when (type) {
+          ThirdPartyAuthType.SSO -> organizationRoles.find { it.managed }!!.organization!!.ssoTenant!!.domain
+          ThirdPartyAuthType.SSO_GLOBAL -> properties.authentication.ssoGlobal.domain
+          else -> null
+        }
 
       return AuthProviderDto(
-        accountType,
+        null,
         type,
         ssoDomain,
       )
@@ -27,7 +30,7 @@ data class AuthProviderDto(
 
     fun AuthProviderChangeRequest.asAuthProviderDto(): AuthProviderDto? {
       return AuthProviderDto(
-        accountType,
+        identifier,
         authType,
         ssoDomain,
       )

@@ -27,6 +27,11 @@ export const useQuickStartGuideService = (
     method: 'get',
     path: { slug: organizationSlug! },
     query: { size: 1, sort: ['id,desc'] },
+    fetchOptions: {
+      disableAutoErrorHandle: true,
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+    },
     options: {
       enabled:
         projectId === undefined && Boolean(organizationSlug) && isEmailVerified,

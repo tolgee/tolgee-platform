@@ -7,6 +7,13 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { RequestOptions } from './ApiHttpService';
 import { globalContext } from 'tg.globalContext/globalActions';
 import { LINKS } from 'tg.constants/links';
+import { matchPath } from 'react-router-dom';
+
+// Paths which user must be able to access during SSO migration
+const SSO_MIGRATION_PATHS = [
+  LINKS.SSO_MIGRATION,
+  LINKS.ACCEPT_AUTH_PROVIDER_CHANGE,
+];
 
 export const handleApiError = (
   r: Response,
@@ -24,13 +31,41 @@ export const handleApiError = (
     if (r.status == 401) {
       // eslint-disable-next-line no-console
       console.warn('Redirecting to login - unauthorized user');
-      messageService.error(<T keyName="expired_jwt_token" />);
-      globalContext.actions?.logout();
+      messageService.error(
+        resObject?.code ? (
+          <TranslatedError code={resObject?.code} />
+        ) : (
+          <T keyName="expired_jwt_token" />
+        )
+      );
+      globalContext.actions?.exitDebugCustomerAccountOrLogout();
       return;
     }
     if (r.status == 403) {
       if (resObject?.code === 'email_not_verified') {
         globalContext.actions?.redirectTo(LINKS.ROOT.build());
+        return;
+      }
+
+      if (resObject?.code === 'sso_login_forced_for_this_account') {
+        const currentLocation = globalContext.actions?.currentLocation();
+        const alreadyCorrectPath =
+          currentLocation &&
+          SSO_MIGRATION_PATHS.some((link) =>
+            matchPath(currentLocation, {
+              path: link.template,
+              exact: true,
+              strict: false,
+            })
+          );
+        if (alreadyCorrectPath) {
+          // Safety net check: Don't redirect if user is already on one of the SSO migration pages
+          // This shouldn't happen; It means frontend is trying to load one of the disabled
+          // endpoints in the background and it should be fixed
+          messageService.error(<TranslatedError code={resObject?.code} />);
+          return;
+        }
+        globalContext.actions?.redirectTo(LINKS.SSO_MIGRATION.build());
         return;
       }
 

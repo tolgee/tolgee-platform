@@ -9,7 +9,7 @@ import {
 import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { LogIn01 } from '@untitled-ui/icons-react';
+import { Key02 } from '@untitled-ui/icons-react';
 
 import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -134,7 +134,7 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                     component={Link}
                     to={LINKS.SSO_LOGIN.build()}
                     size="medium"
-                    endIcon={<LogIn01 />}
+                    endIcon={<Key02 />}
                     variant="outlined"
                     style={{ marginBottom: '0.5rem' }}
                     color="inherit"
@@ -146,11 +146,13 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                   <LoadingButton
                     loading={isLoading}
                     size="medium"
-                    endIcon={<LogIn01 />}
+                    endIcon={<Key02 />}
                     variant="outlined"
                     style={{ marginBottom: '0.5rem' }}
                     color="inherit"
                     onClick={globalSsoLogin}
+                    data-cy="login-provider"
+                    data-cy-provider="sso"
                   >
                     {loginText}
                   </LoadingButton>
@@ -168,6 +170,8 @@ export function LoginCredentialsForm(props: LoginViewCredentialsProps) {
                   variant="outlined"
                   style={{ marginBottom: '0.5rem' }}
                   color="inherit"
+                  data-cy="login-provider"
+                  data-cy-provider={provider.id}
                 >
                   {provider.loginButtonTitle}
                 </Button>

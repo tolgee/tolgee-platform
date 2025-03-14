@@ -2,7 +2,6 @@ package io.tolgee.security.thirdParty
 
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.security.payload.JwtAuthenticationResponse
-import io.tolgee.security.service.thirdParty.SsoDelegate
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

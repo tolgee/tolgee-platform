@@ -1,17 +1,15 @@
 import { FunctionComponent } from 'react';
-import { Alert, Box, Grid, Typography } from '@mui/material';
+import { Alert } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { useFormikContext } from 'formik';
 import { Redirect, useHistory } from 'react-router-dom';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
-import { UserProfileAvatar } from './UserProfileAvatar';
+import { UserProfileFields } from './UserProfileFields';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
 import { LINKS } from 'tg.constants/links';
 import { messageService } from 'tg.service/MessageService';
@@ -21,6 +19,10 @@ import { DeleteUserButton } from './DeleteUserButton';
 export const UserProfileView: FunctionComponent = () => {
   const { t } = useTranslate();
   const { refetchInitialData } = useGlobalActions();
+  const managedBy = useApiQuery({
+    url: `/v2/user/managed-by`,
+    method: 'get',
+  });
   const user = useUser();
 
   const updateUser = useApiMutation({
@@ -56,63 +58,6 @@ export const UserProfileView: FunctionComponent = () => {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
   }
 
-  const Fields = () => {
-    const formik = useFormikContext();
-    const initialEmail = formik.getFieldMeta('email').initialValue;
-    const newEmail = formik.getFieldMeta('email').value;
-    const emailChanged = newEmail !== initialEmail;
-
-    return (
-      <Box data-cy="user-profile" sx={{ mb: 2 }}>
-        <Grid container spacing={8}>
-          <Grid item xs="auto">
-            <UserProfileAvatar />
-          </Grid>
-          <Grid item xs={12} sm>
-            <TextField
-              name="name"
-              label={<T keyName="User settings - Full name" />}
-            />
-            <TextField
-              name="email"
-              disabled={isManaged}
-              helperText={
-                isManaged ? t('managed-account-field-hint') : undefined
-              }
-              label={<T keyName="User settings - E-mail" />}
-            />
-            {user?.emailAwaitingVerification && (
-              <Box>
-                <Typography variant="body1">
-                  <T
-                    keyName="email_waiting_for_verification"
-                    params={{
-                      email: user.emailAwaitingVerification!,
-                    }}
-                  />
-                </Typography>
-              </Box>
-            )}
-
-            {emailChanged && config.needsEmailVerification && (
-              <Typography variant="body1">
-                <T keyName="your_email_was_changed_verification_message" />
-              </Typography>
-            )}
-          </Grid>
-        </Grid>
-
-        {emailChanged && (
-          <TextField
-            name="currentPassword"
-            type="password"
-            label={<T keyName="current-password" />}
-          />
-        )}
-      </Box>
-    );
-  };
-
   return (
     <BaseUserSettingsView
       windowTitle={t('user_profile_title')}
@@ -121,7 +66,14 @@ export const UserProfileView: FunctionComponent = () => {
     >
       {isManaged && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          <T keyName="managed-account-notice" />
+          {managedBy.isLoading || !managedBy.data ? (
+            <T keyName="managed-account-notice" />
+          ) : (
+            <T
+              keyName="managed-account-notice-organization"
+              params={{ organization: managedBy.data?.name }}
+            />
+          )}
         </Alert>
       )}
       {user && (
@@ -142,7 +94,7 @@ export const UserProfileView: FunctionComponent = () => {
           onCancel={() => history.goBack()}
           onSubmit={handleSubmit}
         >
-          <Fields />
+          <UserProfileFields />
         </StandardForm>
       )}
     </BaseUserSettingsView>

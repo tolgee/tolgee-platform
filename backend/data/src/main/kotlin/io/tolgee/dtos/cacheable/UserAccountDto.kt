@@ -8,6 +8,7 @@ import java.util.*
 data class UserAccountDto(
   val name: String,
   val username: String,
+  val domain: String?,
   val role: UserAccount.Role?,
   val id: Long,
   val needsSuperJwt: Boolean,
@@ -24,6 +25,7 @@ data class UserAccountDto(
       UserAccountDto(
         name = entity.name,
         username = entity.username,
+        domain = entity.domain,
         role = entity.role,
         id = entity.id,
         needsSuperJwt = entity.needsSuperJwt,

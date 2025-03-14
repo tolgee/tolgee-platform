@@ -239,7 +239,7 @@ context('Sign up', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(HOST + '/login');
-      loginWithFakeGithub();
+      loginWithFakeGithub(TEST_USERNAME);
       cy.contains('Projects').should('be.visible');
       cy.log(invitationLink);
       cy.visit(invitationLink);
@@ -256,7 +256,8 @@ context('Sign up', () => {
       cy.gcy('accept-invitation-accept').click();
       cy.gcy('pending-invitation-banner').should('be.visible');
       cy.intercept('/api/public/authorize_oauth/github**').as('GithubSignup');
-      loginWithFakeGithub();
+      loginWithFakeGithub(TEST_USERNAME);
+      cy.contains('Projects').should('be.visible');
       cy.wait('@GithubSignup').then((interception) => {
         assert.isTrue(interception.request.url.includes('invitationCode'));
       });
