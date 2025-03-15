@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { BillingProgress } from '../component/BillingProgress';
 import { BILLING_CRITICAL_FRACTION } from '../component/constants';
+import { ProgressItem } from '../component/getProgressData';
 
 export const StyledMetrics = styled('div')`
   display: grid;
@@ -36,8 +37,7 @@ const StyledValue = styled('span')`
 
 type Props = {
   name: string | React.ReactNode;
-  currentQuantity: number;
-  totalQuantity?: number;
+  progress: ProgressItem;
   periodEnd?: number;
   isPayAsYouGo?: boolean;
   'data-cy'?: string;
@@ -45,38 +45,47 @@ type Props = {
 
 export const PlanMetric: React.FC<Props> = ({
   name,
-  currentQuantity,
-  totalQuantity,
+  progress,
   isPayAsYouGo,
   ...props
 }) => {
   const formatNumber = useNumberFormatter();
-  const showProgress = totalQuantity !== undefined;
-  const progress = currentQuantity / totalQuantity!;
-  const valueClass = isPayAsYouGo
-    ? totalQuantity && currentQuantity > totalQuantity
-      ? 'over'
-      : 'sufficient'
-    : progress > BILLING_CRITICAL_FRACTION
-    ? 'low'
-    : 'sufficient';
+  const showProgress = progress.included !== undefined;
+
+  function getValueClass() {
+    if (isPayAsYouGo) {
+      if (progress?.included && progress.used > progress.included) {
+        return 'over';
+      }
+      return 'sufficient';
+    }
+
+    if (progress.progress > BILLING_CRITICAL_FRACTION) {
+      return 'low';
+    }
+
+    return 'sufficient';
+  }
+
+  const valueClass = getValueClass();
 
   return (
     <>
       <StyledName>{name}</StyledName>
       <Box data-cy={props['data-cy']}>
         <StyledValue className={clsx({ [valueClass]: showProgress })}>
-          {formatNumber(currentQuantity)}
+          {formatNumber(progress?.used ?? 0)}
         </StyledValue>
-        <span>{showProgress ? ` / ${formatNumber(totalQuantity!)}` : ''}</span>
+        <span>
+          {showProgress ? ` / ${formatNumber(progress.included)}` : ''}
+        </span>
       </Box>
       {showProgress && (
         <StyledProgress>
           <BillingProgress
-            value={currentQuantity}
-            maxValue={totalQuantity}
+            progressItem={progress}
             height={8}
-            canGoOver={isPayAsYouGo}
+            isPayAsYouGo={isPayAsYouGo}
             showLabels
           />
         </StyledProgress>

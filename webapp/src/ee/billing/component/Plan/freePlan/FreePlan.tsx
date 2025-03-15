@@ -2,51 +2,44 @@ import clsx from 'clsx';
 import { Box, styled, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { PlanContainer, PlanContent } from './PlanStyles';
-import { PlanActiveBanner } from './PlanActiveBanner';
-import { PlanTitle } from './PlanTitle';
-import { PlanType } from './types';
-import { PricePrimary } from '../Price/PricePrimary';
-import { PlanFeature } from '../PlanFeature';
+import { PlanContainer, PlanContent } from '../PlanStyles';
+import { PlanActiveBanner } from '../PlanActiveBanner';
+import { PlanTitle } from '../PlanTitle';
+import { PlanType } from '../types';
+import { PricePrimary } from '../../Price/PricePrimary';
+import { PlanFeature } from '../../PlanFeature';
 import {
-  IncludedCreadits,
+  IncludedCredits,
   IncludedSeats,
   IncludedStrings,
-} from '../IncludedItem';
+} from '../../IncludedItem';
+import { FreePlanLimits } from './FreePlanLimits';
 
 const StyledPlanContent = styled(PlanContent)`
   display: grid;
   grid-template-areas:
     'title   features   price'
-    'strings mt-credits seats';
+    'metric1 metric2  metric3';
   grid-template-rows: unset;
   align-items: center;
 
   .title {
     grid-area: title;
   }
+
   .features {
     grid-area: features;
   }
+
   .price {
     grid-area: price;
   }
-  .strings {
-    grid-area: strings;
-  }
-  .mt-credits {
-    grid-area: mt-credits;
-  }
-  .seats {
-    grid-area: seats;
-  }
 
-  .features,
-  .mt-credits {
+  .features {
     justify-self: center;
   }
-  .price,
-  .seats {
+
+  .price {
     justify-self: end;
   }
 
@@ -67,6 +60,7 @@ const StyledPlanContent = styled(PlanContent)`
     .features {
       justify-self: start;
     }
+
     .price {
       justify-self: end;
     }
@@ -108,27 +102,7 @@ export const FreePlan = ({ plan, active, ended }: Props) => {
           </Box>
         )}
 
-        {plan.includedUsage && (
-          <>
-            <IncludedStrings
-              className="strings"
-              count={plan.includedUsage.translations}
-              highlightColor={highlightColor}
-            />
-
-            <IncludedCreadits
-              className="mt-credits"
-              count={plan.includedUsage.mtCredits}
-              highlightColor={highlightColor}
-            />
-
-            <IncludedSeats
-              className="seats"
-              count={plan.includedUsage.seats}
-              highlightColor={highlightColor}
-            />
-          </>
-        )}
+        <FreePlanLimits plan={plan} />
       </StyledPlanContent>
     </PlanContainer>
   );

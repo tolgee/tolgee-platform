@@ -4,11 +4,13 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.eventListeners.LanguageStatsListener
 import io.tolgee.development.testDataBuilder.builders.*
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
+import io.tolgee.model.Project
 import io.tolgee.service.TenantService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.invitation.InvitationService
 import io.tolgee.service.key.*
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
@@ -68,6 +70,7 @@ class TestDataService(
   private val automationService: AutomationService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val languageStatsListener: LanguageStatsListener,
+  private val invitationService: InvitationService
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -81,6 +84,7 @@ class TestDataService(
   fun saveTestData(builder: TestDataBuilder) {
     activityHolder.enableAutoCompletion = false
     languageStatsListener.bypass = true
+    runBeforeSaveMethodsOfAdditionalSavers(builder)
     prepare()
 
     // Projects have to be stored in separate transaction since projectHolder's
@@ -89,8 +93,8 @@ class TestDataService(
     // To be able to save project in its separate transaction,
     // user/organization has to be stored first.
     executeInNewTransaction(transactionManager) {
-      saveOrganizationData(builder)
       saveAllUsers(builder)
+      saveOrganizationData(builder)
     }
 
     executeInNewTransaction(transactionManager) {
@@ -108,10 +112,13 @@ class TestDataService(
     updateLanguageStats(builder)
     activityHolder.enableAutoCompletion = true
     languageStatsListener.bypass = false
+
+    runAfterSaveMethodsOfAdditionalSavers(builder)
   }
 
   @Transactional
   fun cleanTestData(builder: TestDataBuilder) {
+    runBeforeCleanMethodsOfAdditionalSavers(builder)
     tryUntilItDoesntBreakConstraint {
       executeInNewTransaction(transactionManager) {
         builder.data.userAccounts.forEach {
@@ -129,6 +136,7 @@ class TestDataService(
           }
         }
       }
+      runAfterCleanMethodsOfAdditionalSavers(builder)
     }
 
     additionalTestDataSavers.forEach { dataSaver ->
@@ -163,6 +171,7 @@ class TestDataService(
   }
 
   private fun saveOrganizationDependants(builder: TestDataBuilder) {
+    saveOrganizationInvitations(builder)
     saveOrganizationRoles(builder)
     saveOrganizationAvatars(builder)
     saveAllMtCreditBuckets(builder)
@@ -208,6 +217,7 @@ class TestDataService(
   private fun saveAllProjectDependants(builder: ProjectBuilder) {
     saveApiKeys(builder)
     saveLanguages(builder)
+    saveProjectInvitations(builder.testDataBuilder.data.invitations, builder.self)
     savePermissions(builder)
     saveMtServiceConfigs(builder)
     saveAllNamespaces(builder)
@@ -378,7 +388,8 @@ class TestDataService(
   }
 
   private fun savePermissions(builder: ProjectBuilder) {
-    permissionService.saveAll(builder.data.permissions.map { it.self })
+    val toSave = builder.data.permissions.map { it.self }
+    permissionService.saveAll(toSave)
   }
 
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
@@ -527,5 +538,50 @@ class TestDataService(
 
   companion object {
     private val passwordHashCache = mutableMapOf<String, String>()
+  }
+
+  private fun runBeforeSaveMethodsOfAdditionalSavers(builder: TestDataBuilder) {
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach {
+        it.beforeSave(builder)
+      }
+    }
+  }
+
+
+  private fun runAfterSaveMethodsOfAdditionalSavers(builder: TestDataBuilder) {
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach {
+        it.afterSave(builder)
+      }
+    }
+  }
+
+  private fun runBeforeCleanMethodsOfAdditionalSavers(builder: TestDataBuilder) {
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach {
+        it.beforeClean(builder)
+      }
+    }
+  }
+
+  private fun runAfterCleanMethodsOfAdditionalSavers(builder: TestDataBuilder) {
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach {
+        it.afterClean(builder)
+      }
+    }
+  }
+
+  private fun saveOrganizationInvitations(builder: TestDataBuilder) {
+    builder.data.invitations.filter { it.self.organizationRole != null }.forEach {
+      invitationService.save(it.self)
+    }
+  }
+
+  private fun saveProjectInvitations(invitations: MutableList<InvitationBuilder>, self: Project) {
+    invitations.filter { it.self.permission?.project == self }.forEach {
+      invitationService.save(it.self)
+    }
   }
 }

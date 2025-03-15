@@ -92,3 +92,4 @@ logging:
     io.tolgee.service: TRACE
     io.tolgee.controllers.internal.e2eData.OrganizationE2eDataController: TRACE
     io.tolgee.controllers.internal.e2eData.ProjectsE2eDataController: TRACE
+    io.tolgee.ExceptionHandlers: DEBUG

@@ -2,7 +2,7 @@ import { Box, styled, SxProps } from '@mui/material';
 import { T } from '@tolgee/react';
 import { MtHint } from 'tg.component/billing/MtHint';
 import { StringSlotsHint } from './Hints';
-import { StringsHint } from 'tg.component/common/StringsHint';
+import { KeysHint, StringsHint } from 'tg.component/common/StringsHint';
 
 export const IncludedItemContainer = styled(Box)``;
 
@@ -15,16 +15,16 @@ type IncludedItemProps = {
   sx?: SxProps;
   className?: string;
   highlightColor: string;
+  'data-cy'?: string;
 };
 
 export const IncludedStringSlots = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       <T
         keyName="billing_subscription_included_slots_strings"
         params={{
@@ -40,11 +40,10 @@ export const IncludedStringSlots = ({
 export const IncludedStrings = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       {count === -1 ? (
         <T
           keyName="billing_subscription_included_strings_unlimited"
@@ -67,17 +66,45 @@ export const IncludedStrings = ({
   );
 };
 
-export const IncludedCreadits = ({
+export const IncludedKeys = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       {count === -1 ? (
         <T
-          keyName="billing_subscription_included_credits_unlimited"
+          keyName="billing_subscription_included_keys_negotiable"
+          params={{
+            highlight: <StyledQuantity color={highlightColor} />,
+            hint: <KeysHint />,
+          }}
+        />
+      ) : (
+        <T
+          keyName="billing_subscription_included_keys"
+          params={{
+            highlight: <StyledQuantity color={highlightColor} />,
+            quantity: count,
+            hint: <KeysHint />,
+          }}
+        />
+      )}
+    </IncludedItemContainer>
+  );
+};
+
+export const IncludedCredits = ({
+  count,
+  highlightColor,
+  ...containerProps
+}: IncludedItemProps) => {
+  return (
+    <IncludedItemContainer {...containerProps}>
+      {count === -1 ? (
+        <T
+          keyName="billing_subscription_included_credits_negotiable"
           params={{
             highlight: <StyledQuantity color={highlightColor} />,
             hint: <MtHint />,
@@ -100,14 +127,13 @@ export const IncludedCreadits = ({
 export const IncludedSeats = ({
   count,
   highlightColor,
-  sx,
-  className,
+  ...containerProps
 }: IncludedItemProps) => {
   return (
-    <IncludedItemContainer {...{ sx, className }}>
+    <IncludedItemContainer {...containerProps}>
       {count === -1 ? (
         <T
-          keyName="billing_subscription_included_seats_unlimited"
+          keyName="billing_subscription_included_seats_negotiable"
           params={{
             highlight: <StyledQuantity color={highlightColor} />,
             hint: <span />,

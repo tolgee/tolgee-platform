@@ -3,7 +3,7 @@ import { styled } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanType } from '../../component/Plan/types';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
-import { FreePlan } from '../../component/Plan/FreePlan';
+import { FreePlan } from '../../component/Plan/freePlan/FreePlan';
 import { useCloudPlans } from './useCloudPlans';
 import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
 import { CloudPlanItem } from './CloudPlanItem';

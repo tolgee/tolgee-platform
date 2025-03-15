@@ -2039,7 +2039,12 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported"
+        | "keys_seats_metric_are_not_supported_for_slots_fixed_type"
+        | "plan_key_limit_exceeded"
+        | "keys_spending_limit_exceeded"
+        | "plan_seat_limit_exceeded";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2659,6 +2664,11 @@ export interface components {
     KeyWithTranslationsModel: {
       /** @description There is a context available for this key */
       contextPresent: boolean;
+      /**
+       * Format: int64
+       * @description The time when the key was created
+       */
+      createdAt: number;
       /**
        * @description The namespace of the key
        * @example homepage
@@ -3449,6 +3459,8 @@ export interface components {
     };
     PlanIncludedUsageModel: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
@@ -3459,6 +3471,7 @@ export interface components {
     };
     PlanPricesModel: {
       perSeat: number;
+      perThousandKeys: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -3864,9 +3877,19 @@ export interface components {
       creditBalanceRefilledAt: number;
       /**
        * Format: int64
+       * @description How many keys are currently stored by organization
+       */
+      currentKeys: number;
+      /**
+       * Format: int64
        * @description Currently used credits over credits included in plan and extra credits
        */
       currentPayAsYouGoMtCredits: number;
+      /**
+       * Format: int64
+       * @description How seats are currently used by organization
+       */
+      currentSeats: number;
       /**
        * Format: int64
        * @description How many translations slots are currently used by organization
@@ -3887,9 +3910,19 @@ export interface components {
       extraCreditBalance: number;
       /**
        * Format: int64
+       * @description How many keys are included in current subscription plan. How many keys can organization use without additional costs.
+       */
+      includedKeys: number;
+      /**
+       * Format: int64
        * @description How many credits are included in your current plan
        */
       includedMtCredits: number;
+      /**
+       * Format: int64
+       * @description How many seats are included in current subscription plan. How many seats can organization use without additional costs.
+       */
+      includedSeats: number;
       /**
        * Format: int64
        * @description How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs
@@ -3900,8 +3933,20 @@ export interface components {
        * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
        */
       includedTranslations: number;
+      /** @description Whether the current plan is pay-as-you-go of fixed. For pay-as-you-go plans, the spending limit is the top limit. */
+      isPayAsYouGo: boolean;
+      /**
+       * Format: int64
+       * @description How many keys can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
+       */
+      keysLimit: number;
       /** Format: int64 */
       organizationId: number;
+      /**
+       * Format: int64
+       * @description How many seats can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
+       */
+      seatsLimit: number;
       /**
        * Format: int64
        * @description How many translations can be stored within your organization
@@ -3912,6 +3957,11 @@ export interface components {
        * @description How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
        */
       translationsLimit: number;
+      /**
+       * Format: int64
+       * @description Currently used credits including credits used over the limit
+       */
+      usedMtCredits: number;
     };
     /** @example Quick start data for current user */
     QuickStartModel: {
@@ -4543,7 +4593,12 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported"
+        | "keys_seats_metric_are_not_supported_for_slots_fixed_type"
+        | "plan_key_limit_exceeded"
+        | "keys_spending_limit_exceeded"
+        | "plan_seat_limit_exceeded";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -4863,6 +4918,7 @@ export interface components {
       /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
       appliedStripeCredits?: number;
       credits?: components["schemas"]["SumUsageItemModel"];
+      keys: components["schemas"]["AverageProportionalUsageItemModel"];
       seats: components["schemas"]["AverageProportionalUsageItemModel"];
       subscriptionPrice?: number;
       total: number;

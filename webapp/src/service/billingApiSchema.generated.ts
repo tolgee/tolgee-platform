@@ -222,6 +222,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -322,6 +323,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -354,6 +356,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
@@ -508,6 +511,7 @@ export interface components {
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "third_party_switch_initiated"
+        | "third_party_switch_conflict"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -589,6 +593,7 @@ export interface components {
         | "cannot_create_organization"
         | "wrong_current_password"
         | "wrong_param_type"
+        | "user_missing_password"
         | "expired_super_jwt_token"
         | "cannot_delete_your_own_account"
         | "cannot_sort_by_this_column"
@@ -722,6 +727,7 @@ export interface components {
         | "sso_cant_verify_user"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
+        | "authentication_method_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
@@ -730,6 +736,7 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
         | "sso_login_forced_for_this_account"
+        | "use_sso_for_authentication_instead"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -739,7 +746,12 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported"
+        | "keys_seats_metric_are_not_supported_for_slots_fixed_type"
+        | "plan_key_limit_exceeded"
+        | "keys_spending_limit_exceeded"
+        | "plan_seat_limit_exceeded";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -914,6 +926,8 @@ export interface components {
     };
     PlanIncludedUsageModel: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
@@ -924,6 +938,8 @@ export interface components {
     };
     PlanIncludedUsageRequest: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
@@ -932,6 +948,7 @@ export interface components {
     };
     PlanPricesModel: {
       perSeat: number;
+      perThousandKeys: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -939,6 +956,7 @@ export interface components {
     };
     PlanPricesRequest: {
       perSeat?: number;
+      perThousandKeys?: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -1066,6 +1084,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
@@ -1233,6 +1252,7 @@ export interface components {
       /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
       appliedStripeCredits?: number;
       credits?: components["schemas"]["SumUsageItemModel"];
+      keys: components["schemas"]["AverageProportionalUsageItemModel"];
       seats: components["schemas"]["AverageProportionalUsageItemModel"];
       subscriptionPrice?: number;
       total: number;
@@ -2893,7 +2913,7 @@ export interface operations {
     parameters: {
       path: {
         organizationId: number;
-        type: "SEATS" | "TRANSLATIONS";
+        type: "SEATS" | "TRANSLATIONS" | "KEYS";
       };
     };
     responses: {
@@ -3094,7 +3114,7 @@ export interface operations {
       path: {
         organizationId: number;
         invoiceId: number;
-        type: "SEATS" | "TRANSLATIONS";
+        type: "SEATS" | "TRANSLATIONS" | "KEYS";
       };
     };
     responses: {
