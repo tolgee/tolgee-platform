@@ -143,7 +143,15 @@ class WebSecurityConfig(
   }
 
   companion object {
-    private val PUBLIC_ENDPOINTS = arrayOf("/api/public/**", "/v2/public/**", "/avatars/**", "/v3/api-docs/**")
+    private val PUBLIC_ENDPOINTS =
+      arrayOf(
+        "/api/public/**",
+        "/v2/public/**",
+        "/avatars/**",
+        "/v3/api-docs/**",
+        "/screenshots/**",
+        "/uploaded-images/**",
+      )
     private val INTERNAL_ENDPOINTS = arrayOf("/internal/**")
   }
 }

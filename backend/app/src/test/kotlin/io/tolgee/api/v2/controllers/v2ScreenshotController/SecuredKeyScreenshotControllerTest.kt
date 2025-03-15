@@ -42,7 +42,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       val key = keyService.create(project, CreateKeyDto("test"))
       val screenshot = screenshotService.store(screenshotFile, key, null)
 
-      performAuthGet("/screenshots/${screenshot.filename}").andIsNotFound
+      performGet("/screenshots/${screenshot.filename}").andIsNotFound
     }
   }
 
@@ -66,7 +66,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
         )
 
       moveCurrentDate(Duration.ofSeconds(10))
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsUnauthorized
     }
   }
 
@@ -89,7 +89,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
           ),
         )
 
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
     }
   }
 
@@ -163,9 +163,9 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       // Login as someone who has 0 access to the project and see if it works
       loginAsUser(newUserRandom)
 
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsOk
       permissionService.delete(userPermission)
-      performAuthGet("/screenshots/${screenshot.filename}?token=$token").andIsNotFound
+      performGet("/screenshots/${screenshot.filename}?token=$token").andIsNotFound
     }
   }
 }
