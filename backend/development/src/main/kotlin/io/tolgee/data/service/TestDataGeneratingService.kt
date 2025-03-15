@@ -20,7 +20,7 @@ class TestDataGeneratingService(
     return getStandardResult(testData)
   }
 
-  private fun getStandardResult(data: TestDataBuilder): StandardTestDataResult {
+  fun getStandardResult(data: TestDataBuilder): StandardTestDataResult {
     return StandardTestDataResult(
       projects =
       data.data.projects.map {
