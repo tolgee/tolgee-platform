@@ -5,11 +5,7 @@
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsCreated
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.*
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -151,12 +147,12 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         screenshotService.store(screenshotFile, key, null)
       }
     val result =
-      performAuthGet("/screenshots/${screenshot.filename}").andIsOk
+      performGet("/screenshots/${screenshot.filename}").andIsOk
         .andExpect(
           header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"),
         )
         .andReturn()
-    performAuthGet("/screenshots/${screenshot.thumbnailFilename}").andIsOk
+    performGet("/screenshots/${screenshot.thumbnailFilename}").andIsOk
     assertThat(result.response.contentAsByteArray).isEqualTo(fileStorage.readFile("screenshots/" + screenshot.filename))
   }
 

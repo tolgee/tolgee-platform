@@ -34,7 +34,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
   @Test
   fun getScreenshotFileNoTimestamp() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
-    performAuthGet("/uploaded-images/${image.filename}.jpg").andIsNotFound
+    performGet("/uploaded-images/${image.filename}.jpg").andIsNotFound
   }
 
   @Test
@@ -50,7 +50,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       )
 
     moveCurrentDate(Duration.ofSeconds(10))
-    performAuthGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
+    performGet("/uploaded-images/${image.filename}.jpg?token=$token").andIsUnauthorized
   }
 
   @Test
@@ -66,7 +66,7 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
       )
 
     val storedImage =
-      performAuthGet("/uploaded-images/${image.filename}.png?token=$token")
+      performGet("/uploaded-images/${image.filename}.png?token=$token")
         .andIsOk.andReturn().response.contentAsByteArray
 
     assertThat(storedImage).isEqualTo(fileStorage.readFile("uploadedImages/" + image.filename + ".png"))
