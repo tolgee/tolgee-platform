@@ -1613,6 +1613,7 @@
   "translation_filter_item_exclude": "Ekskluder",
   "translation_filter_item_excluded": "Ekskludert",
   "translation_filters_comments_resolved": "Løste kommentarer",
+  "translation_filters_comments_unresolved": "Uløste kommentarer",
   "translation_format_help": "Hvordan formatere oversettelsen",
   "translation_grid_key_text": "Nøkkel",
   "Translation grid - Successfully deleted!": "Oversettelser slettet!",

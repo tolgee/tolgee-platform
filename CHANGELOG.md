@@ -1,3 +1,10 @@
+## [3.111.1](https://github.com/tolgee/tolgee-platform/compare/v3.111.0...v3.111.1) (2025-03-15)
+
+
+### Bug Fixes
+
+* Ignore screenshot paths for new interceptors ([#2997](https://github.com/tolgee/tolgee-platform/issues/2997)) ([b5186d3](https://github.com/tolgee/tolgee-platform/commit/b5186d3b3460513fb28e3614dd4257810b8e959f))
+
 # [3.111.0](https://github.com/tolgee/tolgee-platform/compare/v3.110.2...v3.111.0) (2025-03-14)
 
 

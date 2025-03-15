@@ -1617,6 +1617,7 @@
   "translation_filter_item_exclude": "Exclure",
   "translation_filter_item_excluded": "Exclu",
   "translation_filters_comments_resolved": "Commentaires résolus",
+  "translation_filters_comments_unresolved": "Commentaires non résolus",
   "translation_format_help": "Comment formater la traduction",
   "translation_grid_key_text": "Clé",
   "Translation grid - Successfully deleted!": "Traductions suprimées !",

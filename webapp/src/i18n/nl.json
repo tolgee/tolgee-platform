@@ -1615,6 +1615,7 @@
   "translation_filter_item_exclude": "Uitsluiten",
   "translation_filter_item_excluded": "Uitgesloten",
   "translation_filters_comments_resolved": "Opgeloste opmerkingen",
+  "translation_filters_comments_unresolved": "Onopgeloste opmerkingen",
   "translation_format_help": "Hoe de vertaling te formatteren",
   "translation_grid_key_text": "Sleutel",
   "Translation grid - Successfully deleted!": "Vertalingen verwijderd!",

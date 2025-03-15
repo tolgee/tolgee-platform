@@ -1542,6 +1542,7 @@
   "translation_filter_item_exclude": "Escludere",
   "translation_filter_item_excluded": "Escluso",
   "translation_filters_comments_resolved": "Commenti risolti",
+  "translation_filters_comments_unresolved": "Commenti non risolti",
   "translation_format_help": "Come formattare la traduzione",
   "translation_grid_key_text": "Chiave",
   "translation_memory_empty": "Vuoto",

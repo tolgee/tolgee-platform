@@ -1634,6 +1634,7 @@
   "translation_filter_item_exclude": "除外",
   "translation_filter_item_excluded": "除外",
   "translation_filters_comments_resolved": "解決済みのコメント",
+  "translation_filters_comments_unresolved": "未解決のコメント",
   "translation_format_help": "翻訳のフォーマット方法",
   "translation_grid_key_text": "キー",
   "Translation grid - Successfully deleted!": "翻訳の削除に成功しました！",
