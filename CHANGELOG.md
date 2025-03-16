@@ -1,3 +1,10 @@
+## [3.111.2](https://github.com/tolgee/tolgee-platform/compare/v3.111.1...v3.111.2) (2025-03-16)
+
+
+### Bug Fixes
+
+* properly handle unauthenticated requests in email and sso interceptor ([#2995](https://github.com/tolgee/tolgee-platform/issues/2995)) ([79a6f0b](https://github.com/tolgee/tolgee-platform/commit/79a6f0b02cb2ccb9618c6d050507bc463f0c4d7c))
+
 ## [3.111.1](https://github.com/tolgee/tolgee-platform/compare/v3.111.0...v3.111.1) (2025-03-15)
 
 
