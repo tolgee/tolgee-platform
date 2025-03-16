@@ -33,6 +33,11 @@ class EmailValidationInterceptor(
       return true
     }
 
+    if (!authenticationFacade.isAuthenticated) {
+      // Allow unauthenticated requests - not our concern
+      return super.preHandle(request, response, handler)
+    }
+
     val user = authenticationFacade.authenticatedUser
     checkEmailVerificationOrThrow(user, handler)
 
