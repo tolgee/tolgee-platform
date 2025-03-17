@@ -1,3 +1,11 @@
+# [3.112.0](https://github.com/tolgee/tolgee-platform/compare/v3.111.3...v3.112.0) (2025-03-17)
+
+
+### Features
+
+* add CloudFront cache purger ([#2988](https://github.com/tolgee/tolgee-platform/issues/2988)) ([98d802c](https://github.com/tolgee/tolgee-platform/commit/98d802c9cfef603e15e43fae8a7a373e2a61de6f))
+* Escaping Tags in XLIFF ([#2936](https://github.com/tolgee/tolgee-platform/issues/2936)) ([a5f44a5](https://github.com/tolgee/tolgee-platform/commit/a5f44a53e9f1805c6c839ea12fd0278e7be11520)), closes [#2912](https://github.com/tolgee/tolgee-platform/issues/2912) [#2912](https://github.com/tolgee/tolgee-platform/issues/2912)
+
 ## [3.111.3](https://github.com/tolgee/tolgee-platform/compare/v3.111.2...v3.111.3) (2025-03-17)
 
 
