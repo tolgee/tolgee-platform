@@ -1,3 +1,10 @@
+## [3.111.3](https://github.com/tolgee/tolgee-platform/compare/v3.111.2...v3.111.3) (2025-03-17)
+
+
+### Bug Fixes
+
+* update docker image and fix docker build cache ([#2993](https://github.com/tolgee/tolgee-platform/issues/2993)) ([3948507](https://github.com/tolgee/tolgee-platform/commit/3948507ea618708063200f86ea4c82b8b23a5047))
+
 ## [3.111.2](https://github.com/tolgee/tolgee-platform/compare/v3.111.1...v3.111.2) (2025-03-16)
 
 
