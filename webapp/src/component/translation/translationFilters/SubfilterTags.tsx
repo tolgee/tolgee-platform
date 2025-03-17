@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Divider, Menu } from '@mui/material';
+import { Box, Divider, Menu } from '@mui/material';
 import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -195,12 +195,16 @@ export function getTagFiltersName(value: FiltersInternal) {
     );
   }
   if (value.filterNoTag?.length) {
-    return (
+    return value.filterNoTag[0] ? (
       <Tag
         name={value.filterNoTag[0]}
         sx={{ textDecoration: 'line-through' }}
         className="selected"
       />
+    ) : (
+      <Box display="inline" sx={{ textDecoration: 'line-through' }}>
+        <T keyName="translations_filters_tags_without_tags" />
+      </Box>
     );
   }
 }

@@ -261,18 +261,18 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     userAccount = testData.user
     performProjectAuthGet("/translations?filterState=de,TRANSLATED&filterState=en,REVIEWED")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("state test key 2")
-        node("page.totalElements").isEqualTo(1)
+        node("_embedded.keys[0].keyName").isEqualTo("state test key")
+        node("_embedded.keys[1].keyName").isEqualTo("state test key 2")
+        node("_embedded.keys[2].keyName").isEqualTo("state test key 3")
+        node("page.totalElements").isEqualTo(3)
       }
     performProjectAuthGet("/translations?filterState=de,REVIEWED&filterState=en,REVIEWED")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("state test key")
-        node("page.totalElements").isEqualTo(1)
-      }
-    performProjectAuthGet("/translations?filterState=de,UNTRANSLATED&filterState=en,REVIEWED")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("state test key 3")
-        node("page.totalElements").isEqualTo(1)
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[1].keyName").isEqualTo("state test key")
+        node("_embedded.keys[2].keyName").isEqualTo("state test key 2")
+        node("_embedded.keys[3].keyName").isEqualTo("state test key 3")
+        node("page.totalElements").isEqualTo(4)
       }
   }
 

@@ -63,13 +63,15 @@ export const SubfilterComments = ({ value, actions }: Props) => {
         >
           <FilterItem
             label={t('translation_filters_comments_unresolved')}
-            selected={value.filterHasUnresolvedComments === true}
-            onClick={() => handleUnresolvedSetValue(true)}
+            selected={Boolean(value.filterHasUnresolvedComments)}
+            onClick={() =>
+              handleUnresolvedSetValue(!value.filterHasUnresolvedComments)
+            }
           />
           <FilterItem
             label={t('translation_filters_comments_any')}
-            selected={value.filterHasComments === true}
-            onClick={() => handleSetValue(true)}
+            selected={Boolean(value.filterHasComments)}
+            onClick={() => handleSetValue(!value.filterHasComments)}
           />
         </Menu>
       )}

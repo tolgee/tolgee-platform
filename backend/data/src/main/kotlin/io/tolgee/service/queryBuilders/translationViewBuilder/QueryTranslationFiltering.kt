@@ -74,7 +74,7 @@ class QueryTranslationFiltering(
       )
 
     if (conditions.isNotEmpty()) {
-      queryBase.whereConditions.add(cb.or(*conditions.toTypedArray()))
+      queryBase.translationConditions.add(cb.or(*conditions.toTypedArray()))
     }
   }
 
