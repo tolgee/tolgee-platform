@@ -195,6 +195,7 @@ declare namespace DataCy {
         "expiration-date-field" |
         "expiration-date-picker" |
         "expiration-select" |
+        "export-escape_html-selector" |
         "export-format-selector" |
         "export-format-selector-item" |
         "export-language-selector" |

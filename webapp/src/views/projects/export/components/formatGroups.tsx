@@ -12,6 +12,7 @@ export interface FormatItem {
   defaultStructureDelimiter?: string;
   showSupportArrays?: boolean;
   defaultSupportArrays?: boolean;
+  showEscapeHtml?: boolean;
   structured?: boolean;
   format: components['schemas']['ExportParams']['format'];
   messageFormat?: MessageFormat;
@@ -54,6 +55,7 @@ export const formatGroups: FormatGroup[] = [
         extension: 'xliff',
         name: <T keyName="export-format-xliff" />,
         format: 'XLIFF',
+        showEscapeHtml: true,
         supportedMessageFormats: [
           'ICU',
           'JAVA_STRING_FORMAT',

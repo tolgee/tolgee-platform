@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="" datatype="plaintext" source-language="en" target-language="cs">
+    <body>
+      <trans-unit id="simple_html" xml:space="preserve"><source><b>Bold text</b> and <i>italic text</i></source></trans-unit>
+      <trans-unit id="nested_html" xml:space="preserve"><source><div><p>Nested <b>bold</b> text</p></div></source></trans-unit>
+      <trans-unit id="mixed_entities" xml:space="preserve"><source><span>Copyright &#169; 2024 &amp; <b>Terms</b></span></source></trans-unit>
+      <trans-unit id="html_attributes" xml:space="preserve"><source><a href="https://example.com" class="link">Click here</a></source></trans-unit>
+    </body>
+  </file>
+</xliff> 

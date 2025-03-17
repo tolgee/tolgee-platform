@@ -106,6 +106,7 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
             format: defaultFormat.id,
             nested: false,
             supportArrays: defaultFormat.defaultSupportArrays || false,
+            escapeHtml: false,
             messageFormat: 'ICU' as MessageFormat | undefined,
           }}
           validate={(values) => {
@@ -143,6 +144,7 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
                       // strict message format is prioritized
                       format.messageFormat ??
                       normalizeSelectedMessageFormat(values),
+                    escapeHtml: values.escapeHtml,
                   },
                 },
               },

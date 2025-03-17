@@ -48,6 +48,7 @@ class ContentDeliveryConfigService(
     config.copyPropsFrom(dto)
     setSlugForCreation(config, dto)
     config.pruneBeforePublish = dto.pruneBeforePublish
+    config.escapeHtml = dto.escapeHtml
     contentDeliveryConfigRepository.save(config)
     if (dto.autoPublish) {
       automationService.createForContentDelivery(config)

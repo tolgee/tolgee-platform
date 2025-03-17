@@ -26,6 +26,7 @@ class ContentDeliveryConfigModelAssembler(
       autoPublish = entity.automationActions.isNotEmpty(),
       lastPublished = entity.lastPublished?.time,
       lastPublishedFiles = entity.lastPublishedFiles ?: listOf(),
+      escapeHtml = entity.escapeHtml,
     ).also {
       it.copyPropsFrom(entity)
     }

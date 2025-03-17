@@ -33,6 +33,7 @@ export function getCdEditInitialValues(
       messageFormat: data?.messageFormat,
     }),
     pruneBeforePublish: data?.pruneBeforePublish ?? true,
+    escapeHtml: data?.escapeHtml ?? false,
     slug: data?.slug,
   };
 }

@@ -150,6 +150,7 @@ export const ExportForm = () => {
             ? getFormatById(urlFormat as string).defaultSupportArrays
             : defaultFormat.defaultSupportArrays) || false,
         messageFormat: (messageFormat ?? 'ICU') as MessageFormat | undefined,
+        escapeHtml: false,
       }}
       validate={(values) => {
         const errors: FormikErrors<typeof values> = {};
@@ -192,6 +193,7 @@ export const ExportForm = () => {
                   // strict message format is prioritized
                   format.messageFormat ??
                   normalizeSelectedMessageFormat(values),
+                escapeHtml: values.escapeHtml || false,
               },
             },
           },
