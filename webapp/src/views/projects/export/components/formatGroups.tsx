@@ -12,6 +12,7 @@ export interface FormatItem {
   defaultStructureDelimiter?: string;
   showSupportArrays?: boolean;
   defaultSupportArrays?: boolean;
+  showPreserveFormatSpecifiers?: boolean;
   structured?: boolean;
   format: components['schemas']['ExportParams']['format'];
   messageFormat?: MessageFormat;
@@ -180,18 +181,21 @@ export const formatGroups: FormatGroup[] = [
         extension: 'strings',
         name: <T keyName="export-format-apple-strings" />,
         format: 'APPLE_STRINGS_STRINGSDICT',
+        showPreserveFormatSpecifiers: true,
       },
       {
         id: 'apple_xliff',
         extension: 'xliff',
         name: <T keyName="export-format-apple-xliff" />,
         format: 'APPLE_XLIFF',
+        showPreserveFormatSpecifiers: true,
       },
       {
         id: 'apple_xcstrings',
         extension: 'xcstrings',
         name: <T keyName="export-format-apple-xcstrings" />,
         format: 'APPLE_XCSTRINGS',
+        showPreserveFormatSpecifiers: true,
       },
     ],
   },

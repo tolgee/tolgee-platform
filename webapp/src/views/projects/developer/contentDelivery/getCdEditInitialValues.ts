@@ -28,6 +28,7 @@ export function getCdEditInitialValues(
       data?.supportArrays !== undefined
         ? data.supportArrays
         : initialFormat.defaultSupportArrays || false,
+    preserveFormatSpecifiers: data?.preserveFormatSpecifiers ?? false,
     messageFormat: normalizeSelectedMessageFormat({
       format: initialFormat.id,
       messageFormat: data?.messageFormat,

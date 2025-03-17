@@ -49,6 +49,7 @@ export function useCdActions({ allNamespaces, onClose }: UseCdActionsProps) {
       autoPublish: values.autoPublish,
       contentStorageId: values.contentStorageId,
       supportArrays: values.supportArrays || false,
+      preserveFormatSpecifiers: values.preserveFormatSpecifiers || false,
       messageFormat:
         // strict message format is prioritized
         format.messageFormat ?? normalizeSelectedMessageFormat(values),

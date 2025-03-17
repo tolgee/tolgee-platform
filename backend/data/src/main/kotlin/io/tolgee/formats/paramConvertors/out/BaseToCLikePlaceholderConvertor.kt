@@ -8,6 +8,7 @@ class BaseToCLikePlaceholderConvertor(
   private val defaultSpecifier: String = "s",
   private val numberSpecifier: String = "d",
   numberAllArgs: Boolean = false,
+  private val preserveFormatSpecifiers: Boolean = false,
   private val argNameStringProvider: (BaseToCLikePlaceholderConvertor.(MessagePatternUtil.ArgNode) -> String)? = null,
 ) {
   private var argIndex = -1
@@ -37,7 +38,7 @@ class BaseToCLikePlaceholderConvertor(
   ) = type == MessagePattern.ArgType.NONE && node.argNumOrNull == null
 
   fun convertText(string: String): String {
-    return escapePercentSign(string)
+    return escapePercentSign(string, preserveFormatSpecifiers = preserveFormatSpecifiers)
   }
 
   private fun convertNumber(node: MessagePatternUtil.ArgNode): String {
