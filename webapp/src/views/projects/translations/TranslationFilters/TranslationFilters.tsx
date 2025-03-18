@@ -9,7 +9,7 @@ import { TextField } from 'tg.component/common/TextField';
 import { FakeInput } from 'tg.component/FakeInput';
 import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { TranslationFiltersPopup } from './TranslationFiltersPopup';
-import { type FilterActions } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
+import { type FilterActions } from './tools';
 import { countFilters, getFilterName } from './summary';
 
 const StyledInputButton = styled(IconButton)`

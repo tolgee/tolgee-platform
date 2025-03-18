@@ -16,7 +16,7 @@ import { TaskDatePicker } from '../TaskDatePicker';
 import { TranslationStateFilter } from './TranslationStateFilter';
 import { TaskPreview } from './TaskPreview';
 import { Field, useFormikContext } from 'formik';
-import { FiltersType } from 'tg.component/translation/translationFilters/tools';
+import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { Select } from 'tg.component/common/Select';
 import { useEffect } from 'react';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';

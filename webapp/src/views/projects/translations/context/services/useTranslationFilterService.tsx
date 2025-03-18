@@ -1,50 +1,11 @@
 import { useMemo } from 'react';
-import { FiltersType } from 'tg.component/translation/translationFilters/tools';
-import { StateType } from 'tg.constants/translationStates';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
-export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
-
-export type FiltersInternal = {
-  filterTag?: string[];
-  filterNoTag?: string[];
-  filterNamespace?: string[];
-  filterNoNamespace?: string[];
-  filterTranslationState?: TranslationStateType[];
-  filterHasScreenshot?: boolean;
-  filterHasNoScreenshot?: boolean;
-  filterHasUnresolvedComments?: boolean;
-  filterHasComments?: boolean;
-
-  /*
-   * Specifies which languages will be considered when filtering by translation state
-   *  - undefined = all but base
-   *  - true = all
-   *  - string = one language tag
-   */
-  filterTranslationLanguage?: true | string;
-};
-
-export type AddParams =
-  | ['filterTag', string]
-  | ['filterNoTag', string]
-  | ['filterNamespace', string]
-  | ['filterNoNamespace', string]
-  | ['filterTranslationState', TranslationStateType]
-  | ['filterHasScreenshot']
-  | ['filterHasNoScreenshot']
-  | ['filterHasUnresolvedComments']
-  | ['filterHasComments'];
-
-export type FilterActions = {
-  addFilter: (...params: AddParams) => void;
-  removeFilter: (...params: AddParams) => void;
-  setFilters: (value: FiltersInternal) => void;
-};
-
-export const isFilterEmpty = (filter: FiltersType) => {
-  return Object.values(filter).filter(Boolean).length === 0;
-};
+import {
+  AddParams,
+  FiltersInternal,
+  FiltersType,
+} from '../../TranslationFilters/tools';
 
 function remove<T extends string>(list: T[] | undefined, value: T) {
   const result = list?.filter((i) => i !== value) || [];

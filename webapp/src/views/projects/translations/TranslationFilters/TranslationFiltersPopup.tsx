@@ -1,7 +1,8 @@
 import { Menu, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { type FilterActions } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
+import { useProject } from 'tg.hooks/useProject';
 
+import { FilterActions } from './tools';
 import { FiltersType, LanguageModel } from './tools';
 import { countFilters } from './summary';
 import { SubfilterTags } from './SubfilterTags';
@@ -12,7 +13,6 @@ import {
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
 import { SubfilterComments } from './SubfilterComments';
-import { useProject } from 'tg.hooks/useProject';
 
 type Props = {
   value: FiltersType;

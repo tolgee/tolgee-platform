@@ -36,8 +36,8 @@ import { PrefilterType } from '../prefilters/usePrefilter';
 import { useTaskService } from './services/useTaskService';
 import { usePositionService } from './services/usePositionService';
 import { useLayoutService } from './services/useLayoutService';
-import { AddParams } from './services/useTranslationFilterService';
-import { FiltersType } from 'tg.component/translation/translationFilters/tools';
+import { AddParams } from '../TranslationFilters/tools';
+import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
 
 type Props = {
   projectId: number;

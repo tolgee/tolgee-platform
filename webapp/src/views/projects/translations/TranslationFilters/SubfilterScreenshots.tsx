@@ -4,10 +4,7 @@ import { Box, Menu } from '@mui/material';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
 import { FilterItem } from './FilterItem';
-import {
-  type FiltersInternal,
-  type FilterActions,
-} from 'tg.views/projects/translations/context/services/useTranslationFilterService';
+import { FiltersInternal, FilterActions } from './tools';
 
 type Props = {
   projectId: number;

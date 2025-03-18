@@ -30,7 +30,7 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { FiltersType } from 'tg.component/translation/translationFilters/tools';
+import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { User } from 'tg.component/UserAccount';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useEnabledFeatures, useUser } from 'tg.globalContext/helpers';

@@ -22,11 +22,11 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
-import { TranslationFiltersPopup } from 'tg.component/translation/translationFilters/TranslationFiltersPopup';
+import { TranslationFiltersPopup } from 'tg.views/projects/translations/TranslationFilters/TranslationFiltersPopup';
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { Sort } from 'tg.component/CustomIcons';
 import { useProject } from 'tg.hooks/useProject';
-import { countFilters } from 'tg.component/translation/translationFilters/summary';
+import { countFilters } from 'tg.views/projects/translations/TranslationFilters/summary';
 
 import {
   useTranslationsActions,

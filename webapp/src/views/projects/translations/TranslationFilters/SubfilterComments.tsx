@@ -3,10 +3,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { Menu } from '@mui/material';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
-import {
-  type FiltersInternal,
-  type FilterActions,
-} from 'tg.views/projects/translations/context/services/useTranslationFilterService';
+import { FiltersInternal, FilterActions } from './tools';
 import { FilterItem } from './FilterItem';
 
 type Props = {

@@ -1,4 +1,4 @@
-import { type FiltersInternal } from 'tg.views/projects/translations/context/services/useTranslationFilterService';
+import { type FiltersInternal } from './tools';
 import {
   getCommentsFiltersLength,
   getCommentsFiltersName,

@@ -11,7 +11,7 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { TranslationFilters } from 'tg.component/translation/translationFilters/TranslationFilters';
+import { TranslationFilters } from 'tg.views/projects/translations/TranslationFilters/TranslationFilters';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 

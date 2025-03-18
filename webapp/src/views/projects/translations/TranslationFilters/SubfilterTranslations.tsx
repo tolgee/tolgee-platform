@@ -1,18 +1,15 @@
 import { useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem } from '@mui/material';
+import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
-import {
-  type FiltersInternal,
-  type TranslationStateType,
-  type FilterActions,
-} from 'tg.views/projects/translations/context/services/useTranslationFilterService';
 import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
+import { CompactListSubheader } from 'tg.component/ListComponents';
+
+import { FiltersInternal, FilterActions, TranslationStateType } from './tools';
 import { FilterItem } from './FilterItem';
 import { LanguageModel } from './tools';
-import { CompactListSubheader } from 'tg.component/ListComponents';
-import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 type Props = {
   projectId: number;
