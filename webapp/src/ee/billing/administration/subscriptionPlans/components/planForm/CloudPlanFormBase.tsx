@@ -8,8 +8,12 @@ type CloudPlanModel = components['schemas']['CloudPlanRequest'];
 type EnabledFeature =
   components['schemas']['CloudPlanRequest']['enabledFeatures'][number];
 
+export type MetricType =
+  components['schemas']['CloudPlanRequest']['metricType'];
+
 export type CloudPlanFormData = {
   type: CloudPlanModel['type'];
+  metricType: MetricType;
   name: string;
   prices: CloudPlanModel['prices'];
   includedUsage: CloudPlanModel['includedUsage'];

@@ -21,12 +21,17 @@ declare namespace DataCy {
         "administration-billing-edit-custom-plan-button" |
         "administration-billing-exclusive-plan-chip" |
         "administration-billing-trial-badge" |
-        "administration-cloud-plan-field-feature" |
         "administration-cloud-plan-field-free" |
+        "administration-cloud-plan-field-included-keys" |
         "administration-cloud-plan-field-included-mt-credits" |
+        "administration-cloud-plan-field-included-seats" |
         "administration-cloud-plan-field-included-translations" |
+        "administration-cloud-plan-field-metric-type" |
+        "administration-cloud-plan-field-metric-type-item" |
         "administration-cloud-plan-field-name" |
         "administration-cloud-plan-field-price-monthly" |
+        "administration-cloud-plan-field-price-per-seat" |
+        "administration-cloud-plan-field-price-per-thousand-keys" |
         "administration-cloud-plan-field-price-per-thousand-mt-credits" |
         "administration-cloud-plan-field-price-per-thousand-translations" |
         "administration-cloud-plan-field-price-yearly" |
@@ -47,7 +52,6 @@ declare namespace DataCy {
         "administration-ee-license-key-input" |
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-cancel-button" |
-        "administration-ee-plan-field-feature" |
         "administration-ee-plan-field-free" |
         "administration-ee-plan-field-included-mt-credits" |
         "administration-ee-plan-field-included-seats" |
@@ -73,6 +77,7 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-plan-field-feature" |
         "administration-plan-field-non-commercial" |
         "administration-plan-selector" |
         "administration-subscriptions-cloud-plan-name" |
@@ -125,10 +130,12 @@ declare namespace DataCy {
         "batch-select-item" |
         "billing-actual-period" |
         "billing-actual-period-end" |
+        "billing-actual-used-keys" |
         "billing-actual-used-monthly-credits" |
+        "billing-actual-used-seats" |
         "billing-actual-used-strings" |
-        "billing-estimated-costs" |
-        "billing-estimated-costs-open-button" |
+        "billing-expected-usage" |
+        "billing-expected-usage-open-button" |
         "billing-invoice-item-number" |
         "billing-invoice-usage-button" |
         "billing-invoices-list" |
@@ -136,8 +143,14 @@ declare namespace DataCy {
         "billing-period-switch" |
         "billing-plan" |
         "billing-plan-action-button" |
+        "billing-plan-included-credits" |
+        "billing-plan-included-keys" |
+        "billing-plan-included-seats" |
+        "billing-plan-included-strings" |
+        "billing-plan-included-translation-slots" |
         "billing-plan-monthly-price" |
         "billing-plan-price-extra-seat" |
+        "billing-plan-price-extra-thousand-keys" |
         "billing-plan-price-extra-thousand-mt-credits" |
         "billing-plan-price-extra-thousand-strings" |
         "billing-plan-subtitle" |
@@ -147,6 +160,10 @@ declare namespace DataCy {
         "billing-subscriptions-self-hosted-ee-button" |
         "billing-upgrade-preview-confirm-button" |
         "billing-usage-table" |
+        "billing-usage-table-credits" |
+        "billing-usage-table-keys" |
+        "billing-usage-table-seats" |
+        "billing-usage-table-translations" |
         "billing_period_annual" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
@@ -192,6 +209,7 @@ declare namespace DataCy {
         "edit-pat-dialog-description-input" |
         "edit-pat-dialog-title" |
         "empty-scope-dialog" |
+        "expected-usage-dialog" |
         "expiration-date-field" |
         "expiration-date-picker" |
         "expiration-select" |
@@ -287,6 +305,7 @@ declare namespace DataCy {
         "integrate-select-api-key-step-content" |
         "integrate-select-api-key-step-label" |
         "integrate-weapon-selector-button" |
+        "invitation-accepted-success-message" |
         "invitation-dialog-close-button" |
         "invitation-dialog-input-field" |
         "invitation-dialog-invite-button" |
@@ -295,6 +314,7 @@ declare namespace DataCy {
         "invitation-dialog-type-email-button" |
         "invitation-dialog-type-link-button" |
         "invite-generate-button" |
+        "invoice-details-dialog" |
         "key-edit-tab-advanced" |
         "key-edit-tab-context" |
         "key-edit-tab-custom-properties" |
@@ -418,6 +438,7 @@ declare namespace DataCy {
         "permissions-menu-inherited-message" |
         "permissions-menu-reset-to-organization" |
         "permissions-menu-save" |
+        "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
         "project-dashboard-activity-chart" |
@@ -511,6 +532,7 @@ declare namespace DataCy {
         "search-select-item" |
         "search-select-new" |
         "search-select-search" |
+        "seat_spending_limit_exceeded_while_accepting_invitation_message" |
         "self-hosted-ee-active-plan" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |

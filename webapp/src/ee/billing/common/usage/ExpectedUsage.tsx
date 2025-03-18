@@ -4,7 +4,7 @@ import { FC, useState } from 'react';
 import { useMoneyFormatter } from 'tg.hooks/useLocale';
 import { useTranslate } from '@tolgee/react';
 import { Box, Tooltip } from '@mui/material';
-import { UsageDialogButton } from './UsageDialogButton';
+import { ExpectedUsageDialogButton } from './ExpectedUsageDialogButton';
 
 export type EstimatedCostsProps = {
   useUsage: (
@@ -13,7 +13,7 @@ export type EstimatedCostsProps = {
   estimatedCosts?: number;
 };
 
-export const EstimatedCosts: FC<EstimatedCostsProps> = ({
+export const ExpectedUsage: FC<EstimatedCostsProps> = ({
   useUsage,
   estimatedCosts,
 }) => {
@@ -26,11 +26,7 @@ export const EstimatedCosts: FC<EstimatedCostsProps> = ({
   const usage = useUsage(open);
 
   return (
-    <Box
-      display="flex"
-      justifyContent="right"
-      data-cy="billing-estimated-costs"
-    >
+    <Box display="flex" justifyContent="right" data-cy="billing-expected-usage">
       <Box>
         <Tooltip
           title={t('active-plan-estimated-costs-description')}
@@ -40,7 +36,7 @@ export const EstimatedCosts: FC<EstimatedCostsProps> = ({
         </Tooltip>
         <Box textAlign="right" display="flex" alignItems="center">
           {formatMoney(estimatedCosts || 0)}
-          <UsageDialogButton
+          <ExpectedUsageDialogButton
             usageData={usage.data}
             loading={usage.isLoading}
             onOpen={() => setOpen(true)}

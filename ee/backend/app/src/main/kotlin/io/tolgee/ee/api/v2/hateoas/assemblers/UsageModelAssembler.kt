@@ -18,6 +18,7 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
       subscriptionPrice = data.subscriptionPrice,
       seats = this.periodToModel(data.seatsUsage),
       translations = this.periodToModel(data.translationsUsage),
+      keys = this.periodToModel(data.keysUsage),
       credits = data.creditsUsage?.let { sumToModel(it) },
       total = data.total,
       appliedStripeCredits = data.appliedStripeCredits,

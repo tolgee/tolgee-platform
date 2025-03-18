@@ -48,6 +48,7 @@ export const AdministrationEePlanCreateView = () => {
                   content: {
                     'application/json': {
                       ...values,
+                      metricType: 'KEYS_SEATS',
                       stripeProductId: values.stripeProductId,
                       forOrganizationIds: values.public
                         ? []
@@ -78,6 +79,7 @@ export const AdministrationEePlanCreateView = () => {
                 seats: 0,
                 translations: 0,
                 mtCredits: 0,
+                keys: 0,
               },
               forOrganizationIds: [],
               enabledFeatures: [],

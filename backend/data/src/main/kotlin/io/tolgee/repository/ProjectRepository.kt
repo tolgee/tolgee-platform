@@ -156,4 +156,11 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   """,
   )
   fun find(id: Long): Project?
+
+  @Query(
+    """
+    from Project where id = :id and deletedAt is not null
+  """,
+  )
+  fun findDeleted(id: Long): Project?
 }

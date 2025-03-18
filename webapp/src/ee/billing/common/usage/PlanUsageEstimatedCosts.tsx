@@ -1,11 +1,11 @@
 import { FC } from 'react';
-import { EstimatedCosts, EstimatedCostsProps } from './EstimatedCosts';
+import { ExpectedUsage, EstimatedCostsProps } from './ExpectedUsage';
 import { Box } from '@mui/material';
 
 export const PlanUsageEstimatedCosts: FC<EstimatedCostsProps> = (props) => {
   return (
     <Box>
-      <EstimatedCosts {...props} />
+      <ExpectedUsage {...props} />
     </Box>
   );
 };
