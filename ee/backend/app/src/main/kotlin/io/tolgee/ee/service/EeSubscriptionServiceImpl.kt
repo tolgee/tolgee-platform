@@ -18,7 +18,6 @@ import io.tolgee.ee.data.ReportUsageDto
 import io.tolgee.ee.data.SetLicenseKeyLicensingDto
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.events.OnUserCountChanged
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
@@ -27,7 +26,6 @@ import io.tolgee.service.InstanceIdService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
-import io.tolgee.util.logger
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
@@ -106,6 +104,9 @@ class EeSubscriptionServiceImpl(
       entity.currentPeriodEnd = responseBody.currentPeriodEnd?.let { Date(it) }
       entity.enabledFeatures = responseBody.plan.enabledFeatures
       entity.nonCommercial = responseBody.plan.nonCommercial
+      entity.includedKeys = responseBody.plan.includedUsage.keys
+      entity.includedSeats = responseBody.plan.includedUsage.seats
+      entity.isPayAsYouGo = responseBody.plan.isPayAsYouGo
       return self.save(entity)
     }
 
@@ -237,22 +238,9 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun checkCountAndReportUsage(event: OnUserCountChanged) {
-    try {
-      val seats = userAccountService.countAllEnabled()
-      val subscription = self.findSubscriptionDto()
-      reportUsage(seats, subscription)
-      if (!event.decrease) {
-        checkUserCount(seats, subscription)
-      }
-    } catch (e: NoActiveSubscriptionException) {
-      logger.debug("No active subscription, skipping usage reporting.")
-    }
-  }
-
-  private fun checkUserCount(
-    seats: Long,
+  fun checkUserCount(
     subscription: EeSubscriptionDto?,
+    seats: Long,
   ) {
     if (bypassSeatCountCheck) {
       return
@@ -265,14 +253,26 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  private fun reportUsage(
-    seats: Long,
+  fun checkKeyCount(
     subscription: EeSubscriptionDto?,
+    seats: Long,
+  ) {
+    if (subscription == null) {
+      if (seats > 10) {
+        throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+      }
+    }
+  }
+
+  fun reportUsage(
+    subscription: EeSubscriptionDto?,
+    keys: Long? = null,
+    seats: Long? = null,
   ) {
     if (subscription != null) {
       catchingSeatsSpendingLimit {
         catchingLicenseNotFound {
-          reportUsageRemote(subscription, seats)
+          reportUsageRemote(subscription = subscription, keys = keys, seats = seats)
         }
       }
     }
@@ -303,11 +303,12 @@ class EeSubscriptionServiceImpl(
 
   private fun reportUsageRemote(
     subscription: EeSubscriptionDto,
-    seats: Long,
+    keys: Long?,
+    seats: Long?,
   ) {
     postRequest<Any>(
       REPORT_USAGE_PATH,
-      ReportUsageDto(subscription.licenseKey, seats),
+      ReportUsageDto(licenseKey = subscription.licenseKey, keys = keys, seats = seats),
     )
   }
 

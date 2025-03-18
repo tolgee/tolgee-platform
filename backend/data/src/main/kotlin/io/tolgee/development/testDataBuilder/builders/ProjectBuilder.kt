@@ -89,7 +89,6 @@ class ProjectBuilder(
       this.user = null
     }.build(buildPermission)
     return invitationBuilder
-
   }
 
   fun addKey(

@@ -138,7 +138,6 @@ class Permission(
   companion object {
     @Configurable
     class PermissionListeners {
-
       @PrePersist
       @PreUpdate
       fun prePersist(permission: Permission) {
@@ -152,7 +151,7 @@ class Permission(
             permission.viewLanguages.isNotEmpty() ||
               permission.translateLanguages.isNotEmpty() ||
               permission.stateChangeLanguages.isNotEmpty()
-            )
+          )
         ) {
           throw IllegalStateException("Organization base permission cannot have language permissions")
         }

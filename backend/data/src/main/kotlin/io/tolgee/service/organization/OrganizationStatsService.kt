@@ -65,23 +65,22 @@ class OrganizationStatsService(
   fun getTranslationCount(organizationId: Long): Long {
     return entityManager.createQuery(
       """
-        select count(t.id) from Translation t
-        join t.key k
-        join k.project p on p.deletedAt is null
-        join t.language l on l.deletedAt is null
-        where p.organizationOwner.id = :organizationId and t.text is not null and t.text <> ''
-        """.trimIndent(),
+      select count(t.id) from Translation t
+      join t.key k
+      join k.project p on p.deletedAt is null
+      join t.language l on l.deletedAt is null
+      where p.organizationOwner.id = :organizationId and t.text is not null and t.text <> ''
+      """.trimIndent(),
     ).setParameter("organizationId", organizationId).singleResult as Long
   }
 
   fun getKeyCount(organizationId: Long): Long {
     return entityManager.createQuery(
       """
-        select count(k.id) from Key k
-        join k.project p on p.deletedAt is null
-        where p.organizationOwner.id = :organizationId
-        """.trimIndent(),
+      select count(k.id) from Key k
+      join k.project p on p.deletedAt is null
+      where p.organizationOwner.id = :organizationId
+      """.trimIndent(),
     ).setParameter("organizationId", organizationId).singleResult as Long
   }
-
 }

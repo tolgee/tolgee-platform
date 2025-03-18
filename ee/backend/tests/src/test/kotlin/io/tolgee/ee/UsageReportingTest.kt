@@ -1,9 +1,9 @@
 package io.tolgee.ee
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.AbstractSpringTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
+import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.model.UserAccount
@@ -38,18 +38,8 @@ class UsageReportingTest : AbstractSpringTest() {
   private lateinit var signUpService: SignUpService
 
   @Test
-  fun `it checks for subscription changes`() {
-    eeSubscriptionRepository.save(
-      EeSubscription().apply {
-        licenseKey = "mock"
-        name = "Plaaan"
-        status = SubscriptionStatus.ERROR
-        currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
-        enabledFeatures = Feature.values()
-        lastValidCheck = Date()
-      },
-    )
+  fun `it reports seat usage`() {
+    saveSubscription()
 
     eeLicenseMockRequestUtil.mock {
       whenReq {
@@ -87,8 +77,99 @@ class UsageReportingTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  fun `it reports keys usage`() {
+    testWithBaseTestData { testData, captor ->
+      // key add & delete
+      val key = keyService.create(testData.project, "key1", null)
+      captor.assertKeys(1)
+      keyService.delete(key.id)
+      captor.assertKeys(0)
+    }
+  }
+
+  @Test
+  fun `it does not execute many requests`() {
+    testWithBaseTestData { testData, captor ->
+      // create 10 keys
+      executeInNewTransaction {
+        (1..10).forEach {
+          keyService.create(testData.project, "key$it", null)
+        }
+      }
+
+      // now we have reported 10 keys
+      captor.assertKeys(10)
+
+      // check it doesn't do request for every key
+      captor.allValues.assert.hasSizeLessThan(10)
+    }
+  }
+
+  @Test
+  fun `it reports key usage when project is deleted`() {
+    testWithBaseTestData { testData, captor ->
+      keyService.create(testData.project, "key1", null)
+      // delete the project
+      projectService.deleteProject(testData.project.id)
+      captor.assertKeys(0)
+    }
+  }
+
+  @Test
+  fun `it reports usage when organization is deleted`() {
+    testWithBaseTestData { testData, captor ->
+      keyService.create(testData.project, "key1", null)
+      // delete the organization
+      organizationService.delete(testData.projectBuilder.self.organizationOwner)
+      captor.assertKeys(0)
+    }
+  }
+
+  private fun testWithBaseTestData(test: (BaseTestData, KArgumentCaptor<HttpEntity<*>>) -> Unit) {
+    saveSubscription()
+    val testData = BaseTestData()
+    testDataService.saveTestData(testData.root)
+
+    eeLicenseMockRequestUtil.mock {
+      whenReq {
+        this.method = { it == HttpMethod.POST }
+        this.url = { it.contains("/v2/public/licensing/report-usage") }
+      }
+
+      thenAnswer {
+      }
+
+      verify {
+        test(testData, captor)
+      }
+    }
+  }
+
+  private fun saveSubscription() {
+    eeSubscriptionRepository.save(
+      EeSubscription().apply {
+        licenseKey = "mock"
+        name = "Plaaan"
+        status = SubscriptionStatus.ERROR
+        currentPeriodEnd = Date()
+        cancelAtPeriodEnd = false
+        enabledFeatures = Feature.values()
+        lastValidCheck = Date()
+      },
+    )
+  }
+
   fun KArgumentCaptor<HttpEntity<*>>.assertSeats(seats: Long) {
-    val data = jacksonObjectMapper().readValue(this.lastValue.body as String, Map::class.java)
+    val data = parseRequestArgs()
     data["seats"].toString().assert.isEqualTo(seats.toString())
   }
+
+  fun KArgumentCaptor<HttpEntity<*>>.assertKeys(keys: Long) {
+    val data = parseRequestArgs()
+    data["keys"].toString().assert.isEqualTo(keys.toString())
+  }
+
+  private fun KArgumentCaptor<HttpEntity<*>>.parseRequestArgs(): Map<*, *> =
+    objectMapper.readValue(this.lastValue.body as String, Map::class.java)
 }
