@@ -23,6 +23,7 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.service.InstanceIdService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
@@ -49,6 +50,7 @@ class EeSubscriptionServiceImpl(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
+  private val keyService: KeyService,
 ) : EeSubscriptionProvider, Logging {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
@@ -77,6 +79,7 @@ class EeSubscriptionServiceImpl(
   @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
   fun setLicenceKey(licenseKey: String): EeSubscription {
     val seats = userAccountService.countAllEnabled()
+    val keys = keyService.countAllOnInstance()
     this.findSubscriptionEntity()?.let {
       throw BadRequestException(Message.THIS_INSTANCE_IS_ALREADY_LICENSED)
     }
@@ -92,7 +95,12 @@ class EeSubscriptionServiceImpl(
         try {
           postRequest<SelfHostedEeSubscriptionModel>(
             SET_PATH,
-            SetLicenseKeyLicensingDto(licenseKey, seats, instanceIdService.getInstanceId()),
+            SetLicenseKeyLicensingDto(
+              licenseKey = licenseKey,
+              seats = seats,
+              keys = keys,
+              instanceId = instanceIdService.getInstanceId()
+            ),
           )
         } catch (e: HttpClientErrorException.NotFound) {
           throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)
