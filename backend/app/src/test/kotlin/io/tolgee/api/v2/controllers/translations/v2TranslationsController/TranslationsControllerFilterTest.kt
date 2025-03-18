@@ -137,7 +137,6 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       }
   }
 
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `it doesn't filter when no namespace is provided`() {
