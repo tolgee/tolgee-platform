@@ -67,4 +67,25 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1742306073641-1">
+        <addColumn tableName="ee_subscription">
+            <column name="included_keys" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1742306073641-2">
+        <addColumn tableName="ee_subscription">
+            <column name="included_seats" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1742307074282-1">
+        <addColumn tableName="ee_subscription">
+            <column name="is_pay_as_you_go" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

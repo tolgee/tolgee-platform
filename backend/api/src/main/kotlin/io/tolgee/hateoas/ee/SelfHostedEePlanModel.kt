@@ -20,6 +20,7 @@ open class SelfHostedEePlanModel(
   val hasYearlyPrice: Boolean = false,
   val free: Boolean,
   val nonCommercial: Boolean,
+  val isPayAsYouGo: Boolean,
 ) : RepresentationModel<SelfHostedEePlanModel>() {
   /**
    * We need to provide this setter so unrecognized features are ignored in situation

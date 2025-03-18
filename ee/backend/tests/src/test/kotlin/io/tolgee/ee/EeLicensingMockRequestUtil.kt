@@ -36,6 +36,7 @@ class EeLicensingMockRequestUtil {
         ),
       free = false,
       nonCommercial = false,
+      isPayAsYouGo = false,
     )
 
   final val mockedSubscriptionResponse =

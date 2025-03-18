@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["internal/e2e-data/task"])
 @Transactional
 class TaskE2eDataController(
-  private val generatingService: TestDataGeneratingService
+  private val generatingService: TestDataGeneratingService,
 ) : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional

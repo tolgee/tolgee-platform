@@ -327,7 +327,7 @@ class KeyService(
     keyMetaService.deleteAllByProject(projectId)
     screenshotService.deleteAllByProject(projectId)
 
-    entityManager.createNativeQuery("""delete from key where project_id = :projectId""")
+    entityManager.createQuery("""delete from Key where project.id = :projectId""")
       .setParameter("projectId", projectId)
       .executeUpdate()
 
@@ -491,5 +491,9 @@ class KeyService(
       // limit of postgres in clause size
       .chunked(32000)
       .flatMap { keyRepository.findAllByIdIn(it) }
+  }
+
+  fun countAllOnInstance(): Long {
+    return keyRepository.countAllOnInstance()
   }
 }

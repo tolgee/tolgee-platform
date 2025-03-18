@@ -70,7 +70,7 @@ class TestDataService(
   private val automationService: AutomationService,
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val languageStatsListener: LanguageStatsListener,
-  private val invitationService: InvitationService
+  private val invitationService: InvitationService,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -548,7 +548,6 @@ class TestDataService(
     }
   }
 
-
   private fun runAfterSaveMethodsOfAdditionalSavers(builder: TestDataBuilder) {
     executeInNewTransaction(transactionManager) {
       additionalTestDataSavers.forEach {
@@ -579,7 +578,10 @@ class TestDataService(
     }
   }
 
-  private fun saveProjectInvitations(invitations: MutableList<InvitationBuilder>, self: Project) {
+  private fun saveProjectInvitations(
+    invitations: MutableList<InvitationBuilder>,
+    self: Project,
+  ) {
     invitations.filter { it.self.permission?.project == self }.forEach {
       invitationService.save(it.self)
     }

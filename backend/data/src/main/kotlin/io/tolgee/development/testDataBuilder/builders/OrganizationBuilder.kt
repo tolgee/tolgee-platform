@@ -8,7 +8,6 @@ import io.tolgee.model.Permission
 import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import org.springframework.core.io.ClassPathResource
