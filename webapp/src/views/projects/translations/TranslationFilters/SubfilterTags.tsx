@@ -11,6 +11,7 @@ import { InfiniteSearchSelectContent } from 'tg.component/searchSelect/InfiniteS
 
 import { FiltersInternal, FilterActions } from './tools';
 import { FilterItem } from './FilterItem';
+import { SmoothProgress } from 'tg.component/SmoothProgress';
 
 type TagModel = components['schemas']['TagModel'];
 
@@ -28,7 +29,7 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
     search: searchDebounced,
     size: 30,
   };
-  const tagsLoadable = useApiInfiniteQuery({
+  const dataLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/tags',
     method: 'get',
     path: {
@@ -37,6 +38,8 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
     query,
     options: {
       keepPreviousData: true,
+      refetchOnMount: true,
+      noGlobalLoading: true,
       onSuccess(data) {
         if (
           totalItems === undefined &&
@@ -70,7 +73,7 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
 
-  const data = tagsLoadable.data?.pages.flatMap((p) => p._embedded?.tags ?? []);
+  const data = dataLoadable.data?.pages.flatMap((p) => p._embedded?.tags ?? []);
 
   const handleToggleTag = (name: string) => {
     if (value.filterTag?.includes(name)) {
@@ -91,8 +94,8 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
   };
 
   const handleFetchMore = () => {
-    if (tagsLoadable.hasNextPage && tagsLoadable.isFetching) {
-      tagsLoadable.fetchNextPage();
+    if (dataLoadable.hasNextPage && !dataLoadable.isFetching) {
+      dataLoadable.fetchNextPage();
     }
   };
 
@@ -134,39 +137,51 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
             setSearch('');
           }}
         >
-          {(totalItems ?? 0) > 10 ? (
-            <>
-              <InfiniteSearchSelectContent
-                open={true}
-                items={data}
-                maxWidth={400}
-                onSearch={setSearch}
-                search={search}
-                displaySearch={true}
-                renderOption={(props, item) => (
-                  <FilterItem
-                    {...props}
-                    label={item.name}
-                    selected={Boolean(value.filterTag?.includes(item.name))}
-                    excluded={Boolean(value.filterNoTag?.includes(item.name))}
-                    onClick={() => handleToggleTag(item.name)}
-                    onExclude={() => handleExcludeTag(item.name)}
-                  />
-                )}
-                getOptionLabel={(o) => o.name}
-                ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
-                searchPlaceholder={t(
-                  'translations_filters_tags_search_placeholder'
-                )}
-                onGetMoreData={handleFetchMore}
-              />
-              <Divider />
-            </>
-          ) : (
-            data?.map((i) => (
-              <React.Fragment key={i.id}>{renderItem(null, i)}</React.Fragment>
-            ))
-          )}
+          <SmoothProgress
+            loading={Boolean(
+              dataLoadable.isFetching &&
+                (searchDebounced || totalItems === undefined)
+            )}
+            sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
+          />
+          {totalItems !== undefined &&
+            ((totalItems ?? 0) > 10 ? (
+              <>
+                <InfiniteSearchSelectContent
+                  open={true}
+                  items={data}
+                  maxWidth={400}
+                  onSearch={setSearch}
+                  search={search}
+                  displaySearch={true}
+                  renderOption={(props, item) => (
+                    <FilterItem
+                      {...props}
+                      label={item.name}
+                      selected={Boolean(value.filterTag?.includes(item.name))}
+                      excluded={Boolean(value.filterNoTag?.includes(item.name))}
+                      onClick={() => handleToggleTag(item.name)}
+                      onExclude={() => handleExcludeTag(item.name)}
+                    />
+                  )}
+                  getOptionLabel={(o) => o.name}
+                  ListboxProps={{
+                    style: { maxHeight: 400, overflow: 'auto' },
+                  }}
+                  searchPlaceholder={t(
+                    'translations_filters_tags_search_placeholder'
+                  )}
+                  onGetMoreData={handleFetchMore}
+                />
+                <Divider />
+              </>
+            ) : (
+              data?.map((i) => (
+                <React.Fragment key={i.id}>
+                  {renderItem(null, i)}
+                </React.Fragment>
+              ))
+            ))}
           <FilterItem
             label={t('translations_filters_tags_without_tags')}
             selected={Boolean(value.filterTag?.includes(''))}

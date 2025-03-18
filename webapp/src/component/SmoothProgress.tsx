@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
-import { styled, useTheme } from '@mui/material';
+import { styled, SxProps, useTheme } from '@mui/material';
 import clsx from 'clsx';
 import { useLoadingRegister } from './GlobalLoading';
 
@@ -23,12 +23,14 @@ const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
 type Props = {
   loading: boolean;
   className?: string;
+  sx?: SxProps;
   global?: boolean;
 };
 
 export const SmoothProgress: React.FC<Props> = ({
   loading,
   className,
+  sx,
   global,
 }) => {
   const theme = useTheme();
@@ -77,6 +79,7 @@ export const SmoothProgress: React.FC<Props> = ({
         },
         className
       )}
+      sx={sx}
     />
   ) : null;
 };

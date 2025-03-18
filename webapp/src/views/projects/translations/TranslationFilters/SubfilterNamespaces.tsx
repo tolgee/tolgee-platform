@@ -1,15 +1,15 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, Divider, Menu } from '@mui/material';
 import { useDebounce } from 'use-debounce';
 
+import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { SubmenuItem } from 'tg.component/SubmenuItem';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { InfiniteSearchSelectContent } from 'tg.component/searchSelect/InfiniteSearchSelectContent';
 import { FiltersInternal, FilterActions } from './tools';
 import { components } from 'tg.service/apiSchema.generated';
 import { FilterItem } from './FilterItem';
-import React from 'react';
 
 type NamespaceModel = components['schemas']['NamespaceModel'];
 
@@ -27,7 +27,7 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
     search: searchDebounced,
     size: 30,
   };
-  const tagsLoadable = useApiInfiniteQuery({
+  const dataLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/namespaces',
     method: 'get',
     path: {
@@ -36,6 +36,8 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
     query,
     options: {
       keepPreviousData: true,
+      refetchOnMount: true,
+      noGlobalLoading: true,
       onSuccess(data) {
         if (
           totalItems === undefined &&
@@ -69,7 +71,7 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
 
-  const data = tagsLoadable.data?.pages.flatMap(
+  const data = dataLoadable.data?.pages.flatMap(
     (p) => p._embedded?.namespaces ?? []
   );
 
@@ -92,8 +94,8 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
   };
 
   const handleFetchMore = () => {
-    if (tagsLoadable.hasNextPage && tagsLoadable.isFetching) {
-      tagsLoadable.fetchNextPage();
+    if (dataLoadable.hasNextPage && dataLoadable.isFetching) {
+      dataLoadable.fetchNextPage();
     }
   };
 
@@ -136,30 +138,40 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
             setSearch('');
           }}
         >
-          {(totalItems ?? 0) > 10 ? (
-            <>
-              <InfiniteSearchSelectContent
-                open={true}
-                items={data}
-                maxWidth={400}
-                onSearch={setSearch}
-                search={search}
-                displaySearch={true}
-                renderOption={renderItem}
-                getOptionLabel={(o) => o.name}
-                ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
-                searchPlaceholder={t(
-                  'translations_filters_namespaces_search_placeholder'
-                )}
-                onGetMoreData={handleFetchMore}
-              />
-              <Divider />
-            </>
-          ) : (
-            data?.map((i) => (
-              <React.Fragment key={i.id}>{renderItem(null, i)}</React.Fragment>
-            ))
-          )}
+          <SmoothProgress
+            loading={Boolean(
+              dataLoadable.isFetching &&
+                (searchDebounced || totalItems === undefined)
+            )}
+            sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
+          />
+          {totalItems !== undefined &&
+            ((totalItems ?? 0) > 10 ? (
+              <>
+                <InfiniteSearchSelectContent
+                  open={true}
+                  items={data}
+                  maxWidth={400}
+                  onSearch={setSearch}
+                  search={search}
+                  displaySearch={true}
+                  renderOption={renderItem}
+                  getOptionLabel={(o) => o.name}
+                  ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
+                  searchPlaceholder={t(
+                    'translations_filters_namespaces_search_placeholder'
+                  )}
+                  onGetMoreData={handleFetchMore}
+                />
+                <Divider />
+              </>
+            ) : (
+              data?.map((i) => (
+                <React.Fragment key={i.id}>
+                  {renderItem(null, i)}
+                </React.Fragment>
+              ))
+            ))}
           <FilterItem
             label={t('translations_filters_namespaces_without_namespace')}
             selected={Boolean(value.filterNamespace?.includes(''))}
