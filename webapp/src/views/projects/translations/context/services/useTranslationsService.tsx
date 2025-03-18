@@ -206,17 +206,6 @@ export const useTranslationsService = (props: Props) => {
             return [...(fixedTranslations || []), ...newKeys];
           });
         }
-        const langs = shaveBy(
-          data?.pages[0]?.selectedLanguages.map((l) => l.tag),
-          languages
-        );
-
-        if (languages) {
-          // sort selected languages
-          langs?.sort(
-            (l1, l2) => languages!.indexOf(l1) - languages!.indexOf(l2)
-          );
-        }
       },
     },
   });
