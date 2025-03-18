@@ -10,4 +10,7 @@ interface IEeSubscription {
   var enabledFeatures: Array<Feature>
   var status: SubscriptionStatus
   var lastValidCheck: Date?
+  var includedKeys: Long
+  var includedSeats: Long
+  var isPayAsYouGo: Boolean
 }

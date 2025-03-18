@@ -11,7 +11,6 @@ data class UsageLimits(
   val strings: Limit,
   val keys: Limit,
   val seats: Limit,
-
   //
   // Legacy units
   //
@@ -20,7 +19,6 @@ data class UsageLimits(
   data class Limit(
     /** What's included in the plan */
     val included: Long,
-
     /** What's the maximum value before using all the usage from spending limit */
     val limit: Long,
   )

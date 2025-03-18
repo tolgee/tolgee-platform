@@ -330,22 +330,16 @@ class OrganizationController(
       availablePayAsYouGoMtCredits = availablePayAsYouGoMtCredits,
       currentTranslations = currentTranslations,
       currentTranslationSlots = currentTranslationSlots,
-
       includedTranslations = limits.strings.included,
       translationsLimit = limits.strings.limit,
-
       includedTranslationSlots = limits.translationSlots.included,
       translationSlotsLimit = limits.translationSlots.limit,
-
       includedKeys = limits.keys.included,
       keysLimit = limits.keys.limit,
-
       includedSeats = limits.seats.included,
       seatsLimit = limits.seats.limit,
-
       currentKeys = currentKeys,
       currentSeats = currentSeats,
-
       usedMtCredits = creditBalances.usedCredits / 100,
     )
   }
