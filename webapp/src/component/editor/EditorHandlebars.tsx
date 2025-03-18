@@ -11,6 +11,7 @@ import { Direction } from 'tg.fixtures/getLanguageDirection';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { handlebarsAutocomplete } from './utils/handlebarsAutocomplete';
 import { components } from 'tg.service/apiSchema.generated';
+import { handlebarsTooltip } from './utils/handlebarsTooltip';
 
 type PromptVariable = components['schemas']['PromptVariable'];
 
@@ -138,11 +139,12 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
             dir: direction || 'ltr',
             lang: locale || '',
           }),
+          handlebarsLanguage,
           autocompletion({
             override: [handlebarsAutocomplete(variableRefs)],
             icons: false,
           }),
-          handlebarsLanguage,
+          handlebarsTooltip(variableRefs),
           direction === 'rtl' ? htmlIsolatesPlugin : [],
         ],
       }),
