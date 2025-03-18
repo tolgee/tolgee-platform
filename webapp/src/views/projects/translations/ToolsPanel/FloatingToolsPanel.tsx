@@ -6,6 +6,8 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { ToolsPanel } from './ToolsPanel';
 import { useHeaderNsContext } from '../context/HeaderNsContext';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { AiPlayground } from './AiPlayground/AiPlaygrount';
 
 const StyledContainer = styled('div')`
   position: relative;
@@ -36,6 +38,11 @@ export const FloatingToolsPanel = ({ width }: Props) => {
   const needsNamespaceMargin = useTranslationsSelector(
     (c) => Boolean(c.translations?.[0]?.keyNamespace) && c.view === 'LIST'
   );
+
+  const [aiPlayground] = useUrlSearchState('aiPlayground', {
+    defaultVal: undefined,
+    history: false,
+  });
 
   useEffect(() => {
     function recalculate() {
@@ -79,7 +86,7 @@ export const FloatingToolsPanel = ({ width }: Props) => {
       }}
       ref={containerRef}
     >
-      <ToolsPanel />
+      {aiPlayground ? <AiPlayground /> : <ToolsPanel />}
     </StyledContainer>
   );
 };

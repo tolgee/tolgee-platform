@@ -4,15 +4,16 @@ import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
 
 type Props = {
   sidePanelOpen: boolean;
+  wider: boolean;
 };
 
-export const useLayoutService = ({ sidePanelOpen }: Props) => {
+export const useLayoutService = ({ sidePanelOpen, wider }: Props) => {
   const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
   const isSmall = bodyWidth < 800;
-  const sidePanelWidth =
-    sidePanelOpen && !isSmall
-      ? Math.min(Math.max(0.24 * bodyWidth, 300), 500)
-      : 0;
+  const size = wider
+    ? Math.min(Math.max(0.34 * bodyWidth, 400), 600)
+    : Math.min(Math.max(0.24 * bodyWidth, 300), 500);
+  const sidePanelWidth = sidePanelOpen && !isSmall ? size : 0;
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const mainContentWidth =
     bodyWidth -

@@ -3,6 +3,7 @@ package io.tolgee.service
 import com.github.jknack.handlebars.Handlebars
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptTestDto
+import io.tolgee.dtos.request.prompt.PromptVariable
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -10,6 +11,8 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.RequestParam
+import software.amazon.awssdk.services.translate.model.InvalidRequestException
 
 @Service
 class PromptService(
@@ -19,35 +22,47 @@ class PromptService(
   private val projectService: ProjectService,
   private val translationService: TranslationService
 ) {
-  fun getPrompt(data: PromptTestDto): String {
+  fun getVariables(
+    projectId: Long,
+    keyId: Long,
+    targetLanguageId: Long,
+  ): MutableList<PromptVariable> {
     securityService.checkLanguageViewPermission(
-      data.projectId,
-      listOf(data.targetLanguageId),
+      projectId,
+      listOf(targetLanguageId),
     )
-    val key = keyService.find(data.keyId!!) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-    keyService.checkInProject(key, data.projectId)
-    val project = projectService.get(data.projectId) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+    keyService.checkInProject(key, projectId)
+    val project = projectService.get(projectId) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
 
-    val tLanguage = languageService.find(data.targetLanguageId, data.projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-    val sLanguage = languageService.get(project.baseLanguage!!.id, data.projectId)
+    val tLanguage = languageService.find(targetLanguageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    val sLanguage = languageService.get(project.baseLanguage!!.id, projectId)
 
     val sTranslation = translationService.find(key, sLanguage)
     val tTranslation = translationService.find(key, tLanguage)
 
 
+    val variables = mutableListOf<PromptVariable>()
 
+    variables.add(PromptVariable("target", sLanguage.name))
+    variables.add(PromptVariable("source", tLanguage.name))
+
+    variables.add(PromptVariable("projectName", project.name))
+    variables.add(PromptVariable("projectDescription", project.aiTranslatorPromptDescription ?: ""))
+    variables.add(PromptVariable("sourceText", sTranslation.get().text ?: ""))
+    variables.add(PromptVariable("targetText", tTranslation.get().text ?: ""))
+
+    return variables
+  }
+
+  fun getPrompt(data: PromptTestDto): String {
+    val params = getVariables(data.projectId, data.keyId, data.targetLanguageId)
     val handlebars = Handlebars()
-    val params = HashMap<String, Any>()
 
-    params.set("target", sLanguage.name)
-    params.set("source", tLanguage.name)
-    params.set("projectName", project.name)
-    params.set("projectDescription", project.aiTranslatorPromptDescription ?: "")
-    params.set("sourceText", sTranslation.get().text ?: "")
-    params.set("targetText", tTranslation.get().text ?: "")
+    val mapParams = params.map { it.name to it.value }.toMap()
 
     val template = handlebars.compileInline(data.template)
-    val prompt = template.apply(params)
+    val prompt = template.apply(mapParams)
     return prompt
   }
 }
