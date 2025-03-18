@@ -35,8 +35,6 @@ export const handlebarsAutocomplete =
       postfix = '}}';
     }
 
-    console.log({ from });
-
     if (from) {
       return {
         from,
