@@ -116,6 +116,28 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes namespace`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterNoNamespace=&filterNoNamespace=ns-2")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+        }
+      }
+    performProjectAuthGet("/translations?filterNoNamespace=ns-2&filterNoNamespace=ns-1")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+        }
+      }
+  }
+
+
   @Test
   @ProjectJWTAuthTestMethod
   fun `it doesn't filter when no namespace is provided`() {
@@ -322,6 +344,34 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `excludes by tag`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=Cool tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("Z key")
+        node("_embedded.keys[0].keyTags[0].name").isEqualTo("Lame tag")
+        node("_embedded.keys[1].keyName").isEqualTo("Another key with tag")
+        node("_embedded.keys[1].keyTags[0].name").isEqualTo("Another cool tag")
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes by multiple tags`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=Cool tag&filterNoTag=Another cool tag&filterNoTag=Lame tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(0)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `validates filter state`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -357,6 +407,55 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       .andIsOk.andAssertThatJson {
         node("_embedded.keys").isArray.hasSize(2)
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by auto-translated flag`() {
+    val testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterAutoTranslatedInLang=en").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("Z key")
+        node("[0].translations.en.auto").isEqualTo(true)
+      }
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters keys with unresolved comments`() {
+    val testData = TranslationsTestData()
+    testData.addCommentStatesData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterHasUnresolvedCommentsInLang=de").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("commented_key")
+      }
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters keys with any comments`() {
+    val testData = TranslationsTestData()
+    testData.addCommentStatesData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterHasCommentsInLang=de").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(2)
+        node("[0].keyName").isEqualTo("A key")
+        node("[1].keyName").isEqualTo("commented_key")
+      }
+    }
   }
 
   @ProjectJWTAuthTestMethod
