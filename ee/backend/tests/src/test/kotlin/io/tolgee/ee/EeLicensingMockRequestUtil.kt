@@ -3,10 +3,7 @@ package io.tolgee.ee
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.fixtures.HttpClientMocker
-import io.tolgee.hateoas.ee.PlanPricesModel
-import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
-import io.tolgee.hateoas.ee.SelfHostedEePlanModel
-import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
+import io.tolgee.hateoas.ee.*
 import io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel
 import io.tolgee.hateoas.ee.uasge.UsageModel
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,6 +31,10 @@ class EeLicensingMockRequestUtil {
           perSeat = 20.toBigDecimal(),
           subscriptionMonthly = 200.toBigDecimal(),
         ),
+      includedUsage = PlanIncludedUsageModel(
+        seats = 10,
+        keys = 10
+      ),
       free = false,
       nonCommercial = false,
       isPayAsYouGo = false,
