@@ -24,6 +24,7 @@ export const SubfilterScreenshots = ({ value, actions, projectId }: Props) => {
         label={t('translations_filters_heading_screenshots')}
         onClick={() => setOpen(true)}
         selected={Boolean(getScreenshotFiltersLength(value))}
+        open={open}
       />
       {open && (
         <Menu

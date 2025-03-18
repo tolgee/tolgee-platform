@@ -19,8 +19,7 @@ const StyledMenuItem = styled(CompactMenuItem)`
   & .exclude {
     opacity: 0;
   }
-  &:hover .exclude,
-  .exclude:focus-within {
+  &:hover .exclude {
     opacity: 1;
   }
   gap: 8px;
@@ -36,6 +35,18 @@ const StyledExcludeButton = styled(Button)`
   font-style: normal;
   font-weight: 500;
   transition: opacity ease-in 0.1s;
+  background-color: ${({ theme }) => theme.palette.tokens.icon.primary};
+  color: ${({ theme }) => theme.palette.background.default};
+  :hover {
+    background-color: ${({ theme }) => theme.palette.tokens.icon.primary};
+  }
+  &.exclude {
+    background-color: ${({ theme }) => theme.palette.background.default};
+    color: ${({ theme }) => theme.palette.tokens.icon.primary};
+    :hover {
+      background-color: ${({ theme }) => theme.palette.background.default};
+    }
+  }
 `;
 
 const StyledListItemText = styled(ListItemText)`
@@ -45,14 +56,14 @@ const StyledListItemText = styled(ListItemText)`
 const StyledCheckbox = styled(Checkbox)`
   margin: -8px -8px -8px 0px;
   &.excluded {
-    color: ${({ theme }) => theme.palette.text.primary};
+    color: ${({ theme }) => theme.palette.tokens.icon.primary};
   }
 `;
 
 const StyledRadio = styled(Radio)`
   margin: -8px -8px -8px 0px;
   &.excluded {
-    color: ${({ theme }) => theme.palette.text.primary};
+    color: ${({ theme }) => theme.palette.tokens.icon.primary};
   }
 `;
 
@@ -70,7 +81,12 @@ export const FilterItem = React.forwardRef(function FilterItem(
 ) {
   const { t } = useTranslate();
   return (
-    <StyledMenuItem ref={ref as any} data-cy="filter-item" {...other}>
+    <StyledMenuItem
+      ref={ref as any}
+      data-cy="filter-item"
+      selected={selected}
+      {...other}
+    >
       {exclusive ? (
         <StyledRadio
           checked={Boolean(selected || excluded)}
@@ -91,7 +107,6 @@ export const FilterItem = React.forwardRef(function FilterItem(
           variant="contained"
           size="small"
           className={clsx({ exclude: !excluded })}
-          color={excluded ? 'contrast' : 'inherit'}
           onMouseDown={(e) => {
             e.stopPropagation();
           }}

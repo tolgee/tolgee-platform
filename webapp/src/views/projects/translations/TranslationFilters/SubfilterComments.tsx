@@ -40,6 +40,7 @@ export const SubfilterComments = ({ value, actions }: Props) => {
         label={t('translations_filters_heading_comments')}
         onClick={() => setOpen(true)}
         selected={Boolean(getCommentsFiltersLength(value))}
+        open={open}
       />
       {open && (
         <Menu

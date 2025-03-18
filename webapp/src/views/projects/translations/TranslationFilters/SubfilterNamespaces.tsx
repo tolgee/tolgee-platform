@@ -102,7 +102,6 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
   function renderItem(props: any, item: NamespaceModel) {
     return (
       <FilterItem
-        {...props}
         label={item.name}
         selected={Boolean(value.filterNamespace?.includes(item.name))}
         excluded={Boolean(value.filterNoNamespace?.includes(item.name))}
@@ -119,6 +118,7 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
         label={t('translations_filters_heading_namespaces')}
         onClick={() => setOpen(true)}
         selected={Boolean(getNamespaceFiltersLength(value))}
+        open={open}
       />
 
       {open && (
@@ -145,33 +145,26 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
             )}
             sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
           />
-          {totalItems !== undefined &&
-            ((totalItems ?? 0) > 10 ? (
-              <>
-                <InfiniteSearchSelectContent
-                  open={true}
-                  items={data}
-                  maxWidth={400}
-                  onSearch={setSearch}
-                  search={search}
-                  displaySearch={true}
-                  renderOption={renderItem}
-                  getOptionLabel={(o) => o.name}
-                  ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
-                  searchPlaceholder={t(
-                    'translations_filters_namespaces_search_placeholder'
-                  )}
-                  onGetMoreData={handleFetchMore}
-                />
-                <Divider />
-              </>
-            ) : (
-              data?.map((i) => (
-                <React.Fragment key={i.id}>
-                  {renderItem(null, i)}
-                </React.Fragment>
-              ))
-            ))}
+          {totalItems !== undefined && (
+            <>
+              <InfiniteSearchSelectContent
+                open={true}
+                items={data}
+                maxWidth={400}
+                onSearch={setSearch}
+                search={search}
+                displaySearch={(totalItems ?? 0) > 10}
+                renderOption={renderItem}
+                getOptionLabel={(o) => o.name}
+                ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
+                searchPlaceholder={t(
+                  'translations_filters_namespaces_search_placeholder'
+                )}
+                onGetMoreData={handleFetchMore}
+              />
+              <Divider sx={{ my: 1 }} />
+            </>
+          )}
           <FilterItem
             label={t('translations_filters_namespaces_without_namespace')}
             selected={Boolean(value.filterNamespace?.includes(''))}

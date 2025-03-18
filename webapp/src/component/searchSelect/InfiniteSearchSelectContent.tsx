@@ -107,12 +107,6 @@ export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
           </React.Fragment>
         )}
         ListboxProps={{
-          style: {
-            padding: 0,
-            minHeight: 400,
-            overflow: 'auto',
-            ...ListboxProps?.style,
-          },
           onScroll: (event) => {
             const target = event.target as HTMLDivElement;
             if (
@@ -123,12 +117,20 @@ export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
             }
           },
           ...ListboxProps,
+          style: {
+            overflow: 'auto',
+            padding: 0,
+            ...ListboxProps?.style,
+          },
           ref: listboxEl,
         }}
         onKeyDown={(e) => e.stopPropagation()}
         renderInput={(params) => (
           <StyledInputWrapper
-            sx={{ display: !displaySearch && !title ? 'none' : undefined }}
+            sx={{
+              display: !displaySearch && !title ? 'none' : undefined,
+              marginBottom: 1,
+            }}
           >
             <StyledInput
               data-cy="search-select-search"

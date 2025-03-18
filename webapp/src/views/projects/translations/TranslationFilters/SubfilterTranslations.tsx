@@ -65,6 +65,7 @@ export const SubfilterTranslations = ({
         label={t('translations_filters_heading_translations')}
         onClick={() => setOpen(true)}
         selected={Boolean(getTranslationFiltersLength(value))}
+        open={open}
       />
       {open && (
         <Menu

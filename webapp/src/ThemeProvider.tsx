@@ -132,7 +132,6 @@ const getTheme = (mode: PaletteMode) => {
       info: fromFigmaColor(tPalette.info),
       warning: fromFigmaColor(tPalette.warning),
       error: fromFigmaColor(tPalette.error),
-      contrast: createColor(c.text),
       common: {
         white: c.white,
       },
@@ -275,6 +274,13 @@ const getTheme = (mode: PaletteMode) => {
           list: {
             paddingTop: 8,
             paddingBottom: 8,
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          focusVisible: {
+            backgroundColor: tPalette.text._states.hover,
           },
         },
       },
