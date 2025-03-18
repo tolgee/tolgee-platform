@@ -327,6 +327,21 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters "without tag" specified by empty tag`() {
+    testData.addFewKeysWithTags()
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterTag=")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(2)
+        node("_embedded.keys[0].keyName").isEqualTo("key with screenshot")
+        node("_embedded.keys[1].keyName").isEqualTo("key with screenshot 2")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `filters by multiple tags`() {
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
@@ -338,6 +353,24 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
         node("_embedded.keys[1].keyTags[0].name").isEqualTo("Another cool tag")
         node("_embedded.keys[2].keyTags[0].name").isEqualTo("Cool tag")
         node("page.totalElements").isEqualTo(4)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters in combination with "without tag"`() {
+    testData.addFewKeysWithTags()
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=keyName&filterTag=&filterTag=Cool tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(5)
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[1].keyName").isEqualTo("key with screenshot")
+        node("_embedded.keys[2].keyName").isEqualTo("key with screenshot 2")
+        node("_embedded.keys[3].keyName").isEqualTo("Key with tag")
+        node("_embedded.keys[4].keyName").isEqualTo("Key with tag 2")
       }
   }
 
@@ -359,6 +392,20 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `excludes by "Without tag"`() {
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[1].keyName").isEqualTo("Z key")
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `excludes by multiple tags`() {
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
@@ -366,6 +413,19 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     performProjectAuthGet("/translations?filterNoTag=Cool tag&filterNoTag=Another cool tag&filterNoTag=Lame tag")
       .andPrettyPrint.andIsOk.andAssertThatJson {
         node("page.totalElements").isEqualTo(0)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes in combination with "Without tag"`() {
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=Cool tag&filterNoTag=")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(1)
+        node("_embedded.keys[0].keyName").isEqualTo("Z key")
       }
   }
 
