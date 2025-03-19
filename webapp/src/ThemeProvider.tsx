@@ -279,8 +279,10 @@ const getTheme = (mode: PaletteMode) => {
       },
       MuiMenuItem: {
         styleOverrides: {
-          focusVisible: {
-            backgroundColor: tPalette.text._states.hover,
+          root: {
+            '&.Mui-focusVisible': {
+              backgroundColor: tPalette.text._states.hover,
+            },
           },
         },
       },

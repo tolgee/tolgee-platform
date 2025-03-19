@@ -1,4 +1,4 @@
-import { Menu, MenuItem } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 
@@ -46,35 +46,38 @@ export const TranslationFiltersPopup = ({
         },
       }}
     >
-      <SubfilterTags value={value} actions={actions} projectId={projectId} />
-      {(project.useNamespaces || Boolean(getNamespaceFiltersLength(value))) && (
-        <SubfilterNamespaces
+      <Box display="grid">
+        <SubfilterTags value={value} actions={actions} projectId={projectId} />
+        {(project.useNamespaces ||
+          Boolean(getNamespaceFiltersLength(value))) && (
+          <SubfilterNamespaces
+            value={value}
+            actions={actions}
+            projectId={projectId}
+          />
+        )}
+        <SubfilterTranslations
+          value={value}
+          actions={actions}
+          projectId={projectId}
+          selectedLanguages={selectedLanguages}
+        />
+        <SubfilterScreenshots
           value={value}
           actions={actions}
           projectId={projectId}
         />
-      )}
-      <SubfilterTranslations
-        value={value}
-        actions={actions}
-        projectId={projectId}
-        selectedLanguages={selectedLanguages}
-      />
-      <SubfilterScreenshots
-        value={value}
-        actions={actions}
-        projectId={projectId}
-      />
-      <SubfilterComments
-        value={value}
-        actions={actions}
-        projectId={projectId}
-      />
-      {showClearButton && Boolean(countFilters(value)) && (
-        <MenuItem onClick={() => actions.setFilters({})}>
-          {t('translations_filters_heading_clear')}
-        </MenuItem>
-      )}
+        <SubfilterComments
+          value={value}
+          actions={actions}
+          projectId={projectId}
+        />
+        {showClearButton && Boolean(countFilters(value)) && (
+          <MenuItem onClick={() => actions.setFilters({})}>
+            {t('translations_filters_heading_clear')}
+          </MenuItem>
+        )}
+      </Box>
     </Menu>
   );
 };

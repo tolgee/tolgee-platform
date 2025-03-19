@@ -9,7 +9,7 @@ export const tolgeeColors = {
     '400': '#f06695',
     '500': '#ec407a',
     '600': '#d73a6f',
-    '700': '#a82d57',
+    '700': '#a52c55',
     '800': '#822343',
     '900': '#631b33',
   },
@@ -296,6 +296,16 @@ export const tolgeePalette = {
       pricing: '#1f2d400d',
     },
     _components: {
+      buttonToggle: {
+        enabled: '#ffffff',
+        textEnabled: '#1f2d40de',
+        hovered: '#1f2d400a',
+        textHovered: '#1f2d40',
+        active: '#1f2d40de',
+        textActive: '#ffffff',
+        activeHover: '#1f2d40',
+        textActiveHover: '#ffffff',
+      },
       task: {
         state: {
           review: '#00b9624d',
@@ -380,13 +390,13 @@ export const tolgeePalette = {
         importantLinkHover: tolgeeColors['pink']['600'],
       },
       progressbar: {
-        background: tolgeeColors['grey']['50'],
         pricing: {
           low: tolgeeColors['red']['400'],
           over: tolgeeColors['yellow']['500'],
           overForbidden: tolgeeColors['red']['800'],
           sufficient: tolgeeColors['teal']['500'],
         },
+        background: tolgeeColors['grey']['50'],
         task: {
           inProgress: tolgeeColors['lightBlue']['500'],
           done: tolgeeColors['green']['600'],
@@ -600,6 +610,16 @@ export const tolgeePalette = {
       pricing: '#1f2d400d',
     },
     _components: {
+      buttonToggle: {
+        enabled: '#182230',
+        textEnabled: '#ffffff',
+        hovered: '#000000de',
+        textHovered: '#ffffff',
+        active: '#ffffff',
+        textActive: '#1f2d40de',
+        activeHover: '#ffffffe5',
+        textActiveHover: '#000000de',
+      },
       task: {
         state: {
           review: '#33d5894d',
@@ -684,13 +704,13 @@ export const tolgeePalette = {
         importantLinkHover: tolgeeColors['grey']['50'],
       },
       progressbar: {
-        background: tolgeeColors['grey']['700'],
         pricing: {
           low: tolgeeColors['red']['400'],
           over: tolgeeColors['yellow']['500'],
           overForbidden: tolgeeColors['red']['600'],
           sufficient: tolgeeColors['teal']['400'],
         },
+        background: tolgeeColors['grey']['700'],
         task: {
           inProgress: tolgeeColors['lightBlue']['700'],
           done: tolgeeColors['green']['600'],

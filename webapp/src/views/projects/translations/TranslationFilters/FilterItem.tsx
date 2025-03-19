@@ -1,5 +1,4 @@
 import {
-  Button,
   Checkbox,
   ListItemText,
   MenuItemProps,
@@ -9,6 +8,7 @@ import {
 import { useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 import React from 'react';
+import { ButtonToggle } from 'tg.component/ButtonToggle';
 import { CompactMenuItem } from 'tg.component/ListComponents';
 
 const StyledMenuItem = styled(CompactMenuItem)`
@@ -23,30 +23,6 @@ const StyledMenuItem = styled(CompactMenuItem)`
     opacity: 1;
   }
   gap: 8px;
-`;
-
-const StyledExcludeButton = styled(Button)`
-  margin-left: 8px;
-  padding: 2px 8px;
-  font-size: 13px;
-  align-self: center;
-  min-height: 0px !important;
-  text-transform: none;
-  font-style: normal;
-  font-weight: 500;
-  transition: opacity ease-in 0.1s;
-  background-color: ${({ theme }) => theme.palette.tokens.icon.primary};
-  color: ${({ theme }) => theme.palette.background.default};
-  :hover {
-    background-color: ${({ theme }) => theme.palette.tokens.icon.primary};
-  }
-  &.exclude {
-    background-color: ${({ theme }) => theme.palette.background.default};
-    color: ${({ theme }) => theme.palette.tokens.icon.primary};
-    :hover {
-      background-color: ${({ theme }) => theme.palette.background.default};
-    }
-  }
 `;
 
 const StyledListItemText = styled(ListItemText)`
@@ -102,11 +78,9 @@ export const FilterItem = React.forwardRef(function FilterItem(
       )}
       <StyledListItemText primary={label} />
       {onExclude && (
-        <StyledExcludeButton
+        <ButtonToggle
           data-cy="filter-item-exclude"
-          variant="contained"
-          size="small"
-          className={clsx({ exclude: !excluded })}
+          active={excluded}
           onMouseDown={(e) => {
             e.stopPropagation();
           }}
@@ -118,7 +92,7 @@ export const FilterItem = React.forwardRef(function FilterItem(
           {excluded
             ? t('translation_filter_item_excluded')
             : t('translation_filter_item_exclude')}
-        </StyledExcludeButton>
+        </ButtonToggle>
       )}
     </StyledMenuItem>
   );
