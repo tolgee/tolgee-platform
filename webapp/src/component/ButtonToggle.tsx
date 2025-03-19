@@ -10,7 +10,6 @@ const StyledButton = styled(Button)`
   text-transform: none;
   font-style: normal;
   font-weight: 500;
-  transition: opacity ease-in 0.1s;
   background-color: ${({ theme }) =>
     theme.palette.tokens._components.buttonToggle.enabled};
   color: ${({ theme }) =>

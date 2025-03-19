@@ -16,10 +16,11 @@ const StyledMenuItem = styled(CompactMenuItem)`
   grid-template-columns: auto 1fr auto;
   align-items: center;
   padding-left: 4px !important;
-  & .exclude {
+  & .hidden {
     opacity: 0;
+    transition: opacity ease-in 0.1s;
   }
-  &:hover .exclude {
+  &:hover .hidden {
     opacity: 1;
   }
   gap: 8px;
@@ -81,6 +82,7 @@ export const FilterItem = React.forwardRef(function FilterItem(
         <ButtonToggle
           data-cy="filter-item-exclude"
           active={excluded}
+          className={clsx({ hidden: !excluded })}
           onMouseDown={(e) => {
             e.stopPropagation();
           }}
