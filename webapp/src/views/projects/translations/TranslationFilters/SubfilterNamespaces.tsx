@@ -145,7 +145,7 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
             )}
             sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
           />
-          {totalItems !== undefined && (
+          {Boolean(totalItems) && (
             <Box display="grid">
               <InfiniteSearchSelectContent
                 open={true}
