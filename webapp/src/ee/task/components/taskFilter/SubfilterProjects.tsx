@@ -21,6 +21,7 @@ export const SubfilterProjects = ({ value, onChange }: Props) => {
         label={t('task_filter_projects')}
         onClick={() => setOpen(true)}
         selected={Boolean(value?.length)}
+        open={open}
       />
       {open && (
         <ProjectSearchSelectPopover

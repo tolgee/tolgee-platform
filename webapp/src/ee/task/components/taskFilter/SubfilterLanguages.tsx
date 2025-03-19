@@ -32,6 +32,7 @@ export const SubfilterLanguages = ({ value, onChange, languages }: Props) => {
         label={t('task_filter_languages')}
         onClick={() => setOpen(true)}
         selected={Boolean(value?.length)}
+        open={open}
       />
       {open && (
         <Menu

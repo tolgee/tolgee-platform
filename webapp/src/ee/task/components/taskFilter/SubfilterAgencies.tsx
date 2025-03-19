@@ -40,6 +40,7 @@ export const SubfilterAgencies = ({ value, onChange }: Props) => {
         label={t('task_filter_agencies')}
         onClick={() => setOpen(true)}
         selected={Boolean(value?.length)}
+        open={open}
       />
       {open && (
         <Menu
