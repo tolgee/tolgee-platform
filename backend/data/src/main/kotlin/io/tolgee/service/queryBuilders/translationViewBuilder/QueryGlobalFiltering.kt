@@ -183,9 +183,8 @@ class QueryGlobalFiltering(
   private fun filterNoTag() {
     val filterNoTag = distinguishEmptyValue(params.filterNoTag)
     if (filterNoTag != null) {
-      // Build a subquery that finds any Key that has a tag in filterNoTag
-      val query = queryBase.query // The main CriteriaQuery
-      val root = queryBase.root // The root for Key in the main query
+      val query = queryBase.query
+      val root = queryBase.root
       val keyMetaJoin = queryBase.root.join(Key_.keyMeta, JoinType.LEFT)
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
 
@@ -194,14 +193,12 @@ class QueryGlobalFiltering(
       val subJoin = subRoot.join(Key_.keyMeta).join(KeyMeta_.tags)
       val hasEmptyTag = filterNoTag.contains("")
 
-      // subquery: SELECT subRoot.id FROM Key subRoot ... WHERE subRoot.id = root.id AND tag in filterNoTag
       subquery.select(subRoot.get(Key_.id))
         .where(
           cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
           subJoin.get(Tag_.name).`in`(filterNoTag),
         )
 
-      // main query excludes if such a subquery exists
       queryBase.whereConditions.add(
         cb.not(cb.exists(subquery)),
       )

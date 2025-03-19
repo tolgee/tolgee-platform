@@ -28,7 +28,7 @@ describe('Translations Base', () => {
   });
 
   after(() => {
-    // translationsTestData.cleanupForFilters();
+    translationsTestData.cleanupForFilters();
   });
 
   it('filters untranslated', () => {

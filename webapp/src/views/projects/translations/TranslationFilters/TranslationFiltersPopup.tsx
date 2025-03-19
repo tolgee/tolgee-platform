@@ -2,7 +2,7 @@ import { Box, Menu, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 
-import { FilterActions } from './tools';
+import { FilterActions, FilterOptions } from './tools';
 import { FiltersType, LanguageModel } from './tools';
 import { countFilters } from './summary';
 import { SubfilterTags } from './SubfilterTags';
@@ -22,6 +22,7 @@ type Props = {
   projectId: number;
   selectedLanguages: LanguageModel[];
   showClearButton?: boolean;
+  filterOptions?: FilterOptions;
 };
 
 export const TranslationFiltersPopup = ({
@@ -32,6 +33,7 @@ export const TranslationFiltersPopup = ({
   projectId,
   selectedLanguages,
   showClearButton,
+  filterOptions,
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
@@ -56,22 +58,26 @@ export const TranslationFiltersPopup = ({
             projectId={projectId}
           />
         )}
-        <SubfilterTranslations
-          value={value}
-          actions={actions}
-          projectId={projectId}
-          selectedLanguages={selectedLanguages}
-        />
         <SubfilterScreenshots
           value={value}
           actions={actions}
           projectId={projectId}
         />
-        <SubfilterComments
-          value={value}
-          actions={actions}
-          projectId={projectId}
-        />
+        {!filterOptions?.keyRelatedOnly && (
+          <>
+            <SubfilterTranslations
+              value={value}
+              actions={actions}
+              projectId={projectId}
+              selectedLanguages={selectedLanguages}
+            />
+            <SubfilterComments
+              value={value}
+              actions={actions}
+              projectId={projectId}
+            />
+          </>
+        )}
         {showClearButton && Boolean(countFilters(value)) && (
           <MenuItem onClick={() => actions.setFilters({})}>
             {t('translations_filters_heading_clear')}

@@ -21,6 +21,7 @@ import {
   TaskCreateForm,
 } from './TaskCreateForm';
 import { EmptyScopeDialog } from './EmptyScopeDialog';
+import { useTranslationFilters } from 'tg.views/projects/translations/TranslationFilters/useTranslationFilters';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -91,6 +92,10 @@ export const TaskCreateDialog = ({
   });
 
   const [filters, setFilters] = useState<FiltersType>({});
+  const { filtersQuery, ...actions } = useTranslationFilters({
+    filters,
+    setFilters,
+  });
   const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
   const [languages, setLanguages] = useState(initialValues?.languages ?? []);
 
@@ -99,7 +104,7 @@ export const TaskCreateDialog = ({
     method: 'get',
     path: { projectId },
     query: {
-      ...filters,
+      ...filtersQuery,
       languages: allLanguages.map((l) => l.tag),
     },
     options: {
@@ -207,7 +212,7 @@ export const TaskCreateDialog = ({
                 disabled={!taskFeature}
                 setLanguages={setLanguages}
                 filters={filters}
-                setFilters={initialValues?.selection ? undefined : setFilters}
+                filterActions={initialValues?.selection ? undefined : actions}
                 stateFilters={getStateFilters(values.type)}
                 setStateFilters={setStateFilters}
                 projectId={projectId}

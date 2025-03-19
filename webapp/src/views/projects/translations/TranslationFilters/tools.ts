@@ -47,3 +47,7 @@ export type FilterActions = {
   removeFilter: (...params: AddParams) => void;
   setFilters: (value: FiltersInternal) => void;
 };
+
+export type FilterOptions = {
+  keyRelatedOnly?: boolean;
+};

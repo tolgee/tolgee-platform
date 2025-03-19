@@ -4,7 +4,7 @@ import { IconButton, styled, SxProps, Box } from '@mui/material';
 import { useState, useRef } from 'react';
 
 import { stopBubble } from 'tg.fixtures/eventHandler';
-import { FiltersType, LanguageModel } from './tools';
+import { FilterOptions, FiltersType, LanguageModel } from './tools';
 import { TextField } from 'tg.component/common/TextField';
 import { FakeInput } from 'tg.component/FakeInput';
 import { ArrowDropDown } from 'tg.component/CustomIcons';
@@ -24,6 +24,7 @@ type Props = {
   projectId: number;
   sx?: SxProps;
   className?: string;
+  filterOptions?: FilterOptions;
 };
 
 export const TranslationFilters = ({
@@ -31,6 +32,7 @@ export const TranslationFilters = ({
   actions,
   selectedLanguages,
   projectId,
+  filterOptions,
   sx,
   className,
 }: Props) => {
@@ -48,7 +50,6 @@ export const TranslationFilters = ({
     <>
       <TextField
         variant="outlined"
-        // value={getFilterValue(value)}
         data-cy="translations-filter-select"
         minHeight={false}
         placeholder={t('task_filter_placeholder')}
@@ -121,6 +122,7 @@ export const TranslationFilters = ({
           anchorEl={anchorEl.current!}
           projectId={projectId}
           selectedLanguages={selectedLanguages}
+          filterOptions={filterOptions}
         />
       )}
     </>

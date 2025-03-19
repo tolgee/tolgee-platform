@@ -16,13 +16,17 @@ import { TaskDatePicker } from '../TaskDatePicker';
 import { TranslationStateFilter } from './TranslationStateFilter';
 import { TaskPreview } from './TaskPreview';
 import { Field, useFormikContext } from 'formik';
-import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
+import {
+  FilterActions,
+  FiltersType,
+} from 'tg.views/projects/translations/TranslationFilters/tools';
 import { Select } from 'tg.component/common/Select';
 import { useEffect } from 'react';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { useApiQueries } from 'tg.service/http/useQueryApi';
 import { stringHash } from 'tg.fixtures/stringHash';
 import { StateType } from 'tg.constants/translationStates';
+import { TranslationFilters } from 'tg.views/projects/translations/TranslationFilters/TranslationFilters';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -60,7 +64,7 @@ type Props = {
   setLanguages: (languages: number[]) => void;
   allLanguages: LanguageModel[];
   filters: FiltersType;
-  setFilters?: (filters: FiltersType) => void;
+  filterActions?: FilterActions;
   stateFilters: TranslationStateType[];
   setStateFilters: (filters: TranslationStateType[]) => void;
   projectId: number;
@@ -76,7 +80,7 @@ export const TaskCreateForm = ({
   setLanguages,
   allLanguages,
   filters,
-  setFilters,
+  filterActions,
   stateFilters,
   setStateFilters,
   projectId,
@@ -230,18 +234,17 @@ export const TaskCreateForm = ({
               : t('create_task_tasks_and_assignees_title')}
           </Typography>
           <StyledFilters my={1}>
-            {/* {setFilters && (
+            {filterActions && (
               <TranslationFilters
                 value={filters}
-                onChange={setFilters}
-                selectedLanguages={allLanguages.filter((l) =>
-                  languages.includes(l.id)
-                )}
+                actions={filterActions}
+                selectedLanguages={[]}
+                projectId={projectId}
                 placeholder={t('create_task_filter_keys_placeholder')}
                 filterOptions={{ keyRelatedOnly: true }}
                 sx={{ width: '100%', maxWidth: '270px' }}
               />
-            )} */}
+            )}
             <TranslationStateFilter
               value={stateFilters}
               placeholder={t(
