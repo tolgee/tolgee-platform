@@ -7,7 +7,7 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 import { ToolsPanel } from './ToolsPanel';
 import { useHeaderNsContext } from '../context/HeaderNsContext';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { AiPlayground } from './AiPlayground/AiPlaygrount';
+import { AiPlayground } from './AiPlayground/AiPlayground';
 
 const StyledContainer = styled('div')`
   position: relative;

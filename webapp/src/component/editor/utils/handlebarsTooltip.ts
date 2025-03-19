@@ -3,6 +3,7 @@ import { syntaxTree } from '@codemirror/language';
 import { RefObject } from 'react';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { trimDetail } from './handlebarsAutocomplete';
 
 type PromptVariable = components['schemas']['PromptVariable'];
 
@@ -24,8 +25,9 @@ export const handlebarsTooltip = (
         end: node.to,
         create(view) {
           const dom = document.createElement('div');
+          dom.style.whiteSpace = 'nowrap';
           dom.textContent = variable
-            ? variable.value || 'Empty'
+            ? trimDetail(variable.value, 50) || 'Empty'
             : 'Unknown variable';
           return { dom };
         },

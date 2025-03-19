@@ -5,8 +5,8 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type PromptVariable = components['schemas']['PromptVariable'];
 
-function trimDetail(text, maxLength = 20) {
-  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+export function trimDetail(text, maxLength = 20) {
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
 }
 
 export const handlebarsAutocomplete =

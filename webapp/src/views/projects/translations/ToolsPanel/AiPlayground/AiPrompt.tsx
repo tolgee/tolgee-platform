@@ -34,7 +34,7 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     url: '/v2/prompts/get-variables',
     method: 'get',
     query: {
-      pId: props.project.id,
+      projectId: props.project.id,
       keyId: props.keyData.keyId,
       targetLanguageId: props.language.id,
     },

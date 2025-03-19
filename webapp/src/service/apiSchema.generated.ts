@@ -91,6 +91,10 @@ export interface paths {
     /** Returns info the API key which user currently authenticated with. Otherwise responds with 400 status code. */
     get: operations["getCurrent_1"];
   };
+  "/v2/api-keys/current-permissions": {
+    /** Returns current PAK or PAT permissions for current user, api-key and project */
+    get: operations["getCurrentPermissions"];
+  };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_9"];
     delete: operations["delete_13"];
@@ -968,6 +972,65 @@ export interface components {
       userFullName?: string;
       /** @description Username of user owner */
       username?: string;
+    };
+    ApiKeyPermissionsModel: {
+      project: components["schemas"]["SimpleProjectModel"];
+      /**
+       * Format: int64
+       * @description The API key's project id or the one provided as query param
+       */
+      projectId: number;
+      /**
+       * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
+       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       */
+      scopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
+      )[];
+      /**
+       * @description List of languages user can change state to. If null, changing state of all language values is permitted.
+       * @example 200001,200004
+       */
+      stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can translate to. If null, all languages editing is permitted.
+       * @example 200001,200004
+       */
+      translateLanguageIds?: number[];
+      /** @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions */
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * @description List of languages user can view. If null, all languages view is permitted.
+       * @example 200001,200004
+       */
+      viewLanguageIds?: number[];
     };
     ApiKeyWithLanguagesModel: {
       description: string;
@@ -6141,6 +6204,55 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiKeyWithLanguagesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns current PAK or PAT permissions for current user, api-key and project */
+  getCurrentPermissions: {
+    parameters: {
+      query: {
+        /** Required when using with PAT */
+        projectId?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiKeyPermissionsModel"];
         };
       };
       /** Bad Request */
@@ -17641,7 +17753,7 @@ export interface operations {
   variables: {
     parameters: {
       query: {
-        pId: number;
+        projectId: number;
         keyId: number;
         targetLanguageId: number;
       };

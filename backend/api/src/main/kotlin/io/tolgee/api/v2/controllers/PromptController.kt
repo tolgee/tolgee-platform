@@ -30,10 +30,10 @@ class PromptController(private val promptService: PromptService) {
   @GetMapping("get-variables")
   @Operation(summary = "Get variables")
   fun variables(
-    @RequestParam pId: Long,
+    @RequestParam projectId: Long,
     @RequestParam keyId: Long,
     @RequestParam targetLanguageId: Long,
   ): VariablesResponse {
-    return VariablesResponse(promptService.getVariables(pId, keyId, targetLanguageId))
+    return VariablesResponse(promptService.getVariables(projectId, keyId, targetLanguageId))
   }
 }
