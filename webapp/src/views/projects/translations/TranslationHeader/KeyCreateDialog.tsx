@@ -57,6 +57,7 @@ export const KeyCreateDialog: React.FC<Props> = ({
       contextPresent: false,
       keyIsPlural: data.isPlural,
       keyPluralArgName: data.pluralArgName,
+      createdAt: new Date().getTime(),
     });
   };
 

@@ -1,12 +1,17 @@
 import { useTranslate } from '@tolgee/react';
 
 import { SelfHostedPlanAction } from './SelfHostedPlanAction';
-import { PlanType } from '../../component/Plan/types';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 import { excludePreviousPlanFeatures } from '../../component/Plan/plansTools';
 import { Plan } from 'tg.ee.module/billing/component/Plan/Plan';
 import { AllFromPlanFeature } from 'tg.ee.module/billing/component/Plan/AllFromPlanFeature';
 import { PlanFeature } from 'tg.ee.module/billing/component/PlanFeature';
+import { components } from 'tg.service/billingApiSchema.generated';
+import React, { FC } from 'react';
+import { PlanType } from '../../component/Plan/types';
+
+export type SelfHostedEePlanModel =
+  components['schemas']['SelfHostedEePlanModel'];
 
 type BillingPlansProps = {
   plans: PlanType[];
@@ -14,7 +19,7 @@ type BillingPlansProps = {
   onPeriodChange: (period: BillingPeriodType) => void;
 };
 
-export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
+export const PlansSelfHostedList: FC<BillingPlansProps> = ({
   plans,
   period,
   onPeriodChange,
@@ -47,7 +52,7 @@ export const PlansSelfHostedList: React.FC<BillingPlansProps> = ({
       'TASKS',
       'ORDER_TRANSLATION',
       'SSO',
-    ] as const satisfies PlanType['enabledFeatures'],
+    ] as const satisfies SelfHostedEePlanModel['enabledFeatures'],
     free: false,
     hasYearlyPrice: false,
     public: true,
