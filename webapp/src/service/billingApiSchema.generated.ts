@@ -983,9 +983,17 @@ export interface components {
       stackTrace: string;
     };
     ReportUsageDto: {
+      /**
+       * Format: int64
+       * @description Number of keys in the project. If not provided, the number of keys will not be updated.
+       */
+      keys?: number;
       licenseKey: string;
-      /** Format: int64 */
-      seats: number;
+      /**
+       * Format: int64
+       * @description Number of languages in the project. If not provided, the number of languages will not be updated.
+       */
+      seats?: number;
     };
     SelfHostedEeFreeSubscribeRequest: {
       /**
@@ -1021,6 +1029,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -1053,6 +1062,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -1084,11 +1094,12 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
-      metricType: "KEYS_SEATS" | "STRINGS";
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
       notAvailableBefore?: string;
+      payAsYouGo?: boolean;
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId?: string;
@@ -1128,6 +1139,8 @@ export interface components {
     };
     SetLicenseKeyLicensingDto: {
       instanceId: string;
+      /** Format: int64 */
+      keys: number;
       licenseKey: string;
       /** Format: int64 */
       seats: number;
