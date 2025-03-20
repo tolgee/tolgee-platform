@@ -7,6 +7,7 @@ import { EditorHandlebars } from 'tg.component/editor/EditorHandlebars';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { PanelContentProps } from '../common/types';
+import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
@@ -21,26 +22,35 @@ const StyledTextField = styled(TextField)`
 `;
 
 export const AiPrompt: React.FC<PanelContentProps> = (props) => {
-  const [value, setValue] = useState(
-    'Hi translate from {{source}} to {{target}}'
-  );
+  const [value, setValue] = useLocalStorageState<string>({
+    key: 'aiPlaygroundLastValue',
+    initial: 'Hi translate from {{source}} to {{target}}',
+  });
   const [result, setResult] = useState('');
   const promptLoadable = useApiMutation({
     url: '/v2/prompts/test',
     method: 'post',
   });
 
+  const cellSelected = Boolean(props.keyData && props.language);
+
   const promptVariables = useApiQuery({
     url: '/v2/prompts/get-variables',
     method: 'get',
     query: {
       projectId: props.project.id,
-      keyId: props.keyData.keyId,
-      targetLanguageId: props.language.id,
+      keyId: props.keyData?.keyId,
+      targetLanguageId: props.language?.id,
+    },
+    options: {
+      enabled: cellSelected,
     },
   });
 
   function handleTestPrompt() {
+    if (!cellSelected) {
+      return;
+    }
     promptLoadable.mutate(
       {
         content: {
@@ -78,7 +88,11 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
       </EditorWrapper>
 
       <Box sx={{ margin: '8px', display: 'flex', justifyContent: 'end' }}>
-        <IconButton color="primary" onClick={handleTestPrompt}>
+        <IconButton
+          color="primary"
+          onClick={handleTestPrompt}
+          disabled={!cellSelected}
+        >
           <Send03 width={20} height={20} />
         </IconButton>
       </Box>

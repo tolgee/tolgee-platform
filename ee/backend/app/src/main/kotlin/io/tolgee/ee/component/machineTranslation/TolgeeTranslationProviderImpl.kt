@@ -9,7 +9,6 @@ import io.tolgee.component.machineTranslation.providers.tolgee.CloudTolgeeTransl
 import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateApiService
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
-import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslationProvider
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Lazy

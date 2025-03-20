@@ -51,6 +51,7 @@ class PromptService(
     variables.add(PromptVariable("projectDescription", project.aiTranslatorPromptDescription ?: ""))
     variables.add(PromptVariable("sourceText", sTranslation.get().text ?: ""))
     variables.add(PromptVariable("targetText", tTranslation.get().text ?: ""))
+    variables.add(PromptVariable("keyName", key.name))
 
     return variables
   }
