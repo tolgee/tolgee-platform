@@ -661,6 +661,8 @@
   "export_form_message_format_ruby-sprintf": "Ruby Sprintf",
   "export_translations_auto_publish_hint": "Der Export wird automatisch durchgeführt, nachdem eine Übersetzung geändert oder hinzugefügt wurde. Da die Inhaltsauslieferung stark zwischengespeichert wird, kann es bis zu 15 Minuten dauern, bis die Änderungen wirksam werden.",
   "export_translations_auto_publish_label": "Automatisch veröffentlichen",
+  "export_translations_escape_html_hint": "Wenn aktiviert, werden HTML-Tags in der exportierten Datei maskiert.",
+  "export_translations_escape_html_label": "HTML maskieren",
   "export_translations_export_label": "Exportieren",
   "export_translations_format_label": "Formatieren",
   "export_translations_languages_label": "Sprachen",

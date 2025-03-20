@@ -655,6 +655,8 @@
   "export_form_message_format_ruby-sprintf": "Ruby Sprintf",
   "export_translations_auto_publish_hint": "Az exportálás automatikusan megtörténik minden fordítás módosítása vagy hozzáadása után. Mivel a tartalom szállítása erősen gyorsítótárazott, akár 15 percig is eltarthat, amíg a változások érvénybe lépnek.",
   "export_translations_auto_publish_label": "Automatikus közzététel",
+  "export_translations_escape_html_hint": "Ha engedélyezve van, a HTML címkék el lesznek kerülve az exportált fájlban.",
+  "export_translations_escape_html_label": "HTML kódolása",
   "export_translations_export_label": "Exportálás",
   "export_translations_format_label": "Formátum",
   "export_translations_languages_label": "Nyelvek",

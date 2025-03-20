@@ -655,6 +655,8 @@
   "export_form_message_format_ruby-sprintf": "Ruby Sprintf",
   "export_translations_auto_publish_hint": "Eksport vil bli utført automatisk etter at en oversettelse er endret eller lagt til. Siden innholdsdistribusjonen er sterkt mellomlagret, kan det ta opptil 15 minutter før endringene trer i kraft.",
   "export_translations_auto_publish_label": "Publiser automatisk",
+  "export_translations_escape_html_hint": "Når aktivert vil HTML-tagger bli erstattet i den eksporterte filen.",
+  "export_translations_escape_html_label": "Unngå HTML",
   "export_translations_export_label": "Eksporter",
   "export_translations_format_label": "Format",
   "export_translations_languages_label": "Språk",

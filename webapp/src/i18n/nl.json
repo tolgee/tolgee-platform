@@ -657,6 +657,8 @@
   "export_form_message_format_ruby-sprintf": "Ruby Sprintf",
   "export_translations_auto_publish_hint": "Export wordt automatisch uitgevoerd nadat een vertaling is gewijzigd of toegevoegd. Omdat de inhoud sterk wordt gecachet, kan het tot 15 minuten duren voordat de wijzigingen van kracht worden.",
   "export_translations_auto_publish_label": "Automatisch publiceren",
+  "export_translations_escape_html_hint": "Wanneer ingeschakeld worden HTML-tags ontsnapt in het geëxporteerde bestand.",
+  "export_translations_escape_html_label": "HTML ontsnappen",
   "export_translations_export_label": "Exporteren",
   "export_translations_format_label": "Formaat",
   "export_translations_languages_label": "Talen",

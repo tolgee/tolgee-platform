@@ -1,3 +1,10 @@
+# [3.113.0](https://github.com/tolgee/tolgee-platform/compare/v3.112.0...v3.113.0) (2025-03-20)
+
+
+### Features
+
+* new filters ([#2999](https://github.com/tolgee/tolgee-platform/issues/2999)) ([4f8197c](https://github.com/tolgee/tolgee-platform/commit/4f8197c27bbb2687a9a3db2a34a37168e9133fab))
+
 # [3.112.0](https://github.com/tolgee/tolgee-platform/compare/v3.111.3...v3.112.0) (2025-03-17)
 
 
