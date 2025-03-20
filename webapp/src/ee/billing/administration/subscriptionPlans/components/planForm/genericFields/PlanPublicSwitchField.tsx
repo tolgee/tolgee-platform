@@ -23,7 +23,7 @@ export const PlanPublicSwitchField: FC<{
               onChange={() => setFieldValue('public', !values.public)}
             />
           }
-          data-cy="administration-cloud-plan-field-public"
+          data-cy="administration-plan-field-public"
           label={t('administration_cloud_plan_field_public')}
         />
         {values.public && (

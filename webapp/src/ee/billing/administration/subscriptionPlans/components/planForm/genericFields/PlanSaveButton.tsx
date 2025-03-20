@@ -18,7 +18,7 @@ export const PlanSaveButton: FC<CloudPlanSaveButtonProps> = ({ loading }) => {
           variant="contained"
           color="primary"
           type="submit"
-          data-cy="administration-cloud-plan-submit-button"
+          data-cy="form-submit-button"
         >
           {t('global_form_save')}
         </LoadingButton>

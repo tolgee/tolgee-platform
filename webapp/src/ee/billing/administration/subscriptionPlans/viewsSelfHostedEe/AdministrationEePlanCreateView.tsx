@@ -83,7 +83,7 @@ export const AdministrationEePlanCreateView = () => {
               },
               forOrganizationIds: [],
               enabledFeatures: [],
-              public: true,
+              public: false,
               free: false,
               nonCommercial: false,
               isPayAsYouGo: true,
