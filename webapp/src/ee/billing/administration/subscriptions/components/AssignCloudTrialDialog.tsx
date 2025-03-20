@@ -16,15 +16,15 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { CloudPlanFields } from '../../subscriptionPlans/components/planForm/fields/CloudPlanFields';
-import { getCloudPlanInitialValues } from '../../subscriptionPlans/components/planForm/getCloudPlanInitialValues';
+import { CloudPlanFields } from '../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanFields';
+import { getCloudPlanInitialValues } from '../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { PlanSelectorField } from '../../subscriptionPlans/components/planForm/fields/PlanSelectorField';
-import { CloudPlanFormData } from '../../subscriptionPlans/components/planForm/CloudPlanFormBase';
+import { PlanSelectorField } from '../../subscriptionPlans/components/planForm/cloud/fields/PlanSelectorField';
 import { useTestClock } from 'tg.service/useTestClock';
 import { AssignTrialDatePicker } from './AssignTrialDatePicker';
 import { useCurrentDate } from 'tg.hooks/useCurrentDate';
+import { CloudPlanFormData } from '../../subscriptionPlans/components/planForm/cloud/types';
 
 export const AssignCloudTrialDialog: FC<{
   open: boolean;
@@ -55,7 +55,11 @@ export const AssignCloudTrialDialog: FC<{
             planId: customize ? undefined : value.planId!,
             trialEnd: value.trialEnd.getTime(),
             customPlan: customize
-              ? { ...value.customPlan, public: false }
+              ? {
+                  ...value.customPlan,
+                  public: false,
+                  stripeProductId: value.customPlan.stripeProductId ?? '',
+                }
               : undefined,
           },
         },

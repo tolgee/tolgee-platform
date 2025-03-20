@@ -69,21 +69,21 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1742306073641-1">
         <addColumn tableName="ee_subscription">
-            <column name="included_keys" type="BIGINT">
+            <column name="included_keys" type="BIGINT" defaultValue="-1">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1742306073641-2">
         <addColumn tableName="ee_subscription">
-            <column name="included_seats" type="BIGINT">
+            <column name="included_seats" type="BIGINT" defaultValue="-1">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1742307074282-1">
         <addColumn tableName="ee_subscription">
-            <column name="is_pay_as_you_go" type="BOOLEAN">
+            <column name="is_pay_as_you_go" type="BOOLEAN" defaultValue="true">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

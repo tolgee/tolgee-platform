@@ -146,7 +146,10 @@ export const PlansSelfHosted = () => {
             </Box>
             <StyledShoppingGrid>
               <PlansSelfHostedList
-                plans={plansLoadable.data._embedded.plans}
+                plans={plansLoadable.data._embedded.plans.map((plan) => ({
+                  ...plan,
+                  metricType: 'KEYS_SEATS',
+                }))}
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />

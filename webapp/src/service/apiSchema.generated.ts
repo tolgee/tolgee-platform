@@ -3804,6 +3804,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       public: boolean;
@@ -4125,6 +4126,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
