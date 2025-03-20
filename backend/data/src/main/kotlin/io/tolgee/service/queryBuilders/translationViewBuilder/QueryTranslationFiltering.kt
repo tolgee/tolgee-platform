@@ -18,6 +18,7 @@ class QueryTranslationFiltering(
     language: LanguageDto,
     translationTextField: Path<String>,
     translationStateField: Path<TranslationState>,
+    autoTranslatedField: Path<Boolean>,
   ) {
     filterByStateMap?.get(language.tag)?.let { states ->
       val languageStateConditions = mutableListOf<Predicate>()
@@ -28,15 +29,33 @@ class QueryTranslationFiltering(
         }
         languageStateConditions.add(condition)
       }
-      queryBase.whereConditions.add(cb.or(*languageStateConditions.toTypedArray()))
+      queryBase.translationConditions.add(cb.or(*languageStateConditions.toTypedArray()))
+    }
+
+    if (params.filterAutoTranslatedInLang?.contains(language.tag) == true) {
+      queryBase.translationConditions.add(cb.equal(autoTranslatedField, true))
     }
 
     if (params.filterUntranslatedInLang == language.tag) {
-      queryBase.whereConditions.add(with(queryBase) { translationTextField.isNullOrBlank })
+      queryBase.translationConditions.add(with(queryBase) { translationTextField.isNullOrBlank })
     }
 
     if (params.filterTranslatedInLang == language.tag) {
-      queryBase.whereConditions.add(with(queryBase) { translationTextField.isNotNullOrBlank })
+      queryBase.translationConditions.add(with(queryBase) { translationTextField.isNotNullOrBlank })
+    }
+  }
+
+  fun apply(
+    language: LanguageDto,
+    commentsExpression: Expression<Long>,
+    unresolvedCommentsExpression: Expression<Long>,
+  ) {
+    if (params.filterHasCommentsInLang?.contains(language.tag) == true) {
+      queryBase.translationConditions.add(cb.greaterThan(commentsExpression, cb.literal(0L)))
+    }
+
+    if (params.filterHasUnresolvedCommentsInLang?.contains(language.tag) == true) {
+      queryBase.translationConditions.add(cb.greaterThan(unresolvedCommentsExpression, cb.literal(0L)))
     }
   }
 
@@ -55,7 +74,7 @@ class QueryTranslationFiltering(
       )
 
     if (conditions.isNotEmpty()) {
-      queryBase.whereConditions.add(cb.or(*conditions.toTypedArray()))
+      queryBase.translationConditions.add(cb.or(*conditions.toTypedArray()))
     }
   }
 

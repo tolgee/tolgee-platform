@@ -26,25 +26,27 @@ describe('filter by namespaces and tags', () => {
   it('searches in tags', () => {
     selectInSelect(gcy('translations-filter-select'), 'Tags');
     gcy('search-select-search').type('Tag 15');
-    expect(gcy('search-select-item').should('have.length', 1));
+    expect(gcy('filter-item').should('have.length', 2));
   });
 
   it('searches in namespaces', () => {
     selectInSelect(gcy('translations-filter-select'), 'Namespaces');
     gcy('search-select-search').type('Namespace 15');
-    expect(gcy('search-select-item').should('have.length', 1));
+    expect(gcy('filter-item').should('have.length', 2));
   });
 
   it('filters by tag', () => {
     selectInSelect(gcy('translations-filter-select'), 'Tags');
-    gcy('search-select-item').contains('Tag 02').click();
+    gcy('filter-item').contains('Tag 02').click();
+    gcy('filter-item').contains('Without tags').should('be.visible');
     waitForGlobalLoading();
     gcy('translations-key-count').contains('1').should('exist');
   });
 
   it('filters by namespace', () => {
     selectInSelect(gcy('translations-filter-select'), 'Namespaces');
-    gcy('search-select-item').contains('Namespace 02').click();
+    gcy('filter-item').contains('Namespace 02').click();
+    gcy('filter-item').contains('Without namespace').should('be.visible');
     waitForGlobalLoading();
     gcy('translations-key-count').contains('1').should('exist');
   });

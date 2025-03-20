@@ -24,13 +24,7 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -60,8 +54,9 @@ class NamespaceController(
     @ParameterObject
     @SortDefault("id")
     pageable: Pageable,
+    @RequestParam("search") search: String?,
   ): PagedModel<NamespaceModel> {
-    val namespaces = namespaceService.getAllInProject(projectHolder.project.id, pageable)
+    val namespaces = namespaceService.getAllInProject(projectHolder.project.id, pageable, search)
     return pagedResourcesAssembler.toModel(namespaces, namespaceModelAssembler)
   }
 

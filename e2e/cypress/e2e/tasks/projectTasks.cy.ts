@@ -156,7 +156,7 @@ describe('project tasks', () => {
     });
   });
 
-  it('task create displays correct numbers for filter', () => {
+  it('task create displays correct numbers for state filter', () => {
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-languages').click();
     cy.gcy('create-task-field-languages-item').contains('Czech').click();
@@ -171,6 +171,30 @@ describe('project tasks', () => {
       alert: false,
       words: 8,
       characters: 52,
+    });
+  });
+
+  it('task create displays correct numbers for key filter', () => {
+    cy.gcy('tasks-header-add-task').click();
+    cy.gcy('create-task-field-languages').click();
+    cy.gcy('create-task-field-languages-item').contains('Czech').click();
+
+    dismissMenu();
+    cy.waitForDom();
+    cy.gcy('translations-state-filter-clear').click();
+    cy.gcy('translations-filter-select').click();
+    cy.gcy('submenu-item').contains('Tags').click();
+    cy.gcy('filter-item-exclude').click();
+    dismissMenu();
+    dismissMenu();
+    waitForGlobalLoading();
+
+    checkTaskPreview({
+      language: 'Czech',
+      keys: 0,
+      alert: false,
+      words: 0,
+      characters: 0,
     });
   });
 

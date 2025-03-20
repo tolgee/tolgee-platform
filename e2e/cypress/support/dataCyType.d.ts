@@ -208,6 +208,8 @@ declare namespace DataCy {
         "export-state-selector-item" |
         "export-submit-button" |
         "export-support_arrays-selector" |
+        "filter-item" |
+        "filter-item-exclude" |
         "former-user-name" |
         "generate-api-key-dialog-description-input" |
         "generate-pat-dialog-content" |
@@ -537,6 +539,7 @@ declare namespace DataCy {
         "storage-item-edit" |
         "storage-list-item" |
         "storage-subtitle" |
+        "submenu-item" |
         "subscribe-cancels-trial-plan-tooltip" |
         "subscriptions-trial-alert" |
         "subscriptions-trial-alert-reaching-the-limit" |
@@ -634,10 +637,12 @@ declare namespace DataCy {
         "translations-cell-task-button" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
-        "translations-filter-clear-all" |
-        "translations-filter-option" |
+        "translations-filter-apply-for-all" |
+        "translations-filter-apply-for-expand" |
+        "translations-filter-apply-for-language" |
+        "translations-filter-apply-no-base" |
         "translations-filter-select" |
-        "translations-filters-subheader" |
+        "translations-filter-select-clear" |
         "translations-history-load-more-button" |
         "translations-key-cell-description" |
         "translations-key-count" |

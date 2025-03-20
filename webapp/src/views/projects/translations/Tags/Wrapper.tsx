@@ -18,6 +18,7 @@ const StyledWrapper = styled('div')`
       : theme.palette.emphasis[200]};
   border: 1px solid transparent;
   max-width: 100%;
+  box-sizing: border-box;
 
   & input {
     color: ${({ theme }) => theme.palette.text.primary};

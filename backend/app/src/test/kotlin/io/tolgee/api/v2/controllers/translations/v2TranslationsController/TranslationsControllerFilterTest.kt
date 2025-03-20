@@ -116,6 +116,27 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes namespace`() {
+    val testData = NamespacesTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterNoNamespace=&filterNoNamespace=ns-2")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+        }
+      }
+    performProjectAuthGet("/translations?filterNoNamespace=ns-2&filterNoNamespace=ns-1")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+        }
+      }
+  }
+
   @Test
   @ProjectJWTAuthTestMethod
   fun `it doesn't filter when no namespace is provided`() {
@@ -261,18 +282,18 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     userAccount = testData.user
     performProjectAuthGet("/translations?filterState=de,TRANSLATED&filterState=en,REVIEWED")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("state test key 2")
-        node("page.totalElements").isEqualTo(1)
+        node("_embedded.keys[0].keyName").isEqualTo("state test key")
+        node("_embedded.keys[1].keyName").isEqualTo("state test key 2")
+        node("_embedded.keys[2].keyName").isEqualTo("state test key 3")
+        node("page.totalElements").isEqualTo(3)
       }
     performProjectAuthGet("/translations?filterState=de,REVIEWED&filterState=en,REVIEWED")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("state test key")
-        node("page.totalElements").isEqualTo(1)
-      }
-    performProjectAuthGet("/translations?filterState=de,UNTRANSLATED&filterState=en,REVIEWED")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("state test key 3")
-        node("page.totalElements").isEqualTo(1)
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[1].keyName").isEqualTo("state test key")
+        node("_embedded.keys[2].keyName").isEqualTo("state test key 2")
+        node("_embedded.keys[3].keyName").isEqualTo("state test key 3")
+        node("page.totalElements").isEqualTo(4)
       }
   }
 
@@ -306,6 +327,21 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters "without tag" specified by empty tag`() {
+    testData.addFewKeysWithTags()
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterTag=")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(2)
+        node("_embedded.keys[0].keyName").isEqualTo("key with screenshot")
+        node("_embedded.keys[1].keyName").isEqualTo("key with screenshot 2")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `filters by multiple tags`() {
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
@@ -317,6 +353,79 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
         node("_embedded.keys[1].keyTags[0].name").isEqualTo("Another cool tag")
         node("_embedded.keys[2].keyTags[0].name").isEqualTo("Cool tag")
         node("page.totalElements").isEqualTo(4)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters in combination with "without tag"`() {
+    testData.addFewKeysWithTags()
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=keyName&filterTag=&filterTag=Cool tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(5)
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[1].keyName").isEqualTo("key with screenshot")
+        node("_embedded.keys[2].keyName").isEqualTo("key with screenshot 2")
+        node("_embedded.keys[3].keyName").isEqualTo("Key with tag")
+        node("_embedded.keys[4].keyName").isEqualTo("Key with tag 2")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes by tag`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=Cool tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("Z key")
+        node("_embedded.keys[0].keyTags[0].name").isEqualTo("Lame tag")
+        node("_embedded.keys[1].keyName").isEqualTo("Another key with tag")
+        node("_embedded.keys[1].keyTags[0].name").isEqualTo("Another cool tag")
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes by "Without tag"`() {
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[1].keyName").isEqualTo("Z key")
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes by multiple tags`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=Cool tag&filterNoTag=Another cool tag&filterNoTag=Lame tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(0)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `excludes in combination with "Without tag"`() {
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterNoTag=Cool tag&filterNoTag=")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("page.totalElements").isEqualTo(1)
+        node("_embedded.keys[0].keyName").isEqualTo("Z key")
       }
   }
 
@@ -357,6 +466,55 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       .andIsOk.andAssertThatJson {
         node("_embedded.keys").isArray.hasSize(2)
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by auto-translated flag`() {
+    val testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterAutoTranslatedInLang=en").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("Z key")
+        node("[0].translations.en.auto").isEqualTo(true)
+      }
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters keys with unresolved comments`() {
+    val testData = TranslationsTestData()
+    testData.addCommentStatesData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterHasUnresolvedCommentsInLang=de").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("commented_key")
+      }
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters keys with any comments`() {
+    val testData = TranslationsTestData()
+    testData.addCommentStatesData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthGet("/translations?filterHasCommentsInLang=de").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(2)
+        node("[0].keyName").isEqualTo("A key")
+        node("[1].keyName").isEqualTo("commented_key")
+      }
+    }
   }
 
   @ProjectJWTAuthTestMethod

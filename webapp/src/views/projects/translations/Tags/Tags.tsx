@@ -4,10 +4,6 @@ import {
   useTranslationsSelector,
   useTranslationsActions,
 } from '../context/TranslationsContext';
-import {
-  encodeFilter,
-  toggleFilter,
-} from 'tg.component/translation/translationFilters/tools';
 import { Tag } from './Tag';
 
 type TagModel = components['schemas']['TagModel'];
@@ -19,7 +15,7 @@ type Props = {
 };
 
 export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
-  const { removeTag, setFilters } = useTranslationsActions();
+  const { removeTag, removeFilter, addFilter } = useTranslationsActions();
   const filters = useTranslationsSelector((c) => c.filters);
 
   const handleTagDelete = (tagId: number) => {
@@ -27,15 +23,11 @@ export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   };
 
   const handleTagClick = (tagName: string) => {
-    const newFilters = toggleFilter(
-      filters,
-      [],
-      encodeFilter({
-        filter: 'filterTag',
-        value: tagName,
-      })
-    );
-    setFilters(newFilters);
+    if (filters.filterTag?.includes(tagName)) {
+      removeFilter('filterTag', tagName);
+    } else {
+      addFilter('filterTag', tagName);
+    }
   };
 
   return (

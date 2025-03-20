@@ -22,20 +22,30 @@ class TranslationsViewQueryBuilder(
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
 ) {
-  private fun <T> getBaseQuery(
-    query: CriteriaQuery<T>,
-    isKeyIdsQuery: Boolean = false,
-  ): QueryBase<T> {
+  private fun <T> getBaseQuery(query: CriteriaQuery<T>): QueryBase<T> {
     return QueryBase(
       cb = cb,
       projectId = projectId,
       query = query,
       languages = languages,
       params = params,
-      isKeyIdsQuery = isKeyIdsQuery,
       entityManager,
       authenticationFacade,
     )
+  }
+
+  private fun getWhereConditions(queryBase: QueryBase<*>): MutableList<Predicate> {
+    val where = queryBase.whereConditions.toMutableList()
+    val translationConditions = queryBase.translationConditions.toMutableList()
+    if (translationConditions.isNotEmpty()) {
+      where.add(cb.or(*translationConditions.toTypedArray()))
+    }
+
+    val cursorPredicateProvider = CursorPredicateProvider(cb, cursor, queryBase.querySelection)
+    cursorPredicateProvider()?.let {
+      where.add(it)
+    }
+    return where
   }
 
   val dataQuery: CriteriaQuery<Array<Any?>>
@@ -45,14 +55,10 @@ class TranslationsViewQueryBuilder(
       val paths = queryBase.querySelection.values.toTypedArray()
       query.multiselect(*paths)
       val orderList = getOrderList(queryBase)
-      val where = queryBase.whereConditions.toMutableList()
 
-      val cursorPredicateProvider = CursorPredicateProvider(cb, cursor, queryBase.querySelection)
-      cursorPredicateProvider()?.let {
-        where.add(it)
-      }
       val groupBy = listOf(queryBase.keyIdExpression, *queryBase.groupByExpressions.toTypedArray())
-      query.where(*where.toTypedArray())
+      query.where(*getWhereConditions(queryBase).toTypedArray())
+
       query.groupBy(groupBy)
       query.orderBy(orderList)
       return query
@@ -90,16 +96,16 @@ class TranslationsViewQueryBuilder(
       val queryBase = getBaseQuery(query)
       val file = query.roots.iterator().next() as Root<*>
       query.select(cb.countDistinct(file))
-      query.where(*queryBase.whereConditions.toTypedArray())
+      query.where(*getWhereConditions(queryBase).toTypedArray())
       return query
     }
 
   val keyIdsQuery: CriteriaQuery<Long>
     get() {
       val query = cb.createQuery(Long::class.java)
-      val queryBase = getBaseQuery(query = query, isKeyIdsQuery = true)
+      val queryBase = getBaseQuery(query = query)
       query.select(queryBase.keyIdExpression)
-      query.where(*queryBase.whereConditions.toTypedArray())
+      query.where(*getWhereConditions(queryBase).toTypedArray())
       query.distinct(true)
       return query
     }

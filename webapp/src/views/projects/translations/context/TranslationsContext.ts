@@ -16,7 +16,6 @@ import {
   ChangeValue,
   Edit,
   EditorProps,
-  Filters,
   KeyElement,
   KeyUpdateData,
   RemoveTag,
@@ -37,6 +36,8 @@ import { PrefilterType } from '../prefilters/usePrefilter';
 import { useTaskService } from './services/useTaskService';
 import { usePositionService } from './services/usePositionService';
 import { useLayoutService } from './services/useLayoutService';
+import { AddParams } from '../TranslationFilters/tools';
+import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
 
 type Props = {
   projectId: number;
@@ -170,9 +171,21 @@ export const [
       translationService.setUrlSearch(search);
       return handleTranslationsReset();
     },
-    async setFilters(filters: Filters) {
+    async addFilter(...params: AddParams) {
       if (await positionService.confirmUnsavedChanges()) {
-        translationService.setFilters(filters);
+        translationService.addFilter(...params);
+        return handleTranslationsReset();
+      }
+    },
+    async removeFilter(...params: AddParams) {
+      if (await positionService.confirmUnsavedChanges()) {
+        translationService.removeFilter(...params);
+        return handleTranslationsReset();
+      }
+    },
+    async setFilters(value: FiltersType) {
+      if (await positionService.confirmUnsavedChanges()) {
+        translationService.setFilters(value);
         return handleTranslationsReset();
       }
     },

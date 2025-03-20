@@ -105,7 +105,8 @@ class NamespaceService(
   fun getAllInProject(
     projectId: Long,
     pageable: Pageable,
-  ) = namespaceRepository.getAllByProjectId(projectId, pageable)
+    search: String?,
+  ) = namespaceRepository.getByProjectAndSearch(projectId, search, pageable)
 
   fun saveAll(entities: Collection<Namespace>) {
     namespaceRepository.saveAll(entities)

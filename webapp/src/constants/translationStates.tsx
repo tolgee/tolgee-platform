@@ -12,7 +12,7 @@ type StateStruct = Record<
   }
 >;
 
-export const TRANSLATION_STATES: StateStruct = {
+export const TRANSLATION_STATES = {
   DISABLED: {
     translation: <T keyName="translation_state_disabled" />,
     color: '#7e7e7e',
@@ -33,7 +33,7 @@ export const TRANSLATION_STATES: StateStruct = {
     color: '#17AD18',
     next: 'TRANSLATED',
   },
-};
+} as const satisfies StateStruct;
 
 export const EXPORTABLE_STATES = Object.keys(TRANSLATION_STATES).filter(
   (val) => val !== 'DISABLED'

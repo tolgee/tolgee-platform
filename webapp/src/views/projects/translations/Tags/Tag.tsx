@@ -1,4 +1,4 @@
-import { styled } from '@mui/material';
+import { styled, SxProps } from '@mui/material';
 import { XClose } from '@untitled-ui/icons-react';
 
 import { Wrapper } from './Wrapper';
@@ -36,6 +36,7 @@ type Props = {
   onClick?: (name: string) => void;
   selected?: boolean;
   className?: string;
+  sx?: SxProps;
 };
 
 export const Tag: React.FC<Props> = ({
@@ -44,11 +45,13 @@ export const Tag: React.FC<Props> = ({
   onClick,
   selected,
   className,
+  sx,
 }) => {
   return (
     <StyledWrapper
       onClick={onClick ? () => onClick?.(name) : undefined}
       className={clsx({ selected }, className)}
+      sx={sx}
     >
       <StyledTag>{name}</StyledTag>
       {onDelete && (

@@ -20,6 +20,7 @@ import {
 } from '../types';
 import { PrefilterType } from '../../prefilters/usePrefilter';
 import { useConfig } from 'tg.globalContext/helpers';
+import { useTranslationFiltersService } from './useTranslationFilterService';
 
 const PAGE_SIZE = 60;
 
@@ -30,17 +31,6 @@ export type DeletableKeyWithTranslationsModelType =
 type TranslationsResponse =
   components['schemas']['KeysWithTranslationsPageModel'];
 type TranslationModel = components['schemas']['TranslationViewModel'];
-
-type FiltersType = Pick<
-  TranslationsQueryType,
-  | 'filterHasNoScreenshot'
-  | 'filterHasScreenshot'
-  | 'filterTranslatedAny'
-  | 'filterUntranslatedAny'
-  | 'filterTranslatedInLang'
-  | 'filterUntranslatedInLang'
-  | 'filterNamespace'
->;
 
 type Props = {
   projectId: number;
@@ -81,16 +71,10 @@ const flattenKeys = (
 
 export const useTranslationsService = (props: Props) => {
   const config = useConfig();
-  const [filters, _setFilters] = useUrlSearchState('filters', {
-    defaultVal: JSON.stringify({}),
-  });
+
   const [order, setOrder] = useUrlSearchState('order', {
     defaultVal: 'keyName',
   });
-  const parsedFilters = useMemo(
-    () => (filters ? JSON.parse(filters as string) : {}) as FiltersType,
-    [filters]
-  );
 
   const [_, setUrlLanguages] = useUrlSearchState('languages', {});
 
@@ -130,16 +114,28 @@ export const useTranslationsService = (props: Props) => {
     [props.projectId]
   );
 
+  const {
+    filters,
+    filtersQuery,
+    addFilter,
+    removeFilter,
+    setFilters,
+    updateSelectedLanguages,
+  } = useTranslationFiltersService({
+    selectedLanguages: query.languages,
+    baseLang: props.baseLang,
+  });
+
   const filterNamespace =
     props.keyNamespace !== undefined
       ? [props.keyNamespace]
-      : parsedFilters.filterNamespace;
+      : filtersQuery.filterNamespace;
 
   const requestQuery: TranslationsQueryType = {
     ...query,
     // smuggle in base lang if not present
     languages: addBaseIfMissing(query.languages, props.baseLang!),
-    ...parsedFilters,
+    ...filtersQuery,
     filterKeyName: props.keyName ? [props.keyName] : undefined,
     filterNamespace,
     filterKeyId: props.keyId ? [props.keyId] : undefined,
@@ -214,6 +210,28 @@ export const useTranslationsService = (props: Props) => {
     },
   });
 
+  const currentFetchedLangs = useMemo(() => {
+    const langs = shaveBy(
+      translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
+      languages
+    );
+
+    if (languages) {
+      // sort selected languages
+      langs?.sort((l1, l2) => languages!.indexOf(l1) - languages!.indexOf(l2));
+    }
+    return langs;
+  }, [translations.data]);
+
+  // memoize so we keep the same reference when possible
+  const [selectedLanguages, translationsLanguages] = useMemo(
+    () => [
+      putBaseLangFirst(languages || currentFetchedLangs, props.baseLang),
+      putBaseLangFirst(currentFetchedLangs, props.baseLang),
+    ],
+    [languages, currentFetchedLangs, props.baseLang]
+  );
+
   const allIds = useApiMutation({
     url: '/v2/projects/{projectId}/translations/select-all',
     method: 'get',
@@ -287,13 +305,9 @@ export const useTranslationsService = (props: Props) => {
 
   const updateQuery = (q: Partial<typeof query>) => {
     refetchTranslations(() => {
-      setQuery({ ...query, ...q });
-    });
-  };
-
-  const setFilters = (filters: FiltersType) => {
-    refetchTranslations(() => {
-      _setFilters(JSON.stringify(filters));
+      const combined = { ...query, ...q };
+      updateSelectedLanguages(combined.languages);
+      setQuery(combined);
     });
   };
 
@@ -371,28 +385,6 @@ export const useTranslationsService = (props: Props) => {
 
   const totalCount = translations.data?.pages[0].page?.totalElements;
 
-  const currentFetchedLangs = useMemo(() => {
-    const langs = shaveBy(
-      translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
-      languages
-    );
-
-    if (languages) {
-      // sort selected languages
-      langs?.sort((l1, l2) => languages!.indexOf(l1) - languages!.indexOf(l2));
-    }
-    return langs;
-  }, [translations.data]);
-
-  // memoize so we keep the same reference when possible
-  const [selectedLanguages, translationsLanguages] = useMemo(
-    () => [
-      putBaseLangFirst(languages || currentFetchedLangs, props.baseLang),
-      putBaseLangFirst(currentFetchedLangs, props.baseLang),
-    ],
-    [languages, currentFetchedLangs, props.baseLang]
-  );
-
   return {
     isLoading: translations.isLoading,
     isFetching: translations.isFetching,
@@ -400,8 +392,8 @@ export const useTranslationsService = (props: Props) => {
     isLoadingAllIds: allIds.isLoading,
     hasNextPage: translations.hasNextPage,
     query,
-    filters: parsedFilters,
     order,
+    filters,
     fetchNextPage: translations.fetchNextPage,
     selectedLanguages,
     translationsLanguages,
@@ -416,7 +408,6 @@ export const useTranslationsService = (props: Props) => {
     setSearch,
     setLanguages,
     setUrlSearch,
-    setFilters,
     setOrder,
     updateTranslationKeys,
     updateTranslation,
@@ -424,5 +415,8 @@ export const useTranslationsService = (props: Props) => {
     urlSearch: urlSearch as string | undefined,
     updateScreenshots,
     getAllIds,
+    addFilter,
+    removeFilter,
+    setFilters,
   };
 };

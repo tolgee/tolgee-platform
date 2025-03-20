@@ -30,7 +30,7 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { FiltersType } from 'tg.component/translation/translationFilters/tools';
+import { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { User } from 'tg.component/UserAccount';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useEnabledFeatures, useUser } from 'tg.globalContext/helpers';
@@ -43,6 +43,7 @@ import {
   TaskCreateForm,
 } from 'tg.ee.module/task/components/taskCreate/TaskCreateForm';
 import { EmptyScopeDialog } from 'tg.ee.module/task/components/taskCreate/EmptyScopeDialog';
+import { useTranslationFilters } from 'tg.views/projects/translations/TranslationFilters/useTranslationFilters';
 
 type CreateTaskRequest = components['schemas']['CreateTaskRequest'];
 type TaskType = CreateTaskRequest['type'];
@@ -125,7 +126,11 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
     invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });
 
-  const [filters, setFilters] = useState<FiltersType>({});
+  const [filters, setFilters] = useState<FiltersInternal>({});
+  const { filtersQuery, ...actions } = useTranslationFilters({
+    filters,
+    setFilters,
+  });
   const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
   const [languages, setLanguages] = useState(initialValues?.languages ?? []);
   const [successMessage, setSuccessMessage] = useState(false);
@@ -163,7 +168,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
     method: 'get',
     path: { projectId },
     query: {
-      ...filters,
+      ...filtersQuery,
       languages: allLanguages.map((l) => l.tag),
     },
     options: {
@@ -286,7 +291,9 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
               {
                 path: { projectId },
                 query: {
-                  filterState: stateFilters.filter((i) => i !== 'OUTDATED'),
+                  filterState: stateFilters.filter(
+                    (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
+                  ),
                   filterOutdated: stateFilters.includes('OUTDATED'),
                 },
                 content: {
@@ -384,9 +391,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
                           setLanguages={setLanguages}
                           allLanguages={allLanguages}
                           filters={filters}
-                          setFilters={
-                            !initialValues?.selection ? setFilters : undefined
-                          }
+                          filterActions={actions}
                           stateFilters={getStateFilters(values.type)}
                           setStateFilters={setStateFilters}
                           projectId={projectId}

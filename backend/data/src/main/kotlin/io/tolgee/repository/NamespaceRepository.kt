@@ -33,6 +33,21 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
 
   @Query(
     """
+      from Namespace ns where ns.project.id = :id and (
+        cast(:search as string) is null
+        or cast(:search as string) = ''
+        or lower(ns.name) like lower(concat('%', cast(:search as string),'%'))
+    )
+    """,
+  )
+  fun getByProjectAndSearch(
+    id: Long,
+    search: String?,
+    pageable: Pageable,
+  ): Page<Namespace>
+
+  @Query(
+    """
     select count(k) > 0 from Key k where k.namespace is null and k.project.id = :projectId
   """,
   )

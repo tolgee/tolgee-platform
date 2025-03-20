@@ -43,7 +43,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthGet("stats").andIsOk.andPrettyPrint.andAssertThatJson {
       node("projectId").isNumber
       node("languageCount").isEqualTo(2)
-      node("keyCount").isEqualTo(7)
+      node("keyCount").isEqualTo(8)
       node("baseWordsCount").isEqualTo(7)
       node("translatedPercentage").isNumber.isLessThan(BigDecimal(14.5)).isGreaterThan(BigDecimal(14))
       node("reviewedPercentage").isNumber.isLessThan(BigDecimal(14.5)).isGreaterThan(BigDecimal(14))
@@ -76,7 +76,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("reviewedKeyCount").isEqualTo(2)
           node("reviewedWordCount").isEqualTo(1)
           node("reviewedPercentage").isEqualTo(14.285714285714285)
-          node("untranslatedKeyCount").isEqualTo(4)
+          node("untranslatedKeyCount").isEqualTo(5)
           node("untranslatedWordCount").isEqualTo(5)
           node("untranslatedPercentage").isEqualTo(71.42857142857143)
         }

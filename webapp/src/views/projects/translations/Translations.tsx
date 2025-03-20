@@ -28,6 +28,7 @@ import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { TranslationsTaskDetail } from 'tg.ee';
 import { TaskAllDonePlaceholder } from 'tg.ee';
 import { EmptyState } from 'tg.component/common/EmptyState';
+import { countFilters } from './TranslationFilters/summary';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -54,7 +55,7 @@ export const Translations = () => {
   );
 
   const filtersOrSearchApplied = useTranslationsSelector((c) =>
-    Boolean(Object.values(c.filters).filter(Boolean).length || c.urlSearch)
+    Boolean(countFilters(c.filters) !== 0 || c.urlSearch)
   );
 
   const memoizedFiltersOrSearchApplied = useMemo(

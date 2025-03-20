@@ -277,6 +277,15 @@ const getTheme = (mode: PaletteMode) => {
           },
         },
       },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            '&.Mui-focusVisible': {
+              backgroundColor: tPalette.text._states.hover,
+            },
+          },
+        },
+      },
       MuiLink: {
         styleOverrides: {
           root: {
@@ -294,6 +303,12 @@ const getTheme = (mode: PaletteMode) => {
     },
   });
 };
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    contrast: true;
+  }
+}
 
 const ThemeContext = React.createContext({
   mode: undefined as PaletteMode | undefined,

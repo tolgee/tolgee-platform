@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { Checkbox, ListItemText, Menu, MenuItem } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { SubmenuItem } from './SubmenuItem';
+import { SubmenuItem } from '../../../../component/SubmenuItem';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -32,6 +32,7 @@ export const SubfilterLanguages = ({ value, onChange, languages }: Props) => {
         label={t('task_filter_languages')}
         onClick={() => setOpen(true)}
         selected={Boolean(value?.length)}
+        open={open}
       />
       {open && (
         <Menu

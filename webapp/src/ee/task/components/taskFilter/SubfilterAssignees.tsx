@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
+import { SubmenuItem } from 'tg.component/SubmenuItem';
 
-import { SubmenuItem } from './SubmenuItem';
 import { AssigneeSearchSelectPopover } from '../assigneeSelect/AssigneeSearchSelectPopover';
 
 type Props = {
@@ -22,6 +22,7 @@ export const SubfilterAssignees = ({ value, onChange, projectId }: Props) => {
         label={t('task_filter_assignees')}
         onClick={() => setOpen(true)}
         selected={Boolean(value?.length)}
+        open={open}
       />
       {open && (
         <AssigneeSearchSelectPopover
