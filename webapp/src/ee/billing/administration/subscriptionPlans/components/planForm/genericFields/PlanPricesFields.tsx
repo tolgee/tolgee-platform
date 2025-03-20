@@ -35,7 +35,7 @@ export const PlanPricesFields: FC<PlanPricesFieldsProps> = ({
         <TextField
           name={`${parentName}prices.subscriptionMonthly`}
           size="small"
-          data-cy="administration-cloud-plan-field-price-monthly"
+          data-cy="administration-plan-field-price-monthly"
           label={t('administration_cloud_plan_field_price_monthly')}
           type="number"
           fullWidth
@@ -43,7 +43,7 @@ export const PlanPricesFields: FC<PlanPricesFieldsProps> = ({
         <TextField
           name={`${parentName}prices.subscriptionYearly`}
           size="small"
-          data-cy="administration-cloud-plan-field-price-yearly"
+          data-cy="administration-plan-field-price-yearly"
           label={t('administration_cloud_plan_field_price_yearly')}
           type="number"
           fullWidth
@@ -102,7 +102,7 @@ export const PlanPricesFields: FC<PlanPricesFieldsProps> = ({
             <TextField
               name={`${parentName}prices.perSeat`}
               size="small"
-              data-cy="administration-cloud-plan-field-price-per-seat"
+              data-cy="administration-plan-field-price-per-seat"
               label={t('administration_cloud_plan_field_price_per_seat')}
               type="number"
               fullWidth

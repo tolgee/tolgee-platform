@@ -30,7 +30,7 @@ export const PlanStripeProductSelectField: FC<
             }
             SelectProps={{
               // @ts-ignore
-              'data-cy': 'administration-cloud-plan-field-stripe-product',
+              'data-cy': 'administration-plan-field-stripe-product',
               label: t('administration_cloud_plan_field_stripe_product'),
               size: 'small',
               fullWidth: true,

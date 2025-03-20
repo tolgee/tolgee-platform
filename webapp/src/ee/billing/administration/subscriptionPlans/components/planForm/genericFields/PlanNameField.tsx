@@ -15,7 +15,7 @@ export const PlanNameField: FC<PlanNameFieldProps> = ({ parentName = '' }) => {
       size="small"
       label={t('administration_cloud_plan_field_name')}
       fullWidth
-      data-cy="administration-cloud-plan-field-name"
+      data-cy="administration-plan-field-name"
     />
   );
 };
