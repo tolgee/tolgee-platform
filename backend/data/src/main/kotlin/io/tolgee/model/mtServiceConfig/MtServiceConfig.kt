@@ -74,7 +74,7 @@ class MtServiceConfig : StandardAuditModel() {
         when (serviceType) {
           MtServiceType.AWS -> config.awsFormality
           MtServiceType.DEEPL -> config.deeplFormality
-          MtServiceType.TOLGEE -> config.tolgeeFormality
+//          MtServiceType.TOLGEE -> config.tolgeeFormality
           else -> null
         }
       return MtServiceInfo(serviceType, formality)

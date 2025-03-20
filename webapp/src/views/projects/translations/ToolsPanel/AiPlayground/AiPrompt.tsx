@@ -1,17 +1,18 @@
-import { useState } from 'react';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useMemo } from 'react';
 import { Box, IconButton, styled, TextField } from '@mui/material';
-import { Send03 } from '@untitled-ui/icons-react';
+import { ChevronDown, ChevronUp, Send03 } from '@untitled-ui/icons-react';
 
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { EditorHandlebars } from 'tg.component/editor/EditorHandlebars';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
 import { stopBubble } from 'tg.fixtures/eventHandler';
-import { PanelContentProps } from '../common/types';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import { FieldLabel } from 'tg.component/FormField';
+import { PanelContentProps } from '../common/types';
+import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
-  margin: 8px;
   opacity: 0.5;
   &:focus-within {
     opacity: 1;
@@ -26,7 +27,11 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     key: 'aiPlaygroundLastValue',
     initial: 'Hi translate from {{source}} to {{target}}',
   });
-  const [result, setResult] = useState('');
+  const [expanded, setExpanded] = useLocalStorageState({
+    key: 'aiPlaygroundExpanded',
+    initial: undefined,
+  });
+
   const promptLoadable = useApiMutation({
     url: '/v2/prompts/test',
     method: 'post',
@@ -51,66 +56,111 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     if (!cellSelected) {
       return;
     }
-    promptLoadable.mutate(
-      {
-        content: {
-          'application/json': {
-            template: value,
-            keyId: props.keyData.keyId,
-            targetLanguageId: props.language.id,
-            projectId: props.project.id,
-          },
+    promptLoadable.mutate({
+      content: {
+        'application/json': {
+          template: value,
+          keyId: props.keyData.keyId,
+          targetLanguageId: props.language.id,
+          projectId: props.project.id,
         },
       },
-      {
-        onSuccess(data) {
-          setResult(data.prompt);
-        },
-      }
-    );
+    });
   }
+
+  const formattedResult = useMemo(() => {
+    try {
+      return JSON.stringify(
+        JSON.parse(promptLoadable.data?.result ?? ''),
+        null,
+        2
+      );
+    } catch (e) {
+      return promptLoadable.data?.result;
+    }
+  }, [promptLoadable.data?.result]);
 
   return (
     <Box display="grid">
-      <EditorWrapper sx={{ margin: '8px' }} onKeyDown={stopBubble()}>
-        <EditorHandlebars
-          minHeight={100}
-          value={value}
-          onChange={setValue}
-          shortcuts={[
-            {
-              key: 'Mod-Enter',
-              run: () => (handleTestPrompt(), true),
-            },
-          ]}
-          availableVariables={promptVariables.data?.data}
-        />
-      </EditorWrapper>
+      <Box sx={{ margin: '8px' }}>
+        <FieldLabel>Prompt</FieldLabel>
+        <EditorWrapper onKeyDown={stopBubble()}>
+          <EditorHandlebars
+            minHeight={100}
+            value={value}
+            onChange={setValue}
+            shortcuts={[
+              {
+                key: 'Mod-Enter',
+                run: () => (handleTestPrompt(), true),
+              },
+            ]}
+            availableVariables={promptVariables.data?.data}
+          />
+        </EditorWrapper>
+      </Box>
 
       <Box sx={{ margin: '8px', display: 'flex', justifyContent: 'end' }}>
         <IconButton
           color="primary"
           onClick={handleTestPrompt}
-          disabled={!cellSelected}
+          disabled={!cellSelected || promptLoadable.isLoading}
+          size="medium"
         >
-          <Send03 width={20} height={20} />
+          {promptLoadable.isLoading ? (
+            <SpinnerProgress size={22} />
+          ) : (
+            <Send03 width={22} height={22} />
+          )}
         </IconButton>
       </Box>
 
-      <StyledTextField
-        multiline
-        variant="outlined"
-        size="small"
-        value={result}
-        onChange={(e) => e.preventDefault()}
-        data-cy="translations-comments-output"
-        InputProps={{
-          sx: {
-            padding: '8px 4px 8px 12px',
-            borderRadius: '8px',
-          },
-        }}
-      />
+      <Box sx={{ margin: '8px', display: 'grid' }}>
+        <FieldLabel>Result</FieldLabel>
+        <StyledTextField
+          multiline
+          minRows={3}
+          variant="outlined"
+          size="small"
+          value={formattedResult}
+          onChange={(e) => e.preventDefault()}
+          data-cy="translations-comments-output"
+          InputProps={{
+            sx: {
+              padding: '8px 4px 8px 12px',
+              borderRadius: '8px',
+            },
+          }}
+        />
+      </Box>
+
+      {Boolean(expanded) && (
+        <Box sx={{ margin: '8px', display: 'grid' }}>
+          <FieldLabel>Rendered prompt</FieldLabel>
+          <StyledTextField
+            multiline
+            variant="outlined"
+            size="small"
+            value={promptLoadable.data?.prompt}
+            onChange={(e) => e.preventDefault()}
+            data-cy="translations-comments-output"
+            InputProps={{
+              sx: {
+                padding: '8px 4px 8px 12px',
+                borderRadius: '8px',
+              },
+            }}
+          />
+        </Box>
+      )}
+
+      <Box display="flex" justifyContent="center">
+        <IconButton
+          onClick={() => setExpanded((val) => (val ? undefined : 'true'))}
+        >
+          {expanded ? <ChevronUp /> : <ChevronDown />}
+        </IconButton>
+      </Box>
     </Box>
   );
 };

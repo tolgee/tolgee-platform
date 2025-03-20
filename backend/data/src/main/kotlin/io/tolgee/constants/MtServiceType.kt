@@ -46,11 +46,11 @@ enum class MtServiceType(
     providerClass = BaiduTranslationProvider::class.java,
     order = 5,
   ),
-  TOLGEE(
-    propertyClass = TolgeeMachineTranslationProperties::class.java,
-    providerClass = TolgeeTranslationProvider::class.java,
-    usesMetadata = true,
-    order = -1,
-    supportsPlurals = true,
-  ),
+//  TOLGEE(
+//    propertyClass = TolgeeMachineTranslationProperties::class.java,
+//    providerClass = TolgeeTranslationProvider::class.java,
+//    usesMetadata = true,
+//    order = -1,
+//    supportsPlurals = true,
+//  ),
 }

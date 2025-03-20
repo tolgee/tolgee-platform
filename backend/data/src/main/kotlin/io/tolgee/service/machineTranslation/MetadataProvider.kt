@@ -17,27 +17,7 @@ class MetadataProvider(
 
     val targetLanguage = context.getLanguage(metadataKey.targetLanguageId)
 
-    return Metadata(
-      examples =
-        getExamples(
-          targetLanguage,
-          context.getKey(metadataKey.keyId)?.isPlural ?: false,
-          metadataKey.baseTranslationText,
-          metadataKey.keyId,
-        ),
-      closeItems =
-        closeKeyIds?.let {
-          getCloseItems(
-            context.baseLanguage,
-            targetLanguage,
-            it,
-            metadataKey.keyId,
-          )
-        } ?: listOf(),
-      keyDescription = keyDescription,
-      projectDescription = context.project.aiTranslatorPromptDescription,
-      languageDescription = targetLanguage.aiTranslatorPromptDescription,
-    )
+    return Metadata(prompt = "test")
   }
 
   private fun getCloseItems(

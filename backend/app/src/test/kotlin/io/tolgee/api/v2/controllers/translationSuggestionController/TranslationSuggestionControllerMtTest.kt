@@ -9,8 +9,7 @@ import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
-import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
-import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
+import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -82,7 +81,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   lateinit var cacheMock: Cache
 
-  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
+  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<LLMParams>
 
   @BeforeEach
   fun setup() {
@@ -165,7 +164,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     ).thenAnswer {
       MtValueProvider.MtResult(
         "Translated with Tolgee Translator",
-        ((it.arguments[0] as? TolgeeTranslateParams)?.text?.length ?: 0) * 100,
+        ((it.arguments[0] as? LLMParams)?.text?.length ?: 0) * 100,
       )
     }
   }

@@ -2854,27 +2854,14 @@ export interface components {
        * @deprecated
        * @description Services to be used for suggesting (deprecated: use enabledServicesInfo)
        */
-      enabledServices: (
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE"
-      )[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
       /** @description Info about enabled services */
       enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
       /**
        * @deprecated
        * @description Service used for automated translating (deprecated: use primaryServiceInfo)
        */
-      primaryService?:
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
       /**
        * Format: int64
@@ -2999,27 +2986,14 @@ export interface components {
        * @deprecated
        * @description List of enabled services (deprecated: use enabledServicesInfo)
        */
-      enabledServices?: (
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE"
-      )[];
+      enabledServices?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
       /** @description Info about enabled services */
       enabledServicesInfo?: components["schemas"]["MtServiceInfo"][];
       /**
        * @deprecated
        * @description This service will be used for automated translation
        */
-      primaryService?:
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
       /**
        * Format: int64
@@ -3061,21 +3035,15 @@ export interface components {
     /** @description Info about enabled services */
     MtServiceInfo: {
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
     };
     MtServicesDTO: {
-      defaultPrimaryService?:
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "TOLGEE";
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     MtSupportedService: {
       formalitySupported: boolean;
-      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
     };
     NamespaceModel: {
       /**
@@ -3835,6 +3803,7 @@ export interface components {
     };
     PromptResponseDto: {
       prompt: string;
+      result: string;
     };
     PromptTestDto: {
       /** Format: int64 */
@@ -4668,7 +4637,7 @@ export interface components {
       keyId?: number;
       plural?: boolean;
       /** @description List of services to use. If null, then all enabled services are used. */
-      services?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE")[];
+      services?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
       /** Format: int64 */
       targetLanguageId: number;
     };
@@ -4867,7 +4836,7 @@ export interface components {
        */
       id: number;
       /** @description Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
       /** @description State of translation */
@@ -4903,7 +4872,7 @@ export interface components {
        */
       id: number;
       /** @description Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
       /** @description State of translation */

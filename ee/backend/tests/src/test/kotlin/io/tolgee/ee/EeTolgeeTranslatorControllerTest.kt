@@ -3,10 +3,9 @@ package io.tolgee.ee
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
+import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
-import io.tolgee.ee.component.contentDelivery.EeTolgeeTranslateApiServiceImpl
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.fixtures.andAssertThatJson
@@ -72,7 +71,7 @@ class EeTolgeeTranslatorControllerTest : ProjectAuthControllerTest("/v2/projects
     ).thenAnswer {
       MtValueProvider.MtResult(
         "Translated with Tolgee Translator",
-        ((it.arguments[0] as? TolgeeTranslateParams)?.text?.length ?: 0) * 100,
+        ((it.arguments[0] as? LLMParams)?.text?.length ?: 0) * 100,
         "OMG!",
       )
     }

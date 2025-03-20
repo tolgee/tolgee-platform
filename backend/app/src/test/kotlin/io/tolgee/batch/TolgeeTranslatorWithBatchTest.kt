@@ -4,8 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.component.machineTranslation.providers.tolgee.CloudTolgeeTranslateApiService
-import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
+import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -69,7 +68,7 @@ class TolgeeTranslatorWithBatchTest {
 
     assertThrows<TranslationApiRateLimitException> {
       cloudTolgeeTranslateApiService.translate(
-        TolgeeTranslateParams(
+        LLMParams(
           "Helo",
           null,
           "en",
@@ -90,7 +89,7 @@ class TolgeeTranslatorWithBatchTest {
 
     assertThrows<TranslationApiRateLimitException> {
       cloudTolgeeTranslateApiService.translate(
-        TolgeeTranslateParams(
+        LLMParams(
           "Helo",
           null,
           "en",
