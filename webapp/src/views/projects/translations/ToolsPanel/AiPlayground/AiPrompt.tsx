@@ -133,8 +133,7 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
           }}
         />
 
-        <Typography variant="caption">
-          Usage -{' '}
+        <Typography variant="caption" minHeight={20}>
           {promptLoadable.data?.usage && (
             <>
               tokens: {promptLoadable.data.usage.total_tokens}, cached:{' '}

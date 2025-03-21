@@ -1,5 +1,7 @@
 package io.tolgee.service
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.jknack.handlebars.Handlebars
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
@@ -7,22 +9,19 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.PromptVariable
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Screenshot
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.machineTranslation.MetadataKey
+import io.tolgee.service.machineTranslation.MetadataProvider
+import io.tolgee.service.machineTranslation.MtTranslatorContext
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.ImageConverter
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
-import java.awt.BasicStroke
-import java.awt.Color
-import java.awt.Graphics2D
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.Writer
-import javax.imageio.ImageIO
 import kotlin.jvm.optionals.getOrNull
 
 @Service
@@ -33,7 +32,8 @@ class PromptService(
   private val projectService: ProjectService,
   private val translationService: TranslationService,
   private val fileStorage: FileStorage,
-  private val screenshotService: ScreenshotService
+  private val screenshotService: ScreenshotService,
+  private val applicationContext: ApplicationContext,
 ) {
 
   fun encodeScreenshot(number: Long, type: String): String {
@@ -83,29 +83,49 @@ class PromptService(
     variables.add(
       PromptVariable(
         "allScreenshots",
-        encodeScreenshots(screenshots, "full")
-      )
-    )
-
-    variables.add(
-      PromptVariable(
-        "allSmallScreenshots",
         encodeScreenshots(screenshots, "small")
       )
     )
 
     variables.add(
       PromptVariable(
+        "allScreenshotsFull",
+        encodeScreenshots(screenshots, "full")
+      )
+    )
+
+    variables.add(
+      PromptVariable(
         "firstScreenshot",
+        encodeScreenshots(screenshots.take(1), "small")
+      )
+    )
+
+    variables.add(
+      PromptVariable(
+        "firstScreenshotFull",
         encodeScreenshots(screenshots.take(1), "full")
       )
     )
 
     variables.add(
       PromptVariable(
-        "firstSmallScreenshot",
-        encodeScreenshots(screenshots.take(1), "small")
-      )
+        "relatedKeysJson",
+        "Related keys in json format (based on context extraction)",
+        lazyValue = {
+          val context = MtTranslatorContext(projectId, applicationContext, false)
+          val metadataProvider = MetadataProvider(context)
+          val closeItems = metadataProvider.getCloseItems(
+            sLanguage,
+            tLanguage,
+            MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id)
+          )
+          closeItems.joinToString("\n") {
+            val mapper = ObjectMapper()
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            mapper.writeValueAsString(it)
+          }
+        })
     )
 
     variables.add(
@@ -128,10 +148,16 @@ class PromptService(
     val params = getVariables(data.projectId, data.keyId, data.targetLanguageId)
     val handlebars = Handlebars()
 
-    val mapParams = params.map { it.name to Handlebars.SafeString(it.value) }.toMap()
+    val mapParams = params.map {
+      it.name to it
+    }.toMap()
+
+    val lazyMap = LazyMap()
+    lazyMap.setMap(mapParams)
+
 
     val template = handlebars.compileInline(data.template)
-    val prompt = template.apply(mapParams)
+    val prompt = template.apply(lazyMap)
     return prompt
   }
 
@@ -204,6 +230,21 @@ class PromptService(
     }
 
     return result
+  }
+
+  companion object {
+    class LazyMap : HashMap<String, Handlebars.SafeString>() {
+      private lateinit var internalMap: Map<String, PromptVariable>
+      fun setMap(map: Map<String, PromptVariable>) {
+        internalMap = map
+      }
+
+      override fun get(key: String): Handlebars.SafeString? {
+        val promptValue = internalMap.get(key)
+        val stringValue = promptValue?.lazyValue?.let { it() } ?: promptValue?.value
+        return stringValue?.let { Handlebars.SafeString(it) } ?: null
+      }
+    }
   }
 }
 

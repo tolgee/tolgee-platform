@@ -20,12 +20,13 @@ class MetadataProvider(
     return Metadata(prompt = "test")
   }
 
-  private fun getCloseItems(
+  fun getCloseItems(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,
-    closeKeyIds: List<Long>,
-    excludeKeyId: Long?,
+    metadataKey: MetadataKey
   ): List<ExampleItem> {
+    val closeKeyIds = metadataKey.keyId?.let { bigMetaService.getCloseKeyIds(it) }
+
     return entityManager.createQuery(
       """
       select new 
@@ -44,14 +45,14 @@ class MetadataProvider(
     """,
       ExampleItem::class.java,
     )
-      .setParameter("excludeKeyId", excludeKeyId)
+      .setParameter("excludeKeyId", metadataKey.keyId)
       .setParameter("targetLanguageId", targetLanguage.id)
       .setParameter("sourceLanguageId", sourceLanguage.id)
       .setParameter("closeKeyIds", closeKeyIds)
       .resultList
   }
 
-  private fun getExamples(
+  fun getExamples(
     targetLanguage: LanguageDto,
     isPlural: Boolean,
     text: String,
