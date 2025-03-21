@@ -173,6 +173,8 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "create-glossary-field-name" |
+        "create-glossary-submit" |
         "create-task-field-description" |
         "create-task-field-languages" |
         "create-task-field-languages-item" |
@@ -458,6 +460,7 @@ declare namespace DataCy {
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
+        "project-menu-item-glossaries" |
         "project-menu-item-import" |
         "project-menu-item-integrate" |
         "project-menu-item-languages" |

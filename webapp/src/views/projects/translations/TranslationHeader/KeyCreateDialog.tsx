@@ -46,6 +46,7 @@ export const KeyCreateDialog: React.FC<Props> = ({
     });
 
     insertTranslation({
+      createdAt: -1,
       keyId: data.id,
       keyNamespace: data.namespace,
       keyDescription: data.description,

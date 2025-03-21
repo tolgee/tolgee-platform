@@ -175,6 +175,8 @@ export function useErrorTranslation() {
         return t('expired_jwt_token');
       case 'free_self_hosted_seat_limit_exceeded':
         return t('free_self_hosted_seat_limit_exceeded');
+      case 'glossary_not_found':
+        return t('glossary_not_found');
       default:
         return code;
     }
