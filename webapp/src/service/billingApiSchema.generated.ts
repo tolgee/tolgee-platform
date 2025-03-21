@@ -1003,6 +1003,7 @@ export interface components {
       planId: number;
     };
     SelfHostedEePlanAdministrationModel: {
+      canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -1023,6 +1024,11 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
       )[];
+      /**
+       * Format: int64
+       * @description If only single organization is using this plan or can see this plan, this is the organization id, null otherwise.When provided, we are sure that no other organization is currently using or have been invoiced with this plan.
+       */
+      exclusiveForOrganizationId?: number;
       forOrganizationIds: number[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -1823,6 +1829,20 @@ export interface operations {
     };
   };
   getPlans_1: {
+    parameters: {
+      query: {
+        /**
+         * Filters only plans which can be assignable to the provided organization it.
+         *
+         * Plan can be assignable to organization because of one of these reasons:
+         * - plan is private free, visible to organization
+         * - plan is paid (Assignable as trial)
+         */
+        filterAssignableToOrganization?: number;
+        filterPlanIds?: number[];
+        filterPublic?: boolean;
+      };
+    };
     responses: {
       /** OK */
       200: {
