@@ -56,6 +56,12 @@ const StyledEditor = styled('div')`
   }
 `;
 
+function useRefGroup<T>(value: T): RefObject<T> {
+  const refObject = useRef(value);
+  refObject.current = value;
+  return refObject;
+}
+
 export type EditorProps = {
   value: string;
   onChange?: (val: string) => void;
@@ -71,13 +77,8 @@ export type EditorProps = {
   locale?: string;
   editorRef?: React.RefObject<EditorView | null>;
   availableVariables?: PromptVariable[];
+  unknownVariableMessage?: string;
 };
-
-function useRefGroup<T>(value: T): RefObject<T> {
-  const refObject = useRef(value);
-  refObject.current = value;
-  return refObject;
-}
 
 export const EditorHandlebars: React.FC<EditorProps> = ({
   value,
@@ -91,11 +92,13 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
   locale,
   editorRef,
   availableVariables,
+  unknownVariableMessage,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const editor = useRef<EditorView>();
   const keyBindings = useRef(shortcuts);
   const variableRefs = useRef(availableVariables);
+  const unknownVariableMessageRef = useRef(unknownVariableMessage);
   const theme = useTheme();
   const callbacksRef = useRefGroup({
     onChange,
@@ -144,7 +147,7 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
             override: [handlebarsAutocomplete(variableRefs)],
             icons: false,
           }),
-          handlebarsTooltip(variableRefs),
+          handlebarsTooltip(variableRefs, unknownVariableMessageRef),
           direction === 'rtl' ? htmlIsolatesPlugin : [],
         ],
       }),

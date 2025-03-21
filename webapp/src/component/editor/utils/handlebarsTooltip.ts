@@ -8,7 +8,8 @@ import { trimDetail } from './handlebarsAutocomplete';
 type PromptVariable = components['schemas']['PromptVariable'];
 
 export const handlebarsTooltip = (
-  variablesRef: RefObject<PromptVariable[] | undefined>
+  variablesRef: RefObject<PromptVariable[] | undefined>,
+  unknownVariableMessageRef?: RefObject<string | undefined>
 ) =>
   hoverTooltip((context, pos, side) => {
     const tree = syntaxTree(context.state);
@@ -23,12 +24,12 @@ export const handlebarsTooltip = (
       return {
         pos: node.from,
         end: node.to,
-        create(view) {
+        create() {
           const dom = document.createElement('div');
           dom.style.whiteSpace = 'nowrap';
           dom.textContent = variable
             ? trimDetail(variable.value, 50) || 'Empty'
-            : 'Unknown variable';
+            : unknownVariableMessageRef?.current ?? 'Unknown variable';
           return { dom };
         },
       };

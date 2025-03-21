@@ -89,6 +89,11 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
             minHeight={100}
             value={value}
             onChange={setValue}
+            unknownVariableMessage={
+              cellSelected
+                ? 'Unknown variable'
+                : 'Select translation to see the value'
+            }
             shortcuts={[
               {
                 key: 'Mod-Enter',
