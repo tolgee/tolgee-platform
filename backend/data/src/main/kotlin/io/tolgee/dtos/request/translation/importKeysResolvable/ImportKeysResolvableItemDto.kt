@@ -26,4 +26,20 @@ class ImportKeysResolvableItemDto(
     description = "Object mapping language tag to translation",
   )
   val translations: Map<String, ImportTranslationResolvableDto?> = mapOf(),
+
+  @Schema(
+    description = "Whether key is pluralized.\n\n" +
+      "If null, it will be auto-detected (if any translation contains valid ICU plural syntax, " +
+      "the key is considered plural)." +
+      "However, when auto-detected only from not-plural to plural transition is allowed.\n\n" +
+      "When provided, both way transition is enabled.",
+  )
+  val isPlural: Boolean? = null,
+
+  @Schema(
+    description =
+    "The argument name for the plural. " +
+      "If null, value will be guessed from the values provided in translations.",
+  )
+  val pluralArgName: String? = null,
 )

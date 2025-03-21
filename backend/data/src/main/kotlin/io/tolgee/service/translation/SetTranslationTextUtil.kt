@@ -30,7 +30,7 @@ class SetTranslationTextUtil(
 
     return setForKey(
       key,
-      normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
+      normalized.convertedStrings.map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
       oldTranslations,
     ).mapKeys { it.key.tag }
