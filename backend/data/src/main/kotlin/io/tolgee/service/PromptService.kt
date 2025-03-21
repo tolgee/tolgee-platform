@@ -7,14 +7,23 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.PromptVariable
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Screenshot
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.ImageConverter
 import org.springframework.stereotype.Service
+import java.awt.BasicStroke
+import java.awt.Color
+import java.awt.Graphics2D
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.Writer
+import javax.imageio.ImageIO
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class PromptService(
@@ -48,14 +57,14 @@ class PromptService(
     )
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     keyService.checkInProject(key, projectId)
-    val project = projectService.get(projectId) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    val project = projectService.get(projectId)
 
     val tLanguage =
       languageService.find(targetLanguageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
     val sLanguage = languageService.get(project.baseLanguage!!.id, projectId)
 
-    val sTranslation = translationService.find(key, sLanguage)
-    val tTranslation = translationService.find(key, tLanguage)
+    val sTranslation = translationService.find(key, sLanguage).getOrNull()
+    val tTranslation = translationService.find(key, tLanguage).getOrNull()
 
 
     val variables = mutableListOf<PromptVariable>()
@@ -65,8 +74,8 @@ class PromptService(
 
     variables.add(PromptVariable("projectName", project.name))
     variables.add(PromptVariable("projectDescription", project.aiTranslatorPromptDescription ?: ""))
-    variables.add(PromptVariable("sourceText", sTranslation.get().text ?: ""))
-    variables.add(PromptVariable("targetText", tTranslation.get().text ?: ""))
+    variables.add(PromptVariable("sourceText", sTranslation?.text ?: ""))
+    variables.add(PromptVariable("targetText", tTranslation?.text ?: ""))
     variables.add(PromptVariable("keyName", key.name))
 
     val screenshots = key.keyScreenshotReferences
@@ -144,7 +153,23 @@ class PromptService(
         } else {
           screenshot.middleSizedFilename ?: screenshot.filename
         }
-        val image = fileStorage.readFile(screenshotService.getScreenshotPath(file))
+
+
+        var image = fileStorage.readFile(
+          screenshotService.getScreenshotPath(file)
+        )
+
+        if (screenshot.keyScreenshotReferences.find { it.key.id == key.id } !== null) {
+          val converter = ImageConverter(
+            ByteArrayInputStream(
+              fileStorage.readFile(
+                screenshotService.getScreenshotPath(file)
+              )
+            )
+          )
+          image = converter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
+        }
+
         LLMParams.Companion.LlmMessage(
           type = LLMParams.Companion.LlmMessageType.IMAGE,
           image = image

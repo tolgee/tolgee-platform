@@ -45,7 +45,8 @@ class PromptController(
     )
     return PromptResponseDto(
       prompt,
-      response.translated ?: ""
+      response.translated ?: "",
+      response.usage,
     )
   }
 

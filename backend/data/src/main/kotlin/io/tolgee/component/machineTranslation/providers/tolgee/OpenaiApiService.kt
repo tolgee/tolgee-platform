@@ -98,7 +98,8 @@ class OpenaiApiService(
 
     return MtValueProvider.MtResult(
       response.body?.choices?.first()?.message?.content ?: throw RuntimeException(response.toString()),
-      100,
+      price = response.body?.usage?.total_tokens ?: 0,
+      usage = response.body?.usage,
     )
   }
 
@@ -162,7 +163,8 @@ class OpenaiApiService(
     )
 
     class OpenaiResponse(
-      val choices: List<OpenAiResponseChoice>
+      val choices: List<OpenAiResponseChoice>,
+      val usage: OpenaiUsage
     )
 
     class OpenAiResponseChoice(
@@ -171,6 +173,25 @@ class OpenaiApiService(
 
     class OpenAiResponseMessage(
       val content: String
+    )
+
+    class OpenaiUsage(
+      val prompt_tokens: Int,
+      val completion_tokens: Int,
+      val total_tokens: Int,
+      val prompt_tokens_details: OpenaiPromptTokenDetails,
+      val completion_tokens_details: OpenaiCompletionTokenDetails
+
+    )
+
+    class OpenaiPromptTokenDetails(
+      val cached_tokens: Int
+    )
+
+    class OpenaiCompletionTokenDetails(
+      val reasoning_tokens: Int,
+      val accepted_prediction_tokens: Int,
+      val rejected_prediction_tokens: Int,
     )
   }
 

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, IconButton, styled, TextField } from '@mui/material';
+import { Box, IconButton, styled, TextField, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp, Send03 } from '@untitled-ui/icons-react';
 
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -132,6 +132,16 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
             },
           }}
         />
+
+        <Typography variant="caption">
+          Usage -{' '}
+          {promptLoadable.data?.usage && (
+            <>
+              tokens: {promptLoadable.data.usage.total_tokens}, cached:{' '}
+              {promptLoadable.data.usage.prompt_tokens_details.cached_tokens}
+            </>
+          )}
+        </Typography>
       </Box>
 
       {Boolean(expanded) && (

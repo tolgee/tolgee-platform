@@ -3104,6 +3104,28 @@ export interface components {
       enabled: boolean;
       scopes?: string[];
     };
+    OpenaiCompletionTokenDetails: {
+      /** Format: int32 */
+      accepted_prediction_tokens: number;
+      /** Format: int32 */
+      reasoning_tokens: number;
+      /** Format: int32 */
+      rejected_prediction_tokens: number;
+    };
+    OpenaiPromptTokenDetails: {
+      /** Format: int32 */
+      cached_tokens: number;
+    };
+    OpenaiUsage: {
+      /** Format: int32 */
+      completion_tokens: number;
+      completion_tokens_details: components["schemas"]["OpenaiCompletionTokenDetails"];
+      /** Format: int32 */
+      prompt_tokens: number;
+      prompt_tokens_details: components["schemas"]["OpenaiPromptTokenDetails"];
+      /** Format: int32 */
+      total_tokens: number;
+    };
     OrganizationDto: {
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
@@ -3804,6 +3826,7 @@ export interface components {
     PromptResponseDto: {
       prompt: string;
       result: string;
+      usage?: components["schemas"]["OpenaiUsage"];
     };
     PromptTestDto: {
       /** Format: int64 */
