@@ -21,7 +21,11 @@ type Props = {
   children: React.ReactNode;
 } & SadEmotionMessageProps;
 
-export const EmptyState = ({ loading, children, wrapperProps }: Props) => {
+export const EmptyState: React.FC<Props> = ({
+  loading,
+  children,
+  wrapperProps,
+}) => {
   wrapperProps = {
     ...wrapperProps,
     py: wrapperProps?.py || 8,

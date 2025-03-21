@@ -56,6 +56,12 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_profile'),
     },
+    {
+      link: LINKS.ORGANIZATION_GLOSSARIES.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_glossaries'),
+    },
   ];
 
   if (preferredOrganization?.currentUserRole === 'OWNER' || isAdmin) {
