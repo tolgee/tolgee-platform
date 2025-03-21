@@ -7,7 +7,7 @@ import { getCloudPlanInitialValues } from './getCloudPlanInitialValues';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory } from 'react-router-dom';
 import { CreatingPlanForOrganizationAlert } from '../genericFields/CreatingPlanForOrganizationAlert';
-import { PlanTemplateSelector } from './fields/PlanTemplateSelector';
+import { CloudPlanTemplateSelectorField } from './fields/CloudPlanTemplateSelectorField';
 import { CloudPlanFormData } from './types';
 import { useCreatingForOrganization } from '../genericFields/useCreatingForOrganization';
 
@@ -69,7 +69,7 @@ export const CloudPlanCreateForm: FC = () => {
           <CreatingPlanForOrganizationAlert
             organization={forOrganization.data}
           />
-          <PlanTemplateSelector />
+          <CloudPlanTemplateSelectorField />
         </>
       }
     />

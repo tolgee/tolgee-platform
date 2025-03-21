@@ -6,10 +6,11 @@ import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory } from 'react-router-dom';
 import { CreatingPlanForOrganizationAlert } from '../genericFields/CreatingPlanForOrganizationAlert';
-import { PlanTemplateSelector } from '../cloud/fields/PlanTemplateSelector';
+import { CloudPlanTemplateSelectorField } from '../cloud/fields/CloudPlanTemplateSelectorField';
 import { useCreatingForOrganization } from '../genericFields/useCreatingForOrganization';
 import { getSelfHostedPlanInitialValues } from './getSelfHostedPlanInitialValues';
 import { SelfHostedEePlanFormData } from '../cloud/types';
+import { SelfHostedEePlanTemplateSelectorField } from './fields/SelfHostedEePlanTemplateSelectorField';
 
 export const SelfHostedEePlanCreateForm: FC = () => {
   const messaging = useMessage();
@@ -61,7 +62,7 @@ export const SelfHostedEePlanCreateForm: FC = () => {
           <CreatingPlanForOrganizationAlert
             organization={forOrganization.data}
           />
-          <PlanTemplateSelector />
+          <SelfHostedEePlanTemplateSelectorField />
         </>
       }
     />

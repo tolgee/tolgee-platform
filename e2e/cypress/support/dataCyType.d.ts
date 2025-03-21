@@ -18,6 +18,7 @@ declare namespace DataCy {
         "administration-access-message" |
         "administration-assign-trial-assign-button" |
         "administration-assign-trial-button" |
+        "administration-billing-creating-for-organization-alert" |
         "administration-billing-edit-custom-plan-button" |
         "administration-billing-exclusive-plan-chip" |
         "administration-billing-trial-badge" |

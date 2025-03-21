@@ -1,15 +1,15 @@
 import React, { FC, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
-import { PlanSelector } from './PlanSelectorField';
-import { getCloudPlanInitialValues } from '../getCloudPlanInitialValues';
 import { Divider, FormHelperText } from '@mui/material';
-import { CloudPlanFormData } from '../types';
+import { SelfHostedEePlanSelector } from './SelfHostedEePlanSelector';
+import { getSelfHostedPlanInitialValues } from '../getSelfHostedPlanInitialValues';
+import { SelfHostedEePlanFormData } from '../../cloud/types';
 
-export const PlanTemplateSelector: FC = () => {
+export const SelfHostedEePlanTemplateSelectorField: FC = () => {
   const { t } = useTranslate();
 
-  const { setValues, values } = useFormikContext<CloudPlanFormData>();
+  const { setValues, values } = useFormikContext<SelfHostedEePlanFormData>();
 
   const [selectedPlanId, setSelectedPlanId] = useState<number | undefined>(
     undefined
@@ -17,14 +17,14 @@ export const PlanTemplateSelector: FC = () => {
 
   return (
     <>
-      <PlanSelector
+      <SelfHostedEePlanSelector
         value={selectedPlanId}
         selectProps={{
           label: t('admin_billing_create_plan_template_select'),
         }}
         onPlanChange={(plan) => {
           const newValues = {
-            ...getCloudPlanInitialValues(plan),
+            ...getSelfHostedPlanInitialValues(plan),
             name: values.name,
             public: false,
           };
