@@ -11,37 +11,14 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { EePlanForm } from '../components/planForm/selfHostedEe/EePlanForm';
+import { SelfHostedEePlanForm } from '../components/planForm/selfHostedEe/SelfHostedEePlanForm';
+import { SelfHostedEePlanEditForm } from '../components/planForm/selfHostedEe/SelfHostedEePlanEditForm';
 
 export const AdministrationEePlanEditView = () => {
   const match = useRouteMatch();
   const { t } = useTranslate();
-  const messaging = useMessage();
-  const history = useHistory();
 
   const planId = match.params[PARAMS.PLAN_ID];
-
-  const planLoadable = useBillingApiQuery({
-    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
-    method: 'get',
-    path: { planId },
-  });
-
-  const planEditLoadable = useBillingApiMutation({
-    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
-    method: 'put',
-    invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
-  });
-
-  if (planLoadable.isLoading) {
-    return <SpinnerProgress />;
-  }
-
-  const planData = planLoadable.data;
-
-  if (!planData) {
-    return null;
-  }
 
   return (
     <DashboardPage>
@@ -62,42 +39,8 @@ export const AdministrationEePlanEditView = () => {
         allCentered
         hideChildrenOnLoading={false}
       >
-        <Box>
-          <Typography variant="h5">
-            {t('administration_ee_plan_edit')}
-          </Typography>
-          <EePlanForm
-            loading={false}
-            initialData={{
-              ...planData,
-            }}
-            isUpdate={true}
-            onSubmit={(values) => {
-              planEditLoadable.mutate(
-                {
-                  path: { planId },
-                  content: {
-                    'application/json': {
-                      ...values,
-                      stripeProductId: values.stripeProductId!,
-                      forOrganizationIds: values.public
-                        ? []
-                        : values.forOrganizationIds,
-                    },
-                  },
-                },
-                {
-                  onSuccess() {
-                    messaging.success(
-                      <T keyName="administration_ee_plan_updated_success" />
-                    );
-                    history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
-                  },
-                }
-              );
-            }}
-          />
-        </Box>
+        <Typography variant="h5">{t('administration_ee_plan_edit')}</Typography>
+        <SelfHostedEePlanEditForm planId={planId} />
       </BaseAdministrationView>
     </DashboardPage>
   );

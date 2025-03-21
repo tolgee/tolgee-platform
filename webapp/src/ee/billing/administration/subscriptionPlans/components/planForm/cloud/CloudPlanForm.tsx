@@ -1,16 +1,32 @@
+import { Box } from '@mui/material';
+import { CloudPlanFields } from './fields/CloudPlanFields';
+import React, { ComponentProps, ReactNode } from 'react';
+import { PlanPublicSwitchField } from '../genericFields/PlanPublicSwitchField';
+import { PlanSaveButton } from '../genericFields/PlanSaveButton';
+import { CloudPlanFormData } from './types';
+import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { Form, Formik } from 'formik';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { useUrlSearch } from 'tg.hooks/useUrlSearch';
-import React from 'react';
-import { CloudPlanFormData } from './types';
 
 type Props = {
-  children: React.ReactNode;
+  isUpdate?: boolean;
   initialData: CloudPlanFormData;
   onSubmit: (value: CloudPlanFormData) => void;
+  loading: boolean | undefined;
+  canEditPrices: boolean;
+  beforeFields?: ReactNode;
+  publicSwitchFieldProps?: ComponentProps<typeof PlanPublicSwitchField>;
 };
 
-export function CloudPlanFormBase({ initialData, children, onSubmit }: Props) {
+export function CloudPlanForm({
+  isUpdate,
+  initialData,
+  loading,
+  canEditPrices,
+  onSubmit,
+  beforeFields,
+  publicSwitchFieldProps,
+}: Props) {
   const { creatingForOrganizationId: creatingForOrganizationIdString } =
     useUrlSearch();
 
@@ -44,7 +60,16 @@ export function CloudPlanFormBase({ initialData, children, onSubmit }: Props) {
       }}
       validationSchema={Validation.CLOUD_PLAN_FORM}
     >
-      <Form>{children}</Form>
+      <Form>
+        {beforeFields}
+        <Box mb={3} pt={2}>
+          <PlanPublicSwitchField {...publicSwitchFieldProps} />
+
+          <CloudPlanFields isUpdate={isUpdate} canEditPrices={canEditPrices} />
+
+          <PlanSaveButton loading={loading} />
+        </Box>
+      </Form>
     </Formik>
   );
 }

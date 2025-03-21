@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { CloudPlanForm } from '../genericFields/CloudPlanForm';
+import { CloudPlanForm } from './CloudPlanForm';
 import { T } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
 import {
@@ -14,7 +14,7 @@ import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { Alert } from '@mui/material';
 
-export const EditCloudPlanForm: FC<{ planId: number }> = ({ planId }) => {
+export const CloudPlanEditForm: FC<{ planId: number }> = ({ planId }) => {
   const messaging = useMessage();
   const history = useHistory();
 

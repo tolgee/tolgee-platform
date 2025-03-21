@@ -1,20 +1,17 @@
 import React, { FC } from 'react';
-import { CloudPlanForm } from '../genericFields/CloudPlanForm';
+import { CloudPlanForm } from './CloudPlanForm';
 import { T } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
-import {
-  useApiQuery,
-  useBillingApiMutation,
-} from 'tg.service/http/useQueryApi';
+import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { getCloudPlanInitialValues } from './getCloudPlanInitialValues';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory } from 'react-router-dom';
-import { CreatingPlanForOrganizationAlert } from './CreatingPlanForOrganizationAlert';
+import { CreatingPlanForOrganizationAlert } from '../genericFields/CreatingPlanForOrganizationAlert';
 import { PlanTemplateSelector } from './fields/PlanTemplateSelector';
-import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { CloudPlanFormData } from './types';
+import { useCreatingForOrganization } from '../genericFields/useCreatingForOrganization';
 
-export const CreateCloudPlanForm: FC = () => {
+export const CloudPlanCreateForm: FC = () => {
   const messaging = useMessage();
   const history = useHistory();
 
@@ -25,6 +22,19 @@ export const CreateCloudPlanForm: FC = () => {
 
   const initialData = getCloudPlanInitialValues();
 
+  function onSaveSuccess() {
+    messaging.success(
+      <T keyName="administration_cloud_plan_created_success" />
+    );
+    history.push(LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build());
+  }
+
+  const forOrganization = useCreatingForOrganization({
+    initialPlanName: initialData.name,
+  });
+
+  initialData.name = forOrganization.initialPlanName;
+
   function onSubmit(values: CloudPlanFormData) {
     createPlanLoadable.mutate(
       {
@@ -32,7 +42,7 @@ export const CreateCloudPlanForm: FC = () => {
           'application/json': {
             ...values,
             stripeProductId: values.stripeProductId!,
-            forOrganizationIds: values.public ? [] : values.forOrganizationIds,
+            forOrganizationIds: forOrganization.id ? [forOrganization.id] : [],
           },
         },
       },
@@ -42,33 +52,6 @@ export const CreateCloudPlanForm: FC = () => {
     );
   }
 
-  function onSaveSuccess() {
-    messaging.success(
-      <T keyName="administration_cloud_plan_created_success" />
-    );
-    history.push(LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build());
-  }
-
-  const { creatingForOrganizationId: creatingForOrganizationIdString } =
-    useUrlSearch();
-
-  const creatingForOrganizationId = creatingForOrganizationIdString
-    ? parseInt(creatingForOrganizationIdString as string)
-    : undefined;
-
-  const organizationLoadable = useApiQuery({
-    url: '/v2/organizations/{id}',
-    method: 'get',
-    path: { id: creatingForOrganizationId || 0 },
-    options: {
-      enabled: !!creatingForOrganizationId,
-    },
-  });
-
-  if (!initialData.name && organizationLoadable.data?.name) {
-    initialData.name = 'Custom for ' + organizationLoadable.data.name;
-  }
-
   return (
     <CloudPlanForm
       loading={createPlanLoadable.isLoading}
@@ -76,7 +59,7 @@ export const CreateCloudPlanForm: FC = () => {
       onSubmit={onSubmit}
       initialData={initialData}
       publicSwitchFieldProps={{
-        disabled: Boolean(creatingForOrganizationId),
+        disabled: Boolean(forOrganization.id),
         disabledInfo: (
           <T keyName="admin_billing_disabled_public_switch_when_creating_cusom_tooltip" />
         ),
@@ -84,7 +67,7 @@ export const CreateCloudPlanForm: FC = () => {
       beforeFields={
         <>
           <CreatingPlanForOrganizationAlert
-            organization={organizationLoadable.data}
+            organization={forOrganization.data}
           />
           <PlanTemplateSelector />
         </>
