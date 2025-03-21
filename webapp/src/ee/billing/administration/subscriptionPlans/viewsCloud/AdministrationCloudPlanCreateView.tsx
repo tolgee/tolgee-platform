@@ -4,7 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { CreateCloudPlanForm } from '../components/planForm/cloud/CreateCloudPlanForm';
+import { CloudPlanCreateForm } from '../components/planForm/cloud/CloudPlanCreateForm';
 
 export const AdministrationCloudPlanCreateView = () => {
   const { t } = useTranslate();
@@ -31,7 +31,7 @@ export const AdministrationCloudPlanCreateView = () => {
             {t('administration_cloud_plan_create')}
           </Typography>
 
-          <CreateCloudPlanForm />
+          <CloudPlanCreateForm />
         </Box>
       </BaseAdministrationView>
     </DashboardPage>
