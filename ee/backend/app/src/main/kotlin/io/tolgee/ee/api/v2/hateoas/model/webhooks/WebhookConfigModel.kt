@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.ee.webhooks
+package io.tolgee.ee.api.v2.hateoas.model.webhooks
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
@@ -21,4 +21,4 @@ class WebhookConfigModel(
     description = """Date of the last webhook request.""",
   )
   var lastExecuted: Long?,
-) : RepresentationModel<io.tolgee.hateoas.ee.webhooks.WebhookConfigModel>(), Serializable
+) : RepresentationModel<WebhookConfigModel>(), Serializable
