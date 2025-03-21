@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { FC, JSXElementConstructor, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { styled } from '@mui/material';
+import { Pagination, styled, Table, TableBody } from '@mui/material';
 
-import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import {
+  InferItemType,
+  PaginatedHateoasList,
+  PaginatedHateoasListProps,
+} from 'tg.component/common/list/PaginatedHateoasList';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { LINKS } from 'tg.constants/links';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { AdministrationSubscriptionsListItem } from './components/AdministrationSubscriptionsListItem';
+import {
+  HateoasListData,
+  HateoasPaginatedData,
+} from 'tg.service/response.types';
+import { PaginatedHateoasTable } from 'tg.component/common/table/PaginatedHateoasTable';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -54,7 +63,7 @@ export const AdministrationSubscriptionsView = () => {
           hideChildrenOnLoading={false}
           loading={listPermitted.isFetching}
         >
-          <PaginatedHateoasList
+          <PaginatedHateoasTable
             wrapperComponentProps={{ className: 'listWrapper' }}
             onPageChange={setPage}
             onSearchChange={setSearch}

@@ -16,15 +16,15 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { CloudPlanFields } from '../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanFields';
-import { getCloudPlanInitialValues } from '../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
+import { CloudPlanFields } from '../../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanFields';
+import { getCloudPlanInitialValues } from '../../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { AssignCloudTrialPlanSelectorField } from './AssignCloudTrialPlanSelectorField';
 import { useTestClock } from 'tg.service/useTestClock';
 import { AssignTrialDatePicker } from './AssignTrialDatePicker';
 import { useCurrentDate } from 'tg.hooks/useCurrentDate';
-import { CloudPlanFormData } from '../../subscriptionPlans/components/planForm/cloud/types';
+import { CloudPlanFormData } from '../../../subscriptionPlans/components/planForm/cloud/types';
 
 export const AssignCloudTrialDialog: FC<{
   open: boolean;

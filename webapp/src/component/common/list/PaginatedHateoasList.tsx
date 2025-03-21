@@ -20,6 +20,28 @@ export type InferItemType<TData> = TData extends HateoasListData<
   ? ItemDataType
   : never;
 
+export type PaginatedHateoasListProps<
+  WrapperComponent extends
+    | keyof JSX.IntrinsicElements
+    | JSXElementConstructor<any>,
+  ListComponent extends
+    | keyof JSX.IntrinsicElements
+    | JSXElementConstructor<any>,
+  TData extends HateoasListData<TItem> | HateoasPaginatedData<TItem>,
+  TItem = InferItemType<TData>
+> = {
+  renderItem: (itemData: TItem) => ReactNode;
+  itemSeparator?: () => ReactNode;
+  loadable: UseQueryResult<TData, any>;
+  title?: ReactNode;
+  sortBy?: string[];
+  searchText?: string;
+  onSearchChange?: (value: string) => void;
+  onPageChange?: (value: number) => void;
+  emptyPlaceholder?: React.ReactNode;
+  getKey?: (value: TItem) => any;
+} & OverridableListWrappers<WrapperComponent, ListComponent>;
+
 export const PaginatedHateoasList = <
   WrapperComponent extends
     | keyof JSX.IntrinsicElements
@@ -30,18 +52,12 @@ export const PaginatedHateoasList = <
   TData extends HateoasListData<TItem> | HateoasPaginatedData<TItem>,
   TItem = InferItemType<TData>
 >(
-  props: {
-    renderItem: (itemData: TItem) => ReactNode;
-    itemSeparator?: () => ReactNode;
-    loadable: UseQueryResult<TData, any>;
-    title?: ReactNode;
-    sortBy?: string[];
-    searchText?: string;
-    onSearchChange?: (value: string) => void;
-    onPageChange?: (value: number) => void;
-    emptyPlaceholder?: React.ReactNode;
-    getKey?: (value: TItem) => any;
-  } & OverridableListWrappers<WrapperComponent, ListComponent>
+  props: PaginatedHateoasListProps<
+    WrapperComponent,
+    ListComponent,
+    TData,
+    TItem
+  >
 ) => {
   const { loadable } = props;
 
