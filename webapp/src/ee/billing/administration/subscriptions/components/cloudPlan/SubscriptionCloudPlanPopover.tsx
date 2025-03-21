@@ -1,23 +1,26 @@
 import React, { FC } from 'react';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { Box, Button, Chip, Tooltip, Typography } from '@mui/material';
-import { PlanPublicChip } from '../../../component/Plan/PlanPublicChip';
+import { PlanPublicChip } from '../../../../component/Plan/PlanPublicChip';
 import { T } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { SubscriptionsCloudEditPlanButton } from './SubscriptionsCloudEditPlanButton';
 import { Link } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { OrganizationCloudCustomPlans } from './OrganizationCloudCustomPlans';
+import { SubscriptionPeriodInfo } from './SubscriptionPerodInfo';
 
 type Props = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
   onOpenAssignTrialDialog: () => void;
+  onOpenAddPlanDialog: () => void;
   children: React.ReactElement;
 };
 
 export const SubscriptionCloudPlanPopover: FC<Props> = ({
   item,
   onOpenAssignTrialDialog,
+  onOpenAddPlanDialog,
   children,
 }) => {
   const formatDate = useDateFormatter();
@@ -62,6 +65,12 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
               </>
             )}
           </Box>
+          <SubscriptionPeriodInfo
+            isTrial={isTrial}
+            currentBillingPeriod={item.cloudSubscription?.currentBillingPeriod}
+            currentPeriodStart={item.cloudSubscription?.currentPeriodStart}
+            currentPeriodEnd={item.cloudSubscription?.currentPeriodEnd}
+          />
           {item.cloudSubscription?.stripeSubscriptionId && (
             <Button
               sx={{ mt: 1 }}
@@ -74,19 +83,12 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
               <T keyName="admin_billing_cloud_subscription_view_in_stripe" />
             </Button>
           )}
-          <OrganizationCloudCustomPlans item={item} />
-          <Box mt={3}>
-            {item.cloudSubscription?.currentPeriodEnd && !isTrial && (
-              <>
-                <Typography variant={'body2'}>
-                  {item.cloudSubscription?.currentBillingPeriod}
-                </Typography>
-                <Typography variant={'body2'}>
-                  {formatDate(item.cloudSubscription?.currentPeriodEnd)}
-                </Typography>
-              </>
-            )}
-            <Box display="flex">
+          <OrganizationCloudCustomPlans
+            item={item}
+            onOpenAddPlanDialog={onOpenAddPlanDialog}
+          />
+          <Box mt={2}>
+            <Box display="flex" mt={3}>
               <Button
                 color="primary"
                 onClick={() => onOpenAssignTrialDialog()}
