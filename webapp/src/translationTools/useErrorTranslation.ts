@@ -177,6 +177,8 @@ export function useErrorTranslation() {
         return t('free_self_hosted_seat_limit_exceeded');
       case 'plan_seat_limit_exceeded':
         return t('plan_seat_limit_exceeded');
+      case 'glossary_not_found':
+        return t('glossary_not_found');
       default:
         return code;
     }

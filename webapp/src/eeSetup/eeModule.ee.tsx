@@ -49,6 +49,8 @@ import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import { BillingMenuItemsProps } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
+import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
+import { GlossaryView } from '../ee/glossary/views/GlossaryView';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -166,6 +168,12 @@ export const routes = {
         )}
         <PrivateRoute path={LINKS.ORGANIZATION_SSO.template}>
           <OrganizationSsoView />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ORGANIZATION_GLOSSARIES.template}>
+          <GlossariesListView />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ORGANIZATION_GLOSSARY.template}>
+          <GlossaryView />
         </PrivateRoute>
       </>
     );

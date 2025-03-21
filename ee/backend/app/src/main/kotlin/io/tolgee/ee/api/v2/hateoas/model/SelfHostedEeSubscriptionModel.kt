@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.ee
+package io.tolgee.ee.api.v2.hateoas.model
 
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.BillingPeriod

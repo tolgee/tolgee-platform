@@ -281,6 +281,7 @@ enum class Message {
   PLAN_SEAT_LIMIT_EXCEEDED,
   INSTANCE_NOT_USING_LICENSE_KEY,
   INVALID_PATH,
+  GLOSSARY_NOT_FOUND,
   ;
 
   val code: String

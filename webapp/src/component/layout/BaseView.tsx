@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 import { Box, styled, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
@@ -68,7 +68,7 @@ export interface BaseViewProps {
   stretch?: boolean;
 }
 
-export const BaseView = (props: BaseViewProps) => {
+export const BaseView: FC<BaseViewProps> = (props) => {
   const hideChildrenOnLoading =
     props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading;
 

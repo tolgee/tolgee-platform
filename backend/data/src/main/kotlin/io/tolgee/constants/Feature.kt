@@ -21,7 +21,7 @@ enum class Feature {
   TASKS,
   SSO,
   ORDER_TRANSLATION,
-
+  GLOSSARY,
   ;
 
   companion object {

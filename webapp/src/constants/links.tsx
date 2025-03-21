@@ -59,6 +59,7 @@ export enum PARAMS {
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
+  GLOSSARY_ID = 'glossaryId',
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
   TA_ID = 'taId',
@@ -70,8 +71,6 @@ export class LINKS {
   /**
    * Authentication
    */
-
-  static MY_TASKS = Link.ofRoot('my-tasks');
 
   static LOGIN = Link.ofRoot('login');
 
@@ -176,6 +175,8 @@ export class LINKS {
     LINKS.USER_ACCOUNT_SECURITY,
     'disable-mfa'
   );
+
+  static MY_TASKS = Link.ofRoot('my-tasks');
 
   /**
    * Administration
@@ -295,6 +296,16 @@ export class LINKS {
   static ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE = Link.ofParent(
     LINKS.ORGANIZATION_SUBSCRIPTIONS,
     'self-hosted-ee'
+  );
+
+  static ORGANIZATION_GLOSSARIES = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'glossaries'
+  );
+
+  static ORGANIZATION_GLOSSARY = Link.ofParent(
+    LINKS.ORGANIZATION_GLOSSARIES,
+    p(PARAMS.GLOSSARY_ID)
   );
 
   /**

@@ -469,6 +469,13 @@ export class Validation {
       name: Yup.string().min(3).required(),
       email: Yup.string().min(3).required(),
     });
+
+  static readonly GLOSSARY_CREATE_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+      baseLanguageCode: Yup.string().min(1).required(),
+      assignedProjects: Yup.array().of(Yup.number().required()),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;
