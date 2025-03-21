@@ -11,7 +11,11 @@ export const CreatingPlanForOrganizationAlert: FC<{
   }
 
   return (
-    <Alert sx={{ mt: 2, mb: 2 }} severity="info">
+    <Alert
+      sx={{ mt: 2, mb: 2 }}
+      severity="info"
+      data-cy="administration-billing-creating-for-organization-alert"
+    >
       <T
         keyName="administration_cloud_plan_for_organization_alert"
         params={{
