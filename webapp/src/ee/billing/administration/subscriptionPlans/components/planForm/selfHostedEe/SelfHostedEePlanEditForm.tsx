@@ -24,6 +24,12 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
     path: { planId },
   });
 
+  const planEditMutation = useBillingApiMutation({
+    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
+    method: 'put',
+    invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
+  });
+
   if (planLoadable.isLoading) {
     return <SpinnerProgress />;
   }
@@ -34,12 +40,6 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
     return null;
   }
 
-  const planEditLoadable = useBillingApiMutation({
-    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
-    method: 'put',
-    invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
-  });
-
   return (
     <SelfHostedEePlanForm
       loading={false}
@@ -48,7 +48,7 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
       }}
       isUpdate={true}
       onSubmit={(values) => {
-        planEditLoadable.mutate(
+        planEditMutation.mutate(
           {
             path: { planId },
             content: {

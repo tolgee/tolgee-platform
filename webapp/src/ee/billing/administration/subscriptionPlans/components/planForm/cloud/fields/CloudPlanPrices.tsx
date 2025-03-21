@@ -50,7 +50,7 @@ export const CloudPlanPrices: FC<CloudPlanPricesProps> = ({ parentName }) => {
 
   return (
     <PlanPricesFields
-      isPayAsYouGo={type !== 'PAY_AS_YOU_GO'}
+      isPayAsYouGo={type === 'PAY_AS_YOU_GO'}
       parentName={parentName}
       metricType={metricType}
     />

@@ -20,7 +20,7 @@ import { CloudPlanFields } from '../../subscriptionPlans/components/planForm/clo
 import { getCloudPlanInitialValues } from '../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { PlanSelectorField } from '../../subscriptionPlans/components/planForm/cloud/fields/PlanSelectorField';
+import { AssignCloudTrialPlanSelectorField } from './AssignCloudTrialPlanSelectorField';
 import { useTestClock } from 'tg.service/useTestClock';
 import { AssignTrialDatePicker } from './AssignTrialDatePicker';
 import { useCurrentDate } from 'tg.hooks/useCurrentDate';
@@ -125,7 +125,7 @@ export const AssignCloudTrialDialog: FC<{
               <FormHelperText>
                 <T keyName="administration-subscription-assign-trial-plan-help" />
               </FormHelperText>
-              <PlanSelectorField
+              <AssignCloudTrialPlanSelectorField
                 organizationId={organizationId}
                 onPlanChange={(plan) => setCustomPlanValues(formikProps, plan)}
               />
