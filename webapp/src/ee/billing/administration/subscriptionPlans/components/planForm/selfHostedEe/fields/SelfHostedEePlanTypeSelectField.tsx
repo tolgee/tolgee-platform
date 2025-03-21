@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
-import { SelfHostedEePlanFormData } from '../cloud/types';
-import { usePlanFormValues } from '../cloud/usePlanFormValues';
+import { SelfHostedEePlanFormData } from '../../cloud/types';
+import { usePlanFormValues } from '../../cloud/usePlanFormValues';
 import {
   PlanTypeOption,
   PlanTypeSelect,
-} from '../genericFields/PlanTypeSelect';
+} from '../../genericFields/PlanTypeSelect';
 
 type PlanTypeSelectFieldProps = {
   parentName?: string;

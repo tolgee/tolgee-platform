@@ -5,7 +5,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { EditCloudPlanForm } from '../components/planForm/cloud/EditCloudPlanForm';
+import { CloudPlanEditForm } from '../components/planForm/cloud/CloudPlanEditForm';
 
 export const AdministrationCloudPlanEditView = () => {
   const match = useRouteMatch();
@@ -37,7 +37,7 @@ export const AdministrationCloudPlanEditView = () => {
             {t('administration_cloud_plan_edit')}
           </Typography>
         </Box>
-        <EditCloudPlanForm planId={planId} />
+        <CloudPlanEditForm planId={planId} />
       </BaseAdministrationView>
     </DashboardPage>
   );
