@@ -62,9 +62,12 @@ import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.Duration
 import java.util.*
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
+@ActiveProfiles("test")
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
@@ -80,6 +83,151 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   protected lateinit var languageService: LanguageService
+
+  @Autowired
+  protected lateinit var keyRepository: KeyRepository
+
+  @Autowired
+  protected lateinit var userAccountService: UserAccountService
+
+  @Autowired
+  protected lateinit var apiKeyService: ApiKeyService
+
+  @Autowired
+  protected lateinit var permissionService: PermissionService
+
+  @Autowired
+  protected lateinit var invitationService: InvitationService
+
+  @Autowired
+  open lateinit var tolgeeProperties: TolgeeProperties
+
+  @Autowired
+  lateinit var mapper: ObjectMapper
+
+  @Autowired
+  protected lateinit var initialPasswordManager: InitialPasswordManager
+
+  @Autowired
+  protected lateinit var screenshotService: ScreenshotService
+
+  @Autowired
+  protected lateinit var imageUploadService: ImageUploadService
+
+  protected lateinit var initialUsername: String
+
+  protected lateinit var initialPassword: String
+
+  @Autowired
+  protected lateinit var organizationRepository: OrganizationRepository
+
+  @Autowired
+  open lateinit var organizationService: OrganizationService
+
+  @Autowired
+  protected lateinit var organizationRoleService: OrganizationRoleService
+
+  @Autowired
+  open lateinit var organizationRoleRepository: OrganizationRoleRepository
+
+  @Autowired
+  open lateinit var projectRepository: ProjectRepository
+
+  @Autowired
+  lateinit var importService: ImportService
+
+  @Autowired
+  lateinit var testDataService: TestDataService
+
+  @Autowired
+  lateinit var translationCommentService: TranslationCommentService
+
+  @Autowired
+  lateinit var tagService: TagService
+
+  @Autowired
+  lateinit var fileStorage: FileStorage
+
+  @Autowired
+  open lateinit var machineTranslationProperties: MachineTranslationProperties
+
+  @Autowired
+  lateinit var awsMachineTranslationProperties: AwsMachineTranslationProperties
+
+  @Autowired
+  lateinit var googleMachineTranslationProperties: GoogleMachineTranslationProperties
+
+  @Autowired
+  lateinit var deeplMachineTranslationProperties: DeeplMachineTranslationProperties
+
+  @Autowired
+  lateinit var azureCognitiveTranslationProperties: AzureCognitiveTranslationProperties
+
+  @Autowired
+  lateinit var baiduMachineTranslationProperties: BaiduMachineTranslationProperties
+
+  @Autowired
+  lateinit var tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties
+
+  @Autowired
+  lateinit var internalProperties: InternalProperties
+
+  @Autowired
+  lateinit var mtServiceConfigService: MtServiceConfigService
+
+  @set:Autowired
+  lateinit var emailVerificationService: EmailVerificationService
+
+  @set:Autowired
+  lateinit var emailVerificationRepository: EmailVerificationRepository
+
+  @set:Autowired
+  lateinit var applicationContext: ApplicationContext
+
+  @Autowired
+  open lateinit var mtCreditBucketService: MtCreditBucketService
+
+  @Autowired
+  open lateinit var mtService: MtService
+
+  @Autowired
+  lateinit var mtServiceManager: MtServiceManager
+
+  @Autowired
+  lateinit var activityService: ActivityService
+
+  @Autowired
+  lateinit var userPreferencesService: UserPreferencesService
+
+  @Autowired
+  lateinit var transactionTemplate: TransactionTemplate
+
+  @Autowired
+  lateinit var languageStatsService: LanguageStatsService
+
+  @Autowired
+  lateinit var platformTransactionManager: PlatformTransactionManager
+
+  @Autowired
+  lateinit var patService: PatService
+
+  @Autowired
+  lateinit var mfaService: MfaService
+
+  @Autowired
+  lateinit var namespaceService: NamespaceService
+
+  @Autowired
+  open lateinit var cacheManager: CacheManager
+
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
+
+  @Autowired
+  lateinit var allCachesProvider: AllCachesProvider
+
+  @Autowired
+  protected lateinit var keyService: KeyService
 
   @Autowired
   protected lateinit var keyRepository: KeyRepository
@@ -284,4 +432,42 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   open fun moveCurrentDate(duration: Duration) {
     currentDateProvider.move(duration)
   }
+
+  // Add a unique identifier for each test instance
+  protected val testId = UUID.randomUUID().toString().replace("-", "").substring(0, 8)
+  
+  // Counter to ensure unique names within a test
+  private val nameCounter = AtomicInteger(0)
+  
+  // Generate unique names for test entities to avoid conflicts
+  protected fun uniqueName(prefix: String = ""): String {
+    return "${prefix}_${testId}_${nameCounter.incrementAndGet()}"
+  }
+  
+  // Helper method to create isolated test data
+  protected fun createIsolatedTestData(): TestDataSet {
+    // Implementation that creates data with unique identifiers
+    // This ensures tests don't conflict with each other
+    val projectName = uniqueName("project")
+    val organizationName = uniqueName("org")
+    
+    // Create project with unique name
+    val project = projectService.createProject(
+      organizationName = organizationName,
+      projectName = projectName,
+      languages = listOf("en", "cs")
+    )
+    
+    // Return the created data
+    return TestDataSet(
+      project = project,
+      // Other fields...
+    )
+  }
+  
+  // Data class to hold test data
+  data class TestDataSet(
+    val project: Project,
+    // Other fields...
+  )
 }

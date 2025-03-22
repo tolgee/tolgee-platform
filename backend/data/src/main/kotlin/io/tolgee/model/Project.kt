@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
@@ -10,6 +11,7 @@ import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
+import io.tolgee.model.mtProvider.MtProviderUsage
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.service.language.LanguageService
@@ -27,9 +29,11 @@ import kotlin.jvm.Transient
 
 @Entity
 @Table(
+  name = "project",
   indexes = [
-    Index(columnList = "user_owner_id"),
-    Index(columnList = "organization_owner_id"),
+    Index(columnList = "organization_id"),
+    Index(columnList = "base_language_id"),
+    Index(columnList = "name"),
   ],
 )
 @EntityListeners(Project.Companion.ProjectListener::class)
@@ -39,22 +43,23 @@ class Project(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0L,
   @field:NotBlank
-  @field:Size(min = 3, max = 50)
+  @field:Size(max = 50)
+  @Column(nullable = false)
+  @ActivityDescribingProp
   @ActivityLoggedProp
   override var name: String = "",
-  @field:Size(min = 3, max = 2000)
+  @field:Size(max = 2000)
   @ActivityLoggedProp
   @Column(length = 2000)
   override var description: String? = null,
-  @field:Size(max = 2000)
-  @Column(columnDefinition = "text")
+  @field:Size(max = 50)
+  @Column(unique = true)
   @ActivityLoggedProp
-  var aiTranslatorPromptDescription: String? = null,
-  @Column(name = "address_part")
-  @ActivityLoggedProp
-  @field:Size(min = 3, max = 60)
-  @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   override var slug: String? = null,
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "organization_id")
+  @ActivityLoggedProp
+  var organizationOwner: Organization? = null,
 ) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable, ISimpleProject {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
@@ -74,10 +79,8 @@ class Project(
   @Deprecated(message = "Project can be owned only by organization")
   var userOwner: UserAccount? = null
 
-  @ManyToOne(optional = true, fetch = FetchType.LAZY)
-  lateinit var organizationOwner: Organization
-
-  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "base_language_id")
   @ActivityLoggedProp
   var baseLanguage: Language? = null
 
@@ -104,13 +107,13 @@ class Project(
   @OneToMany(orphanRemoval = true, mappedBy = "project")
   var automations: MutableList<Automation> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
   var contentDeliveryConfigs: MutableList<ContentDeliveryConfig> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
   var contentStorages: MutableList<ContentStorage> = mutableListOf()
 
-  @OneToMany(orphanRemoval = true, mappedBy = "project")
+  @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
   var webhookConfigs: MutableList<WebhookConfig> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
@@ -125,6 +128,21 @@ class Project(
 
   @ColumnDefault("0")
   var lastTaskNumber: Long = 0
+
+  @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+  var mtProviderUsages: MutableSet<MtProviderUsage> = mutableSetOf()
+
+  @Column(name = "auto_translation_enabled")
+  @ActivityLoggedProp
+  var autoTranslationEnabled: Boolean = false
+
+  @Column(name = "auto_translation_config")
+  @ActivityLoggedProp
+  var autoTranslationConfig: String? = null
+
+  @Column(name = "machine_translation_enabled")
+  @ActivityLoggedProp
+  var machineTranslationEnabled: Boolean = true
 
   override var deletedAt: Date? = null
 

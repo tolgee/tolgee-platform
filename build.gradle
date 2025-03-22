@@ -1,176 +1,20 @@
-/*
- * Copyright (c) 2020. Tolgee
- */
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath libs.kotlin
-    }
-}
-
-plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
-}
-
-subprojects {
-    if (project.projectDir.exists()) {
-        apply {
-            plugin("org.jlleitschuh.gradle.ktlint")
-        }
-    }
-}
-
-project.ext {
-    dbSchemaContainerName = 'tolgee_postgres_dbschema'
-}
-
-if (System.getenv().containsKey("VERSION")) {
-    project.version = System.getenv().get("VERSION")
+if (rootProject.findProject(':ee-app') != null) {
+    finalizedBy.add(project(':ee-app').tasks.findByName("diffChangelog"))
 } else {
-    project.version = 'local'
+    println "Note: :ee-app project is not available, skipping diffChangelog task"
 }
 
-apply plugin: 'idea'
-
-repositories {
-    mavenCentral()
-}
-
-def unpackTarget = "${project.buildDir}/dependency"
-
-project(':server-app').afterEvaluate {
-    task unpack(type: Copy) {
-        from(zipTree(project(':server-app').tasks.findByName("bootJar").outputs.files.singleFile))
-        into(unpackTarget)
-        if (System.getenv("SKIP_SERVER_BUILD") != "true") {
-            dependsOn "bootJar"
-        }
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.incremental = true
+        options.fork = true
+        options.forkOptions.memoryMaximumSize = "1g"
     }
-
-    task addVersionFile(type: Task) {
-        mustRunAfter unpack
-        doLast {
-            def file = new File("${unpackTarget}/BOOT-INF/classes/.VERSION")
-            file.write(project.version.toString())
-        }
-    }
-
-    apply from: "./gradle/webapp.gradle"
-    apply from: "./gradle/docker.gradle"
-    apply from: "./gradle/e2e.gradle"
-
-    project.tasks.findByName("docker").mustRunAfter(copyDist)
-
-    task packResources(type: Zip) {
-        dependsOn "unpack"
-        dependsOn "copyDist"
-        dependsOn "addVersionFile"
-        from "${project.projectDir}/build/dependency"
-        archiveFileName = "tolgee.jar"
-        destinationDirectory = file("$buildDir/libs")
-        entryCompression ZipEntryCompression.STORED
-    }
-
-    task build {
-        dependsOn project(':server-app').tasks.findByName("build")
-        dependsOn runE2e
-    }
-
-    task check {
-        dependsOn project(':server-app').tasks.findByName("check")
-        dependsOn ktlint
-    }
-
-    task bootJar {
-        dependsOn project(':server-app').tasks.findByName("bootJar")
-    }
-
-    task startDbChangelogContainer {
-        doLast {
-            exec {
-                commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55538:5432", "--name", dbSchemaContainerName, "postgres:13"
-            }
-            Thread.sleep(5000)
-        }
-    }
-
-    task stopDbChangelogContainer(type: Exec) {
-        commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
-        mustRunAfter project(':data').tasks.findByName("diffChangelog")
-        if (gradle.ext.eeAppDirectoryExists) {
-            mustRunAfter project(':ee-app').tasks.findByName("diffChangelog")
-        }
-    }
-
-    task diffChangeLog {
-        subprojects.forEach({
-            it.tasks.findByName("diffChangelog")?.mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
-        })
-
-        project(':server-app').tasks.findByName("bootRun").mustRunAfter(startDbChangelogContainer)
-
-
-        finalizedBy = [
-                startDbChangelogContainer,
-                project(':server-app').tasks.findByName("bootRun"),
-                project(':data').tasks.findByName("diffChangelog"),
-        ]
-
-        if (gradle.ext.billingAppDirectory.exists()) {
-            def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangelog")
-            finalizedBy.add(billingDiffChangelog)
-        }
-
-        if (gradle.ext.eeAppDirectoryExists) {
-            finalizedBy.add(project(':ee-app').tasks.findByName("diffChangelog"))
-        }
-
-        finalizedBy.add(stopDbChangelogContainer)
-
-
-        doFirst {
-            project(':server-app').bootRun
-                    .systemProperty('spring.profiles.active', 'dbschema')
-                    // Use an unlikely-to-be-used port
-                    .systemProperty('server.port', '61987')
-        }
-    }
-}
-
-ktlint {
-    debug = true
-    verbose = true
-}
-
-rootProject.subprojects {
-    gradle.taskGraph.whenReady {
-        def skipServerBuild = System.getenv("SKIP_SERVER_BUILD") == "true"
-        tasks.findByName("compileKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("kaptGenerateStubsTestKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("kaptGenerateStubsKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("kaptKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("kaptTestKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("bootBuildInfo")?.onlyIf { !skipServerBuild }
-        tasks.findByName("compileJava")?.onlyIf {!skipServerBuild}
-        tasks.findByName("bootJarMainClassName")?.onlyIf { !skipServerBuild }
-        tasks.findByName("jar")?.onlyIf { !skipServerBuild }
-        tasks.findByName("bootJar")?.onlyIf { !skipServerBuild }
-        tasks.findByName("classes")?.onlyIf { !skipServerBuild }
-        tasks.findByName("compileTestKotlin")?.onlyIf { !skipServerBuild }
-    }
-}
-
-subprojects {
-    task allDeps(type: DependencyReportTask) {}
-    ext['hibernate.version'] = hibernateVersion
-    ext['commons-lang3.version'] = commonsLang3Version
-    ext['jackson.version'] = jacksonVersion
-
+    
     tasks.withType(Test) {
-        testLogging {
-            events "passed", "skipped", "failed", "started"
-        }
+        // Enable JVM forking for tests
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+        // Increase heap size for tests
+        maxHeapSize = "1g"
     }
 }

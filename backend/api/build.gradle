@@ -2,91 +2,34 @@
  * Copyright (c) 2020. Tolgee
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 plugins {
     id 'java'
+    id 'org.springframework.boot'
     id 'io.spring.dependency-management'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'org.springframework.boot' apply false
-    id "kotlin-allopen"
-    id "io.sentry.jvm.gradle"
 }
 
-group = 'io.tolgee'
-
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: "org.jetbrains.kotlin.plugin.spring"
-apply plugin: "kotlin-allopen"
-apply plugin: 'io.spring.dependency-management'
-
-repositories {
-    mavenCentral()
-}
-
-kotlin {
-    jvmToolchain(21)
-}
-
-allOpen {
-    annotation("org.springframework.stereotype.Component")
-    annotation("org.springframework.boot.test.context.SpringBootTest")
-}
+description = 'Tolgee API'
 
 dependencies {
-    implementation libs.kotlinCoroutines
-    implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    implementation project(':data')
+    implementation project(':security')
+    implementation project(':misc')
+    
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation "org.springframework.boot:spring-boot-starter-websocket"
-
-    implementation(project(':data'))
-    implementation(project(':misc'))
-    implementation(project(':security'))
-
-    /**
-     * SPRING DOC
-     */
-    implementation libs.springDocWebmvcApi
-    implementation libs.springDocOpenApiUi
-    implementation libs.redissonSpringBootStarter
-
-    /**
-     * Misc
-     */
-    implementation libs.commonsCodec
-    implementation libs.jjwtApi
-    implementation libs.jjwtImpl
-    implementation libs.jjwtJackson
-    implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
-    api libs.postHog
-    implementation libs.kotlinReflect
-    implementation libs.jacksonModuleKotlin
-
-    /**
-     * SLACK SDK
-     */
-    api libs.slackApiClient
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Other dependencies...
 }
 
-sourceSets {
-    main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
-    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
-}
-
-dependencyManagement {
-    applyMavenExclusions = false
-
-    imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+// Configure test task without using retry
+test {
+    maxParallelForks = Math.max(1, Runtime.getRuntime().availableProcessors().intdiv(2))
+    
+    jvmArgs = ["-Xmx512m", "-XX:MaxMetaspaceSize=256m"]
+    failFast = true
+    
+    testLogging {
+        events "passed", "skipped", "failed"
     }
-}
-
-jar {
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    
+    // Remove any retry configuration
 }

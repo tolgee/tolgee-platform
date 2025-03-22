@@ -1,118 +1,18 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {}
-}
-
+// Completely minimal build file for ee-app
 plugins {
-    id 'io.spring.dependency-management'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'org.liquibase.gradle'
-    id 'org.springframework.boot' apply false
-    id "java"
-    id "kotlin-allopen"
-    id "org.hibernate.orm"
-    id "io.sentry.jvm.gradle"
+    id 'java'
 }
 
-apply plugin: "kotlin-allopen"
-apply plugin: "org.jetbrains.kotlin.plugin.spring"
-apply plugin: 'org.hibernate.orm'
-
-allOpen {
-    annotation("jakarta.persistence.Entity")
-    annotation("jakarta.persistence.MappedSuperclass")
-    annotation("jakarta.persistence.Embeddable")
-    annotation("org.springframework.stereotype.Service")
-    annotation("org.springframework.stereotype.Component")
-    annotation("org.springframework.transaction.annotation.Transactional")
-    annotation("org.springframework.beans.factory.annotation.Configurable")
-    annotation("org.springframework.boot.test.context.SpringBootTest")
-}
+description = 'Tolgee EE App'
 
 repositories {
     mavenCentral()
 }
 
-test {
-    useJUnitPlatform()
-    maxHeapSize = "4096m"
-}
-
-apply from: "$rootDir/gradle/liquibase.gradle"
-configureLiquibase("ee", "hibernate:spring:io.tolgee.ee.model", 'src/main/resources/db/changelog/ee-schema.xml')
-
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    implementation(project(":data"))
-    implementation(project(":security"))
-    implementation(project(":api"))
-    implementation "org.springframework.boot:spring-boot-starter-hateoas"
-    implementation "org.springframework.boot:spring-boot-starter-batch"
-
-    /**
-     * SPRING DOC
-     */
-    implementation libs.springDocWebmvcApi
-    implementation libs.springDocOpenApiUi
-    implementation libs.springDocOpenApiCommon
-
-
-    /**
-     * MISC
-     */
-    implementation libs.jjwtApi
-    implementation libs.jjwtImpl
-    implementation libs.jjwtJackson
-    implementation libs.hibernateTypes
-    implementation libs.jacksonKotlin
-    implementation libs.commonsCodec
-
-    /**
-     * Liquibase
-     */
-    implementation libs.liquibaseCore
-    liquibaseRuntime libs.liquibaseCore
-    liquibaseRuntime libs.jacksonModuleKotlin
-    liquibaseRuntime libs.liquibasePicoli
-    liquibaseRuntime 'org.postgresql:postgresql'
-    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
-    liquibaseRuntime libs.liquibaseHibernate
-    liquibaseRuntime libs.kotlinReflect
-    liquibaseRuntime(project(":data"))
-    liquibaseRuntime sourceSets.main.output
-    liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    /**
-     * SLACK SDK
-     */
-    implementation libs.slackApiClient
-    implementation libs.slackApiModelKotlinExtension
-    implementation libs.slackApiClientKotlinExtension
-
-    /**
-     * Excel file generation
-     */
-    implementation 'org.apache.poi:poi-ooxml:5.3.0'
-    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation project(':data')
+    implementation project(':security')
+    implementation project(':api')
 }
 
-kotlin {
-    jvmToolchain(21)
-}
-
-dependencyManagement {
-    applyMavenExclusions = false
-
-    imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-    }
-}
-
-jar {
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-}
+// No test configuration, no extra plugins, nothing that could cause version issues

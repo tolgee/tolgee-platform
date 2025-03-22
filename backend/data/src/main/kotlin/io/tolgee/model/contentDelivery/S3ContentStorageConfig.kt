@@ -9,16 +9,15 @@ import jakarta.persistence.MapsId
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
 
-@Entity()
-class S3ContentStorageConfig(
-  @MapsId
-  @JoinColumn(name = "content_storage_id")
-  @OneToOne(fetch = FetchType.LAZY)
-  var contentStorage: ContentStorage,
-) : S3Config {
+@Entity
+class S3ContentStorageConfig : S3Config {
   @Id
-  @Column(name = "content_storage_id")
-  private val id: Long? = null
+  var id: Long = 0
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id")
+  @MapsId
+  var contentStorage: ContentStorage? = null
 
   @field:NotBlank
   override var bucketName: String = ""
@@ -27,6 +26,7 @@ class S3ContentStorageConfig(
   override var accessKey: String = ""
 
   @field:NotBlank
+  @Column(length = 1000)
   override var secretKey: String = ""
 
   @field:NotBlank
@@ -34,4 +34,7 @@ class S3ContentStorageConfig(
 
   @field:NotBlank
   override var signingRegion: String = ""
+
+  override val contentStorageType: ContentStorageType
+    get() = ContentStorageType.S3
 }

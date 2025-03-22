@@ -72,8 +72,10 @@ dependencies {
     implementation libs.kotlinReflect
     implementation libs.kotlinCoroutines
 
-    if (gradle.ext.eeAppDirectoryExists) {
+    if (rootProject.findProject(':ee-app') != null) {
         api project(":ee-app")
+    } else {
+        println "Note: :ee-app project is not available, skipping dependency"
     }
 }
 
