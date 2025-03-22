@@ -9,20 +9,22 @@ import jakarta.persistence.MapsId
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
 
-@Entity()
-class AzureContentStorageConfig(
-  @MapsId
-  @JoinColumn(name = "content_storage_id")
-  @OneToOne(fetch = FetchType.LAZY)
-  var contentStorage: ContentStorage,
-) : AzureBlobConfig {
+@Entity
+class AzureContentStorageConfig : AzureConfig {
   @Id
-  @Column(name = "content_storage_id")
-  private val id: Long? = null
+  var id: Long = 0
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id")
+  @MapsId
+  var contentStorage: ContentStorage? = null
 
   @field:NotBlank
-  override var connectionString: String? = ""
+  override var connectionString: String = ""
 
   @field:NotBlank
-  override var containerName: String? = ""
+  override var containerName: String = ""
+
+  override val contentStorageType: ContentStorageType
+    get() = ContentStorageType.AZURE
 }

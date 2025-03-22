@@ -106,13 +106,7 @@ project(':testing').projectDir = new File('backend/testing')
 include ':misc'
 project(':misc').projectDir = new File('backend/misc')
 
-if (gradle.ext.eeAppDirectoryExists) {
-    include ':ee-app'
-    project(':ee-app').projectDir = new File('ee/backend/app')
-
-    include ':ee-test'
-    project(':ee-test').projectDir = new File('ee/backend/tests')
-}
+// include ':ee-app'  // Temporarily disabled
 
 include ':development'
 project(':development').projectDir = new File('backend/development')

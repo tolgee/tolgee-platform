@@ -8,33 +8,40 @@ import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 @Entity
-@ActivityLoggedEntity
 @Table(
+  name = "content_storage",
   indexes = [
     Index(columnList = "project_id"),
   ],
 )
-class ContentStorage(
+@ActivityLoggedEntity
+class ContentStorage : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
-  var project: Project,
-  @NotBlank
-  @ActivityLoggedProp
+  @JoinColumn(name = "project_id")
+  var project: Project? = null
+
+  @field:NotBlank
+  @field:Size(max = 100)
   @ActivityDescribingProp
-  var name: String,
-) : StandardAuditModel() {
+  @ActivityLoggedProp
+  var name: String = ""
+
+  @field:Size(max = 255)
   @ActivityLoggedProp
   var publicUrlPrefix: String? = null
 
-  @OneToOne(mappedBy = "contentStorage", optional = true, orphanRemoval = true)
+  @OneToOne(mappedBy = "contentStorage", optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
   var azureContentStorageConfig: AzureContentStorageConfig? = null
 
-  @OneToOne(mappedBy = "contentStorage", optional = true, orphanRemoval = true)
+  @OneToOne(mappedBy = "contentStorage", optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
   var s3ContentStorageConfig: S3ContentStorageConfig? = null
 
   val storageConfig: StorageConfig?

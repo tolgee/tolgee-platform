@@ -210,4 +210,46 @@ class ContentDeliveryConfigService(
   fun save(config: ContentDeliveryConfig): ContentDeliveryConfig {
     return contentDeliveryConfigRepository.save(config)
   }
+
+  /**
+   * Get ContentDeliveryConfig with optimized query
+   */
+  @Transactional(readOnly = true)
+  fun getOptimized(
+    projectId: Long,
+    contentDeliveryConfigId: Long
+  ): ContentDeliveryConfig {
+    return contentDeliveryConfigRepository.findByProjectIdAndIdOptimized(
+      projectId, contentDeliveryConfigId
+    ) ?: throw NoSuchElementException("ContentDeliveryConfig not found")
+  }
+
+  /**
+   * Check if ContentDeliveryConfig exists with optimized query
+   */
+  @Transactional(readOnly = true)
+  fun existsOptimized(
+    projectId: Long,
+    contentDeliveryConfigId: Long
+  ): Boolean {
+    return contentDeliveryConfigRepository.existsByProjectIdAndId(
+      projectId, contentDeliveryConfigId
+    )
+  }
+
+  /**
+   * Count ContentDeliveryConfigs for a project with optimized query
+   */
+  @Transactional(readOnly = true)
+  fun countByProjectIdOptimized(projectId: Long): Int {
+    return contentDeliveryConfigRepository.countByProjectId(projectId)
+  }
+
+  /**
+   * Get all ContentDeliveryConfigs for a project with optimized query
+   */
+  @Transactional(readOnly = true)
+  fun getAllForProjectOptimized(projectId: Long): List<ContentDeliveryConfig> {
+    return contentDeliveryConfigRepository.findAllByProjectIdOptimized(projectId)
+  }
 }

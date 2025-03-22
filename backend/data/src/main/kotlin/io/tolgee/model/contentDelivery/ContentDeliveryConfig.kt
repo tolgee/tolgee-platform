@@ -18,29 +18,40 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
-@ActivityLoggedEntity
 @Table(
+  name = "content_delivery_config",
   indexes = [
     Index(columnList = "project_id"),
-    Index(columnList = "content_storage_id"),
+    Index(columnList = "slug"),
   ],
 )
+@ActivityLoggedEntity
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "project_id")
   var project: Project,
 ) : StandardAuditModel(), IExportParams {
+  @field:NotBlank
+  @field:Size(max = 100)
+  @Column(nullable = false)
   @ActivityLoggedProp
-  @ActivityDescribingProp
-  lateinit var name: String
+  var name: String = ""
 
+  @field:NotBlank
+  @field:Size(max = 100)
+  @Column(nullable = false)
   @ActivityLoggedProp
   var slug: String = ""
 
@@ -51,7 +62,9 @@ class ContentDeliveryConfig(
   @ColumnDefault("false")
   var customSlug: Boolean = false
 
-  @ManyToOne
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "content_storage_id")
+  @ActivityLoggedProp
   var contentStorage: ContentStorage? = null
 
   @OneToMany(mappedBy = "contentDeliveryConfig")
@@ -71,8 +84,9 @@ class ContentDeliveryConfig(
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   @ActivityLoggedProp
-  override var languages: Set<String>? = null
+  override var languages: List<String>? = null
 
+  @Enumerated(EnumType.STRING)
   @ActivityLoggedProp
   override var format: ExportFormat = ExportFormat.JSON
 
@@ -112,11 +126,7 @@ class ContentDeliveryConfig(
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   @ActivityLoggedProp
-  override var filterState: List<TranslationState>? =
-    listOf(
-      TranslationState.TRANSLATED,
-      TranslationState.REVIEWED,
-    )
+  override var filterState: List<TranslationState>? = null
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")

@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Check if JAVA_HOME_17 is set
+if [ -n "$JAVA_HOME_17" ]; then
+    export JAVA_HOME="$JAVA_HOME_17"
+else
+    # Try to find Java 17 in common installation locations
+    for dir in \
+        "/Library/Java/JavaVirtualMachines/jdk-17"* \
+        "/Library/Java/JavaVirtualMachines/temurin-17"* \
+        "/Library/Java/JavaVirtualMachines/adoptopenjdk-17"* \
+        "/opt/homebrew/opt/openjdk@17" \
+        "/usr/lib/jvm/java-17-openjdk"* \
+        "/usr/lib/jvm/java-17-amazon-corretto"*
+    do
+        if [ -d "$dir" ]; then
+            if [ -d "$dir/Contents/Home" ]; then
+                # macOS path
+                export JAVA_HOME="$dir/Contents/Home"
+            else
+                # Linux path
+                export JAVA_HOME="$dir"
+            fi
+            break
+        fi
+    done
+fi
+
+if [ -z "$JAVA_HOME" ]; then
+    echo "Java 17 not found. Please set JAVA_HOME_17 environment variable to point to a Java 17 installation."
+    exit 1
+fi
+
+echo "Using Java 17 from $JAVA_HOME"
+chmod +x ./gradlew
+./gradlew "$@" 

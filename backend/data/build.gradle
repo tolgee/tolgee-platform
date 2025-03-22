@@ -78,7 +78,13 @@ diff.dependsOn compileKotlin
 diffChangelog.dependsOn compileKotlin
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 dependencies {
@@ -207,6 +213,19 @@ dependencies {
     implementation libs.slackApiClient
     implementation libs.slackApiModelKotlinExtension
     implementation libs.slackApiClientKotlinExtension
+
+    // Add H2 database for tests
+    testImplementation("com.h2database:h2:2.2.224")
+
+    implementation project(':common')
+    
+    testImplementation 'org.testcontainers:postgresql:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 test {
@@ -249,4 +268,29 @@ hibernate {
         enableAssociationManagement = false
         enableExtendedEnhancement = false
     }
+}
+
+task runParallelTests(type: JavaExec) {
+    dependsOn testClasses
+    main = 'io.tolgee.performance.ParallelTestExecutor'
+    classpath = sourceSets.test.runtimeClasspath
+    description = 'Runs tests in parallel using the ParallelTestExecutor'
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+    maxParallelForks = (Runtime.runtime.availableProcessors() / 2).coerceAtLeast(1)
+    
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+    
+    systemProperty 'spring.jpa.hibernate.ddl-auto', 'create-drop'
+    systemProperty 'spring.datasource.url', 'jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL'
+    systemProperty 'spring.datasource.driver-class-name', 'org.h2.Driver'
+    systemProperty 'spring.jpa.properties.hibernate.dialect', 'org.hibernate.dialect.H2Dialect'
+    systemProperty 'spring.jpa.properties.hibernate.format_sql', 'false'
+    systemProperty 'spring.jpa.properties.hibernate.show_sql', 'false'
+    systemProperty 'logging.level.org.hibernate.SQL', 'ERROR'
+    systemProperty 'logging.level.org.hibernate.type.descriptor.sql.BasicBinder', 'ERROR'
 }

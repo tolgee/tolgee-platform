@@ -119,4 +119,25 @@ class ContentDeliveryConfigController(
     val exporter = contentDeliveryService.get(projectHolder.project.id, id)
     contentDeliveryUploader.upload(exporter.id)
   }
+
+  /**
+   * Get a specific content delivery config with optimized query
+   */
+  @GetMapping("/{configId}/optimized")
+  fun getOptimized(
+    @PathVariable projectId: Long,
+    @PathVariable configId: Long
+  ): ContentDeliveryConfigModel {
+    val config = contentDeliveryService.getOptimized(projectId, configId)
+    return contentDeliveryConfigModelAssembler.toModel(config)
+  }
+
+  /**
+   * Get all content delivery configs for a project with optimized query
+   */
+  @GetMapping("/optimized")
+  fun getAllOptimized(@PathVariable projectId: Long): List<ContentDeliveryConfigModel> {
+    val configs = contentDeliveryService.getAllForProjectOptimized(projectId)
+    return contentDeliveryConfigModelAssembler.toModels(configs)
+  }
 }
