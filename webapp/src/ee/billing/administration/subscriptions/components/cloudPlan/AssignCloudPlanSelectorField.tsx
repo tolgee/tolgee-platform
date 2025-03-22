@@ -10,11 +10,13 @@ type CloudPlanSelectorFieldProps = {
   onPlanChange?: (
     plan: components['schemas']['AdministrationCloudPlanModel']
   ) => void;
+  filterPublic?: boolean;
 };
 
-export const AssignCloudTrialPlanSelectorField = ({
+export const AssignCloudPlanSelectorField = ({
   organizationId,
   onPlanChange,
+  filterPublic,
 }: CloudPlanSelectorFieldProps) => {
   const fieldName = 'planId';
   const [field, _, helpers] = useField(fieldName);
@@ -36,6 +38,7 @@ export const AssignCloudTrialPlanSelectorField = ({
         error: errorTextWhenTouched,
         label: t('administration_billing_trial_plan_assign_plan_label'),
       }}
+      filterPublic={filterPublic}
     />
   );
 };

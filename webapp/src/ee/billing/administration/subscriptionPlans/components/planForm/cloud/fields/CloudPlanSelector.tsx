@@ -18,7 +18,6 @@ export const CloudPlanSelector: FC<
     url: '/v2/administration/billing/cloud-plans',
     method: 'get',
     query: {
-      filterAssignableToOrganization: organizationId,
       filterPublic,
     },
   });

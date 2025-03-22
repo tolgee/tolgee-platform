@@ -9,18 +9,17 @@ import { Link } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { OrganizationCloudCustomPlans } from './OrganizationCloudCustomPlans';
 import { SubscriptionPeriodInfo } from './SubscriptionPerodInfo';
+import { AssignPlanButton } from './AssignPlanButton';
 
 type Props = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
   onOpenAssignTrialDialog: () => void;
-  onOpenAddPlanDialog: () => void;
   children: React.ReactElement;
 };
 
 export const SubscriptionCloudPlanPopover: FC<Props> = ({
   item,
   onOpenAssignTrialDialog,
-  onOpenAddPlanDialog,
   children,
 }) => {
   const formatDate = useDateFormatter();
@@ -83,19 +82,10 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
               <T keyName="admin_billing_cloud_subscription_view_in_stripe" />
             </Button>
           )}
-          <OrganizationCloudCustomPlans
-            item={item}
-            onOpenAddPlanDialog={onOpenAddPlanDialog}
-          />
+          <OrganizationCloudCustomPlans item={item} />
           <Box mt={2}>
             <Box display="flex" mt={3}>
-              <Button
-                color="primary"
-                onClick={() => onOpenAssignTrialDialog()}
-                data-cy="administration-assign-trial-button"
-              >
-                <T keyName="administration-subscriptions-assign-trial" />
-              </Button>
+              <AssignPlanButton onClick={() => onOpenAssignTrialDialog()} />
               <Button
                 sx={{ ml: 1 }}
                 color="primary"
