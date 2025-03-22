@@ -21,6 +21,7 @@ export const AdministrationSubscriptionsCloudPlan: FC<Props> = ({ item }) => {
       >
         <Box>
           <SubscriptionRowPlanInfo
+            dataCy={'administration-subscriptions-cloud-plan-name'}
             label={
               <T
                 keyName={'administration-subscriptions-active-cloud-plan-cell'}

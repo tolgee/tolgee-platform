@@ -5,6 +5,7 @@ import { Box, styled, Typography } from '@mui/material';
 export interface SubscriptionRowPlanInfoProps {
   label: ReactNode;
   children: ReactNode;
+  dataCy?: string;
 }
 
 const StyledContainer = styled(Box)`
@@ -15,9 +16,10 @@ const StyledContainer = styled(Box)`
 export const SubscriptionRowPlanInfo: FC<SubscriptionRowPlanInfoProps> = ({
   label,
   children,
+  dataCy,
 }) => {
   return (
-    <StyledContainer data-cy="administration-subscriptions-cloud-plan-name">
+    <StyledContainer data-cy={dataCy}>
       <Typography sx={{ fontSize: '10px' }}>{label}</Typography>
       {children}
     </StyledContainer>
