@@ -14,6 +14,7 @@ export const AdministrationSubscriptionsSelfHostedEe: FC<
   return (
     <>
       <SubscriptionRowPlanInfo
+        dataCy={'administration-subscriptions-active-self-hosted-ee-plan'}
         label={
           <>
             <T
