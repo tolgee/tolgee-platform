@@ -17,6 +17,9 @@ declare namespace DataCy {
         "activity-detail-dialog" |
         "administration-access-message" |
         "administration-assign-plan-button" |
+        "administration-assign-plan-dialog-not-trial-not-free-alert" |
+        "administration-assign-plan-dialog-organization-paying-alert" |
+        "administration-assign-plan-dialog-trial-switch" |
         "administration-assign-trial-assign-button" |
         "administration-billing-creating-for-organization-alert" |
         "administration-billing-edit-custom-plan-button" |

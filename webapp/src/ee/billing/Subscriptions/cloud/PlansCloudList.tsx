@@ -28,12 +28,17 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
   const { defaultPlan, plans } = useCloudPlans();
 
   function isActive(plan: PlanType) {
-    const planPeriod = plan.free ? undefined : period;
-    return (
-      activeSubscription.plan.id === plan.id &&
-      (activeSubscription.currentBillingPeriod === planPeriod ||
-        !isPlanPeriodDependant(plan.prices))
-    );
+    if (activeSubscription.plan.id !== plan.id) {
+      return false;
+    }
+
+    // if trial or free, we don't care about period
+    if (activeSubscription.status === 'TRIALING' || plan.free) {
+      return true;
+    }
+
+    // if the period is the same, it's active
+    return activeSubscription.currentBillingPeriod === period;
   }
 
   function isEnded(plan: PlanType) {
