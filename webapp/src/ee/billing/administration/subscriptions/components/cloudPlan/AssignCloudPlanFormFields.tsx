@@ -63,6 +63,7 @@ export const AssignCloudPlanFormFields: FC<AssignCloudPlanFormProps> = ({
           >
             <span>
               <MuiSwitch
+                data-cy="administration-assign-plan-dialog-trial-switch"
                 disabled={isCurrentlyPaying}
                 checked={formikProps.values.trialEnd !== undefined}
                 onChange={(_, checked) => {
@@ -112,13 +113,19 @@ export const AssignCloudPlanFormFields: FC<AssignCloudPlanFormProps> = ({
       )}
 
       {isCurrentlyPaying ? (
-        <Alert severity="info">
+        <Alert
+          severity="info"
+          data-cy="administration-assign-plan-dialog-organization-paying-alert"
+        >
           <T keyName="assign-plan-cannot-assign-plan-dialog-form-helper-text" />
         </Alert>
       ) : (
         !selectedPlan?.free &&
         !isTrial && (
-          <Alert severity="info">
+          <Alert
+            severity="info"
+            data-cy="administration-assign-plan-dialog-not-trial-not-free-alert"
+          >
             <T keyName="assign-plan-cannot-assign-paid-plan-dialog-form-helper-text" />
           </Alert>
         )
