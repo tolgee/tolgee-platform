@@ -1,5 +1,7 @@
 package io.tolgee.component.machineTranslation.providers.llm
 
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+
 class LLMParams(
   val messages: List<LlmMessage>,
 ) {

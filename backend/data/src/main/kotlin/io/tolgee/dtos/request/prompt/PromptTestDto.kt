@@ -5,4 +5,5 @@ data class PromptTestDto (
   var projectId: Long,
   var keyId: Long,
   var targetLanguageId: Long,
+  var provider: String
 )

@@ -12,6 +12,10 @@ import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.hateoas.prompt.PromptModelAssembler
 import io.tolgee.model.Prompt
 import io.tolgee.openApiDocs.OpenApiOrderExtension
+import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.PromptService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -26,28 +30,24 @@ import org.springframework.web.bind.annotation.*
 @OpenApiOrderExtension(6)
 class PromptController(
   private val promptService: PromptService,
-  private val openaiApiService: OpenaiApiService,
-  private val ollamaApiService: OllamaApiService,
   private val promptModelAssembler: PromptModelAssembler,
   private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
   ) {
   @GetMapping("")
+  @UseDefaultPermissions
   fun getAllPaged(
-    @ParameterObject
-    pageable: Pageable,
-    @RequestParam
-    organizationId: Long,
-    @RequestParam
-    search: String?,
+    @ParameterObject pageable: Pageable,
+    @PathVariable organizationId: Long,
+    @RequestParam search: String?,
   ): PagedModel<PromptModel> {
     val result = promptService.getAllPaged(organizationId, pageable, search)
     return arrayResourcesAssembler.toModel(result, promptModelAssembler)
   }
 
   @PostMapping("")
+  @UseDefaultPermissions
   fun createPrompt(
-    @RequestParam
-    organizationId: Long,
+    @PathVariable organizationId: Long,
     @RequestBody @Valid dto: PromptCreateDto,
   ): PromptModel {
     val result = promptService.createPrompt(organizationId, dto)
@@ -55,26 +55,23 @@ class PromptController(
   }
 
   @DeleteMapping("/{promptId}")
+  @UseDefaultPermissions
   fun deletePrompt(
-    @RequestParam
-    organizationId: Long,
-    @RequestParam
-    promptId: Long,
+    @PathVariable organizationId: Long,
+    @RequestParam promptId: Long,
   ) {
     promptService.deletePrompt(organizationId, promptId)
   }
 
   @PostMapping("run")
+  @UseDefaultPermissions
   fun run(
-    @Valid @RequestBody
-    promptTestDto: PromptTestDto,
+    @PathVariable organizationId: Long,
+    @Valid @RequestBody promptTestDto: PromptTestDto,
   ): PromptResponseDto {
     val prompt = promptService.getPrompt(promptTestDto)
     val messages = promptService.getLlmMessages(prompt, promptTestDto)
-
-    val response = openaiApiService.translate(
-      LLMParams(messages)
-    )
+    val response = promptService.runPrompt(LLMParams(messages), promptTestDto)
     return PromptResponseDto(
       prompt,
       response.translated ?: "",
@@ -84,7 +81,9 @@ class PromptController(
 
   @GetMapping("get-variables")
   @Operation(summary = "Get variables")
+  @UseDefaultPermissions
   fun variables(
+    @PathVariable organizationId: Long,
     @RequestParam projectId: Long,
     @RequestParam keyId: Long,
     @RequestParam targetLanguageId: Long,

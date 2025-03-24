@@ -8,8 +8,7 @@ import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.configuration.tolgee.machineTranslation.OllamaProperties
-import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.logger
@@ -29,12 +28,11 @@ import kotlin.time.measureTimedValue
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class OllamaApiService(
-  private val ollamaProperties: OllamaProperties,
   private val restTemplate: RestTemplate,
   private val tokenBucketManager: TokenBucketManager,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
-  fun translate(params: LLMParams): MtValueProvider.MtResult {
+  fun translate(params: LLMParams, config: LLMProperties.LLMProvider): MtValueProvider.MtResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
 
@@ -63,10 +61,10 @@ class OllamaApiService(
     }
 
     val requestBody = RequestBody(
-      model = ollamaProperties.model!!,
+      model = config.model!!,
       messages = messages,
-      keepAlive = ollamaProperties.keepAlive,
-      format = if (promptHasJsonInside && ollamaProperties.format == "json") "json" else null
+      keepAlive = config.keepAlive,
+      format = if (promptHasJsonInside && config.format == "json") "json" else null
     )
 
     val request = HttpEntity(requestBody, headers)
@@ -76,7 +74,7 @@ class OllamaApiService(
     val response: ResponseEntity<ResponseBody> = try {
       val (value, time) = measureTimedValue {
         restTemplate.exchange<ResponseBody>(
-          "${ollamaProperties.apiUrl}/api/chat",
+          "$ config.apiUrl}/api/chat",
           HttpMethod.POST,
           request,
         )

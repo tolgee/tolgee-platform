@@ -8,7 +8,7 @@ import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.logger
@@ -28,15 +28,14 @@ import kotlin.time.measureTimedValue
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class OpenaiApiService(
-  private val tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties,
   private val restTemplate: RestTemplate,
   private val tokenBucketManager: TokenBucketManager,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
-  fun translate(params: LLMParams): MtValueProvider.MtResult {
+  fun translate(params: LLMParams, config: LLMProperties.LLMProvider): MtValueProvider.MtResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
-    headers.set("api-key", tolgeeMachineTranslationProperties.apiKey)
+    headers.set("api-key", config.apiKey)
 
     val messages = mutableListOf<OpenaiMessage>()
     val content = mutableListOf<OpenaiMessageContent>()
@@ -81,7 +80,7 @@ class OpenaiApiService(
     val response: ResponseEntity<OpenaiResponse> = try {
       val (value, time) = measureTimedValue {
         restTemplate.exchange<OpenaiResponse>(
-          "${tolgeeMachineTranslationProperties.apiUrl}/openai/deployments/4o/chat/completions?api-version=2023-03-15-preview",
+          "${config.apiUrl}/openai/deployments/4o/chat/completions?api-version=2023-03-15-preview",
           HttpMethod.POST,
           request,
         )

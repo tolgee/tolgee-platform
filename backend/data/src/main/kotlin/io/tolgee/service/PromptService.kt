@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.jknack.handlebars.Handlebars
 import io.tolgee.component.fileStorage.FileStorage
+import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
+import io.tolgee.component.machineTranslation.providers.llm.OllamaApiService
+import io.tolgee.component.machineTranslation.providers.llm.OpenaiApiService
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptCreateDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
@@ -42,6 +46,9 @@ class PromptService(
   private val applicationContext: ApplicationContext,
   private val promptRepository: PromptRepository,
   private val organizationService: OrganizationService,
+  private val lLMProperties: LLMProperties,
+  private val openaiApiService: OpenaiApiService,
+  private val ollamaApiService: OllamaApiService,
 ) {
   fun getAllPaged(organizationId: Long, pageable: Pageable, search: String?): Page<Prompt> {
     return promptRepository.getAllPaged(organizationId, pageable, search)
@@ -60,6 +67,8 @@ class PromptService(
   fun deletePrompt(organizationId: Long, promptId: Long) {
     promptRepository.deleteById(promptId)
   }
+
+
 
   fun encodeScreenshot(number: Long, type: String): String {
     return "[[screenshot_${type}_$number]]"
@@ -255,6 +264,15 @@ class PromptService(
     }
 
     return result
+  }
+
+  fun runPrompt(params: LLMParams, promptTestDto: PromptTestDto): MtValueProvider.MtResult {
+    val providerConfig = lLMProperties.providers.get(promptTestDto.provider) ?: throw NotFoundException(Message.LLM_PROVIDER_NOT_FOUND)
+    return when (providerConfig.type) {
+      "openai" -> openaiApiService.translate(params, providerConfig)
+      "ollama" -> ollamaApiService.translate(params, providerConfig)
+      else -> throw NotFoundException(Message.UNKNOWN_LLM_PROVIER)
+    }
   }
 
   companion object {

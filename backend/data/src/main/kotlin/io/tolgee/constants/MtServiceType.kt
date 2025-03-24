@@ -12,7 +12,6 @@ import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslation
 import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationServiceProperties
-import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
 
 enum class MtServiceType(
   val propertyClass: Class<out MachineTranslationServiceProperties>,
