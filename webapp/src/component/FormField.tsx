@@ -1,4 +1,4 @@
-import { InputLabel, styled, Typography } from '@mui/material';
+import { InputLabel, styled, SxProps, Typography } from '@mui/material';
 import React from 'react';
 
 const StyledInputLabel = styled(InputLabel)`
@@ -12,9 +12,18 @@ export const StyledError = styled(Typography)`
   min-height: 1.25rem;
 `;
 
-export const FieldLabel: React.FC = ({ children }) => {
+type FieldLabelProps = {
+  sx?: SxProps;
+  className?: string;
+};
+
+export const FieldLabel: React.FC<FieldLabelProps> = ({
+  children,
+  sx,
+  className,
+}) => {
   return (
-    <StyledInputLabel data-cy="translation-field-label">
+    <StyledInputLabel data-cy="translation-field-label" {...{ sx, className }}>
       {children}
     </StyledInputLabel>
   );

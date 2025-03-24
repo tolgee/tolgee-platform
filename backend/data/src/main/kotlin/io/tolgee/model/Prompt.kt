@@ -4,14 +4,18 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 
 @Entity
-class Prompt() : AuditModel() {
+class Prompt(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long = 0L
+  var id: Long = 0L,
 
   @field:NotBlank
-  var name: String = ""
+  var name: String = "",
 
   @Column(length = 10000)
-  var template: String = ""
-}
+  var template: String = "",
+
+  @ManyToOne
+  @JoinColumn(name = "organization_id")
+  var organization: Organization
+) : AuditModel()

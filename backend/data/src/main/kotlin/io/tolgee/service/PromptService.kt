@@ -6,20 +6,26 @@ import com.github.jknack.handlebars.Handlebars
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.prompt.PromptCreateDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.PromptVariable
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Prompt
+import io.tolgee.repository.PromptRepository
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MetadataKey
 import io.tolgee.service.machineTranslation.MetadataProvider
 import io.tolgee.service.machineTranslation.MtTranslatorContext
+import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.ImageConverter
 import org.springframework.context.ApplicationContext
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 import kotlin.jvm.optionals.getOrNull
@@ -34,7 +40,26 @@ class PromptService(
   private val fileStorage: FileStorage,
   private val screenshotService: ScreenshotService,
   private val applicationContext: ApplicationContext,
+  private val promptRepository: PromptRepository,
+  private val organizationService: OrganizationService,
 ) {
+  fun getAllPaged(organizationId: Long, pageable: Pageable, search: String?): Page<Prompt> {
+    return promptRepository.getAllPaged(organizationId, pageable, search)
+  }
+
+  fun createPrompt(organizationId: Long, dto: PromptCreateDto): Prompt {
+    val prompt = Prompt(
+      name = dto.name,
+      template = dto.template,
+      organization = organizationService.get(organizationId),
+    )
+    promptRepository.save(prompt)
+    return prompt
+  }
+
+  fun deletePrompt(organizationId: Long, promptId: Long) {
+    promptRepository.deleteById(promptId)
+  }
 
   fun encodeScreenshot(number: Long, type: String): String {
     return "[[screenshot_${type}_$number]]"

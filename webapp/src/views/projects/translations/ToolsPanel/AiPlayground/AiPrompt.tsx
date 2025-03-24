@@ -118,12 +118,11 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
       </Box>
 
       <Box sx={{ margin: '8px', display: 'grid' }}>
-        <FieldLabel>Result</FieldLabel>
-
         <AiResult
           raw={promptLoadable.data?.result}
           json={jsonValue}
           isPlural={props.keyData?.keyIsPlural}
+          locale={props.language?.tag}
         />
 
         <Typography variant="caption" minHeight={20}>

@@ -1,8 +1,7 @@
 import { Box, Button, ButtonGroup, styled, TextField } from '@mui/material';
 import { TranslationVisual } from '../../translationVisual/TranslationVisual';
-import { useEffect, useState } from 'react';
-import { useTranslate } from '@tolgee/react';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import { FieldLabel } from 'tg.component/FormField';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
@@ -24,9 +23,10 @@ type Props = {
   raw: string | undefined;
   json: any | undefined;
   isPlural: boolean;
+  locale: string;
 };
 
-export const AiResult = ({ raw, json, isPlural }: Props) => {
+export const AiResult = ({ raw, json, isPlural, locale }: Props) => {
   const [_mode, setMode] = useLocalStorageState({
     key: 'aiPlaygroundResultMode',
     initial: 'translation',
@@ -36,7 +36,8 @@ export const AiResult = ({ raw, json, isPlural }: Props) => {
 
   return (
     <Box display="grid" gap={1}>
-      <Box display="flex" justifyContent="flex-end">
+      <Box display="flex" justifyContent="space-between" alignItems="end">
+        <FieldLabel sx={{ margin: 0 }}>Result</FieldLabel>
         <ButtonGroup disabled={!json?.output}>
           <Button
             size="small"
@@ -84,7 +85,7 @@ export const AiResult = ({ raw, json, isPlural }: Props) => {
           <TranslationVisual
             maxLines={100}
             text={json.output ?? ''}
-            locale={''}
+            locale={locale}
             isPlural={isPlural}
           />
           {json.contextDescription && (
