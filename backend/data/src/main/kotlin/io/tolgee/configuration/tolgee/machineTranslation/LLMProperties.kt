@@ -9,17 +9,21 @@ class LLMProperties {
 
   class LLMProvider {
     @DocProperty(description = "Provider name")
-    var name: String? = null
+    var name: String = "default"
     @DocProperty(description = "Provider type: openai or ollama")
     var type: String? = null
+    @DocProperty(description = "Provider priority")
+    var priority: String? = null
 
     // general
     var apiKey: String? = null
     var apiUrl: String? = null
-    var endpoint: String? = null
+    var model: String? = null
+
+    // openai only
+    var deployment: String? = null
 
     // ollama only
-    var model: String? = null
     var keepAlive: String? = null
     var format: String? = null
   }

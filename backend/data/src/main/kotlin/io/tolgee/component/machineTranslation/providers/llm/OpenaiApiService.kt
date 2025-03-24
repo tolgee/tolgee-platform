@@ -70,7 +70,8 @@ class OpenaiApiService(
 
     val requestBody = OpenaiRequestBody(
       messages = messages,
-      response_format = if (promptHasJsonInside) OpenaiResponseFormat() else null
+      response_format = if (promptHasJsonInside) OpenaiResponseFormat() else null,
+      model = config.model,
     )
 
     val request = HttpEntity(requestBody, headers)
@@ -80,7 +81,7 @@ class OpenaiApiService(
     val response: ResponseEntity<OpenaiResponse> = try {
       val (value, time) = measureTimedValue {
         restTemplate.exchange<OpenaiResponse>(
-          "${config.apiUrl}/openai/deployments/4o/chat/completions?api-version=2023-03-15-preview",
+          "${config.apiUrl}/${config.deployment}/completions?api-version=2023-03-15-preview",
           HttpMethod.POST,
           request,
         )
@@ -139,7 +140,8 @@ class OpenaiApiService(
       val stream: Boolean = false,
       val response_format: OpenaiResponseFormat? = null,
       val stop: Boolean? = null,
-      val messages: List<OpenaiMessage>
+      val messages: List<OpenaiMessage>,
+      val model: String?
     )
 
     class OpenaiMessage(
