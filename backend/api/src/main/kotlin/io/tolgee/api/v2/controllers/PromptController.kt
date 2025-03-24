@@ -27,7 +27,7 @@ class PromptController(
   private val promptService: PromptService,
   private val promptModelAssembler: PromptModelAssembler,
   private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
-  ) {
+) {
   @GetMapping("")
   @UseDefaultPermissions
   fun getAllPaged(

@@ -32,7 +32,10 @@ class OllamaApiService(
   private val tokenBucketManager: TokenBucketManager,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
-  fun translate(params: LLMParams, config: LLMProperties.LLMProvider): MtValueProvider.MtResult {
+  fun translate(
+    params: LLMParams,
+    config: LLMProperties.LLMProvider,
+  ): MtValueProvider.MtResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
 
@@ -42,52 +45,55 @@ class OllamaApiService(
 
     params.messages.forEach {
       if (
-        it.type == LLMParams.Companion.LlmMessageType.TEXT
-        && it.text != null
+        it.type == LLMParams.Companion.LlmMessageType.TEXT &&
+        it.text != null
       ) {
         messages.add(RequestMessage(role = "user", content = it.text))
         promptHasJsonInside = promptHasJsonInside || it.text.lowercase().contains("json")
       } else if (
-        it.type == LLMParams.Companion.LlmMessageType.IMAGE
-        && it.image != null
+        it.type == LLMParams.Companion.LlmMessageType.IMAGE &&
+        it.image != null
       ) {
         messages.add(
           RequestMessage(
             role = "user",
-            images = listOf("${Base64.encode(it.image)}")
-          )
+            images = listOf("${Base64.encode(it.image)}"),
+          ),
         )
       }
     }
 
-    val requestBody = RequestBody(
-      model = config.model!!,
-      messages = messages,
-      keepAlive = config.keepAlive,
-      format = if (promptHasJsonInside && config.format == "json") "json" else null
-    )
+    val requestBody =
+      RequestBody(
+        model = config.model!!,
+        messages = messages,
+        keepAlive = config.keepAlive,
+        format = if (promptHasJsonInside && config.format == "json") "json" else null,
+      )
 
     val request = HttpEntity(requestBody, headers)
 
     checkPositiveRateLimitTokens(params)
 
-    val response: ResponseEntity<ResponseBody> = try {
-      val (value, time) = measureTimedValue {
-        restTemplate.exchange<ResponseBody>(
-          "$ config.apiUrl}/api/chat",
-          HttpMethod.POST,
-          request,
-        )
+    val response: ResponseEntity<ResponseBody> =
+      try {
+        val (value, time) =
+          measureTimedValue {
+            restTemplate.exchange<ResponseBody>(
+              "$ config.apiUrl}/api/chat",
+              HttpMethod.POST,
+              request,
+            )
+          }
+        logger.debug("Translator request took ${time.inWholeMilliseconds} ms")
+        value
+      } catch (e: HttpClientErrorException.TooManyRequests) {
+        val data = e.parse()
+        emptyBucket(data)
+        val waitTime = data.retryAfter ?: 0
+        logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
+        throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
       }
-      logger.debug("Translator request took ${time.inWholeMilliseconds} ms")
-      value
-    } catch (e: HttpClientErrorException.TooManyRequests) {
-      val data = e.parse()
-      emptyBucket(data)
-      val waitTime = data.retryAfter ?: 0
-      logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
-      throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
-    }
 
     return MtValueProvider.MtResult(
       response.body?.message?.content ?: throw RuntimeException(response.toString()),
@@ -104,9 +110,10 @@ class OllamaApiService(
     try {
       tokenBucketManager.checkPositiveBalance(BUCKET_KEY)
     } catch (e: NotEnoughTokensException) {
-      logger.debug {
-        "Cannot translate using the translator for next " + "${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s. The bucket is empty."
-      }
+      logger.debug(
+        "Cannot translate using the translator for next " +
+          "${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s. The bucket is empty.",
+      )
       throw TranslationApiRateLimitException(e.refillAt, e)
     }
   }
@@ -140,7 +147,6 @@ class OllamaApiService(
       val images: List<String>? = null,
     )
 
-
     class ResponseBody(
       val model: String,
       val message: ResponseMessage,
@@ -148,9 +154,8 @@ class OllamaApiService(
 
     class ResponseMessage(
       val role: String,
-      val content: String
+      val content: String,
     )
-
   }
 
   class TooManyRequestsData(

@@ -23,7 +23,7 @@ class MetadataProvider(
   fun getCloseItems(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,
-    metadataKey: MetadataKey
+    metadataKey: MetadataKey,
   ): List<ExampleItem> {
     val closeKeyIds = metadataKey.keyId?.let { bigMetaService.getCloseKeyIds(it) }
 

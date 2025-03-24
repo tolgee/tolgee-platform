@@ -361,7 +361,7 @@ class ScreenshotService(
   }
 
   fun getScreenshotPath(filename: String): String {
-    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${filename}"
+    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/$filename"
   }
 
   fun saveAll(screenshots: List<Screenshot>) {

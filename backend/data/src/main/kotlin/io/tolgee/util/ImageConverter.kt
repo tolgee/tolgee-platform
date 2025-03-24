@@ -3,7 +3,6 @@ package io.tolgee.util
 import io.tolgee.model.Screenshot
 import java.awt.*
 import java.awt.image.BufferedImage
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import javax.imageio.IIOImage
@@ -11,7 +10,6 @@ import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import javax.imageio.ImageWriter
 import kotlin.math.floor
-import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 class ImageConverter(
@@ -121,7 +119,6 @@ class ImageConverter(
       val newImage = sourceBufferedImage
       val g = newImage.createGraphics()
 
-
       val scaling = sourceBufferedImage.width.toFloat() / screenshot.width.toFloat()
 
       // Set up the red frame properties
@@ -137,7 +134,7 @@ class ImageConverter(
               (it.x * scaling).toInt(),
               (it.y * scaling).toInt(),
               (it.width * scaling).toInt(),
-              (it.height * scaling).toInt()
+              (it.height * scaling).toInt(),
             )
           }
         }

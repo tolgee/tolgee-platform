@@ -51,31 +51,46 @@ class PromptService(
   private val openaiApiService: OpenaiApiService,
   private val ollamaApiService: OllamaApiService,
 ) {
-  fun getAllPaged(organizationId: Long, pageable: Pageable, search: String?): Page<Prompt> {
+  fun getAllPaged(
+    organizationId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<Prompt> {
     return promptRepository.getAllPaged(organizationId, pageable, search)
   }
 
-  fun createPrompt(organizationId: Long, dto: PromptCreateDto): Prompt {
-    val prompt = Prompt(
-      name = dto.name,
-      template = dto.template,
-      organization = organizationService.get(organizationId),
-    )
+  fun createPrompt(
+    organizationId: Long,
+    dto: PromptCreateDto,
+  ): Prompt {
+    val prompt =
+      Prompt(
+        name = dto.name,
+        template = dto.template,
+        organization = organizationService.get(organizationId),
+      )
     promptRepository.save(prompt)
     return prompt
   }
 
-  fun deletePrompt(organizationId: Long, promptId: Long) {
+  fun deletePrompt(
+    organizationId: Long,
+    promptId: Long,
+  ) {
     promptRepository.deleteById(promptId)
   }
 
-
-
-  fun encodeScreenshot(number: Long, type: String): String {
+  fun encodeScreenshot(
+    number: Long,
+    type: String,
+  ): String {
     return "[[screenshot_${type}_$number]]"
   }
 
-  fun encodeScreenshots(list: List<Any>, type: String): String {
+  fun encodeScreenshots(
+    list: List<Any>,
+    type: String,
+  ): String {
     return list
       .mapIndexed { index, _ -> encodeScreenshot(index.toLong(), type) }
       .joinToString("\n")
@@ -101,7 +116,6 @@ class PromptService(
     val sTranslation = translationService.find(key, sLanguage).getOrNull()
     val tTranslation = translationService.find(key, tLanguage).getOrNull()
 
-
     val variables = mutableListOf<PromptVariable>()
 
     variables.add(PromptVariable("source", sLanguage.name))
@@ -118,29 +132,29 @@ class PromptService(
     variables.add(
       PromptVariable(
         "allScreenshots",
-        encodeScreenshots(screenshots, "small")
-      )
+        encodeScreenshots(screenshots, "small"),
+      ),
     )
 
     variables.add(
       PromptVariable(
         "allScreenshotsFull",
-        encodeScreenshots(screenshots, "full")
-      )
+        encodeScreenshots(screenshots, "full"),
+      ),
     )
 
     variables.add(
       PromptVariable(
         "firstScreenshot",
-        encodeScreenshots(screenshots.take(1), "small")
-      )
+        encodeScreenshots(screenshots.take(1), "small"),
+      ),
     )
 
     variables.add(
       PromptVariable(
         "firstScreenshotFull",
-        encodeScreenshots(screenshots.take(1), "full")
-      )
+        encodeScreenshots(screenshots.take(1), "full"),
+      ),
     )
 
     variables.add(
@@ -150,17 +164,19 @@ class PromptService(
         lazyValue = {
           val context = MtTranslatorContext(projectId, applicationContext, false)
           val metadataProvider = MetadataProvider(context)
-          val closeItems = metadataProvider.getCloseItems(
-            sLanguage,
-            tLanguage,
-            MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id)
-          )
+          val closeItems =
+            metadataProvider.getCloseItems(
+              sLanguage,
+              tLanguage,
+              MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id),
+            )
           closeItems.joinToString("\n") {
             val mapper = ObjectMapper()
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
             mapper.writeValueAsString(it)
           }
-        })
+        },
+      ),
     )
 
     variables.add(
@@ -172,8 +188,8 @@ class PromptService(
    "output": <translation>,
    "contextDescription": <description>
 }
-```"""
-      )
+```""",
+      ),
     )
 
     return variables
@@ -183,20 +199,23 @@ class PromptService(
     val params = getVariables(data.projectId, data.keyId, data.targetLanguageId)
     val handlebars = Handlebars()
 
-    val mapParams = params.map {
-      it.name to it
-    }.toMap()
+    val mapParams =
+      params.map {
+        it.name to it
+      }.toMap()
 
     val lazyMap = LazyMap()
     lazyMap.setMap(mapParams)
-
 
     val template = handlebars.compileInline(data.template)
     val prompt = template.apply(lazyMap)
     return prompt
   }
 
-  fun getLlmMessages(prompt: String, data: PromptTestDto): List<LLMParams.Companion.LlmMessage> {
+  fun getLlmMessages(
+    prompt: String,
+    data: PromptTestDto,
+  ): List<LLMParams.Companion.LlmMessage> {
     val key = keyService.find(data.keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
 
     val pattern = Regex("\\[\\[screenshot_(full|small)_(\\d+)]]")
@@ -209,36 +228,38 @@ class PromptService(
         val size = match.groups[1]!!.value // full or small
         val number = match.groups[2]!!.value.toInt() // number
         val screenshot = key.keyScreenshotReferences[number].screenshot
-        val file = if (size === "full") {
-          screenshot.filename
-        } else {
-          screenshot.middleSizedFilename ?: screenshot.filename
-        }
+        val file =
+          if (size === "full") {
+            screenshot.filename
+          } else {
+            screenshot.middleSizedFilename ?: screenshot.filename
+          }
 
-
-        var image = fileStorage.readFile(
-          screenshotService.getScreenshotPath(file)
-        )
+        var image =
+          fileStorage.readFile(
+            screenshotService.getScreenshotPath(file),
+          )
 
         if (screenshot.keyScreenshotReferences.find { it.key.id == key.id } !== null) {
-          val converter = ImageConverter(
-            ByteArrayInputStream(
-              fileStorage.readFile(
-                screenshotService.getScreenshotPath(file)
-              )
+          val converter =
+            ImageConverter(
+              ByteArrayInputStream(
+                fileStorage.readFile(
+                  screenshotService.getScreenshotPath(file),
+                ),
+              ),
             )
-          )
           image = converter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
         }
 
         LLMParams.Companion.LlmMessage(
           type = LLMParams.Companion.LlmMessageType.IMAGE,
-          image = image
+          image = image,
         )
       } else {
         LLMParams.Companion.LlmMessage(
           type = LLMParams.Companion.LlmMessageType.TEXT,
-          text = it
+          text = it,
         )
       }
     }
@@ -267,9 +288,13 @@ class PromptService(
     return result
   }
 
-  fun runPrompt(params: LLMParams, promptTestDto: PromptTestDto): MtValueProvider.MtResult {
-    val providerConfig = lLMProperties.providers.find { it.name == promptTestDto.provider }
-      ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptTestDto.provider))
+  fun runPrompt(
+    params: LLMParams,
+    promptTestDto: PromptTestDto,
+  ): MtValueProvider.MtResult {
+    val providerConfig =
+      lLMProperties.providers.find { it.name == promptTestDto.provider }
+        ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptTestDto.provider))
     return when (providerConfig.type) {
       "openai" -> openaiApiService.translate(params, providerConfig)
       "ollama" -> ollamaApiService.translate(params, providerConfig)
@@ -280,6 +305,7 @@ class PromptService(
   companion object {
     class LazyMap : HashMap<String, Handlebars.SafeString>() {
       private lateinit var internalMap: Map<String, PromptVariable>
+
       fun setMap(map: Map<String, PromptVariable>) {
         internalMap = map
       }
@@ -292,4 +318,3 @@ class PromptService(
     }
   }
 }
-

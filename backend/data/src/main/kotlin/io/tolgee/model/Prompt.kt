@@ -8,14 +8,11 @@ class Prompt(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
-
   @field:NotBlank
   var name: String = "",
-
   @Column(length = 10000)
   var template: String = "",
-
   @ManyToOne
   @JoinColumn(name = "organization_id")
-  var organization: Organization
+  var organization: Organization,
 ) : AuditModel()

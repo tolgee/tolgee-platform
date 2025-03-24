@@ -32,7 +32,10 @@ class OpenaiApiService(
   private val tokenBucketManager: TokenBucketManager,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
-  fun translate(params: LLMParams, config: LLMProperties.LLMProvider): MtValueProvider.MtResult {
+  fun translate(
+    params: LLMParams,
+    config: LLMProperties.LLMProvider,
+  ): MtValueProvider.MtResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
     headers.set("api-key", config.apiKey)
@@ -44,57 +47,61 @@ class OpenaiApiService(
 
     params.messages.forEach {
       if (
-        it.type == LLMParams.Companion.LlmMessageType.TEXT
-        && it.text != null
+        it.type == LLMParams.Companion.LlmMessageType.TEXT &&
+        it.text != null
       ) {
         content.add(OpenaiMessageContent(type = "text", text = it.text))
         promptHasJsonInside = promptHasJsonInside || it.text.lowercase().contains("json")
       } else if (
-        it.type == LLMParams.Companion.LlmMessageType.IMAGE
-        && it.image != null
+        it.type == LLMParams.Companion.LlmMessageType.IMAGE &&
+        it.image != null
       ) {
         content.add(
           OpenaiMessageContent(
             type = "image_url",
             image_url = OpenaiImageUrl("data:image/jpeg;base64,${Base64.encode(it.image)}"),
-          )
+          ),
         )
       }
     }
 
     messages.add(
       OpenaiMessage(
-        role = "user", content = content
-      )
+        role = "user",
+        content = content,
+      ),
     )
 
-    val requestBody = OpenaiRequestBody(
-      messages = messages,
-      response_format = if (promptHasJsonInside) OpenaiResponseFormat() else null,
-      model = config.model,
-    )
+    val requestBody =
+      OpenaiRequestBody(
+        messages = messages,
+        response_format = if (promptHasJsonInside) OpenaiResponseFormat() else null,
+        model = config.model,
+      )
 
     val request = HttpEntity(requestBody, headers)
 
     checkPositiveRateLimitTokens(params)
 
-    val response: ResponseEntity<OpenaiResponse> = try {
-      val (value, time) = measureTimedValue {
-        restTemplate.exchange<OpenaiResponse>(
-          "${config.apiUrl}/${config.deployment}/completions?api-version=2023-03-15-preview",
-          HttpMethod.POST,
-          request,
-        )
+    val response: ResponseEntity<OpenaiResponse> =
+      try {
+        val (value, time) =
+          measureTimedValue {
+            restTemplate.exchange<OpenaiResponse>(
+              "${config.apiUrl}/${config.deployment}/completions?api-version=2023-03-15-preview",
+              HttpMethod.POST,
+              request,
+            )
+          }
+        logger.debug("Translator request took ${time.inWholeMilliseconds} ms")
+        value
+      } catch (e: HttpClientErrorException.TooManyRequests) {
+        val data = e.parse()
+        emptyBucket(data)
+        val waitTime = data.retryAfter ?: 0
+        logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
+        throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
       }
-      logger.debug("Translator request took ${time.inWholeMilliseconds} ms")
-      value
-    } catch (e: HttpClientErrorException.TooManyRequests) {
-      val data = e.parse()
-      emptyBucket(data)
-      val waitTime = data.retryAfter ?: 0
-      logger.debug("Translator thrown TooManyRequests exception. Waiting for ${waitTime}s")
-      throw TranslationApiRateLimitException(currentDateProvider.date.time + (waitTime * 1000), e)
-    }
 
     return MtValueProvider.MtResult(
       response.body?.choices?.first()?.message?.content ?: throw RuntimeException(response.toString()),
@@ -111,9 +118,10 @@ class OpenaiApiService(
     try {
       tokenBucketManager.checkPositiveBalance(BUCKET_KEY)
     } catch (e: NotEnoughTokensException) {
-      logger.debug {
-        "Cannot translate using the translator for next " + "${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s. The bucket is empty."
-      }
+      logger.debug(
+        "Cannot translate using the translator for next " +
+          "${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s. The bucket is empty.",
+      )
       throw TranslationApiRateLimitException(e.refillAt, e)
     }
   }
@@ -141,7 +149,7 @@ class OpenaiApiService(
       val response_format: OpenaiResponseFormat? = null,
       val stop: Boolean? = null,
       val messages: List<OpenaiMessage>,
-      val model: String?
+      val model: String?,
     )
 
     class OpenaiMessage(
@@ -160,20 +168,20 @@ class OpenaiApiService(
     )
 
     class OpenaiResponseFormat(
-      val type: String = "json_object"
+      val type: String = "json_object",
     )
 
     class OpenaiResponse(
       val choices: List<OpenAiResponseChoice>,
-      val usage: OpenaiUsage
+      val usage: OpenaiUsage,
     )
 
     class OpenAiResponseChoice(
-      val message: OpenAiResponseMessage
+      val message: OpenAiResponseMessage,
     )
 
     class OpenAiResponseMessage(
-      val content: String
+      val content: String,
     )
 
     class OpenaiUsage(
@@ -181,12 +189,11 @@ class OpenaiApiService(
       val completion_tokens: Int,
       val total_tokens: Int,
       val prompt_tokens_details: OpenaiPromptTokenDetails,
-      val completion_tokens_details: OpenaiCompletionTokenDetails
-
+      val completion_tokens_details: OpenaiCompletionTokenDetails,
     )
 
     class OpenaiPromptTokenDetails(
-      val cached_tokens: Int
+      val cached_tokens: Int,
     )
 
     class OpenaiCompletionTokenDetails(

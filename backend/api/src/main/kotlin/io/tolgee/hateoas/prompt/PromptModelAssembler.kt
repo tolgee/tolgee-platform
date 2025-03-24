@@ -6,15 +6,16 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class PromptModelAssembler: RepresentationModelAssemblerSupport<Prompt, PromptModel>(
-  PromptController::class.java, PromptModel::class.java,
+class PromptModelAssembler : RepresentationModelAssemblerSupport<Prompt, PromptModel>(
+  PromptController::class.java,
+  PromptModel::class.java,
 ) {
   override fun toModel(entity: Prompt): PromptModel {
     return PromptModel(
       id = entity.id,
       name = entity.name,
       template = entity.template,
-      organizationId = entity.organization.id
+      organizationId = entity.organization.id,
     )
   }
 }

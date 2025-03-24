@@ -5,7 +5,6 @@ import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
-import io.tolgee.constants.MtServiceType
 import io.tolgee.model.batch.params.MachineTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService

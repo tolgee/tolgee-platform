@@ -8,7 +8,6 @@ import {
   ClockRewind,
   Keyboard02,
   MessageTextSquare02,
-  Stars01,
 } from '@untitled-ui/icons-react';
 import { PanelConfig } from './common/types';
 import { KeyboardShortcuts } from './panels/KeyboardShortcuts/KeyboardShortcuts';

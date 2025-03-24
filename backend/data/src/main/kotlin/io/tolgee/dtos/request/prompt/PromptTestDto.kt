@@ -1,9 +1,9 @@
 package io.tolgee.dtos.request.prompt
 
-data class PromptTestDto (
+data class PromptTestDto(
   val template: String,
   var projectId: Long,
   var keyId: Long,
   var targetLanguageId: Long,
-  var provider: String
+  var provider: String,
 )
