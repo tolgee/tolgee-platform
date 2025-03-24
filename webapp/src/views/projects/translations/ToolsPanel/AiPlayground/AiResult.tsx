@@ -80,7 +80,7 @@ export const AiResult = ({ raw, json, isPlural, locale }: Props) => {
           borderRadius="4px"
           padding="4px 8px 8px 8px"
           display="grid"
-          gap={2}
+          gap={1}
         >
           <TranslationVisual
             maxLines={100}
