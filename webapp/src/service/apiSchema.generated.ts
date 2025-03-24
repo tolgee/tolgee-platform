@@ -199,6 +199,19 @@ export interface paths {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
     get: operations["getAllWithStatistics_2"];
   };
+  "/v2/organizations/{organizationId}/prompts": {
+    get: operations["getAllPaged"];
+    post: operations["createPrompt"];
+  };
+  "/v2/organizations/{organizationId}/prompts/get-variables": {
+    get: operations["variables"];
+  };
+  "/v2/organizations/{organizationId}/prompts/run": {
+    post: operations["run"];
+  };
+  "/v2/organizations/{organizationId}/prompts/{promptId}": {
+    delete: operations["deletePrompt"];
+  };
   "/v2/organizations/{organizationId}/set-base-permissions": {
     /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
     put: operations["setBasePermissions"];
@@ -357,7 +370,7 @@ export interface paths {
     post: operations["create_5"];
   };
   "/v2/projects/{projectId}/content-storages/test": {
-    post: operations["test_2"];
+    post: operations["test_1"];
   };
   "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
     get: operations["get_8"];
@@ -774,12 +787,6 @@ export interface paths {
   };
   "/v2/projects/{projectId}/webhook-configs/{id}/test": {
     /** Sends a test request to the webhook */
-    post: operations["test_1"];
-  };
-  "/v2/prompts/get-variables": {
-    get: operations["variables"];
-  };
-  "/v2/prompts/test": {
     post: operations["test"];
   };
   "/v2/public/business-events/identify": {
@@ -2120,7 +2127,9 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "llm_provider_not_found"
+        | "unknown_llm_provier";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2258,6 +2267,7 @@ export interface components {
       supportArrays: boolean;
       zip: boolean;
     };
+    Function0String: { [key: string]: unknown };
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
@@ -3301,6 +3311,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelPromptModel: {
+      _embedded?: {
+        prompt?: components["schemas"]["PromptModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelSimpleUserAccountModel: {
       _embedded?: {
         users?: components["schemas"]["SimpleUserAccountModel"][];
@@ -3823,6 +3839,18 @@ export interface components {
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };
+    PromptCreateDto: {
+      name: string;
+      template: string;
+    };
+    PromptModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      /** Format: int64 */
+      organizationId: number;
+      template: string;
+    };
     PromptResponseDto: {
       prompt: string;
       result: string;
@@ -3833,11 +3861,13 @@ export interface components {
       keyId: number;
       /** Format: int64 */
       projectId: number;
+      provider: string;
       /** Format: int64 */
       targetLanguageId: number;
       template: string;
     };
     PromptVariable: {
+      lazyValue?: components["schemas"]["Function0String"];
       name: string;
       value: string;
     };
@@ -4643,7 +4673,9 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "llm_provider_not_found"
+        | "unknown_llm_provier";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -7985,6 +8017,264 @@ export interface operations {
       };
     };
   };
+  getAllPaged: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPromptModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createPrompt: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateDto"];
+      };
+    };
+  };
+  variables: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        projectId: number;
+        keyId: number;
+        targetLanguageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["VariablesResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  run: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptResponseDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptTestDto"];
+      };
+    };
+  };
+  deletePrompt: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        promptId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Set default granular (scope-based) permissions for organization users, who don't have direct project permissions set. */
   setBasePermissions: {
     parameters: {
@@ -10576,7 +10866,7 @@ export interface operations {
       };
     };
   };
-  test_2: {
+  test_1: {
     parameters: {
       path: {
         projectId: number;
@@ -14048,6 +14338,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        search?: string;
       };
       path: {
         projectId: number;
@@ -17694,7 +17985,7 @@ export interface operations {
     };
   };
   /** Sends a test request to the webhook */
-  test_1: {
+  test: {
     parameters: {
       path: {
         id: number;
@@ -17739,102 +18030,6 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
-      };
-    };
-  };
-  variables: {
-    parameters: {
-      query: {
-        projectId: number;
-        keyId: number;
-        targetLanguageId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["VariablesResponse"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  test: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PromptResponseDto"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptTestDto"];
       };
     };
   };

@@ -2,8 +2,6 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
-import io.tolgee.component.machineTranslation.providers.llm.OllamaApiService
-import io.tolgee.component.machineTranslation.providers.llm.OpenaiApiService
 import io.tolgee.dtos.request.prompt.PromptCreateDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.VariablesResponse
@@ -12,9 +10,6 @@ import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.hateoas.prompt.PromptModelAssembler
 import io.tolgee.model.Prompt
 import io.tolgee.openApiDocs.OpenApiOrderExtension
-import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AuthTokenType
-import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.PromptService
 import jakarta.validation.Valid

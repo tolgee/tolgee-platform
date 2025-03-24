@@ -13,6 +13,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptCreateDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.PromptVariable
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
 import io.tolgee.repository.PromptRepository
@@ -267,11 +268,12 @@ class PromptService(
   }
 
   fun runPrompt(params: LLMParams, promptTestDto: PromptTestDto): MtValueProvider.MtResult {
-    val providerConfig = lLMProperties.providers.get(promptTestDto.provider) ?: throw NotFoundException(Message.LLM_PROVIDER_NOT_FOUND)
+    val providerConfig = lLMProperties.providers.find { it.name == promptTestDto.provider }
+      ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptTestDto.provider))
     return when (providerConfig.type) {
       "openai" -> openaiApiService.translate(params, providerConfig)
       "ollama" -> ollamaApiService.translate(params, providerConfig)
-      else -> throw NotFoundException(Message.UNKNOWN_LLM_PROVIER)
+      else -> throw BadRequestException(Message.UNKNOWN_LLM_PROVIDER_TYPE, listOf(providerConfig.type))
     }
   }
 

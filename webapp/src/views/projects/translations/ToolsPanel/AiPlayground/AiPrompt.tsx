@@ -34,15 +34,18 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
   });
 
   const promptLoadable = useApiMutation({
-    url: '/v2/prompts/test',
+    url: '/v2/organizations/{organizationId}/prompts/run',
     method: 'post',
   });
 
   const cellSelected = Boolean(props.keyData && props.language);
 
   const promptVariables = useApiQuery({
-    url: '/v2/prompts/get-variables',
+    url: '/v2/organizations/{organizationId}/prompts/get-variables',
     method: 'get',
+    path: {
+      organizationId: props.project.organizationOwner!.id,
+    },
     query: {
       projectId: props.project.id,
       keyId: props.keyData?.keyId,
@@ -58,12 +61,16 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
       return;
     }
     promptLoadable.mutate({
+      path: {
+        organizationId: props.project.organizationOwner!.id,
+      },
       content: {
         'application/json': {
           template: value,
           keyId: props.keyData.keyId,
           targetLanguageId: props.language.id,
           projectId: props.project.id,
+          provider: 'default',
         },
       },
     });

@@ -5,9 +5,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.llm")
 class LLMProperties {
-  lateinit var providers: Map<String, LLMProvider>
+  var providers: MutableList<LLMProvider> = mutableListOf()
 
   class LLMProvider {
+    @DocProperty(description = "Provider name")
+    var name: String? = null
     @DocProperty(description = "Provider type: openai or ollama")
     var type: String? = null
 
