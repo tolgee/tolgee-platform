@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.jknack.handlebars.Handlebars
 import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
+import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.PromptVariable
@@ -134,8 +134,8 @@ class PromptService(
         """Return result in json
 ```
 {
-   "translation": <translation>,
-   "description": <description>
+   "output": <translation>,
+   "contextDescription": <description>
 }
 ```"""
       )

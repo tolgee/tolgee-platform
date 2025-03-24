@@ -10,6 +10,7 @@ import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { FieldLabel } from 'tg.component/FormField';
 import { PanelContentProps } from '../common/types';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import { AiResult } from './AiResult';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
@@ -68,15 +69,11 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     });
   }
 
-  const formattedResult = useMemo(() => {
+  const jsonValue = useMemo(() => {
     try {
-      return JSON.stringify(
-        JSON.parse(promptLoadable.data?.result ?? ''),
-        null,
-        2
-      );
+      return JSON.parse(promptLoadable.data?.result ?? '');
     } catch (e) {
-      return promptLoadable.data?.result;
+      return undefined;
     }
   }, [promptLoadable.data?.result]);
 
@@ -122,20 +119,11 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
 
       <Box sx={{ margin: '8px', display: 'grid' }}>
         <FieldLabel>Result</FieldLabel>
-        <StyledTextField
-          multiline
-          minRows={3}
-          variant="outlined"
-          size="small"
-          value={formattedResult}
-          onChange={(e) => e.preventDefault()}
-          data-cy="translations-comments-output"
-          InputProps={{
-            sx: {
-              padding: '8px 4px 8px 12px',
-              borderRadius: '8px',
-            },
-          }}
+
+        <AiResult
+          raw={promptLoadable.data?.result}
+          json={jsonValue}
+          isPlural={props.keyData?.keyIsPlural}
         />
 
         <Typography variant="caption" minHeight={20}>

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
+import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

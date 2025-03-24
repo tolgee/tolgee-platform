@@ -3,7 +3,7 @@ package io.tolgee.ee
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
+import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.ee.model.EeSubscription

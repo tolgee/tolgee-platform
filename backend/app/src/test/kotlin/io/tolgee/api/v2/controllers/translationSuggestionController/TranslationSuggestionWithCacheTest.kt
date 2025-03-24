@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
+import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto

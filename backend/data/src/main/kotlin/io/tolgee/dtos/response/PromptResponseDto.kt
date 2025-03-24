@@ -1,6 +1,6 @@
 package io.tolgee.dtos.response
 
-import io.tolgee.component.machineTranslation.providers.tolgee.OpenaiApiService
+import io.tolgee.component.machineTranslation.providers.llm.OpenaiApiService
 
 data class PromptResponseDto(
   val prompt: String,

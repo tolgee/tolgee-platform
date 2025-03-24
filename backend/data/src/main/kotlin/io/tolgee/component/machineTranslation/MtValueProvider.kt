@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation
 
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
-import io.tolgee.component.machineTranslation.providers.tolgee.OpenaiApiService
+import io.tolgee.component.machineTranslation.providers.llm.OpenaiApiService
 
 interface MtValueProvider {
   val isEnabled: Boolean

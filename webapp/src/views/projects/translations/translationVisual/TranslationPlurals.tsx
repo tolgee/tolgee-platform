@@ -56,7 +56,7 @@ const StyledVariantContent = styled('div')`
 `;
 
 type RenderProps = {
-  content: string;
+  content: string | undefined;
   variant: string | undefined;
   locale: string;
   exampleValue?: number;

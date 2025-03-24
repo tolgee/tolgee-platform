@@ -9,7 +9,7 @@ import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
-import io.tolgee.component.machineTranslation.providers.tolgee.LLMParams
+import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message

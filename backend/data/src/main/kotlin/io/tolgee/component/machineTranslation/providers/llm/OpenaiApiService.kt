@@ -1,4 +1,4 @@
-package io.tolgee.component.machineTranslation.providers.tolgee
+package io.tolgee.component.machineTranslation.providers.llm
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

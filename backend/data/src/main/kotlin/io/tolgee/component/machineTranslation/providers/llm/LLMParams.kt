@@ -1,4 +1,4 @@
-package io.tolgee.component.machineTranslation.providers.tolgee
+package io.tolgee.component.machineTranslation.providers.llm
 
 class LLMParams(
   val messages: List<LlmMessage>,
