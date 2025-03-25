@@ -2,12 +2,12 @@ package io.tolgee.ee
 
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
-import io.tolgee.ee.api.v2.hateoas.model.PlanPricesModel
-import io.tolgee.ee.api.v2.hateoas.model.PrepareSetEeLicenceKeyModel
-import io.tolgee.ee.api.v2.hateoas.model.SelfHostedEePlanModel
-import io.tolgee.ee.api.v2.hateoas.model.SelfHostedEeSubscriptionModel
-import io.tolgee.ee.api.v2.hateoas.model.uasge.AverageProportionalUsageItemModel
-import io.tolgee.ee.api.v2.hateoas.model.uasge.UsageModel
+import io.tolgee.hateoas.ee.PlanPricesModel
+import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
+import io.tolgee.hateoas.ee.SelfHostedEePlanModel
+import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
+import io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel
+import io.tolgee.hateoas.ee.uasge.UsageModel
 import io.tolgee.fixtures.HttpClientMocker
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component

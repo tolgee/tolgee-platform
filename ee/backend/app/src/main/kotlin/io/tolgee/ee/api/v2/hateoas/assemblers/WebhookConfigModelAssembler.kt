@@ -1,7 +1,7 @@
 package io.tolgee.ee.api.v2.hateoas.assemblers
 
 import io.tolgee.ee.api.v2.controllers.WebhookConfigController
-import io.tolgee.ee.api.v2.hateoas.model.webhooks.WebhookConfigModel
+import io.tolgee.hateoas.ee.webhooks.WebhookConfigModel
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
