@@ -8,7 +8,7 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.WebhookConfigRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.WebhookConfigModelAssembler
-import io.tolgee.ee.api.v2.hateoas.model.webhooks.WebhookConfigModel
+import io.tolgee.hateoas.ee.webhooks.WebhookConfigModel
 import io.tolgee.ee.data.WebhookTestResponse
 import io.tolgee.ee.service.WebhookConfigService
 import io.tolgee.model.enums.Scope

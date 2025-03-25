@@ -10,8 +10,8 @@ import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
-import io.tolgee.ee.api.v2.hateoas.model.PrepareSetEeLicenceKeyModel
-import io.tolgee.ee.api.v2.hateoas.model.SelfHostedEeSubscriptionModel
+import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
+import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.ee.data.GetMySubscriptionDto
 import io.tolgee.ee.data.PrepareSetLicenseKeyDto
 import io.tolgee.ee.data.ReleaseKeyDto
