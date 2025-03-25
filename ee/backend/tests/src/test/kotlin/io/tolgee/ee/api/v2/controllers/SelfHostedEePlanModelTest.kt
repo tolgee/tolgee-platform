@@ -3,8 +3,8 @@ package io.tolgee.ee.api.v2.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.constants.Feature
-import io.tolgee.ee.api.v2.hateoas.model.PlanPricesModel
-import io.tolgee.ee.api.v2.hateoas.model.SelfHostedEePlanModel
+import io.tolgee.hateoas.ee.PlanPricesModel
+import io.tolgee.hateoas.ee.SelfHostedEePlanModel
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

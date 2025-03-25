@@ -9,7 +9,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.dtos.sso.toDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
-import io.tolgee.ee.api.v2.hateoas.model.SsoTenantModel
+import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.ee.data.CreateProviderRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException

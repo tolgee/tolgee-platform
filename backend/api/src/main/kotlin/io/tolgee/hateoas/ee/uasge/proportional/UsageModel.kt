@@ -1,8 +1,12 @@
 <<<<<<<< HEAD:backend/api/src/main/kotlin/io/tolgee/hateoas/ee/uasge/proportional/UsageModel.kt
+<<<<<<<< HEAD:backend/api/src/main/kotlin/io/tolgee/hateoas/ee/uasge/proportional/UsageModel.kt
 package io.tolgee.hateoas.ee.uasge.proportional
 ========
 package io.tolgee.ee.api.v2.hateoas.model.uasge
 >>>>>>>> 795c0acf1 (feat: wip: initial work on glossaries - db schema, ui prototyping, refractoring;):ee/backend/app/src/main/kotlin/io/tolgee/ee/api/v2/hateoas/model/uasge/UsageModel.kt
+========
+package io.tolgee.hateoas.ee.uasge
+>>>>>>>> 1a95c2a89 (revert some of the refractoring):backend/api/src/main/kotlin/io/tolgee/hateoas/ee/uasge/UsageModel.kt
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
