@@ -1,6 +1,6 @@
-package io.tolgee.ee.api.v2.hateoas.model
+package io.tolgee.hateoas.ee
 
-import io.tolgee.ee.api.v2.hateoas.model.uasge.UsageModel
+import io.tolgee.hateoas.ee.uasge.UsageModel
 import org.springframework.hateoas.RepresentationModel
 
 @Suppress("unused")

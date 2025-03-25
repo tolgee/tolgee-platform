@@ -1,10 +1,9 @@
-package io.tolgee.ee.api.v2.hateoas.model
+package io.tolgee.hateoas.ee
 
 import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import io.tolgee.constants.Feature
-import io.tolgee.hateoas.ee.PlanIncludedUsageModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
