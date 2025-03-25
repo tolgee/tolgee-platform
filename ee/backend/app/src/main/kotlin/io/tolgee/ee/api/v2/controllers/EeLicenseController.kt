@@ -3,9 +3,9 @@ package io.tolgee.ee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.ee.api.v2.hateoas.assemblers.EeSubscriptionModelAssembler
-import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.ee.data.SetLicenseKeyDto
 import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.eeSubscription.EeSubscriptionModel
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.authentication.RequiresSuperAuthentication
