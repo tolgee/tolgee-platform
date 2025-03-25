@@ -1,11 +1,11 @@
 package io.tolgee.ee.api.v2.hateoas.assemblers
 
-import io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel
-import io.tolgee.hateoas.ee.uasge.SumUsageItemModel
-import io.tolgee.hateoas.ee.uasge.UsageModel
 import io.tolgee.ee.data.ProportionalUsagePeriod
 import io.tolgee.ee.data.SumUsageItem
 import io.tolgee.ee.data.UsageData
+import io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel
+import io.tolgee.hateoas.ee.uasge.SumUsageItemModel
+import io.tolgee.hateoas.ee.uasge.UsageModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
