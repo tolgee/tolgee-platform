@@ -1,4 +1,4 @@
-package io.tolgee.ee.api.v2.hateoas.model.uasge
+package io.tolgee.hateoas.ee.uasge
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
