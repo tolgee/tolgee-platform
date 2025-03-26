@@ -30,7 +30,7 @@ class LanguageStatsModelAssembler :
       untranslatedKeyCount = stats.untranslatedKeys,
       untranslatedWordCount = stats.untranslatedWords,
       untranslatedPercentage = stats.untranslatedPercentage,
-      translationsUpdatedAt = stats.translationsUpdatedAt,
+      lastModified = stats.lastModified,
     )
   }
 }
