@@ -8,7 +8,7 @@ import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.logger
@@ -34,7 +34,7 @@ class OllamaApiService(
 ) : Logging {
   fun translate(
     params: LLMParams,
-    config: LLMProperties.LLMProvider,
+    config: LLMProviderInterface,
   ): MtValueProvider.MtResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
@@ -80,7 +80,7 @@ class OllamaApiService(
         val (value, time) =
           measureTimedValue {
             restTemplate.exchange<ResponseBody>(
-              "$ config.apiUrl}/api/chat",
+              "${config.apiUrl}/api/chat",
               HttpMethod.POST,
               request,
             )

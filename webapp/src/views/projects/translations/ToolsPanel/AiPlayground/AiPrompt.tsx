@@ -1,5 +1,13 @@
 import { useMemo } from 'react';
-import { Box, IconButton, styled, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  MenuItem,
+  Select,
+  styled,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { ChevronDown, ChevronUp, Send03 } from '@untitled-ui/icons-react';
 
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -32,22 +40,33 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     key: 'aiPlaygroundExpanded',
     initial: undefined,
   });
+  const [provider, setProvider] = useLocalStorageState<string>({
+    key: 'aiPlaygroundProvider',
+    initial: 'default',
+  });
 
   const promptLoadable = useApiMutation({
-    url: '/v2/organizations/{organizationId}/prompts/run',
+    url: '/v2/projects/{projectId}/prompts/run',
     method: 'post',
+  });
+
+  const providersLoadable = useApiQuery({
+    url: '/v2/organizations/{organizationId}/llm-providers/all-available',
+    method: 'get',
+    path: {
+      organizationId: props.project.organizationOwner!.id,
+    },
   });
 
   const cellSelected = Boolean(props.keyData && props.language);
 
   const promptVariables = useApiQuery({
-    url: '/v2/organizations/{organizationId}/prompts/get-variables',
+    url: '/v2/projects/{projectId}/prompts/get-variables',
     method: 'get',
     path: {
-      organizationId: props.project.organizationOwner!.id,
+      projectId: props.project.id,
     },
     query: {
-      projectId: props.project.id,
       keyId: props.keyData?.keyId,
       targetLanguageId: props.language?.id,
     },
@@ -62,15 +81,14 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     }
     promptLoadable.mutate({
       path: {
-        organizationId: props.project.organizationOwner!.id,
+        projectId: props.project.id,
       },
       content: {
         'application/json': {
           template: value,
           keyId: props.keyData.keyId,
           targetLanguageId: props.language.id,
-          projectId: props.project.id,
-          provider: 'default',
+          provider,
         },
       },
     });
@@ -109,7 +127,20 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
         </EditorWrapper>
       </Box>
 
-      <Box sx={{ margin: '8px', display: 'flex', justifyContent: 'end' }}>
+      <Box
+        sx={{ margin: '8px', display: 'flex', justifyContent: 'space-between' }}
+      >
+        <Select
+          size="small"
+          value={provider}
+          onChange={(e) => setProvider(e.target.value)}
+        >
+          {providersLoadable.data?.items.map((i) => (
+            <MenuItem key={i.name} value={i.name}>
+              {i.name}
+            </MenuItem>
+          ))}
+        </Select>
         <IconButton
           color="primary"
           onClick={handleTestPrompt}

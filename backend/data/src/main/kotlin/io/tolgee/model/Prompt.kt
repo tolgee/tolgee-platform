@@ -12,7 +12,9 @@ class Prompt(
   var name: String = "",
   @Column(length = 10000)
   var template: String = "",
+  @Column
+  var providerName: String = "",
   @ManyToOne
-  @JoinColumn(name = "organization_id")
-  var organization: Organization,
+  @JoinColumn(name = "project_id")
+  var project: Project,
 ) : AuditModel()

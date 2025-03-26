@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -15,7 +16,7 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
     """
     from Prompt p
     where
-      p.organization.id = :organizationId
+      p.project.id = :projectId
       and (
         :search is null or (lower(p.name) like lower(concat('%', cast(:search as string), '%'))
         or lower(p.name) like lower(concat('%', cast(:search as string),'%')))
@@ -23,8 +24,22 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
     """,
   )
   fun getAllPaged(
-    organizationId: Long,
+    projectId: Long,
     pageable: Pageable,
     search: String?,
   ): Page<Prompt>
+
+  @Modifying
+  @Query(
+    """
+    delete from Prompt p
+    where
+      p.project.id = :projectId
+      and p.id = :promptId
+    """,
+  )
+  fun deletePrompt(
+    projectId: Long,
+    promptId: Long,
+  )
 }

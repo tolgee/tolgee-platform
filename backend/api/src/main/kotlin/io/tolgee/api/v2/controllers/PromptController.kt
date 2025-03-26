@@ -10,6 +10,7 @@ import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.hateoas.prompt.PromptModelAssembler
 import io.tolgee.model.Prompt
 import io.tolgee.openApiDocs.OpenApiOrderExtension
+import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.PromptService
 import jakarta.validation.Valid
@@ -21,50 +22,52 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/prompts"])
+@RequestMapping(
+  value = [
+    "/v2/projects/{projectId}/prompts",
+    "/v2/projects/prompts",
+  ],
+)
 @OpenApiOrderExtension(6)
 class PromptController(
   private val promptService: PromptService,
   private val promptModelAssembler: PromptModelAssembler,
   private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
+  private val projectHolder: ProjectHolder,
 ) {
   @GetMapping("")
   @UseDefaultPermissions
   fun getAllPaged(
     @ParameterObject pageable: Pageable,
-    @PathVariable organizationId: Long,
     @RequestParam search: String?,
   ): PagedModel<PromptModel> {
-    val result = promptService.getAllPaged(organizationId, pageable, search)
+    val result = promptService.getAllPaged(projectHolder.project.id, pageable, search)
     return arrayResourcesAssembler.toModel(result, promptModelAssembler)
   }
 
   @PostMapping("")
   @UseDefaultPermissions
   fun createPrompt(
-    @PathVariable organizationId: Long,
     @RequestBody @Valid dto: PromptCreateDto,
   ): PromptModel {
-    val result = promptService.createPrompt(organizationId, dto)
+    val result = promptService.createPrompt(projectHolder.project.id, dto)
     return promptModelAssembler.toModel(result)
   }
 
   @DeleteMapping("/{promptId}")
   @UseDefaultPermissions
   fun deletePrompt(
-    @PathVariable organizationId: Long,
     @RequestParam promptId: Long,
   ) {
-    promptService.deletePrompt(organizationId, promptId)
+    promptService.deletePrompt(projectHolder.project.id, promptId)
   }
 
   @PostMapping("run")
   @UseDefaultPermissions
   fun run(
-    @PathVariable organizationId: Long,
     @Valid @RequestBody promptTestDto: PromptTestDto,
   ): PromptResponseDto {
-    val prompt = promptService.getPrompt(promptTestDto)
+    val prompt = promptService.getPrompt(projectHolder.project.id, promptTestDto)
     val messages = promptService.getLlmMessages(prompt, promptTestDto)
     val response = promptService.runPrompt(LLMParams(messages), promptTestDto)
     return PromptResponseDto(
@@ -78,11 +81,9 @@ class PromptController(
   @Operation(summary = "Get variables")
   @UseDefaultPermissions
   fun variables(
-    @PathVariable organizationId: Long,
-    @RequestParam projectId: Long,
     @RequestParam keyId: Long,
     @RequestParam targetLanguageId: Long,
   ): VariablesResponse {
-    return VariablesResponse(promptService.getVariables(projectId, keyId, targetLanguageId))
+    return VariablesResponse(promptService.getVariables(projectHolder.project.id, keyId, targetLanguageId))
   }
 }

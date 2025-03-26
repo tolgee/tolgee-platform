@@ -15,7 +15,7 @@ class PromptModelAssembler : RepresentationModelAssemblerSupport<Prompt, PromptM
       id = entity.id,
       name = entity.name,
       template = entity.template,
-      organizationId = entity.organization.id,
+      projectId = entity.project.id,
     )
   }
 }

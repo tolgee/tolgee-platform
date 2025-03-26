@@ -8,7 +8,6 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.component.machineTranslation.providers.llm.OllamaApiService
 import io.tolgee.component.machineTranslation.providers.llm.OpenaiApiService
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptCreateDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
@@ -16,14 +15,15 @@ import io.tolgee.dtos.request.prompt.PromptVariable
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
+import io.tolgee.model.enums.LLMProviderType
 import io.tolgee.repository.PromptRepository
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MetadataKey
 import io.tolgee.service.machineTranslation.MetadataProvider
 import io.tolgee.service.machineTranslation.MtTranslatorContext
-import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
@@ -32,6 +32,8 @@ import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.ResourceAccessException
 import java.io.ByteArrayInputStream
 import kotlin.jvm.optionals.getOrNull
 
@@ -46,38 +48,38 @@ class PromptService(
   private val screenshotService: ScreenshotService,
   private val applicationContext: ApplicationContext,
   private val promptRepository: PromptRepository,
-  private val organizationService: OrganizationService,
-  private val lLMProperties: LLMProperties,
+  private val providerService: LLMProviderService,
   private val openaiApiService: OpenaiApiService,
   private val ollamaApiService: OllamaApiService,
+  private val projectHolder: ProjectHolder,
 ) {
   fun getAllPaged(
-    organizationId: Long,
+    projectId: Long,
     pageable: Pageable,
     search: String?,
   ): Page<Prompt> {
-    return promptRepository.getAllPaged(organizationId, pageable, search)
+    return promptRepository.getAllPaged(projectId, pageable, search)
   }
 
   fun createPrompt(
-    organizationId: Long,
+    projectId: Long,
     dto: PromptCreateDto,
   ): Prompt {
     val prompt =
       Prompt(
         name = dto.name,
         template = dto.template,
-        organization = organizationService.get(organizationId),
+        project = projectService.get(projectId),
       )
     promptRepository.save(prompt)
     return prompt
   }
 
   fun deletePrompt(
-    organizationId: Long,
+    projectId: Long,
     promptId: Long,
   ) {
-    promptRepository.deleteById(promptId)
+    promptRepository.deletePrompt(projectId, promptId)
   }
 
   fun encodeScreenshot(
@@ -195,8 +197,11 @@ class PromptService(
     return variables
   }
 
-  fun getPrompt(data: PromptTestDto): String {
-    val params = getVariables(data.projectId, data.keyId, data.targetLanguageId)
+  fun getPrompt(
+    projectId: Long,
+    data: PromptTestDto,
+  ): String {
+    val params = getVariables(projectId, data.keyId, data.targetLanguageId)
     val handlebars = Handlebars()
 
     val mapParams =
@@ -293,12 +298,18 @@ class PromptService(
     promptTestDto: PromptTestDto,
   ): MtValueProvider.MtResult {
     val providerConfig =
-      lLMProperties.providers.find { it.name == promptTestDto.provider }
+      providerService.getProviderByName(projectHolder.project.organizationOwnerId, promptTestDto.provider)
         ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptTestDto.provider))
-    return when (providerConfig.type) {
-      "openai" -> openaiApiService.translate(params, providerConfig)
-      "ollama" -> ollamaApiService.translate(params, providerConfig)
-      else -> throw BadRequestException(Message.UNKNOWN_LLM_PROVIDER_TYPE, listOf(providerConfig.type))
+
+    try {
+      return when (providerConfig.type) {
+        LLMProviderType.OPENAI -> openaiApiService.translate(params, providerConfig)
+        LLMProviderType.OLLAMA -> ollamaApiService.translate(params, providerConfig)
+      }
+    } catch (e: ResourceAccessException) {
+      throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message))
+    } catch (e: HttpClientErrorException) {
+      throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message))
     }
   }
 
@@ -313,7 +324,7 @@ class PromptService(
       override fun get(key: String): Handlebars.SafeString? {
         val promptValue = internalMap.get(key)
         val stringValue = promptValue?.lazyValue?.let { it() } ?: promptValue?.value
-        return stringValue?.let { Handlebars.SafeString(it) } ?: null
+        return stringValue?.let { Handlebars.SafeString(it) }
       }
     }
   }

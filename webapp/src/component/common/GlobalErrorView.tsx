@@ -1,9 +1,10 @@
 import { Box, Container, Paper } from '@mui/material';
 import { GlobalError } from 'tg.error/GlobalError';
 import GlobalErrorPage from './GlobalErrorPage';
+import { ApiError } from 'tg.service/http/ApiError';
 
 type Props = {
-  error: GlobalError;
+  error: GlobalError | ApiError;
 };
 
 export const GlobalErrorView = ({ error }: Props) => {

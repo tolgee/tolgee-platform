@@ -204,6 +204,7 @@ export const useInitialDataService = () => {
     : undefined;
 
   return {
+    error: initialDataLoadable.error,
     state,
     actions: {
       refetchInitialData,
