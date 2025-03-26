@@ -41,6 +41,9 @@ class OrganizationRoleService(
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
 ) {
+
+	private val OWNER_OR_MAINTAINER_ROLES = setOf(OrganizationRoleType.OWNER, OrganizationRoleType.MAINTAINER)
+
   fun canUserViewStrict(
     userId: Long,
     organizationId: Long,
@@ -102,11 +105,14 @@ class OrganizationRoleService(
     // If a new role gets added, this will not compile and will need to be addressed.
     return when (role) {
       OrganizationRoleType.MEMBER ->
-        isUserMemberOrOwner(userId, organizationId)
+        isUserMember(userId, organizationId)
 
       OrganizationRoleType.OWNER ->
         isUserOwner(userId, organizationId)
-    }
+
+			OrganizationRoleType.MAINTAINER ->
+				isUserOwnerOrMaintainer(userId, organizationId)
+		}
   }
 
   fun checkUserIsOwner(
@@ -125,22 +131,42 @@ class OrganizationRoleService(
     }
   }
 
-  fun checkUserIsOwner(organizationId: Long) {
-    this.checkUserIsOwner(authenticationFacade.authenticatedUser.id, organizationId)
-  }
-
-  fun checkUserIsMemberOrOwner(
+	fun checkUserIsOwnerOrMaintainer(
     userId: Long,
     organizationId: Long,
   ) {
     val isServerAdmin = userAccountService.getDto(userId).role == UserAccount.Role.ADMIN
-    if (isUserMemberOrOwner(userId, organizationId) || isServerAdmin) {
+    if (this.isUserOwnerOrMaintainer(
+        userId,
+        organizationId,
+      ) || isServerAdmin
+    ) {
+      return
+    } else {
+      throw PermissionException(Message.USER_IS_NOT_OWNER_OF_ORGANIZATION)
+    }
+  }
+
+  fun checkUserIsOwner(organizationId: Long) {
+    this.checkUserIsOwner(authenticationFacade.authenticatedUser.id, organizationId)
+  }
+
+  fun checkUserIsOwnerOrMaintainer(organizationId: Long) {
+    this.checkUserIsOwnerOrMaintainer(authenticationFacade.authenticatedUser.id, organizationId)
+  }
+
+  fun checkUserIsMember(
+    userId: Long,
+    organizationId: Long,
+  ) {
+    val isServerAdmin = userAccountService.getDto(userId).role == UserAccount.Role.ADMIN
+    if (isUserMember(userId, organizationId) || isServerAdmin) {
       return
     }
     throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
   }
 
-  fun isUserMemberOrOwner(
+  fun isUserMember(
     userId: Long,
     organizationId: Long,
   ): Boolean {
@@ -154,6 +180,14 @@ class OrganizationRoleService(
   ): Boolean {
     val role = self.getDto(organizationId, userId)
     return role.type == OrganizationRoleType.OWNER
+  }
+
+  fun isUserOwnerOrMaintainer(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean {
+    val role = self.getDto(organizationId, userId)
+    return OWNER_OR_MAINTAINER_ROLES.contains(role.type)
   }
 
   fun find(id: Long): OrganizationRole? {

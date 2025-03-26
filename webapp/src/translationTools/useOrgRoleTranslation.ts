@@ -11,6 +11,8 @@ export const useOrgRoleTranslation = () => {
           return t('organization_role_type_MEMBER_hint');
         case 'OWNER':
           return t('organization_role_type_OWNER_hint');
+        case 'MAINTAINER':
+          return t('organization_role_type_MAINTAINER_hint');
       }
     } else {
       switch (type) {
@@ -18,6 +20,8 @@ export const useOrgRoleTranslation = () => {
           return t('organization_role_type_MEMBER');
         case 'OWNER':
           return t('organization_role_type_OWNER');
+        case 'MAINTAINER':
+          return t('organization_role_type_MAINTAINER');
       }
     }
     return type;

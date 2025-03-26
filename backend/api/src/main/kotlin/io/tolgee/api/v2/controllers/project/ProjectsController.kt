@@ -94,7 +94,7 @@ class ProjectsController(
     @RequestBody @Valid
     dto: CreateProjectRequest,
   ): ProjectModel {
-    organizationRoleService.checkUserIsOwner(dto.organizationId)
+    organizationRoleService.checkUserIsOwnerOrMaintainer(dto.organizationId)
     val project = projectCreationService.createProject(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }

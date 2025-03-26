@@ -48,6 +48,7 @@ export enum ProjectPermissionType {
 
 export enum OrganizationRoleType {
   MEMBER = 'MEMBER',
+  MAINTAINER = 'MAINTAINER',
   OWNER = 'OWNER',
 }
 
