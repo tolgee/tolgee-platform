@@ -8,11 +8,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -25,7 +21,7 @@ class TranslationsE2eDataController(
   private val testDataService: TestDataService,
   private val userAccountService: UserAccountService,
 ) {
-  @GetMapping(value = ["/generate/{projectId}/{number}"])
+  @GetMapping(value = ["/generate/{projectId:[0-9]+}/{number}"])
   @Transactional
   fun generateKeys(
     @PathVariable projectId: Long,

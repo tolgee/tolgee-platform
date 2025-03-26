@@ -19,6 +19,7 @@ package io.tolgee.security
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.exceptions.InvalidPathException
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
@@ -156,5 +157,17 @@ class RequestContextServiceTest {
 
     assertThat(org?.id).isEqualTo(TEST_ORGANIZATION_ID)
     assertThat(org?.slug).isEqualTo(TEST_ORGANIZATION_SLUG)
+  }
+
+  @Test
+  fun `it throws invalid path when the path variable of project is not in proper format`() {
+    val req = makeRequest("/v2/projects/{projectId}")
+		assertThrows<InvalidPathException> { requestContextService.getTargetProject(req) }
+  }
+
+	@Test
+  fun `it throws invalid path when the path variable of organization is not in proper format`() {
+    val req = makeRequest("/v2/organizations/{organizationId}")
+		assertThrows<InvalidPathException> { requestContextService.getTargetOrganization(req) }
   }
 }

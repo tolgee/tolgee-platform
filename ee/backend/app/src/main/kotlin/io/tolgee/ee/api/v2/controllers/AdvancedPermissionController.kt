@@ -17,11 +17,7 @@ import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.organization.OrganizationRoleService
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v2/")
@@ -35,7 +31,7 @@ class AdvancedPermissionController(
   private val organizationRoleService: OrganizationRoleService,
 ) {
   @Suppress("MVCPathVariableInspection")
-  @PutMapping("projects/{projectId}/users/{userId}/set-permissions")
+  @PutMapping("projects/{projectId:[0-9]+}/users/{userId}/set-permissions")
   @Operation(
     summary = "Set user's project permission",
     description = "Set user's granular (scope-based) direct project permission",

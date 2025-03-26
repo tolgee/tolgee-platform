@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId}",
+    "/v2/projects/{projectId:[0-9]+}",
   ],
 )
 @Tag(name = "All localization keys", description = "All localization keys in the project")

@@ -14,11 +14,7 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.ByteArrayInputStream
 import java.io.OutputStream
@@ -28,9 +24,9 @@ import java.util.zip.ZipOutputStream
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
-  "/api/project/{projectId}/export",
+  "/api/project/{projectId:[0-9]+}/export",
   "/api/project/export",
-  "/api/repository/{projectId}/export",
+  "/api/repository/{projectId:[0-9]+}/export",
   "/api/repository/export",
 )
 @Tag(name = "Export")
