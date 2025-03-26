@@ -1,3 +1,10 @@
+## [3.113.2](https://github.com/tolgee/tolgee-platform/compare/v3.113.1...v3.113.2) (2025-03-26)
+
+
+### Bug Fixes
+
+* sort languages in selectbox by base and name ([#3014](https://github.com/tolgee/tolgee-platform/issues/3014)) ([2add346](https://github.com/tolgee/tolgee-platform/commit/2add3469f1cf5f7de5e3f3bbcdc482f1bad32fcd))
+
 ## [3.113.1](https://github.com/tolgee/tolgee-platform/compare/v3.113.0...v3.113.1) (2025-03-26)
 
 
