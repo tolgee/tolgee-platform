@@ -375,18 +375,19 @@ class TranslationService(
     texts: Map<T, String?>,
     isKeyPlural: Boolean,
     pluralArgName: String?,
-  ): Map<T, String?> {
+  ): PossibleConvertToIcuPluralResult<T> {
     if (isKeyPlural) {
-      return validateAndNormalizePlurals(texts, pluralArgName)
+      val converted = validateAndNormalizePlurals(texts, pluralArgName)
+      return PossibleConvertToIcuPluralResult(converted.convertedStrings, converted.argName)
     }
 
-    return texts
+    return PossibleConvertToIcuPluralResult(texts, argName = null)
   }
 
   fun <T> validateAndNormalizePlurals(
     texts: Map<T, String?>,
     pluralArgName: String?,
-  ): Map<T, String?> {
+  ): ConvertToIcuPluralResult<T> {
     @Suppress("UNCHECKED_CAST")
     return try {
       normalizePlurals(texts, pluralArgName)
