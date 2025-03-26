@@ -297,7 +297,7 @@ export const [
   };
 
   const dataReady = Boolean(
-    languagesLoadable.data && translationService.fixedTranslations,
+    languagesLoadable.data && translationService.fixedTranslations
   );
 
   const state = {
