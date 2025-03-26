@@ -37,8 +37,8 @@ class LanguageStats(
 
   override var reviewedPercentage: Double = 0.0
 
-  override val translationsUpdatedAt: Date?
-    get() = updatedAt
+  override val lastModified: Date
+    get() = updatedAt ?: Date()
 
   override val languageId: Long
     get() = language.id
@@ -56,6 +56,6 @@ class LanguageStats(
       untranslatedPercentage = untranslatedPercentage,
       translatedPercentage = translatedPercentage,
       reviewedPercentage = reviewedPercentage,
-      translationsUpdatedAt = translationsUpdatedAt
+      lastModified = lastModified
     )
 }
