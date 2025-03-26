@@ -603,6 +603,7 @@ export interface paths {
     post: operations["run"];
   };
   "/v2/projects/{projectId}/prompts/{promptId}": {
+    put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
   };
   "/v2/projects/{projectId}/single-step-import": {
@@ -2143,7 +2144,8 @@ export interface components {
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "llm_provider_not_found"
-        | "llm_provider_error";
+        | "llm_provider_error"
+        | "prompt_not_found";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3911,8 +3913,9 @@ export interface components {
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };
-    PromptCreateDto: {
+    PromptDto: {
       name: string;
+      providerName: string;
       template: string;
     };
     PromptModel: {
@@ -3921,6 +3924,7 @@ export interface components {
       name: string;
       /** Format: int64 */
       projectId: number;
+      providerName: string;
       template: string;
     };
     PromptResponseDto: {
@@ -4745,7 +4749,8 @@ export interface components {
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "llm_provider_not_found"
-        | "llm_provider_error";
+        | "llm_provider_error"
+        | "prompt_not_found";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -14743,7 +14748,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PromptCreateDto"];
+        "application/json": components["schemas"]["PromptDto"];
       };
     };
   };
@@ -14847,6 +14852,59 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PromptTestDto"];
+      };
+    };
+  };
+  updatePrompt: {
+    parameters: {
+      path: {
+        promptId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptDto"];
       };
     };
   };

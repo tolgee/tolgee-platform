@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.reactivex.rxjava3.core.Maybe
 import io.tolgee.model.Prompt
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -29,17 +30,16 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
     search: String?,
   ): Page<Prompt>
 
-  @Modifying
   @Query(
     """
-    delete from Prompt p
+    from Prompt p
     where
       p.project.id = :projectId
       and p.id = :promptId
     """,
   )
-  fun deletePrompt(
+  fun findPrompt(
     projectId: Long,
     promptId: Long,
-  )
+  ) : Prompt?
 }

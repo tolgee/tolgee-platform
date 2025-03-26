@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
-import io.tolgee.dtos.request.prompt.PromptCreateDto
+import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.VariablesResponse
 import io.tolgee.dtos.response.PromptResponseDto
@@ -48,9 +48,19 @@ class PromptController(
   @PostMapping("")
   @UseDefaultPermissions
   fun createPrompt(
-    @RequestBody @Valid dto: PromptCreateDto,
+    @RequestBody @Valid dto: PromptDto,
   ): PromptModel {
     val result = promptService.createPrompt(projectHolder.project.id, dto)
+    return promptModelAssembler.toModel(result)
+  }
+
+  @PutMapping("/{promptId}")
+  @UseDefaultPermissions
+  fun updatePrompt(
+    @PathVariable promptId: Long,
+    @RequestBody @Valid dto: PromptDto,
+  ): PromptModel {
+    val result = promptService.updatePrompt(projectHolder.project.id, promptId, dto)
     return promptModelAssembler.toModel(result)
   }
 

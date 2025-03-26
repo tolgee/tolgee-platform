@@ -9,4 +9,5 @@ open class PromptModel(
   val name: String,
   val template: String,
   val projectId: Long,
+  val providerName: String,
 ) : RepresentationModel<PromptModel>()

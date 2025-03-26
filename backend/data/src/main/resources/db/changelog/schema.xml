@@ -4240,4 +4240,23 @@
     <changeSet author="stepangranat (generated)" id="1742904352553-1">
         <modifyDataType columnName="type" newDataType="varchar(255)" tableName="llmprovider"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1742989288527-4">
+        <dropForeignKeyConstraint baseTableName="prompt" constraintName="FKfi3qvef342cy2ep1wkny25bdb"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1742989288527-1">
+        <addColumn tableName="prompt">
+            <column name="project_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1742989288527-2">
+        <addColumn tableName="prompt">
+            <column name="provider_name" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1742989288527-3">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="prompt" constraintName="FK596hug6yhk8qd0ba6pqvpgdj6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1742989288527-5">
+        <dropColumn columnName="organization_id" tableName="prompt"/>
+    </changeSet>
 </databaseChangeLog>

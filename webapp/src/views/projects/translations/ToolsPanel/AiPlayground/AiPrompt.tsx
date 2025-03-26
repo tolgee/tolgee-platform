@@ -19,6 +19,8 @@ import { FieldLabel } from 'tg.component/FormField';
 import { PanelContentProps } from '../common/types';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { AiResult } from './AiResult';
+import { PromptLoadMenu } from './PromptLoadMenu';
+import { PromptSaveMenu } from './PromptSaveMenu';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
@@ -102,8 +104,49 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     }
   }, [promptLoadable.data?.result]);
 
+  const totalTokens = promptLoadable.data?.usage?.total_tokens;
+  const cachedTokens =
+    promptLoadable.data?.usage?.prompt_tokens_details?.cached_tokens;
+
   return (
     <Box display="grid">
+      <Box
+        sx={{
+          margin: 1,
+          display: 'flex',
+          gap: 1,
+          justifyContent: 'space-between',
+          alignItems: 'end',
+        }}
+      >
+        <Box>
+          <FieldLabel>Provider</FieldLabel>
+          <Select
+            size="small"
+            value={provider}
+            onChange={(e) => setProvider(e.target.value)}
+          >
+            {providersLoadable.data?.items.map((i) => (
+              <MenuItem key={i.name} value={i.name}>
+                {i.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
+        <Box display="flex" gap={1}>
+          <PromptLoadMenu
+            projectId={props.project.id}
+            onSelect={(item) => {
+              setProvider(item.providerName);
+              setValue(item.template);
+            }}
+          />
+          <PromptSaveMenu
+            projectId={props.project.id}
+            data={{ template: value, providerName: provider }}
+          />
+        </Box>
+      </Box>
       <Box sx={{ margin: '8px' }}>
         <FieldLabel>Prompt</FieldLabel>
         <EditorWrapper onKeyDown={stopBubble()}>
@@ -127,20 +170,7 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
         </EditorWrapper>
       </Box>
 
-      <Box
-        sx={{ margin: '8px', display: 'flex', justifyContent: 'space-between' }}
-      >
-        <Select
-          size="small"
-          value={provider}
-          onChange={(e) => setProvider(e.target.value)}
-        >
-          {providersLoadable.data?.items.map((i) => (
-            <MenuItem key={i.name} value={i.name}>
-              {i.name}
-            </MenuItem>
-          ))}
-        </Select>
+      <Box sx={{ margin: '8px', display: 'flex', justifyContent: 'end' }}>
         <IconButton
           color="primary"
           onClick={handleTestPrompt}
@@ -166,8 +196,8 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
         <Typography variant="caption" minHeight={20}>
           {promptLoadable.data?.usage && (
             <>
-              tokens: {promptLoadable.data.usage.total_tokens}, cached:{' '}
-              {promptLoadable.data.usage.prompt_tokens_details.cached_tokens}
+              {`tokens: ${totalTokens}`}
+              {cachedTokens !== undefined && `, cached: ${cachedTokens}`}
             </>
           )}
         </Typography>

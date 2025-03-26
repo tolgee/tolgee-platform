@@ -9,7 +9,7 @@ import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.component.machineTranslation.providers.llm.OllamaApiService
 import io.tolgee.component.machineTranslation.providers.llm.OpenaiApiService
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.prompt.PromptCreateDto
+import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.PromptVariable
 import io.tolgee.exceptions.BadRequestException
@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import java.io.ByteArrayInputStream
+import kotlin.collections.HashMap
 import kotlin.jvm.optionals.getOrNull
 
 @Service
@@ -63,14 +64,35 @@ class PromptService(
 
   fun createPrompt(
     projectId: Long,
-    dto: PromptCreateDto,
+    dto: PromptDto,
   ): Prompt {
     val prompt =
       Prompt(
         name = dto.name,
         template = dto.template,
         project = projectService.get(projectId),
+        providerName = dto.providerName,
       )
+    promptRepository.save(prompt)
+    return prompt
+  }
+
+  fun findPrompt(
+    projectId: Long,
+    promtId: Long,
+  ): Prompt {
+    return promptRepository.findPrompt(projectId, promtId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
+  }
+
+  fun updatePrompt(
+    projectId: Long,
+    promptId: Long,
+    dto: PromptDto,
+  ): Prompt {
+    val prompt = findPrompt(projectId, promptId)
+    prompt.name = dto.name
+    prompt.template = dto.template
+    prompt.providerName = dto.providerName
     promptRepository.save(prompt)
     return prompt
   }
@@ -79,7 +101,8 @@ class PromptService(
     projectId: Long,
     promptId: Long,
   ) {
-    promptRepository.deletePrompt(projectId, promptId)
+    val prompt = this.findPrompt(projectId, promptId)
+    promptRepository.delete(prompt)
   }
 
   fun encodeScreenshot(

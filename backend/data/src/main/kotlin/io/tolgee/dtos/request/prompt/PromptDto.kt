@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request.prompt
 
-data class PromptCreateDto(
+data class PromptDto(
   val name: String,
   val template: String,
+  val providerName: String,
 )
