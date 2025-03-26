@@ -1,3 +1,10 @@
+## [3.113.1](https://github.com/tolgee/tolgee-platform/compare/v3.113.0...v3.113.1) (2025-03-26)
+
+
+### Bug Fixes
+
+* infinite global loading + namespace search padding ([#3012](https://github.com/tolgee/tolgee-platform/issues/3012)) ([9064b79](https://github.com/tolgee/tolgee-platform/commit/9064b798e4993965cf44381b09f7c364fa580f73))
+
 # [3.113.0](https://github.com/tolgee/tolgee-platform/compare/v3.112.0...v3.113.0) (2025-03-20)
 
 
