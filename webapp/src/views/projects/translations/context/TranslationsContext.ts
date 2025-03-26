@@ -85,7 +85,7 @@ export const [
     url: '/v2/projects/{projectId}/languages',
     method: 'get',
     path: { projectId: props.projectId },
-    query: { size: 1000, sort: ['tag'] },
+    query: { size: 1000, sort: ['name'] },
     options: {
       cacheTime: 0,
     },
@@ -93,9 +93,9 @@ export const [
 
   const allowedLanguages = useMemo(
     () =>
-      languagesLoadable.data?._embedded?.languages?.filter((l) =>
-        satisfiesLanguageAccess('translations.view', l.id)
-      ),
+      languagesLoadable.data?._embedded?.languages
+        ?.filter((l) => satisfiesLanguageAccess('translations.view', l.id))
+        ?.sort((a, b) => Number(b.base) - Number(a.base)),
     [languagesLoadable.data]
   );
 
@@ -297,7 +297,7 @@ export const [
   };
 
   const dataReady = Boolean(
-    languagesLoadable.data && translationService.fixedTranslations
+    languagesLoadable.data && translationService.fixedTranslations,
   );
 
   const state = {
