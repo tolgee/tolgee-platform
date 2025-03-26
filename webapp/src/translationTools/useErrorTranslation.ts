@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 export function useErrorTranslation() {
   const { t } = useTranslate();
 
-  return (code: string) => {
+  return (code: string, params?: string[]) => {
     switch (code.toLocaleLowerCase()) {
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':

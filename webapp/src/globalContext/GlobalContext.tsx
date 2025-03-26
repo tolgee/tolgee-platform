@@ -56,12 +56,10 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
 
     globalContext.actions = actions;
 
+    const error = initialData.error || globalError;
+
     if (!initialData.state) {
-      return globalError ? (
-        <GlobalErrorView error={globalError} />
-      ) : (
-        <FullPageLoading />
-      );
+      return error ? <GlobalErrorView error={error} /> : <FullPageLoading />;
     }
 
     const contextData = {
