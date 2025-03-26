@@ -143,7 +143,7 @@ class OrganizationRoleService(
     ) {
       return
     } else {
-      throw PermissionException(Message.USER_IS_NOT_OWNER_OF_ORGANIZATION)
+      throw PermissionException(Message.USER_IS_NOT_OWNER_OR_MAINTAINER_OF_ORGANIZATION)
     }
   }
 
