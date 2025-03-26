@@ -4,7 +4,7 @@
 package io.tolgee.constants
 
 import com.fasterxml.jackson.annotation.JsonValue
-import java.util.*
+import java.util.Locale
 
 enum class Message {
   UNAUTHENTICATED,
@@ -280,6 +280,7 @@ enum class Message {
   KEYS_SPENDING_LIMIT_EXCEEDED,
   PLAN_SEAT_LIMIT_EXCEEDED,
   INSTANCE_NOT_USING_LICENSE_KEY,
+	INVALID_PATH,
   ;
 
   val code: String

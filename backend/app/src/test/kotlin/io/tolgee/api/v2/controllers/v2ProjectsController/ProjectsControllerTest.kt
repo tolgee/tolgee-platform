@@ -1,15 +1,10 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsNotFound
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.isPermissionScopes
-import io.tolgee.fixtures.node
+import io.tolgee.fixtures.*
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
@@ -277,4 +272,15 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val project = projectService.find(base.project.id)
     Assertions.assertThat(project).isNull()
   }
+
+	@Test
+	fun `test bad request error is returned when requested url with wrong pattern`() {
+		performAuthGet("/v2/projects/export&format=JSON")
+			.andIsNotFound
+			.andPrettyPrint
+			.andAssertThatJson.let {
+				it.node("code").isEqualTo(Message.RESOURCE_NOT_FOUND.code)
+				it.node("params[0]").isEqualTo("v2/projects/export&format=JSON")
+			}
+	}
 }

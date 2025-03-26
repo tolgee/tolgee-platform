@@ -18,6 +18,7 @@ package io.tolgee.security
 
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.exceptions.InvalidPathException
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
@@ -58,10 +59,11 @@ class RequestContextService(
       // No permission check needs to occur here.
       return null
     }
-
-    val id = (pathVariablesMap.values.first() as String).toLong()
-    return projectService.findDto(id)
-  }
+		val idAsString = pathVariablesMap.values.first() as String
+		return runCatching { projectService.findDto(idAsString.toLong())}
+			.onFailure { throw InvalidPathException("Invalid format of project id: $idAsString") }
+			.getOrNull()
+	}
 
   private fun getTargetProjectImplicit(): ProjectDto? {
     // This method is the source of complexity for the global handling, but is itself quite simple. Oh, the irony!
@@ -90,8 +92,9 @@ class RequestContextService(
     if (idOrSlug.contains(IS_SLUG_RE)) {
       return organizationService.findDto(idOrSlug)
     }
-
-    return organizationService.findDto(idOrSlug.toLong())
+		return runCatching { organizationService.findDto(idOrSlug.toLong())}
+			.onFailure { throw InvalidPathException("Invalid format of organization id: $idOrSlug") }
+			.getOrNull()
   }
 
   companion object {
