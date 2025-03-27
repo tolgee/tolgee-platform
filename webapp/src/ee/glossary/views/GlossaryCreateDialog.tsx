@@ -50,12 +50,6 @@ export const GlossaryCreateDialog = ({
   const { isEnabled } = useEnabledFeatures();
   const glossaryFeature = isEnabled('GLOSSARY');
 
-  // const availableLanguages = useApiQuery({
-  //   url: '/v2/organizations/{organizationId}/all-languages',
-  //   method: 'get',
-  //   path: { organizationId: organization!.id },
-  // });
-
   const createGlossary = useApiMutation({
     url: '/v2/organizations/{organizationId}/glossaries',
     method: 'post',
@@ -64,9 +58,9 @@ export const GlossaryCreateDialog = ({
 
   const canBeSubmitted = true; // scope.every(Boolean);
 
-  const initialValues: CreateGlossaryRequest = {
+  const initialValues: Partial<CreateGlossaryRequest> = {
     name: '',
-    baseLanguageCode: 'en',
+    baseLanguageCode: undefined,
     assignedProjects: [],
   };
 
@@ -122,12 +116,16 @@ export const GlossaryCreateDialog = ({
           //     },
           //   }
           // );
+          onFinished();
         }}
       >
         {({ submitForm, values }) => {
           return (
             <StyledContainer>
-              <GlossaryCreateForm disabled={!glossaryFeature} />
+              <GlossaryCreateForm
+                disabled={!glossaryFeature}
+                organizationId={organizationId}
+              />
               <StyledActions>
                 <Button onClick={onClose}>{t('global_cancel_button')}</Button>
                 <LoadingButton

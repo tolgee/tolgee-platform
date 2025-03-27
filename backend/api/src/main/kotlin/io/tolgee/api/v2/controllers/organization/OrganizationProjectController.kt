@@ -6,26 +6,30 @@ package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.cacheable.OrganizationLanguageDto
+import io.tolgee.dtos.request.language.LanguageFilters
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.facade.ProjectWithStatsFacade
+import io.tolgee.hateoas.language.LanguageModel
+import io.tolgee.hateoas.language.LanguageModelAssembler
+import io.tolgee.hateoas.language.OrganizationLanguageModel
+import io.tolgee.hateoas.language.OrganizationLanguageModelAssembler
 import io.tolgee.hateoas.project.ProjectModel
 import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -38,6 +42,9 @@ class OrganizationProjectController(
   private val projectService: ProjectService,
   private val projectModelAssembler: ProjectModelAssembler,
   private val projectWithStatsFacade: ProjectWithStatsFacade,
+  private val languageService: LanguageService,
+  private val organizationLanguageModelAssembler: OrganizationLanguageModelAssembler,
+  private val pagedAssembler: PagedResourcesAssembler<OrganizationLanguageDto>,
 ) {
   @GetMapping("/{id:[0-9]+}/projects")
   @Operation(
@@ -111,5 +118,21 @@ class OrganizationProjectController(
     } ?: throw NotFoundException()
   }
 
-  // TODO: get getAllLanguagesInUse - for glossaries
+  @Operation(
+    summary = "Get all languages in use by projects owned by specified organization",
+    description = "Returns all languages in use by projects owned by specified organization",
+  )
+  @GetMapping("/{organizationId:[0-9]+}/languages")
+  @UseDefaultPermissions
+  fun getAllLanguagesInUse(
+    @ParameterObject
+    @SortDefault("base", direction = Sort.Direction.DESC)
+    @SortDefault("tag", direction = Sort.Direction.ASC)
+    pageable: Pageable,
+    @RequestParam("search") search: String?,
+    @PathVariable organizationId: Long,
+  ): PagedModel<OrganizationLanguageModel> {
+    val languages = languageService.getPagedByOrganization(organizationId, pageable, search)
+    return pagedAssembler.toModel(languages, organizationLanguageModelAssembler)
+  }
 }
