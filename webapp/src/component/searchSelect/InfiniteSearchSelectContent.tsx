@@ -3,10 +3,10 @@ import { Autocomplete, Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import {
-  StyledWrapper,
   StyledHeading,
   StyledInput,
   StyledInputWrapper,
+  StyledWrapper,
 } from 'tg.component/searchSelect/SearchStyled';
 
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
@@ -23,11 +23,12 @@ function PaperComponent(props) {
   return <Box {...other} style={{ width: '100%' }} />;
 }
 
-type Props<T extends { id: React.Key }> = {
+type Props<T> = {
   open: boolean;
   onClose?: () => void;
   anchorEl?: HTMLElement;
   items: T[] | undefined;
+  itemKey: (item: T) => React.Key;
   displaySearch?: boolean;
   searchPlaceholder?: string;
   search?: string;
@@ -43,15 +44,15 @@ type Props<T extends { id: React.Key }> = {
     },
     option: T
   ) => React.ReactNode;
-  getOptionLabel: (item: T) => string;
   ListboxProps?: React.HTMLAttributes<HTMLUListElement>;
 };
 
-export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
+export function InfiniteSearchSelectContent<T>({
   open,
   onClose,
   anchorEl,
   items,
+  itemKey,
   displaySearch,
   searchPlaceholder,
   search,
@@ -61,7 +62,6 @@ export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
   maxWidth,
   compareFunction,
   renderOption,
-  getOptionLabel,
   ListboxProps,
   onGetMoreData,
 }: Props<T>) {
@@ -98,11 +98,11 @@ export function InfiniteSearchSelectContent<T extends { id: React.Key }>({
             ? onSearch(value)
             : setInputValue(value);
         }}
-        getOptionLabel={getOptionLabel}
+        getOptionLabel={() => ''}
         PopperComponent={PopperComponent}
         PaperComponent={PaperComponent}
         renderOption={(props, item) => (
-          <React.Fragment key={item.id}>
+          <React.Fragment key={itemKey(item)}>
             {renderOption(props, item)}
           </React.Fragment>
         )}

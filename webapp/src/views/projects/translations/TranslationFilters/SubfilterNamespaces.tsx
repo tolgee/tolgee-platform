@@ -94,7 +94,7 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
   };
 
   const handleFetchMore = () => {
-    if (dataLoadable.hasNextPage && dataLoadable.isFetching) {
+    if (dataLoadable.hasNextPage && !dataLoadable.isFetching) {
       dataLoadable.fetchNextPage();
     }
   };
@@ -150,12 +150,12 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
               <InfiniteSearchSelectContent
                 open={true}
                 items={data}
+                itemKey={(item) => item.id}
                 maxWidth={400}
                 onSearch={setSearch}
                 search={search}
                 displaySearch={(totalItems ?? 0) > 10}
                 renderOption={renderItem}
-                getOptionLabel={(o) => o.name}
                 ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
                 searchPlaceholder={t(
                   'translations_filters_namespaces_search_placeholder'

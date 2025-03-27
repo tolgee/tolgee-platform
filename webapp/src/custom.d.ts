@@ -106,4 +106,8 @@ declare module 'react' {
   interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
     webkitdirectory?: boolean;
   }
+
+  type KeyOf<T> = {
+    [K in keyof T]-?: T[K] extends Key ? K : never;
+  }[keyof T];
 }

@@ -7,31 +7,25 @@ import { MenuItem } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 
-type KeyValue = string | number;
-type Key<T> = {
-  [K in keyof T]-?: T[K] extends KeyValue ? K : never;
-}[keyof T];
-
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
 type Props = {
   label?: ReactNode;
   name: string;
-  key?: Key<SimpleProjectModel>;
+  valueKey?: React.KeyOf<SimpleProjectModel>;
   available: SimpleProjectModel[];
 } & Omit<ComponentProps<typeof Box>, 'children'>;
 
 export const ProjectSelect: React.VFC<Props> = ({
   label,
   name,
-  key,
+  valueKey = 'id',
   available,
   ...boxProps
 }) => {
   const context = useFormikContext();
   const { t } = useTranslate();
-  const value = context.getFieldProps(name).value as KeyValue[];
-  const valueKey = key || 'id';
+  const value = context.getFieldProps(name).value as React.Key[];
 
   return (
     <Box {...boxProps}>
@@ -51,7 +45,7 @@ export const ProjectSelect: React.VFC<Props> = ({
         }}
         displayEmpty
         renderValue={(v) => {
-          const value = v as KeyValue[];
+          const value = v as React.Key[];
           if (value.length === 0) {
             return t('project_select_empty_value');
           }
@@ -62,10 +56,7 @@ export const ProjectSelect: React.VFC<Props> = ({
         }}
       >
         {available.map((p) => (
-          <MenuItem
-            key={p[valueKey] as KeyValue}
-            value={p[valueKey] as KeyValue}
-          >
+          <MenuItem key={p[valueKey]} value={p[valueKey]}>
             {p.name}
             {/*  TODO: next project view for this select*/}
           </MenuItem>
