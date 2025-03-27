@@ -37,6 +37,7 @@ type Props<T, S> = {
   ) => React.ReactNode;
   labelItem: (item: S) => string;
   label?: string;
+  error?: React.ReactNode;
   searchPlaceholder?: string;
   displaySearch?: boolean;
   disabled?: boolean;
@@ -54,6 +55,7 @@ export function InfiniteSearchSelect<T, S>({
   renderItem,
   labelItem,
   label,
+  error,
   searchPlaceholder,
   displaySearch,
   disabled,
@@ -98,6 +100,8 @@ export function InfiniteSearchSelect<T, S>({
         value={selectedItemLabel}
         label={label}
         disabled={disabled}
+        error={!!error}
+        helperText={error}
         InputProps={{
           placeholder: searchPlaceholder,
           onClick: () => setOpen(true),

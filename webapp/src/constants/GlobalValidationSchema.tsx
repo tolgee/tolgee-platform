@@ -473,8 +473,16 @@ export class Validation {
   static readonly GLOSSARY_CREATE_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
       name: Yup.string().min(3).required(),
-      baseLanguageCode: Yup.string().min(1).required(),
-      assignedProjects: Yup.array().of(Yup.number().required()),
+      baseLanguage: Yup.object()
+        .required()
+        .shape({
+          tag: Yup.string().min(1).required(),
+        }),
+      assignedProjects: Yup.array().of(
+        Yup.object().shape({
+          id: Yup.number().required(),
+        })
+      ),
     });
 }
 

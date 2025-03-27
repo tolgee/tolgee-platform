@@ -9,13 +9,20 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { GlossaryCreateForm } from 'tg.ee.module/glossary/views/GlossaryCreateForm';
+import { messageService } from 'tg.service/MessageService';
 
 type CreateGlossaryRequest = components['schemas']['CreateGlossaryRequest'];
-
-// const StyledSubtitle = styled('div')`
-//   padding: ${({ theme }) => theme.spacing(0, 3, 2, 3)};
-//   color: ${({ theme }) => theme.palette.text.secondary};
-// `;
+type CreateGlossaryForm = {
+  name: string;
+  baseLanguage:
+    | {
+        tag: string;
+      }
+    | undefined;
+  assignedProjects: {
+    id: number;
+  }[];
+};
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -56,11 +63,9 @@ export const GlossaryCreateDialog = ({
     invalidatePrefix: '/v2/organizations/{organizationId}/glossaries',
   });
 
-  const canBeSubmitted = true; // scope.every(Boolean);
-
-  const initialValues: Partial<CreateGlossaryRequest> = {
+  const initialValues: CreateGlossaryForm = {
     name: '',
-    baseLanguageCode: undefined,
+    baseLanguage: undefined,
     assignedProjects: [],
   };
 
@@ -78,45 +83,29 @@ export const GlossaryCreateDialog = ({
       <Formik
         initialValues={initialValues}
         validationSchema={Validation.GLOSSARY_CREATE_FORM(t)}
-        onSubmit={async (values) => {
-          // const data = languages.map((languageId) => ({
-          //   type: values.type,
-          //   name: values.name || undefined,
-          //   description: values.description,
-          //   languageId: languageId,
-          //   dueDate: values.dueDate,
-          //   assignees: values.assignees[languageId]?.map((u) => u.id) ?? [],
-          //   keys: selectedKeys,
-          // }));
-          //
-          // const stateFilters = getStateFilters(values.type);
-          //
-          // createTasksLoadable.mutate(
-          //   {
-          //     path: { projectId },
-          //     query: {
-          //       filterState: stateFilters.filter(
-          //         (i) => i !== 'OUTDATED'
-          //       ) as StateType[],
-          //       filterOutdated: stateFilters.includes('OUTDATED'),
-          //     },
-          //     content: {
-          //       'application/json': { tasks: data },
-          //     },
-          //   },
-          //   {
-          //     onSuccess() {
-          //       messageService.success(
-          //         <T
-          //           keyName="create_task_success_message"
-          //           params={{ count: languages.length }}
-          //         />
-          //       );
-          //       onFinished();
-          //     },
-          //   }
-          // );
-          onFinished();
+        onSubmit={async (values: CreateGlossaryForm) => {
+          const data: CreateGlossaryRequest = {
+            name: values.name,
+            baseLanguageCode: values.baseLanguage!.tag,
+            assignedProjects: values.assignedProjects?.map(({ id }) => id),
+          };
+
+          createGlossary.mutate(
+            {
+              path: { organizationId },
+              content: {
+                'application/json': data,
+              },
+            },
+            {
+              onSuccess() {
+                messageService.success(
+                  <T keyName="create_glossary_success_message" />
+                );
+                onFinished();
+              },
+            }
+          );
         }}
       >
         {({ submitForm, values }) => {
@@ -129,7 +118,7 @@ export const GlossaryCreateDialog = ({
               <StyledActions>
                 <Button onClick={onClose}>{t('global_cancel_button')}</Button>
                 <LoadingButton
-                  disabled={!glossaryFeature || !canBeSubmitted}
+                  disabled={!glossaryFeature}
                   onClick={submitForm}
                   color="primary"
                   variant="contained"
