@@ -1,6 +1,7 @@
 import { Box, Button, Menu, MenuItem, styled } from '@mui/material';
 import { useRef, useState } from 'react';
 import { CompactListSubheader } from 'tg.component/ListComponents';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -79,14 +80,14 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
                 variant="outlined"
                 color="error"
                 size="small"
-                onClick={() => {
+                onClick={stopAndPrevent(() =>
                   deletePrompt.mutate({
                     path: { projectId },
                     query: {
                       promptId: item.id,
                     },
-                  });
-                }}
+                  })
+                )}
               >
                 Delete
               </StyledCompactButton>

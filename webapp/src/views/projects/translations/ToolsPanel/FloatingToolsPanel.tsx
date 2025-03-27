@@ -72,7 +72,7 @@ export const FloatingToolsPanel = ({ width }: Props) => {
 
   return (
     <StyledContainer
-      key={`${keyId}.${language?.id}`}
+      key={aiPlayground ? undefined : `${keyId}.${language?.id}`}
       style={{
         top: topBannerHeight + topBarHeight + floatingBannerHeight,
         height: `calc(${-fixedTopDistance}px + 100vh)`,

@@ -3088,6 +3088,7 @@ export interface components {
     };
     MachineTranslationRequest: {
       keyIds: number[];
+      llmPrompt?: components["schemas"]["PromptDto"];
       targetLanguageIds: number[];
     };
     ModifiedEntityModel: {

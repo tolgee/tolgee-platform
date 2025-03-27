@@ -234,6 +234,9 @@ export const [
       const allItems = await translationService.getAllIds();
       return selectionService.select(allItems.ids);
     },
+    async getAllIds() {
+      return (await translationService.getAllIds()).ids;
+    },
     selectionClear() {
       return selectionService.clear();
     },

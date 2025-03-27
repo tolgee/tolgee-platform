@@ -79,7 +79,11 @@ class PromptController(
   ): PromptResponseDto {
     val prompt = promptService.getPrompt(projectHolder.project.id, promptTestDto)
     val messages = promptService.getLlmMessages(prompt, promptTestDto)
-    val response = promptService.runPrompt(LLMParams(messages), promptTestDto)
+    val response = promptService.runPrompt(
+      projectHolder.project.organizationOwnerId,
+      LLMParams(messages),
+      promptTestDto
+    )
     return PromptResponseDto(
       prompt,
       response.translated ?: "",

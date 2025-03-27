@@ -277,6 +277,7 @@ enum class Message {
   LLM_PROVIDER_NOT_FOUND,
   LLM_PROVIDER_ERROR,
   PROMPT_NOT_FOUND,
+  LLM_PROVIDER_NOT_RETURNED_JSON,
   ;
 
   val code: String

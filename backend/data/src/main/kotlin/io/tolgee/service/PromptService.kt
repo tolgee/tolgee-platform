@@ -1,8 +1,13 @@
 package io.tolgee.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.jknack.handlebars.Handlebars
+import com.google.gson.JsonObject
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
@@ -12,10 +17,12 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptTestDto
 import io.tolgee.dtos.request.prompt.PromptVariable
+import io.tolgee.dtos.response.PromptResponseDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.key.Key
 import io.tolgee.repository.PromptRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
@@ -126,10 +133,6 @@ class PromptService(
     keyId: Long,
     targetLanguageId: Long,
   ): MutableList<PromptVariable> {
-    securityService.checkLanguageViewPermission(
-      projectId,
-      listOf(targetLanguageId),
-    )
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     keyService.checkInProject(key, projectId)
     val project = projectService.get(projectId)
@@ -317,11 +320,12 @@ class PromptService(
   }
 
   fun runPrompt(
+    organizationId: Long,
     params: LLMParams,
     promptTestDto: PromptTestDto,
   ): MtValueProvider.MtResult {
     val providerConfig =
-      providerService.getProviderByName(projectHolder.project.organizationOwnerId, promptTestDto.provider)
+      providerService.getProviderByName(organizationId, promptTestDto.provider)
         ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptTestDto.provider))
 
     try {
@@ -334,6 +338,19 @@ class PromptService(
     } catch (e: HttpClientErrorException) {
       throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message))
     }
+  }
+
+  fun translateViaPrompt(projectId: Long, data: PromptTestDto) {
+    val project = projectService.get(projectId)
+    val prompt = getPrompt(projectId, data)
+    val messages = getLlmMessages(prompt, data)
+    val response = runPrompt(project.organizationOwner.id, LLMParams(messages), data)
+    val json = response.translated?.let { jacksonObjectMapper().readValue<JsonNode>(it) }
+      ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
+    val result = json.get("output").asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
+    val translation = translationService.getOrCreate(data.keyId, data.targetLanguageId)
+    translation.text = result
+    translationService.save(translation)
   }
 
   companion object {

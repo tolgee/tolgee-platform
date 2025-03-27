@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
+  Button,
   IconButton,
   MenuItem,
   Select,
@@ -9,18 +10,22 @@ import {
   Typography,
 } from '@mui/material';
 import { ChevronDown, ChevronUp, Send03 } from '@untitled-ui/icons-react';
-
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { EditorHandlebars } from 'tg.component/editor/EditorHandlebars';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { FieldLabel } from 'tg.component/FormField';
-import { PanelContentProps } from '../common/types';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import { confirmation } from 'tg.hooks/confirmation';
+
 import { AiResult } from './AiResult';
 import { PromptLoadMenu } from './PromptLoadMenu';
 import { PromptSaveMenu } from './PromptSaveMenu';
+import { PanelContentProps } from '../common/types';
+import { useTranslationsActions } from '../../context/TranslationsContext';
+import { BatchJobModel } from '../../BatchOperations/types';
+import { BatchOperationDialog } from '../../BatchOperations/OperationsSummary/BatchOperationDialog';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
@@ -34,6 +39,8 @@ const StyledTextField = styled(TextField)`
 `;
 
 export const AiPrompt: React.FC<PanelContentProps> = (props) => {
+  const { getAllIds, setEdit, refetchTranslations } = useTranslationsActions();
+  const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
   const [value, setValue] = useLocalStorageState<string>({
     key: 'aiPlaygroundLastValue',
     initial: 'Hi translate from {{source}} to {{target}}',
@@ -59,6 +66,41 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
       organizationId: props.project.organizationOwner!.id,
     },
   });
+
+  const mtTranslate = useApiMutation({
+    url: '/v2/projects/{projectId}/start-batch-job/machine-translate',
+    method: 'post',
+  });
+
+  const handleRunBatch = async () => {
+    const allIds = await getAllIds();
+    confirmation({
+      title: `Run for ${allIds.length} keys?`,
+      onConfirm() {
+        setEdit(undefined);
+        mtTranslate
+          .mutateAsync({
+            content: {
+              'application/json': {
+                keyIds: allIds,
+                targetLanguageIds: [props.language.id],
+                llmPrompt: {
+                  name: '',
+                  template: value,
+                  providerName: provider,
+                },
+              },
+            },
+            path: {
+              projectId: props.project.id,
+            },
+          })
+          .then((data) => {
+            setRunningOperation(data);
+          });
+      },
+    });
+  };
 
   const cellSelected = Boolean(props.keyData && props.language);
 
@@ -170,7 +212,17 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
         </EditorWrapper>
       </Box>
 
-      <Box sx={{ margin: '8px', display: 'flex', justifyContent: 'end' }}>
+      <Box
+        sx={{ margin: '8px', display: 'flex', gap: 1, justifyContent: 'end' }}
+      >
+        <Button
+          size="small"
+          color="secondary"
+          onClick={handleRunBatch}
+          disabled={!cellSelected || promptLoadable.isLoading}
+        >
+          Batch
+        </Button>
         <IconButton
           color="primary"
           onClick={handleTestPrompt}
@@ -230,6 +282,16 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
           {expanded ? <ChevronUp /> : <ChevronDown />}
         </IconButton>
       </Box>
+      {runningOperation && (
+        <BatchOperationDialog
+          operation={runningOperation}
+          onClose={() => setRunningOperation(undefined)}
+          onFinished={() => {
+            refetchTranslations();
+            setRunningOperation(undefined);
+          }}
+        />
+      )}
     </Box>
   );
 };
