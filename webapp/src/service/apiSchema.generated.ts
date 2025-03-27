@@ -196,6 +196,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
   };
+  "/v2/organizations/{organizationId}/languages": {
+    /** Returns all languages in use by projects owned by specified organization */
+    get: operations["getAllLanguagesInUse"];
+  };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     /** Returns machine translation credit balance for organization */
     get: operations["getOrganizationCredits"];
@@ -1351,7 +1355,7 @@ export interface components {
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -1469,7 +1473,7 @@ export interface components {
        */
       contentStorageId?: number;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -2110,7 +2114,7 @@ export interface components {
     };
     ExportParams: {
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -3121,6 +3125,30 @@ export interface components {
       name?: string;
       roleType: "MEMBER" | "OWNER";
     };
+    OrganizationLanguageModel: {
+      /** @description Whether is base language of any project */
+      base: boolean;
+      /**
+       * @description Language flag emoji as UTF-8 emoji
+       * @example 🇨🇿
+       */
+      flagEmoji?: string;
+      /**
+       * @description Language name in english
+       * @example Czech
+       */
+      name: string;
+      /**
+       * @description Language name in this language
+       * @example čeština
+       */
+      originalName?: string;
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
+      tag: string;
+    };
     OrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
@@ -3237,6 +3265,12 @@ export interface components {
     PagedModelNotificationModel: {
       _embedded?: {
         notificationModelList?: components["schemas"]["NotificationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelOrganizationLanguageModel: {
+      _embedded?: {
+        languages?: components["schemas"]["OrganizationLanguageModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -8031,6 +8065,63 @@ export interface operations {
       };
     };
   };
+  /** Returns all languages in use by projects owned by specified organization */
+  getAllLanguagesInUse: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelOrganizationLanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Returns machine translation credit balance for organization */
   getOrganizationCredits: {
     parameters: {
@@ -11133,7 +11224,7 @@ export interface operations {
          */
         supportArrays?: boolean;
         /**
-         * If true, HTML tags are escaped in the exported file.
+         * If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
          *
          * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
          */
@@ -13554,6 +13645,8 @@ export interface operations {
         filterId?: number[];
         /** Filter languages without id */
         filterNotId?: number[];
+        /** Filter languages by name or tag */
+        search?: string;
       };
     };
     responses: {
@@ -14199,6 +14292,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        search?: string;
       };
       path: {
         projectId: number;
