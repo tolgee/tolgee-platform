@@ -20,13 +20,14 @@ export const GlossaryCreateForm: VFC<Props> = ({
     <Box display="grid">
       <TextField
         name="name"
+        autoFocus
         label={t('create_glossary_field_name')}
         placeholder={t('glossary_default_name')}
         data-cy="create-glossary-field-name"
         disabled={disabled}
       />
       <GlossaryBaseLanguageSelect
-        name="baseLanguageCode"
+        name="baseLanguage"
         organizationId={organizationId}
         disabled={disabled}
       />

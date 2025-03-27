@@ -32,10 +32,10 @@ export const GlossariesListView = () => {
     <BaseOrganizationSettingsView
       windowTitle={t('organization_glossaries_title')}
       link={LINKS.ORGANIZATION_GLOSSARIES}
-      title={t('organization_glossaries_title')}
+      title=" "
       navigation={[
         [
-          t('edit_organization_title'),
+          t('organization_glossaries_title'),
           LINKS.ORGANIZATION_GLOSSARIES.build({
             [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
           }),
