@@ -1,7 +1,7 @@
 import { components } from 'tg.service/apiSchema.generated';
 import React, { ComponentProps, useState } from 'react';
 import Box from '@mui/material/Box';
-import { useFormikContext } from 'formik';
+import {useField, useFormikContext} from 'formik';
 import { useTranslate } from '@tolgee/react';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
@@ -28,7 +28,10 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
 }) => {
   const context = useFormikContext();
   const { t } = useTranslate();
-  const value = context.getFieldProps(name).value as SelectedProjectModel[];
+  const [field, meta] = useField(name);
+  const value = field.value as SelectedProjectModel[];
+  // Formik returns error as object - schema is incorrect...
+  const error = (meta.error as any)?.id;
 
   const [search, setSearch] = useState('');
   const [searchDebounced] = useDebounce(search, 500);
@@ -119,6 +122,7 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
         renderItem={renderItem}
         labelItem={labelItem}
         label={t('create_glossary_field_project')}
+        error={meta.touched && error}
         searchPlaceholder={t('project_select_search_placeholder')}
         disabled={disabled}
       />
