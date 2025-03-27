@@ -3,6 +3,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { Chip } from '@mui/material';
 import { SubscriptionRowPlanInfo } from '../generic/SubscriptionRowPlanInfo';
 import { T } from '@tolgee/react';
+import { SubscriptionsSelfHostedPopover } from './SubscriptionsSelfHostedPopover';
 
 type AdministrationSubscriptionsSelfHostedEeSubscriptionsProps = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
@@ -12,7 +13,7 @@ export const AdministrationSubscriptionsSelfHostedEe: FC<
   AdministrationSubscriptionsSelfHostedEeSubscriptionsProps
 > = ({ item }) => {
   return (
-    <>
+    <SubscriptionsSelfHostedPopover item={item}>
       <SubscriptionRowPlanInfo
         dataCy={'administration-subscriptions-active-self-hosted-ee-plan'}
         label={
@@ -27,7 +28,7 @@ export const AdministrationSubscriptionsSelfHostedEe: FC<
       >
         <Label item={item} />
       </SubscriptionRowPlanInfo>
-    </>
+    </SubscriptionsSelfHostedPopover>
   );
 };
 

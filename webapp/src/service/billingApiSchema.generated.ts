@@ -62,11 +62,11 @@ export interface paths {
     delete: operations["removeAvatar"];
   };
   "/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan": {
-    /** Assigns a private free plan or trial plan to an organization. */
+    /** Assigns a private free plan or trial plan to an organization.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
     put: operations["assignCloudPlan"];
   };
   "/v2/administration/organizations/{organizationId}/billing/update-trial-end-date": {
-    put: operations["updateTrialEndDAte"];
+    put: operations["updateTrialEndDate"];
   };
   "/v2/billing/translation-agency": {
     get: operations["getAll"];
@@ -821,7 +821,7 @@ export interface components {
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
       organization: components["schemas"]["SimpleOrganizationModel"];
-      selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionModel"][];
+      selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionAdministrationModel"][];
     };
     PageMetadata: {
       /** Format: int64 */
@@ -1119,6 +1119,29 @@ export interface components {
        * @description Id of the subscription plan
        */
       planId: number;
+    };
+    SelfHostedEeSubscriptionAdministrationModel: {
+      /** Format: int64 */
+      createdAt: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      /** Format: int64 */
+      currentPeriodStart?: number;
+      estimatedCosts?: number;
+      /** Format: int64 */
+      id: number;
+      licenseKey?: string;
+      plan: components["schemas"]["SelfHostedEePlanAdministrationModel"];
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
     };
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
@@ -2507,7 +2530,7 @@ export interface operations {
       };
     };
   };
-  /** Assigns a private free plan or trial plan to an organization. */
+  /** Assigns a private free plan or trial plan to an organization.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
   assignCloudPlan: {
     parameters: {
       path: {
@@ -2556,7 +2579,7 @@ export interface operations {
       };
     };
   };
-  updateTrialEndDAte: {
+  updateTrialEndDate: {
     parameters: {
       path: {
         organizationId: number;
