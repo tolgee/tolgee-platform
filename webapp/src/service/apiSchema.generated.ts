@@ -2145,7 +2145,8 @@ export interface components {
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "llm_provider_not_found"
         | "llm_provider_error"
-        | "prompt_not_found";
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2929,14 +2930,27 @@ export interface components {
        * @deprecated
        * @description Services to be used for suggesting (deprecated: use enabledServicesInfo)
        */
-      enabledServices: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
+      enabledServices: (
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "PROMPT"
+      )[];
       /** @description Info about enabled services */
       enabledServicesInfo: components["schemas"]["MtServiceInfo"][];
       /**
        * @deprecated
        * @description Service used for automated translating (deprecated: use primaryServiceInfo)
        */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      primaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "PROMPT";
       primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
       /**
        * Format: int64
@@ -3061,14 +3075,27 @@ export interface components {
        * @deprecated
        * @description List of enabled services (deprecated: use enabledServicesInfo)
        */
-      enabledServices?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
+      enabledServices?: (
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "PROMPT"
+      )[];
       /** @description Info about enabled services */
       enabledServicesInfo?: components["schemas"]["MtServiceInfo"][];
       /**
        * @deprecated
        * @description This service will be used for automated translation
        */
-      primaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      primaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "PROMPT";
       primaryServiceInfo?: components["schemas"]["MtServiceInfo"];
       /**
        * Format: int64
@@ -3111,15 +3138,23 @@ export interface components {
     /** @description Info about enabled services */
     MtServiceInfo: {
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      /** Format: int64 */
+      promptId?: number;
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
     };
     MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      defaultPrimaryService?:
+        | "GOOGLE"
+        | "AWS"
+        | "DEEPL"
+        | "AZURE"
+        | "BAIDU"
+        | "PROMPT";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     MtSupportedService: {
       formalitySupported: boolean;
-      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
     };
     NamespaceModel: {
       /**
@@ -4751,7 +4786,8 @@ export interface components {
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "llm_provider_not_found"
         | "llm_provider_error"
-        | "prompt_not_found";
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -4768,7 +4804,7 @@ export interface components {
       keyId?: number;
       plural?: boolean;
       /** @description List of services to use. If null, then all enabled services are used. */
-      services?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU")[];
+      services?: ("GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT")[];
       /** Format: int64 */
       targetLanguageId: number;
     };
@@ -4967,7 +5003,7 @@ export interface components {
        */
       id: number;
       /** @description Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
       /** @description State of translation */
@@ -5003,7 +5039,7 @@ export interface components {
        */
       id: number;
       /** @description Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
       /** @description State of translation */

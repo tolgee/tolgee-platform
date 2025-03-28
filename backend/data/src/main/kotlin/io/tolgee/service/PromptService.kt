@@ -39,6 +39,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import java.io.ByteArrayInputStream
@@ -340,16 +341,27 @@ class PromptService(
     }
   }
 
-  fun translateViaPrompt(projectId: Long, data: PromptTestDto) {
+  @Transactional
+  fun translateViaPrompt(projectId: Long, data: PromptTestDto): MtValueProvider.MtResult {
     val project = projectService.get(projectId)
     val prompt = getPrompt(projectId, data)
     val messages = getLlmMessages(prompt, data)
     val response = runPrompt(project.organizationOwner.id, LLMParams(messages), data)
     val json = response.translated?.let { jacksonObjectMapper().readValue<JsonNode>(it) }
       ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
-    val result = json.get("output").asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
+    val translation = json.get("output").asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
+    return MtValueProvider.MtResult(
+      translation,
+      contextDescription = json.get("contextDescription").asText(),
+      price = 0,
+      usage = response.usage
+    )
+  }
+
+  fun translateAndUpdateTranslation(projectId: Long, data: PromptTestDto) {
+    val result = translateViaPrompt(projectId, data)
     val translation = translationService.getOrCreate(data.keyId, data.targetLanguageId)
-    translation.text = result
+    translation.text = result.translated
     translationService.save(translation)
   }
 

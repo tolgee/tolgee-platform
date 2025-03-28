@@ -1,7 +1,6 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.metadata.ExampleItem
-import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
@@ -11,15 +10,6 @@ import org.springframework.data.domain.Pageable
 class MetadataProvider(
   private val context: MtTranslatorContext,
 ) {
-  fun get(metadataKey: MetadataKey): Metadata {
-    val closeKeyIds = metadataKey.keyId?.let { bigMetaService.getCloseKeyIds(it) }
-    val keyDescription = context.keys[metadataKey.keyId]?.description
-
-    val targetLanguage = context.getLanguage(metadataKey.targetLanguageId)
-
-    return Metadata(prompt = "test")
-  }
-
   fun getCloseItems(
     sourceLanguage: LanguageDto,
     targetLanguage: LanguageDto,

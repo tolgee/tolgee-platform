@@ -171,10 +171,13 @@ class MtBatchTranslator(
       keyName = context.keys[item.keyId]?.name,
       sourceLanguageTag = context.baseLanguage.tag,
       targetLanguageTag = targetLanguageTag,
+      sourceLangaugeId = context.baseLanguage.id,
+      targetLangaugeId = item.targetLanguageId,
       serviceInfo = context.getServiceInfo(item.targetLanguageId, item.service),
-      metadata = context.getMetadata(item),
       isBatch = context.isBatch,
       pluralForms = pluralForms?.forms,
+      keyId = item.keyId,
+      projectId = context.project.id,
       pluralFormExamples =
         pluralFormsWithReplacedParam?.let {
           PluralTranslationUtil.getSourceExamples(

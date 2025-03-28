@@ -1,20 +1,11 @@
 package io.tolgee.constants
 
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
-import io.tolgee.component.machineTranslation.providers.AzureCognitiveTranslationProvider
-import io.tolgee.component.machineTranslation.providers.BaiduTranslationProvider
-import io.tolgee.component.machineTranslation.providers.DeeplTranslationProvider
-import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationServiceProperties
+import io.tolgee.component.machineTranslation.providers.*
+import io.tolgee.configuration.tolgee.machineTranslation.*
 
 enum class MtServiceType(
-  val propertyClass: Class<out MachineTranslationServiceProperties>,
+  val propertyClass: Class<out MachineTranslationServiceProperties>?,
   val providerClass: Class<out MtValueProvider>,
   val usesMetadata: Boolean = false,
   val supportsPlurals: Boolean = false,
@@ -45,11 +36,11 @@ enum class MtServiceType(
     providerClass = BaiduTranslationProvider::class.java,
     order = 5,
   ),
-//  TOLGEE(
-//    propertyClass = TolgeeMachineTranslationProperties::class.java,
-//    providerClass = TolgeeTranslationProvider::class.java,
-//    usesMetadata = true,
-//    order = -1,
-//    supportsPlurals = true,
-//  ),
+  PROMPT(
+    propertyClass = null,
+    providerClass = LLMTranslationProvider::class.java,
+    usesMetadata = true,
+    order = -1,
+    supportsPlurals = true,
+  ),
 }

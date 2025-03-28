@@ -55,7 +55,7 @@ class GenericAutoTranslationChunkProcessor(
           isBatch = true,
         )
       } else {
-        promptService.translateViaPrompt(
+        promptService.translateAndUpdateTranslation(
           job.projectId!!,
           PromptTestDto(
             template = llmPrompt.template,
