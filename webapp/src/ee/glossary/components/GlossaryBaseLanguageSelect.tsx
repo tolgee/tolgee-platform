@@ -1,7 +1,7 @@
 import { components } from 'tg.service/apiSchema.generated';
 import React, { ComponentProps, useState } from 'react';
 import Box from '@mui/material/Box';
-import {useField, useFormikContext} from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
