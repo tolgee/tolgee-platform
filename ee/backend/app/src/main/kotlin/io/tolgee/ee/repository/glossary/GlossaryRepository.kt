@@ -2,6 +2,8 @@ package io.tolgee.ee.repository.glossary
 
 import io.tolgee.model.glossary.Glossary
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -27,6 +29,20 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
   """,
   )
   fun findByOrganizationId(organizationId: Long): List<Glossary>
+
+  @Query(
+    """
+    from Glossary
+    where organizationOwner.id = :organizationId
+    and deletedAt is null
+    and (:search is null or lower(name) like lower(concat('%', cast(:search as text), '%')))
+  """,
+  )
+  fun findByOrganizationIdPaged(
+    organizationId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<Glossary>
 
   @Query(
     """

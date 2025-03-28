@@ -3208,6 +3208,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelGlossaryModel: {
+      _embedded?: {
+        glossaries?: components["schemas"]["GlossaryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelImportFileIssueModel: {
       _embedded?: {
         importFileIssues?: components["schemas"]["ImportFileIssueModel"][];
@@ -7779,12 +7785,21 @@ export interface operations {
       path: {
         organizationId: number;
       };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["GlossaryModel"][];
+          "application/json": components["schemas"]["PagedModelGlossaryModel"];
         };
       };
       /** Bad Request */
