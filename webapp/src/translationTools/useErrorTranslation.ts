@@ -175,6 +175,10 @@ export function useErrorTranslation() {
         return t('expired_jwt_token');
       case 'free_self_hosted_seat_limit_exceeded':
         return t('free_self_hosted_seat_limit_exceeded');
+      case 'llm_provider_not_found':
+        return t('llm_provider_not_found', { value: params?.[0] || '' });
+      case 'llm_provider_error':
+        return t('llm_provider_error', { value: params?.[0] || '' });
       default:
         return code;
     }

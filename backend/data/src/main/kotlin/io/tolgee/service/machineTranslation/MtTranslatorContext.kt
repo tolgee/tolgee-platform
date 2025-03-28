@@ -7,11 +7,13 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.PluralForms
+import io.tolgee.service.PromptService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.PluralTranslationUtil.Companion.REPLACE_NUMBER_PLACEHOLDER
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
+import org.springframework.data.domain.Pageable
 
 class MtTranslatorContext(
   private val projectId: Long,
@@ -26,7 +28,7 @@ class MtTranslatorContext(
     projectService.getDto(projectId)
   }
 
-  val metadata: MutableMap<MetadataKey, Metadata> = mutableMapOf()
+  val metadata: MutableMap<MetadataKey, MetadataKey> = mutableMapOf()
 
   val keys: MutableMap<Long, KeyForMt> = mutableMapOf()
 
@@ -171,22 +173,22 @@ class MtTranslatorContext(
     val newMetadataKeys =
       batch.filter { needsMetadata(it) }.mapNotNull {
         val baseTranslationText = it.baseTranslationText ?: return@mapNotNull null
-        MetadataKey(it.keyId, baseTranslationText, it.targetLanguageId)
+        MetadataKey(
+          it.keyId,
+          baseTranslationText,
+          it.targetLanguageId
+        )
       }.filter { !metadata.containsKey(it) }
     newMetadataKeys.forEach {
-      storeMetadata(it)
+      metadata[it] = it
     }
-  }
-
-  private fun storeMetadata(metadataKey: MetadataKey) {
-    metadata[metadataKey] = metadataProvider.get(metadataKey)
   }
 
   fun getLanguage(languageId: Long): LanguageDto {
     return languages[languageId] ?: throw IllegalStateException("Language $languageId not found")
   }
 
-  fun getMetadata(item: MtBatchItemParams): Metadata? {
+  fun getMetadata(item: MtBatchItemParams): MetadataKey? {
     val baseTranslationText =
       item.baseTranslationText
         ?: throw IllegalStateException("Base translation text not found")
@@ -203,7 +205,8 @@ class MtTranslatorContext(
       val language =
         languages[it]
           ?: throw IllegalStateException("Language $it not found")
-      mtServiceConfigService.getEnabledServiceInfos(language).toSet()
+      val result = mtServiceConfigService.getEnabledServiceInfos(language).toMutableSet()
+      result
     }
   }
 
@@ -229,6 +232,10 @@ class MtTranslatorContext(
 
   private val projectService: ProjectService by lazy {
     applicationContext.getBean(ProjectService::class.java)
+  }
+
+  private val promptService: PromptService by lazy {
+    applicationContext.getBean(PromptService::class.java)
   }
 
   private val mtServiceConfigService: MtServiceConfigService by lazy {

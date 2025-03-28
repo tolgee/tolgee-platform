@@ -360,6 +360,10 @@ class ScreenshotService(
     return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.thumbnailFilename}"
   }
 
+  fun getScreenshotPath(filename: String): String {
+    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/$filename"
+  }
+
   fun saveAll(screenshots: List<Screenshot>) {
     screenshotRepository.saveAll(screenshots)
   }
