@@ -9,6 +9,8 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.service.project.ProjectService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,10 +19,16 @@ class GlossaryService(
   private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-//  TODO: don't forget - paging support
-
   fun findAll(organizationId: Long): List<Glossary> {
     return glossaryRepository.findByOrganizationId(organizationId)
+  }
+
+  fun findAllPaged(
+    organizationId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<Glossary> {
+    return glossaryRepository.findByOrganizationIdPaged(organizationId, pageable, search)
   }
 
   fun find(
