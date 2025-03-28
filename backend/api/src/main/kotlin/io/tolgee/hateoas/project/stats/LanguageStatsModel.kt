@@ -18,5 +18,5 @@ open class LanguageStatsModel(
   val untranslatedKeyCount: Long,
   val untranslatedWordCount: Long,
   val untranslatedPercentage: Double,
-  val lastModified: Date?,
+  val translationsUpdatedAt: Date?,
 ) : RepresentationModel<LanguageStatsModel>()

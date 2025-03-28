@@ -13,5 +13,5 @@ interface ILanguageStats {
   val untranslatedPercentage: Double
   val translatedPercentage: Double
   val reviewedPercentage: Double
-  val lastModified: Date
+  val translationsUpdatedAt: Date?
 }

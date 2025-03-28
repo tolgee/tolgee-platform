@@ -15,5 +15,5 @@ data class LanguageStatsDto(
   override val untranslatedPercentage: Double,
   override val translatedPercentage: Double,
   override val reviewedPercentage: Double,
-  override val lastModified: Date,
+  override val translationsUpdatedAt: Date?
 ) : ILanguageStats
