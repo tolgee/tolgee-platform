@@ -79,7 +79,7 @@ export const BaseView: FC<BaseViewProps> = (props) => {
   const displayNavigation = props.customNavigation || props.navigation;
 
   const displayHeader =
-    props.title ||
+    props.title !== undefined ||
     props.customHeader ||
     props.onSearch ||
     props.onAdd ||
@@ -127,7 +127,7 @@ export const BaseView: FC<BaseViewProps> = (props) => {
               {props.customHeader || (
                 <Box display="flex" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap="8px">
-                    {props.title && (
+                    {props.title !== undefined && (
                       <Typography variant="h4">{props.title}</Typography>
                     )}
                     {typeof props.onSearch === 'function' && (

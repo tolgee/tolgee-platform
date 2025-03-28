@@ -40,7 +40,7 @@ class OrganizationProjectController(
   private val projectWithStatsFacade: ProjectWithStatsFacade,
   private val languageService: LanguageService,
   private val organizationLanguageModelAssembler: OrganizationLanguageModelAssembler,
-  private val pagedAssembler: PagedResourcesAssembler<OrganizationLanguageDto>,
+  private val pagedOrganizationLanguageAssembler: PagedResourcesAssembler<OrganizationLanguageDto>,
 ) {
   @GetMapping("/{id:[0-9]+}/projects")
   @Operation(
@@ -129,6 +129,6 @@ class OrganizationProjectController(
     @PathVariable organizationId: Long,
   ): PagedModel<OrganizationLanguageModel> {
     val languages = languageService.getPagedByOrganization(organizationId, pageable, search)
-    return pagedAssembler.toModel(languages, organizationLanguageModelAssembler)
+    return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
   }
 }

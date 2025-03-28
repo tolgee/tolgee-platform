@@ -252,7 +252,13 @@ declare namespace DataCy {
         "global-plus-button" |
         "global-search-field" |
         "global-user-menu-button" |
+        "glossaries-empty-add-button" |
+        "glossaries-list-more-button" |
         "glossary-base-language-select" |
+        "glossary-delete-button" |
+        "glossary-edit-button" |
+        "glossary-list-languages" |
+        "glossary-view-button" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |

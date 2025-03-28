@@ -10,12 +10,17 @@ import io.tolgee.ee.data.glossary.CreateGlossaryRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
 import io.tolgee.ee.service.glossary.GlossaryService
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -32,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController
 class GlossaryController(
   private val glossaryService: GlossaryService,
   private val glossaryModelAssembler: GlossaryModelAssembler,
+  private val pagedAssembler: PagedResourcesAssembler<Glossary>,
   private val organizationHolder: OrganizationHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
@@ -122,16 +129,16 @@ class GlossaryController(
   fun getAll(
     @PathVariable
     organizationId: Long,
-  ): List<GlossaryModel> {
-    // TODO paging
+    @ParameterObject pageable: Pageable,
+    @RequestParam("search") search: String?,
+  ): PagedModel<GlossaryModel> {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
     )
 
     val organization = organizationHolder.organization
-    return glossaryService.findAll(organization.id).map {
-      glossaryModelAssembler.toModel(it)
-    }
+    val glossaries = glossaryService.findAllPaged(organization.id, pageable, search)
+    return pagedAssembler.toModel(glossaries, glossaryModelAssembler)
   }
 }

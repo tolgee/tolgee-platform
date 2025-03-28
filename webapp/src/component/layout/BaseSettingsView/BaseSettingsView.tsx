@@ -54,7 +54,7 @@ export const BaseSettingsView: React.FC<Props> = ({
 
         <StyledContainer style={{ maxWidth: containerMaxWidth }}>
           <StyledContent>
-            {title && (
+            {(title !== undefined || addLinkTo || onAdd) && (
               <Box sx={{ mb: 2, display: 'flex' }}>
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="h6">{title}</Typography>
