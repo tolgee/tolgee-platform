@@ -1,5 +1,7 @@
 package io.tolgee.api
 
+import java.util.*
+
 interface ILanguageStats {
   val languageId: Long
   val untranslatedWords: Long
@@ -11,4 +13,5 @@ interface ILanguageStats {
   val untranslatedPercentage: Double
   val translatedPercentage: Double
   val reviewedPercentage: Double
+  val translationsUpdatedAt: Date?
 }
