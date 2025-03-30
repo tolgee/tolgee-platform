@@ -17,9 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 class StreamingImportProgressUtil(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) : Logging {
-  fun stream(
-    fn: (writeStatus: (status: ImportApplicationStatus) -> Unit) -> Unit,
-  ): ResponseEntity<StreamingResponseBody> {
+  fun stream(fn: (writeStatus: (status: ImportApplicationStatus) -> Unit) -> Unit): ResponseEntity<StreamingResponseBody> {
     return streamingResponseBodyProvider.streamNdJson { write ->
       val writeStatus = { status: ImportApplicationStatus ->
         write(ImportApplicationStatusItem(status))

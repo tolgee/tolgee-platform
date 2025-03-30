@@ -66,9 +66,7 @@ class RelationDataProvider(
     return missing
   }
 
-  private fun getRelationsForRevisions(
-    missing: Set<Triple<Long, String, Long>>,
-  ): MutableList<ActivityDescribingEntity> {
+  private fun getRelationsForRevisions(missing: Set<Triple<Long, String, Long>>): MutableList<ActivityDescribingEntity> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createQuery(ActivityDescribingEntity::class.java)
     val root = query.from(ActivityDescribingEntity::class.java)

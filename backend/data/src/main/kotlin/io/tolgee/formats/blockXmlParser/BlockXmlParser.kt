@@ -34,8 +34,7 @@ class BlockXmlParser {
     }
   }
 
-  private fun getAttributes(event: StartElement) =
-    event.attributes.asSequence().map { it.name.localPart to it.value }.toMap()
+  private fun getAttributes(event: StartElement) = event.attributes.asSequence().map { it.name.localPart to it.value }.toMap()
 
   private var idCounter = 0
   val rootModel = ModelElement("root", idCounter++, null)

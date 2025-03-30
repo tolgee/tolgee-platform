@@ -104,13 +104,12 @@ class SlackIntegrationDataProvider(
    * In other words this returns all "siblings" of the translation with the given id, so we can populate the cache
    * for whole key with all it's translations
    */
-  private fun getTranslationsViaEntityManagerByTranslationId(
-    translationId: Long,
-  ): MutableList<SlackTranslationInfoDto> =
-    getQuery()
+  private fun getTranslationsViaEntityManagerByTranslationId(translationId: Long): MutableList<SlackTranslationInfoDto> {
+    return getQuery()
       .setParameter("keyId", null)
       .setParameter("translationId", translationId)
       .resultList
+  }
 
   private fun getQuery(): TypedQuery<SlackTranslationInfoDto> =
     entityManager.createQuery(

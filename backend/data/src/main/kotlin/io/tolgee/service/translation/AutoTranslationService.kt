@@ -343,8 +343,7 @@ class AutoTranslationService(
     return autoTranslationConfigRepository.save(config)
   }
 
-  fun getConfigs(project: Project) =
-    addDefaultConfig(project, autoTranslationConfigRepository.findAllByProject(project))
+  fun getConfigs(project: Project) = addDefaultConfig(project, autoTranslationConfigRepository.findAllByProject(project))
 
   private fun addDefaultConfig(
     project: Project,

@@ -232,8 +232,7 @@ class KeyComplexEditHelper(
     dto.pluralArgName ?: key.pluralArgName
   }
 
-  private fun getExistingTranslationsByTag() =
-    existingTranslations.map { languageByTag(it.key) to it.value.text }.toMap()
+  private fun getExistingTranslationsByTag() = existingTranslations.map { languageByTag(it.key) to it.value.text }.toMap()
 
   private fun getModifiedTranslationsByTag() =
     modifiedTranslations!!

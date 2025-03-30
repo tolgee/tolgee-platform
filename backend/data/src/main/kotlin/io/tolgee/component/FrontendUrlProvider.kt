@@ -35,11 +35,13 @@ class FrontendUrlProvider(
     }
   }
 
-  fun getSubscriptionsUrl(organizationSlug: String): String =
-    "${this.url}/organizations/$organizationSlug/subscriptions"
+  fun getSubscriptionsUrl(organizationSlug: String): String {
+    return "${this.url}/organizations/$organizationSlug/subscriptions"
+  }
 
-  fun getSelfHostedSubscriptionsUrl(organizationSlug: String): String =
-    "${this.url}/organizations/$organizationSlug/subscriptions/self-hosted-ee"
+  fun getSelfHostedSubscriptionsUrl(organizationSlug: String): String {
+    return "${this.url}/organizations/$organizationSlug/subscriptions/self-hosted-ee"
+  }
 
   fun getInvoicesUrl(organizationSlug: String): String {
     return "${this.url}/organizations/$organizationSlug/invoices"

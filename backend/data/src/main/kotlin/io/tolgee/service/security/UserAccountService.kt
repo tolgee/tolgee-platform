@@ -536,8 +536,7 @@ class UserAccountService(
     applicationEventPublisher.publishEvent(event)
   }
 
-  fun saveAll(userAccounts: Collection<UserAccount>): MutableList<UserAccount> =
-    userAccountRepository.saveAll(userAccounts)
+  fun saveAll(userAccounts: Collection<UserAccount>): MutableList<UserAccount> = userAccountRepository.saveAll(userAccounts)
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun save(user: UserAccount): UserAccount {

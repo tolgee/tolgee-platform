@@ -161,9 +161,7 @@ class ImportDataManager(
     }
   }
 
-  private fun getOrInitLanguageDataItem(
-    language: ImportLanguage,
-  ): MutableMap<ImportKey, MutableList<ImportTranslation>> {
+  private fun getOrInitLanguageDataItem(language: ImportLanguage): MutableMap<ImportKey, MutableList<ImportTranslation>> {
     return this.storedTranslations.computeIfAbsent(language) { mutableMapOf() }
   }
 
@@ -358,9 +356,7 @@ class ImportDataManager(
     importService.deleteAllBetweenFileCollisionsForFiles(fileIds, languageIds)
   }
 
-  fun checkForOtherFilesCollisions(
-    newTranslation: ImportTranslation,
-  ): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
+  fun checkForOtherFilesCollisions(newTranslation: ImportTranslation): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
     return checkForOtherFilesCollisions(newTranslation, getLanguagesWithSameExisting(newTranslation.language))
   }
 

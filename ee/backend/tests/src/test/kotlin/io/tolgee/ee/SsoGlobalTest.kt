@@ -199,9 +199,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
       "test-org",
     )
 
-  fun loginAsSsoUser(
-    tokenResponse: ResponseEntity<OAuth2TokenResponse>? = SsoMultiTenantsMocks.defaultTokenResponse,
-  ): MvcResult {
+  fun loginAsSsoUser(tokenResponse: ResponseEntity<OAuth2TokenResponse>? = SsoMultiTenantsMocks.defaultTokenResponse): MvcResult {
     return ssoMultiTenantsMocks.authorize("domain.com", tokenResponse = tokenResponse)
   }
 }

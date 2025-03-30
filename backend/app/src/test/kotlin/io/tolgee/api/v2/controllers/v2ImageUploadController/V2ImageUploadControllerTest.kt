@@ -106,7 +106,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
     performAuthDelete("/v2/image-upload/$idsToDelete", null).andIsOk
     val rest = imageUploadService.find(list.map { it.id }.toSet())
-    assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
+    assertThat(rest.sortedBy { it.id }).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
 
     list.asSequence().take(10).forEach {
       fileStorage.fileExists("uploadedImages/${it.filenameWithExtension}").assert.isFalse()
