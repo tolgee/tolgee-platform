@@ -7,6 +7,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.LanguageStats
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
+import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.LanguageStatsProvider
 import io.tolgee.util.Logging
@@ -24,6 +25,7 @@ class LanguageStatsService(
   private val languageService: LanguageService,
   private val projectStatsService: ProjectStatsService,
   private val languageStatsRepository: LanguageStatsRepository,
+  private val translationRepository: TranslationRepository,
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
   private val lockingProvider: LockingProvider,
@@ -58,6 +60,9 @@ class LanguageStatsService(
                 languageStats.computeIfAbsent(language.id) {
                   LanguageStats(entityManager.getReference(Language::class.java, language.id))
                 }
+
+              val lastUpdatedAt = translationRepository.getLastModifiedDate(language.id)
+
               stats.apply {
                 translatedKeys = rawLanguageStats.translatedKeys
                 translatedWords = rawLanguageStats.translatedWords
@@ -68,6 +73,7 @@ class LanguageStatsService(
                 untranslatedKeys = projectStats.keyCount - translatedOrReviewedKeys
                 this.untranslatedWords = baseWords - translatedOrReviewedWords
                 untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100
+                translationsUpdatedAt = lastUpdatedAt
               }
             }
 
