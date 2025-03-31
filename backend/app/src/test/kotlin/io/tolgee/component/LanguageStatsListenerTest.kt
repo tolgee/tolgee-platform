@@ -49,6 +49,7 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
           languageStatsService.getLanguageStats(projectId = testData.project.id)
             .find { projectLanguages[it.languageId]!!.tag == "de" }
         assertThat(newDeutschStats!!.untranslatedWords - 1).isEqualTo(deutschStats?.untranslatedWords)
+        assertThat(newDeutschStats.translationsUpdatedAt!!.after(deutschStats!!.translationsUpdatedAt))
       }
     }
   }
