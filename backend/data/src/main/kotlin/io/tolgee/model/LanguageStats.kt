@@ -37,10 +37,7 @@ class LanguageStats(
 
   override var reviewedPercentage: Double = 0.0
 
-  override val translationsUpdatedAt: Date?
-    get() = language.translations
-      .mapNotNull { it.updatedAt ?: it.createdAt }
-      .maxByOrNull { it }
+  override var translationsUpdatedAt: Date? = null
 
   override val languageId: Long
     get() = language.id
