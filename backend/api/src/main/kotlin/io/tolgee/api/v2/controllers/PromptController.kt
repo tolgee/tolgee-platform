@@ -95,8 +95,8 @@ class PromptController(
   @Operation(summary = "Get variables")
   @UseDefaultPermissions
   fun variables(
-    @RequestParam keyId: Long,
-    @RequestParam targetLanguageId: Long,
+    @RequestParam keyId: Long?,
+    @RequestParam targetLanguageId: Long?,
   ): VariablesResponseDto {
     return VariablesResponseDto(
       promptService.getVariables(projectHolder.project.id, keyId, targetLanguageId)

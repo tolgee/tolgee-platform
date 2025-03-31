@@ -19,6 +19,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.key.Key
 import io.tolgee.repository.PromptRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
@@ -27,10 +28,12 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MetadataKey
 import io.tolgee.service.machineTranslation.MetadataProvider
 import io.tolgee.service.machineTranslation.MtTranslatorContext
+import io.tolgee.service.machineTranslation.PluralTranslationUtil
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.ImageConverter
+import org.aspectj.weaver.ast.Var
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -56,7 +59,7 @@ class PromptService(
   private val providerService: LLMProviderService,
   private val openaiApiService: OpenaiApiService,
   private val ollamaApiService: OllamaApiService,
-  private val projectHolder: ProjectHolder,
+  private val promptFragmentsService: PromptFragmentsService,
 ) {
   fun getAllPaged(
     projectId: Long,
@@ -124,109 +127,181 @@ class PromptService(
 
   fun getVariables(
     projectId: Long,
-    keyId: Long,
-    targetLanguageId: Long,
+    keyId: Long?,
+    targetLanguageId: Long?,
   ): MutableList<Variable> {
-    val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-    keyService.checkInProject(key, projectId)
+    var key: Key? = null
+    if (keyId !== null) {
+      key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+      keyService.checkInProject(key, projectId)
+    }
+
     val project = projectService.get(projectId)
 
-    val tLanguage =
+    val tLanguage = targetLanguageId?.let {
       languageService.find(targetLanguageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    }
     val sLanguage = languageService.get(project.baseLanguage!!.id, projectId)
 
-    val sTranslation = translationService.find(key, sLanguage).getOrNull()
-    val tTranslation = translationService.find(key, tLanguage).getOrNull()
+    val sTranslation = key?.let { translationService.find(it, sLanguage).getOrNull() }
+    val tTranslation = key?.let { tLanguage?.let { translationService.find(key, tLanguage).getOrNull() } }
 
     val variables = mutableListOf<Variable>()
 
     val source = Variable("source")
     val target = Variable("target")
 
-
     source.props.add(Variable("language", sLanguage.name))
     source.props.add(Variable("translation", sTranslation?.text ?: ""))
 
-    target.props.add(Variable("language", tLanguage.name))
+    target.props.add(Variable("language", tLanguage?.name))
     target.props.add(Variable("translation", tTranslation?.text ?: ""))
 
+    val context = MtTranslatorContext(projectId, applicationContext, false)
+    val pluralFormsWithReplacedParam =
+      if (key != null && key.isPlural && sTranslation != null && tLanguage?.tag != null) context.getPluralFormsReplacingReplaceParam(
+        sTranslation.text ?: ""
+      ) else null
+    val pluralSourceExamples = pluralFormsWithReplacedParam?.let {
+      PluralTranslationUtil.getSourceExamples(
+        context.baseLanguage.tag,
+        tLanguage!!.tag,
+        it,
+      )
+    }
+
+    target.props.add(
+      Variable(
+        "pluralFormExamples", value = pluralSourceExamples?.map { "${it.key} (e.g. ${it.value})" }?.joinToString("\n")
+      )
+    )
+
+    target.props.add(
+      Variable(
+        "exactForms",
+        value = pluralSourceExamples?.map { it.key }?.joinToString(" "))
+    )
+
+    target.props.add(
+      Variable(
+        "exampleIcuPlural",
+        value = pluralSourceExamples?.let { "{count, plural, ${it.map { "${it.key} {...}" }.joinToString(" ") }}" }
+      )
+    )
 
     variables.add(source)
     variables.add(target)
 
-    variables.add(Variable("projectName", project.name))
-    variables.add(Variable("projectDescription", project.aiTranslatorPromptDescription ?: ""))
-    variables.add(Variable("keyName", key.name))
+    val projectVar = Variable("project")
 
-    val screenshots = key.keyScreenshotReferences
+    projectVar.props.add(Variable("name", project.name))
+    projectVar.props.add(Variable("description", project.aiTranslatorPromptDescription ?: ""))
 
-    variables.add(
+    variables.add(projectVar)
+
+    val keyVar = Variable("key")
+    keyVar.props.add(Variable("name", key?.name))
+    keyVar.props.add(Variable("description", key?.keyMeta?.description ?: ""))
+    variables.add(keyVar)
+
+    val relatedKeys = Variable("relatedKeys")
+    relatedKeys.props.add(
       Variable(
-        "allScreenshots",
-        encodeScreenshots(screenshots, "small"),
-      ),
-    )
-
-    variables.add(
-      Variable(
-        "allScreenshotsFull",
-        encodeScreenshots(screenshots, "full"),
-      ),
-    )
-
-    variables.add(
-      Variable(
-        "firstScreenshot",
-        encodeScreenshots(screenshots.take(1), "small"),
-      ),
-    )
-
-    variables.add(
-      Variable(
-        "firstScreenshotFull",
-        encodeScreenshots(screenshots.take(1), "full"),
-      ),
-    )
-
-    variables.add(
-      Variable(
-        "relatedKeysJson",
+        "json",
         description = "Related keys in json format (based on context extraction)",
         lazyValue = {
           val context = MtTranslatorContext(projectId, applicationContext, false)
           val metadataProvider = MetadataProvider(context)
-          val closeItems = metadataProvider.getCloseItems(
-            sLanguage,
-            tLanguage,
-            MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id),
-          )
-          closeItems.joinToString("\n") {
+          val closeItems = tLanguage?.let {
+            key?.let {
+              metadataProvider.getCloseItems(
+                sLanguage,
+                tLanguage,
+                MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id),
+              )
+            }
+          }
+          if (!closeItems.isNullOrEmpty()) closeItems.joinToString("\n") {
             val mapper = ObjectMapper()
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
             mapper.writeValueAsString(it)
-          }
+          } else null
         },
       ),
     )
+    variables.add(relatedKeys)
 
-    val fragments = Variable("fragments")
-
-    fragments.props.add(
+    val translationMemory = Variable("translationMemory")
+    translationMemory.props.add(
       Variable(
-        "translateJson",
-        """Return result in json
-```
-{
-   "output": <translation>,
-   "contextDescription": <description>
-}
-```""",
+        "json", description = "", lazyValue = {
+          val context = MtTranslatorContext(projectId, applicationContext, false)
+          val metadataProvider = MetadataProvider(context)
+          val closeItems = tLanguage?.let {
+            key?.let {
+              metadataProvider.getExamples(
+                tLanguage,
+                isPlural = key.isPlural,
+                text = sTranslation?.text ?: "",
+                keyId = key.id,
+              )
+            }
+          }
+          if (!closeItems.isNullOrEmpty()) closeItems.joinToString("\n") {
+            val mapper = ObjectMapper()
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            mapper.writeValueAsString(it)
+          } else null
+        })
+    )
+    variables.add(translationMemory)
+
+    val screenshots = key?.keyScreenshotReferences
+    val screenshotsVar = Variable("screenshots")
+
+    screenshotsVar.props.add(
+      Variable(
+        "first",
+        screenshots?.let { encodeScreenshots(it.take(1), "small") },
       ),
     )
 
+    screenshotsVar.props.add(
+      Variable(
+        "firstFull",
+        screenshots?.let { encodeScreenshots(it.take(1), "full") },
+      ),
+    )
+
+    screenshotsVar.props.add(
+      Variable(
+        "all",
+        screenshots?.let { encodeScreenshots(it, "small") },
+      ),
+    )
+
+    screenshotsVar.props.add(
+      Variable(
+        "allFull",
+        screenshots?.let { encodeScreenshots(it, "full") },
+      ),
+    )
+
+    variables.add(screenshotsVar)
+
+    val fragments = Variable("fragments", props = promptFragmentsService.getAllFragments())
     variables.add(fragments)
 
     return variables
+  }
+
+  fun createVariablesLazyMap(params: List<Variable>): LazyMap {
+    val mapParams = params.map {
+      it.name to it
+    }.toMap()
+    val lazyMap = LazyMap()
+    lazyMap.setMap(mapParams)
+    return lazyMap
   }
 
   fun getPrompt(
@@ -236,15 +311,18 @@ class PromptService(
     val params = getVariables(projectId, data.keyId, data.targetLanguageId)
     val handlebars = Handlebars()
 
-    val mapParams = params.map {
-      it.name to it
-    }.toMap()
+    val paramsForFragments = createVariablesLazyMap(params)
 
-    val lazyMap = LazyMap()
-    lazyMap.setMap(mapParams)
+    val fragments = params.find { it.name == "fragments" }?.props
 
+    fragments?.forEach {
+      val template = handlebars.compileInline(it.value)
+      it.value = template.apply(paramsForFragments)
+    }
+
+    val finalParams = createVariablesLazyMap(params)
     val template = handlebars.compileInline(data.template)
-    val prompt = template.apply(lazyMap)
+    val prompt = template.apply(finalParams)
     return prompt
   }
 
@@ -392,7 +470,7 @@ class PromptService(
     class Variable(
       val name: String,
       var value: String? = null,
-      var lazyValue: (() -> String)? = null,
+      var lazyValue: (() -> String?)? = null,
       val description: String? = null,
       val props: MutableList<Variable> = mutableListOf(),
     ) {

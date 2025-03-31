@@ -14,6 +14,7 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.checkerframework.checker.units.qual.Temperature
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpEntity
@@ -146,6 +147,7 @@ class OpenaiApiService(
       val stop: Boolean? = null,
       val messages: List<OpenaiMessage>,
       val model: String?,
+      val temperature: Long? = 0,
     )
 
     class OpenaiMessage(

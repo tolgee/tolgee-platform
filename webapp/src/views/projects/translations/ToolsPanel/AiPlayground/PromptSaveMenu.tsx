@@ -85,7 +85,9 @@ export const PromptSaveMenu = ({ projectId, data }: Props) => {
                     updatePrompt.mutate(
                       {
                         path: { projectId, promptId: item.id },
-                        content: { 'application/json': { ...data, name } },
+                        content: {
+                          'application/json': { ...data, name: item.name },
+                        },
                       },
                       {
                         onSuccess() {

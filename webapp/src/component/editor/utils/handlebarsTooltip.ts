@@ -14,20 +14,20 @@ export const handlebarsTooltip = (
   hoverTooltip((context, pos, side) => {
     const tree = syntaxTree(context.state);
     const node = tree.resolveInner(pos);
-    const variableName = context.state.doc
-      .toString()
-      .substring(node.from, node.to);
-    const path = variableName.split('.');
 
-    let variable: PromptVariableDto | undefined = {
-      name: '',
-      props: variablesRef.current,
-    };
-    path.forEach(
-      (item) => (variable = variable?.props?.find((i) => i.name === item))
-    );
+    if (node.name === 'Identifier') {
+      const variableName = context.state.doc
+        .toString()
+        .substring(node.from, node.to);
+      const path = variableName.split('.');
 
-    if (node.name === 'Identifier' && variable) {
+      let variable: PromptVariableDto | undefined = {
+        name: '',
+        props: variablesRef.current,
+      };
+      path.forEach(
+        (item) => (variable = variable?.props?.find((i) => i.name === item))
+      );
       return {
         pos: node.from,
         end: node.to,
