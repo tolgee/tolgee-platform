@@ -34,7 +34,8 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
       ls.reviewedKeys,
       ls.untranslatedPercentage,
       ls.translatedPercentage,
-      ls.reviewedPercentage
+      ls.reviewedPercentage,
+      ls.translationsUpdatedAt
     )
     from LanguageStats ls
     where ls.language.project.id in :projectIds and ls.language.deletedAt is null
