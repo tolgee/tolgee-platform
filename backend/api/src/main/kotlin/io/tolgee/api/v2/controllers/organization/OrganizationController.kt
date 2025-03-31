@@ -311,7 +311,6 @@ class OrganizationController(
   ): PublicUsageModel {
     val organization = organizationService.get(organizationId)
     val creditBalances = mtCreditConsumer.getCreditBalances(organization.id)
-    val currentTranslationSlots = organizationStatsService.getTranslationSlotCount(organizationId)
     val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)
     val currentTranslations = organizationStatsService.getTranslationCount(organizationId)
@@ -329,11 +328,8 @@ class OrganizationController(
       currentPayAsYouGoMtCredits = currentPayAsYouGoMtCredits,
       availablePayAsYouGoMtCredits = availablePayAsYouGoMtCredits,
       currentTranslations = currentTranslations,
-      currentTranslationSlots = currentTranslationSlots,
       includedTranslations = limits.strings.included,
       translationsLimit = limits.strings.limit,
-      includedTranslationSlots = limits.translationSlots.included,
-      translationSlotsLimit = limits.translationSlots.limit,
       includedKeys = limits.keys.included,
       keysLimit = limits.keys.limit,
       includedSeats = limits.seats.included,

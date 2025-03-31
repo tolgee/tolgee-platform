@@ -17,10 +17,7 @@ export const getCloudPlanInitialValues = (
       },
       includedUsage: {
         ...planData.includedUsage,
-        translations:
-          planData.type === 'SLOTS_FIXED'
-            ? planData.includedUsage.translationSlots
-            : planData.includedUsage.translations,
+        translations: planData.includedUsage.translations,
       },
     } as CloudPlanFormData;
   }

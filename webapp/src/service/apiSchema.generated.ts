@@ -1337,7 +1337,7 @@ export interface components {
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -1455,7 +1455,7 @@ export interface components {
        */
       contentStorageId?: number;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -2094,7 +2094,7 @@ export interface components {
     };
     ExportParams: {
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -3483,8 +3483,6 @@ export interface components {
       /** Format: int64 */
       seats: number;
       /** Format: int64 */
-      translationSlots: number;
-      /** Format: int64 */
       translations: number;
     };
     PlanPricesModel: {
@@ -3944,11 +3942,6 @@ export interface components {
       includedSeats: number;
       /**
        * Format: int64
-       * @description How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs
-       */
-      includedTranslationSlots: number;
-      /**
-       * Format: int64
        * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
        */
       includedTranslations: number;
@@ -3966,11 +3959,6 @@ export interface components {
        * @description How many seats can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
        */
       seatsLimit: number;
-      /**
-       * Format: int64
-       * @description How many translations can be stored within your organization
-       */
-      translationSlotsLimit: number;
       /**
        * Format: int64
        * @description How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
@@ -10906,7 +10894,7 @@ export interface operations {
          */
         supportArrays?: boolean;
         /**
-         * If true, HTML tags are escaped in the exported file.
+         * If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
          *
          * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
          */
@@ -13972,6 +13960,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        search?: string;
       };
       path: {
         projectId: number;

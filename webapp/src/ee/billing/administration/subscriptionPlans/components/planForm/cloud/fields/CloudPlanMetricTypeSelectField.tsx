@@ -20,10 +20,6 @@ export const CloudPlanMetricTypeSelectField: FC<
     { value: 'STRINGS', label: 'Strings' },
   ] satisfies { value: MetricType; label: string }[];
 
-  if (values.type == 'SLOTS_FIXED') {
-    return null;
-  }
-
   return (
     <Select
       label={t('administration_cloud_plan_field_metric_type')}

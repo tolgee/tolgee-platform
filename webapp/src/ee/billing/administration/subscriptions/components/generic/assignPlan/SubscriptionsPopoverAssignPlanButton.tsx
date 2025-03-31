@@ -2,7 +2,9 @@ import { Button } from '@mui/material';
 import { T } from '@tolgee/react';
 import React from 'react';
 
-export const AssignPlanButton = (props: { onClick: () => void }) => {
+export const SubscriptionsPopoverAssignPlanButton = (props: {
+  onClick: () => void;
+}) => {
   return (
     <Button
       color="primary"

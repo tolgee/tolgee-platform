@@ -4,6 +4,7 @@ import { Box, Tooltip } from '@mui/material';
 import { CloudPlanPrices } from './CloudPlanPrices';
 import { PlanIncludedUsageFields } from '../../genericFields/PlanIncludedUsageFields';
 import { usePlanFormValues } from '../usePlanFormValues';
+import { PlanPricesFields } from '../../genericFields/PlanPricesFields';
 
 export const CloudPlanPricesAndLimits: FC<{
   parentName?: string;
@@ -13,7 +14,7 @@ export const CloudPlanPricesAndLimits: FC<{
 
   return (
     <Wrapper canEditPrices={canEditPrices}>
-      <CloudPlanPrices parentName={parentName} />
+      <PlanPricesFields parentName={parentName} />
       <PlanIncludedUsageFields
         parentName={parentName}
         metricType={values['metricType']}

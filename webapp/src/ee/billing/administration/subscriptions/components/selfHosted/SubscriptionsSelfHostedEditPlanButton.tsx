@@ -19,7 +19,7 @@ export const SubscriptionsSelfHostedEditPlanButton: FC<{
     <SubscriptionsEditPlanButton
       isExclusive={isExclusive}
       link={
-        LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
+        LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.build({
           [PARAMS.PLAN_ID]: planId,
         }) + `?editingForOrganizationId=${organizationId}`
       }

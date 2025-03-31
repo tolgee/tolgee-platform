@@ -54,6 +54,12 @@ export const useCloudPlans = () => {
     public: true,
     nonCommercial: false,
     metricType: 'KEYS_SEATS',
+    includedUsage: {
+      seats: -2,
+      keys: -2,
+      mtCredits: -2,
+      translations: -2,
+    },
   });
 
   const parentForPublic: PlanType[] = [];

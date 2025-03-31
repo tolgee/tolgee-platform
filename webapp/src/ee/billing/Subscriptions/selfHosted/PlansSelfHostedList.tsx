@@ -53,6 +53,12 @@ export const PlansSelfHostedList: FC<BillingPlansProps> = ({
       'ORDER_TRANSLATION',
       'SSO',
     ] as const satisfies SelfHostedEePlanModel['enabledFeatures'],
+    includedUsage: {
+      seats: -2,
+      keys: -2,
+      mtCredits: -2,
+      translations: -2,
+    },
     free: false,
     hasYearlyPrice: false,
     public: true,

@@ -5,7 +5,6 @@ import { PlanType } from '../../component/Plan/types';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 import { FreePlan } from '../../component/Plan/freePlan/FreePlan';
 import { useCloudPlans } from './useCloudPlans';
-import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
 import { CloudPlanItem } from './CloudPlanItem';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];

@@ -14,9 +14,4 @@ enum class CloudSubscriptionPlanType(
    * Plans where user cannot exceed included translations
    */
   FIXED(false, false),
-
-  /**
-   * Plans where user cannot exceed included translation slots
-   */
-  SLOTS_FIXED(false, true),
 }

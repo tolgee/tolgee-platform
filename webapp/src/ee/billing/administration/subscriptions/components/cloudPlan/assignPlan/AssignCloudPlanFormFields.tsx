@@ -9,11 +9,11 @@ import {
 import { AssignTrialDatePicker } from './AssignTrialDatePicker';
 import { T, useTranslate } from '@tolgee/react';
 import { AssignCloudPlanSelectorField } from './AssignCloudPlanSelectorField';
-import { CloudPlanFields } from '../../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanFields';
+import { CloudPlanFields } from '../../../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanFields';
 import { AssignCloudPlanValuesType } from './AssignCloudPlanDialog';
 import { FormikProps, useFormikContext } from 'formik';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { getCloudPlanInitialValues } from '../../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
+import { getCloudPlanInitialValues } from '../../../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
 import { Switch } from 'tg.component/common/form/fields/Switch';
 
 type AssignCloudPlanFormProps = {

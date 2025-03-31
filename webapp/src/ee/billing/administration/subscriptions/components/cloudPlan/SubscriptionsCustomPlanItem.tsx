@@ -2,18 +2,24 @@ import React, { FC } from 'react';
 import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
 import { Edit02 } from '@untitled-ui/icons-react';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 type CloudCustomPlanItemProps = {
-  plan: components['schemas']['AdministrationCloudPlanModel'];
+  plan: {
+    id: number;
+    name: string;
+    prices: components['schemas']['PlanPricesModel'];
+    exclusiveForOrganizationId: number;
+  };
   organizationId: number;
+  editLink: string;
 };
 
-export const CloudCustomPlanItem: FC<CloudCustomPlanItemProps> = ({
+export const SubscriptionsCustomPlanItem: FC<CloudCustomPlanItemProps> = ({
   plan,
   organizationId,
+  editLink,
 }) => {
   return (
     <Box
@@ -40,9 +46,7 @@ export const CloudCustomPlanItem: FC<CloudCustomPlanItemProps> = ({
         data-cy={'administration-billing-edit-custom-plan-button'}
         sx={{ p: '4px', ml: 1 }}
         component={Link}
-        to={`${LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
-          [PARAMS.PLAN_ID]: plan.id,
-        })}?editingForOrganizationId=${organizationId}`}
+        to={editLink}
       >
         <Edit02 height="20px" width="20px" />
       </IconButton>

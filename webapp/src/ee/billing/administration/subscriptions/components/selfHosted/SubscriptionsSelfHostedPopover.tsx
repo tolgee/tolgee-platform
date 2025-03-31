@@ -3,15 +3,21 @@ import { SubscriptionsDetailPopover } from '../generic/SubscriptionsDetailPopove
 import { components } from 'tg.service/billingApiSchema.generated';
 import { SubscriptionCurrentPlanInfo } from '../generic/SubscriptionCurrentPlanInfo';
 import { SubscriptionsSelfHostedEditPlanButton } from './SubscriptionsSelfHostedEditPlanButton';
+import { SubscriptionsPopoverAssignPlanButton } from '../generic/assignPlan/SubscriptionsPopoverAssignPlanButton';
+import { SubscriptionsPopoverSelfHostedCustomPlans } from './SubscriptionsPopoverSelfHostedCustomPlans';
+import { Box } from '@mui/material';
+import { SubscriptionsPopoverCreateCustomPlanButton } from '../generic/SubscriptionsPopoverCreateCustomPlanButton';
+import { LINKS } from 'tg.constants/links';
 
 type SubscriptionsSelfHostedPopoverProps = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
   children: React.ReactElement;
+  onOpenAssignTrialDialog: () => void;
 };
 
 export const SubscriptionsSelfHostedPopover: FC<
   SubscriptionsSelfHostedPopoverProps
-> = ({ item, children }) => {
+> = ({ item, children, onOpenAssignTrialDialog }) => {
   return (
     <SubscriptionsDetailPopover
       popoverContent={
@@ -28,6 +34,19 @@ export const SubscriptionsSelfHostedPopover: FC<
               }
             />
           ))}
+          <SubscriptionsPopoverSelfHostedCustomPlans item={item} />
+          <Box mt={3}>
+            <SubscriptionsPopoverAssignPlanButton
+              onClick={onOpenAssignTrialDialog}
+            />
+            <SubscriptionsPopoverCreateCustomPlanButton
+              link={
+                LINKS.ADMINISTRATION_BILLING_EE_PLAN_CREATE.build() +
+                '?creatingForOrganizationId=' +
+                item.organization.id
+              }
+            />
+          </Box>
         </>
       }
     >
