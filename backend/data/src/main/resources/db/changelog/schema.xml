@@ -4192,4 +4192,9 @@
     <changeSet author="anty (generated)" id="1741689879651-1">
         <dropColumn columnName="account_type" tableName="auth_provider_change_request"/>
     </changeSet>
+    <changeSet id="1743416359510-1" author="icodetea">
+        <addColumn tableName="language_stats">
+            <column name="translations_updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
