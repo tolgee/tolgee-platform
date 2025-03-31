@@ -102,7 +102,6 @@ export const Plan: FC<Props> = ({
             <IncludedUsage
               metricType={plan.metricType}
               includedUsage={plan.includedUsage}
-              isLegacy={isPlanLegacy(plan)}
               highlightColor={highlightColor}
               sx={{ alignSelf: 'center' }}
             />

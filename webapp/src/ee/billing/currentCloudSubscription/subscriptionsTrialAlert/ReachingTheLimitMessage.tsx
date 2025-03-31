@@ -11,8 +11,6 @@ export const ReachingTheLimitMessage: FC<SubscriptionsTrialAlertProps> = (
   }
 
   const runningOutOfMtCredits = props.usage.creditProgress.progress > 0.9;
-  const runningOutOfTranslations =
-    props.usage.translationSlotsProgress.progress > 0.9;
   const runningOutOfKeys = props.usage.keysProgress.progress > 0.9;
   const runningOutOfSeats = props.usage.seatsProgress.progress > 0.9;
   const runningOutOfStrings = props.usage.stringsProgress.progress > 0.9;

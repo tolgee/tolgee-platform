@@ -23,11 +23,6 @@ class BaseLimitsProvider : LimitsProvider {
           included = -1,
           limit = -1,
         ),
-      translationSlots =
-        UsageLimits.Limit(
-          included = -1,
-          limit = -1,
-        ),
       isTrial = false,
     )
   }

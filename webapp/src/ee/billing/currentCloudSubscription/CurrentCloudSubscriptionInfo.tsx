@@ -99,16 +99,6 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
               )}
           </Box>
 
-          {activeSubscription.plan.type === 'SLOTS_FIXED' && (
-            <PlanMetric
-              name={t('billing_actual_used_translations')}
-              progress={progressData.translationSlotsProgress}
-              periodEnd={activeSubscription.currentPeriodEnd}
-              isPayAsYouGo={isPayAsYouGo}
-              data-cy="billing-actual-used-strings"
-            />
-          )}
-
           {activeSubscription.plan.metricType === 'STRINGS' && (
             <PlanMetric
               name={

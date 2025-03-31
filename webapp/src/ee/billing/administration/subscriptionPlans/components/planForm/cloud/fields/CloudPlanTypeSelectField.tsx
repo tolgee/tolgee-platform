@@ -19,7 +19,6 @@ export const CloudPlanTypeSelectField: FC<PlanTypeSelectFieldProps> = ({
   const typeOptions = [
     { value: 'PAY_AS_YOU_GO', label: 'Pay as you go', enabled: !values.free },
     { value: 'FIXED', label: 'Fixed', enabled: true },
-    { value: 'SLOTS_FIXED', label: 'Slots fixed (legacy)', enabled: true },
   ] as PlanTypeOption[];
 
   return (
