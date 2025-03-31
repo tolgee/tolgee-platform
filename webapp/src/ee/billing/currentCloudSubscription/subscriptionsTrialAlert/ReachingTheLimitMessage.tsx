@@ -17,7 +17,6 @@ export const ReachingTheLimitMessage: FC<SubscriptionsTrialAlertProps> = (
 
   if (
     !runningOutOfMtCredits &&
-    !runningOutOfTranslations &&
     !runningOutOfKeys &&
     !runningOutOfSeats &&
     !runningOutOfStrings

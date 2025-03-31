@@ -34,7 +34,7 @@ export const SubscriptionCurrentPlanInfo: FC<
   const isTrial = Boolean(props.subscription.status === 'TRIALING');
 
   return (
-    <>
+    <Box data-cy="administration-subscriptions-current-plan-info" mb={2}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Typography variant={'h3'} sx={{ display: 'inline', fontSize: '20px' }}>
           {props.subscription.plan.name}{' '}
@@ -83,6 +83,6 @@ export const SubscriptionCurrentPlanInfo: FC<
           <T keyName="admin_billing_cloud_subscription_view_in_stripe" />
         </Button>
       )}
-    </>
+    </Box>
   );
 };

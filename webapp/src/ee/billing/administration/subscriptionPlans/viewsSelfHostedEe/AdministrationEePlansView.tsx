@@ -31,6 +31,7 @@ export const AdministrationEePlansView = () => {
   const plansLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/self-hosted-ee-plans',
     method: 'get',
+    query: {},
   });
 
   const deletePlanLoadable = useBillingApiMutation({

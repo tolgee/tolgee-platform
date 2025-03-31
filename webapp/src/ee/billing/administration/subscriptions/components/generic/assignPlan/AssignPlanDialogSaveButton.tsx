@@ -15,7 +15,7 @@ export const AssignPlanDialogSaveButton: FC<
       loading={saveMutation.isLoading}
       color="primary"
       variant="contained"
-      data-cy="administration-subscriptions-assign-plan-button"
+      data-cy="administration-subscriptions-assign-plan-save-button"
     >
       <T keyName="administartion_billing_assign-plan-save_button" />
     </LoadingButton>

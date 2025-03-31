@@ -232,7 +232,7 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
     };
     AdministrationCloudSubscriptionModel: {
       cancelAtPeriodEnd: boolean;
@@ -339,7 +339,7 @@ export interface components {
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
     };
     CloudPlanRequest: {
       /** Format: date-time */
@@ -375,7 +375,7 @@ export interface components {
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId: string;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
       /** Format: date-time */
       usableUntil?: string;
     };
@@ -759,7 +759,6 @@ export interface components {
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "strings_metric_are_not_supported"
-        | "keys_seats_metric_are_not_supported_for_slots_fixed_type"
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded";
