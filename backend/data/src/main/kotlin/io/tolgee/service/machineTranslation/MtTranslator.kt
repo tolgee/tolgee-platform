@@ -70,6 +70,7 @@ class MtTranslator(
               baseTranslationText = params.baseTranslationText ?: getBaseTranslation(params.keyId),
               targetLanguageId = targetLanguageId,
               service = serviceInfo.serviceType,
+              promptId = serviceInfo.promptId,
             ),
           )
         }

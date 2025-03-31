@@ -33,7 +33,7 @@ export const handleApiError = (
       console.warn('Redirecting to login - unauthorized user');
       messageService.error(
         resObject?.code ? (
-          <TranslatedError code={resObject?.code} />
+          <TranslatedError code={resObject?.code} params={resObject?.params} />
         ) : (
           <T keyName="expired_jwt_token" />
         )
@@ -62,7 +62,12 @@ export const handleApiError = (
           // Safety net check: Don't redirect if user is already on one of the SSO migration pages
           // This shouldn't happen; It means frontend is trying to load one of the disabled
           // endpoints in the background and it should be fixed
-          messageService.error(<TranslatedError code={resObject?.code} />);
+          messageService.error(
+            <TranslatedError
+              code={resObject?.code}
+              params={resObject?.params}
+            />
+          );
           return;
         }
         globalContext.actions?.redirectTo(LINKS.SSO_MIGRATION.build());
@@ -75,7 +80,7 @@ export const handleApiError = (
 
       messageService.error(
         resObject?.code ? (
-          <TranslatedError code={resObject?.code} />
+          <TranslatedError code={resObject?.code} params={resObject?.params} />
         ) : (
           <T keyName="operation_not_permitted_error" />
         )
@@ -100,7 +105,9 @@ export const handleApiError = (
   if (r.status == 400 && !options.disableErrorNotification) {
     const parsed = parseErrorResponse(resObject);
     parsed.forEach((message) =>
-      messageService.error(<TranslatedError code={message} />)
+      messageService.error(
+        <TranslatedError code={message} params={resObject?.params} />
+      )
     );
     return;
   }

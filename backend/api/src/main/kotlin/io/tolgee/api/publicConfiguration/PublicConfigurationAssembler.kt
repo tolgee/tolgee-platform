@@ -116,7 +116,7 @@ class PublicConfigurationAssembler(
         .associateWith {
           PublicConfigurationDTO.MtServiceDTO(
             applicationContext.getBean(it.providerClass).isEnabled,
-            applicationContext.getBean(it.propertyClass).defaultEnabled,
+            it.propertyClass?.let { applicationContext.getBean(it).defaultEnabled } ?: true,
           )
         }
     return mtServices

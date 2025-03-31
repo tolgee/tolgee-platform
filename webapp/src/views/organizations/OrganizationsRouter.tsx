@@ -14,6 +14,7 @@ import { OrganizationProfileView } from './OrganizationProfileView';
 import { useOrganization } from './useOrganization';
 import { OrganizationAppsView } from './apps/OrganizationAppsView';
 import { routes } from 'tg.ee';
+import { OrganizationLLMProvidersView } from './OrganizationLLMProvidersView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -40,6 +41,9 @@ const SpecificOrganizationRouter = () => {
 
           <PrivateRoute path={LINKS.ORGANIZATION_APPS.template}>
             <OrganizationAppsView />
+          </PrivateRoute>
+          <PrivateRoute path={LINKS.ORGANIZATION_LLM_PROVIDERS.template}>
+            <OrganizationLLMProvidersView />
           </PrivateRoute>
           <routes.Organization />
         </>

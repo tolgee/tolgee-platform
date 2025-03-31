@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Box, IconButton, styled, Typography } from '@mui/material';
-import { useProject } from 'tg.hooks/useProject';
 
 import {
   useTranslationsActions,
@@ -12,7 +11,7 @@ import { getPanels, PANELS_WHEN_INACTIVE } from './panelsList';
 import { useOpenPanels } from './useOpenPanels';
 import { XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { usePanelData } from './usePanelData';
 
 const StyledButton = styled(IconButton)`
   position: absolute;
@@ -37,13 +36,11 @@ const StyledPanelList = styled(Box)`
 `;
 
 export const ToolsPanel = () => {
-  const project = useProject();
   const keyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const languageTag = useTranslationsSelector((c) => c.cursor?.language);
-  const activeVariant = useTranslationsSelector((c) => c.cursor?.activeVariant);
   const translations = useTranslationsSelector((c) => c.translations);
   const languages = useTranslationsSelector((c) => c.languages);
-  const { setEditValueString, setSidePanelOpen } = useTranslationsActions();
+  const { setSidePanelOpen } = useTranslationsActions();
 
   const [openPanels, setOpenPanels] = useOpenPanels();
 
@@ -58,37 +55,8 @@ export const ToolsPanel = () => {
   const baseLanguage = useMemo(() => {
     return languages?.find((l) => l.base);
   }, [languages]);
-  const translation = language?.tag
-    ? keyData?.translations[language.tag]
-    : undefined;
-
   const displayPanels = keyData && language && baseLanguage;
-  const projectPermissions = useProjectPermissions();
-
-  const dataProps = {
-    project,
-    keyData: keyData!,
-    language: language!,
-    baseLanguage: baseLanguage!,
-    activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
-    setValue: setEditValueString,
-    editEnabled: language
-      ? (projectPermissions.satisfiesLanguageAccess(
-          'translations.edit',
-          language.id
-        ) &&
-          translation?.state !== 'DISABLED') ||
-        Boolean(
-          keyData?.tasks?.find(
-            (t) =>
-              t.languageTag === language.tag &&
-              t.userAssigned &&
-              t.type === 'TRANSLATE'
-          )
-        )
-      : false,
-    projectPermissions,
-  };
+  const dataProps = usePanelData();
 
   return (
     <StyledWrapper>

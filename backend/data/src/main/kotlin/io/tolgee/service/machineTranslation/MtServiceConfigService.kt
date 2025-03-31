@@ -13,6 +13,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
+import io.tolgee.service.PromptService
 import io.tolgee.service.language.LanguageService
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +28,9 @@ class MtServiceConfigService(
   private val mtServiceConfigRepository: MtServiceConfigRepository,
   private val entityManager: EntityManager,
 ) {
+  @Autowired
+  private lateinit var promptService: PromptService
+
   @set:Autowired
   @set:Lazy
   lateinit var languageService: LanguageService
@@ -62,15 +66,17 @@ class MtServiceConfigService(
   private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> {
     return services.asSequence()
       .sortedBy { it.key.order }
-      .sortedByDescending { it.value.first.defaultPrimary }
-      .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
+      .sortedByDescending { it.value.first?.defaultPrimary ?: true }
+      .filter { it.value.first?.defaultEnabled ?: true && it.value.second.isEnabled && language.isSupportedBy(it.key) }
       .map { it.key }
       .map { MtServiceInfo(it, null) }
       .toMutableList()
   }
 
   private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
-    return services.filter { it.value.first.defaultPrimary && it.value.second.isEnabled }.keys.minByOrNull { it.order }
+    return services.filter {
+      (it.value.first?.defaultPrimary ?: true) && it.value.second.isEnabled
+    }.keys.minByOrNull { it.order }
   }
 
   private fun getEnabledServiceInfosByStoredConfig(language: LanguageDto): List<MtServiceInfo>? {
@@ -113,6 +119,16 @@ class MtServiceConfigService(
               this.targetLanguage = entityManager.getReference(Language::class.java, it)
             }
           }
+
+      entity.prompt =
+        (languageSetting.primaryServiceInfo?.promptId
+          ?: languageSetting.enabledServicesInfo?.find { it.promptId != null }?.promptId)?.let {
+          promptService.findPrompt(
+            project.id,
+            it
+          )
+        }
+
 
       setPrimaryService(entity, languageSetting)
       entity.enabledServices = getEnabledServices(languageSetting)
@@ -251,7 +267,7 @@ class MtServiceConfigService(
       when (it.serviceType) {
         MtServiceType.AWS -> entity.awsFormality = it.formality ?: Formality.DEFAULT
         MtServiceType.DEEPL -> entity.deeplFormality = it.formality ?: Formality.DEFAULT
-        MtServiceType.TOLGEE -> entity.tolgeeFormality = it.formality ?: Formality.DEFAULT
+//        MtServiceType.TOLGEE -> entity.tolgeeFormality = it.formality ?: Formality.DEFAULT
         else -> {}
       }
     }
@@ -282,7 +298,7 @@ class MtServiceConfigService(
   private fun getDefaultConfig(project: Project): MtServiceConfig {
     return MtServiceConfig().apply {
       enabledServices =
-        services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
+        services.filter { it.value.first?.defaultEnabled ?: true && it.value.second.isEnabled }
           .keys.toMutableSet()
       this.project = project
       primaryService = getPrimaryServiceByDefaultConfig()
@@ -349,7 +365,7 @@ class MtServiceConfigService(
 
   val services by lazy {
     MtServiceType.entries.associateWith {
-      (applicationContext.getBean(it.propertyClass) to applicationContext.getBean(it.providerClass))
+      (it.propertyClass?.let { applicationContext.getBean(it) } to applicationContext.getBean(it.providerClass))
     }
   }
 }
