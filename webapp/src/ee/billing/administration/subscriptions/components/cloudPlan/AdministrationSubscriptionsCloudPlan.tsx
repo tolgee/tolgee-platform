@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { SubscriptionCloudPlanPopover } from './SubscriptionCloudPlanPopover';
-import { AssignCloudPlanDialog } from './AssignCloudPlanDialog';
+import { AssignCloudPlanDialog } from './assignPlan/AssignCloudPlanDialog';
 import { T } from '@tolgee/react';
 import { SubscriptionRowPlanInfo } from '../generic/SubscriptionRowPlanInfo';
 import { Box } from '@mui/material';
@@ -11,13 +11,13 @@ type Props = {
 };
 
 export const AdministrationSubscriptionsCloudPlan: FC<Props> = ({ item }) => {
-  const [assignTrialDialogOpen, setAssignTrialDialogOpen] = useState(false);
+  const [assignPlanDialogOpen, setAssignPlanDialogOpen] = useState(false);
 
   return (
     <>
       <SubscriptionCloudPlanPopover
         item={item}
-        onOpenAssignTrialDialog={() => setAssignTrialDialogOpen(true)}
+        onOpenAssignPlanDialog={() => setAssignPlanDialogOpen(true)}
       >
         <Box>
           <SubscriptionRowPlanInfo
@@ -33,9 +33,8 @@ export const AdministrationSubscriptionsCloudPlan: FC<Props> = ({ item }) => {
         </Box>
       </SubscriptionCloudPlanPopover>
       <AssignCloudPlanDialog
-        organizationId={item.organization.id}
-        open={assignTrialDialogOpen}
-        handleClose={() => setAssignTrialDialogOpen(false)}
+        open={assignPlanDialogOpen}
+        onClose={() => setAssignPlanDialogOpen(false)}
         item={item}
       />
     </>

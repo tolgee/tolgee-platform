@@ -20,7 +20,6 @@ declare namespace DataCy {
         "administration-assign-plan-dialog-not-trial-not-free-alert" |
         "administration-assign-plan-dialog-organization-paying-alert" |
         "administration-assign-plan-dialog-trial-switch" |
-        "administration-assign-trial-assign-button" |
         "administration-billing-creating-for-organization-alert" |
         "administration-billing-edit-custom-plan-button" |
         "administration-billing-exclusive-plan-chip" |
@@ -73,6 +72,7 @@ declare namespace DataCy {
         "administration-plan-field-stripe-product" |
         "administration-plan-selector" |
         "administration-subscriptions-active-self-hosted-ee-plan" |
+        "administration-subscriptions-assign-plan-button" |
         "administration-subscriptions-cloud-plan-name" |
         "administration-subscriptions-custom-plans-item" |
         "administration-subscriptions-plan-popover" |
@@ -140,7 +140,6 @@ declare namespace DataCy {
         "billing-plan-included-keys" |
         "billing-plan-included-seats" |
         "billing-plan-included-strings" |
-        "billing-plan-included-translation-slots" |
         "billing-plan-monthly-price" |
         "billing-plan-price-extra-seat" |
         "billing-plan-price-extra-thousand-keys" |
@@ -206,6 +205,7 @@ declare namespace DataCy {
         "expiration-date-field" |
         "expiration-date-picker" |
         "expiration-select" |
+        "export-escape_html-selector" |
         "export-format-selector" |
         "export-format-selector-item" |
         "export-language-selector" |
@@ -218,6 +218,8 @@ declare namespace DataCy {
         "export-state-selector-item" |
         "export-submit-button" |
         "export-support_arrays-selector" |
+        "filter-item" |
+        "filter-item-exclude" |
         "form-submit-button" |
         "former-user-name" |
         "generate-api-key-dialog-description-input" |
@@ -552,6 +554,7 @@ declare namespace DataCy {
         "storage-item-edit" |
         "storage-list-item" |
         "storage-subtitle" |
+        "submenu-item" |
         "subscribe-cancels-trial-plan-tooltip" |
         "subscriptions-trial-alert" |
         "subscriptions-trial-alert-reaching-the-limit" |
@@ -649,10 +652,12 @@ declare namespace DataCy {
         "translations-cell-task-button" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
-        "translations-filter-clear-all" |
-        "translations-filter-option" |
+        "translations-filter-apply-for-all" |
+        "translations-filter-apply-for-expand" |
+        "translations-filter-apply-for-language" |
+        "translations-filter-apply-no-base" |
         "translations-filter-select" |
-        "translations-filters-subheader" |
+        "translations-filter-select-clear" |
         "translations-history-load-more-button" |
         "translations-key-cell-description" |
         "translations-key-count" |

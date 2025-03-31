@@ -65,6 +65,10 @@ export interface paths {
     /** Assigns a private free plan or trial plan to an organization.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
     put: operations["assignCloudPlan"];
   };
+  "/v2/administration/organizations/{organizationId}/billing/assign-self-hosted-plan": {
+    /** Assigns a self-hosted plan to an organization. If plan is free, it's assigned as active plan.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
+    put: operations["assignSelfHostedPlan"];
+  };
   "/v2/administration/organizations/{organizationId}/billing/update-trial-end-date": {
     put: operations["updateTrialEndDate"];
   };
@@ -256,12 +260,19 @@ export interface components {
       /** Format: int64 */
       trialEnd?: number;
     };
-    AssignPlanRequest: {
+    AssignCloudPlanRequest: {
       customPlan?: components["schemas"]["CloudPlanRequest"];
       /** Format: int64 */
       planId?: number;
       /** Format: int64 */
       trialEnd?: number;
+    };
+    AssignSelfHostedPlanRequest: {
+      /**
+       * Format: int64
+       * @description Id of the subscription plan
+       */
+      planId: number;
     };
     Avatar: {
       large: string;
@@ -931,8 +942,6 @@ export interface components {
       mtCredits: number;
       /** Format: int64 */
       seats: number;
-      /** Format: int64 */
-      translationSlots: number;
       /** Format: int64 */
       translations: number;
     };
@@ -2575,7 +2584,56 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["AssignPlanRequest"];
+        "application/json": components["schemas"]["AssignCloudPlanRequest"];
+      };
+    };
+  };
+  /** Assigns a self-hosted plan to an organization. If plan is free, it's assigned as active plan.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
+  assignSelfHostedPlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignSelfHostedPlanRequest"];
       };
     };
   };

@@ -1,32 +1,25 @@
 import React, { FC } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Form, Formik } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@mui/material';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { Dialog } from '@mui/material';
 
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { getCloudPlanInitialValues } from '../../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
+import { getCloudPlanInitialValues } from '../../../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useTestClock } from 'tg.service/useTestClock';
 import { useCurrentDate } from 'tg.hooks/useCurrentDate';
-import { CloudPlanFormData } from '../../../subscriptionPlans/components/planForm/cloud/types';
+import { CloudPlanFormData } from '../../../../subscriptionPlans/components/planForm/cloud/types';
 import { AssignCloudPlanFormFields } from './AssignCloudPlanFormFields';
 import { components } from 'tg.service/billingApiSchema.generated';
+import { AssignCloudPlanDialogForm } from '../../generic/assignPlan/AssignCloudPlanDialogForm';
 
 export const AssignCloudPlanDialog: FC<{
   open: boolean;
-  handleClose: () => void;
-  organizationId: number;
+  onClose: () => void;
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
-}> = ({ handleClose, open, organizationId, item }) => {
+}> = ({ onClose, open, item }) => {
   const assignMutation = useBillingApiMutation({
     url: '/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan',
     method: 'put',
@@ -51,7 +44,7 @@ export const AssignCloudPlanDialog: FC<{
   ) => {
     assignMutation.mutate(
       {
-        path: { organizationId },
+        path: { organizationId: item.organization.id },
         content: {
           'application/json': {
             planId: value.customize ? undefined : value.planId!,
@@ -68,7 +61,7 @@ export const AssignCloudPlanDialog: FC<{
       },
       {
         onSuccess() {
-          handleClose();
+          onClose();
           resetForm();
           messaging.success(
             <T keyName="administration-subscription-plan-assigned-success-message" />
@@ -89,7 +82,7 @@ export const AssignCloudPlanDialog: FC<{
   const currentDate = useCurrentDate();
 
   return (
-    <Dialog open={open} fullWidth maxWidth="lg" onClose={handleClose}>
+    <Dialog open={open} fullWidth maxWidth="lg" onClose={onClose}>
       <Formik
         initialValues={
           {
@@ -109,32 +102,17 @@ export const AssignCloudPlanDialog: FC<{
           customPlan: Validation.CLOUD_PLAN_FORM,
         })}
       >
-        <Form>
-          <DialogTitle>
-            <T keyName="administration-subscription-assign-plan-dialog-title" />
-          </DialogTitle>
-          <DialogContent sx={{ display: 'grid', gap: '16px' }}>
+        <AssignCloudPlanDialogForm
+          fields={
             <AssignCloudPlanFormFields
               defaultTrialDate={currentDaPlus2weeks}
-              organizationId={organizationId}
+              organizationId={item.organization.id}
               isCurrentlyPaying={isCurrentlyPaying}
             />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>
-              <T keyName="global_cancel_button" />
-            </Button>
-            <LoadingButton
-              type="submit"
-              loading={assignMutation.isLoading}
-              color="primary"
-              variant="contained"
-              data-cy="administration-assign-trial-assign-button"
-            >
-              <T keyName="administartion_billing_assign-trial-save_button" />
-            </LoadingButton>
-          </DialogActions>
-        </Form>
+          }
+          onClose={onClose}
+          saveMutation={assignMutation}
+        />
       </Formik>
     </Dialog>
   );

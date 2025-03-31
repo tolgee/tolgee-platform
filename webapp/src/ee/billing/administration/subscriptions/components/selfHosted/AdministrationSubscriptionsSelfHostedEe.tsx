@@ -1,9 +1,10 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Chip } from '@mui/material';
 import { SubscriptionRowPlanInfo } from '../generic/SubscriptionRowPlanInfo';
 import { T } from '@tolgee/react';
 import { SubscriptionsSelfHostedPopover } from './SubscriptionsSelfHostedPopover';
+import { AssignSelfHostedPlanDialog } from './AssignSelfHostedPlanDialog';
 
 type AdministrationSubscriptionsSelfHostedEeSubscriptionsProps = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
@@ -12,23 +13,35 @@ type AdministrationSubscriptionsSelfHostedEeSubscriptionsProps = {
 export const AdministrationSubscriptionsSelfHostedEe: FC<
   AdministrationSubscriptionsSelfHostedEeSubscriptionsProps
 > = ({ item }) => {
+  const [assignPlanDialogOpen, setAssignPlanDialogOpen] = useState(false);
+
   return (
-    <SubscriptionsSelfHostedPopover item={item}>
-      <SubscriptionRowPlanInfo
-        dataCy={'administration-subscriptions-active-self-hosted-ee-plan'}
-        label={
-          <>
-            <T
-              keyName={
-                'administration-subscriptions-active-self-hosted-ee-plan-cell'
-              }
-            />
-          </>
-        }
+    <>
+      <SubscriptionsSelfHostedPopover
+        item={item}
+        onOpenAssignTrialDialog={() => setAssignPlanDialogOpen(true)}
       >
-        <Label item={item} />
-      </SubscriptionRowPlanInfo>
-    </SubscriptionsSelfHostedPopover>
+        <SubscriptionRowPlanInfo
+          dataCy={'administration-subscriptions-active-self-hosted-ee-plan'}
+          label={
+            <>
+              <T
+                keyName={
+                  'administration-subscriptions-active-self-hosted-ee-plan-cell'
+                }
+              />
+            </>
+          }
+        >
+          <Label item={item} />
+        </SubscriptionRowPlanInfo>
+      </SubscriptionsSelfHostedPopover>
+      <AssignSelfHostedPlanDialog
+        open={assignPlanDialogOpen}
+        onClose={() => setAssignPlanDialogOpen(false)}
+        item={item}
+      />
+    </>
   );
 };
 

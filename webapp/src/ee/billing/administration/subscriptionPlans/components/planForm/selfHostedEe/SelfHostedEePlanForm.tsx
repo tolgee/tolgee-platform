@@ -5,7 +5,6 @@ import { PlanEnabledFeaturesField } from '../genericFields/PlanEnabledFeaturesFi
 import { PlanIncludedUsageFields } from '../genericFields/PlanIncludedUsageFields';
 import { PlanNonCommercialSwitch } from '../genericFields/PlanNonCommercialSwitch';
 import React, { ReactElement } from 'react';
-import { PlanPricesFields } from '../genericFields/PlanPricesFields';
 import { PlanStripeProductSelectField } from '../genericFields/PlanStripeProductSelectField';
 import { PlanFreePlanSwitch } from '../genericFields/PlanFreePlanSwitch';
 import { PlanPublicSwitchField } from '../genericFields/PlanPublicSwitchField';
@@ -13,6 +12,7 @@ import { PlanNameField } from '../genericFields/PlanNameField';
 import { SelfHostedEePlanFormData } from '../cloud/types';
 import { SelfHostedEePlanTypeSelectField } from './fields/SelfHostedEePlanTypeSelectField';
 import { PlanSaveButton } from '../genericFields/PlanSaveButton';
+import { PlanPricesFields } from '../genericFields/PlanPricesFields';
 
 type Props = {
   initialData: SelfHostedEePlanFormData;
@@ -55,7 +55,7 @@ export function SelfHostedEePlanForm({
             <SelfHostedEePlanTypeSelectField />
             <PlanStripeProductSelectField />
           </Box>
-          <PlanPricesFields isPayAsYouGo={initialData.isPayAsYouGo} />
+          <PlanPricesFields />
           <PlanIncludedUsageFields />
           <PlanEnabledFeaturesField />
           <PlanNonCommercialSwitch />

@@ -4,19 +4,30 @@ import { Box, Typography } from '@mui/material';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useTranslate } from '@tolgee/react';
 import { PlanType } from '../../../../../component/Plan/types';
+import { usePlanFormValues } from '../cloud/usePlanFormValues';
+import { CloudPlanFormData } from '../cloud/types';
+import { useSetZeroPricesWhenFree } from '../../../../subscriptions/components/generic/useSetZeroPricesWhenFree';
 
 export interface PlanPricesFieldsProps {
   parentName?: string;
-  isPayAsYouGo: boolean;
   metricType?: PlanType['metricType'];
 }
 
 export const PlanPricesFields: FC<PlanPricesFieldsProps> = ({
   parentName = '',
-  isPayAsYouGo,
   metricType = 'KEYS_SEATS',
 }) => {
+  const { values } = usePlanFormValues<CloudPlanFormData>(parentName);
+
+  useSetZeroPricesWhenFree({ parentName });
+
   const { t } = useTranslate();
+
+  const isPayAsYouGo = values.type === 'PAY_AS_YOU_GO';
+
+  if (values.free) {
+    return null;
+  }
 
   return (
     <>

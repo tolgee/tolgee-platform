@@ -4,13 +4,6 @@ import { BILLING_CRITICAL_FRACTION } from './constants';
 type UsageModel = components['schemas']['PublicUsageModel'];
 
 export const getProgressData = ({ usage }: { usage: UsageModel }) => {
-  const usesSlots = usage.translationSlotsLimit !== -1;
-
-  const translationSlotsProgress = new ProgressItem(
-    usage.includedTranslationSlots,
-    usage.currentTranslationSlots
-  );
-
   const stringsProgress = new ProgressItem(
     usage.includedTranslations,
     usage.currentTranslations
@@ -29,7 +22,6 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
   );
 
   const mostCriticalProgress = Math.max(
-    translationSlotsProgress.progress,
     stringsProgress.progress,
     keysProgress.progress,
     seatsProgress.progress
@@ -40,8 +32,6 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
     Number(mostCriticalProgress) > BILLING_CRITICAL_FRACTION;
 
   return {
-    usesSlots,
-    translationSlotsProgress,
     stringsProgress,
     keysProgress,
     seatsProgress,
