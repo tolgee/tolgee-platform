@@ -63,6 +63,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("reviewedKeyCount").isEqualTo(3)
           node("reviewedWordCount").isEqualTo(3)
           node("reviewedPercentage").isEqualTo(42.857142857142854)
+          node("translationsUpdatedAt").isNotNull
         }
         node("[1]") {
           node("languageId").isValidId
@@ -79,6 +80,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("untranslatedKeyCount").isEqualTo(5)
           node("untranslatedWordCount").isEqualTo(5)
           node("untranslatedPercentage").isEqualTo(71.42857142857143)
+          node("translationsUpdatedAt").isNotNull
         }
       }
     }
