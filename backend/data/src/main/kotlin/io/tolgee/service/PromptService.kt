@@ -149,10 +149,14 @@ class PromptService(
     val variables = mutableListOf<Variable>()
 
     val source = Variable("source")
-    val target = Variable("target")
 
     source.props.add(Variable("language", sLanguage.name))
     source.props.add(Variable("translation", sTranslation?.text ?: ""))
+    source.props.add(Variable("languageNote", sLanguage.aiTranslatorPromptDescription ?: ""))
+    variables.add(source)
+
+
+    val target = Variable("target")
 
     target.props.add(Variable("language", tLanguage?.name))
     target.props.add(Variable("translation", tTranslation?.text ?: ""))
@@ -162,6 +166,7 @@ class PromptService(
       if (key != null && key.isPlural && sTranslation != null && tLanguage?.tag != null) context.getPluralFormsReplacingReplaceParam(
         sTranslation.text ?: ""
       ) else null
+
     val pluralSourceExamples = pluralFormsWithReplacedParam?.let {
       PluralTranslationUtil.getSourceExamples(
         context.baseLanguage.tag,
@@ -179,17 +184,23 @@ class PromptService(
     target.props.add(
       Variable(
         "exactForms",
-        value = pluralSourceExamples?.map { it.key }?.joinToString(" "))
+        value = pluralSourceExamples?.map { it.key }?.joinToString(" ")
+      )
     )
 
     target.props.add(
       Variable(
         "exampleIcuPlural",
-        value = pluralSourceExamples?.let { "{count, plural, ${it.map { "${it.key} {...}" }.joinToString(" ") }}" }
+        value = pluralSourceExamples?.let { "{count, plural, ${it.map { "${it.key} {...}" }.joinToString(" ")}}" }
+      )
+    )
+    target.props.add(
+      Variable(
+        "languageNote",
+        tLanguage?.aiTranslatorPromptDescription ?: ""
       )
     )
 
-    variables.add(source)
     variables.add(target)
 
     val projectVar = Variable("project")
@@ -289,7 +300,7 @@ class PromptService(
 
     variables.add(screenshotsVar)
 
-    val fragments = Variable("fragments", props = promptFragmentsService.getAllFragments())
+    val fragments = Variable("fragment", props = promptFragmentsService.getAllFragments())
     variables.add(fragments)
 
     return variables
@@ -313,7 +324,7 @@ class PromptService(
 
     val paramsForFragments = createVariablesLazyMap(params)
 
-    val fragments = params.find { it.name == "fragments" }?.props
+    val fragments = params.find { it.name == "fragment" }?.props
 
     fragments?.forEach {
       val template = handlebars.compileInline(it.value)

@@ -114,9 +114,6 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
       keyId: props.keyData?.keyId,
       targetLanguageId: props.language?.id,
     },
-    options: {
-      enabled: cellSelected,
-    },
   });
 
   function handleTestPrompt() {

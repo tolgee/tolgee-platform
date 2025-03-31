@@ -12,13 +12,46 @@ class PromptFragmentsService {
 
     result.add(
       Variable(
-        "translatorIntro",
+        "intro",
         """
           You are a translator in software localization platform, that strictly follows instructions.
           Each translation has a translation key, which usually reflects the structure of the app, so similar keys are usually related.
          """.trimIndent()
       )
     )
+
+    result.add(
+      Variable(
+        "styleInfo",
+        """
+          Don't add any extra dots, spaces or additional marks.
+          Keep original line breaks in the text.
+          Keep the style of source text.
+          All translations are part of software product, don't transform them into sentences.
+        """.trimIndent()
+      )
+    )
+
+    result.add(
+      Variable(
+        "promptCustomization",
+        """
+          {{#with project.description}}
+          Here is user defined description for the project:
+          ```
+          {{this}}
+          ```
+          {{/with}}
+          {{#with target.languageNote}}
+          Here is user defined note:
+          ```
+          {{this}}
+          ```
+          {{/with}}          
+        """.trimIndent()
+      )
+    )
+
 
     result.add(
       Variable(
@@ -43,19 +76,6 @@ class PromptFragmentsService {
           
           {{this}}
           {{/with}}
-        """.trimIndent()
-      )
-    )
-
-
-    result.add(
-      Variable(
-        "styleInfo",
-        """
-          Don't add any extra dots, spaces or additional marks.
-          Keep original line breaks in the text.
-          Keep the style of source text.
-          All translations are part of software product, don't transform them into sentences.
         """.trimIndent()
       )
     )
@@ -90,11 +110,18 @@ class PromptFragmentsService {
           You are working with translation key "{{ key.name }}" (no need to mention it in response).
           {{#with key.description}}
           User provided additional description of the key:
+          ```
           {{this}}
+          ```
           {{/with}}
         """.trimIndent()
       )
     )
+
+    result.add(Variable(
+      "screenshots",
+      """{{screenshots.first}}"""
+    ))
 
     result.add(
       Variable(
