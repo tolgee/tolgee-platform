@@ -1,6 +1,6 @@
 package io.tolgee.dtos.request.prompt
 
-data class PromptTestDto(
+data class PromptRunDto(
   val template: String,
   var keyId: Long,
   var targetLanguageId: Long,

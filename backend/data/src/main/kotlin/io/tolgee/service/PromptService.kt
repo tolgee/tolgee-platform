@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.jknack.handlebars.Handlebars
-import com.google.gson.JsonObject
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
@@ -15,14 +13,12 @@ import io.tolgee.component.machineTranslation.providers.llm.OllamaApiService
 import io.tolgee.component.machineTranslation.providers.llm.OpenaiApiService
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptDto
-import io.tolgee.dtos.request.prompt.PromptTestDto
-import io.tolgee.dtos.request.prompt.PromptVariable
-import io.tolgee.dtos.response.PromptResponseDto
+import io.tolgee.dtos.request.prompt.PromptRunDto
+import io.tolgee.dtos.request.prompt.PromptVariableDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LLMProviderType
-import io.tolgee.model.key.Key
 import io.tolgee.repository.PromptRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
@@ -74,13 +70,12 @@ class PromptService(
     projectId: Long,
     dto: PromptDto,
   ): Prompt {
-    val prompt =
-      Prompt(
-        name = dto.name,
-        template = dto.template,
-        project = projectService.get(projectId),
-        providerName = dto.providerName,
-      )
+    val prompt = Prompt(
+      name = dto.name,
+      template = dto.template,
+      project = projectService.get(projectId),
+      providerName = dto.providerName,
+    )
     promptRepository.save(prompt)
     return prompt
   }
@@ -124,16 +119,14 @@ class PromptService(
     list: List<Any>,
     type: String,
   ): String {
-    return list
-      .mapIndexed { index, _ -> encodeScreenshot(index.toLong(), type) }
-      .joinToString("\n")
+    return list.mapIndexed { index, _ -> encodeScreenshot(index.toLong(), type) }.joinToString("\n")
   }
 
   fun getVariables(
     projectId: Long,
     keyId: Long,
     targetLanguageId: Long,
-  ): MutableList<PromptVariable> {
+  ): MutableList<Variable> {
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     keyService.checkInProject(key, projectId)
     val project = projectService.get(projectId)
@@ -145,60 +138,68 @@ class PromptService(
     val sTranslation = translationService.find(key, sLanguage).getOrNull()
     val tTranslation = translationService.find(key, tLanguage).getOrNull()
 
-    val variables = mutableListOf<PromptVariable>()
+    val variables = mutableListOf<Variable>()
 
-    variables.add(PromptVariable("source", sLanguage.name))
-    variables.add(PromptVariable("target", tLanguage.name))
+    val source = Variable("source")
+    val target = Variable("target")
 
-    variables.add(PromptVariable("projectName", project.name))
-    variables.add(PromptVariable("projectDescription", project.aiTranslatorPromptDescription ?: ""))
-    variables.add(PromptVariable("sourceText", sTranslation?.text ?: ""))
-    variables.add(PromptVariable("targetText", tTranslation?.text ?: ""))
-    variables.add(PromptVariable("keyName", key.name))
+
+    source.props.add(Variable("language", sLanguage.name))
+    source.props.add(Variable("translation", sTranslation?.text ?: ""))
+
+    target.props.add(Variable("language", tLanguage.name))
+    target.props.add(Variable("translation", tTranslation?.text ?: ""))
+
+
+    variables.add(source)
+    variables.add(target)
+
+    variables.add(Variable("projectName", project.name))
+    variables.add(Variable("projectDescription", project.aiTranslatorPromptDescription ?: ""))
+    variables.add(Variable("keyName", key.name))
 
     val screenshots = key.keyScreenshotReferences
 
     variables.add(
-      PromptVariable(
+      Variable(
         "allScreenshots",
         encodeScreenshots(screenshots, "small"),
       ),
     )
 
     variables.add(
-      PromptVariable(
+      Variable(
         "allScreenshotsFull",
         encodeScreenshots(screenshots, "full"),
       ),
     )
 
     variables.add(
-      PromptVariable(
+      Variable(
         "firstScreenshot",
         encodeScreenshots(screenshots.take(1), "small"),
       ),
     )
 
     variables.add(
-      PromptVariable(
+      Variable(
         "firstScreenshotFull",
         encodeScreenshots(screenshots.take(1), "full"),
       ),
     )
 
     variables.add(
-      PromptVariable(
+      Variable(
         "relatedKeysJson",
-        "Related keys in json format (based on context extraction)",
+        description = "Related keys in json format (based on context extraction)",
         lazyValue = {
           val context = MtTranslatorContext(projectId, applicationContext, false)
           val metadataProvider = MetadataProvider(context)
-          val closeItems =
-            metadataProvider.getCloseItems(
-              sLanguage,
-              tLanguage,
-              MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id),
-            )
+          val closeItems = metadataProvider.getCloseItems(
+            sLanguage,
+            tLanguage,
+            MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id),
+          )
           closeItems.joinToString("\n") {
             val mapper = ObjectMapper()
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
@@ -208,9 +209,11 @@ class PromptService(
       ),
     )
 
-    variables.add(
-      PromptVariable(
-        "fragmentReturnJson",
+    val fragments = Variable("fragments")
+
+    fragments.props.add(
+      Variable(
+        "translateJson",
         """Return result in json
 ```
 {
@@ -221,20 +224,21 @@ class PromptService(
       ),
     )
 
+    variables.add(fragments)
+
     return variables
   }
 
   fun getPrompt(
     projectId: Long,
-    data: PromptTestDto,
+    data: PromptRunDto,
   ): String {
     val params = getVariables(projectId, data.keyId, data.targetLanguageId)
     val handlebars = Handlebars()
 
-    val mapParams =
-      params.map {
-        it.name to it
-      }.toMap()
+    val mapParams = params.map {
+      it.name to it
+    }.toMap()
 
     val lazyMap = LazyMap()
     lazyMap.setMap(mapParams)
@@ -246,7 +250,7 @@ class PromptService(
 
   fun getLlmMessages(
     prompt: String,
-    data: PromptTestDto,
+    data: PromptRunDto,
   ): List<LLMParams.Companion.LlmMessage> {
     val key = keyService.find(data.keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
 
@@ -260,27 +264,24 @@ class PromptService(
         val size = match.groups[1]!!.value // full or small
         val number = match.groups[2]!!.value.toInt() // number
         val screenshot = key.keyScreenshotReferences[number].screenshot
-        val file =
-          if (size === "full") {
-            screenshot.filename
-          } else {
-            screenshot.middleSizedFilename ?: screenshot.filename
-          }
+        val file = if (size === "full") {
+          screenshot.filename
+        } else {
+          screenshot.middleSizedFilename ?: screenshot.filename
+        }
 
-        var image =
-          fileStorage.readFile(
-            screenshotService.getScreenshotPath(file),
-          )
+        var image = fileStorage.readFile(
+          screenshotService.getScreenshotPath(file),
+        )
 
         if (screenshot.keyScreenshotReferences.find { it.key.id == key.id } !== null) {
-          val converter =
-            ImageConverter(
-              ByteArrayInputStream(
-                fileStorage.readFile(
-                  screenshotService.getScreenshotPath(file),
-                ),
+          val converter = ImageConverter(
+            ByteArrayInputStream(
+              fileStorage.readFile(
+                screenshotService.getScreenshotPath(file),
               ),
-            )
+            ),
+          )
           image = converter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
         }
 
@@ -323,11 +324,10 @@ class PromptService(
   fun runPrompt(
     organizationId: Long,
     params: LLMParams,
-    promptTestDto: PromptTestDto,
+    promptRunDto: PromptRunDto,
   ): MtValueProvider.MtResult {
-    val providerConfig =
-      providerService.getProviderByName(organizationId, promptTestDto.provider)
-        ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptTestDto.provider))
+    val providerConfig = providerService.getProviderByName(organizationId, promptRunDto.provider)
+      ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptRunDto.provider))
 
     try {
       return when (providerConfig.type) {
@@ -342,23 +342,21 @@ class PromptService(
   }
 
   @Transactional
-  fun translateViaPrompt(projectId: Long, data: PromptTestDto): MtValueProvider.MtResult {
+  fun translateViaPrompt(projectId: Long, data: PromptRunDto): MtValueProvider.MtResult {
     val project = projectService.get(projectId)
     val prompt = getPrompt(projectId, data)
     val messages = getLlmMessages(prompt, data)
     val response = runPrompt(project.organizationOwner.id, LLMParams(messages), data)
-    val json = response.translated?.let { jacksonObjectMapper().readValue<JsonNode>(it) }
-      ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
+    val json = response.translated?.let { jacksonObjectMapper().readValue<JsonNode>(it) } ?: throw BadRequestException(
+      Message.LLM_PROVIDER_NOT_RETURNED_JSON
+    )
     val translation = json.get("output").asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
     return MtValueProvider.MtResult(
-      translation,
-      contextDescription = json.get("contextDescription").asText(),
-      price = 0,
-      usage = response.usage
+      translation, contextDescription = json.get("contextDescription").asText(), price = 0, usage = response.usage
     )
   }
 
-  fun translateAndUpdateTranslation(projectId: Long, data: PromptTestDto) {
+  fun translateAndUpdateTranslation(projectId: Long, data: PromptRunDto) {
     val result = translateViaPrompt(projectId, data)
     val translation = translationService.getOrCreate(data.keyId, data.targetLanguageId)
     translation.text = result.translated
@@ -366,17 +364,46 @@ class PromptService(
   }
 
   companion object {
-    class LazyMap : HashMap<String, Handlebars.SafeString>() {
-      private lateinit var internalMap: Map<String, PromptVariable>
+    class LazyMap : HashMap<String, Any?>() {
+      private lateinit var internalMap: Map<String, Variable>
 
-      fun setMap(map: Map<String, PromptVariable>) {
+      fun setMap(map: Map<String, Variable>) {
         internalMap = map
       }
 
-      override fun get(key: String): Handlebars.SafeString? {
+      override fun get(key: String): Any? {
         val promptValue = internalMap.get(key)
+
+        if (!promptValue?.props.isNullOrEmpty()) {
+          val mapParams = promptValue!!.props.map {
+            it.name to it
+          }.toMap()
+
+          val lazyMap = LazyMap()
+          lazyMap.setMap(mapParams)
+          return lazyMap
+        }
+
         val stringValue = promptValue?.lazyValue?.let { it() } ?: promptValue?.value
         return stringValue?.let { Handlebars.SafeString(it) }
+      }
+    }
+
+    class Variable(
+      val name: String,
+      var value: String? = null,
+      var lazyValue: (() -> String)? = null,
+      val description: String? = null,
+      val props: MutableList<Variable> = mutableListOf(),
+    ) {
+      fun toPromptVariableDto(): PromptVariableDto {
+        return PromptVariableDto(
+          name = name,
+          description = description,
+          value = value,
+          props = if (props.size != 0) props.map { it.toPromptVariableDto() }.toMutableList()
+          else null,
+        )
       }
     }
   }

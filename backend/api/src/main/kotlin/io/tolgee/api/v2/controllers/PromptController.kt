@@ -3,8 +3,8 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.dtos.request.prompt.PromptDto
-import io.tolgee.dtos.request.prompt.PromptTestDto
-import io.tolgee.dtos.request.prompt.VariablesResponse
+import io.tolgee.dtos.request.prompt.PromptRunDto
+import io.tolgee.dtos.request.prompt.VariablesResponseDto
 import io.tolgee.dtos.response.PromptResponseDto
 import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.hateoas.prompt.PromptModelAssembler
@@ -75,14 +75,14 @@ class PromptController(
   @PostMapping("run")
   @UseDefaultPermissions
   fun run(
-    @Valid @RequestBody promptTestDto: PromptTestDto,
+    @Valid @RequestBody promptRunDto: PromptRunDto,
   ): PromptResponseDto {
-    val prompt = promptService.getPrompt(projectHolder.project.id, promptTestDto)
-    val messages = promptService.getLlmMessages(prompt, promptTestDto)
+    val prompt = promptService.getPrompt(projectHolder.project.id, promptRunDto)
+    val messages = promptService.getLlmMessages(prompt, promptRunDto)
     val response = promptService.runPrompt(
       projectHolder.project.organizationOwnerId,
       LLMParams(messages),
-      promptTestDto
+      promptRunDto
     )
     return PromptResponseDto(
       prompt,
@@ -97,7 +97,10 @@ class PromptController(
   fun variables(
     @RequestParam keyId: Long,
     @RequestParam targetLanguageId: Long,
-  ): VariablesResponse {
-    return VariablesResponse(promptService.getVariables(projectHolder.project.id, keyId, targetLanguageId))
+  ): VariablesResponseDto {
+    return VariablesResponseDto(
+      promptService.getVariables(projectHolder.project.id, keyId, targetLanguageId)
+        .map { it.toPromptVariableDto() }.toMutableList()
+    )
   }
 }

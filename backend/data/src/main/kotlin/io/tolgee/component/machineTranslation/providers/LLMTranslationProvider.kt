@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.dtos.request.prompt.PromptTestDto
+import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.service.PromptService
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -22,7 +22,7 @@ class LLMTranslationProvider(private val promptService: PromptService) : Abstrac
     val prompt = promptService.findPrompt(params.projectId, params.promptId!!)
     return promptService.translateViaPrompt(
       params.projectId,
-      PromptTestDto(
+      PromptRunDto(
         template = prompt.template,
         provider = prompt.providerName,
         targetLanguageId = params.targetLanguageId,

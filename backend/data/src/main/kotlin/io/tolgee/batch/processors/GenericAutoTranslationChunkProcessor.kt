@@ -8,7 +8,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptDto
-import io.tolgee.dtos.request.prompt.PromptTestDto
+import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
@@ -57,7 +57,7 @@ class GenericAutoTranslationChunkProcessor(
       } else {
         promptService.translateAndUpdateTranslation(
           job.projectId!!,
-          PromptTestDto(
+          PromptRunDto(
             template = llmPrompt.template,
             keyId = key.id,
             targetLanguageId = languageId,

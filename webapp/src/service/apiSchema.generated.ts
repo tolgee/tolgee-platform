@@ -2284,7 +2284,6 @@ export interface components {
       supportArrays: boolean;
       zip: boolean;
     };
-    Function0String: { [key: string]: unknown };
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
@@ -3968,7 +3967,7 @@ export interface components {
       result: string;
       usage?: components["schemas"]["OpenaiUsage"];
     };
-    PromptTestDto: {
+    PromptRunDto: {
       /** Format: int64 */
       keyId: number;
       provider: string;
@@ -3976,10 +3975,12 @@ export interface components {
       targetLanguageId: number;
       template: string;
     };
-    PromptVariable: {
-      lazyValue?: components["schemas"]["Function0String"];
+    PromptVariableDto: {
+      description?: string;
       name: string;
-      value: string;
+      /** @description List of nested properties for this variable, allowing hierarchical structuring. Can be null if no nested properties exist. */
+      props?: components["schemas"]["PromptVariableDto"][] | null;
+      value?: string;
     };
     PropertyModification: {
       new?: { [key: string]: unknown };
@@ -5187,8 +5188,8 @@ export interface components {
       description?: string;
       scopes: string[];
     };
-    VariablesResponse: {
-      data: components["schemas"]["PromptVariable"][];
+    VariablesResponseDto: {
+      data: components["schemas"]["PromptVariableDto"][];
     };
     WebhookConfigModel: {
       /**
@@ -14803,7 +14804,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["VariablesResponse"];
+          "application/json": components["schemas"]["VariablesResponseDto"];
         };
       };
       /** Bad Request */
@@ -14888,7 +14889,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PromptTestDto"];
+        "application/json": components["schemas"]["PromptRunDto"];
       };
     };
   };

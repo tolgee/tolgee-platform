@@ -13,7 +13,7 @@ import { handlebarsAutocomplete } from './utils/handlebarsAutocomplete';
 import { components } from 'tg.service/apiSchema.generated';
 import { handlebarsTooltip } from './utils/handlebarsTooltip';
 
-type PromptVariable = components['schemas']['PromptVariable'];
+type PromptVariable = components['schemas']['PromptVariableDto'];
 
 const StyledEditor = styled('div')`
   font-size: 14px;
@@ -146,6 +146,8 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
           autocompletion({
             override: [handlebarsAutocomplete(variableRefs)],
             icons: false,
+            activateOnCompletion: (c) => c.type === 'object',
+            activateOnTyping: true,
           }),
           handlebarsTooltip(variableRefs, unknownVariableMessageRef),
           direction === 'rtl' ? htmlIsolatesPlugin : [],
