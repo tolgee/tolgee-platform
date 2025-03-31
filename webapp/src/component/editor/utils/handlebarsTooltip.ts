@@ -5,10 +5,10 @@ import { RefObject } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { trimDetail } from './handlebarsAutocomplete';
 
-type PromptVariable = components['schemas']['PromptVariable'];
+type PromptVariableDto = components['schemas']['PromptVariableDto'];
 
 export const handlebarsTooltip = (
-  variablesRef: RefObject<PromptVariable[] | undefined>,
+  variablesRef: RefObject<PromptVariableDto[] | undefined>,
   unknownVariableMessageRef?: RefObject<string | undefined>
 ) =>
   hoverTooltip((context, pos, side) => {
@@ -17,10 +17,17 @@ export const handlebarsTooltip = (
     const variableName = context.state.doc
       .toString()
       .substring(node.from, node.to);
+    const path = variableName.split('.');
 
-    const variable = variablesRef.current?.find((i) => i.name === variableName);
+    let variable: PromptVariableDto | undefined = {
+      name: '',
+      props: variablesRef.current,
+    };
+    path.forEach(
+      (item) => (variable = variable?.props?.find((i) => i.name === item))
+    );
 
-    if (node.name === 'Identifier') {
+    if (node.name === 'Identifier' && variable) {
       return {
         pos: node.from,
         end: node.to,
@@ -28,7 +35,7 @@ export const handlebarsTooltip = (
           const dom = document.createElement('div');
           dom.style.whiteSpace = 'nowrap';
           dom.textContent = variable
-            ? trimDetail(variable.value, 50) || 'Empty'
+            ? trimDetail(variable.description ?? variable.value, 50) || 'Empty'
             : unknownVariableMessageRef?.current ?? 'Unknown variable';
           return { dom };
         },
