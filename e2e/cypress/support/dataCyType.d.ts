@@ -72,8 +72,9 @@ declare namespace DataCy {
         "administration-plan-field-stripe-product" |
         "administration-plan-selector" |
         "administration-subscriptions-active-self-hosted-ee-plan" |
-        "administration-subscriptions-assign-plan-button" |
+        "administration-subscriptions-assign-plan-save-button" |
         "administration-subscriptions-cloud-plan-name" |
+        "administration-subscriptions-current-plan-info" |
         "administration-subscriptions-custom-plans-item" |
         "administration-subscriptions-plan-popover" |
         "administration-trial-end-date-field" |

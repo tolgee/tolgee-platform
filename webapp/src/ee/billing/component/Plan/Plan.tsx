@@ -15,7 +15,6 @@ import { ShowAllFeaturesLink } from './ShowAllFeatures';
 import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
-import { isPlanLegacy } from './plansTools';
 import { Box, Chip, Theme, Tooltip, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 

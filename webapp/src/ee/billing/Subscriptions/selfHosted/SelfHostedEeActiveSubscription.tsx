@@ -4,7 +4,6 @@ import { components } from 'tg.service/billingApiSchema.generated';
 
 import { SelfHostedEeSubscriptionActions } from './SelfHostedEeSubscriptionActions';
 import { PlanContainer, PlanContent } from '../../component/Plan/PlanStyles';
-import { isPlanLegacy } from '../../component/Plan/plansTools';
 import { ActiveSubscriptionBanner } from 'tg.ee.module/billing/component/ActiveSubscription/ActiveSubscriptionBanner';
 import { ActivePlanTitle } from 'tg.ee.module/billing/component/ActiveSubscription/ActivePlanTitle';
 import { SelfHostedEeEstimatedCosts } from 'tg.ee.module/billing/component/ActiveSubscription/SelfHostedEeEstimatedCosts';
@@ -76,7 +75,6 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
           <IncludedUsage
             metricType={'KEYS_SEATS'}
             includedUsage={plan.includedUsage}
-            isLegacy={isPlanLegacy(plan)}
             highlightColor={highlightColor}
           />
           <PayAsYouGoPrices
