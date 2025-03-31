@@ -19,37 +19,43 @@ export const SubscriptionPeriodInfo: FC<SubscriptionPeriodInfoProps> = ({
 }) => {
   const formatDate = useDateFormatter();
 
+  if (!currentPeriodStart || isTrial) {
+    return (
+      <Typography sx={{ fontStyle: 'italic' }}>
+        <T keyName="admin_billing_no_period_info" />
+      </Typography>
+    );
+  }
+
   return (
     <>
-      {currentPeriodEnd && !isTrial && (
-        <>
-          <Typography variant={'body2'} sx={{ fontSize: '12px' }}>
-            <T
-              keyName="admin_billing_current_period"
-              params={{
-                period: currentBillingPeriod,
-              }}
-            />
-          </Typography>
+      <>
+        <Typography variant={'body2'} sx={{ fontSize: '12px' }}>
+          <T
+            keyName="admin_billing_current_period"
+            params={{
+              period: currentBillingPeriod,
+            }}
+          />
+        </Typography>
 
-          <Typography variant={'body2'} sx={{ fontSize: '12px' }}>
-            <T
-              keyName="admin_billing_current_perdiod_start"
-              params={{
-                date: formatDate(currentPeriodStart),
-              }}
-            />
-          </Typography>
-          <Typography variant={'body2'} sx={{ fontSize: '12px' }}>
-            <T
-              keyName="admin_billing_current_perdiod_end"
-              params={{
-                date: formatDate(currentPeriodEnd),
-              }}
-            />
-          </Typography>
-        </>
-      )}
+        <Typography variant={'body2'} sx={{ fontSize: '12px' }}>
+          <T
+            keyName="admin_billing_current_perdiod_start"
+            params={{
+              date: formatDate(currentPeriodStart),
+            }}
+          />
+        </Typography>
+        <Typography variant={'body2'} sx={{ fontSize: '12px' }}>
+          <T
+            keyName="admin_billing_current_perdiod_end"
+            params={{
+              date: formatDate(currentPeriodEnd),
+            }}
+          />
+        </Typography>
+      </>
     </>
   );
 };

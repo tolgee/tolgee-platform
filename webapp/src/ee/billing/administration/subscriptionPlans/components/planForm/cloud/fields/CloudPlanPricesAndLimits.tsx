@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Box, Tooltip } from '@mui/material';
-import { CloudPlanPrices } from './CloudPlanPrices';
 import { PlanIncludedUsageFields } from '../../genericFields/PlanIncludedUsageFields';
 import { usePlanFormValues } from '../usePlanFormValues';
 import { PlanPricesFields } from '../../genericFields/PlanPricesFields';
