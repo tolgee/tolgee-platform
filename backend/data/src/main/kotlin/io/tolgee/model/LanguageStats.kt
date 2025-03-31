@@ -10,6 +10,8 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import jakarta.persistence.Temporal
+import jakarta.persistence.TemporalType
 import jakarta.persistence.UniqueConstraint
 import java.util.*
 
@@ -37,6 +39,7 @@ class LanguageStats(
 
   override var reviewedPercentage: Double = 0.0
 
+  @Temporal(TemporalType.TIMESTAMP)
   override var translationsUpdatedAt: Date? = null
 
   override val languageId: Long
