@@ -53,6 +53,11 @@ const StyledEditor = styled('div')`
     background-color: ${({ theme }) => theme.palette.tooltip.background};
     padding: 4px 8px;
     margin-top: 4px;
+    max-width: 100%;
+    display: block;
+    unicode-bidi: embed;
+    white-space: pre-wrap;
+    pointer-events: none;
   }
 `;
 
@@ -161,8 +166,6 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
 
     editor.current = instance;
   }, [theme.palette.mode]);
-
-  useEffect(() => {}, []);
 
   useEffect(() => {
     const state = editor.current?.state;
