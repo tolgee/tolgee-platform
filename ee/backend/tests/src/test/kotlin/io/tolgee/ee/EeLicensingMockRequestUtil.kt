@@ -31,10 +31,11 @@ class EeLicensingMockRequestUtil {
           perSeat = 20.toBigDecimal(),
           subscriptionMonthly = 200.toBigDecimal(),
         ),
-      includedUsage = PlanIncludedUsageModel(
-        seats = 10,
-        keys = 10
-      ),
+      includedUsage =
+        PlanIncludedUsageModel(
+          seats = 10,
+          keys = 10,
+        ),
       free = false,
       nonCommercial = false,
       isPayAsYouGo = false,

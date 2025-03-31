@@ -3,7 +3,6 @@ package io.tolgee.service.organization
 import io.tolgee.repository.OrganizationRepository.Companion.ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class OrganizationStatsService(
