@@ -58,6 +58,6 @@ class LanguageStats(
       untranslatedPercentage = untranslatedPercentage,
       translatedPercentage = translatedPercentage,
       reviewedPercentage = reviewedPercentage,
-      translationsUpdatedAt = translationsUpdatedAt
+      translationsUpdatedAt = translationsUpdatedAt,
     )
 }
