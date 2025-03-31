@@ -99,7 +99,7 @@ class EeSubscriptionServiceImpl(
               licenseKey = licenseKey,
               seats = seats,
               keys = keys,
-              instanceId = instanceIdService.getInstanceId()
+              instanceId = instanceIdService.getInstanceId(),
             ),
           )
         } catch (e: HttpClientErrorException.NotFound) {
