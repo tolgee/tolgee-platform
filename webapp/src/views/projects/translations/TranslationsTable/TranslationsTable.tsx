@@ -3,8 +3,8 @@ import { Portal, styled, useMediaQuery } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
@@ -280,8 +280,7 @@ export const TranslationsTable = ({ width }: Props) => {
                 language && (
                   <StyledHeaderCell key={i}>
                     <CellLanguage
-                      colIndex={i - 1}
-                      onResize={startResize}
+                      onResize={() => startResize(i - 1)}
                       language={language}
                     />
                   </StyledHeaderCell>
