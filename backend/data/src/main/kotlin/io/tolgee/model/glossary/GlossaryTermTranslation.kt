@@ -14,5 +14,5 @@ class GlossaryTermTranslation(
   var text: String? = null,
 ) : StandardAuditModel() {
   @ManyToOne
-  lateinit var glossaryTerm: GlossaryTerm // TODO: rename to term
+  lateinit var term: GlossaryTerm // TODO: rename to term
 }
