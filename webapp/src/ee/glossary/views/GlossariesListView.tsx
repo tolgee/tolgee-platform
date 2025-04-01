@@ -23,12 +23,11 @@ const StyledWrapper = styled('div')`
 export const GlossariesListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const organization = useOrganization();
 
   const { t } = useTranslate();
-
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const glossaries = useApiQuery({
     url: '/v2/organizations/{organizationId}/glossaries',
