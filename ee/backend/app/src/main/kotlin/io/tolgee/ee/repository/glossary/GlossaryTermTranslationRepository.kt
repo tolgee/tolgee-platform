@@ -13,10 +13,10 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
     """
     select distinct t.languageCode
     from GlossaryTermTranslation t
-    where t.glossaryTerm.glossary.id = :glossaryId
-      and t.glossaryTerm.glossary.deletedAt is null
-      and t.glossaryTerm.glossary.organizationOwner.id = :organizationId
-      and t.glossaryTerm.glossary.organizationOwner.deletedAt is null
+    where t.term.glossary.id = :glossaryId
+      and t.term.glossary.deletedAt is null
+      and t.term.glossary.organizationOwner.id = :organizationId
+      and t.term.glossary.organizationOwner.deletedAt is null
     """,
   )
   fun findDistinctLanguageTagsByGlossary(

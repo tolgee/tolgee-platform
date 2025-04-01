@@ -14,7 +14,7 @@ class GlossaryTerm(
   @ManyToOne
   lateinit var glossary: Glossary
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "glossaryTerm")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "term")
   var translations: MutableList<GlossaryTermTranslation> = mutableListOf()
 
   @ActivityLoggedProp

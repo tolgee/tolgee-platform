@@ -26,7 +26,7 @@ class GlossaryTermTranslationService(
         languageCode = dto.languageCode,
         text = dto.text,
       ).apply {
-        this.glossaryTerm = term
+        this.term = term
       }
     return glossaryTermTranslationRepository.save(translation)
   }
