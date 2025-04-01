@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation.providers.llm
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -14,7 +15,6 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.checkerframework.checker.units.qual.Temperature
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpEntity
@@ -76,7 +76,13 @@ class OpenaiApiService(
     val requestBody =
       OpenaiRequestBody(
         messages = messages,
-        response_format = if (promptHasJsonInside) OpenaiResponseFormat() else null,
+        response_format = if (promptHasJsonInside) {
+          when (config.format) {
+            "json_object" -> OpenaiResponseFormat(type="json_object", json_schema = null)
+            "json_schema" -> OpenaiResponseFormat()
+            else -> null
+          }
+        } else null,
         model = config.model,
       )
 
@@ -143,6 +149,7 @@ class OpenaiApiService(
     class OpenaiRequestBody(
       val max_completion_tokens: Long = 800,
       val stream: Boolean = false,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
       val response_format: OpenaiResponseFormat? = null,
       val stop: Boolean? = null,
       val messages: List<OpenaiMessage>,
@@ -165,7 +172,21 @@ class OpenaiApiService(
     )
 
     class OpenaiResponseFormat(
-      val type: String = "json_object",
+      val type: String = "json_schema",
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val json_schema: Map<String, Any>? = mapOf(
+        "name" to "simple_response",
+        "schema" to mapOf(
+          "type" to "object",
+          "properties" to mapOf(
+            "output" to mapOf("type" to "string"),
+            "contextDescription" to mapOf("type" to "string")
+          ),
+          "required" to listOf("output", "contextDescription"),
+          "additionalProperties" to false
+        ),
+        "strict" to true
+      )
     )
 
     class OpenaiResponse(
@@ -186,7 +207,7 @@ class OpenaiApiService(
       val completion_tokens: Int,
       val total_tokens: Int,
       val prompt_tokens_details: OpenaiPromptTokenDetails?,
-      val completion_tokens_details: OpenaiCompletionTokenDetails,
+      val completion_tokens_details: OpenaiCompletionTokenDetails?,
     )
 
     class OpenaiPromptTokenDetails(
