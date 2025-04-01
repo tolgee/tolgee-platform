@@ -1,3 +1,10 @@
+# [3.114.0](https://github.com/tolgee/tolgee-platform/compare/v3.113.2...v3.114.0) (2025-04-01)
+
+
+### Features
+
+* Add translation update time to the stats endpoint ([#3018](https://github.com/tolgee/tolgee-platform/issues/3018)) ([99ce9d7](https://github.com/tolgee/tolgee-platform/commit/99ce9d73396bfc09413146a49f5a1bbda3605b67)), closes [#3008](https://github.com/tolgee/tolgee-platform/issues/3008)
+
 ## [3.113.2](https://github.com/tolgee/tolgee-platform/compare/v3.113.1...v3.113.2) (2025-03-26)
 
 
