@@ -1,11 +1,15 @@
 import React from 'react';
-import { styled, Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CellStateBar } from '../cell/CellStateBar';
 import { FlagImage } from 'tg.component/languages/FlagImage';
 
 type LanguageModel = components['schemas']['LanguageModel'];
+export type CellLanguageModel = Pick<
+  LanguageModel,
+  'base' | 'flagEmoji' | 'name'
+>;
 
 const StyledContent = styled('div')`
   display: flex;
@@ -16,17 +20,12 @@ const StyledContent = styled('div')`
 `;
 
 type Props = {
-  language: LanguageModel;
-  colIndex: number;
-  onResize: (colIndex: number) => void;
+  language: CellLanguageModel;
+  onResize: () => void;
 };
 
-export const CellLanguage: React.FC<Props> = ({
-  language,
-  onResize,
-  colIndex,
-}) => {
-  const handleResize = () => onResize(colIndex);
+export const CellLanguage: React.FC<Props> = ({ language, onResize }) => {
+  const handleResize = () => onResize();
   return (
     <>
       <StyledContent>
