@@ -4197,4 +4197,91 @@
             <column name="translations_updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
         </addColumn>
     </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-1">
+        <createTable tableName="glossary">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="glossaryPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_language_code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="organization_owner_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-2">
+        <createTable tableName="glossary_project">
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="glossary_projectPK"/>
+            </column>
+            <column name="glossary_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="glossary_projectPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-3">
+        <createTable tableName="glossary_term">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="glossary_termPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="flag_abbreviation" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flag_case_sensitive" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flag_forbidden_term" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flag_non_translatable" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="glossary_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-4">
+        <createTable tableName="glossary_term_translation">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="glossary_term_translationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_code" type="VARCHAR(255)"/>
+            <column name="text" type="VARCHAR(255)"/>
+            <column name="term_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-5">
+        <addForeignKeyConstraint baseColumnNames="glossary_id" baseTableName="glossary_project" constraintName="FK5rc6dwok62j8pnnnlojfela6r" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-6">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="glossary_project" constraintName="FKcsc92g97364ofbu2s0w39pf1o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="glossary" validate="true"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-7">
+        <addForeignKeyConstraint baseColumnNames="term_id" baseTableName="glossary_term_translation" constraintName="FKi4r73bypqbg79v8vmxc08lv9q" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="glossary_term" validate="true"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-8">
+        <addForeignKeyConstraint baseColumnNames="glossary_id" baseTableName="glossary_term" constraintName="FKqgqkew17tle3xkot7shvas8x1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="glossary" validate="true"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1743523453022-9">
+        <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="glossary" constraintName="FKtiuusr7urs46e15gjy94jhdfm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
