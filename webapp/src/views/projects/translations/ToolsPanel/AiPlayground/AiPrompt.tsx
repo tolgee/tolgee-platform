@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -26,6 +26,7 @@ import { PanelContentProps } from '../common/types';
 import { useTranslationsActions } from '../../context/TranslationsContext';
 import { BatchJobModel } from '../../BatchOperations/types';
 import { BatchOperationDialog } from '../../BatchOperations/OperationsSummary/BatchOperationDialog';
+import { EditorError } from 'tg.component/editor/utils/codemirrorError';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;
@@ -53,11 +54,16 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     key: 'aiPlaygroundProvider',
     initial: 'default',
   });
+  const [errors, setErrors] = useState<EditorError[]>();
 
   const promptLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/prompts/run',
     method: 'post',
   });
+
+  useEffect(() => {
+    setErrors(undefined);
+  }, [value]);
 
   const providersLoadable = useApiQuery({
     url: '/v2/organizations/{organizationId}/llm-providers/all-available',
@@ -120,19 +126,35 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     if (!cellSelected) {
       return;
     }
-    promptLoadable.mutate({
-      path: {
-        projectId: props.project.id,
-      },
-      content: {
-        'application/json': {
-          template: value,
-          keyId: props.keyData.keyId,
-          targetLanguageId: props.language.id,
-          provider,
+    promptLoadable.mutate(
+      {
+        path: {
+          projectId: props.project.id,
+        },
+        content: {
+          'application/json': {
+            template: value,
+            keyId: props.keyData.keyId,
+            targetLanguageId: props.language.id,
+            provider,
+          },
         },
       },
-    });
+      {
+        onError(e) {
+          if (e.params) {
+            setErrors([
+              {
+                message: e.params[0],
+                line: e.params[1],
+                column: e.params[2] + 1,
+              },
+            ]);
+          }
+          e.handleError?.();
+        },
+      }
+    );
   }
 
   const jsonValue = useMemo(() => {
@@ -205,6 +227,7 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
               },
             ]}
             availableVariables={promptVariables.data?.data}
+            errors={errors}
           />
         </EditorWrapper>
       </Box>

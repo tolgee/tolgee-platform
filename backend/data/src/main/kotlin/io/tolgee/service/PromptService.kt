@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.jknack.handlebars.Handlebars
+import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
@@ -21,7 +22,6 @@ import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LLMProviderType
 import io.tolgee.model.key.Key
 import io.tolgee.repository.PromptRepository
-import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
@@ -33,7 +33,6 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.ImageConverter
-import org.aspectj.weaver.ast.Var
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -319,22 +318,28 @@ class PromptService(
     projectId: Long,
     data: PromptRunDto,
   ): String {
-    val params = getVariables(projectId, data.keyId, data.targetLanguageId)
-    val handlebars = Handlebars()
 
-    val paramsForFragments = createVariablesLazyMap(params)
+    try {
+      val params = getVariables(projectId, data.keyId, data.targetLanguageId)
 
-    val fragments = params.find { it.name == "fragment" }?.props
+      val handlebars = Handlebars()
 
-    fragments?.forEach {
-      val template = handlebars.compileInline(it.value)
-      it.value = template.apply(paramsForFragments)
+      val paramsForFragments = createVariablesLazyMap(params)
+
+      val fragments = params.find { it.name == "fragment" }?.props
+
+      fragments?.forEach {
+        val template = handlebars.compileInline(it.value)
+        it.value = template.apply(paramsForFragments)
+      }
+
+      val finalParams = createVariablesLazyMap(params)
+      val template = handlebars.compileInline(data.template)
+      val prompt = template.apply(finalParams)
+      return prompt
+    } catch (e: HandlebarsException) {
+      throw BadRequestException(Message.LLM_TEMPLATE_PARSING_ERROR, listOf(e.error.reason, e.error.line, e.error.column))
     }
-
-    val finalParams = createVariablesLazyMap(params)
-    val template = handlebars.compileInline(data.template)
-    val prompt = template.apply(finalParams)
-    return prompt
   }
 
   fun getLlmMessages(

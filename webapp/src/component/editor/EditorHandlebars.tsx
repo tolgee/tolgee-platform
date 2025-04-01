@@ -12,6 +12,11 @@ import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { handlebarsAutocomplete } from './utils/handlebarsAutocomplete';
 import { components } from 'tg.service/apiSchema.generated';
 import { handlebarsTooltip } from './utils/handlebarsTooltip';
+import {
+  EditorError,
+  errorPlugin,
+  setErrorsEffect,
+} from './utils/codemirrorError';
 
 type PromptVariable = components['schemas']['PromptVariableDto'];
 
@@ -59,6 +64,10 @@ const StyledEditor = styled('div')`
     white-space: pre-wrap;
     pointer-events: none;
   }
+  .cm-error-underline {
+    text-decoration: underline wavy red;
+    text-underline-offset: 4px;
+  }
 `;
 
 function useRefGroup<T>(value: T): RefObject<T> {
@@ -83,6 +92,7 @@ export type EditorProps = {
   editorRef?: React.RefObject<EditorView | null>;
   availableVariables?: PromptVariable[];
   unknownVariableMessage?: string;
+  errors?: EditorError[];
 };
 
 export const EditorHandlebars: React.FC<EditorProps> = ({
@@ -98,6 +108,7 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
   editorRef,
   availableVariables,
   unknownVariableMessage,
+  errors,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const editor = useRef<EditorView>();
@@ -113,6 +124,7 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
 
   keyBindings.current = shortcuts;
   variableRefs.current = availableVariables;
+  unknownVariableMessageRef.current = unknownVariableMessage;
 
   useEffect(() => {
     const shortcutsUptoDate = shortcuts?.map((value, i) => {
@@ -154,6 +166,7 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
             activateOnCompletion: (c) => c.type === 'object',
             activateOnTyping: true,
           }),
+          errorPlugin(),
           handlebarsTooltip(variableRefs, unknownVariableMessageRef),
           direction === 'rtl' ? htmlIsolatesPlugin : [],
         ],
@@ -166,6 +179,12 @@ export const EditorHandlebars: React.FC<EditorProps> = ({
 
     editor.current = instance;
   }, [theme.palette.mode]);
+
+  useEffect(() => {
+    editor.current?.dispatch({
+      effects: setErrorsEffect.of(errors ?? []),
+    });
+  }, [editor.current, errors]);
 
   useEffect(() => {
     const state = editor.current?.state;

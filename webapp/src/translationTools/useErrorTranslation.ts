@@ -179,6 +179,12 @@ export function useErrorTranslation() {
         return t('llm_provider_not_found', { value: params?.[0] || '' });
       case 'llm_provider_error':
         return t('llm_provider_error', { value: params?.[0] || '' });
+      case 'llm_template_parsing_error':
+        return t('llm_template_parsing_error', {
+          value: params?.[0] || '',
+          line: params?.[1] || '',
+          column: params?.[2] || '',
+        });
       default:
         return code;
     }

@@ -74,6 +74,7 @@ export const MachineTranslationItem = ({
   pluralVariant,
 }: Props) => {
   const error = data?.errorMessage?.toLowerCase();
+  const errorParams = data?.errorParams;
   const result = data?.result;
 
   const text = useExtractedPlural(pluralVariant, data?.result?.output);
@@ -122,7 +123,7 @@ export const MachineTranslationItem = ({
         </>
       ) : error ? (
         <StyledError>
-          <TranslatedError code={error} />
+          <TranslatedError code={error} params={errorParams} />
         </StyledError>
       ) : !data && isFetching ? (
         <LoadingSkeletonFadingIn variant="text" />

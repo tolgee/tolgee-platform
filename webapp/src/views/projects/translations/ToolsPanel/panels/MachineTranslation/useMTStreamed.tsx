@@ -19,6 +19,7 @@ type ServiceOutput = {
   serviceType: string;
   result?: { output: string; contextDescription?: string };
   errorMessage: string | null;
+  errorParams: string[] | undefined;
 };
 
 export type CombinedMTResponse = {
