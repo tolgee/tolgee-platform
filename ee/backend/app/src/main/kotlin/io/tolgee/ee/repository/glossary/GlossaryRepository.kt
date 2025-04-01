@@ -15,7 +15,11 @@ import java.util.Date
 interface GlossaryRepository : JpaRepository<Glossary, Long> {
   @Query(
     """
-    from Glossary where organizationOwner.id = :organizationId and id = :id and deletedAt is null
+    from Glossary
+    where organizationOwner.id = :organizationId
+      and organizationOwner.deletedAt is null
+      and id = :id
+      and deletedAt is null
   """,
   )
   fun find(
@@ -25,7 +29,10 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
 
   @Query(
     """
-    from Glossary where organizationOwner.id = :organizationId and deletedAt is null
+    from Glossary
+    where organizationOwner.id = :organizationId
+      and organizationOwner.deletedAt is null
+      and deletedAt is null
   """,
   )
   fun findByOrganizationId(organizationId: Long): List<Glossary>
@@ -34,8 +41,9 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     """
     from Glossary
     where organizationOwner.id = :organizationId
-    and deletedAt is null
-    and (:search is null or lower(name) like lower(concat('%', cast(:search as text), '%')))
+      and organizationOwner.deletedAt is null
+      and deletedAt is null
+      and (:search is null or lower(name) like lower(concat('%', cast(:search as text), '%')))
   """,
   )
   fun findByOrganizationIdPaged(

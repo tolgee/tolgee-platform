@@ -187,6 +187,9 @@ declare namespace DataCy {
         "content-delivery-subtitle" |
         "create-glossary-field-name" |
         "create-glossary-submit" |
+        "create-glossary-term-field-description" |
+        "create-glossary-term-field-text" |
+        "create-glossary-term-submit" |
         "create-task-field-description" |
         "create-task-field-languages" |
         "create-task-field-languages-item" |

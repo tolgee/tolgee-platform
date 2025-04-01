@@ -7,6 +7,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.SoftDeletable
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
@@ -31,6 +32,7 @@ class Glossary(
 //  @ActivityLoggedProp
 //  var baseLanguage: Language? = null, // TODO: prob needs language entity modifications/custom language entity
   @ActivityLoggedProp
+  @Column(nullable = false)
   var baseLanguageCode: String? = null,
 ) : StandardAuditModel(), SoftDeletable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "glossary")

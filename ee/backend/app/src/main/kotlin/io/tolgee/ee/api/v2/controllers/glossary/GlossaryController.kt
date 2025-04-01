@@ -62,7 +62,7 @@ class GlossaryController(
     return glossaryModelAssembler.toModel(glossary)
   }
 
-  @PutMapping("/{id}")
+  @PutMapping("/{id:[0-9]+}")
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
@@ -84,7 +84,7 @@ class GlossaryController(
     return glossaryModelAssembler.toModel(glossary)
   }
 
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/{id:[0-9]+}")
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
@@ -102,7 +102,7 @@ class GlossaryController(
     glossaryService.delete(organizationHolder.organization.id, id)
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{id:[0-9]+}")
   @Operation(summary = "Get glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
