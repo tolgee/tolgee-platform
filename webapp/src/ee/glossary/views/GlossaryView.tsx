@@ -2,7 +2,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
 import { T, useTranslate } from '@tolgee/react';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import React, { useMemo, useRef, useState } from 'react';
 import { styled } from '@mui/material';
@@ -14,6 +14,8 @@ import { ColumnResizer } from 'tg.views/projects/translations/ColumnResizer';
 import { useColumns } from 'tg.views/projects/translations/useColumns';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
+import { ReactList } from 'tg.component/reactList/ReactList';
+import { useDebounce } from 'use-debounce';
 
 const StyledVerticalScroll = styled('div')`
   overflow-x: scroll;
@@ -48,12 +50,14 @@ const StyledHeaderCell = styled('div')`
 
 export const GlossaryView = () => {
   const [search, setSearch] = useState('');
+  const [searchDebounced] = useDebounce(search, 500);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<
     string[] | undefined
   >(undefined);
 
   const verticalScrollRef = useRef<HTMLDivElement>(null);
+  const reactListRef = useRef<ReactList>(null);
 
   const organization = useOrganization();
   const match = useRouteMatch();
@@ -63,15 +67,15 @@ export const GlossaryView = () => {
   const { t } = useTranslate();
 
   const glossary = useApiQuery({
-    url: '/v2/organizations/{organizationId}/glossaries/{id}',
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
     method: 'get',
-    path: { organizationId: organization!.id, id: glossaryId },
+    path: { organizationId: organization!.id, glossaryId },
   });
 
   const glossaryLanguages = useApiQuery({
-    url: '/v2/organizations/{organizationId}/glossaries/{id}/languages',
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages',
     method: 'get',
-    path: { organizationId: organization!.id, id: glossaryId },
+    path: { organizationId: organization!.id, glossaryId },
     options: {
       onSuccess: (data) => {
         if (selectedLanguages === undefined) {
@@ -81,22 +85,44 @@ export const GlossaryView = () => {
     },
   });
 
-  // const terms = useApiQuery({
-  //   url: '/v2/organizations/{organizationId}/glossaries/{id}/terms',
-  //   method: 'get',
-  //   path: { organizationId: organization!.id, id: glossaryId },
-  //   query: {
-  //     page,
-  //     size: 20,
-  //     search,
-  //     sort: ['id,desc'],
-  //   },
-  //   options: {
-  //     keepPreviousData: true,
-  //   },
-  // });
+  const path = { organizationId: organization!.id, glossaryId };
+  const query = {
+    search: searchDebounced,
+    size: 30,
+    // sort: ['id,desc'],
+  };
+  const termsLoadable = useApiInfiniteQuery({
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms',
+    method: 'get',
+    path: path,
+    query: query,
+    options: {
+      keepPreviousData: true,
+      refetchOnMount: true,
+      noGlobalLoading: true,
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            path: path,
+            query: {
+              ...query,
+              page: lastPage.page!.number! + 1,
+            },
+          };
+        } else {
+          return null;
+        }
+      },
+    },
+  });
 
-  const items = []; // terms?.data?._embedded?.terms;
+  const terms =
+    termsLoadable.data?.pages.flatMap(
+      (p) => p._embedded?.glossaryTerms ?? []
+    ) ?? [];
 
   const onCreate = () => {
     setCreateDialogOpen(true);
@@ -145,7 +171,7 @@ export const GlossaryView = () => {
       hideChildrenOnLoading={false}
       maxWidth="wide"
       allCentered
-      onAdd={items && onCreate}
+      onAdd={terms && onCreate}
       addLabel={t('glossary_add_button')}
     >
       {createDialogOpen && (
@@ -204,47 +230,41 @@ export const GlossaryView = () => {
               />
             );
           })}
+          <ReactList
+            ref={reactListRef}
+            threshold={800}
+            type="variable"
+            itemSizeEstimator={(index, cache) => {
+              return cache[index] || 84;
+            }}
+            // @ts-ignore
+            scrollParentGetter={() => window}
+            length={terms.length}
+            useTranslate3d
+            itemRenderer={(index) => {
+              const row = terms[index];
+              const isLast = index === terms.length - 1;
+              if (
+                isLast &&
+                !termsLoadable.isFetching &&
+                termsLoadable.hasNextPage
+              ) {
+                termsLoadable.fetchNextPage();
+              }
 
-          {/*<ReactList*/}
-          {/*  ref={reactListRef}*/}
-          {/*  threshold={800}*/}
-          {/*  type="variable"*/}
-          {/*  itemSizeEstimator={(index, cache) => {*/}
-          {/*    return cache[index] || 84;*/}
-          {/*  }}*/}
-          {/*  // @ts-ignore*/}
-          {/*  scrollParentGetter={() => window}*/}
-          {/*  length={translations.length}*/}
-          {/*  useTranslate3d*/}
-          {/*  itemRenderer={(index) => {*/}
-          {/*    const row = translations[index];*/}
-          {/*    const isLast = index === translations.length - 1;*/}
-          {/*    if (isLast && !isFetchingMore && hasMoreToFetch) {*/}
-          {/*      handleFetchMore();*/}
-          {/*    }*/}
-
-          {/*    const nsBannerAfter = nsBanners.find((b) => b.row === index + 1);*/}
-          {/*    const nsBanner = nsBanners.find((b) => b.row === index);*/}
-          {/*    return (*/}
-          {/*      <div key={`${row.keyNamespace}.${row.keyId}`}>*/}
-          {/*        {nsBanner && (*/}
-          {/*          <NamespaceBanner*/}
-          {/*            namespace={nsBanner}*/}
-          {/*            maxWidth={columnSizes[0]}*/}
-          {/*          />*/}
-          {/*        )}*/}
-          {/*        <RowTable*/}
-          {/*          bannerBefore={Boolean(nsBanner)}*/}
-          {/*          bannerAfter={Boolean(nsBannerAfter)}*/}
-          {/*          data={row}*/}
-          {/*          languages={languageCols}*/}
-          {/*          columnSizes={columnSizesPercent}*/}
-          {/*          onResize={startResize}*/}
-          {/*        />*/}
-          {/*      </div>*/}
-          {/*    );*/}
-          {/*  }}*/}
-          {/*/>*/}
+              return (
+                <div key={row.id}>
+                  {row.description}
+                  {/*<RowTable*/}
+                  {/*  data={row}*/}
+                  {/*  languages={languageCols}*/}
+                  {/*  columnSizes={columnSizesPercent}*/}
+                  {/*  onResize={startResize}*/}
+                  {/*/>*/}
+                </div>
+              );
+            }}
+          />
         </StyledContent>
       </StyledVerticalScroll>
     </BaseOrganizationSettingsView>
