@@ -15,6 +15,7 @@ const StyledContainer = styled('div')`
   padding: ${({ theme }) => theme.spacing(1.5, 2.5)};
   align-items: center;
   cursor: pointer;
+  tab-index: 0;
   background-color: ${({ theme }) => theme.palette.background.default};
   @container (max-width: 599px) {
     grid-gap: ${({ theme }) => theme.spacing(1, 2)};
@@ -93,6 +94,7 @@ export const GlossaryListItem: React.VFC<Props> = ({
 
   return (
     <StyledContainer
+      role="button"
       data-cy="dashboard-projects-list-item"
       onClick={() =>
         history.push(

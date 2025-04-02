@@ -33,16 +33,16 @@ class GlossaryService(
 
   fun find(
     organizationId: Long,
-    id: Long,
+    glossaryId: Long,
   ): Glossary? {
-    return glossaryRepository.find(organizationId, id)
+    return glossaryRepository.find(organizationId, glossaryId)
   }
 
   fun get(
     organizationId: Long,
-    id: Long,
+    glossaryId: Long,
   ): Glossary {
-    return find(organizationId, id) ?: throw NotFoundException(Message.GLOSSARY_NOT_FOUND)
+    return find(organizationId, glossaryId) ?: throw NotFoundException(Message.GLOSSARY_NOT_FOUND)
   }
 
   fun create(
