@@ -18,13 +18,13 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     from Glossary
     where organizationOwner.id = :organizationId
       and organizationOwner.deletedAt is null
-      and id = :id
+      and id = :glossaryId
       and deletedAt is null
   """,
   )
   fun find(
     organizationId: Long,
-    id: Long,
+    glossaryId: Long,
   ): Glossary?
 
   @Query(
@@ -56,7 +56,7 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     """
     delete from glossary_project gp
     using glossary g
-    where gp.glossary_id = :id
+    where gp.glossary_id = :glossaryId
       and gp.project_id = :projectId 
       and gp.glossary_id = g.id
       and g.organization_owner_id = :organizationId
@@ -67,7 +67,7 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
   @Modifying
   fun unassignProject(
     organizationId: Long,
-    id: Long,
+    glossaryId: Long,
     projectId: Long,
   ): Int
 
@@ -75,13 +75,15 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     """
     update Glossary
     set deletedAt = :deletedAt
-    where organizationOwner.id = :organizationId and id = :id and deletedAt is null
+    where organizationOwner.id = :organizationId
+      and id = :glossaryId
+      and deletedAt is null
     """,
   )
   @Modifying
   fun softDelete(
     organizationId: Long,
-    id: Long,
+    glossaryId: Long,
     deletedAt: Date,
   ): Int
 }
