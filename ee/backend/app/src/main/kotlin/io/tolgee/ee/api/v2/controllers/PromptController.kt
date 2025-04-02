@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.component.machineTranslation.providers.llm.LLMParams
@@ -6,13 +6,13 @@ import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.dtos.request.prompt.VariablesResponseDto
 import io.tolgee.dtos.response.PromptResponseDto
+import io.tolgee.ee.service.PromptServiceEeImpl
 import io.tolgee.hateoas.prompt.PromptModel
-import io.tolgee.hateoas.prompt.PromptModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
 import io.tolgee.model.Prompt
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.PromptService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.*
 )
 @OpenApiOrderExtension(6)
 class PromptController(
-  private val promptService: PromptService,
-  private val promptModelAssembler: PromptModelAssembler,
-  private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
-  private val projectHolder: ProjectHolder,
+    private val promptService: PromptServiceEeImpl,
+    private val promptModelAssembler: PromptModelAssembler,
+    private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
+    private val projectHolder: ProjectHolder,
 ) {
   @GetMapping("")
   @UseDefaultPermissions

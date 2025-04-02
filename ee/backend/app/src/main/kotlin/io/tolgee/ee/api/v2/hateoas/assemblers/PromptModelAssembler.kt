@@ -1,6 +1,7 @@
-package io.tolgee.hateoas.prompt
+package io.tolgee.ee.api.v2.hateoas.assemblers
 
-import io.tolgee.api.v2.controllers.PromptController
+import io.tolgee.ee.api.v2.controllers.PromptController
+import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component

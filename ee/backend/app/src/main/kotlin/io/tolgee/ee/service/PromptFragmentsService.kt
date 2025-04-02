@@ -1,7 +1,6 @@
-package io.tolgee.service
+package io.tolgee.ee.service
 
-import io.tolgee.service.PromptService.Companion.Variable
-import org.aspectj.weaver.ast.Var
+import io.tolgee.ee.service.PromptServiceEeImpl.Companion.Variable
 import org.springframework.stereotype.Service
 
 @Service
