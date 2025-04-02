@@ -62,7 +62,7 @@ class GlossaryController(
     return glossaryModelAssembler.toModel(glossary)
   }
 
-  @PutMapping("/{id:[0-9]+}")
+  @PutMapping("/{glossaryId:[0-9]+}")
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
@@ -70,7 +70,7 @@ class GlossaryController(
     @PathVariable
     organizationId: Long,
     @PathVariable
-    id: Long,
+    glossaryId: Long,
     @RequestBody @Valid
     dto: UpdateGlossaryRequest,
   ): GlossaryModel {
@@ -80,11 +80,11 @@ class GlossaryController(
     )
 
     val organization = organizationHolder.organization
-    val glossary = glossaryService.update(organization.id, id, dto)
+    val glossary = glossaryService.update(organization.id, glossaryId, dto)
     return glossaryModelAssembler.toModel(glossary)
   }
 
-  @DeleteMapping("/{id:[0-9]+}")
+  @DeleteMapping("/{glossaryId:[0-9]+}")
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
@@ -92,17 +92,17 @@ class GlossaryController(
     @PathVariable
     organizationId: Long,
     @PathVariable
-    id: Long,
+    glossaryId: Long,
   ) {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
     )
 
-    glossaryService.delete(organizationHolder.organization.id, id)
+    glossaryService.delete(organizationHolder.organization.id, glossaryId)
   }
 
-  @GetMapping("/{id:[0-9]+}")
+  @GetMapping("/{glossaryId:[0-9]+}")
   @Operation(summary = "Get glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
@@ -110,7 +110,7 @@ class GlossaryController(
     @PathVariable
     organizationId: Long,
     @PathVariable
-    id: Long,
+    glossaryId: Long,
   ): GlossaryModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
@@ -118,7 +118,7 @@ class GlossaryController(
     )
 
     val organization = organizationHolder.organization
-    val glossary = glossaryService.get(organization.id, id)
+    val glossary = glossaryService.get(organization.id, glossaryId)
     return glossaryModelAssembler.toModel(glossary)
   }
 

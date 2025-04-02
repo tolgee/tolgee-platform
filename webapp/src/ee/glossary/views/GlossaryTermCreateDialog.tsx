@@ -45,9 +45,10 @@ export const GlossaryTermCreateDialog = ({
   const { t } = useTranslate();
 
   const createGlossaryTerm = useApiMutation({
-    url: '/v2/organizations/{organizationId}/glossaries/{id}/terms',
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms',
     method: 'post',
-    invalidatePrefix: '/v2/organizations/{organizationId}/glossaries/{id}',
+    invalidatePrefix:
+      '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
   });
 
   const initialValues: CreateGlossaryTermRequest = {
@@ -73,7 +74,7 @@ export const GlossaryTermCreateDialog = ({
             {
               path: {
                 organizationId,
-                id: glossaryId,
+                glossaryId,
               },
               content: {
                 'application/json': values,
