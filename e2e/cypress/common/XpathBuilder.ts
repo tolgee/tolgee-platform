@@ -41,6 +41,10 @@ export function XPathBuilder(initialXpath = '') {
     return descendant().withDataCy(dataCy).descendant('input').getElement();
   }
 
+  function nth(nth: number) {
+    return XPathBuilder(`(${xpath})[${nth}]`);
+  }
+
   const builder = {
     descendant,
     attributeEquals,
@@ -53,6 +57,7 @@ export function XPathBuilder(initialXpath = '') {
     getInputUnderDataCy,
     getXpath: () => xpath,
     withAttribute,
+    nth,
   };
 
   return builder;
