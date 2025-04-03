@@ -25,7 +25,10 @@ export const SelfHostedEeEstimatedCosts: FC<{
 
   return (
     <Box>
-      <ExpectedUsage useUsage={useUsage} />
+      <ExpectedUsage
+        useUsage={useUsage}
+        estimatedCosts={subscription.estimatedCosts}
+      />
     </Box>
   );
 };
