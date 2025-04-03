@@ -69,7 +69,7 @@ export type { TaskFilterType } from '../ee/task/components/taskFilter/TaskFilter
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
-export { AiPlayground } from '../ee/llm/AiPlayground/AiPlayground';
+export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 
 export const billingMenuItems = [
   BillingMenuItem,
