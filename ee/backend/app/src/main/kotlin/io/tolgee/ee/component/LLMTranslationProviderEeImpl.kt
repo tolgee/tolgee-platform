@@ -3,6 +3,7 @@ package io.tolgee.ee.component
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.LLMTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -13,8 +14,11 @@ import org.springframework.stereotype.Component
 @Component
 @Primary
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class LLMTranslationProviderEeImpl(private val promptService: PromptServiceEeImpl) : LLMTranslationProvider() {
-  override val isEnabled: Boolean get() = true
+class LLMTranslationProviderEeImpl(
+  private val promptService: PromptServiceEeImpl,
+  private val llmProperties: LLMProperties
+) : LLMTranslationProvider() {
+  override val isEnabled: Boolean get() = llmProperties.enabled
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     if (params.keyId == null) {

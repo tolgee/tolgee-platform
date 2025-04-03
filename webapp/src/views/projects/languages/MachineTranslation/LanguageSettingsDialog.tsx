@@ -291,11 +291,13 @@ export const LanguageSettingsDialog = ({
                           {type === 'PROMPT' && (
                             <Select
                               size="small"
-                              value={values.promptId}
+                              value={values.promptId ?? null}
                               onChange={(e) =>
                                 setFieldValue('promptId', e.target.value)
                               }
+                              displayEmpty
                             >
+                              <MenuItem value={null as any}>default</MenuItem>
                               {prompts.data?._embedded?.prompt?.map((item) => {
                                 return (
                                   <MenuItem key={item.id} value={item.id}>

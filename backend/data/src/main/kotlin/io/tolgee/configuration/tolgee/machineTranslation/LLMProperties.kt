@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.llm")
 class LLMProperties {
+  var enabled: Boolean = false
   var providers: MutableList<LLMProvider> = mutableListOf()
 
   open class LLMProvider(
