@@ -34,7 +34,7 @@ type Props = MenuItemProps & {
 };
 
 export const MultiselectItem = React.forwardRef(function MultiselectItem(
-  { label, selected, ...other }: Props,
+  { label, selected, disabled, ...other }: Props,
   ref
 ) {
   return (
@@ -42,9 +42,14 @@ export const MultiselectItem = React.forwardRef(function MultiselectItem(
       ref={ref as any}
       data-cy="filter-item"
       selected={selected}
+      disabled={disabled}
       {...other}
     >
-      <StyledCheckbox checked={Boolean(selected)} size="small" />
+      <StyledCheckbox
+        checked={Boolean(selected)}
+        disabled={disabled}
+        size="small"
+      />
       <StyledListItemText primary={label} />
     </StyledMenuItem>
   );
