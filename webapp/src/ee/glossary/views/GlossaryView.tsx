@@ -5,17 +5,20 @@ import { T, useTranslate } from '@tolgee/react';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import React, { useMemo, useRef, useState } from 'react';
-import { styled } from '@mui/material';
-import {
-  CellLanguage,
-  CellLanguageModel,
-} from 'tg.views/projects/translations/TranslationsTable/CellLanguage';
-import { ColumnResizer } from 'tg.views/projects/translations/ColumnResizer';
-import { useColumns } from 'tg.views/projects/translations/useColumns';
-import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
+import { Box, styled } from '@mui/material';
 import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
 import { ReactList } from 'tg.component/reactList/ReactList';
-import { useDebounce } from 'use-debounce';
+import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
+import { BaseViewAddButton } from 'tg.component/layout/BaseViewAddButton';
+import { GlossaryViewLanguageSelect } from 'tg.ee.module/glossary/components/GlossaryViewLanguageSelect';
+import { GlossaryViewListHeader } from 'tg.ee.module/glossary/components/GlossaryViewListHeader';
+import { GlossaryViewListRow } from 'tg.ee.module/glossary/components/GlossaryViewListRow';
+
+const StyleTermsCount = styled('div')`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  margin-top: ${({ theme }) => theme.spacing(1)};
+  margin-bottom: ${({ theme }) => theme.spacing(1)};
+`;
 
 const StyledVerticalScroll = styled('div')`
   overflow-x: scroll;
@@ -27,34 +30,22 @@ const StyledContent = styled('div')`
   position: relative;
 `;
 
-const StyledHeaderRow = styled('div')`
-  position: sticky;
-  background: ${({ theme }) => theme.palette.background.default};
-  top: 0px;
-  margin-bottom: -1px;
+const StyledContainerInner = styled(Box)`
   display: grid;
-`;
-
-const StyledHeaderCell = styled('div')`
-  border-top: 1px solid ${({ theme }) => theme.palette.divider1};
-  box-sizing: border-box;
-  display: flex;
-  flex-grow: 0;
-  overflow: hidden;
-
-  &.termCell {
-    padding-left: 13px;
-    padding-top: 8px;
-  }
+  width: 100%;
+  margin: 0px auto;
+  margin-top: 0px;
+  margin-bottom: 0px;
 `;
 
 export const GlossaryView = () => {
   const [search, setSearch] = useState('');
-  const [searchDebounced] = useDebounce(search, 500);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<
     string[] | undefined
   >(undefined);
+  const [selectedTerms, setSelectedTerms] = useState<number[]>([]);
+  const [selectedTermsInverted, setSelectedTermsInverted] = useState(false);
 
   const verticalScrollRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
@@ -72,22 +63,9 @@ export const GlossaryView = () => {
     path: { organizationId: organization!.id, glossaryId },
   });
 
-  const glossaryLanguages = useApiQuery({
-    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages',
-    method: 'get',
-    path: { organizationId: organization!.id, glossaryId },
-    options: {
-      onSuccess: (data) => {
-        if (selectedLanguages === undefined) {
-          setSelectedLanguages(data.filter((l) => !l.base).map((l) => l.tag));
-        }
-      },
-    },
-  });
-
   const path = { organizationId: organization!.id, glossaryId };
   const query = {
-    search: searchDebounced,
+    search: search,
     size: 30,
     // sort: ['id,desc'],
   };
@@ -119,36 +97,149 @@ export const GlossaryView = () => {
     },
   });
 
-  const terms =
-    termsLoadable.data?.pages.flatMap(
-      (p) => p._embedded?.glossaryTerms ?? []
-    ) ?? [];
+  const terms = useMemo(
+    () =>
+      termsLoadable.data?.pages.flatMap(
+        (p) => p._embedded?.glossaryTerms ?? []
+      ) ?? [],
+    [termsLoadable.data]
+  );
+
+  const someTermsSelected =
+    selectedTerms.length > 0 && selectedTerms.length < terms.length;
+  const allTermsSelected = selectedTermsInverted
+    ? selectedTerms.length === 0
+    : selectedTerms.length === terms.length;
+
+  const toggleSelectAllTerms = () => {
+    setSelectedTerms([]);
+    if (selectedTermsInverted && selectedTerms.length === terms.length) {
+      return;
+    }
+    setSelectedTermsInverted(!selectedTermsInverted);
+  };
+  const toggleSelectedTerm = (termId: number) => {
+    if (selectedTerms.includes(termId)) {
+      setSelectedTerms(selectedTerms.filter((id) => id !== termId));
+    } else {
+      setSelectedTerms([...selectedTerms, termId]);
+    }
+  };
+
+  const selectedLanguagesWithBaseLanguage = useMemo(() => {
+    return [
+      glossary.data?.baseLanguageCode || '',
+      ...(selectedLanguages ?? []),
+    ];
+  }, [selectedLanguages, glossary.data]);
+
+  const updateSelectedLanguages = (languages: string[]) => {
+    setSelectedLanguages(
+      languages.filter((l) => l !== glossary.data?.baseLanguageCode)
+    );
+  };
 
   const onCreate = () => {
     setCreateDialogOpen(true);
   };
 
-  const initialColumnRatios = useMemo(() => {
-    return [1, ...(selectedLanguages?.map(() => 1) || [])];
-  }, [selectedLanguages]);
+  const body =
+    terms.length > 0 ? (
+      <>
+        {terms && (
+          <Box>
+            <StyledContainerInner>
+              <Box display="flex" justifyContent="space-between">
+                <Box display="flex" alignItems="center" gap="8px">
+                  <Box>
+                    <SecondaryBarSearchField
+                      onSearch={setSearch}
+                      placeholder={t('glossary_search_placeholder')}
+                    />
+                  </Box>
+                </Box>
+                <Box display="flex" gap={2}>
+                  <GlossaryViewLanguageSelect
+                    organizationId={organization!.id}
+                    glossaryId={glossaryId}
+                    value={selectedLanguagesWithBaseLanguage}
+                    onValueChange={updateSelectedLanguages}
+                    sx={{
+                      width: '250px',
+                    }}
+                  />
+                  <BaseViewAddButton
+                    onClick={onCreate}
+                    label={t('glossary_add_button')}
+                  />
+                </Box>
+              </Box>
+            </StyledContainerInner>
+          </Box>
+        )}
 
-  const {
-    columnSizes,
-    columnSizesPercent,
-    startResize,
-    resizeColumn,
-    addResizer,
-  } = useColumns({
-    width: verticalScrollRef.current?.clientWidth || 1,
-    initialRatios: initialColumnRatios,
-    minSize: 350,
-  });
+        <StyledVerticalScroll ref={verticalScrollRef}>
+          <StyledContent>
+            <StyleTermsCount>
+              <T
+                keyName="glossary_view_terms_count"
+                params={{
+                  count:
+                    termsLoadable.data?.pages?.[0]?.page?.totalElements ?? 0,
+                }}
+              />
+            </StyleTermsCount>
+
+            <GlossaryViewListHeader
+              selectedLanguages={selectedLanguages}
+              allTermsSelected={allTermsSelected}
+              someTermsSelected={someTermsSelected}
+              onToggleSelectAll={toggleSelectAllTerms}
+            />
+
+            <ReactList
+              ref={reactListRef}
+              threshold={800}
+              type="variable"
+              itemSizeEstimator={(index, cache) => {
+                return cache[index] || 84;
+              }}
+              // @ts-ignore
+              scrollParentGetter={() => window}
+              length={terms.length}
+              useTranslate3d
+              itemRenderer={(index) => {
+                const row = terms[index];
+                const isLast = index === terms.length - 1;
+                if (
+                  isLast &&
+                  !termsLoadable.isFetching &&
+                  termsLoadable.hasNextPage
+                ) {
+                  termsLoadable.fetchNextPage();
+                }
+
+                return (
+                  <GlossaryViewListRow
+                    item={row}
+                    selectedLanguages={selectedLanguages}
+                    selectedTerms={selectedTerms}
+                    selectedTermsInverted={selectedTermsInverted}
+                    onToggleSelectedTerm={toggleSelectedTerm}
+                  />
+                );
+              }}
+            />
+          </StyledContent>
+        </StyledVerticalScroll>
+      </>
+    ) : (
+      <>Empty TODO</>
+    );
 
   return (
     <BaseOrganizationSettingsView
       windowTitle={glossary.data?.name || t('organization_glossary_title')}
-      onSearch={setSearch}
-      searchPlaceholder={t('glossary_search_placeholder')}
       link={LINKS.ORGANIZATION_GLOSSARY}
       navigation={[
         [
@@ -167,12 +258,10 @@ export const GlossaryView = () => {
             }),
         ],
       ]}
-      loading={glossary.isLoading} // || terms.isLoading}
+      loading={glossary.isLoading || termsLoadable.isLoading}
       hideChildrenOnLoading={false}
       maxWidth="wide"
       allCentered
-      onAdd={terms && onCreate}
-      addLabel={t('glossary_add_button')}
     >
       {createDialogOpen && (
         <GlossaryTermCreateDialog
@@ -183,90 +272,7 @@ export const GlossaryView = () => {
           glossaryId={glossaryId}
         />
       )}
-
-      <StyledVerticalScroll ref={verticalScrollRef}>
-        <StyledContent>
-          <StyledHeaderRow
-            style={{
-              gridTemplateColumns: columnSizesPercent.join(' '),
-            }}
-          >
-            <StyledHeaderCell
-              key={0}
-              style={{
-                width: columnSizesPercent[0],
-                height: 39,
-              }}
-              className="termCell"
-            >
-              <T keyName="glossary_grid_term_text" />
-            </StyledHeaderCell>
-            {selectedLanguages?.map((tag, i) => {
-              const languageData = languageInfo[tag];
-              const language: CellLanguageModel = {
-                base: false,
-                flagEmoji: languageData?.flags?.[0] || '',
-                name: languageData?.englishName || tag,
-              };
-              return (
-                <StyledHeaderCell key={i + 1}>
-                  <CellLanguage
-                    onResize={() => startResize(i)}
-                    language={language}
-                  />
-                </StyledHeaderCell>
-              );
-            })}
-          </StyledHeaderRow>
-          {columnSizes.slice(0, -1).map((w, i) => {
-            const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
-            return (
-              <ColumnResizer
-                key={i}
-                size={w}
-                left={left}
-                onResize={(size) => resizeColumn(i, size)}
-                passResizeCallback={(callback) => addResizer(i, callback)}
-              />
-            );
-          })}
-          <ReactList
-            ref={reactListRef}
-            threshold={800}
-            type="variable"
-            itemSizeEstimator={(index, cache) => {
-              return cache[index] || 84;
-            }}
-            // @ts-ignore
-            scrollParentGetter={() => window}
-            length={terms.length}
-            useTranslate3d
-            itemRenderer={(index) => {
-              const row = terms[index];
-              const isLast = index === terms.length - 1;
-              if (
-                isLast &&
-                !termsLoadable.isFetching &&
-                termsLoadable.hasNextPage
-              ) {
-                termsLoadable.fetchNextPage();
-              }
-
-              return (
-                <div key={row.id}>
-                  {row.description}
-                  {/*<RowTable*/}
-                  {/*  data={row}*/}
-                  {/*  languages={languageCols}*/}
-                  {/*  columnSizes={columnSizesPercent}*/}
-                  {/*  onResize={startResize}*/}
-                  {/*/>*/}
-                </div>
-              );
-            }}
-          />
-        </StyledContent>
-      </StyledVerticalScroll>
+      {body}
     </BaseOrganizationSettingsView>
   );
 };
