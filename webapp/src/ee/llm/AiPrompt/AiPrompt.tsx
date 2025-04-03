@@ -142,7 +142,7 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
       },
       {
         onError(e) {
-          if (e.params) {
+          if (e.code === 'llm_template_parsing_error' && e.params) {
             setErrors([
               {
                 message: e.params[0],

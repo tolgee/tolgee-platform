@@ -368,9 +368,11 @@ class PromptServiceEeImpl(
       }
 
       val finalParams = createVariablesLazyMap(params)
+
       val template = handlebars.compileInline(data.template)
       val prompt = template.apply(finalParams)
-      return prompt
+      // remove excessive newlines and trim
+      return prompt.replace(Regex("\n(\\s*\n)+"), "\n\n").trim()
     } catch (e: HandlebarsException) {
       throw BadRequestException(
         Message.LLM_TEMPLATE_PARSING_ERROR,
