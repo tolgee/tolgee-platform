@@ -62,7 +62,6 @@ const StyledEditor = styled('div')`
     display: block;
     unicode-bidi: embed;
     white-space: pre-wrap;
-    pointer-events: none;
   }
   .cm-error-underline {
     text-decoration: underline wavy red;
