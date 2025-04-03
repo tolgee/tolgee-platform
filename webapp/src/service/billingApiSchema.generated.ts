@@ -62,11 +62,15 @@ export interface paths {
     delete: operations["removeAvatar"];
   };
   "/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan": {
-    /** Assigns a private free plan or trial plan to an organization. */
+    /** Assigns a private free plan or trial plan to an organization.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
     put: operations["assignCloudPlan"];
   };
+  "/v2/administration/organizations/{organizationId}/billing/assign-self-hosted-plan": {
+    /** Assigns a self-hosted plan to an organization. If plan is free, it's assigned as active plan.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
+    put: operations["assignSelfHostedPlan"];
+  };
   "/v2/administration/organizations/{organizationId}/billing/update-trial-end-date": {
-    put: operations["updateTrialEndDAte"];
+    put: operations["updateTrialEndDate"];
   };
   "/v2/billing/translation-agency": {
     get: operations["getAll"];
@@ -222,12 +226,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
     };
     AdministrationCloudSubscriptionModel: {
       cancelAtPeriodEnd: boolean;
@@ -255,12 +260,19 @@ export interface components {
       /** Format: int64 */
       trialEnd?: number;
     };
-    AssignPlanRequest: {
+    AssignCloudPlanRequest: {
       customPlan?: components["schemas"]["CloudPlanRequest"];
       /** Format: int64 */
       planId?: number;
       /** Format: int64 */
       trialEnd?: number;
+    };
+    AssignSelfHostedPlanRequest: {
+      /**
+       * Format: int64
+       * @description Id of the subscription plan
+       */
+      planId: number;
     };
     Avatar: {
       large: string;
@@ -322,11 +334,12 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
     };
     CloudPlanRequest: {
       /** Format: date-time */
@@ -354,6 +367,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
@@ -361,7 +375,7 @@ export interface components {
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId: string;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
       /** Format: date-time */
       usableUntil?: string;
     };
@@ -508,6 +522,7 @@ export interface components {
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "third_party_switch_initiated"
+        | "third_party_switch_conflict"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -589,6 +604,7 @@ export interface components {
         | "cannot_create_organization"
         | "wrong_current_password"
         | "wrong_param_type"
+        | "user_missing_password"
         | "expired_super_jwt_token"
         | "cannot_delete_your_own_account"
         | "cannot_sort_by_this_column"
@@ -722,6 +738,7 @@ export interface components {
         | "sso_cant_verify_user"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
+        | "authentication_method_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
@@ -730,6 +747,7 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
         | "sso_login_forced_for_this_account"
+        | "use_sso_for_authentication_instead"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -739,7 +757,11 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported"
+        | "plan_key_limit_exceeded"
+        | "keys_spending_limit_exceeded"
+        | "plan_seat_limit_exceeded";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -809,7 +831,7 @@ export interface components {
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
       organization: components["schemas"]["SimpleOrganizationModel"];
-      selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionModel"][];
+      selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionAdministrationModel"][];
     };
     PageMetadata: {
       /** Format: int64 */
@@ -914,15 +936,17 @@ export interface components {
     };
     PlanIncludedUsageModel: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
       /** Format: int64 */
-      translationSlots: number;
-      /** Format: int64 */
       translations: number;
     };
     PlanIncludedUsageRequest: {
+      /** Format: int64 */
+      keys: number;
       /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
@@ -932,6 +956,7 @@ export interface components {
     };
     PlanPricesModel: {
       perSeat: number;
+      perThousandKeys: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -939,6 +964,7 @@ export interface components {
     };
     PlanPricesRequest: {
       perSeat?: number;
+      perThousandKeys?: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -965,9 +991,17 @@ export interface components {
       stackTrace: string;
     };
     ReportUsageDto: {
+      /**
+       * Format: int64
+       * @description Number of keys in the project. If not provided, the number of keys will not be updated.
+       */
+      keys?: number;
       licenseKey: string;
-      /** Format: int64 */
-      seats: number;
+      /**
+       * Format: int64
+       * @description Number of languages in the project. If not provided, the number of languages will not be updated.
+       */
+      seats?: number;
     };
     SelfHostedEeFreeSubscribeRequest: {
       /**
@@ -977,6 +1011,7 @@ export interface components {
       planId: number;
     };
     SelfHostedEePlanAdministrationModel: {
+      canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -997,12 +1032,18 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
       )[];
+      /**
+       * Format: int64
+       * @description If only single organization is using this plan or can see this plan, this is the organization id, null otherwise.When provided, we are sure that no other organization is currently using or have been invoiced with this plan.
+       */
+      exclusiveForOrganizationId?: number;
       forOrganizationIds: number[];
       free: boolean;
       hasYearlyPrice: boolean;
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -1035,6 +1076,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -1066,10 +1108,12 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       /** Format: date-time */
       notAvailableBefore?: string;
+      payAsYouGo?: boolean;
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId?: string;
@@ -1083,6 +1127,29 @@ export interface components {
        * @description Id of the subscription plan
        */
       planId: number;
+    };
+    SelfHostedEeSubscriptionAdministrationModel: {
+      /** Format: int64 */
+      createdAt: number;
+      currentBillingPeriod: "MONTHLY" | "YEARLY";
+      /** Format: int64 */
+      currentPeriodEnd?: number;
+      /** Format: int64 */
+      currentPeriodStart?: number;
+      estimatedCosts?: number;
+      /** Format: int64 */
+      id: number;
+      licenseKey?: string;
+      plan: components["schemas"]["SelfHostedEePlanAdministrationModel"];
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
     };
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
@@ -1109,6 +1176,8 @@ export interface components {
     };
     SetLicenseKeyLicensingDto: {
       instanceId: string;
+      /** Format: int64 */
+      keys: number;
       licenseKey: string;
       /** Format: int64 */
       seats: number;
@@ -1233,6 +1302,7 @@ export interface components {
       /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
       appliedStripeCredits?: number;
       credits?: components["schemas"]["SumUsageItemModel"];
+      keys: components["schemas"]["AverageProportionalUsageItemModel"];
       seats: components["schemas"]["AverageProportionalUsageItemModel"];
       subscriptionPrice?: number;
       total: number;
@@ -1790,6 +1860,20 @@ export interface operations {
     };
   };
   getPlans_1: {
+    parameters: {
+      query: {
+        /**
+         * Filters only plans which can be assignable to the provided organization it.
+         *
+         * Plan can be assignable to organization because of one of these reasons:
+         * - plan is private free, visible to organization
+         * - plan is paid (Assignable as trial)
+         */
+        filterAssignableToOrganization?: number;
+        filterPlanIds?: number[];
+        filterPublic?: boolean;
+      };
+    };
     responses: {
       /** OK */
       200: {
@@ -2454,7 +2538,7 @@ export interface operations {
       };
     };
   };
-  /** Assigns a private free plan or trial plan to an organization. */
+  /** Assigns a private free plan or trial plan to an organization.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
   assignCloudPlan: {
     parameters: {
       path: {
@@ -2499,11 +2583,60 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["AssignPlanRequest"];
+        "application/json": components["schemas"]["AssignCloudPlanRequest"];
       };
     };
   };
-  updateTrialEndDAte: {
+  /** Assigns a self-hosted plan to an organization. If plan is free, it's assigned as active plan.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
+  assignSelfHostedPlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignSelfHostedPlanRequest"];
+      };
+    };
+  };
+  updateTrialEndDate: {
     parameters: {
       path: {
         organizationId: number;
@@ -2893,7 +3026,7 @@ export interface operations {
     parameters: {
       path: {
         organizationId: number;
-        type: "SEATS" | "TRANSLATIONS";
+        type: "SEATS" | "TRANSLATIONS" | "KEYS";
       };
     };
     responses: {
@@ -3094,7 +3227,7 @@ export interface operations {
       path: {
         organizationId: number;
         invoiceId: number;
-        type: "SEATS" | "TRANSLATIONS";
+        type: "SEATS" | "TRANSLATIONS" | "KEYS";
       };
     };
     responses: {

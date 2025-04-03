@@ -246,4 +246,13 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """,
   )
   fun getViewsByKeyIds(ids: List<Long>): List<KeyView>
+
+  @Query(
+    """
+    select count(k) from Key k
+    join k.project p on p.deletedAt is null
+    join p.organizationOwner o on o.deletedAt is null
+  """,
+  )
+  fun countAllOnInstance(): Long
 }

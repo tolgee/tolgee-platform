@@ -15,7 +15,7 @@ open class SelfHostedEeSubscriptionModel(
   val currentPeriodEnd: Long? = null,
   val currentBillingPeriod: BillingPeriod = BillingPeriod.MONTHLY,
   val createdAt: Long = 0,
-  val plan: SelfHostedEePlanModel,
+  open val plan: SelfHostedEePlanModel,
   val status: SubscriptionStatus = SubscriptionStatus.ACTIVE,
   val licenseKey: String? = null,
   val estimatedCosts: BigDecimal? = 0.toBigDecimal(),

@@ -79,7 +79,7 @@ class OrganizationRoleCachingTest : AbstractSpringTest() {
   @Test
   fun `it evicts on remove user`() {
     populateCache(testData.pepaOrg.id, testData.pepa.id)
-    organizationRoleService.removeUser(testData.pepaOrg.id, testData.pepa.id)
+    organizationRoleService.removeUser(testData.pepa.id, testData.pepaOrg.id)
     assertCacheEvicted(testData.pepaOrg.id, testData.pepa.id)
   }
 

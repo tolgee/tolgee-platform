@@ -37,7 +37,11 @@ export const useMessageService = () => {
 
   const actions = {
     showMessage(m: Message) {
-      enqueueSnackbar(m.text, { variant: m.variant, action });
+      enqueueSnackbar(m.text, {
+        variant: m.variant,
+        action,
+        style: { maxWidth: 700 },
+      });
     },
   };
 

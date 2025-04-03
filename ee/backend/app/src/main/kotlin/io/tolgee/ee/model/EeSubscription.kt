@@ -3,6 +3,7 @@ package io.tolgee.ee.model
 import io.hypersistence.utils.hibernate.type.array.EnumArrayType
 import io.tolgee.api.EeSubscriptionDto
 import io.tolgee.api.IEeSubscription
+import io.tolgee.api.PlanWithIncludedKeysAndSeats
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.model.AuditModel
@@ -18,9 +19,14 @@ import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 import java.util.*
 
+/**
+ * This entity stores the information about the current Subscription on the Self-Hosted instance.
+ * It is used to store the actual license key and basic information about the subscription, so we can check the limits
+ * and enabled features.
+ */
 @Entity
 @Table(schema = "ee")
-class EeSubscription : AuditModel(), IEeSubscription {
+class EeSubscription : AuditModel(), IEeSubscription, PlanWithIncludedKeysAndSeats {
   @field:Id
   override val id: Int = 1
 
@@ -62,4 +68,10 @@ class EeSubscription : AuditModel(), IEeSubscription {
       nonCommercial = nonCommercial,
     )
   }
+
+  override var includedKeys: Long = 0L
+
+  override var includedSeats: Long = 0L
+
+  override var isPayAsYouGo: Boolean = false
 }
