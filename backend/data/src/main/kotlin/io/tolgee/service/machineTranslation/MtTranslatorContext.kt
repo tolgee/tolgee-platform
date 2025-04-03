@@ -1,7 +1,6 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
-import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -13,7 +12,6 @@ import io.tolgee.service.machineTranslation.PluralTranslationUtil.Companion.REPL
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
-import org.springframework.data.domain.Pageable
 
 class MtTranslatorContext(
   private val projectId: Long,
@@ -176,7 +174,7 @@ class MtTranslatorContext(
         MetadataKey(
           it.keyId,
           baseTranslationText,
-          it.targetLanguageId
+          it.targetLanguageId,
         )
       }.filter { !metadata.containsKey(it) }
     newMetadataKeys.forEach {

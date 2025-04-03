@@ -77,13 +77,16 @@ class OpenaiApiService(
     val requestBody =
       OpenaiRequestBody(
         messages = messages,
-        response_format = if (promptHasJsonInside) {
-          when (config.format) {
-            "json_object" -> OpenaiResponseFormat(type="json_object", json_schema = null)
-            "json_schema" -> OpenaiResponseFormat()
-            else -> null
-          }
-        } else null,
+        response_format =
+          if (promptHasJsonInside) {
+            when (config.format) {
+              "json_object" -> OpenaiResponseFormat(type = "json_object", json_schema = null)
+              "json_schema" -> OpenaiResponseFormat()
+              else -> null
+            }
+          } else {
+            null
+          },
         model = config.model,
       )
 
@@ -175,19 +178,22 @@ class OpenaiApiService(
     class OpenaiResponseFormat(
       val type: String = "json_schema",
       @JsonInclude(JsonInclude.Include.NON_NULL)
-      val json_schema: Map<String, Any>? = mapOf(
-        "name" to "simple_response",
-        "schema" to mapOf(
-          "type" to "object",
-          "properties" to mapOf(
-            "output" to mapOf("type" to "string"),
-            "contextDescription" to mapOf("type" to "string")
-          ),
-          "required" to listOf("output", "contextDescription"),
-          "additionalProperties" to false
+      val json_schema: Map<String, Any>? =
+        mapOf(
+          "name" to "simple_response",
+          "schema" to
+            mapOf(
+              "type" to "object",
+              "properties" to
+                mapOf(
+                  "output" to mapOf("type" to "string"),
+                  "contextDescription" to mapOf("type" to "string"),
+                ),
+              "required" to listOf("output", "contextDescription"),
+              "additionalProperties" to false,
+            ),
+          "strict" to true,
         ),
-        "strict" to true
-      )
     )
 
     class OpenaiResponse(

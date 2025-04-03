@@ -1,12 +1,10 @@
 package io.tolgee.repository
 
-import io.reactivex.rxjava3.core.Maybe
 import io.tolgee.model.Prompt
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -41,5 +39,5 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
   fun findPrompt(
     projectId: Long,
     promptId: Long,
-  ) : Prompt?
+  ): Prompt?
 }

@@ -5,10 +5,10 @@ import io.tolgee.dtos.LLMParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.dtos.response.PromptResponseDto
-import io.tolgee.ee.service.PromptServiceEeImpl
-import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
 import io.tolgee.ee.data.prompt.VariablesResponseDto
+import io.tolgee.ee.service.PromptServiceEeImpl
+import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.*
 )
 @OpenApiOrderExtension(6)
 class PromptController(
-    private val promptService: PromptServiceEeImpl,
-    private val promptModelAssembler: PromptModelAssembler,
-    private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
-    private val projectHolder: ProjectHolder,
+  private val promptService: PromptServiceEeImpl,
+  private val promptModelAssembler: PromptModelAssembler,
+  private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
+  private val projectHolder: ProjectHolder,
 ) {
   @GetMapping("")
   @UseDefaultPermissions
@@ -79,11 +79,12 @@ class PromptController(
   ): PromptResponseDto {
     val prompt = promptService.getPrompt(projectHolder.project.id, promptRunDto)
     val messages = promptService.getLlmMessages(prompt, promptRunDto)
-    val response = promptService.runPrompt(
-      projectHolder.project.organizationOwnerId,
-      LLMParams(messages),
-      promptRunDto
-    )
+    val response =
+      promptService.runPrompt(
+        projectHolder.project.organizationOwnerId,
+        LLMParams(messages),
+        promptRunDto,
+      )
     return PromptResponseDto(
       prompt,
       response.translated ?: "",
@@ -100,7 +101,7 @@ class PromptController(
   ): VariablesResponseDto {
     return VariablesResponseDto(
       promptService.getVariables(projectHolder.project.id, keyId, targetLanguageId)
-        .map { it.toPromptVariableDto() }.toMutableList()
+        .map { it.toPromptVariableDto() }.toMutableList(),
     )
   }
 }

@@ -31,7 +31,7 @@ class LLMTranslationProviderEeImpl(private val promptService: PromptServiceEeImp
         provider = prompt.providerName,
         targetLanguageId = params.targetLanguageId,
         keyId = params.keyId!!,
-      )
+      ),
     )
   }
 
@@ -41,4 +41,3 @@ class LLMTranslationProviderEeImpl(private val promptService: PromptServiceEeImp
   override val supportedLanguages = arrayOf<String>()
   override val formalitySupportingLanguages: Array<String>? = null
 }
-

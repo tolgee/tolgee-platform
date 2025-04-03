@@ -6,11 +6,17 @@ import org.springframework.stereotype.Service
 
 @Service
 class PromptServiceOssImpl : PromptService {
-  override fun translateAndUpdateTranslation(projectId: Long, data: PromptRunDto) {
+  override fun translateAndUpdateTranslation(
+    projectId: Long,
+    data: PromptRunDto,
+  ) {
     throw UnsupportedOperationException("Not included in OSS")
   }
 
-  override fun findPrompt(projectId: Long, promtId: Long): Prompt {
+  override fun findPrompt(
+    projectId: Long,
+    promtId: Long,
+  ): Prompt {
     throw UnsupportedOperationException("Not included in OSS")
   }
 }

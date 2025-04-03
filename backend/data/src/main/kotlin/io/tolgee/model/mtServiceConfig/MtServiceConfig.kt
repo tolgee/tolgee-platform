@@ -54,7 +54,6 @@ class MtServiceConfig : StandardAuditModel() {
   val primaryServiceInfo: MtServiceInfo?
     get() = primaryService?.let { getServiceInfo(this, it) }
 
-
   val enabledServicesInfo
     get() = enabledServices.mapNotNull { getServiceInfo(this, it) }
 

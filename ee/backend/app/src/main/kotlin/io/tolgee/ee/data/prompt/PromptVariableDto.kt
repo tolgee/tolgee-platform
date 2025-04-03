@@ -7,15 +7,16 @@ class PromptVariableDto(
   val name: String,
   val value: String? = null,
   val description: String? = null,
-
   @ArraySchema(
-    arraySchema = Schema(
-      description = "List of nested properties for this variable, allowing hierarchical structuring. Can be null if no nested properties exist.",
-      type = "array",
-      nullable = true
-    ),
-    schema = Schema(
-      ref = "#/components/schemas/PromptVariableDto",
-    )
-  )  val props: MutableList<PromptVariableDto>? = null,
+    arraySchema =
+      Schema(
+        description = "List of nested properties for this variable, allowing hierarchical structuring.",
+        type = "array",
+        nullable = true,
+      ),
+    schema =
+      Schema(
+        ref = "#/components/schemas/PromptVariableDto",
+      ),
+  ) val props: MutableList<PromptVariableDto>? = null,
 )

@@ -37,7 +37,7 @@ class GenericAutoTranslationChunkProcessor(
     onProgress: (Int) -> Unit,
     useTranslationMemory: Boolean,
     useMachineTranslation: Boolean,
-    llmPrompt: PromptDto? = null
+    llmPrompt: PromptDto? = null,
   ) {
     val languages = languageService.findByIdIn(chunk.map { it.languageId }.toSet()).associateBy { it.id }
     val keys = keyService.find(chunk.map { it.keyId }).associateBy { it.id }
@@ -62,7 +62,7 @@ class GenericAutoTranslationChunkProcessor(
             keyId = key.id,
             targetLanguageId = languageId,
             provider = llmPrompt.providerName,
-          )
+          ),
         )
       }
     }

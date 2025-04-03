@@ -121,14 +121,15 @@ class MtServiceConfigService(
           }
 
       entity.prompt =
-        (languageSetting.primaryServiceInfo?.promptId
-          ?: languageSetting.enabledServicesInfo?.find { it.promptId != null }?.promptId)?.let {
+        (
+          languageSetting.primaryServiceInfo?.promptId
+            ?: languageSetting.enabledServicesInfo?.find { it.promptId != null }?.promptId
+        )?.let {
           promptService.findPrompt(
             project.id,
-            it
+            it,
           )
         }
-
 
       setPrimaryService(entity, languageSetting)
       entity.enabledServices = getEnabledServices(languageSetting)

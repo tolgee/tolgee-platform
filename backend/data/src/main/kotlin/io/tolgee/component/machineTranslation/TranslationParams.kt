@@ -1,6 +1,5 @@
 package io.tolgee.component.machineTranslation
 
-import io.tolgee.component.machineTranslation.metadata.Metadata
 import io.tolgee.service.machineTranslation.MtServiceInfo
 
 data class TranslationParams(
