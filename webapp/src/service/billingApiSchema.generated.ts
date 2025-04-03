@@ -508,6 +508,7 @@ export interface components {
         | "third_party_unauthorized"
         | "third_party_google_workspace_mismatch"
         | "third_party_switch_initiated"
+        | "third_party_switch_conflict"
         | "username_already_exists"
         | "username_or_password_invalid"
         | "user_already_has_permissions"
@@ -589,6 +590,7 @@ export interface components {
         | "cannot_create_organization"
         | "wrong_current_password"
         | "wrong_param_type"
+        | "user_missing_password"
         | "expired_super_jwt_token"
         | "cannot_delete_your_own_account"
         | "cannot_sort_by_this_column"
@@ -722,6 +724,7 @@ export interface components {
         | "sso_cant_verify_user"
         | "sso_auth_missing_domain"
         | "sso_domain_not_found_or_disabled"
+        | "authentication_method_disabled"
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
@@ -730,6 +733,7 @@ export interface components {
         | "namespace_cannot_be_used_when_feature_is_disabled"
         | "sso_domain_not_allowed"
         | "sso_login_forced_for_this_account"
+        | "use_sso_for_authentication_instead"
         | "date_has_to_be_in_the_future"
         | "custom_plan_and_plan_id_cannot_be_set_together"
         | "specify_plan_id_or_custom_plan"
@@ -739,14 +743,13 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "llm_provider_not_found"
+        | "llm_provider_error"
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error";
       params?: { [key: string]: unknown }[];
-    };
-    ExampleItem: {
-      key: string;
-      keyNamespace?: string;
-      source: string;
-      target: string;
     };
     GetMySubscriptionDto: {
       instanceId: string;
@@ -786,12 +789,14 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
-    Metadata: {
-      closeItems: components["schemas"]["ExampleItem"][];
-      examples: components["schemas"]["ExampleItem"][];
-      keyDescription?: string;
-      languageDescription?: string;
-      projectDescription?: string;
+    LLMParams: {
+      messages: components["schemas"]["LlmMessage"][];
+    };
+    LlmMessage: {
+      /** Format: byte */
+      image?: string;
+      text?: string;
+      type: "TEXT" | "IMAGE";
     };
     MtCreditsPriceModel: {
       /** Format: int64 */
@@ -799,12 +804,6 @@ export interface components {
       /** Format: int64 */
       id: number;
       price: number;
-    };
-    MtResult: {
-      contextDescription?: string;
-      /** Format: int32 */
-      price: number;
-      translated?: string;
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
@@ -1174,17 +1173,6 @@ export interface components {
       translationsCount: number;
       /** Format: int64 */
       usersCount: number;
-    };
-    TolgeeTranslateParams: {
-      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-      isBatch: boolean;
-      keyName?: string;
-      metadata?: components["schemas"]["Metadata"];
-      pluralFormExamples?: { [key: string]: string };
-      pluralForms?: { [key: string]: string };
-      sourceTag: string;
-      targetTag: string;
-      text: string;
     };
     TranslationAgencyModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -4317,11 +4305,7 @@ export interface operations {
   translate: {
     responses: {
       /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["MtResult"];
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -4357,7 +4341,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["TolgeeTranslateParams"];
+        "application/json": components["schemas"]["LLMParams"];
       };
     };
   };

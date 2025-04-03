@@ -2146,7 +2146,8 @@ export interface components {
         | "llm_provider_not_found"
         | "llm_provider_error"
         | "prompt_not_found"
-        | "llm_provider_not_returned_json";
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3223,28 +3224,6 @@ export interface components {
       enabled: boolean;
       scopes?: string[];
     };
-    OpenaiCompletionTokenDetails: {
-      /** Format: int32 */
-      accepted_prediction_tokens: number;
-      /** Format: int32 */
-      reasoning_tokens: number;
-      /** Format: int32 */
-      rejected_prediction_tokens: number;
-    };
-    OpenaiPromptTokenDetails: {
-      /** Format: int32 */
-      cached_tokens: number;
-    };
-    OpenaiUsage: {
-      /** Format: int32 */
-      completion_tokens: number;
-      completion_tokens_details: components["schemas"]["OpenaiCompletionTokenDetails"];
-      /** Format: int32 */
-      prompt_tokens: number;
-      prompt_tokens_details?: components["schemas"]["OpenaiPromptTokenDetails"];
-      /** Format: int32 */
-      total_tokens: number;
-    };
     OrganizationDto: {
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
@@ -3965,7 +3944,13 @@ export interface components {
     PromptResponseDto: {
       prompt: string;
       result: string;
-      usage?: components["schemas"]["OpenaiUsage"];
+      usage?: components["schemas"]["PromptResponseUsageDto"];
+    };
+    PromptResponseUsageDto: {
+      /** Format: int64 */
+      cachedTokens?: number;
+      /** Format: int64 */
+      totalTokens?: number;
     };
     PromptRunDto: {
       /** Format: int64 */
@@ -3978,7 +3963,7 @@ export interface components {
     PromptVariableDto: {
       description?: string;
       name: string;
-      /** @description List of nested properties for this variable, allowing hierarchical structuring. Can be null if no nested properties exist. */
+      /** @description List of nested properties for this variable, allowing hierarchical structuring. */
       props?: components["schemas"]["PromptVariableDto"][] | null;
       value?: string;
     };
@@ -4788,7 +4773,8 @@ export interface components {
         | "llm_provider_not_found"
         | "llm_provider_error"
         | "prompt_not_found"
-        | "llm_provider_not_returned_json";
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -14793,8 +14779,8 @@ export interface operations {
   variables: {
     parameters: {
       query: {
-        keyId: number;
-        targetLanguageId: number;
+        keyId?: number;
+        targetLanguageId?: number;
       };
       path: {
         projectId: number;

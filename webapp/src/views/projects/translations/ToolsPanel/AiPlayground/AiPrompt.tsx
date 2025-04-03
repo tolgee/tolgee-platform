@@ -165,9 +165,7 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
     }
   }, [promptLoadable.data?.result]);
 
-  const totalTokens = promptLoadable.data?.usage?.total_tokens;
-  const cachedTokens =
-    promptLoadable.data?.usage?.prompt_tokens_details?.cached_tokens;
+  const usage = promptLoadable.data?.usage;
 
   return (
     <Box display="grid">
@@ -266,10 +264,11 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
         />
 
         <Typography variant="caption" minHeight={20}>
-          {promptLoadable.data?.usage && (
+          {usage && (
             <>
-              {`tokens: ${totalTokens}`}
-              {cachedTokens !== undefined && `, cached: ${cachedTokens}`}
+              {`tokens: ${usage.totalTokens}`}
+              {usage.totalTokens !== undefined &&
+                `, cached: ${usage.totalTokens}`}
             </>
           )}
         </Typography>

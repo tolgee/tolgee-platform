@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.dtos.LLMParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.dtos.response.PromptResponseDto
+import io.tolgee.dtos.response.prompt.PromptResponseDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
 import io.tolgee.ee.data.prompt.VariablesResponseDto
 import io.tolgee.ee.service.PromptServiceEeImpl
