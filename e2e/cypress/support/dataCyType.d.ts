@@ -262,6 +262,7 @@ declare namespace DataCy {
         "glossary-edit-button" |
         "glossary-list-languages" |
         "glossary-view-button" |
+        "glossary-view-language-select" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |

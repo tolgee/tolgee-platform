@@ -41,6 +41,7 @@ type Props<T, S> = {
   searchPlaceholder?: string;
   displaySearch?: boolean;
   disabled?: boolean;
+  minHeight?: boolean;
 };
 
 export function InfiniteMultiSearchSelect<T, S>({
@@ -59,6 +60,7 @@ export function InfiniteMultiSearchSelect<T, S>({
   searchPlaceholder,
   displaySearch,
   disabled,
+  minHeight,
 }: Props<T, S>) {
   const [showSearchHint, setShowSearchHint] = useState(false);
 
@@ -99,6 +101,7 @@ export function InfiniteMultiSearchSelect<T, S>({
         disabled={disabled}
         error={!!error}
         helperText={error}
+        minHeight={minHeight}
         InputProps={{
           placeholder: searchPlaceholder,
           onClick: () => setOpen(true),

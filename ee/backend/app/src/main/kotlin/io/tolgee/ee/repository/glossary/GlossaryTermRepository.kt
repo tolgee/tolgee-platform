@@ -53,7 +53,11 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     from GlossaryTerm te
     left join GlossaryTermTranslation tr on tr.term.id = te.id and tr.languageCode = te.glossary.baseLanguageCode
     where te.glossary = :glossary
-      and (:search is null or lower(tr.text) like lower(concat('%', cast(:search as text), '%')))
+      and (
+        :search is null or
+        lower(te.description) like lower(concat('%', cast(:search as text), '%')) or
+        lower(tr.text) like lower(concat('%', cast(:search as text), '%'))
+      )
   """,
   )
   fun findByGlossaryPaged(

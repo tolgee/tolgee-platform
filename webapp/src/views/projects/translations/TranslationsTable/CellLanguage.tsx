@@ -21,11 +21,10 @@ const StyledContent = styled('div')`
 
 type Props = {
   language: CellLanguageModel;
-  onResize: () => void;
+  onResize?: () => void;
 };
 
 export const CellLanguage: React.FC<Props> = ({ language, onResize }) => {
-  const handleResize = () => onResize();
   return (
     <>
       <StyledContent>
@@ -34,7 +33,7 @@ export const CellLanguage: React.FC<Props> = ({ language, onResize }) => {
           {language.name}
         </Box>
       </StyledContent>
-      <CellStateBar onResize={handleResize} />
+      {onResize && <CellStateBar onResize={onResize} />}
     </>
   );
 };
