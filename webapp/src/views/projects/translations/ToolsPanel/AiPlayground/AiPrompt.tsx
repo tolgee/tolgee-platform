@@ -267,8 +267,8 @@ export const AiPrompt: React.FC<PanelContentProps> = (props) => {
           {usage && (
             <>
               {`tokens: ${usage.totalTokens}`}
-              {usage.totalTokens !== undefined &&
-                `, cached: ${usage.totalTokens}`}
+              {typeof usage.cachedTokens === 'number' &&
+                `, cached: ${usage.cachedTokens}`}
             </>
           )}
         </Typography>
