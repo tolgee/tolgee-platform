@@ -103,6 +103,7 @@ declare namespace DataCy {
         "api-key-list-item-regenerate-button" |
         "api-keys-create-edit-dialog" |
         "api-keys-project-select-item" |
+        "assigned-projects-select" |
         "assignee-search-select-popover" |
         "assignee-select" |
         "auto-avatar-img" |
@@ -173,6 +174,11 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "create-glossary-field-name" |
+        "create-glossary-submit" |
+        "create-glossary-term-field-description" |
+        "create-glossary-term-field-text" |
+        "create-glossary-term-submit" |
         "create-task-field-description" |
         "create-task-field-languages" |
         "create-task-field-languages-item" |
@@ -235,6 +241,14 @@ declare namespace DataCy {
         "global-plus-button" |
         "global-search-field" |
         "global-user-menu-button" |
+        "glossaries-empty-add-button" |
+        "glossaries-list-more-button" |
+        "glossary-base-language-select" |
+        "glossary-delete-button" |
+        "glossary-edit-button" |
+        "glossary-list-languages" |
+        "glossary-view-button" |
+        "glossary-view-language-select" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |
@@ -461,6 +475,7 @@ declare namespace DataCy {
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
+        "project-menu-item-glossaries" |
         "project-menu-item-import" |
         "project-menu-item-integrate" |
         "project-menu-item-languages" |
