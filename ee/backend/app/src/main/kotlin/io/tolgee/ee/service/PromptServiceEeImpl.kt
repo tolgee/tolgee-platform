@@ -9,10 +9,10 @@ import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.ee.component.llm.OllamaApiService
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.constants.Message
+import io.tolgee.dtos.LLMParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.dtos.request.prompt.PromptVariableDto

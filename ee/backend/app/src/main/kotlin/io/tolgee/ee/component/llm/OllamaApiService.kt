@@ -7,8 +7,8 @@ import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
+import io.tolgee.dtos.LLMParams
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -49,7 +49,7 @@ class OllamaApiService(
         it.text != null
       ) {
         messages.add(RequestMessage(role = "user", content = it.text))
-        promptHasJsonInside = promptHasJsonInside || it.text.lowercase().contains("json")
+        promptHasJsonInside = promptHasJsonInside || it.text!!.lowercase().contains("json")
       } else if (
         it.type == LLMParams.Companion.LlmMessageType.IMAGE &&
         it.image != null

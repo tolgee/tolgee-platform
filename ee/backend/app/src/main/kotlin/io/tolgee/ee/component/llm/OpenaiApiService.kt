@@ -9,9 +9,9 @@ import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
-import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
 import io.tolgee.constants.Message
+import io.tolgee.dtos.LLMParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -53,8 +53,8 @@ class OpenaiApiService(
         it.type == LLMParams.Companion.LlmMessageType.TEXT &&
         it.text != null
       ) {
-        messages.add(OpenaiMessage(role = "user", content = it.text))
-        promptHasJsonInside = promptHasJsonInside || it.text.lowercase().contains("json")
+        messages.add(OpenaiMessage(role = "user", content = it.text!!))
+        promptHasJsonInside = promptHasJsonInside || it.text!!.lowercase().contains("json")
       } else if (
         it.type == LLMParams.Companion.LlmMessageType.IMAGE &&
         it.image != null

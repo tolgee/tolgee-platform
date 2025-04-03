@@ -1,7 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.tolgee.component.machineTranslation.providers.llm.LLMParams
+import io.tolgee.dtos.LLMParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.dtos.request.prompt.VariablesResponseDto
