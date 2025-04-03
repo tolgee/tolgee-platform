@@ -1,4 +1,4 @@
-package io.tolgee.ee.service
+package io.tolgee.ee.service.prompt
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.JsonNode
@@ -18,6 +18,7 @@ import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.data.prompt.PromptVariableDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LLMProviderType
 import io.tolgee.model.key.Key
@@ -63,6 +64,7 @@ class PromptServiceEeImpl(
   private val openaiApiService: OpenaiApiService,
   private val ollamaApiService: OllamaApiService,
   private val promptFragmentsService: PromptFragmentsService,
+  private val promptDefaultService: PromptDefaultService,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -76,22 +78,35 @@ class PromptServiceEeImpl(
     projectId: Long,
     dto: PromptDto,
   ): Prompt {
-    val prompt =
-      Prompt(
-        name = dto.name,
-        template = dto.template,
-        project = projectService.get(projectId),
-        providerName = dto.providerName,
-      )
+    val prompt = Prompt(
+      name = dto.name,
+      template = dto.template,
+      project = projectService.get(projectId),
+      providerName = dto.providerName,
+    )
     promptRepository.save(prompt)
     return prompt
   }
 
+  override fun findPromptOrDefaultDto(
+    projectId: Long,
+    promptId: Long?,
+  ): PromptDto {
+    if (promptId != null) {
+      val prompt = promptRepository.findPrompt(projectId, promptId)
+        ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
+      return PromptDto(prompt.name, template = prompt.template, providerName = prompt.providerName)
+    } else {
+      return getDefaultPrompt()
+    }
+  }
+
   override fun findPrompt(
     projectId: Long,
-    promtId: Long,
+    promptId: Long,
   ): Prompt {
-    return promptRepository.findPrompt(projectId, promtId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
+      return promptRepository.findPrompt(projectId, promptId)
+        ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
   }
 
   fun updatePrompt(
@@ -142,10 +157,9 @@ class PromptServiceEeImpl(
 
     val project = projectService.get(projectId)
 
-    val tLanguage =
-      targetLanguageId?.let {
-        languageService.find(targetLanguageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-      }
+    val tLanguage = targetLanguageId?.let {
+      languageService.find(targetLanguageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    }
     val sLanguage = languageService.get(project.baseLanguage!!.id, projectId)
 
     val sTranslation = key?.let { translationService.find(it, sLanguage).getOrNull() }
@@ -175,14 +189,13 @@ class PromptServiceEeImpl(
         null
       }
 
-    val pluralSourceExamples =
-      pluralFormsWithReplacedParam?.let {
-        PluralTranslationUtil.getSourceExamples(
-          context.baseLanguage.tag,
-          tLanguage!!.tag,
-          it,
-        )
-      }
+    val pluralSourceExamples = pluralFormsWithReplacedParam?.let {
+      PluralTranslationUtil.getSourceExamples(
+        context.baseLanguage.tag,
+        tLanguage!!.tag,
+        it,
+      )
+    }
 
     target.props.add(
       Variable(
@@ -233,16 +246,15 @@ class PromptServiceEeImpl(
         lazyValue = {
           val context = MtTranslatorContext(projectId, applicationContext, false)
           val metadataProvider = MetadataProvider(context)
-          val closeItems =
-            tLanguage?.let {
-              key?.let {
-                metadataProvider.getCloseItems(
-                  sLanguage,
-                  tLanguage,
-                  MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id),
-                )
-              }
+          val closeItems = tLanguage?.let {
+            key?.let {
+              metadataProvider.getCloseItems(
+                sLanguage,
+                tLanguage,
+                MetadataKey(key.id, sTranslation?.text ?: "", tLanguage.id),
+              )
             }
+          }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
               val mapper = ObjectMapper()
@@ -265,17 +277,16 @@ class PromptServiceEeImpl(
         lazyValue = {
           val context = MtTranslatorContext(projectId, applicationContext, false)
           val metadataProvider = MetadataProvider(context)
-          val closeItems =
-            tLanguage?.let {
-              key?.let {
-                metadataProvider.getExamples(
-                  tLanguage,
-                  isPlural = key.isPlural,
-                  text = sTranslation?.text ?: "",
-                  keyId = key.id,
-                )
-              }
+          val closeItems = tLanguage?.let {
+            key?.let {
+              metadataProvider.getExamples(
+                tLanguage,
+                isPlural = key.isPlural,
+                text = sTranslation?.text ?: "",
+                keyId = key.id,
+              )
             }
+          }
           if (!closeItems.isNullOrEmpty()) {
             closeItems.joinToString("\n") {
               val mapper = ObjectMapper()
@@ -330,10 +341,9 @@ class PromptServiceEeImpl(
   }
 
   fun createVariablesLazyMap(params: List<Variable>): LazyMap {
-    val mapParams =
-      params.map {
-        it.name to it
-      }.toMap()
+    val mapParams = params.map {
+      it.name to it
+    }.toMap()
     val lazyMap = LazyMap()
     lazyMap.setMap(mapParams)
     return lazyMap
@@ -385,27 +395,24 @@ class PromptServiceEeImpl(
         val size = match.groups[1]!!.value // full or small
         val number = match.groups[2]!!.value.toInt() // number
         val screenshot = key.keyScreenshotReferences[number].screenshot
-        val file =
-          if (size === "full") {
-            screenshot.filename
-          } else {
-            screenshot.middleSizedFilename ?: screenshot.filename
-          }
+        val file = if (size === "full") {
+          screenshot.filename
+        } else {
+          screenshot.middleSizedFilename ?: screenshot.filename
+        }
 
-        var image =
-          fileStorage.readFile(
-            screenshotService.getScreenshotPath(file),
-          )
+        var image = fileStorage.readFile(
+          screenshotService.getScreenshotPath(file),
+        )
 
         if (screenshot.keyScreenshotReferences.find { it.key.id == key.id } !== null) {
-          val converter =
-            ImageConverter(
-              ByteArrayInputStream(
-                fileStorage.readFile(
-                  screenshotService.getScreenshotPath(file),
-                ),
+          val converter = ImageConverter(
+            ByteArrayInputStream(
+              fileStorage.readFile(
+                screenshotService.getScreenshotPath(file),
               ),
-            )
+            ),
+          )
           image = converter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
         }
 
@@ -450,9 +457,8 @@ class PromptServiceEeImpl(
     params: LLMParams,
     promptRunDto: PromptRunDto,
   ): MtValueProvider.MtResult {
-    val providerConfig =
-      providerService.getProviderByName(organizationId, promptRunDto.provider)
-        ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptRunDto.provider))
+    val providerConfig = providerService.getProviderByName(organizationId, promptRunDto.provider)
+      ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptRunDto.provider))
 
     try {
       return when (providerConfig.type) {
@@ -475,10 +481,9 @@ class PromptServiceEeImpl(
     val prompt = getPrompt(projectId, data)
     val messages = getLlmMessages(prompt, data)
     val response = runPrompt(project.organizationOwner.id, LLMParams(messages), data)
-    val json =
-      response.translated?.let { jacksonObjectMapper().readValue<JsonNode>(it) } ?: throw BadRequestException(
-        Message.LLM_PROVIDER_NOT_RETURNED_JSON,
-      )
+    val json = response.translated?.let { jacksonObjectMapper().readValue<JsonNode>(it) } ?: throw BadRequestException(
+      Message.LLM_PROVIDER_NOT_RETURNED_JSON,
+    )
     val translation = json.get("output").asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
     return MtValueProvider.MtResult(
       translation,
@@ -498,6 +503,10 @@ class PromptServiceEeImpl(
     translationService.save(translation)
   }
 
+  fun getDefaultPrompt(): PromptDto {
+    return promptDefaultService.getDefaultPrompt()
+  }
+
   companion object {
     class LazyMap : HashMap<String, Any?>() {
       private lateinit var internalMap: Map<String, Variable>
@@ -510,10 +519,9 @@ class PromptServiceEeImpl(
         val promptValue = internalMap.get(key)
 
         if (!promptValue?.props.isNullOrEmpty()) {
-          val mapParams =
-            promptValue!!.props.map {
-              it.name to it
-            }.toMap()
+          val mapParams = promptValue!!.props.map {
+            it.name to it
+          }.toMap()
 
           val lazyMap = LazyMap()
           lazyMap.setMap(mapParams)
@@ -537,12 +545,11 @@ class PromptServiceEeImpl(
           name = name,
           description = description,
           value = value,
-          props =
-            if (props.size != 0) {
-              props.map { it.toPromptVariableDto() }.toMutableList()
-            } else {
-              null
-            },
+          props = if (props.size != 0) {
+            props.map { it.toPromptVariableDto() }.toMutableList()
+          } else {
+            null
+          },
         )
       }
     }

@@ -596,6 +596,9 @@ export interface paths {
     get: operations["getAllPaged"];
     post: operations["createPrompt"];
   };
+  "/v2/projects/{projectId}/prompts/default": {
+    get: operations["getDefaultPrompt"];
+  };
   "/v2/projects/{projectId}/prompts/get-variables": {
     get: operations["variables"];
   };
@@ -14773,6 +14776,53 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PromptDto"];
+      };
+    };
+  };
+  getDefaultPrompt: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };

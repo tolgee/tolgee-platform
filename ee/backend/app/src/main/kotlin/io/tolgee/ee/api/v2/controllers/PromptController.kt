@@ -7,7 +7,7 @@ import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.dtos.response.prompt.PromptResponseDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
 import io.tolgee.ee.data.prompt.VariablesResponseDto
-import io.tolgee.ee.service.PromptServiceEeImpl
+import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -43,6 +43,12 @@ class PromptController(
   ): PagedModel<PromptModel> {
     val result = promptService.getAllPaged(projectHolder.project.id, pageable, search)
     return arrayResourcesAssembler.toModel(result, promptModelAssembler)
+  }
+
+  @GetMapping("default")
+  @UseDefaultPermissions
+  fun getDefaultPrompt(): PromptDto {
+    return promptService.getDefaultPrompt()
   }
 
   @PostMapping("")

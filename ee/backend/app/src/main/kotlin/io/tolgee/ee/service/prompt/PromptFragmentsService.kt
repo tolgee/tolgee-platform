@@ -1,6 +1,6 @@
-package io.tolgee.ee.service
+package io.tolgee.ee.service.prompt
 
-import io.tolgee.ee.service.PromptServiceEeImpl.Companion.Variable
+import io.tolgee.ee.service.prompt.PromptServiceEeImpl.Companion.Variable
 import org.springframework.stereotype.Service
 
 @Service

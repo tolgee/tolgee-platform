@@ -4,7 +4,7 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.LLMTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.ee.service.PromptServiceEeImpl
+import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
@@ -17,13 +17,10 @@ class LLMTranslationProviderEeImpl(private val promptService: PromptServiceEeImp
   override val isEnabled: Boolean get() = true
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    if (params.promptId == null) {
-      throw Error("Prompt ID is required")
-    }
     if (params.keyId == null) {
       throw Error("Key ID is required")
     }
-    val prompt = promptService.findPrompt(params.projectId, params.promptId!!)
+    val prompt = promptService.findPromptOrDefaultDto(params.projectId, params.promptId)
     return promptService.translateViaPrompt(
       params.projectId,
       PromptRunDto(

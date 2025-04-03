@@ -5,7 +5,9 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
-type PromptModel = components['schemas']['PromptModel'];
+type PromptDto = components['schemas']['PromptDto'];
+
+export type PromptItem = PromptDto & { id?: number };
 
 const StyledCompactButton = styled(Button)`
   padding: 4px 8px;
@@ -18,7 +20,7 @@ const StyledCompactButton = styled(Button)`
 `;
 
 type Props = {
-  onSelect: (prompt: PromptModel) => void;
+  onSelect: (prompt: PromptItem) => void;
   projectId: number;
 };
 
@@ -36,10 +38,28 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
     },
   });
 
+  const defaultPrompt = useApiQuery({
+    url: '/v2/projects/{projectId}/prompts/default',
+    method: 'get',
+    path: {
+      projectId,
+    },
+  });
+
   const deletePrompt = useApiMutation({
     url: '/v2/projects/{projectId}/prompts/{promptId}',
     method: 'delete',
     invalidatePrefix: '/v2/projects/{projectId}/prompts',
+  });
+
+  const prompts: (PromptDto & { id?: number })[] = [];
+
+  if (defaultPrompt.data) {
+    prompts.push(defaultPrompt.data);
+  }
+
+  existingPrompts.data?._embedded?.prompt?.forEach((item) => {
+    prompts.push(item);
   });
 
   return (
@@ -62,7 +82,7 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
           <CompactListSubheader sx={{ pt: 0 }}>
             Load existing prompt
           </CompactListSubheader>
-          {existingPrompts.data?._embedded?.prompt?.map((item) => (
+          {prompts?.map((item) => (
             <MenuItem
               key={item.id}
               onClick={() => {
@@ -76,26 +96,26 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
               }}
             >
               <Box>{item.name}</Box>
-              <StyledCompactButton
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={stopAndPrevent(() =>
-                  deletePrompt.mutate({
-                    path: { projectId },
-                    query: {
-                      promptId: item.id,
-                    },
-                  })
-                )}
-              >
-                Delete
-              </StyledCompactButton>
+              {typeof item.id === 'number' && (
+                <StyledCompactButton
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={stopAndPrevent(() =>
+                    deletePrompt.mutate({
+                      path: { projectId },
+                      query: {
+                        promptId: item.id!,
+                      },
+                    })
+                  )}
+                >
+                  Delete
+                </StyledCompactButton>
+              )}
             </MenuItem>
           ))}
-          {existingPrompts.data?.page?.totalElements === 0 && (
-            <MenuItem disabled>No prompts yet</MenuItem>
-          )}
+          {!prompts.length && <MenuItem disabled>No prompts yet</MenuItem>}
         </Menu>
       )}
     </Box>
