@@ -1,4 +1,4 @@
-package io.tolgee.dtos.request.prompt
+package io.tolgee.ee.data.prompt
 
 class VariablesResponseDto(
   val data: MutableList<PromptVariableDto>,

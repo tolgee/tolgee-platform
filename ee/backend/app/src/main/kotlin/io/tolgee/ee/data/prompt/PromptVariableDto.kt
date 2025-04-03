@@ -1,4 +1,4 @@
-package io.tolgee.dtos.request.prompt
+package io.tolgee.ee.data.prompt
 
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema

@@ -15,7 +15,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.LLMParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.dtos.request.prompt.PromptVariableDto
+import io.tolgee.ee.data.prompt.PromptVariableDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
