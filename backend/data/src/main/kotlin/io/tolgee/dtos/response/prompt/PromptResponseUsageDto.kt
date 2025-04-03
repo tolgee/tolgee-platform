@@ -1,6 +1,6 @@
 package io.tolgee.dtos.response.prompt
 
-data class PromptResponseUsageDto (
+data class PromptResponseUsageDto(
   val totalTokens: Long? = null,
   val cachedTokens: Long? = null,
 )

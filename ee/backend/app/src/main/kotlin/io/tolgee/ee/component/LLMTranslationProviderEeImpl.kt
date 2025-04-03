@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class LLMTranslationProviderEeImpl(
   private val promptService: PromptServiceEeImpl,
-  private val llmProperties: LLMProperties
+  private val llmProperties: LLMProperties,
 ) : LLMTranslationProvider() {
   override val isEnabled: Boolean get() = llmProperties.enabled
 

@@ -8,7 +8,8 @@ class PromptDefaultService {
   fun getDefaultPrompt(): PromptDto {
     return PromptDto(
       name = "default",
-      template = """
+      template =
+        """
         {{! Tolgee prompt is split into multiple fragments }}
         {{! Hover any variable to see its content }}
         {{fragment.intro}}
@@ -28,7 +29,7 @@ class PromptDefaultService {
         {{fragment.translationInfo}}
 
         {{fragment.translateJson}}
-      """.trimIndent(),
+        """.trimIndent(),
       providerName = "default",
     )
   }

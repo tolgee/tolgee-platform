@@ -73,7 +73,7 @@ class PublicConfigurationAssembler(
       allowRegistrations = properties.authentication.registrationsAllowed,
       authMethods = properties.authentication.asAuthMethodsDTO(),
       translationsViewLanguagesLimit = properties.translationsViewLanguagesLimit,
-      llm = PublicLLMConfigurationDTO(llmProperties.enabled)
+      llm = PublicLLMConfigurationDTO(llmProperties.enabled),
     )
   }
 

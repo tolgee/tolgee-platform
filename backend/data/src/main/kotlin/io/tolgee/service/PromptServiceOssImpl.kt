@@ -21,7 +21,10 @@ class PromptServiceOssImpl : PromptService {
     throw UnsupportedOperationException("Not included in OSS")
   }
 
-  override fun findPrompt(projectId: Long, promptId: Long): Prompt {
+  override fun findPrompt(
+    projectId: Long,
+    promptId: Long,
+  ): Prompt {
     throw UnsupportedOperationException("Not included in OSS")
   }
 }
