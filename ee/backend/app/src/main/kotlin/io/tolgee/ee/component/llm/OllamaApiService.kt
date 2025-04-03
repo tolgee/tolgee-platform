@@ -1,4 +1,4 @@
-package io.tolgee.component.machineTranslation.providers.llm
+package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -7,6 +7,7 @@ import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
+import io.tolgee.component.machineTranslation.providers.llm.LLMParams
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
