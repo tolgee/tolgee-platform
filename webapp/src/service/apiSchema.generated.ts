@@ -4036,6 +4036,7 @@ export interface components {
       contentDeliveryConfigured: boolean;
       ga4Tag?: string;
       internalControllerEnabled: boolean;
+      llm: components["schemas"]["PublicLLMConfigurationDTO"];
       machineTranslationServices: components["schemas"]["MtServicesDTO"];
       /** Format: int64 */
       maxTranslationTextLength: number;
@@ -4064,6 +4065,9 @@ export interface components {
       id: number;
       organizationName?: string;
       projectName?: string;
+    };
+    PublicLLMConfigurationDTO: {
+      enabled: boolean;
     };
     PublicSsoTenantModel: {
       domain: string;

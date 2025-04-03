@@ -22,11 +22,11 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { AiResult } from './AiResult';
 import { PromptLoadMenu } from './PromptLoadMenu';
 import { PromptSaveMenu } from './PromptSaveMenu';
-import { PanelContentProps } from '../common/types';
-import { useTranslationsActions } from '../../context/TranslationsContext';
-import { BatchJobModel } from '../../BatchOperations/types';
-import { BatchOperationDialog } from '../../BatchOperations/OperationsSummary/BatchOperationDialog';
 import { EditorError } from 'tg.component/editor/utils/codemirrorError';
+import { PanelContentProps } from 'tg.views/projects/translations/ToolsPanel/common/types';
+import { useTranslationsActions } from 'tg.views/projects/translations/context/TranslationsContext';
+import { BatchJobModel } from 'tg.views/projects/translations/BatchOperations/types';
+import { BatchOperationDialog } from 'tg.views/projects/translations/BatchOperations/OperationsSummary/BatchOperationDialog';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;

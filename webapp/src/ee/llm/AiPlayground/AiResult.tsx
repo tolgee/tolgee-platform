@@ -1,7 +1,7 @@
 import { Box, Button, ButtonGroup, styled, TextField } from '@mui/material';
-import { TranslationVisual } from '../../translationVisual/TranslationVisual';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { FieldLabel } from 'tg.component/FormField';
+import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
 
 const StyledTextField = styled(TextField)`
   flex-grow: 1;

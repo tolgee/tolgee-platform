@@ -1,4 +1,4 @@
-import { usePanelData } from '../usePanelData';
+import { usePanelData } from 'tg.views/projects/translations/ToolsPanel/usePanelData';
 import { AiPrompt } from './AiPrompt';
 
 export const AiPlayground = () => {

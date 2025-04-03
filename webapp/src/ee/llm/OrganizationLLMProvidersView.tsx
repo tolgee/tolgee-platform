@@ -1,11 +1,11 @@
 import { useTranslate } from '@tolgee/react';
-import { BaseOrganizationSettingsView } from './components/BaseOrganizationSettingsView';
-import { useOrganization } from './useOrganization';
+import { BaseOrganizationSettingsView } from '../../views/organizations/components/BaseOrganizationSettingsView';
+import { useOrganization } from '../../views/organizations/useOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { Box, IconButton, Typography } from '@mui/material';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useState } from 'react';
-import { LLMProviderCreateDialog } from './llmProviders/LLMProviderCreateDialog';
+import { LLMProviderCreateDialog } from '../../views/organizations/llmProviders/LLMProviderCreateDialog';
 import { Trash01 } from '@untitled-ui/icons-react';
 
 export const OrganizationLLMProvidersView = () => {

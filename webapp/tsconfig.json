@@ -25,5 +25,5 @@
     "emitDecoratorMetadata": true
   },
   "include": ["src", "tolgee.dev.d.ts", "vite-env.d.ts"],
-  "exclude": ["src/eeSetup"]
+  "exclude": ["src/eeSetup/eeModule.*"]
 }
