@@ -36,9 +36,14 @@ class LLMProviderService(
     return llmProviderRepository.getAll(organizationId).map { it.toDto() }
   }
 
-  fun callProvider(organizationId: Long, provider: String, params: LLMParams): MtValueProvider.MtResult {
-    val providerConfig = getProviderByName(organizationId, provider)
-      ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(provider))
+  fun callProvider(
+    organizationId: Long,
+    provider: String,
+    params: LLMParams,
+  ): MtValueProvider.MtResult {
+    val providerConfig =
+      getProviderByName(organizationId, provider)
+        ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(provider))
     return when (providerConfig.type) {
       LLMProviderType.OPENAI -> openaiApiService.translate(params, providerConfig)
       LLMProviderType.OLLAMA -> ollamaApiService.translate(params, providerConfig)
@@ -49,18 +54,19 @@ class LLMProviderService(
     organizationId: Long,
     dto: LLMProviderRequest,
   ): LLMProviderDto {
-    val provider = LLMProvider(
-      name = dto.name,
-      type = dto.type,
-      priority = dto.priority,
-      apiKey = dto.apiKey,
-      apiUrl = dto.apiUrl,
-      model = dto.model,
-      deployment = dto.deployment,
-      keepAlive = dto.keepAlive,
-      format = dto.format,
-      organization = organizationService.get(organizationId),
-    )
+    val provider =
+      LLMProvider(
+        name = dto.name,
+        type = dto.type,
+        priority = dto.priority,
+        apiKey = dto.apiKey,
+        apiUrl = dto.apiUrl,
+        model = dto.model,
+        deployment = dto.deployment,
+        keepAlive = dto.keepAlive,
+        format = dto.format,
+        organization = organizationService.get(organizationId),
+      )
     llmProviderRepository.save(provider)
     return provider.toDto()
   }

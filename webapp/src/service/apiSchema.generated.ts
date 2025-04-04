@@ -2869,17 +2869,6 @@ export interface components {
       /** @description Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
     };
-    LLMProviderCreateDto: {
-      apiKey?: string;
-      apiUrl?: string;
-      deployment?: string;
-      format?: string;
-      keepAlive?: string;
-      model?: string;
-      name: string;
-      priority?: string;
-      type: "OPENAI" | "OLLAMA";
-    };
     LLMProviderModel: {
       apiKey?: string;
       apiUrl?: string;
@@ -2893,11 +2882,7 @@ export interface components {
       priority?: string;
       type: "OPENAI" | "OLLAMA";
     };
-    LLMProviderSimpleModel: {
-      name: string;
-      source?: string;
-    };
-    LLMProviderUpdateDto: {
+    LLMProviderRequest: {
       apiKey?: string;
       apiUrl?: string;
       deployment?: string;
@@ -2908,15 +2893,9 @@ export interface components {
       priority?: string;
       type: "OPENAI" | "OLLAMA";
     };
-    LLMServerProviderModel: {
-      apiUrl?: string;
-      deployment?: string;
-      format?: string;
-      keepAlive?: string;
-      model?: string;
+    LLMProviderSimpleModel: {
       name: string;
-      priority?: string;
-      type: "OPENAI" | "OLLAMA";
+      source?: string;
     };
     LanguageAiPromptCustomizationModel: {
       /**
@@ -3174,9 +3153,6 @@ export interface components {
     };
     NonPagedModelLLMProviderSimpleModel: {
       items: components["schemas"]["LLMProviderSimpleModel"][];
-    };
-    NonPagedModelLLMServerProviderModel: {
-      items: components["schemas"]["LLMServerProviderModel"][];
     };
     NotificationModel: {
       /** Format: date-time */
@@ -8113,7 +8089,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LLMProviderCreateDto"];
+        "application/json": components["schemas"]["LLMProviderRequest"];
       };
     };
   };
@@ -8174,7 +8150,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["NonPagedModelLLMServerProviderModel"];
+          "application/json": components["schemas"]["NonPagedModelLLMProviderModel"];
         };
       };
       /** Bad Request */
@@ -8260,7 +8236,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LLMProviderUpdateDto"];
+        "application/json": components["schemas"]["LLMProviderRequest"];
       };
     };
   };

@@ -13,7 +13,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useOrganization } from '../useOrganization';
 import { messageService } from 'tg.service/MessageService';
 
-type LLMProviderCreateDto = components['schemas']['LLMProviderCreateDto'];
+type LLMProviderRequest = components['schemas']['LLMProviderRequest'];
 
 type Props = {
   onClose: () => void;
@@ -36,7 +36,7 @@ export const LLMProviderCreateDialog = ({ onClose }: Props) => {
           {
             name: '',
             type: 'OPENAI',
-          } as LLMProviderCreateDto
+          } as LLMProviderRequest
         }
         onSubmit={(values) => {
           createLoadable.mutate(

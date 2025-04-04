@@ -13,8 +13,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.LLMParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.ee.component.llm.OllamaApiService
-import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.data.prompt.PromptVariableDto
 import io.tolgee.ee.service.LLMProviderService
 import io.tolgee.exceptions.BadRequestException

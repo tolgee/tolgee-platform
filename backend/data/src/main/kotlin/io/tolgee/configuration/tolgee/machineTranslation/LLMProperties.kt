@@ -34,7 +34,7 @@ class LLMProperties {
         model = model,
         deployment = deployment,
         keepAlive = keepAlive,
-        format = format
+        format = format,
       )
     }
   }
