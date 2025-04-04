@@ -1,6 +1,7 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
+import io.tolgee.dtos.LLMProviderDto
 import io.tolgee.model.enums.LLMProviderType
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -21,5 +22,20 @@ class LLMProperties {
     override var deployment: String?,
     override var keepAlive: String?,
     override var format: String?,
-  ) : LLMProviderInterface
+  ) : LLMProviderInterface {
+    fun toDto(id: Long): LLMProviderDto {
+      return LLMProviderDto(
+        id = id,
+        name = name,
+        type = type,
+        priority = priority,
+        apiKey = apiKey,
+        apiUrl = apiUrl,
+        model = model,
+        deployment = deployment,
+        keepAlive = keepAlive,
+        format = format
+      )
+    }
+  }
 }

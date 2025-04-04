@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
+import io.tolgee.dtos.LLMProviderDto
 import io.tolgee.model.enums.LLMProviderType
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
@@ -24,4 +25,19 @@ class LLMProvider(
   @ManyToOne
   @JoinColumn(name = "organization_id")
   var organization: Organization,
-) : AuditModel(), LLMProviderInterface
+) : AuditModel(), LLMProviderInterface {
+  fun toDto(): LLMProviderDto {
+    return LLMProviderDto(
+      id = id,
+      name = name,
+      type = type,
+      priority = priority,
+      apiKey = apiKey,
+      apiUrl = apiUrl,
+      model = model,
+      deployment = deployment,
+      keepAlive = keepAlive,
+      format = format
+    )
+  }
+}

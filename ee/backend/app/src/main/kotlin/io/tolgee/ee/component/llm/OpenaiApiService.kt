@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.bucket.NotEnoughTokensException
 import io.tolgee.component.bucket.TokenBucketManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import java.time.Duration
 import java.util.*
 import kotlin.time.measureTimedValue
 
@@ -98,8 +96,6 @@ class OpenaiApiService(
 
     val request = HttpEntity(requestBody, headers)
 
-    checkPositiveRateLimitTokens(params)
-
     val response: ResponseEntity<OpenaiResponse> =
       try {
         val (value, time) =
@@ -117,6 +113,8 @@ class OpenaiApiService(
           throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(it))
         }
         throw e
+      } catch (e: HttpClientErrorException.TooManyRequests) {
+        throw TranslationApiRateLimitException(currentDateProvider.date.time + 60 * 1000, cause = e)
       }
 
     return MtValueProvider.MtResult(
@@ -132,22 +130,6 @@ class OpenaiApiService(
     )
   }
 
-  private fun checkPositiveRateLimitTokens(params: LLMParams) {
-//    if (!params.isBatch) {
-//      return
-//    }
-
-    try {
-      tokenBucketManager.checkPositiveBalance(BUCKET_KEY)
-    } catch (e: NotEnoughTokensException) {
-      logger.debug(
-        "Cannot translate using the translator for next " +
-          "${Duration.ofMillis(e.refillAt - currentDateProvider.date.time).seconds}s. The bucket is empty.",
-      )
-      throw TranslationApiRateLimitException(e.refillAt, e)
-    }
-  }
-
   private fun HttpClientErrorException.parse(): JsonNode? {
     if (!this.responseBodyAsString.isNullOrBlank()) {
       return jacksonObjectMapper().readValue(this.responseBodyAsString)
@@ -159,8 +141,6 @@ class OpenaiApiService(
    * Data structure for mapping the AzureCognitive JSON response objects.
    */
   companion object {
-    const val BUCKET_KEY = "tolgee-translate-rate-limit"
-
     @Suppress("unused")
     class OpenaiRequestBody(
       val max_completion_tokens: Long = 800,

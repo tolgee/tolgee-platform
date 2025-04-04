@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
 import io.tolgee.model.enums.LLMProviderType
 
-data class LLMProviderCreateDto(
+data class LLMProviderRequest(
   override var name: String,
   override var type: LLMProviderType,
   override var priority: String?,

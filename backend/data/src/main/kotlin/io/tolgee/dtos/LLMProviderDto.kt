@@ -1,9 +1,11 @@
-package io.tolgee.dtos.request.llmProvider
+package io.tolgee.dtos
 
+import com.fasterxml.jackson.annotation.JsonSetter
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
 import io.tolgee.model.enums.LLMProviderType
 
-data class LLMProviderUpdateDto(
+data class LLMProviderDto(
+  var id: Long,
   override var name: String,
   override var type: LLMProviderType,
   override var priority: String?,
@@ -13,4 +15,9 @@ data class LLMProviderUpdateDto(
   override var deployment: String?,
   override var keepAlive: String?,
   override var format: String?,
-) : LLMProviderInterface
+) : LLMProviderInterface {
+  @JsonSetter("type")
+  fun setType(type: String) {
+    this.type = LLMProviderType.valueOf(type.uppercase())
+  }
+}

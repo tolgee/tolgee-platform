@@ -16,13 +16,12 @@ import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.llm.OllamaApiService
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.data.prompt.PromptVariableDto
+import io.tolgee.ee.service.LLMProviderService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
-import io.tolgee.model.enums.LLMProviderType
 import io.tolgee.model.key.Key
 import io.tolgee.repository.PromptRepository
-import io.tolgee.service.LLMProviderService
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
@@ -44,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import java.io.ByteArrayInputStream
-import java.security.KeyStore.Entry
 import kotlin.jvm.optionals.getOrNull
 
 @Primary
@@ -60,8 +58,6 @@ class PromptServiceEeImpl(
   private val applicationContext: ApplicationContext,
   private val promptRepository: PromptRepository,
   private val providerService: LLMProviderService,
-  private val openaiApiService: OpenaiApiService,
-  private val ollamaApiService: OllamaApiService,
   private val promptFragmentsService: PromptFragmentsService,
   private val promptDefaultService: PromptDefaultService,
 ) : PromptService {
@@ -485,15 +481,8 @@ class PromptServiceEeImpl(
     params: LLMParams,
     promptRunDto: PromptRunDto,
   ): MtValueProvider.MtResult {
-    val providerConfig =
-      providerService.getProviderByName(organizationId, promptRunDto.provider)
-        ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(promptRunDto.provider))
-
     try {
-      return when (providerConfig.type) {
-        LLMProviderType.OPENAI -> openaiApiService.translate(params, providerConfig)
-        LLMProviderType.OLLAMA -> ollamaApiService.translate(params, providerConfig)
-      }
+      return providerService.callProvider(organizationId, promptRunDto.provider, params)
     } catch (e: ResourceAccessException) {
       throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message))
     } catch (e: HttpClientErrorException) {
