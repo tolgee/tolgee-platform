@@ -80,15 +80,16 @@ class ApiKeyController(
     if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
       securityService.checkApiKeyScopes(dto.scopes, project)
     }
-    return apiKeyService.create(
-      userAccount = authenticationFacade.authenticatedUserEntity,
-      scopes = dto.scopes,
-      project = project,
-      expiresAt = dto.expiresAt,
-      description = dto.description,
-    ).let {
-      revealedApiKeyModelAssembler.toModel(it)
-    }
+    return apiKeyService
+      .create(
+        userAccount = authenticationFacade.authenticatedUserEntity,
+        scopes = dto.scopes,
+        project = project,
+        expiresAt = dto.expiresAt,
+        description = dto.description,
+      ).let {
+        revealedApiKeyModelAssembler.toModel(it)
+      }
   }
 
   @Operation(summary = "Get one API key", description = "Returns specific API key info")
@@ -141,19 +142,19 @@ class ApiKeyController(
   fun allByUser(
     pageable: Pageable,
     @RequestParam filterProjectId: Long?,
-  ): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
+  ): PagedModel<ApiKeyModel> =
+    apiKeyService
+      .getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
-  }
 
   @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])
   @Operation(summary = "Get all project API keys", description = "Returns all API keys for specified project")
   @RequiresProjectPermissions([Scope.ADMIN])
   @OpenApiOrderExtension(5)
-  fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
+  fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> =
+    apiKeyService
+      .getAllByProject(projectHolder.project.id, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
-  }
 
   @PutMapping(path = ["/api-keys/{apiKeyId:[0-9]+}"])
   @Operation(summary = "Update API key")
@@ -311,7 +312,8 @@ class ApiKeyController(
   )
   @Deprecated(message = "Don't use this endpoint, it's useless.")
   val scopes: Map<String, List<String>> by lazy {
-    ProjectPermissionType.values()
+    ProjectPermissionType
+      .values()
       .associate { it -> it.name to it.availableScopes.map { it.value }.toList() }
   }
 }

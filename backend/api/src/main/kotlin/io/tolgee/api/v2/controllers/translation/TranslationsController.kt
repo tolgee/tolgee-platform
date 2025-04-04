@@ -178,7 +178,8 @@ When null, resulting file will be a flat key-value object.
         filterTag = filterTag,
       )
 
-    return ResponseEntity.ok()
+    return ResponseEntity
+      .ok()
       .lastModified(lastModified)
       .cacheControl(CacheControl.maxAge(0, TimeUnit.SECONDS))
       .body(
@@ -195,9 +196,7 @@ When null, resulting file will be a flat key-value object.
   fun setTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
-  ): SetTranslationsResponseModel {
-    return createOrUpdateTranslationsFacade.setTranslations(dto)
-  }
+  ): SetTranslationsResponseModel = createOrUpdateTranslationsFacade.setTranslations(dto)
 
   @PostMapping("")
   @Operation(
@@ -212,9 +211,7 @@ When null, resulting file will be a flat key-value object.
   fun createOrUpdateTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
-  ): SetTranslationsResponseModel {
-    return createOrUpdateTranslationsFacade.createOrUpdateTranslations(dto)
-  }
+  ): SetTranslationsResponseModel = createOrUpdateTranslationsFacade.createOrUpdateTranslations(dto)
 
   @PutMapping("/{translationId}/set-state/{state}")
   @Operation(summary = "Set translation state")

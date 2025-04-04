@@ -56,12 +56,11 @@ class PatController(
   @BypassForcedSsoAuthentication
   fun getAll(
     @ParameterObject pageable: Pageable,
-  ): PagedModel<PatModel> {
-    return pagedResourcesAssembler.toModel(
+  ): PagedModel<PatModel> =
+    pagedResourcesAssembler.toModel(
       patService.findAll(authenticationFacade.authenticatedUser.id, pageable),
       patModelAssembler,
     )
-  }
 
   @GetMapping(value = ["/{id:[0-9]+}"])
   @Operation(summary = "Get one PAK")
@@ -81,9 +80,7 @@ class PatController(
   fun create(
     @RequestBody @Valid
     dto: CreatePatDto,
-  ): RevealedPatModel {
-    return revealedPatModelAssembler.toModel(patService.create(dto, authenticationFacade.authenticatedUserEntity))
-  }
+  ): RevealedPatModel = revealedPatModelAssembler.toModel(patService.create(dto, authenticationFacade.authenticatedUserEntity))
 
   @PutMapping(value = ["/{id:[0-9]+}/regenerate"])
   @Operation(

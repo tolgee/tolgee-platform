@@ -32,27 +32,21 @@ class SlugController(
   @Operation(summary = "Validate organization slug")
   fun validateOrganizationSlug(
     @PathVariable("slug") slug: String,
-  ): Boolean {
-    return organizationService.validateSlugUniqueness(slug)
-  }
+  ): Boolean = organizationService.validateSlugUniqueness(slug)
 
   @GetMapping("/validate-project/{slug}")
   @Operation(summary = "Validate project slug")
   @OpenApiHideFromPublicDocs
   fun validateProjectSlug(
     @PathVariable("slug") slug: String,
-  ): Boolean {
-    return projectService.validateSlugUniqueness(slug)
-  }
+  ): Boolean = projectService.validateSlugUniqueness(slug)
 
   @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Generate organization slug")
   fun generateOrganizationSlug(
     @RequestBody @Valid
     dto: GenerateSlugDto,
-  ): String {
-    return """"${organizationService.generateSlug(dto.name!!, dto.oldSlug)}""""
-  }
+  ): String = """"${organizationService.generateSlug(dto.name!!, dto.oldSlug)}""""
 
   @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Generate project slug")
@@ -60,7 +54,5 @@ class SlugController(
   fun generateProjectSlug(
     @RequestBody @Valid
     dto: GenerateSlugDto,
-  ): String {
-    return """"${projectService.generateSlug(dto.name!!, dto.oldSlug)}""""
-  }
+  ): String = """"${projectService.generateSlug(dto.name!!, dto.oldSlug)}""""
 }

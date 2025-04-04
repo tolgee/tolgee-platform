@@ -25,16 +25,19 @@ class MachineTranslationProvidersController(
     description = "Get machine translation providers",
     summary = "Returns information about supported translation providers",
   )
-  fun getInfo(): Map<String, MachineTranslationProviderModel> {
-    return lazyInfo
-  }
+  fun getInfo(): Map<String, MachineTranslationProviderModel> = lazyInfo
 
   val lazyInfo by lazy {
-    mtServiceConfigService.services.mapNotNull {
-      if (!it.value.second.isEnabled) {
-        return@mapNotNull null
-      }
-      it.key.name to MachineTranslationProviderModel(it.value.second.supportedLanguages?.toList())
-    }.toMap()
+    mtServiceConfigService.services
+      .mapNotNull {
+        if (!it.value.second.isEnabled) {
+          return@mapNotNull null
+        }
+        it.key.name to
+          MachineTranslationProviderModel(
+            it.value.second.supportedLanguages
+              ?.toList(),
+          )
+      }.toMap()
   }
 }

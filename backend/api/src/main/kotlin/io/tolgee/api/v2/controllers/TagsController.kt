@@ -62,9 +62,7 @@ class TagsController(
     keyId: Long,
     @Valid @RequestBody
     tagKeyDto: TagKeyDto,
-  ): TagModel {
-    return tagService.tagKey(projectHolder.project.id, keyId, tagKeyDto.name.trim()).model
-  }
+  ): TagModel = tagService.tagKey(projectHolder.project.id, keyId, tagKeyDto.name.trim()).model
 
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
   @Operation(summary = "Remove tag", description = "Removes tag with provided id from key with provided id")
@@ -74,9 +72,7 @@ class TagsController(
   fun removeTag(
     @PathVariable keyId: Long,
     @PathVariable tagId: Long,
-  ) {
-    return tagService.removeTag(projectHolder.project.id, keyId, tagId)
-  }
+  ) = tagService.removeTag(projectHolder.project.id, keyId, tagId)
 
   @GetMapping(value = ["tags"])
   @Operation(summary = "Get tags")

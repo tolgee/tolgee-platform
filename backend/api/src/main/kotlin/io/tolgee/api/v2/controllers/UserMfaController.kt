@@ -63,7 +63,5 @@ class UserMfaController(
   fun regenerateRecoveryCodes(
     @RequestBody @Valid
     dto: UserMfaRecoveryRequestDto,
-  ): List<String> {
-    return mfaService.regenerateRecoveryCodes(authenticationFacade.authenticatedUserEntity, dto)
-  }
+  ): List<String> = mfaService.regenerateRecoveryCodes(authenticationFacade.authenticatedUserEntity, dto)
 }

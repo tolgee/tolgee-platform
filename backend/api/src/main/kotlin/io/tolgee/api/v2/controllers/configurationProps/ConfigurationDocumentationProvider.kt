@@ -40,20 +40,24 @@ class ConfigurationDocumentationProvider {
     val objDef = obj::class.findAnnotations(DocProperty::class).singleOrNull()
     val confPropsDef = obj::class.findAnnotations(ConfigurationProperties::class).singleOrNull()
     val props =
-      obj::class.declaredMemberProperties.mapNotNull {
-        handleProperty(it, obj)
-      }.sortedWith(
-        compareBy(
-          { it is Group },
-          { it.name },
-        ),
-      )
+      obj::class
+        .declaredMemberProperties
+        .mapNotNull {
+          handleProperty(it, obj)
+        }.sortedWith(
+          compareBy(
+            { it is Group },
+            { it.name },
+          ),
+        )
 
     val name =
-      objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
-        "(.*)\\.(.+?)\$".toRegex(),
-        "$1",
-      )?.nullIfEmpty
+      objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef
+        ?.prefix
+        ?.replace(
+          "(.*)\\.(.+?)\$".toRegex(),
+          "$1",
+        )?.nullIfEmpty
         ?: throw RuntimeException("No name for $obj with parent $parent")
     return Group(
       name = name,
@@ -85,7 +89,8 @@ class ConfigurationDocumentationProvider {
         typeOf<Double?>(),
         typeOf<List<*>?>(),
         typeOf<Boolean?>(),
-      ) || (it.returnType.javaType as? Class<*>)?.isEnum == true -> {
+      ) ||
+        (it.returnType.javaType as? Class<*>)?.isEnum == true -> {
         val name = getPropertyName(annotation, it)
         return Property(
           name = name,

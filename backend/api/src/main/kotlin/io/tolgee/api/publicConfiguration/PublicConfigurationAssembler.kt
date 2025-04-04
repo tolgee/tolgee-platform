@@ -24,8 +24,8 @@ class PublicConfigurationAssembler(
   private val versionProvider: VersionProvider,
   private val contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider,
 ) {
-  fun toDto(): PublicConfigurationDTO {
-    return PublicConfigurationDTO(
+  fun toDto(): PublicConfigurationDTO =
+    PublicConfigurationDTO(
       machineTranslationServices =
         PublicConfigurationDTO.MtServicesDTO(
           defaultPrimaryService = getPrimaryMtService(),
@@ -71,7 +71,6 @@ class PublicConfigurationAssembler(
       authMethods = properties.authentication.asAuthMethodsDTO(),
       translationsViewLanguagesLimit = properties.translationsViewLanguagesLimit,
     )
-  }
 
   private fun AuthenticationProperties.asAuthMethodsDTO(): AuthMethodsDTO? {
     if (!enabled) {
