@@ -4,9 +4,12 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermWithTranslationsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermModel
+import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermWithTranslationsModel
 import io.tolgee.ee.data.glossary.CreateGlossaryTermRequest
 import io.tolgee.ee.data.glossary.CreateGlossaryTermResponse
+import io.tolgee.ee.data.glossary.GlossaryTermWithTranslationsView
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.OrganizationRoleType
@@ -31,15 +34,17 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}/terms")
+@RequestMapping("/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}")
 @Tag(name = "Glossary Term")
 class GlossaryTermController(
   private val glossaryTermService: GlossaryTermService,
   private val glossaryTermModelAssembler: GlossaryTermModelAssembler,
+  private val glossaryTermWithTranslationsModelAssembler: GlossaryTermWithTranslationsModelAssembler,
   private val glossaryTermTranslationModelAssembler: GlossaryTermTranslationModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<GlossaryTerm>,
+  private val pagedWithTranslationsAssembler: PagedResourcesAssembler<GlossaryTermWithTranslationsView>,
 ) {
-  @PostMapping()
+  @PostMapping("/terms")
   @Operation(summary = "Create a new glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
@@ -58,7 +63,7 @@ class GlossaryTermController(
     )
   }
 
-  @PutMapping("/{termId:[0-9]+}")
+  @PutMapping("/terms/{termId:[0-9]+}")
   @Operation(summary = "Update glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
@@ -72,7 +77,7 @@ class GlossaryTermController(
     return glossaryTermModelAssembler.toModel(updatedTerm)
   }
 
-  @DeleteMapping("/{termId:[0-9]+}")
+  @DeleteMapping("/terms/{termId:[0-9]+}")
   @Operation(summary = "Delete glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
@@ -84,7 +89,7 @@ class GlossaryTermController(
     glossaryTermService.delete(organizationId, glossaryId, termId)
   }
 
-  @GetMapping("/{termId:[0-9]+}")
+  @GetMapping("/terms/{termId:[0-9]+}")
   @Operation(summary = "Get glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
@@ -97,7 +102,7 @@ class GlossaryTermController(
     return glossaryTermModelAssembler.toModel(glossaryTerm)
   }
 
-  @GetMapping
+  @GetMapping("/terms")
   @Operation(summary = "Get all glossary terms")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
@@ -109,5 +114,27 @@ class GlossaryTermController(
   ): PagedModel<GlossaryTermModel> {
     val terms = glossaryTermService.findAllPaged(organizationId, glossaryId, pageable, search)
     return pagedAssembler.toModel(terms, glossaryTermModelAssembler)
+  }
+
+  @GetMapping("/termsWithTranslations")
+  @Operation(summary = "Get all glossary terms with translations")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @UseDefaultPermissions
+  fun getAllWithTranslations(
+    @PathVariable organizationId: Long,
+    @PathVariable glossaryId: Long,
+    @ParameterObject pageable: Pageable,
+    @RequestParam("search", required = false) search: String?,
+    @RequestParam("languageTags", required = false) languageTags: List<String>?,
+  ): PagedModel<GlossaryTermWithTranslationsModel> {
+    val terms =
+      glossaryTermService.findAllPagedWithTranslations(
+        organizationId,
+        glossaryId,
+        pageable,
+        search,
+        languageTags?.toSet(),
+      )
+    return pagedWithTranslationsAssembler.toModel(terms, glossaryTermWithTranslationsModelAssembler)
   }
 }

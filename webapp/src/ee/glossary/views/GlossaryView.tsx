@@ -63,14 +63,22 @@ export const GlossaryView = () => {
     path: { organizationId: organization!.id, glossaryId },
   });
 
+  const selectedLanguagesWithBaseLanguage = useMemo(() => {
+    return [
+      glossary.data?.baseLanguageCode || '',
+      ...(selectedLanguages ?? []),
+    ];
+  }, [selectedLanguages, glossary.data]);
+
   const path = { organizationId: organization!.id, glossaryId };
   const query = {
     search: search,
+    languageTags: selectedLanguagesWithBaseLanguage,
     size: 30,
     // sort: ['id,desc'],
   };
   const termsLoadable = useApiInfiniteQuery({
-    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms',
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsWithTranslations',
     method: 'get',
     path: path,
     query: query,
@@ -125,13 +133,6 @@ export const GlossaryView = () => {
       setSelectedTerms([...selectedTerms, termId]);
     }
   };
-
-  const selectedLanguagesWithBaseLanguage = useMemo(() => {
-    return [
-      glossary.data?.baseLanguageCode || '',
-      ...(selectedLanguages ?? []),
-    ];
-  }, [selectedLanguages, glossary.data]);
 
   const updateSelectedLanguages = (languages: string[]) => {
     setSelectedLanguages(
@@ -221,7 +222,9 @@ export const GlossaryView = () => {
 
                 return (
                   <GlossaryViewListRow
+                    key={row.id}
                     item={row}
+                    baseLanguage={glossary.data?.baseLanguageCode}
                     selectedLanguages={selectedLanguages}
                     selectedTerms={selectedTerms}
                     selectedTermsInverted={selectedTermsInverted}

@@ -2,7 +2,8 @@ import { Box, Checkbox, styled } from '@mui/material';
 import React from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 
-type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
+type GlossaryTermWithTranslationsModel =
+  components['schemas']['GlossaryTermWithTranslationsModel'];
 
 const StyledRow = styled('div')`
   display: grid;
@@ -24,7 +25,8 @@ const StyledRowCell = styled('div')`
 `;
 
 type Props = {
-  item: GlossaryTermModel;
+  item: GlossaryTermWithTranslationsModel;
+  baseLanguage: string | undefined;
   selectedLanguages: string[] | undefined;
   selectedTerms: number[];
   selectedTermsInverted: boolean;
@@ -33,6 +35,7 @@ type Props = {
 
 export const GlossaryViewListRow: React.VFC<Props> = ({
   item,
+  baseLanguage,
   selectedLanguages,
   selectedTerms,
   selectedTermsInverted,
@@ -56,12 +59,20 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
             onToggleSelectedTerm(item.id);
           }}
         />
-        <Box>{item.description}</Box>
+        <Box>
+          {
+            item.translations?.find((t) => t.languageCode === baseLanguage)
+              ?.text
+          }{' '}
+          - {item.description}
+        </Box>
       </StyledRowCell>
       {selectedLanguages?.map((tag, i) => {
         return (
           <StyledRowCell key={i + 1}>
-            <Box>{tag}</Box>
+            <Box>
+              {item.translations?.find((t) => t.languageCode === tag)?.text}
+            </Box>
           </StyledRowCell>
         );
       })}

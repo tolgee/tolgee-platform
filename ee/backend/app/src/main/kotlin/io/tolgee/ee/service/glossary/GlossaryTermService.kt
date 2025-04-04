@@ -3,6 +3,7 @@ package io.tolgee.ee.service.glossary
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.glossary.CreateGlossaryTermRequest
 import io.tolgee.ee.data.glossary.CreateGlossaryTermTranslationRequest
+import io.tolgee.ee.data.glossary.GlossaryTermWithTranslationsView
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermRequest
 import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
@@ -42,6 +43,17 @@ class GlossaryTermService(
   ): Page<GlossaryTerm> {
     val glossary = glossaryService.get(organizationId, glossaryId)
     return glossaryTermRepository.findByGlossaryPaged(glossary, pageable, search)
+  }
+
+  fun findAllPagedWithTranslations(
+    organizationId: Long,
+    glossaryId: Long,
+    pageable: Pageable,
+    search: String?,
+    languageTags: Set<String>?,
+  ): Page<GlossaryTermWithTranslationsView> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    return glossaryTermRepository.findByGlossaryPagedWithTranslations(glossary, pageable, search, languageTags)
   }
 
   fun get(
