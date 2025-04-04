@@ -55,6 +55,5 @@ class SentryBeforeSendCallback : SentryOptions.BeforeSendCallback {
     return message?.formatted?.contains(string) == true
   }
 
-  private fun SentryEvent.containsExceptionOfType(type: String) =
-    exceptions?.any { it.type?.contains(type) == true } == true
+  private fun SentryEvent.containsExceptionOfType(type: String) = exceptions?.any { it.type?.contains(type) == true } == true
 }

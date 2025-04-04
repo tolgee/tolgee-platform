@@ -190,9 +190,7 @@ class V2ImportController(
     return getNamespacesCollectionModel(result)
   }
 
-  private fun getNamespacesCollectionModel(
-    result: MutableMap<String, ImportNamespaceModel>,
-  ): CollectionModel<ImportNamespaceModel> {
+  private fun getNamespacesCollectionModel(result: MutableMap<String, ImportNamespaceModel>): CollectionModel<ImportNamespaceModel> {
     val assembler =
       object : RepresentationModelAssemblerSupport<ImportNamespaceModel, ImportNamespaceModel>(
         this::class.java,

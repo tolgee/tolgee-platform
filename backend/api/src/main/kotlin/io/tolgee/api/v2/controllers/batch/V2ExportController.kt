@@ -75,13 +75,9 @@ class V2ExportController(
   @ExportApiResponse
   fun exportPost(
     @RequestBody params: ExportParams,
-  ): ResponseEntity<StreamingResponseBody> {
-    return exportData(params)
-  }
+  ): ResponseEntity<StreamingResponseBody> = exportData(params)
 
-  private fun getZipHeaders(projectName: String): HttpHeaders {
-    return getHeaders("$projectName.zip", "application/zip")
-  }
+  private fun getZipHeaders(projectName: String): HttpHeaders = getHeaders("$projectName.zip", "application/zip")
 
   private fun getHeaders(
     fileName: String,

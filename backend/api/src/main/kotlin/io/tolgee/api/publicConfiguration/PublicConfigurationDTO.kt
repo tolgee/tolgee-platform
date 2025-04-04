@@ -44,7 +44,9 @@ class PublicConfigurationDTO(
     val ssoOrganizations: SsoOrganizationsPublicConfigDTO,
   )
 
-  data class OAuthPublicConfigDTO(val clientId: String?) {
+  data class OAuthPublicConfigDTO(
+    val clientId: String?,
+  ) {
     val enabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 

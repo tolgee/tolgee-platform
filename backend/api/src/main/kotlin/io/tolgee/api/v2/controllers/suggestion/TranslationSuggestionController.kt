@@ -60,9 +60,7 @@ class TranslationSuggestionController(
   fun suggestMachineTranslations(
     @RequestBody @Valid
     dto: SuggestRequestDto,
-  ): SuggestResultModel {
-    return machineTranslationSuggestionFacade.suggestSync(dto)
-  }
+  ): SuggestResultModel = machineTranslationSuggestionFacade.suggestSync(dto)
 
   @PostMapping("/machine-translations-streaming", produces = ["application/x-ndjson"])
   @Operation(

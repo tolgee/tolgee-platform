@@ -50,17 +50,17 @@ class MtResultStreamer(
     }
   }
 
-  private fun getInfo(): StreamedSuggestionInfo {
-    return StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseBlank)
-  }
+  private fun getInfo(): StreamedSuggestionInfo = StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseBlank)
 
   private fun writeServiceResultsAsync() {
     runBlocking(Dispatchers.IO) {
-      servicesToUse.map { it.serviceType }.map { service ->
-        async {
-          writeServiceResult(service)
-        }
-      }.awaitAll()
+      servicesToUse
+        .map { it.serviceType }
+        .map { service ->
+          async {
+            writeServiceResult(service)
+          }
+        }.awaitAll()
     }
   }
 
@@ -106,18 +106,18 @@ class MtResultStreamer(
   private fun getTranslatedValue(
     dto: SuggestRequestDto,
     service: MtServiceType,
-  ): MtTranslatorResult? {
-    return mtTranslator.translate(
-      listOf(
-        MachineTranslationParams(
-          keyId = dto.keyId,
-          baseTranslationText = dto.baseText,
-          targetLanguageId = dto.targetLanguageId,
-          desiredServices = setOf(service),
+  ): MtTranslatorResult? =
+    mtTranslator
+      .translate(
+        listOf(
+          MachineTranslationParams(
+            keyId = dto.keyId,
+            baseTranslationText = dto.baseText,
+            targetLanguageId = dto.targetLanguageId,
+            desiredServices = setOf(service),
+          ),
         ),
-      ),
-    ).singleOrNull()
-  }
+      ).singleOrNull()
 
   private fun writeException(
     e: Exception,

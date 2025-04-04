@@ -39,6 +39,5 @@ class CPoConversionTest {
       .isEqualTo(string)
   }
 
-  private fun convertToIcu(string: String) =
-    PoToIcuMessageConvertor { CToIcuPlaceholderConvertor() }.convert(string, "en").message
+  private fun convertToIcu(string: String) = PoToIcuMessageConvertor { CToIcuPlaceholderConvertor() }.convert(string, "en").message
 }

@@ -130,9 +130,7 @@ class ImportFile(
     return this
   }
 
-  fun addIssues(
-    fileCollisions: MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>>,
-  ): List<ImportFileIssue> {
+  fun addIssues(fileCollisions: MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>>): List<ImportFileIssue> {
     return fileCollisions.map { (issueType, params) ->
       addIssue(issueType, params)
     }

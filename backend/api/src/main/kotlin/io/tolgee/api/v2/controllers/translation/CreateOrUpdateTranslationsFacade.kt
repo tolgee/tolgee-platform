@@ -56,8 +56,8 @@ class CreateOrUpdateTranslationsFacade(
   private fun getSetTranslationsResponse(
     key: Key,
     translations: Map<String, Translation>,
-  ): SetTranslationsResponseModel {
-    return SetTranslationsResponseModel(
+  ): SetTranslationsResponseModel =
+    SetTranslationsResponseModel(
       keyId = key.id,
       keyName = key.name,
       keyNamespace = key.namespace?.name,
@@ -67,7 +67,6 @@ class CreateOrUpdateTranslationsFacade(
           languageTag to translationModelAssembler.toModel(translation)
         },
     )
-  }
 
   fun setTranslations(
     @RequestBody @Valid
@@ -86,7 +85,8 @@ class CreateOrUpdateTranslationsFacade(
     val translations =
       dto.languagesToReturn
         ?.let { languagesToReturn ->
-          translationService.findForKeyByLanguages(keyNotNull, languagesToReturn)
+          translationService
+            .findForKeyByLanguages(keyNotNull, languagesToReturn)
             .associateBy { it.language.tag }
         }
         ?: modifiedTranslations

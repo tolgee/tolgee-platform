@@ -79,7 +79,7 @@ class OrganizationController(
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val arrayUserResourcesAssembler: PagedResourcesAssembler<
     Pair<UserAccountWithOrganizationRoleView, List<Project>>,
-    >,
+  >,
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
@@ -176,9 +176,7 @@ class OrganizationController(
     id: Long,
     @RequestBody @Valid
     dto: OrganizationDto,
-  ): OrganizationModel {
-    return this.organizationService.edit(id, editDto = dto).toModel()
-  }
+  ): OrganizationModel = this.organizationService.edit(id, editDto = dto).toModel()
 
   @DeleteMapping("/{id:[0-9]+}")
   @Operation(summary = "Delete organization", description = "Deletes organization and all its data including projects")
@@ -332,7 +330,5 @@ class OrganizationController(
     )
   }
 
-  private fun OrganizationView.toModel(): OrganizationModel {
-    return this@OrganizationController.organizationModelAssembler.toModel(this)
-  }
+  private fun OrganizationView.toModel(): OrganizationModel = this@OrganizationController.organizationModelAssembler.toModel(this)
 }

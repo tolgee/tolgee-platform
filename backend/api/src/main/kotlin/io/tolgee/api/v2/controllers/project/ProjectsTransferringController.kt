@@ -53,13 +53,14 @@ class ProjectsTransferringController(
         project.organizationOwnerId,
       )
     val options =
-      organizations.content.map {
-        ProjectTransferOptionModel(
-          name = it.name,
-          slug = it.slug,
-          id = it.id,
-        )
-      }.toMutableList()
+      organizations.content
+        .map {
+          ProjectTransferOptionModel(
+            name = it.name,
+            slug = it.slug,
+            id = it.id,
+          )
+        }.toMutableList()
     options.sortBy { it.name }
     return CollectionModel.of(options)
   }

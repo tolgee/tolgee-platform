@@ -22,7 +22,5 @@ class ExportInfoController(
   private val exportFormatModelAssembler: ExportFormatModelAssembler,
 ) {
   @GetMapping(value = ["/formats"])
-  fun get(): CollectionModel<ExportFormatModel> {
-    return exportFormatModelAssembler.toCollectionModel(ExportFormat.entries)
-  }
+  fun get(): CollectionModel<ExportFormatModel> = exportFormatModelAssembler.toCollectionModel(ExportFormat.entries)
 }

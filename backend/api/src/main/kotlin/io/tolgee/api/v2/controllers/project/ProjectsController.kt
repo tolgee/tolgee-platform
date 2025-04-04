@@ -106,11 +106,10 @@ class ProjectsController(
   @OpenApiOrderExtension(2)
   fun get(
     @PathVariable("projectId") projectId: Long,
-  ): ProjectModel {
-    return projectService.getView(projectId).let {
+  ): ProjectModel =
+    projectService.getView(projectId).let {
       projectModelAssembler.toModel(it)
     }
-  }
 
   @Operation(summary = "Get all permitted", description = "Returns all projects where current user has any permission")
   @GetMapping("")
@@ -183,17 +182,16 @@ class ProjectsController(
     @ParameterObject pageable: Pageable,
     @RequestParam("search", required = false) search: String?,
     @ParameterObject filters: UserAccountFilters = UserAccountFilters(),
-  ): PagedModel<UserAccountInProjectModel> {
-    return userAccountService.getAllInProjectWithPermittedLanguages(
-      projectId,
-      pageable,
-      search,
-      filters = filters,
-    ).let {
-        users ->
-      userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
-    }
-  }
+  ): PagedModel<UserAccountInProjectModel> =
+    userAccountService
+      .getAllInProjectWithPermittedLanguages(
+        projectId,
+        pageable,
+        search,
+        filters = filters,
+      ).let { users ->
+        userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
+      }
 
   @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload project avatar")

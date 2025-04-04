@@ -70,8 +70,10 @@ class NamespaceController(
   @OpenApiOrderExtension(2)
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
     val namespaces =
-      namespaceService.getAllInProject(projectHolder.project.id)
-        .map { it.id as Long? to it.name as String? }.toMutableList()
+      namespaceService
+        .getAllInProject(projectHolder.project.id)
+        .map { it.id as Long? to it.name as String? }
+        .toMutableList()
     val isDefaultUsed = namespaceService.isDefaultUsed(projectHolder.project.id)
     if (isDefaultUsed) {
       namespaces.add(0, null to null)

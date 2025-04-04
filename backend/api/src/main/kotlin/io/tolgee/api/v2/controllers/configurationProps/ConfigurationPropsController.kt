@@ -21,7 +21,5 @@ class ConfigurationPropsController : IController {
 
   @GetMapping(value = [""])
   @Operation(description = "Return server configuration properties documentation")
-  fun get(): List<DocItem> {
-    return docs
-  }
+  fun get(): List<DocItem> = docs
 }

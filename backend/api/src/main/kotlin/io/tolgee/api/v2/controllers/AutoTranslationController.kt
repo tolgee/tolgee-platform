@@ -101,14 +101,15 @@ When no languages provided, it translates only untranslated languages.""",
 
   private fun getAllLanguagesToTranslate(): Set<String> {
     val baseLanguageTag = getBaseLanguageTag()
-    return projectHolder.projectEntity.languages.map { it.tag }.filter {
-      it != baseLanguageTag
-    }.toSet()
+    return projectHolder.projectEntity.languages
+      .map { it.tag }
+      .filter {
+        it != baseLanguageTag
+      }.toSet()
   }
 
-  private fun getBaseLanguageTag(): String {
-    return projectHolder.projectEntity.baseLanguage?.tag ?: throw NotFoundException(
+  private fun getBaseLanguageTag(): String =
+    projectHolder.projectEntity.baseLanguage?.tag ?: throw NotFoundException(
       Message.BASE_LANGUAGE_NOT_FOUND,
     )
-  }
 }
