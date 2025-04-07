@@ -136,16 +136,17 @@ class TestDataService(
           }
         }
       }
-      runAfterCleanMethodsOfAdditionalSavers(builder)
     }
 
     additionalTestDataSavers.forEach { dataSaver ->
       tryUntilItDoesntBreakConstraint {
         executeInNewTransaction(transactionManager) {
+          entityManager.createNativeQuery("set statement_timeout to 1000000;").executeUpdate()
           dataSaver.clean(builder)
         }
       }
     }
+    runAfterCleanMethodsOfAdditionalSavers(builder)
   }
 
   private fun updateLanguageStats(builder: TestDataBuilder) {

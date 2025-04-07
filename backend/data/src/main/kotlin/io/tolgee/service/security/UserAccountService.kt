@@ -89,7 +89,6 @@ class UserAccountService(
     return this.findActive(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
 
-  @Transactional
   fun findActive(id: Long): UserAccount? {
     return userAccountRepository.findActive(id)
   }
@@ -107,7 +106,7 @@ class UserAccountService(
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
   @Transactional
   fun findDto(id: Long): UserAccountDto? {
-    return userAccountRepository.findActive(id)?.let {
+    return findActive(id)?.let {
       UserAccountDto.fromEntity(it)
     }
   }

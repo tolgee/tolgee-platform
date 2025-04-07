@@ -9,29 +9,48 @@ inline fun <T> tryUntilItDoesntBreakConstraint(
   maxRepeats: Int = 100,
   fn: () -> T,
 ): T {
-  var exception: Exception? = null
+  return tryUntil(
+    maxRepeats = maxRepeats,
+    shouldRetry = { e ->
+      isCommonDbError(e)
+    },
+    exceptionToThrow = { repeats, cause -> RepeatedlyThrowingConstraintViolationException(cause, repeats) },
+    fn = fn,
+  )
+}
+
+fun isCommonDbError(e: Exception) =
+  e is DataIntegrityViolationException ||
+    e is PersistenceException ||
+    e is CannotAcquireLockException ||
+    e is ObjectOptimisticLockingFailureException
+
+inline fun <T> tryUntil(
+  maxRepeats: Int = 100,
+  shouldRetry: (Exception) -> Boolean,
+  exceptionToThrow: (repeats: Int, cause: Throwable) -> Throwable,
+  fn: () -> T,
+): T {
+  var lastException: Exception? = null
   var repeats = 0
   for (it in 1..maxRepeats) {
     try {
       return fn()
     } catch (e: Exception) {
-      when (e) {
-        is DataIntegrityViolationException,
-        is PersistenceException,
-        is CannotAcquireLockException,
-        is ObjectOptimisticLockingFailureException,
-        -> {
-          repeats++
-          exception = e
-        }
-
-        else -> throw e
+      if (shouldRetry(e)) {
+        repeats++
+        lastException = e
+      } else {
+        throw e
       }
     }
   }
 
-  throw RepeatedlyThrowingConstraintViolationException(exception!!, repeats)
+  throw exceptionToThrow(repeats, lastException!!)
 }
 
 class RepeatedlyThrowingConstraintViolationException(cause: Throwable, repeats: Int) :
+  RepeatedlyThrowingException(cause, repeats)
+
+open class RepeatedlyThrowingException(cause: Throwable, repeats: Int) :
   RuntimeException("Retry failed $repeats times.", cause)
