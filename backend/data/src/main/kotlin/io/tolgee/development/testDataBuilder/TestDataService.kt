@@ -93,6 +93,7 @@ class TestDataService(
     // To be able to save project in its separate transaction,
     // user/organization has to be stored first.
     executeInNewTransaction(transactionManager) {
+      generateSlugsForOrganizations(builder)
       saveAllUsers(builder)
       saveOrganizationData(builder)
     }
@@ -114,6 +115,16 @@ class TestDataService(
     languageStatsListener.bypass = false
 
     runAfterSaveMethodsOfAdditionalSavers(builder)
+  }
+
+  private fun generateSlugsForOrganizations(builder: TestDataBuilder) {
+    builder.data.organizations.forEach {
+      val organization = it.self
+      val slug = organization.slug
+      if (slug.isEmpty()) {
+        organization.slug = organizationService.generateSlug(organization.name)
+      }
+    }
   }
 
   @Transactional
@@ -431,15 +442,7 @@ class TestDataService(
   }
 
   private fun saveAllOrganizations(builder: TestDataBuilder) {
-    val organizationsToSave =
-      builder.data.organizations.map {
-        it.self.apply {
-          val slug = this.slug
-          if (slug.isEmpty()) {
-            this.slug = organizationService.generateSlug(this.name)
-          }
-        }
-      }
+    val organizationsToSave = builder.data.organizations.map { it.self }
 
     organizationsToSave.forEach { org ->
       permissionService.save(org.basePermission)
