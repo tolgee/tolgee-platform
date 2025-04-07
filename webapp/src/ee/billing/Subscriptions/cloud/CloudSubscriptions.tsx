@@ -39,11 +39,7 @@ export const CloudSubscriptions = () => {
   function setInitialPeriod(
     data: components['schemas']['CloudSubscriptionModel']
   ) {
-    if (
-      data.plan &&
-      isPlanPeriodDependant(data.plan.prices) &&
-      data.currentBillingPeriod
-    ) {
+    if (isPlanPeriodDependant(data.plan.prices) && data.currentBillingPeriod) {
       setPeriod(data.currentBillingPeriod);
       return;
     }

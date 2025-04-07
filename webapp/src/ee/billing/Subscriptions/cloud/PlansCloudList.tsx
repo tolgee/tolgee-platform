@@ -6,6 +6,7 @@ import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
 import { FreePlan } from '../../component/Plan/freePlan/FreePlan';
 import { useCloudPlans } from './useCloudPlans';
 import { CloudPlanItem } from './CloudPlanItem';
+import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
@@ -29,6 +30,10 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
   function isActive(plan: PlanType) {
     if (activeSubscription.plan.id !== plan.id) {
       return false;
+    }
+
+    if (!isPlanPeriodDependant(plan.prices)) {
+      return true;
     }
 
     // if trial or free, we don't care about period

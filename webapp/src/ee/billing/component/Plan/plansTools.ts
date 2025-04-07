@@ -29,6 +29,12 @@ export function excludePreviousPlanFeatures(
   }
 }
 
+/**
+ * @return Whether period plays any role in the plan visualization or active state.
+ *
+ * The plan can be paid, but can have 0 subscription price. In that case only usage is charged.
+ * We consider such plan period independent.
+ */
 export function isPlanPeriodDependant(prices: PlanType['prices'] | undefined) {
   return (
     prices && Boolean(prices.subscriptionYearly || prices.subscriptionMonthly)
