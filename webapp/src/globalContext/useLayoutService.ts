@@ -14,11 +14,11 @@ export const useLayoutService = ({ quickStart }: Props) => {
   const [topBannerHeight, setTopBannerHeight] = useState(0);
   const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
   const [topBarHidden, setTopBarHidden] = useState(false);
-  const bodySize = useWindowSize();
+  const viewPortSize = useWindowSize();
   const [rightPanelFloatingForced, setRightPanelFloatingForced] =
     useState(false);
 
-  const bodyWidth = bodySize.width!;
+  const bodyWidth = viewPortSize.width;
 
   const rightPanelShouldFloat = bodyWidth < 1200 || rightPanelFloatingForced;
 
