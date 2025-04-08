@@ -17,7 +17,6 @@ import clsx from 'clsx';
 import { useScrollStatus } from './useScrollStatus';
 import { useColumns } from '../useColumns';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const ARROW_SIZE = 50;
 

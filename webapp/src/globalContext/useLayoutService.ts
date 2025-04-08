@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useResizeObserver, useWindowSize } from 'usehooks-ts';
+import { useResizeObserver } from 'usehooks-ts';
 import type { useQuickStartGuideService } from './useQuickStartGuideService';
 
 export const TOP_BAR_HEIGHT = 52;
