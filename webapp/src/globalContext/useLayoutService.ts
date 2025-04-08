@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useWindowSize } from 'usehooks-ts';
+import { useResizeObserver, useWindowSize } from 'usehooks-ts';
 import type { useQuickStartGuideService } from './useQuickStartGuideService';
 
 export const TOP_BAR_HEIGHT = 52;
@@ -15,10 +15,14 @@ export const useLayoutService = ({ quickStart }: Props) => {
   const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
   const [topBarHidden, setTopBarHidden] = useState(false);
   const viewPortSize = useWindowSize();
+  const viewPortWidth = viewPortSize.width;
+  const bodySize = useResizeObserver({
+    ref: { current: document.body },
+  });
   const [rightPanelFloatingForced, setRightPanelFloatingForced] =
     useState(false);
 
-  const bodyWidth = viewPortSize.width;
+  const bodyWidth = bodySize.width!;
 
   const rightPanelShouldFloat = bodyWidth < 1200 || rightPanelFloatingForced;
 
@@ -36,6 +40,7 @@ export const useLayoutService = ({ quickStart }: Props) => {
     topBannerHeight,
     topSubBannerHeight,
     bodyWidth,
+    viewPortWidth,
     rightPanelWidth,
     rightPanelFloating,
     rightPanelShouldFloat,

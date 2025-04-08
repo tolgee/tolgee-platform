@@ -17,6 +17,7 @@ import clsx from 'clsx';
 import { useScrollStatus } from './useScrollStatus';
 import { useColumns } from '../useColumns';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const ARROW_SIZE = 50;
 
@@ -71,7 +72,8 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledVerticalScroll = styled('div')`
-  overflow-x: scroll;
+  overflow-x: auto;
+  scrollbar-width: none;
   overflow-y: hidden;
   scroll-behavior: smooth;
 `;
@@ -149,6 +151,9 @@ export const TranslationsTable = ({ width }: Props) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
+  const scrollbarWidth = useGlobalContext(
+    (c) => c.layout.viewPortWidth - c.layout.bodyWidth
+  );
 
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -212,6 +217,7 @@ export const TranslationsTable = ({ width }: Props) => {
 
   const [scrollLeft, scrollRight] = useScrollStatus(verticalScrollRef, [
     fullWidth,
+    mainContentWidth,
   ]);
 
   function handleScroll(direction: 'left' | 'right') {
@@ -225,6 +231,7 @@ export const TranslationsTable = ({ width }: Props) => {
   }
 
   const [tablePosition, setTablePosition] = useState({ left: 0, right: 0 });
+
   useEffect(() => {
     const position = tableRef.current?.getBoundingClientRect();
     if (position) {
@@ -246,7 +253,7 @@ export const TranslationsTable = ({ width }: Props) => {
           <StyledScrollArrow
             className={clsx('right', { scrollRight })}
             style={{
-              right: tablePosition?.right,
+              right: tablePosition?.right - scrollbarWidth,
             }}
             onClick={() => handleScroll('right')}
           >
