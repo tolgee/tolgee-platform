@@ -14,8 +14,6 @@ export const useLayoutService = ({ quickStart }: Props) => {
   const [topBannerHeight, setTopBannerHeight] = useState(0);
   const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
   const [topBarHidden, setTopBarHidden] = useState(false);
-  const viewPortSize = useWindowSize();
-  const viewPortWidth = viewPortSize.width;
   const bodySize = useResizeObserver({
     ref: { current: document.body },
   });
@@ -40,7 +38,6 @@ export const useLayoutService = ({ quickStart }: Props) => {
     topBannerHeight,
     topSubBannerHeight,
     bodyWidth,
-    viewPortWidth,
     rightPanelWidth,
     rightPanelFloating,
     rightPanelShouldFloat,

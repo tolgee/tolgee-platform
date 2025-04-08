@@ -151,9 +151,6 @@ export const TranslationsTable = ({ width }: Props) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
-  const scrollbarWidth = useGlobalContext(
-    (c) => c.layout.viewPortWidth - c.layout.bodyWidth
-  );
 
   const { fetchMore, registerList, unregisterList } = useTranslationsActions();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -236,7 +233,7 @@ export const TranslationsTable = ({ width }: Props) => {
     const position = tableRef.current?.getBoundingClientRect();
     if (position) {
       const left = position?.left;
-      const right = window.innerWidth - position?.right;
+      const right = document.body.offsetWidth - position?.right;
       setTablePosition({ left, right });
     }
   }, [tableRef.current, mainContentWidth]);
@@ -253,7 +250,7 @@ export const TranslationsTable = ({ width }: Props) => {
           <StyledScrollArrow
             className={clsx('right', { scrollRight })}
             style={{
-              right: tablePosition?.right - scrollbarWidth,
+              right: tablePosition?.right,
             }}
             onClick={() => handleScroll('right')}
           >
