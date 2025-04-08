@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useResizeObserver } from 'usehooks-ts';
+import { useWindowSize } from 'usehooks-ts';
 import type { useQuickStartGuideService } from './useQuickStartGuideService';
 
 export const TOP_BAR_HEIGHT = 52;
@@ -14,9 +14,7 @@ export const useLayoutService = ({ quickStart }: Props) => {
   const [topBannerHeight, setTopBannerHeight] = useState(0);
   const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
   const [topBarHidden, setTopBarHidden] = useState(false);
-  const bodySize = useResizeObserver({
-    ref: { current: document.body },
-  });
+  const bodySize = useWindowSize();
   const [rightPanelFloatingForced, setRightPanelFloatingForced] =
     useState(false);
 
