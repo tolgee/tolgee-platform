@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { useQuickStartGuideService } from './useQuickStartGuideService';
-import { useBodySize } from 'tg.hooks/useBodySize';
+import { useResizeObserver } from 'tg.hooks/useResizeObserver';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -14,8 +14,10 @@ export const useLayoutService = ({ quickStart }: Props) => {
   const [topBannerHeight, setTopBannerHeight] = useState(0);
   const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
   const [topBarHidden, setTopBarHidden] = useState(false);
-  const bodySize = useBodySize();
-  const bodyWidth = bodySize.width;
+  const bodySize = useResizeObserver({
+    ref: { current: document.body },
+  });
+  const bodyWidth = bodySize.width!;
 
   const [rightPanelFloatingForced, setRightPanelFloatingForced] =
     useState(false);
