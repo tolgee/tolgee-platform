@@ -8,7 +8,7 @@ import {
  * usehook-ts resizeObserver is causing "ResizeObserver loop completed with undelivered notifications"
  * in cypress tests and in safari
  *
- * Delaying the event reaction, seems to solve the issue
+ * Reacting to the event in the next frame, seems to solve the issue
  */
 
 type OriginalOptions = Parameters<typeof useOriginalResizeObserver>[0];
@@ -33,7 +33,7 @@ export const useResizeObserver = ({ ref, box, onResize }: Props): Size => {
     ref,
     box,
     onResize(size) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (mounted()) {
           if (onResize) {
             onResize(size);
@@ -41,7 +41,7 @@ export const useResizeObserver = ({ ref, box, onResize }: Props): Size => {
             setElementSize(size as Size);
           }
         }
-      }, 0);
+      });
     },
   });
 
