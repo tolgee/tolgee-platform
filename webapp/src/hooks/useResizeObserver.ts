@@ -25,7 +25,7 @@ type Props<T extends HTMLElement = HTMLElement> = {
 };
 
 export const useResizeObserver = ({ ref, box, onResize }: Props): Size => {
-  const [bodySize, setBodySize] = useState<Size | undefined>(undefined);
+  const [elementSize, setElementSize] = useState<Size | undefined>(undefined);
 
   const mounted = useIsMounted();
 
@@ -38,12 +38,12 @@ export const useResizeObserver = ({ ref, box, onResize }: Props): Size => {
           if (onResize) {
             onResize(size);
           } else {
-            setBodySize(size as Size);
+            setElementSize(size as Size);
           }
         }
       }, 0);
     },
   });
 
-  return bodySize ?? size;
+  return elementSize ?? size;
 };
