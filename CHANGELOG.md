@@ -1,3 +1,10 @@
+## [3.114.1](https://github.com/tolgee/tolgee-platform/compare/v3.114.0...v3.114.1) (2025-04-09)
+
+
+### Bug Fixes
+
+* translations table scrollers ([#3030](https://github.com/tolgee/tolgee-platform/issues/3030)) ([47e6ee4](https://github.com/tolgee/tolgee-platform/commit/47e6ee4346a0f43fd316e5ac37ad82a827199ceb))
+
 # [3.114.0](https://github.com/tolgee/tolgee-platform/compare/v3.113.2...v3.114.0) (2025-04-01)
 
 
