@@ -4,6 +4,13 @@ import {
   useResizeObserver as useOriginalResizeObserver,
 } from 'usehooks-ts';
 
+/**
+ * usehook-ts resizeObserver is causing "ResizeObserver loop completed with undelivered notifications"
+ * in cypress tests and in safari
+ *
+ * Reacting to the event in the next frame, seems to solve the issue
+ */
+
 type OriginalOptions = Parameters<typeof useOriginalResizeObserver>[0];
 type Size = {
   /** The width of the observed element. */
