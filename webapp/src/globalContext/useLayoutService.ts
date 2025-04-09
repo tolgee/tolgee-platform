@@ -15,9 +15,11 @@ export const useLayoutService = ({ quickStart }: Props) => {
   const [topSubBannerHeight, setTopSubBannerHeight] = useState(0);
   const [topBarHidden, setTopBarHidden] = useState(false);
   const bodySize = useResizeObserver({
-    ref: { current: document.body },
+    ref: {
+      current: typeof document !== 'undefined' ? document.body : null,
+    },
   });
-  const bodyWidth = bodySize.width!;
+  const bodyWidth = bodySize.width ?? 0;
 
   const [rightPanelFloatingForced, setRightPanelFloatingForced] =
     useState(false);
