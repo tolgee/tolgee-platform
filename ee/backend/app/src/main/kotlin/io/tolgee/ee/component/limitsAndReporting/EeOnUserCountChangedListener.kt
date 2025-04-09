@@ -1,4 +1,4 @@
-package io.tolgee.ee.component
+package io.tolgee.ee.component.limitsAndReporting
 
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.ee.service.EeSubscriptionServiceImpl
@@ -29,7 +29,7 @@ class EeOnUserCountChangedListener(
       val subscription = eeSubscriptionService.findSubscriptionDto()
       eeSubscriptionService.reportUsage(subscription = subscription, seats = seats)
       if (!event.decrease) {
-        eeSubscriptionService.checkUserCount(subscription, seats)
+        eeSubscriptionService.checkSeatCount(subscription, seats)
       }
     } catch (e: NoActiveSubscriptionException) {
       logger.debug("No active subscription, skipping usage reporting.")

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.TestContext
 import org.springframework.test.context.TestExecutionListener
+import java.sql.BatchUpdateException
 import java.sql.ResultSet
 import java.sql.Statement
 import java.util.concurrent.Executors
@@ -53,7 +54,7 @@ class CleanDbTestListener : TestExecutionListener {
             break
           } catch (e: Exception) {
             when (e) {
-              is PSQLException, is TimeoutCancellationException -> {
+              is PSQLException, is TimeoutCancellationException, is BatchUpdateException -> {
                 if (i > 5) {
                   throw e
                 }

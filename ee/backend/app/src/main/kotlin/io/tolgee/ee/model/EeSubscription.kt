@@ -66,6 +66,9 @@ class EeSubscription : AuditModel(), IEeSubscription, PlanWithIncludedKeysAndSea
       status = status,
       lastValidCheck = lastValidCheck,
       nonCommercial = nonCommercial,
+      includedSeats = includedSeats,
+      includedKeys = includedKeys,
+      isPayAsYouGo = isPayAsYouGo,
     )
   }
 
