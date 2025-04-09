@@ -1,4 +1,4 @@
-package io.tolgee.ee
+package io.tolgee.ee.selfHostedLimitsAndReporting
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.constants.Message
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest()
-class UserLimitTest : AbstractSpringTest() {
+class FreePlanSeatLimitTest : AbstractSpringTest() {
   @Test
   fun `cannot create 11th user`() {
     createNUsers(9)

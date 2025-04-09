@@ -5,6 +5,7 @@ import io.tolgee.ee.service.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.NoActiveSubscriptionException
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.events.OnProjectActivityEvent
+import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeyService
@@ -16,12 +17,23 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 
+/**
+ * This class listens for key count changes and reports such changes to the Tolgee Cloud.
+ *
+ * It reports:
+ *  - When the key count is changed due to modifications in related entities.
+ *  - When a project or organization is deleted, as these events also impact the key count.
+ */
 @Component
-class EeOnKeyCountChangedListener(
+class EeKeyCountReportingListener(
   private val eeSubscriptionService: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
   private val keyService: KeyService,
 ) : Logging {
+  /**
+   * Listens for project activity events and checks if any relevant entity modifications
+   * (like keys or project deletions) occurred to report key count changes.
+   */
   @EventListener
   fun onActivity(event: OnProjectActivityEvent) {
     if (billingConfProvider().enabled) {
@@ -36,7 +48,10 @@ class EeOnKeyCountChangedListener(
       val isProjectDeletedChanged =
         event.modifiedEntities[Project::class]?.any { it.value.modifications.contains("deletedAt") } == true
 
-      if (isKeysChanged || isProjectDeletedChanged) {
+      val isOrganizationDeletedChanged =
+        event.modifiedEntities[Organization::class]?.any { it.value.modifications.contains("deletedAt") } == true
+
+      if (isKeysChanged || isProjectDeletedChanged || isOrganizationDeletedChanged) {
         onKeyCountChanged()
       }
     }
@@ -51,7 +66,6 @@ class EeOnKeyCountChangedListener(
     try {
       val keys = keyService.countAllOnInstance()
       val subscription = eeSubscriptionService.findSubscriptionDto()
-
       eeSubscriptionService.reportUsage(subscription = subscription, keys = keys)
     } catch (e: NoActiveSubscriptionException) {
       logger.debug("No active subscription, skipping usage reporting.")

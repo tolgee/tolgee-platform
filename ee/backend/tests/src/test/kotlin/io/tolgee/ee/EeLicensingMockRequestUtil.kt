@@ -11,10 +11,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
 @Component
-class EeLicensingMockRequestUtil {
-  @Autowired
-  lateinit var restTemplate: RestTemplate
-
+class EeLicensingMockRequestUtil(
+  private val restTemplate: RestTemplate,
+) {
   fun mock(mock: HttpClientMocker.() -> Unit) {
     val mocker = HttpClientMocker(restTemplate)
     mock(mocker)

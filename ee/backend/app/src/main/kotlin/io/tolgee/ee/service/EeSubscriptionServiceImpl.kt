@@ -10,16 +10,13 @@ import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
-import io.tolgee.ee.data.GetMySubscriptionDto
-import io.tolgee.ee.data.PrepareSetLicenseKeyDto
-import io.tolgee.ee.data.ReleaseKeyDto
-import io.tolgee.ee.data.ReportErrorDto
-import io.tolgee.ee.data.ReportUsageDto
-import io.tolgee.ee.data.SetLicenseKeyLicensingDto
+import io.tolgee.ee.data.*
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.exceptions.limits.PlanKeysLimitExceeded
+import io.tolgee.exceptions.limits.PlanSeatLimitExceeded
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.service.InstanceIdService
@@ -246,29 +243,41 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun checkUserCount(
+  fun checkSeatCount(
     subscription: EeSubscriptionDto?,
     seats: Long,
   ) {
-    if (bypassSeatCountCheck) {
+    if (bypassSeatCountCheck || isCloud || subscription?.isPayAsYouGo == true) {
       return
     }
-    val isCloud = billingConfProvider.invoke().enabled
-    if (subscription == null && !isCloud) {
-      if (seats > 10) {
-        throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+
+    val limit = subscription?.includedSeats ?: 10
+
+    if (seats > limit) {
+      when (subscription) {
+        null -> throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+        else -> throw PlanSeatLimitExceeded(seats, limit)
       }
     }
   }
 
+  @Transactional
   fun checkKeyCount(
-    subscription: EeSubscriptionDto?,
-    seats: Long,
+    keys: Long,
   ) {
-    if (subscription == null) {
-      if (seats > 10) {
-        throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
-      }
+    val subscription = findSubscriptionDto()
+
+    if (
+      isCloud ||
+      subscription == null ||
+      subscription.isPayAsYouGo ||
+      subscription.includedKeys < 0
+    ) {
+      return
+    }
+
+    if (keys > subscription.includedKeys) {
+      throw PlanKeysLimitExceeded(keys, subscription.includedKeys)
     }
   }
 
@@ -344,4 +353,7 @@ class EeSubscriptionServiceImpl(
       eeSubscriptionRepository.deleteAll()
     }
   }
+
+  private val isCloud: Boolean
+    get() = billingConfProvider.invoke().enabled
 }

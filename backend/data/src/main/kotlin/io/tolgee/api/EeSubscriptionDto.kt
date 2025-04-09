@@ -18,4 +18,7 @@ data class EeSubscriptionDto(
   var status: SubscriptionStatus = SubscriptionStatus.ACTIVE,
   var lastValidCheck: Date? = null,
   var nonCommercial: Boolean = false,
+  var includedKeys: Long,
+  var includedSeats: Long,
+  var isPayAsYouGo: Boolean
 )
