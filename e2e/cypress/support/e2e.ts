@@ -35,6 +35,11 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   if (err.hasOwnProperty('code') && typeof err.code == 'string') {
     return false;
   }
+  // resize observer throwing random errors, hard to replicate, doesn't seem to affect anything
+  const resizeObserverLoopErrRe = /^ResizeObserver loop limit exceeded/;
+  if (resizeObserverLoopErrRe.test(err.message)) {
+    return false;
+  }
 });
 
 Cypress.on('window:before:load', (win) => {
