@@ -25,6 +25,10 @@ const StyledHeaderCell = styled('div')`
   overflow: hidden;
 `;
 
+const StyledHeaderLanguageCell = styled(StyledHeaderCell)`
+  border-left: 1px solid ${({ theme }) => theme.palette.divider1};
+`;
+
 type Props = {
   selectedLanguages: string[] | undefined;
   allTermsSelected: boolean;
@@ -64,9 +68,9 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
           name: languageData?.englishName || tag,
         };
         return (
-          <StyledHeaderCell key={i + 1}>
+          <StyledHeaderLanguageCell key={i + 1}>
             <CellLanguage language={language} />
-          </StyledHeaderCell>
+          </StyledHeaderLanguageCell>
         );
       })}
     </StyledHeaderRow>

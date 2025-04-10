@@ -1,4 +1,4 @@
-import { Box, Container, styled, Typography } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 
 import {
   BaseView,
@@ -9,14 +9,15 @@ import { SettingsMenu, SettingsMenuItem } from './SettingsMenu';
 import { BaseViewAddButton } from '../BaseViewAddButton';
 
 const StyledWrapper = styled('div')`
-  display: flex;
+  display: grid;
   gap: 32px;
+  grid-template-columns: auto 1fr;
   @container main-container (max-width: 800px) {
-    flex-direction: column;
+    grid-template-columns: none;
   }
 `;
 
-const StyledContainer = styled(Container)`
+const StyledContainer = styled(Box)`
   display: flex;
   padding: 0px !important;
   container: main-container / inline-size;
