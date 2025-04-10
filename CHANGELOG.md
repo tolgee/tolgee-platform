@@ -1,3 +1,10 @@
+## [3.114.2](https://github.com/tolgee/tolgee-platform/compare/v3.114.1...v3.114.2) (2025-04-10)
+
+
+### Bug Fixes
+
+* Billing administration menu items not filtered ([#3037](https://github.com/tolgee/tolgee-platform/issues/3037)) ([c7a6f1f](https://github.com/tolgee/tolgee-platform/commit/c7a6f1fd34d29e3ab8e9f55ea4fcfbe8d78121f3))
+
 ## [3.114.1](https://github.com/tolgee/tolgee-platform/compare/v3.114.0...v3.114.1) (2025-04-09)
 
 
