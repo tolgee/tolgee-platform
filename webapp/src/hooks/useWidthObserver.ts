@@ -12,14 +12,9 @@ type OriginalOptions = Parameters<typeof useResizeObserver>[0];
 type Props<T extends HTMLElement = HTMLElement> = {
   ref: RefObject<T>;
   box?: OriginalOptions['box'];
-  onResize?: OriginalOptions['onResize'];
 };
 
-export const useWidthObserver = ({
-  ref,
-  box,
-  onResize,
-}: Props): number | undefined => {
+export const useWidthObserver = ({ ref, box }: Props): number | undefined => {
   const [elementWidth, setElementWidth] = useState<number | undefined>(
     undefined
   );
@@ -32,11 +27,7 @@ export const useWidthObserver = ({
     onResize(size) {
       requestAnimationFrame(() => {
         if (mounted()) {
-          if (onResize) {
-            onResize(size);
-          } else {
-            setElementWidth(size.width);
-          }
+          setElementWidth(size.width);
         }
       });
     },
