@@ -85,11 +85,12 @@ class OAuth2AuthUtil(
       return authorizedRequestPerformer.performAuthGet(url).andReturn()
     }
 
-    return authMvc!!.perform(
-      MockMvcRequestBuilders.get(url)
-        .accept(MediaType.APPLICATION_JSON)
-        .contentType(MediaType.APPLICATION_JSON),
-    )
-      .andReturn()
+    return authMvc!!
+      .perform(
+        MockMvcRequestBuilders
+          .get(url)
+          .accept(MediaType.APPLICATION_JSON)
+          .contentType(MediaType.APPLICATION_JSON),
+      ).andReturn()
   }
 }

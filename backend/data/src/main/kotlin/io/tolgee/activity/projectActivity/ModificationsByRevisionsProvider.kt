@@ -52,11 +52,9 @@ class ModificationsByRevisionsProvider(
     return PageImpl(content, rawModifiedEntities.pageable, rawModifiedEntities.totalElements)
   }
 
-  private fun getEntityExistences(): Map<Pair<String, Long>, Boolean> {
-    return EntityExistenceProvider(applicationContext, rawModifiedEntities, allRelationData).provide()
-  }
+  private fun getEntityExistences(): Map<Pair<String, Long>, Boolean> =
+    EntityExistenceProvider(applicationContext, rawModifiedEntities, allRelationData).provide()
 
-  private fun getModifiedEntitiesRaw(): Page<ActivityModifiedEntity> {
-    return activityModifiedEntityRepository.getModifiedEntities(projectId, revisionIds, filterEntityClass, pageable)
-  }
+  private fun getModifiedEntitiesRaw(): Page<ActivityModifiedEntity> =
+    activityModifiedEntityRepository.getModifiedEntities(projectId, revisionIds, filterEntityClass, pageable)
 }

@@ -232,9 +232,7 @@ class ImportService(
     }
   }
 
-  fun save(import: Import): Import {
-    return this.importRepository.save(import)
-  }
+  fun save(import: Import): Import = this.importRepository.save(import)
 
   fun saveFile(importFile: ImportFile): ImportFile = importFileRepository.save(importFile)
 
@@ -245,13 +243,9 @@ class ImportService(
   fun getNotExpired(
     projectId: Long,
     authorId: Long,
-  ): Import {
-    return findNotExpired(projectId, authorId) ?: throw NotFoundException()
-  }
+  ): Import = findNotExpired(projectId, authorId) ?: throw NotFoundException()
 
-  fun findDeleted(importId: Long): Import? {
-    return importRepository.findDeleted(importId)
-  }
+  fun findDeleted(importId: Long): Import? = importRepository.findDeleted(importId)
 
   private fun findNotExpired(
     projectId: Long,
@@ -264,50 +258,45 @@ class ImportService(
   fun find(
     projectId: Long,
     authorId: Long,
-  ): Import? {
-    return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
-  }
+  ): Import? = this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
 
   fun get(
     projectId: Long,
     authorId: Long,
-  ): Import {
-    return this.find(projectId, authorId) ?: throw NotFoundException()
-  }
+  ): Import = this.find(projectId, authorId) ?: throw NotFoundException()
 
-  fun get(id: Long): Import {
-    return importRepository.findById(id).orElse(null) ?: throw NotFoundException()
-  }
+  fun get(id: Long): Import = importRepository.findById(id).orElse(null) ?: throw NotFoundException()
 
   fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
   @Suppress("UNCHECKED_CAST")
   fun findKeys(import: Import): List<ImportKey> {
     var result: List<ImportKey> =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.comments ikc
             join ik.file if
             where if.import = :import
             """,
-      )
-        .setParameter("import", import)
+        ).setParameter("import", import)
         .resultList as List<ImportKey>
 
     // when we are import very lot of keys, we need to split it to multiple queries due to parameter limit
     result =
       result.chunked(30000).flatMap { subresult ->
-        entityManager.createQuery(
-          """
+        entityManager
+          .createQuery(
+            """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ik in :keys
         """,
-        ).setParameter("keys", subresult)
+          ).setParameter("keys", subresult)
           .resultList as List<ImportKey>
       }
 
@@ -332,9 +321,7 @@ class ImportService(
     this.importRepository.saveAll(imports)
   }
 
-  fun saveAllFiles(files: Iterable<ImportFile>): MutableList<ImportFile>? {
-    return this.importFileRepository.saveAll(files)
-  }
+  fun saveAllFiles(files: Iterable<ImportFile>): MutableList<ImportFile>? = this.importFileRepository.saveAll(files)
 
   fun onExistingTranslationsRemoved(translationIds: Collection<Long>) {
     this.importTranslationRepository.removeExistingTranslationConflictReferences(translationIds)
@@ -344,19 +331,14 @@ class ImportService(
     projectId: Long,
     userId: Long,
     pageable: Pageable,
-  ): Page<ImportLanguageView> {
-    return this.getNotExpired(projectId, userId).let {
+  ): Page<ImportLanguageView> =
+    this.getNotExpired(projectId, userId).let {
       this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
     }
-  }
 
-  fun findLanguage(languageId: Long): ImportLanguage? {
-    return importLanguageRepository.findById(languageId).orElse(null)
-  }
+  fun findLanguage(languageId: Long): ImportLanguage? = importLanguageRepository.findById(languageId).orElse(null)
 
-  fun findLanguageView(languageId: Long): ImportLanguageView? {
-    return importLanguageRepository.findViewById(languageId).orElse(null)
-  }
+  fun findLanguageView(languageId: Long): ImportLanguageView? = importLanguageRepository.findViewById(languageId).orElse(null)
 
   fun getTranslationsView(
     languageId: Long,
@@ -364,15 +346,14 @@ class ImportService(
     onlyConflicts: Boolean,
     onlyUnresolved: Boolean,
     search: String? = null,
-  ): Page<ImportTranslationView> {
-    return importTranslationRepository.findImportTranslationsView(
+  ): Page<ImportTranslationView> =
+    importTranslationRepository.findImportTranslationsView(
       languageId,
       pageable,
       onlyConflicts,
       onlyUnresolved,
       search,
     )
-  }
 
   @Transactional
   fun deleteImport(import: Import) {
@@ -421,16 +402,12 @@ class ImportService(
       }
   }
 
-  fun findTranslation(translationId: Long): ImportTranslation? {
-    return importTranslationRepository.findById(translationId).orElse(null)
-  }
+  fun findTranslation(translationId: Long): ImportTranslation? = importTranslationRepository.findById(translationId).orElse(null)
 
   fun findTranslation(
     translationId: Long,
     languageId: Long,
-  ): ImportTranslation? {
-    return importTranslationRepository.findByIdAndLanguageId(translationId, languageId)
-  }
+  ): ImportTranslation? = importTranslationRepository.findByIdAndLanguageId(translationId, languageId)
 
   fun resolveTranslationConflict(
     translationId: Long,
@@ -459,9 +436,7 @@ class ImportService(
     projectId: Long,
     authorId: Long,
     fileId: Long,
-  ): ImportFile? {
-    return importFileRepository.finByProjectAuthorAndId(projectId, authorId, fileId)
-  }
+  ): ImportFile? = importFileRepository.finByProjectAuthorAndId(projectId, authorId, fileId)
 
   fun getFileIssues(
     projectId: Long,
@@ -521,8 +496,9 @@ class ImportService(
     importLanguageIds: List<Long>,
   ) {
     val languageIdStrings = importLanguageIds.map { it.toString() }
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       with deleted as (  
         delete from import_file_issue_param
         where issue_id in (
@@ -537,8 +513,7 @@ class ImportService(
       delete from import_file_issue
       where id in (select issue_id from deleted)
     """,
-    )
-      .setParameter("ids", ids)
+      ).setParameter("ids", ids)
       .setParameter("importLanguageIds", languageIdStrings)
       .executeUpdate()
   }
@@ -575,7 +550,6 @@ class ImportService(
     ImportDataManager(applicationContext, import).applySettings(oldSettings, newSettings)
   }
 
-  fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> {
-    return importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
-  }
+  fun findTranslationsForPlaceholderConversion(importId: Long): List<ImportTranslation> =
+    importTranslationRepository.findTranslationsForPlaceholderConversion(importId)
 }

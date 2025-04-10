@@ -25,11 +25,15 @@ class GenericStructuredFileExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, modelBuilder) ->
-      fileName to
-        objectMapper.writer(customPrettyPrinter).writeValueAsBytes(modelBuilder.result)
-          .inputStream()
-    }.toMap()
+    return result
+      .asSequence()
+      .map { (fileName, modelBuilder) ->
+        fileName to
+          objectMapper
+            .writer(customPrettyPrinter)
+            .writeValueAsBytes(modelBuilder.result)
+            .inputStream()
+      }.toMap()
   }
 
   private fun prepare() {
@@ -120,9 +124,7 @@ class GenericStructuredFileExporter(
   private fun convertMessage(
     text: String?,
     isPlural: Boolean,
-  ): String? {
-    return getMessageConvertor(text, isPlural).convert()
-  }
+  ): String? = getMessageConvertor(text, isPlural).convert()
 
   private fun getMessageConvertor(
     text: String?,
@@ -134,9 +136,7 @@ class GenericStructuredFileExporter(
     paramConvertorFactory = placeholderConvertorFactory,
   )
 
-  private fun convertMessageForNestedPlural(text: String?): Map<String, String>? {
-    return getMessageConvertor(text, true).getForcedPluralForms()
-  }
+  private fun convertMessageForNestedPlural(text: String?): Map<String, String>? = getMessageConvertor(text, true).getForcedPluralForms()
 
   private fun getFileContentResultBuilder(translation: ExportTranslationView): StructureModelBuilder {
     val absolutePath = pathProvider.getFilePath(translation)

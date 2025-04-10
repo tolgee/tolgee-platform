@@ -42,7 +42,5 @@ data class CreateApiKeyDto(
 
   @Suppress("unused")
   @JsonGetter("scopes")
-  fun jsonGetScopes(): Set<String> {
-    return scopes.stream().map { obj: Scope -> obj.value }.collect(Collectors.toSet())
-  }
+  fun jsonGetScopes(): Set<String> = scopes.stream().map { obj: Scope -> obj.value }.collect(Collectors.toSet())
 }

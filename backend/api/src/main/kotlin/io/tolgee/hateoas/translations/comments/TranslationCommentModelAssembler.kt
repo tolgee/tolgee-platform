@@ -14,8 +14,8 @@ class TranslationCommentModelAssembler(
     TranslationCommentController::class.java,
     TranslationCommentModel::class.java,
   ) {
-  override fun toModel(entity: TranslationComment): TranslationCommentModel {
-    return TranslationCommentModel(
+  override fun toModel(entity: TranslationComment): TranslationCommentModel =
+    TranslationCommentModel(
       id = entity.id,
       text = entity.text,
       state = entity.state,
@@ -23,5 +23,4 @@ class TranslationCommentModelAssembler(
       createdAt = entity.createdAt ?: Date(),
       updatedAt = entity.updatedAt ?: Date(),
     )
-  }
 }

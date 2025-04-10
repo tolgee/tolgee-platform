@@ -29,25 +29,24 @@ abstract class TableExporter(
     get() = messageFormat.paramConvertorFactory
 
   val entries =
-    translations.map {
-      val converted = convertMessage(it.text, it.key.isPlural)
-      val path =
-        pathProvider.getFilePath(it.key.namespace)
-      val entry =
-        TableEntry(
-          key = it.key.name,
-          language = it.languageTag,
-          value = converted,
-        )
-      path to entry
-    }.groupBy({ it.first }, { it.second })
+    translations
+      .map {
+        val converted = convertMessage(it.text, it.key.isPlural)
+        val path =
+          pathProvider.getFilePath(it.key.namespace)
+        val entry =
+          TableEntry(
+            key = it.key.name,
+            language = it.languageTag,
+            value = converted,
+          )
+        path to entry
+      }.groupBy({ it.first }, { it.second })
 
   fun convertMessage(
     text: String?,
     isPlural: Boolean,
-  ): String? {
-    return getMessageConvertor(text, isPlural).convert()
-  }
+  ): String? = getMessageConvertor(text, isPlural).convert()
 
   fun getMessageConvertor(
     text: String?,
@@ -59,9 +58,7 @@ abstract class TableExporter(
     paramConvertorFactory = placeholderConvertorFactory,
   )
 
-  override fun produceFiles(): Map<String, InputStream> {
-    return entries.mapValues { (_, entry) -> entry.toFileContents() }
-  }
+  override fun produceFiles(): Map<String, InputStream> = entries.mapValues { (_, entry) -> entry.toFileContents() }
 
   abstract fun List<TableEntry>.toFileContents(): InputStream
 }

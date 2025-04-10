@@ -190,9 +190,10 @@ abstract class AbstractTokenBucketManagerTest {
 
     val expectedRefillAt = currentDateProvider.date.time + expectedRetryTime.toMillis()
 
-    refillAt.assert.overridingErrorMessage {
-      val difference = Duration.ofMillis(refillAt - expectedRefillAt)
-      "RefillAt is not correct. Difference is ${difference.seconds} seconds."
-    }.isEqualTo(expectedRefillAt)
+    refillAt.assert
+      .overridingErrorMessage {
+        val difference = Duration.ofMillis(refillAt - expectedRefillAt)
+        "RefillAt is not correct. Difference is ${difference.seconds} seconds."
+      }.isEqualTo(expectedRefillAt)
   }
 }

@@ -97,15 +97,14 @@ class PostHogBusinessEventReporter(
         ),
     )
 
-  fun getAnonIdMap(data: OnBusinessEventToCaptureEvent): Map<String, String> {
-    return (
+  fun getAnonIdMap(data: OnBusinessEventToCaptureEvent): Map<String, String> =
+    (
       data.anonymousUserId?.let {
         mapOf(
           "${'$'}anon_distinct_id" to data.anonymousUserId,
         )
       }
     ) ?: emptyMap()
-  }
 
   private fun fillOtherData(data: OnBusinessEventToCaptureEvent): OnBusinessEventToCaptureEvent {
     val projectDto = data.projectDto ?: data.projectId?.let { projectService.findDto(it) }
@@ -123,15 +122,18 @@ class PostHogBusinessEventReporter(
 
   private fun findOwnerUserByOrganizationId(organizationId: Long?): Long? {
     organizationId ?: return null
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select u.id from UserAccount u 
       join u.organizationRoles orl on orl.organization.id = :organizationId
       where orl.type = io.tolgee.model.enums.OrganizationRoleType.OWNER
       order by u.id
       limit 1
     """,
-      Long::class.java,
-    ).setParameter("organizationId", organizationId).resultList.firstOrNull()
+        Long::class.java,
+      ).setParameter("organizationId", organizationId)
+      .resultList
+      .firstOrNull()
   }
 }

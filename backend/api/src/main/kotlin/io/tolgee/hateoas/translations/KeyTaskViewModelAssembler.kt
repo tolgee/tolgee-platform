@@ -11,8 +11,8 @@ class KeyTaskViewModelAssembler :
     TranslationsController::class.java,
     KeyTaskViewModel::class.java,
   ) {
-  override fun toModel(view: KeyTaskView): KeyTaskViewModel {
-    return KeyTaskViewModel(
+  override fun toModel(view: KeyTaskView): KeyTaskViewModel =
+    KeyTaskViewModel(
       number = view.number,
       languageId = view.languageId,
       languageTag = view.languageTag,
@@ -20,5 +20,4 @@ class KeyTaskViewModelAssembler :
       userAssigned = view.userAssigned,
       type = view.type,
     )
-  }
 }

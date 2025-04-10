@@ -113,9 +113,8 @@ class WebhookConfigController(
   @AllowApiAccess
   fun get(
     @PathVariable id: Long,
-  ): io.tolgee.hateoas.ee.webhooks.WebhookConfigModel {
-    return webhookConfigModelAssembler.toModel(webhookConfigService.get(projectHolder.project.id, id))
-  }
+  ): io.tolgee.hateoas.ee.webhooks.WebhookConfigModel =
+    webhookConfigModelAssembler.toModel(webhookConfigService.get(projectHolder.project.id, id))
 
   @RequiresProjectPermissions([Scope.WEBHOOKS_MANAGE])
   @PostMapping("/{id}/test")

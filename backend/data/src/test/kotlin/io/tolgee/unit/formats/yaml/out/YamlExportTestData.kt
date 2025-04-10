@@ -86,8 +86,8 @@ object YamlExportTestData {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams? = null,
-  ): YamlFileExporter {
-    return YamlFileExporter(
+  ): YamlFileExporter =
+    YamlFileExporter(
       translations = translations,
       exportParams =
         exportParams ?: ExportParams().also {
@@ -99,5 +99,4 @@ object YamlExportTestData {
       objectMapper = ObjectMapper(YAMLFactory()),
       customPrettyPrinter = CustomPrettyPrinter(),
     )
-  }
 }

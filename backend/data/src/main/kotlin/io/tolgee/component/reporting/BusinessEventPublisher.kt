@@ -101,15 +101,14 @@ class BusinessEventPublisher(
 
   private fun getEventThrottlingCache(): Cache? = cacheManager.getCache(Caches.BUSINESS_EVENT_THROTTLING)
 
-  fun getUtmData(): UtmData {
-    return try {
+  fun getUtmData(): UtmData =
+    try {
       applicationContext.getBean(ActivityHolder::class.java).utmData
     } catch (e: Throwable) {
       logger.error("Could not get utm data from activity holder", e)
       Sentry.captureException(e)
       null
     }
-  }
 
   fun getDataWithSdkInfo(data: Map<String, Any?>?): Map<String, Any?>? {
     val sdkInfoMap = sdkInfoProvider.getSdkInfo() ?: return data

@@ -21,4 +21,5 @@ open class KeyModel(
   val description: String?,
   @Schema(description = "Custom values of the key")
   val custom: Map<String, Any?>?,
-) : RepresentationModel<KeyModel>(), Serializable
+) : RepresentationModel<KeyModel>(),
+  Serializable

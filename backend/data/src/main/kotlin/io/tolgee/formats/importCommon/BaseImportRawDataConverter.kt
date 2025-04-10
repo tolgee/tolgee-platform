@@ -51,8 +51,8 @@ class BaseImportRawDataConverter(
   fun convertMessage(
     message: String,
     isInPlural: Boolean = false,
-  ): MessageConvertorResult {
-    return convertMessage(
+  ): MessageConvertorResult =
+    convertMessage(
       message,
       isInPlural,
       convertPlaceholders = convertPlaceholders,
@@ -60,5 +60,4 @@ class BaseImportRawDataConverter(
       escapeUnmatched = !canContainIcu,
       convertorFactory = toIcuPlaceholderConvertorFactory,
     )
-  }
 }

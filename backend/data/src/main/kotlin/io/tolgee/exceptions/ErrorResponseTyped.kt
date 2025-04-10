@@ -6,4 +6,7 @@ import java.io.Serializable
 /**
  * Dummy class to type error messages in swagger
  */
-class ErrorResponseTyped(var code: Message, var params: List<Serializable?>?)
+class ErrorResponseTyped(
+  var code: Message,
+  var params: List<Serializable?>?,
+)

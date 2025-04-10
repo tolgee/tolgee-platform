@@ -60,8 +60,7 @@ class ExportController(
       .header(
         "Content-Disposition",
         String.format("attachment; filename=\"%s.zip\"", projectHolder.project.name),
-      )
-      .body(
+      ).body(
         streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
           val zipOutputStream = ZipOutputStream(out)
           val translations =

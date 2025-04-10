@@ -29,7 +29,6 @@ class PakAction(
       }
     }
 
-  private fun withContent(builder: MockHttpServletRequestBuilder): RequestBuilder {
-    return builder.contentType(MediaType.APPLICATION_JSON).content(jacksonObjectMapper().writeValueAsString(body))
-  }
+  private fun withContent(builder: MockHttpServletRequestBuilder): RequestBuilder =
+    builder.contentType(MediaType.APPLICATION_JSON).content(jacksonObjectMapper().writeValueAsString(body))
 }

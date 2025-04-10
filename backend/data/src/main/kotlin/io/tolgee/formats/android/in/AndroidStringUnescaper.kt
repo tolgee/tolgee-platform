@@ -60,8 +60,8 @@ class AndroidStringUnescaper(
   private fun StringBuilder.handleCharacter(
     state: State,
     char: Char,
-  ): State {
-    return when (state) {
+  ): State =
+    when (state) {
       State.NORMAL ->
         when (char) {
           escapeMark -> State.ESCAPED
@@ -109,7 +109,6 @@ class AndroidStringUnescaper(
         State.QUOTED
       }
     }
-  }
 
   private fun Char.unescape(): String {
     // Android always deletes the backslash even if the escaped character is not valid

@@ -10,19 +10,20 @@ class MtCreditsTestData : BaseTestData() {
   lateinit var organizationProject: Project
 
   init {
-    root.addOrganization {
-      name = "Org"
-      organization = this
-      basePermission.type = TRANSLATE
-    }.apply {
-      addRole {
-        this.user = this@MtCreditsTestData.user
-        this.type = OrganizationRoleType.MEMBER
+    root
+      .addOrganization {
+        name = "Org"
+        organization = this
+        basePermission.type = TRANSLATE
+      }.apply {
+        addRole {
+          this.user = this@MtCreditsTestData.user
+          this.type = OrganizationRoleType.MEMBER
+        }
+        addMtCreditBucket {
+          credits = 12000
+        }
       }
-      addMtCreditBucket {
-        credits = 12000
-      }
-    }
 
     root.addProject {
       name = "Organization project"

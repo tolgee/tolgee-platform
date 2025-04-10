@@ -38,4 +38,6 @@ package io.tolgee.security.authentication
 //  description = "API key provided via header. Safer since headers are not stored in server logs.",
 // )
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
-annotation class AllowApiAccess(val tokenType: AuthTokenType = AuthTokenType.ANY)
+annotation class AllowApiAccess(
+  val tokenType: AuthTokenType = AuthTokenType.ANY,
+)

@@ -15,8 +15,8 @@ data class LanguageDto(
     fun fromEntity(
       language: ILanguage,
       baseLanguageId: Long?,
-    ): LanguageDto {
-      return LanguageDto(
+    ): LanguageDto =
+      LanguageDto(
         id = language.id,
         name = language.name,
         tag = language.tag,
@@ -25,6 +25,5 @@ data class LanguageDto(
         aiTranslatorPromptDescription = language.aiTranslatorPromptDescription,
         base = baseLanguageId == language.id,
       )
-    }
   }
 }

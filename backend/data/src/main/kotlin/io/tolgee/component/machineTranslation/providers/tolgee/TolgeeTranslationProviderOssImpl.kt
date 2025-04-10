@@ -12,19 +12,12 @@ class TolgeeTranslationProviderOssImpl : TolgeeTranslationProvider {
   override val supportedLanguages: Array<String> = emptyArray()
   override val formalitySupportingLanguages: Array<String> = emptyArray()
 
-  override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
+  override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult =
     throw IllegalStateException("Not implemented")
-  }
 
-  override fun isLanguageSupported(tag: String): Boolean {
-    return false
-  }
+  override fun isLanguageSupported(tag: String): Boolean = false
 
-  override fun isLanguageFormalitySupported(tag: String): Boolean {
-    return false
-  }
+  override fun isLanguageFormalitySupported(tag: String): Boolean = false
 
-  override fun translate(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    throw IllegalStateException("Not implemented")
-  }
+  override fun translate(params: ProviderTranslateParams): MtValueProvider.MtResult = throw IllegalStateException("Not implemented")
 }

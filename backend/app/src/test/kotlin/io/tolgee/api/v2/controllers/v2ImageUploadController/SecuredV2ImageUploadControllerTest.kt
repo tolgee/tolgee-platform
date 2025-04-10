@@ -67,7 +67,9 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
     val storedImage =
       performGet("/uploaded-images/${image.filename}.png?token=$token")
-        .andIsOk.andReturn().response.contentAsByteArray
+        .andIsOk
+        .andReturn()
+        .response.contentAsByteArray
 
     assertThat(storedImage).isEqualTo(fileStorage.readFile("uploadedImages/" + image.filename + ".png"))
   }

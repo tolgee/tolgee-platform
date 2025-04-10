@@ -57,7 +57,8 @@ open class PublicUsageModel(
         "(For pay us you go, the top limit is the spending limit)",
   )
   val translationsLimit: Long,
-) : RepresentationModel<PublicUsageModel>(), Serializable {
+) : RepresentationModel<PublicUsageModel>(),
+  Serializable {
   @Schema(
     deprecated = true,
     description =

@@ -17,8 +17,8 @@ class UserAccountView(
   override val totpKey: ByteArray?,
 ) : IUserAccount {
   companion object {
-    fun fromEntity(entity: UserAccount): UserAccountView {
-      return UserAccountView(
+    fun fromEntity(entity: UserAccount): UserAccountView =
+      UserAccountView(
         id = entity.id,
         username = entity.username,
         name = entity.name,
@@ -30,6 +30,5 @@ class UserAccountView(
         isInitialUser = entity.isInitialUser,
         totpKey = entity.totpKey,
       )
-    }
   }
 }

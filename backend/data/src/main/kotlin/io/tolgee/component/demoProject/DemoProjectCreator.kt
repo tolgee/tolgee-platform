@@ -82,11 +82,12 @@ class DemoProjectCreator(
    * Map of Pair(languageTag, keyName) -> Translation
    */
   private val translations by lazy {
-    DemoProjectData.translations.flatMap { (languageTag, translations) ->
-      translations.map { (key, text) ->
-        setTranslation(key, languageTag, text)
-      }
-    }.associateBy { it.language.tag to it.key.name }
+    DemoProjectData.translations
+      .flatMap { (languageTag, translations) ->
+        translations.map { (key, text) ->
+          setTranslation(key, languageTag, text)
+        }
+      }.associateBy { it.language.tag to it.key.name }
   }
 
   private fun addBigMeta() {
@@ -120,10 +121,11 @@ class DemoProjectCreator(
 
   private fun tagKeys() {
     val tagsMap =
-      DemoProjectData.tags.mapNotNull {
-        val key = keys[it.key] ?: return@mapNotNull null
-        key to it.value
-      }.toMap()
+      DemoProjectData.tags
+        .mapNotNull {
+          val key = keys[it.key] ?: return@mapNotNull null
+          key to it.value
+        }.toMap()
     tagService.tagKeys(tagsMap)
   }
 
@@ -151,13 +153,19 @@ class DemoProjectCreator(
 
   private fun saveScreenshot(): Screenshot {
     val image =
-      applicationContext.getResource("classpath:demoProject/screenshot.png").inputStream
+      applicationContext
+        .getResource("classpath:demoProject/screenshot.png")
+        .inputStream
         .use { it.readAllBytes() }
     val middleSized =
-      applicationContext.getResource("classpath:demoProject/screenshot-middle-sized.png").inputStream
+      applicationContext
+        .getResource("classpath:demoProject/screenshot-middle-sized.png")
+        .inputStream
         .use { it.readAllBytes() }
     val thumbnail =
-      applicationContext.getResource("classpath:demoProject/screenshot-thumbnail.png").inputStream
+      applicationContext
+        .getResource("classpath:demoProject/screenshot-thumbnail.png")
+        .inputStream
         .use { screenshotThumbnail -> screenshotThumbnail.readAllBytes() }
 
     return screenshotService.saveScreenshot(
@@ -171,8 +179,8 @@ class DemoProjectCreator(
 
   val keys: MutableMap<String, Key> = mutableMapOf()
 
-  private fun getOrCreateKey(keyName: String): Key {
-    return keys.computeIfAbsent(keyName) {
+  private fun getOrCreateKey(keyName: String): Key =
+    keys.computeIfAbsent(keyName) {
       val key =
         Key().apply {
           name = keyName
@@ -186,7 +194,6 @@ class DemoProjectCreator(
       keyService.save(key)
       key
     }
-  }
 
   private fun setDescriptions() {
     DemoProjectData.descriptions.forEach { (keyName, description) ->
@@ -197,15 +204,14 @@ class DemoProjectCreator(
     }
   }
 
-  private fun getOrCreateKeyMeta(key: Key): KeyMeta {
-    return key.keyMeta ?: let {
+  private fun getOrCreateKeyMeta(key: Key): KeyMeta =
+    key.keyMeta ?: let {
       val keyMeta = KeyMeta()
       keyMeta.key = key
       key.keyMeta = keyMeta
       keyMetaService.save(keyMeta)
       keyMeta
     }
-  }
 
   private val languages: Map<String, Language> by lazy {
     DemoProjectData.languages.associateBy {

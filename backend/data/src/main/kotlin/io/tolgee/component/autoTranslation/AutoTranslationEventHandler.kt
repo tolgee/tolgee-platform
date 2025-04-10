@@ -84,13 +84,14 @@ class AutoTranslationEventHandler(
     }
   }
 
-  private fun ActivityModifiedEntity.isBaseTranslationTextChanged(): Boolean {
-    return this.isTranslation() && this.isBaseTranslation() && this.isTextChanged()
-  }
+  private fun ActivityModifiedEntity.isBaseTranslationTextChanged(): Boolean =
+    this.isTranslation() && this.isBaseTranslation() && this.isTextChanged()
 
   private fun getKeyId(modifiedEntity: ActivityModifiedEntity) =
-    modifiedEntity.describingRelations?.values
-      ?.find { it.entityClass == Key::class.simpleName }?.entityId
+    modifiedEntity.describingRelations
+      ?.values
+      ?.find { it.entityClass == Key::class.simpleName }
+      ?.entityId
 
   private fun ActivityModifiedEntity.isTextChanged(): Boolean {
     val modification = this.modifications["text"] ?: return false
@@ -100,11 +101,11 @@ class AutoTranslationEventHandler(
 
   private fun ActivityModifiedEntity.isTranslation() = entityClass == Translation::class.simpleName
 
-  private fun ActivityModifiedEntity.isBaseTranslation(): Boolean {
-    return describingRelations?.values
+  private fun ActivityModifiedEntity.isBaseTranslation(): Boolean =
+    describingRelations
+      ?.values
       ?.any { it.entityClass == Language::class.simpleName && it.entityId == baseLanguageId }
       ?: false
-  }
 
   private val baseLanguageId: Long? by lazy {
     projectService.get(projectId).baseLanguage?.id

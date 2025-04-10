@@ -12,7 +12,9 @@ const val SEQUENCE_NAME = "hibernate_sequence"
 const val ALLOCATION_SIZE = 1000
 
 @MappedSuperclass
-abstract class StandardAuditModel : AuditModel(), EntityWithId {
+abstract class StandardAuditModel :
+  AuditModel(),
+  EntityWithId {
   @Id
   @SequenceGenerator(
     name = "sequenceGenerator",
@@ -47,9 +49,7 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
     return this.id == other.id
   }
 
-  override fun hashCode(): Int {
-    return id.hashCode()
-  }
+  override fun hashCode(): Int = id.hashCode()
 
   override fun toString() = "${this.javaClass.name}(id: $id)"
 }

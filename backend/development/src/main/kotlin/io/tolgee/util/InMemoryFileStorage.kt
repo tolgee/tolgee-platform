@@ -22,10 +22,9 @@ import io.tolgee.exceptions.FileStoreException
 class InMemoryFileStorage : FileStorage {
   private val files = mutableMapOf<String, ByteArray>()
 
-  override fun readFile(storageFilePath: String): ByteArray {
-    return files[storageFilePath]
+  override fun readFile(storageFilePath: String): ByteArray =
+    files[storageFilePath]
       ?: throw FileStoreException("File not found", storageFilePath)
-  }
 
   override fun deleteFile(storageFilePath: String) {
     files.remove(storageFilePath)
@@ -38,9 +37,7 @@ class InMemoryFileStorage : FileStorage {
     files[storageFilePath] = bytes
   }
 
-  override fun fileExists(storageFilePath: String): Boolean {
-    return files.contains(storageFilePath)
-  }
+  override fun fileExists(storageFilePath: String): Boolean = files.contains(storageFilePath)
 
   override fun pruneDirectory(path: String) {
     val keysToDelete = files.keys.filter { it.startsWith(path.removeSuffix("/") + "/") }

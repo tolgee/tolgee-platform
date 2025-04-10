@@ -11,4 +11,5 @@ class LanguageInfoModel(
   val languageId: Long?,
   val languageTag: String?,
   val supportedServices: List<MtSupportedService>,
-) : RepresentationModel<LanguageInfoModel>(), Serializable
+) : RepresentationModel<LanguageInfoModel>(),
+  Serializable

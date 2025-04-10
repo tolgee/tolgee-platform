@@ -18,8 +18,6 @@ val List<LayoutBlock>.asSlackResponseString: String?
 /**
  * This is taken from the Slack SDK
  */
-private fun getJsonWithGsonAnonymInnerClassHandling(data: Any): String {
-  return GSON.toJson(data)
-}
+private fun getJsonWithGsonAnonymInnerClassHandling(data: Any): String = GSON.toJson(data)
 
 private val GSON = GsonFactory.createSnakeCase()

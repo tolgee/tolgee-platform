@@ -24,7 +24,8 @@ import java.io.UnsupportedEncodingException
 @AutoConfigureMockMvc
 @SpringBootTest
 abstract class AbstractControllerTest :
-  AbstractSpringTest(), RequestPerformer {
+  AbstractSpringTest(),
+  RequestPerformer {
   @Autowired
   protected lateinit var mvc: MockMvc
 
@@ -50,7 +51,8 @@ abstract class AbstractControllerTest :
   ): DefaultAuthenticationResult {
     val response =
       doAuthentication(userName, password)
-        .andReturn().response.contentAsString
+        .andReturn()
+        .response.contentAsString
     val userAccount = userAccountService.findActive(userName) ?: throw NotFoundException()
     return DefaultAuthenticationResult(
       mapper.readValue(response, HashMap::class.java)["accessToken"] as String,
@@ -67,7 +69,8 @@ abstract class AbstractControllerTest :
     request.password = password
     val jsonRequest = mapper.writeValueAsString(request)
     return mvc.perform(
-      MockMvcRequestBuilders.post("/api/public/generatetoken")
+      MockMvcRequestBuilders
+        .post("/api/public/generatetoken")
         .content(jsonRequest)
         .accept(MediaType.ALL)
         .contentType(MediaType.APPLICATION_JSON),
@@ -77,35 +80,33 @@ abstract class AbstractControllerTest :
   protected fun <T> mapResponse(
     result: MvcResult,
     type: JavaType?,
-  ): T {
-    return try {
+  ): T =
+    try {
       mapper.readValue(result.response.contentAsString, type)
     } catch (e: JsonProcessingException) {
       throw RuntimeException(e)
     } catch (e: UnsupportedEncodingException) {
       throw RuntimeException(e)
     }
-  }
 
   protected fun <T> mapResponse(
     result: MvcResult,
     clazz: Class<T>?,
-  ): T {
-    return try {
+  ): T =
+    try {
       mapper.readValue(result.response.contentAsString, clazz)
     } catch (e: JsonProcessingException) {
       throw RuntimeException(e)
     } catch (e: UnsupportedEncodingException) {
       throw RuntimeException(e)
     }
-  }
 
   protected fun <C : Collection<E>?, E> mapResponse(
     result: MvcResult,
     collectionType: Class<C>?,
     elementType: Class<E>?,
-  ): C {
-    return try {
+  ): C =
+    try {
       mapper.readValue(
         result.response.contentAsString,
         TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType),
@@ -115,40 +116,29 @@ abstract class AbstractControllerTest :
     } catch (e: UnsupportedEncodingException) {
       throw RuntimeException(e)
     }
-  }
 
-  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
-    return requestPerformer.perform(builder)
-  }
+  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions = requestPerformer.perform(builder)
 
   override fun performPut(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performPut(url, content, httpHeaders)
-  }
+  ): ResultActions = requestPerformer.performPut(url, content, httpHeaders)
 
   override fun performPost(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performPost(url, content, httpHeaders)
-  }
+  ): ResultActions = requestPerformer.performPost(url, content, httpHeaders)
 
   override fun performGet(
     url: String,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performGet(url, httpHeaders)
-  }
+  ): ResultActions = requestPerformer.performGet(url, httpHeaders)
 
   override fun performDelete(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performDelete(url, content, httpHeaders)
-  }
+  ): ResultActions = requestPerformer.performDelete(url, content, httpHeaders)
 }

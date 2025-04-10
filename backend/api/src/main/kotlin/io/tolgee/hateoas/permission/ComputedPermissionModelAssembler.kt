@@ -12,10 +12,9 @@ class ComputedPermissionModelAssembler(
     V2UserController::class.java,
     ComputedPermissionModel::class.java,
   ) {
-  override fun toModel(dto: ComputedPermissionDto): ComputedPermissionModel {
-    return ComputedPermissionModel(
+  override fun toModel(dto: ComputedPermissionDto): ComputedPermissionModel =
+    ComputedPermissionModel(
       permissionModelAssembler.toModel(dto),
       dto.origin,
     )
-  }
 }

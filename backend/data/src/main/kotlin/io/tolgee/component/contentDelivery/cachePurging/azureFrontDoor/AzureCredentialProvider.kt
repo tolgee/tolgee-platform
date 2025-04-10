@@ -5,11 +5,10 @@ import com.azure.identity.ClientSecretCredentialBuilder
 import io.tolgee.model.contentDelivery.AzureFrontDoorConfig
 
 class AzureCredentialProvider {
-  fun get(config: AzureFrontDoorConfig): ClientSecretCredential {
-    return ClientSecretCredentialBuilder()
+  fun get(config: AzureFrontDoorConfig): ClientSecretCredential =
+    ClientSecretCredentialBuilder()
       .clientId(config.clientId)
       .clientSecret(config.clientSecret)
       .tenantId(config.tenantId)
       .build()
-  }
 }

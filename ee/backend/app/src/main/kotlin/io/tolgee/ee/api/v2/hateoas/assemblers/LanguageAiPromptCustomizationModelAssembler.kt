@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component
 class LanguageAiPromptCustomizationModelAssembler(
   private val languageModelAssembler: LanguageModelAssembler,
 ) : RepresentationModelAssembler<LanguageDto, LanguageAiPromptCustomizationModel> {
-  override fun toModel(dto: LanguageDto): LanguageAiPromptCustomizationModel {
-    return LanguageAiPromptCustomizationModel(
+  override fun toModel(dto: LanguageDto): LanguageAiPromptCustomizationModel =
+    LanguageAiPromptCustomizationModel(
       language = languageModelAssembler.toModel(dto),
       description = dto.aiTranslatorPromptDescription,
     )
-  }
 }

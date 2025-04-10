@@ -38,6 +38,5 @@ class PhpPoConversionTest {
       .isEqualTo(string)
   }
 
-  private fun convertToIcu(string: String) =
-    PoToIcuMessageConvertor { PhpToIcuPlaceholderConvertor() }.convert(string, "en").message
+  private fun convertToIcu(string: String) = PoToIcuMessageConvertor { PhpToIcuPlaceholderConvertor() }.convert(string, "en").message
 }

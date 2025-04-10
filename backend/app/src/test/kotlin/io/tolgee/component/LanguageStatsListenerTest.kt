@@ -25,7 +25,8 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
 
     val deutschStats =
       executeInNewTransaction(platformTransactionManager) {
-        languageStatsService.getLanguageStats(projectId = testData.project.id)
+        languageStatsService
+          .getLanguageStats(projectId = testData.project.id)
           .find { projectLanguages[it.languageId]!!.tag == "de" }
       }
 
@@ -46,7 +47,8 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
     waitForNotThrowing(AssertionFailedError::class) {
       executeInNewTransaction(platformTransactionManager) {
         val newDeutschStats =
-          languageStatsService.getLanguageStats(projectId = testData.project.id)
+          languageStatsService
+            .getLanguageStats(projectId = testData.project.id)
             .find { projectLanguages[it.languageId]!!.tag == "de" }
         assertThat(newDeutschStats!!.untranslatedWords - 1).isEqualTo(deutschStats?.untranslatedWords)
         assertThat(newDeutschStats.translationsUpdatedAt!!.after(deutschStats!!.translationsUpdatedAt))

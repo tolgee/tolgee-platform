@@ -43,14 +43,13 @@ open class AzureBlobFileStorage(
     return
   }
 
-  override fun fileExists(storageFilePath: String): Boolean {
-    return try {
+  override fun fileExists(storageFilePath: String): Boolean =
+    try {
       client.getBlobClient(storageFilePath).exists()
       true
     } catch (e: NoSuchKeyException) {
       false
     }
-  }
 
   override fun pruneDirectory(path: String) {
     val prefix = path.removePrefix("/").removeSuffix("/") + "/"

@@ -20,7 +20,8 @@ import java.util.*
 class LanguageStats(
   @OneToOne(fetch = FetchType.LAZY)
   val language: Language,
-) : StandardAuditModel(), ILanguageStats {
+) : StandardAuditModel(),
+  ILanguageStats {
   override var untranslatedWords: Long = 0
 
   override var translatedWords: Long = 0

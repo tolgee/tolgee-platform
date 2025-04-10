@@ -147,15 +147,19 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   private fun acceptEmailVerification(user: UserAccount) {
     val emailVerificationCode = user.emailVerification!!.code
-    mvc.perform(MockMvcRequestBuilders.get("/api/public/verify_email/${user.id}/$emailVerificationCode"))
-      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    mvc
+      .perform(MockMvcRequestBuilders.get("/api/public/verify_email/${user.id}/$emailVerificationCode"))
+      .andExpect(MockMvcResultMatchers.status().isOk)
+      .andReturn()
   }
 
   private fun verifyEmailUpdated() {
     Thread.sleep(100)
     forServiceManagers {
       val lastInvocation =
-        Mockito.mockingDetails(it).invocations
+        Mockito
+          .mockingDetails(it)
+          .invocations
           .last { it.method.name == "updateContact" }
       val invocationNewEmail = lastInvocation.arguments[1]
       val invocationNewName = lastInvocation.arguments[2]
@@ -171,7 +175,9 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   ) {
     forServiceManagers {
       val lastInvocation =
-        Mockito.mockingDetails(it).invocations
+        Mockito
+          .mockingDetails(it)
+          .invocations
           .last { it.method.name == "submitNewContact" }
       val invocationEmail = lastInvocation.arguments[1]
       val invocationName = lastInvocation.arguments[0]

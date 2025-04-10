@@ -48,9 +48,11 @@ class AppleXliffExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return models.asSequence().map { (fileName, resultItem) ->
-      fileName to XliffFileWriter(xliffModel = resultItem, enableXmlContent = false).produceFiles()
-    }.toMap()
+    return models
+      .asSequence()
+      .map { (fileName, resultItem) ->
+        fileName to XliffFileWriter(xliffModel = resultItem, enableXmlContent = false).produceFiles()
+      }.toMap()
   }
 
   private fun prepare() {
@@ -139,7 +141,8 @@ class AppleXliffExporter(
     targetLanguageTag: String = translation.languageTag,
   ) {
     getResultXliffFile(targetLanguageTag, translation.key, isPlural = false)
-      .createTransUnitIfMissing(translation.key.name).apply {
+      .createTransUnitIfMissing(translation.key.name)
+      .apply {
         note = translation.key.description
         setValue(isSource, value)
       }
@@ -158,22 +161,24 @@ class AppleXliffExporter(
     val fileType = resultFile.getFileType ?: FileType.STRINGSDICT
     if (fileType == FileType.STRINGSDICT) {
       addToAllStringsdictKeys(translation)
-      resultFile.createTransUnitIfMissing(
-        "/${translation.key.name}:dict/NSStringLocalizedFormatKey:dict/:string",
-      ).apply {
-        setValue(isSource, "%#@$property@")
-      }
+      resultFile
+        .createTransUnitIfMissing(
+          "/${translation.key.name}:dict/NSStringLocalizedFormatKey:dict/:string",
+        ).apply {
+          setValue(isSource, "%#@$property@")
+        }
     }
 
     val pluralFormVariants = populateForms(targetLanguageTag, converted)
 
     pluralFormVariants.keys.forEach { keyword ->
-      resultFile.createTransUnitIfMissing(
-        id = getPluralTransUnitId(translation.key.name, property, keyword, fileType),
-      ).apply {
-        val result = pluralFormVariants[keyword] ?: pluralFormVariants["other"]
-        setValue(isSource, result)
-      }
+      resultFile
+        .createTransUnitIfMissing(
+          id = getPluralTransUnitId(translation.key.name, property, keyword, fileType),
+        ).apply {
+          val result = pluralFormVariants[keyword] ?: pluralFormVariants["other"]
+          setValue(isSource, result)
+        }
     }
   }
 
@@ -204,12 +209,11 @@ class AppleXliffExporter(
     this.target = result
   }
 
-  private fun XliffFile.createTransUnitIfMissing(id: String): XliffTransUnit {
-    return this.transUnits.find { it.id == id } ?: XliffTransUnit().apply {
+  private fun XliffFile.createTransUnitIfMissing(id: String): XliffTransUnit =
+    this.transUnits.find { it.id == id } ?: XliffTransUnit().apply {
       this.id = id
       this@createTransUnitIfMissing.transUnits.add(this)
     }
-  }
 
   private fun getPluralTransUnitId(
     keyName: String,
@@ -287,9 +291,7 @@ class AppleXliffExporter(
   private fun getFilePath(
     languageTag: String,
     namespace: String?,
-  ): String {
-    return filePathProvider.getFilePath(namespace, languageTag)
-  }
+  ): String = filePathProvider.getFilePath(namespace, languageTag)
 
   private val filePathProvider by lazy {
     ExportFilePathProvider(

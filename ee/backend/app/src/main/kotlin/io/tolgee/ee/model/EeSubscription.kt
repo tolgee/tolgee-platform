@@ -20,7 +20,9 @@ import java.util.*
 
 @Entity
 @Table(schema = "ee")
-class EeSubscription : AuditModel(), IEeSubscription {
+class EeSubscription :
+  AuditModel(),
+  IEeSubscription {
   @field:Id
   override val id: Int = 1
 
@@ -50,8 +52,8 @@ class EeSubscription : AuditModel(), IEeSubscription {
   @ColumnDefault("false")
   var nonCommercial: Boolean = false
 
-  fun toDto(): EeSubscriptionDto {
-    return EeSubscriptionDto(
+  fun toDto(): EeSubscriptionDto =
+    EeSubscriptionDto(
       licenseKey = licenseKey,
       name = name,
       currentPeriodEnd = currentPeriodEnd,
@@ -61,5 +63,4 @@ class EeSubscription : AuditModel(), IEeSubscription {
       lastValidCheck = lastValidCheck,
       nonCommercial = nonCommercial,
     )
-  }
 }

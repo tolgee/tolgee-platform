@@ -12,12 +12,11 @@ class TranslationMemoryItemModelAssembler :
     TagsController::class.java,
     TranslationMemoryItemModel::class.java,
   ) {
-  override fun toModel(entity: TranslationMemoryItemView): TranslationMemoryItemModel {
-    return TranslationMemoryItemModel(
+  override fun toModel(entity: TranslationMemoryItemView): TranslationMemoryItemModel =
+    TranslationMemoryItemModel(
       targetText = entity.targetTranslationText,
       baseText = entity.baseTranslationText,
       keyName = entity.keyName,
       similarity = entity.similarity,
     )
-  }
 }

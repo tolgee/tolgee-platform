@@ -87,7 +87,10 @@ class EeTolgeeTranslatorControllerTest : ProjectAuthControllerTest("/v2/projects
         }
       }
 
-      Mockito.mockingDetails(eeTolgeeTranslateApiService).invocations.assert.hasSize(1)
+      Mockito
+        .mockingDetails(eeTolgeeTranslateApiService)
+        .invocations.assert
+        .hasSize(1)
     }
   }
 }

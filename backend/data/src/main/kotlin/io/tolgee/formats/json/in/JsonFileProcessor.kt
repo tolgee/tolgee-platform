@@ -33,7 +33,5 @@ class JsonFileProcessor(
     ).process()
   }
 
-  private fun getFormat(data: Any?): ImportFormat {
-    return context.mapping?.format ?: JsonImportFormatDetector().detectFormat(data)
-  }
+  private fun getFormat(data: Any?): ImportFormat = context.mapping?.format ?: JsonImportFormatDetector().detectFormat(data)
 }

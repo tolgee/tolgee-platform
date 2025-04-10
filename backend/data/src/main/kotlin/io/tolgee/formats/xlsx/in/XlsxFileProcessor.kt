@@ -24,7 +24,5 @@ class XlsxFileProcessor(
     }
   }
 
-  private fun getFormat(data: Any?): ImportFormat {
-    return context.mapping?.format ?: XlsxImportFormatDetector().detectFormat(data)
-  }
+  private fun getFormat(data: Any?): ImportFormat = context.mapping?.format ?: XlsxImportFormatDetector().detectFormat(data)
 }

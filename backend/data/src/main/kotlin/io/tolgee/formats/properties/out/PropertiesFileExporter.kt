@@ -42,14 +42,13 @@ class PropertiesFileExporter(
   private fun convertMessage(
     text: String?,
     plural: Boolean,
-  ): String? {
-    return IcuToGenericFormatMessageConvertor(
+  ): String? =
+    IcuToGenericFormatMessageConvertor(
       text,
       plural,
       projectIcuPlaceholdersSupport,
       paramConvertorFactory = messageFormat.paramConvertorFactory,
     ).convert()
-  }
 
   private val messageFormat by lazy {
     exportParams.messageFormat ?: ExportMessageFormat.ICU
@@ -57,11 +56,13 @@ class PropertiesFileExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, properties) ->
-      // convert properties to bytes
-      val bytes = properties.asByteArray()
-      fileName to ByteArrayInputStream(bytes)
-    }.toMap()
+    return result
+      .asSequence()
+      .map { (fileName, properties) ->
+        // convert properties to bytes
+        val bytes = properties.asByteArray()
+        fileName to ByteArrayInputStream(bytes)
+      }.toMap()
   }
 
   private fun PropertiesConfiguration.asByteArray(): ByteArray {
@@ -71,9 +72,7 @@ class PropertiesFileExporter(
     return writer.toString().toByteArray()
   }
 
-  private fun computeFileName(translation: ExportTranslationView): String {
-    return filePathProvider.getFilePath(translation)
-  }
+  private fun computeFileName(translation: ExportTranslationView): String = filePathProvider.getFilePath(translation)
 
   private val filePathProvider by lazy {
     ExportFilePathProvider(
@@ -113,7 +112,5 @@ private class Utf8IoFactory : DefaultIOFactory() {
   override fun createPropertiesWriter(
     out: Writer?,
     handler: ListDelimiterHandler?,
-  ): PropertiesWriter {
-    return PropertiesWriter(out, handler, valueTransformer)
-  }
+  ): PropertiesWriter = PropertiesWriter(out, handler, valueTransformer)
 }

@@ -70,14 +70,23 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `invites user to project with languages (translate)`() {
     val result =
-      invitationTestUtil.perform { getLang ->
-        type = ProjectPermissionType.TRANSLATE
-        languages = setOf(getLang("en"))
-      }.andIsOk
+      invitationTestUtil
+        .perform { getLang ->
+          type = ProjectPermissionType.TRANSLATE
+          languages = setOf(getLang("en"))
+        }.andIsOk
     executeInNewTransaction {
       val invitation = invitationTestUtil.getInvitation(result)
-      invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
-      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+      invitation.permission
+        ?.translateLanguages!!
+        .map { it.tag }
+        .assert
+        .contains("en") // stores
+      invitation.permission
+        ?.viewLanguages!!
+        .map { it.tag }
+        .assert
+        .contains() // ads also to view
     }
   }
 
@@ -85,15 +94,24 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `invites user to project with languages (review)`() {
     val result =
-      invitationTestUtil.perform { getLang ->
-        type = ProjectPermissionType.REVIEW
-        translateLanguages = setOf(getLang("en"))
-        stateChangeLanguages = setOf(getLang("en"))
-      }.andIsOk
+      invitationTestUtil
+        .perform { getLang ->
+          type = ProjectPermissionType.REVIEW
+          translateLanguages = setOf(getLang("en"))
+          stateChangeLanguages = setOf(getLang("en"))
+        }.andIsOk
     executeInNewTransaction {
       val invitation = invitationTestUtil.getInvitation(result)
-      invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
-      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+      invitation.permission
+        ?.stateChangeLanguages!!
+        .map { it.tag }
+        .assert
+        .contains("en") // stores
+      invitation.permission
+        ?.viewLanguages!!
+        .map { it.tag }
+        .assert
+        .contains() // ads also to view
     }
   }
 
@@ -101,12 +119,12 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `cannot set different languages (review)`() {
     val result =
-      invitationTestUtil.perform { getLang ->
-        type = ProjectPermissionType.REVIEW
-        translateLanguages = setOf(getLang("en"))
-        stateChangeLanguages = setOf()
-      }
-        .andIsBadRequest
+      invitationTestUtil
+        .perform { getLang ->
+          type = ProjectPermissionType.REVIEW
+          translateLanguages = setOf(getLang("en"))
+          stateChangeLanguages = setOf()
+        }.andIsBadRequest
         .andHasErrorMessage(
           Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS,
         )
@@ -115,19 +133,23 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @Test
   @ProjectJWTAuthTestMethod
   fun `validates languages and permission (lower)`() {
-    invitationTestUtil.perform { getLang ->
-      type = ProjectPermissionType.VIEW
-      translateLanguages = setOf(getLang("en"))
-    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    invitationTestUtil
+      .perform { getLang ->
+        type = ProjectPermissionType.VIEW
+        translateLanguages = setOf(getLang("en"))
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `validates languages and permission (higher)`() {
-    invitationTestUtil.perform { getLang ->
-      type = ProjectPermissionType.EDIT
-      translateLanguages = setOf(getLang("en"))
-    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    invitationTestUtil
+      .perform { getLang ->
+        type = ProjectPermissionType.EDIT
+        translateLanguages = setOf(getLang("en"))
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test
@@ -216,8 +238,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
     return parseCode(invitationJson)
   }
 
-  private fun parseCode(invitationJson: String) =
-    jacksonObjectMapper().readValue<Map<String, Any>>(invitationJson)["code"] as String
+  private fun parseCode(invitationJson: String) = jacksonObjectMapper().readValue<Map<String, Any>>(invitationJson)["code"] as String
 
   private fun performInviteWithNameAndEmail() =
     performProjectAuthPut(
@@ -237,8 +258,8 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
     return testData
   }
 
-  private fun createTranslateInvitation(project: Project): Invitation {
-    return invitationService.create(
+  private fun createTranslateInvitation(project: Project): Invitation =
+    invitationService.create(
       CreateProjectInvitationParams(
         project = project,
         type = ProjectPermissionType.TRANSLATE,
@@ -248,5 +269,4 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
         scopes = null,
       ),
     )
-  }
 }

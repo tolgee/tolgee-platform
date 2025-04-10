@@ -8,7 +8,9 @@ import io.tolgee.util.addMinutes
 import java.util.Date
 import java.util.UUID
 
-open class AuthProviderChangeTestData(currentDate: Date) : BaseTestData() {
+open class AuthProviderChangeTestData(
+  currentDate: Date,
+) : BaseTestData() {
   val validExpirationDate = currentDate.addMinutes(30)
   val expiredExpirationDate = currentDate.addMinutes(-30)
 
@@ -26,66 +28,72 @@ open class AuthProviderChangeTestData(currentDate: Date) : BaseTestData() {
 
   init {
     userNoProvider =
-      root.addUserAccount {
-        username = "userNoProvider@domain.com"
-      }.self
+      root
+        .addUserAccount {
+          username = "userNoProvider@domain.com"
+        }.self
     userGithub =
-      root.addUserAccount {
-        username = "userGithub@domain.com"
-        thirdPartyAuthType = ThirdPartyAuthType.GITHUB
-        thirdPartyAuthId = "aaa1"
-      }.self
+      root
+        .addUserAccount {
+          username = "userGithub@domain.com"
+          thirdPartyAuthType = ThirdPartyAuthType.GITHUB
+          thirdPartyAuthId = "aaa1"
+        }.self
     userChangeNoneToGithub =
-      root.addUserAccount {
-        username = "userChangeNoneToGithub@domain.com"
-      }.build {
-        changeNoneToGithub =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = ThirdPartyAuthType.GITHUB
-            authId = "aaa2"
-            expirationDate = validExpirationDate
-          }.self
-      }.self
+      root
+        .addUserAccount {
+          username = "userChangeNoneToGithub@domain.com"
+        }.build {
+          changeNoneToGithub =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = ThirdPartyAuthType.GITHUB
+              authId = "aaa2"
+              expirationDate = validExpirationDate
+            }.self
+        }.self
     userChangeGithubToNone =
-      root.addUserAccount {
-        username = "userChangeGithubToNone@domain.com"
-        thirdPartyAuthType = ThirdPartyAuthType.GITHUB
-        thirdPartyAuthId = "aaa3"
-      }.build {
-        changeGithubToNone =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = null
-            expirationDate = validExpirationDate
-          }.self
-      }.self
+      root
+        .addUserAccount {
+          username = "userChangeGithubToNone@domain.com"
+          thirdPartyAuthType = ThirdPartyAuthType.GITHUB
+          thirdPartyAuthId = "aaa3"
+        }.build {
+          changeGithubToNone =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = null
+              expirationDate = validExpirationDate
+            }.self
+        }.self
     userChangeGithubToNoneNoPassword =
-      root.addUserAccount {
-        username = "userChangeGithubToNoneNoPassowrd@domain.com"
-        accountType = AccountType.THIRD_PARTY
-        thirdPartyAuthType = ThirdPartyAuthType.GITHUB
-        thirdPartyAuthId = "aaa4"
-      }.build {
-        rawPassword = null
-        changeGithubToNoneNoPassword =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = null
-            expirationDate = validExpirationDate
-          }.self
-      }.self
+      root
+        .addUserAccount {
+          username = "userChangeGithubToNoneNoPassowrd@domain.com"
+          accountType = AccountType.THIRD_PARTY
+          thirdPartyAuthType = ThirdPartyAuthType.GITHUB
+          thirdPartyAuthId = "aaa4"
+        }.build {
+          rawPassword = null
+          changeGithubToNoneNoPassword =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = null
+              expirationDate = validExpirationDate
+            }.self
+        }.self
     userChangeExpired =
-      root.addUserAccount {
-        username = "userChangeExpired@domain.com"
-      }.build {
-        changeExpired =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = ThirdPartyAuthType.GITHUB
-            authId = "aaa5"
-            expirationDate = expiredExpirationDate
-          }.self
-      }.self
+      root
+        .addUserAccount {
+          username = "userChangeExpired@domain.com"
+        }.build {
+          changeExpired =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = ThirdPartyAuthType.GITHUB
+              authId = "aaa5"
+              expirationDate = expiredExpirationDate
+            }.self
+        }.self
   }
 }

@@ -35,7 +35,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   }
 
   @Test
-  fun getScreenshotFileNoTimestamp() {
+  fun testGetScreenshotFileNoTimestamp() {
     executeInNewTransaction {
       val base = dbPopulator.createBase()
       val project = base.project
@@ -47,7 +47,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   }
 
   @Test
-  fun getScreenshotFileInvalidTimestamp() {
+  fun testGetScreenshotFileInvalidTimestamp() {
     executeInNewTransaction {
       val base = dbPopulator.createBase()
       val project = base.project
@@ -71,7 +71,7 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
   }
 
   @Test
-  fun getScreenshotFile() {
+  fun testGetScreenshotFile() {
     executeInNewTransaction {
       val base = dbPopulator.createBase()
       val project = base.project

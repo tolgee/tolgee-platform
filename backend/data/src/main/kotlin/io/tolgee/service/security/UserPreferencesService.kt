@@ -61,9 +61,7 @@ class UserPreferencesService(
     return preferences
   }
 
-  fun save(prefs: UserPreferences): UserPreferences {
-    return userPreferencesRepository.save(prefs)
-  }
+  fun save(prefs: UserPreferences): UserPreferences = userPreferencesRepository.save(prefs)
 
   fun UserPreferences.tryRefreshPreferredOrganizationWhenNull() {
     if (this.preferredOrganization == null) {

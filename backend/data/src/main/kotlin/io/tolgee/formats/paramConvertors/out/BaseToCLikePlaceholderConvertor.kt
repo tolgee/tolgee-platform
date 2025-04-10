@@ -36,9 +36,7 @@ class BaseToCLikePlaceholderConvertor(
     node: MessagePatternUtil.ArgNode,
   ) = type == MessagePattern.ArgType.NONE && node.argNumOrNull == null
 
-  fun convertText(string: String): String {
-    return escapePercentSign(string)
-  }
+  fun convertText(string: String): String = escapePercentSign(string)
 
   private fun convertNumber(node: MessagePatternUtil.ArgNode): String {
     if (node.simpleStyle.trim() == "scientific") {
@@ -61,9 +59,8 @@ class BaseToCLikePlaceholderConvertor(
     return precisionMatch.groups["precision"]?.value?.length
   }
 
-  private fun getArgNameString(node: MessagePatternUtil.ArgNode): String {
-    return argNameStringProvider?.invoke(this, node) ?: getArgNumString(node.argNumOrNull?.toInt())
-  }
+  private fun getArgNameString(node: MessagePatternUtil.ArgNode): String =
+    argNameStringProvider?.invoke(this, node) ?: getArgNumString(node.argNumOrNull?.toInt())
 
   fun getArgNumString(icuArgNum: Int?): String {
     if ((icuArgNum != argIndex || wasNumberedArg) && icuArgNum != null) {

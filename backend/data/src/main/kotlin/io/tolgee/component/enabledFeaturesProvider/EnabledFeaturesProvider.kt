@@ -10,9 +10,7 @@ interface EnabledFeaturesProvider {
   fun isFeatureEnabled(
     organizationId: Long?,
     feature: Feature,
-  ): Boolean {
-    return this.get(organizationId).contains(feature)
-  }
+  ): Boolean = this.get(organizationId).contains(feature)
 
   fun checkFeatureEnabled(
     organizationId: Long?,

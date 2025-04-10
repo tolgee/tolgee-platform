@@ -33,22 +33,15 @@ class SetTranslationsStateChunkProcessor(
     }
   }
 
-  override fun getTarget(data: SetTranslationsStateStateRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: SetTranslationsStateStateRequest): List<Long> = data.keyIds
 
-  override fun getParamsType(): Class<SetTranslationStateJobParams> {
-    return SetTranslationStateJobParams::class.java
-  }
+  override fun getParamsType(): Class<SetTranslationStateJobParams> = SetTranslationStateJobParams::class.java
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getParams(data: SetTranslationsStateStateRequest): SetTranslationStateJobParams {
-    return SetTranslationStateJobParams().apply {
+  override fun getParams(data: SetTranslationsStateStateRequest): SetTranslationStateJobParams =
+    SetTranslationStateJobParams().apply {
       languageIds = data.languageIds
       state = data.state
     }
-  }
 }

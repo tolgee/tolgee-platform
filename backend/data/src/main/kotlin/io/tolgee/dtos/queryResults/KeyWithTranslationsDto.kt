@@ -3,14 +3,14 @@ package io.tolgee.dtos.queryResults
 import io.tolgee.dtos.PathDTO
 import java.util.*
 
-class KeyWithTranslationsDto(queryResult: Array<Any?>) {
+class KeyWithTranslationsDto(
+  queryResult: Array<Any?>,
+) {
   val path: PathDTO
   val id: Long
   private val translations: MutableMap<String, String?> = LinkedHashMap()
 
-  fun getTranslations(): Map<String, String?> {
-    return translations
-  }
+  fun getTranslations(): Map<String, String?> = translations
 
   init {
     val data = LinkedList(listOf(*queryResult))

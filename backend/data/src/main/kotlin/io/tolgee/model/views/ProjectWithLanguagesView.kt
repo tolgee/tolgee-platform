@@ -23,8 +23,8 @@ open class ProjectWithLanguagesView(
     fun fromProjectView(
       view: ProjectView,
       permittedLanguageIds: List<Long>?,
-    ): ProjectWithLanguagesView {
-      return ProjectWithLanguagesView(
+    ): ProjectWithLanguagesView =
+      ProjectWithLanguagesView(
         id = view.id,
         name = view.name,
         description = view.description,
@@ -38,6 +38,5 @@ open class ProjectWithLanguagesView(
         permittedLanguageIds = permittedLanguageIds,
         icuPlaceholders = view.icuPlaceholders,
       )
-    }
   }
 }

@@ -186,8 +186,11 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
-        .assert.isEqualTo((1000 - "Beautiful".length * 100).toLong())
+      mtCreditBucketService
+        .getCreditBalances(testData.projectBuilder.self.organizationOwner.id)
+        .creditBalance
+        .assert
+        .isEqualTo((1000 - "Beautiful".length * 100).toLong())
     }
   }
 
@@ -239,11 +242,13 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
 
-      mtCreditBucketService.getCreditBalances(
-        testData.projectBuilder.self.organizationOwner.id,
-      ).creditBalance.assert.isEqualTo(
-        600,
-      )
+      mtCreditBucketService
+        .getCreditBalances(
+          testData.projectBuilder.self.organizationOwner.id,
+        ).creditBalance.assert
+        .isEqualTo(
+          600,
+        )
     }
   }
 
@@ -381,8 +386,11 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
       node("machineTranslations") {
         node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
       }
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
-        .assert.isEqualTo(5100)
+      mtCreditBucketService
+        .getCreditBalances(testData.projectBuilder.self.organizationOwner.id)
+        .creditBalance
+        .assert
+        .isEqualTo(5100)
     }
 
     tolgeeTranslateParamsCaptor.allValues.assert.hasSize(1)
@@ -401,7 +409,8 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     testData.enableTolgee(Formality.FORMAL)
     saveTestData()
     performMtRequest()
-    tolgeeTranslateParamsCaptor.firstValue.formality.assert.isEqualTo(Formality.FORMAL)
+    tolgeeTranslateParamsCaptor.firstValue.formality.assert
+      .isEqualTo(Formality.FORMAL)
   }
 
   @Test
@@ -411,7 +420,12 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     testData.enableDeepL(Formality.FORMAL)
     saveTestData()
     performMtRequest()
-    val formality = Mockito.mockingDetails(deeplApiService).invocations.first().arguments[3] as? Formality
+    val formality =
+      Mockito
+        .mockingDetails(deeplApiService)
+        .invocations
+        .first()
+        .arguments[3] as? Formality
     formality.assert.isEqualTo(Formality.FORMAL)
   }
 
@@ -423,9 +437,17 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     saveTestData()
     performMtRequest()
     val request =
-      Mockito.mockingDetails(amazonTranslate).invocations.first().arguments[0]
+      Mockito
+        .mockingDetails(amazonTranslate)
+        .invocations
+        .first()
+        .arguments[0]
         as TranslateTextRequest
-    request.settings().formality().assert.isEqualTo(AwsFormality.FORMAL)
+    request
+      .settings()
+      .formality()
+      .assert
+      .isEqualTo(AwsFormality.FORMAL)
   }
 
   private fun testMtCreditConsumption() {
@@ -436,16 +458,17 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   private fun performMtRequestAndExpectAfterBalance(creditBalance: Long) {
     performMtRequest().andIsOk
-    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
-      .assert.isEqualTo(creditBalance * 100)
+    mtCreditBucketService
+      .getCreditBalances(testData.projectBuilder.self.organizationOwner.id)
+      .creditBalance
+      .assert
+      .isEqualTo(creditBalance * 100)
   }
 
-  private fun performMtRequestAndExpectBadRequest(): ResultActions {
-    return performMtRequest().andIsBadRequest
-  }
+  private fun performMtRequestAndExpectBadRequest(): ResultActions = performMtRequest().andIsBadRequest
 
-  private fun performMtRequest(services: List<MtServiceType>? = null): ResultActions {
-    return performAuthPost(
+  private fun performMtRequest(services: List<MtServiceType>? = null): ResultActions =
+    performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(
         keyId = testData.beautifulKey.id,
@@ -453,7 +476,6 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
         services = services?.toSet(),
       ),
     )
-  }
 
   private fun verifyServiceFirst(service: String) {
     val result = performMtRequest().andIsOk.andReturn().mapResponseTo<Map<String, Any>>()

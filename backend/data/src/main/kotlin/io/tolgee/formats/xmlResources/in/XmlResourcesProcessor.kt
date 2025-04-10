@@ -141,18 +141,15 @@ class XmlResourcesProcessor(
     inputFactory.createXMLEventReader(context.file.data.inputStream())
   }
 
-  private fun convertMessage(message: Any): MessageConvertorResult {
-    return messageConvertor.convert(
+  private fun convertMessage(message: Any): MessageConvertorResult =
+    messageConvertor.convert(
       message,
       guessedLanguage,
       context.importSettings.convertPlaceholdersToIcu,
       context.projectIcuPlaceholdersEnabled,
     )
-  }
 
-  private fun convertText(text: String?): String? {
-    return text?.let { convertMessage(it).message }
-  }
+  private fun convertText(text: String?): String? = text?.let { convertMessage(it).message }
 
   private val importFormat = context.mapping?.format ?: ImportFormat.ANDROID_XML
 

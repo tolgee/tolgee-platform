@@ -2,6 +2,4 @@ package io.tolgee.fixtures
 
 import java.util.*
 
-fun generateUniqueString(): String {
-  return UUID.randomUUID().toString()
-}
+fun generateUniqueString(): String = UUID.randomUUID().toString()

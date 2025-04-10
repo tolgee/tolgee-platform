@@ -99,21 +99,22 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun getEntityManagerInvocationsCount() =
-    Mockito.mockingDetails(entityManager)
-      .invocations.count {
+    Mockito
+      .mockingDetails(entityManager)
+      .invocations
+      .count {
         it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
       }
 
   private fun getAutomations(
     automationTriggerType: AutomationTriggerType,
     activityType: ActivityType?,
-  ): List<AutomationDto> {
-    return automationService.getProjectAutomations(
+  ): List<AutomationDto> =
+    automationService.getProjectAutomations(
       testData.projectBuilder.self.id,
       automationTriggerType,
       activityType,
     )
-  }
 
   private fun getFromCache(
     automationTriggerType: AutomationTriggerType,

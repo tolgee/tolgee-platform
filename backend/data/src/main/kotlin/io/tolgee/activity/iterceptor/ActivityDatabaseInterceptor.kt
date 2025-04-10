@@ -10,7 +10,9 @@ import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class ActivityDatabaseInterceptor : Interceptor, Logging {
+class ActivityDatabaseInterceptor :
+  Interceptor,
+  Logging {
   @Autowired
   lateinit var applicationContext: ApplicationContext
 

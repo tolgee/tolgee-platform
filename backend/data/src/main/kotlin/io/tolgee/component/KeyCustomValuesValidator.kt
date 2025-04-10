@@ -23,12 +23,11 @@ class KeyCustomValuesValidator(
     }
   }
 
-  fun isValid(customData: Map<String, Any?>): Boolean {
-    return try {
+  fun isValid(customData: Map<String, Any?>): Boolean =
+    try {
       validate(customData)
       true
     } catch (e: BadRequestException) {
       false
     }
-  }
 }

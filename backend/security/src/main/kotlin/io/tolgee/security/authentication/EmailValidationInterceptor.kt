@@ -18,7 +18,8 @@ class EmailValidationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   @Lazy
   private val emailVerificationService: EmailVerificationService,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -44,9 +45,7 @@ class EmailValidationInterceptor(
     return true
   }
 
-  override fun getOrder(): Int {
-    return Ordered.HIGHEST_PRECEDENCE
-  }
+  override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE
 
   private fun checkEmailVerificationOrThrow(
     userAccount: UserAccountDto,

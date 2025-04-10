@@ -38,8 +38,8 @@ class FileExporterFactory(
     baseTranslationsProvider: () -> List<ExportTranslationView>,
     baseLanguage: LanguageDto,
     projectIcuPlaceholdersSupport: Boolean,
-  ): FileExporter {
-    return when (exportParams.format) {
+  ): FileExporter =
+    when (exportParams.format) {
       ExportFormat.CSV ->
         CsvFileExporter(
           data,
@@ -130,5 +130,4 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport,
         )
     }
-  }
 }

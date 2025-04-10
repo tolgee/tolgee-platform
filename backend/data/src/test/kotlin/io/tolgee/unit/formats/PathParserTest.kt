@@ -69,7 +69,9 @@ class PathParserTest {
   @Test
   fun `returns valid original string`() {
     getPathItems("a[10]a.he\\llo.[a10]a.yay\\x.a[10].he\\.llo[10][18]", true)
-      .map { it.originalPathString }.assert.isEqualTo(
+      .map { it.originalPathString }
+      .assert
+      .isEqualTo(
         listOf(
           "a[10]a",
           "he\\llo",

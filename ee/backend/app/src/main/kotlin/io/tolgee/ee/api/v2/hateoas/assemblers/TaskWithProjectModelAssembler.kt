@@ -21,8 +21,8 @@ class TaskWithProjectModelAssembler(
     TaskController::class.java,
     TaskWithProjectModel::class.java,
   ) {
-  override fun toModel(entity: TaskWithScopeView): TaskWithProjectModel {
-    return TaskWithProjectModel(
+  override fun toModel(entity: TaskWithScopeView): TaskWithProjectModel =
+    TaskWithProjectModel(
       number = entity.number,
       name = entity.name,
       description = entity.description,
@@ -49,5 +49,4 @@ class TaskWithProjectModelAssembler(
       project = entity.project.let { simpleProjectModelAssembler.toModel(it) },
       agency = entity.agency?.let { translationAgencySimpleModelAssembler.toModel(it) },
     )
-  }
 }

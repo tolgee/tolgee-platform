@@ -9,7 +9,7 @@ import io.tolgee.model.enums.TranslationState
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
-class ContentDeliveryConfigRequest() : IExportParams {
+class ContentDeliveryConfigRequest : IExportParams {
   @field:NotBlank
   var name: String = ""
 

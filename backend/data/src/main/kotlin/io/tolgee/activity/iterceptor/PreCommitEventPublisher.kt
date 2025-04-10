@@ -7,7 +7,9 @@ import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class PreCommitEventPublisher(private val applicationContext: ApplicationContext) {
+class PreCommitEventPublisher(
+  private val applicationContext: ApplicationContext,
+) {
   fun onPersist(entity: Any?) {
     applicationContext.publishEvent(OnEntityPrePersist(this, entity))
   }

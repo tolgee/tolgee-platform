@@ -31,7 +31,6 @@ class PreferredOrganizationController(
         "if user doesn't have access to any organization.",
   )
   @OpenApiHideFromPublicDocs
-  fun getPreferred(): PrivateOrganizationModel {
-    return preferredOrganizationFacade.getPreferred() ?: throw PermissionException(Message.CANNOT_CREATE_ORGANIZATION)
-  }
+  fun getPreferred(): PrivateOrganizationModel =
+    preferredOrganizationFacade.getPreferred() ?: throw PermissionException(Message.CANNOT_CREATE_ORGANIZATION)
 }

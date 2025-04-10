@@ -19,46 +19,36 @@ class BaseRequestPerformer : RequestPerformer {
   @field:Autowired
   lateinit var mvc: MockMvc
 
-  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
-    return try {
+  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions =
+    try {
       mvc.perform(builder)
     } catch (e: Exception) {
       throw RuntimeException(e)
     }
-  }
 
   override fun performPut(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return perform(MockMvcRequestBuilders.put(url).withJsonContent(content).headers(httpHeaders))
-  }
+  ): ResultActions = perform(MockMvcRequestBuilders.put(url).withJsonContent(content).headers(httpHeaders))
 
   override fun performPost(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return perform(MockMvcRequestBuilders.post(url).withJsonContent(content).headers(httpHeaders))
-  }
+  ): ResultActions = perform(MockMvcRequestBuilders.post(url).withJsonContent(content).headers(httpHeaders))
 
   override fun performGet(
     url: String,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return perform(MockMvcRequestBuilders.get(url).headers(httpHeaders))
-  }
+  ): ResultActions = perform(MockMvcRequestBuilders.get(url).headers(httpHeaders))
 
   override fun performDelete(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return perform(MockMvcRequestBuilders.delete(url).withJsonContent(content).headers(httpHeaders))
-  }
+  ): ResultActions = perform(MockMvcRequestBuilders.delete(url).withJsonContent(content).headers(httpHeaders))
 
-  protected fun MockHttpServletRequestBuilder.withJsonContent(content: Any?): MockHttpServletRequestBuilder {
-    return this.contentType(MediaType.APPLICATION_JSON).content(jacksonObjectMapper().writeValueAsString(content))
-  }
+  protected fun MockHttpServletRequestBuilder.withJsonContent(content: Any?): MockHttpServletRequestBuilder =
+    this.contentType(MediaType.APPLICATION_JSON).content(jacksonObjectMapper().writeValueAsString(content))
 }

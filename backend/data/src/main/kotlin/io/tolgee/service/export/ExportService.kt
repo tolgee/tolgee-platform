@@ -33,23 +33,25 @@ class ExportService(
         baseLanguage = baseLanguage,
       )
 
-    return fileExporterFactory.create(
-      data = data,
-      exportParams = exportParams,
-      baseTranslationsProvider = baseTranslationsProvider,
-      baseLanguage,
-      projectIcuPlaceholdersSupport = project.icuPlaceholders,
-    ).produceFiles().also {
-      businessEventPublisher.publishOnceInTime(
-        OnBusinessEventToCaptureEvent(
-          eventName = "EXPORT",
-          projectId = projectId,
-        ),
-        Duration.ofDays(1),
-      ) {
-        "EXPORT_$projectId"
+    return fileExporterFactory
+      .create(
+        data = data,
+        exportParams = exportParams,
+        baseTranslationsProvider = baseTranslationsProvider,
+        baseLanguage,
+        projectIcuPlaceholdersSupport = project.icuPlaceholders,
+      ).produceFiles()
+      .also {
+        businessEventPublisher.publishOnceInTime(
+          OnBusinessEventToCaptureEvent(
+            eventName = "EXPORT",
+            projectId = projectId,
+          ),
+          Duration.ofDays(1),
+        ) {
+          "EXPORT_$projectId"
+        }
       }
-    }
   }
 
   /**
@@ -60,26 +62,22 @@ class ExportService(
     exportParams: IExportParams,
     projectId: Long,
     baseLanguage: LanguageDto,
-  ): () -> List<ExportTranslationView> {
-    return {
+  ): () -> List<ExportTranslationView> =
+    {
       getDataForExport(projectId, exportParams, listOf(baseLanguage.tag))
     }
-  }
 
   private fun getDataForExport(
     projectId: Long,
     exportParams: IExportParams,
     overrideLanguageTags: List<String>? = null,
-  ): List<ExportTranslationView> {
-    return ExportDataProvider(
+  ): List<ExportTranslationView> =
+    ExportDataProvider(
       applicationContext = applicationContext,
       exportParams = exportParams,
       projectId = projectId,
       overrideLanguageTag = overrideLanguageTags,
     ).data
-  }
 
-  private fun getProjectBaseLanguage(projectId: Long): LanguageDto {
-    return projectService.getOrAssignBaseLanguage(projectId)
-  }
+  private fun getProjectBaseLanguage(projectId: Long): LanguageDto = projectService.getOrAssignBaseLanguage(projectId)
 }

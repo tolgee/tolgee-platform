@@ -78,23 +78,20 @@ class AutomationService(
     delete(automation)
   }
 
-  private fun getCache(): Cache {
-    return cacheManager.getCache(Caches.AUTOMATIONS)!!
-  }
+  private fun getCache(): Cache = cacheManager.getCache(Caches.AUTOMATIONS)!!
 
   @Transactional
-  fun getAction(actionId: Long): AutomationAction {
-    return entityManager.createQuery(
-      """
+  fun getAction(actionId: Long): AutomationAction =
+    entityManager
+      .createQuery(
+        """
       from AutomationAction aa 
       join fetch aa.automation
       where aa.id = :actionId
       """,
-      AutomationAction::class.java,
-    )
-      .setParameter("actionId", actionId)
+        AutomationAction::class.java,
+      ).setParameter("actionId", actionId)
       .singleResult ?: throw NotFoundException()
-  }
 
   private fun deleteTriggersAndActions(automation: Automation) {
     automation.actions.removeAll {
@@ -238,14 +235,10 @@ class AutomationService(
   }
 
   @Transactional
-  fun get(id: Long): Automation {
-    return find(id) ?: throw NotFoundException()
-  }
+  fun get(id: Long): Automation = find(id) ?: throw NotFoundException()
 
   @Transactional
-  fun find(id: Long): Automation? {
-    return automationRepository.find(id)
-  }
+  fun find(id: Long): Automation? = automationRepository.find(id)
 
   @Transactional
   fun delete(
@@ -277,10 +270,9 @@ class AutomationService(
   fun get(
     projectId: Long,
     automationId: Long,
-  ): Automation {
-    return automationRepository.findByIdAndProjectId(automationId, projectId)
+  ): Automation =
+    automationRepository.findByIdAndProjectId(automationId, projectId)
       ?: throw NotFoundException()
-  }
 
   private fun getAutomationWithFetchedData(
     projectId: Long,
@@ -289,10 +281,12 @@ class AutomationService(
   ): MutableList<Automation> {
     val automations = getAutomationsWithTriggerOfType(projectId, automationTriggerType, activityType)
 
-    return entityManager.createQuery(
-      """from Automation a join fetch a.actions where a in :automations""",
-      Automation::class.java,
-    ).setParameter("automations", automations).resultList
+    return entityManager
+      .createQuery(
+        """from Automation a join fetch a.actions where a in :automations""",
+        Automation::class.java,
+      ).setParameter("automations", automations)
+      .resultList
   }
 
   private fun getAutomationsWithTriggerOfType(
@@ -300,20 +294,20 @@ class AutomationService(
     automationTriggerType: AutomationTriggerType,
     activityType: ActivityType?,
   ): MutableList<Automation>? =
-    entityManager.createQuery(
-      """
-      from Automation a join fetch a.triggers
-      where a.id in (
-          select a2.id from Automation a2 
-          join a2.triggers at 
-            where a2.project.id = :projectId
-             and at.type = :automationTriggerType
-             and (at.activityType = :activityType or (:activityType is null and at.activityType is null))
-      )
-      """.trimIndent(),
-      Automation::class.java,
-    )
-      .setParameter("projectId", projectId)
+    entityManager
+      .createQuery(
+        """
+        from Automation a join fetch a.triggers
+        where a.id in (
+            select a2.id from Automation a2 
+            join a2.triggers at 
+              where a2.project.id = :projectId
+               and at.type = :automationTriggerType
+               and (at.activityType = :activityType or (:activityType is null and at.activityType is null))
+        )
+        """.trimIndent(),
+        Automation::class.java,
+      ).setParameter("projectId", projectId)
       .setParameter("automationTriggerType", automationTriggerType)
       .setParameter("activityType", activityType)
       .resultList

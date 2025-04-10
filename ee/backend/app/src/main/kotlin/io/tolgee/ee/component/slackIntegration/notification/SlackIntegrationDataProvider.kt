@@ -18,11 +18,10 @@ class SlackIntegrationDataProvider(
   private val translationCache = mutableMapOf<Long, List<SlackTranslationInfoDto>>()
   private val keyCache = mutableMapOf<Long, SlackKeyInfoDto>()
 
-  fun getKeyTranslations(keyId: Long): List<SlackTranslationInfoDto> {
-    return translationCache.getOrPut(keyId) {
+  fun getKeyTranslations(keyId: Long): List<SlackTranslationInfoDto> =
+    translationCache.getOrPut(keyId) {
       getTranslationsViaEntityManager(keyId)
     }
-  }
 
   fun getTranslationById(translationId: Long): SlackTranslationInfoDto? {
     val fromCache = tryToFindInCache(translationId)
@@ -48,16 +47,16 @@ class SlackIntegrationDataProvider(
     return null
   }
 
-  fun getKeyInfo(keyId: Long): SlackKeyInfoDto {
-    return keyCache.getOrPut(keyId) {
+  fun getKeyInfo(keyId: Long): SlackKeyInfoDto =
+    keyCache.getOrPut(keyId) {
       getKeyInfoViaEntityManager(keyId)
     }
-  }
 
   private fun getKeyInfoViaEntityManager(keyId: Long): SlackKeyInfoDto {
     val result =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
       |SELECT k.id, k.name, t.name, n.name, km.description
       |FROM Key k
       |left join k.keyMeta km
@@ -65,10 +64,9 @@ class SlackIntegrationDataProvider(
       |left join k.namespace n
       |    WHERE k.id = :keyId
       |
-        """.trimMargin(),
-        Array::class.java,
-      )
-        .setParameter("keyId", keyId)
+          """.trimMargin(),
+          Array::class.java,
+        ).setParameter("keyId", keyId)
         .resultList
 
     return result
@@ -77,20 +75,21 @@ class SlackIntegrationDataProvider(
         SlackKeyInfoDto(
           id = it.key as Long,
           name = it.value.firstOrNull()?.get(1) as String,
-          tags = it.value.mapNotNull { row -> row[2] as String? }.toSet().nullIfEmpty(),
+          tags =
+            it.value
+              .mapNotNull { row -> row[2] as String? }
+              .toSet()
+              .nullIfEmpty(),
           namespace = it.value.firstOrNull()?.get(3) as String?,
           description = it.value.firstOrNull()?.get(4) as String?,
         )
-      }
-      .single()
+      }.single()
   }
 
   fun getTranslation(
     keyId: Long,
     languageTag: String,
-  ): SlackTranslationInfoDto? {
-    return getKeyTranslations(keyId).find { it.languageTag == languageTag }
-  }
+  ): SlackTranslationInfoDto? = getKeyTranslations(keyId).find { it.languageTag == languageTag }
 
   private fun getTranslationsViaEntityManager(keyId: Long): MutableList<SlackTranslationInfoDto> =
     getQuery()
@@ -104,9 +103,7 @@ class SlackIntegrationDataProvider(
    * In other words this returns all "siblings" of the translation with the given id, so we can populate the cache
    * for whole key with all it's translations
    */
-  private fun getTranslationsViaEntityManagerByTranslationId(
-    translationId: Long,
-  ): MutableList<SlackTranslationInfoDto> =
+  private fun getTranslationsViaEntityManagerByTranslationId(translationId: Long): MutableList<SlackTranslationInfoDto> =
     getQuery()
       .setParameter("keyId", null)
       .setParameter("translationId", translationId)

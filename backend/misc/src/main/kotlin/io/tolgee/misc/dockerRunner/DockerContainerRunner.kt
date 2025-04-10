@@ -125,20 +125,21 @@ class DockerContainerRunner(
     workingDir: File,
     timeoutAmount: Long,
     timeoutUnit: TimeUnit,
-  ): Process {
-    return ProcessBuilder("\\s+".toRegex().split(this.trim()))
+  ): Process =
+    ProcessBuilder("\\s+".toRegex().split(this.trim()))
       .directory(workingDir)
       .redirectOutput(ProcessBuilder.Redirect.PIPE)
       .redirectError(ProcessBuilder.Redirect.PIPE)
-      .start().also { it.waitFor(timeoutAmount, timeoutUnit) }
-  }
+      .start()
+      .also { it.waitFor(timeoutAmount, timeoutUnit) }
 
-  private fun String?.containsTimes(string2: String): Int {
-    return this?.windowed(string2.length) {
-      if (it == string2) 1 else 0
-    }?.sum() ?: 0
-  }
+  private fun String?.containsTimes(string2: String): Int =
+    this
+      ?.windowed(string2.length) {
+        if (it == string2) 1 else 0
+      }?.sum() ?: 0
 
-  class CommandRunFailedException(val output: String) :
-    RuntimeException("Command execution failed\n\nOutput:\n$output")
+  class CommandRunFailedException(
+    val output: String,
+  ) : RuntimeException("Command execution failed\n\nOutput:\n$output")
 }

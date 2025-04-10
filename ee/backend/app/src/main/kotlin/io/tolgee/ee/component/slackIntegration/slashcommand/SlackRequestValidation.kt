@@ -49,7 +49,5 @@ class SlackRequestValidation(
     }
   }
 
-  private fun throwError() {
-    throw SlackErrorException(slackErrorProvider.getInvalidSignatureError(), message = "Invalid signature")
-  }
+  private fun throwError(): Unit = throw SlackErrorException(slackErrorProvider.getInvalidSignatureError(), message = "Invalid signature")
 }

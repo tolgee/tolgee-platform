@@ -56,21 +56,14 @@ class SetKeysNamespaceChunkProcessor(
     }
   }
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getTarget(data: SetKeysNamespaceRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: SetKeysNamespaceRequest): List<Long> = data.keyIds
 
-  override fun getParamsType(): Class<SetKeysNamespaceParams> {
-    return SetKeysNamespaceParams::class.java
-  }
+  override fun getParamsType(): Class<SetKeysNamespaceParams> = SetKeysNamespaceParams::class.java
 
-  override fun getParams(data: SetKeysNamespaceRequest): SetKeysNamespaceParams {
-    return SetKeysNamespaceParams().apply {
+  override fun getParams(data: SetKeysNamespaceRequest): SetKeysNamespaceParams =
+    SetKeysNamespaceParams().apply {
       this.namespace = data.namespace
     }
-  }
 }

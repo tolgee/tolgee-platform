@@ -12,9 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 class SlackMessageInfoService(
   private val slackMessageInfoRepository: SlackMessageInfoRepository,
 ) {
-  fun create(slackMessageInfo: SlackMessageInfo): SlackMessageInfo {
-    return slackMessageInfoRepository.save(slackMessageInfo)
-  }
+  fun create(slackMessageInfo: SlackMessageInfo): SlackMessageInfo = slackMessageInfoRepository.save(slackMessageInfo)
 
   fun update(
     slackMessageInfo: SlackMessageInfo,
@@ -25,9 +23,7 @@ class SlackMessageInfoService(
     return slackMessageInfoRepository.save(slackMessageInfo)
   }
 
-  fun get(id: Long): SlackMessageInfo {
-    return slackMessageInfoRepository.findById(id).orElseThrow { NotFoundException() }
-  }
+  fun get(id: Long): SlackMessageInfo = slackMessageInfoRepository.findById(id).orElseThrow { NotFoundException() }
 
   fun delete(slackMessageInfo: SlackMessageInfo) {
     slackMessageInfoRepository.delete(slackMessageInfo)

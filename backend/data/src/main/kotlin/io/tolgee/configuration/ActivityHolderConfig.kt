@@ -20,16 +20,12 @@ class ActivityHolderConfig {
   @Scope(SCOPE_TRANSACTION, proxyMode = ScopedProxyMode.TARGET_CLASS)
   @ConditionalOnMissingBean
   @Qualifier("transactionActivityHolder")
-  fun transactionActivityHolder(applicationContext: ApplicationContext): ActivityHolder {
-    return ActivityHolder(applicationContext)
-  }
+  fun transactionActivityHolder(applicationContext: ApplicationContext): ActivityHolder = ActivityHolder(applicationContext)
 
   @Bean
   @RequestScope
   @Qualifier("requestActivityHolder")
-  fun requestActivityHolder(applicationContext: ApplicationContext): ActivityHolder {
-    return ActivityHolder(applicationContext)
-  }
+  fun requestActivityHolder(applicationContext: ApplicationContext): ActivityHolder = ActivityHolder(applicationContext)
 
   /**
    * This method for getting the activity holder is slow, since it
@@ -40,7 +36,5 @@ class ActivityHolderConfig {
   @Bean
   @Primary
   @Scope(BeanDefinition.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
-  fun activityHolder(activityHolderProvider: ActivityHolderProvider): ActivityHolder {
-    return activityHolderProvider.getActivityHolder()
-  }
+  fun activityHolder(activityHolderProvider: ActivityHolderProvider): ActivityHolder = activityHolderProvider.getActivityHolder()
 }

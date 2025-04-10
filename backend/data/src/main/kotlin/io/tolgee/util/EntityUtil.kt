@@ -14,17 +14,15 @@ class EntityUtil(
 
   val cache = ConcurrentHashMap<String, Class<out Any>?>()
 
-  fun getRealEntityClass(simpleName: String): Class<out Any>? {
-    return cache.computeIfAbsent(simpleName) {
+  fun getRealEntityClass(simpleName: String): Class<out Any>? =
+    cache.computeIfAbsent(simpleName) {
       val entitySimpleName = simpleName.replace(REGEX, "")
       entityManager
         .metamodel
         .entities
-        .find { it.name == entitySimpleName }?.javaType
+        .find { it.name == entitySimpleName }
+        ?.javaType
     }
-  }
 
-  fun getRealEntityClass(maybeProxiedClass: Class<out Any>): Class<out Any>? {
-    return getRealEntityClass(maybeProxiedClass.simpleName)
-  }
+  fun getRealEntityClass(maybeProxiedClass: Class<out Any>): Class<out Any>? = getRealEntityClass(maybeProxiedClass.simpleName)
 }

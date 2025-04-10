@@ -88,20 +88,16 @@ class EmailVerificationService(
     createForUser(userAccount, callbackUrl, newEmail)
   }
 
-  fun getEmail(userAccount: UserAccount): String {
-    return userAccount.emailVerification?.newEmail ?: userAccount.username
-  }
+  fun getEmail(userAccount: UserAccount): String = userAccount.emailVerification?.newEmail ?: userAccount.username
 
-  fun isVerified(userAccount: UserAccountDto): Boolean {
-    return !tolgeeProperties.authentication.needsEmailVerification || userAccount.emailVerified
-  }
+  fun isVerified(userAccount: UserAccountDto): Boolean =
+    !tolgeeProperties.authentication.needsEmailVerification || userAccount.emailVerified
 
-  fun isVerified(userAccount: UserAccount): Boolean {
-    return !(
+  fun isVerified(userAccount: UserAccount): Boolean =
+    !(
       tolgeeProperties.authentication.needsEmailVerification &&
         userAccount.emailVerification != null
     )
-  }
 
   fun check(userAccount: UserAccount) {
     if (!isVerified(userAccount)) {

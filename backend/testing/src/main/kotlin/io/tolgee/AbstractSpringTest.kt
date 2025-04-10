@@ -258,13 +258,12 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     internalProperties.fakeMtProviders = false
   }
 
-  fun <T> executeInNewTransaction(fn: (ts: TransactionStatus) -> T): T {
-    return io.tolgee.util.executeInNewTransaction(
+  fun <T> executeInNewTransaction(fn: (ts: TransactionStatus) -> T): T =
+    io.tolgee.util.executeInNewTransaction(
       transactionManager = platformTransactionManager,
       fn = fn,
       isolationLevel = TransactionDefinition.ISOLATION_DEFAULT,
     )
-  }
 
   open fun setForcedDate(date: Date = Date()) {
     currentDateProvider.forcedDate = date

@@ -16,21 +16,13 @@ class SlackConfigReadService(
   fun find(
     projectId: Long,
     channelId: String,
-  ): SlackConfig? {
-    return slackConfigRepository.findByProjectIdAndChannelId(projectId, channelId)
-  }
+  ): SlackConfig? = slackConfigRepository.findByProjectIdAndChannelId(projectId, channelId)
 
-  fun get(configId: Long): SlackConfig {
-    return slackConfigRepository.findById(configId).orElseThrow { NotFoundException() }
-  }
+  fun get(configId: Long): SlackConfig = slackConfigRepository.findById(configId).orElseThrow { NotFoundException() }
 
-  fun getAllByChannelId(channelId: String): List<SlackConfig> {
-    return slackConfigRepository.getAllByChannelId(channelId)
-  }
+  fun getAllByChannelId(channelId: String): List<SlackConfig> = slackConfigRepository.getAllByChannelId(channelId)
 
-  fun findAll(): List<SlackConfig> {
-    return slackConfigRepository.findAll()
-  }
+  fun findAll(): List<SlackConfig> = slackConfigRepository.findAll()
 
   fun findWorkspace(slackTeamId: String): OrganizationSlackWorkspace? {
     if (slackProperties.token != null) {

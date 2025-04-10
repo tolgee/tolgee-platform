@@ -57,7 +57,8 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
         )
       loginAsUser("hellouser")
       performAuthGet("/v2/organizations/${organization.id}/invitations")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.organizationInvitations").let { projectsNode ->
             projectsNode.isArray.hasSize(1)
             projectsNode.node("[0].id").isEqualTo(invitation.id)

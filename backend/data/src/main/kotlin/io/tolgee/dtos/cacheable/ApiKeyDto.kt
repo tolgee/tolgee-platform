@@ -30,8 +30,8 @@ data class ApiKeyDto(
   val scopes: Set<Scope>,
 ) : Serializable {
   companion object {
-    fun fromEntity(apiKey: ApiKey): ApiKeyDto {
-      return ApiKeyDto(
+    fun fromEntity(apiKey: ApiKey): ApiKeyDto =
+      ApiKeyDto(
         id = apiKey.id,
         hash = apiKey.keyHash,
         expiresAt = apiKey.expiresAt,
@@ -39,6 +39,5 @@ data class ApiKeyDto(
         userAccountId = apiKey.userAccount.id,
         scopes = apiKey.scopesEnum.filterNotNull().toSet(),
       )
-    }
   }
 }

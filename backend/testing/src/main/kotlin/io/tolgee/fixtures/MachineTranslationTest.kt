@@ -51,13 +51,12 @@ open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
     whenever(amazonTranslate.translateText(any<TranslateTextRequest>())).thenReturn(awsTranslateTextResult)
   }
 
-  fun Key.getLangTranslation(lang: Language): io.tolgee.model.translation.Translation {
-    return transactionTemplate.execute {
+  fun Key.getLangTranslation(lang: Language): io.tolgee.model.translation.Translation =
+    transactionTemplate.execute {
       keyService.get(this.id).translations.find {
         it.language == lang
       } ?: throw IllegalStateException("Translation not found")
     }!!
-  }
 
   protected fun createAnotherThisIsBeautifulKey() {
     performCreateKey(
@@ -71,15 +70,14 @@ open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   protected fun performCreateKey(
     keyName: String = CREATE_KEY_NAME,
     translations: Map<String, String>,
-  ): ResultActions {
-    return performProjectAuthPost(
+  ): ResultActions =
+    performProjectAuthPost(
       "keys",
       CreateKeyDto(
         name = keyName,
         translations = translations,
       ),
     )
-  }
 
   companion object {
     const val CREATE_KEY_NAME = "super_key"

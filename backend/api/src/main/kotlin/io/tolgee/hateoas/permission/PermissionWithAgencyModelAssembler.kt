@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component
 class PermissionWithAgencyModelAssembler(
   private val translationAgencySimpleModelAssembler: TranslationAgencySimpleModelAssembler,
 ) : RepresentationModelAssembler<Permission, PermissionWithAgencyModel> {
-  override fun toModel(entity: Permission): PermissionWithAgencyModel {
-    return PermissionWithAgencyModel(
+  override fun toModel(entity: Permission): PermissionWithAgencyModel =
+    PermissionWithAgencyModel(
       scopes = Scope.expand(entity.scopes),
       permittedLanguageIds = entity.translateLanguageIds,
       translateLanguageIds = entity.translateLanguageIds,
@@ -20,5 +20,4 @@ class PermissionWithAgencyModelAssembler(
       type = entity.type,
       agency = entity.agency?.let { translationAgencySimpleModelAssembler.toModel(it) },
     )
-  }
 }

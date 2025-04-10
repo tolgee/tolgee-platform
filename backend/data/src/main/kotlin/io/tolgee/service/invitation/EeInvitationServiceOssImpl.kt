@@ -8,7 +8,5 @@ import org.springframework.stereotype.Component
 
 @Component
 class EeInvitationServiceOssImpl : EeInvitationService {
-  override fun create(params: CreateProjectInvitationParams): Invitation {
-    throw NotImplementedInOss(Feature.GRANULAR_PERMISSIONS)
-  }
+  override fun create(params: CreateProjectInvitationParams): Invitation = throw NotImplementedInOss(Feature.GRANULAR_PERMISSIONS)
 }

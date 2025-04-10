@@ -5,8 +5,7 @@ import io.tolgee.model.contentDelivery.AWSCloudFrontConfig
 import org.springframework.stereotype.Component
 
 @Component
-class AWSCloudFrontContentDeliveryCachePurgingFactory() : ContentDeliveryCachePurgingFactory {
-  override fun create(config: Any): AWSCloudFrontContentDeliveryCachePurging {
-    return AWSCloudFrontContentDeliveryCachePurging(config as AWSCloudFrontConfig, AWSCredentialProvider())
-  }
+class AWSCloudFrontContentDeliveryCachePurgingFactory : ContentDeliveryCachePurgingFactory {
+  override fun create(config: Any): AWSCloudFrontContentDeliveryCachePurging =
+    AWSCloudFrontContentDeliveryCachePurging(config as AWSCloudFrontConfig, AWSCredentialProvider())
 }

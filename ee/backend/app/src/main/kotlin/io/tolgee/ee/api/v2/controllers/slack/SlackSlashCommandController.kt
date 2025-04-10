@@ -57,8 +57,8 @@ class SlackSlashCommandController(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
     @RequestBody body: String,
-  ): String? {
-    return slackExceptionHandler.handle {
+  ): String? =
+    slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)
       val token = checkIfTokenIsPresent(payload.team_id)
       if (!slackBotInfoProvider.isBotInChannel(payload, token)) {
@@ -100,21 +100,20 @@ class SlackSlashCommandController(
         }
       }
     }
-  }
 
   private fun checkIfTokenIsPresent(teamId: String): String {
     if (tolgeeProperties.slack.token != null) {
       return tolgeeProperties.slack.token!!
     }
 
-    return organizationSlackWorkspaceService.findBySlackTeamId(
-      teamId,
-    )?.accessToken ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
+    return organizationSlackWorkspaceService
+      .findBySlackTeamId(
+        teamId,
+      )?.accessToken ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
   }
 
-  private fun String?.toLongOrThrowInvalidCommand(): Long {
-    return this?.toLongOrNull() ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
-  }
+  private fun String?.toLongOrThrowInvalidCommand(): Long =
+    this?.toLongOrNull() ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
 
   private fun logout(
     slackId: String,
@@ -193,13 +192,12 @@ class SlackSlashCommandController(
     return subscribe(payload, projectId, languageTag, events, isGlobal)
   }
 
-  fun parseEventName(event: String): SlackEventType {
-    return try {
+  fun parseEventName(event: String): SlackEventType =
+    try {
       SlackEventType.valueOf(event.uppercase())
     } catch (e: IllegalArgumentException) {
       throw SlackErrorException(slackErrorProvider.getInvalidParameterError(event))
     }
-  }
 
   private fun subscribe(
     payload: SlackCommandDto,
@@ -252,7 +250,8 @@ class SlackSlashCommandController(
   ) {
     try {
       if (
-        permissionService.getProjectPermissionScopesNoApiKey(projectId, userAccountId)
+        permissionService
+          .getProjectPermissionScopesNoApiKey(projectId, userAccountId)
           ?.contains(Scope.ACTIVITY_VIEW) != true
       ) {
         throw SlackErrorException(slackErrorProvider.getNoPermissionError())
@@ -294,9 +293,8 @@ class SlackSlashCommandController(
     }
   }
 
-  private fun getProject(id: Long): Project {
-    return projectService.find(id) ?: throw SlackErrorException(slackErrorProvider.getProjectNotFoundError(id))
-  }
+  private fun getProject(id: Long): Project =
+    projectService.find(id) ?: throw SlackErrorException(slackErrorProvider.getProjectNotFoundError(id))
 
   private fun getUserAccount(payload: SlackCommandDto): UserAccount {
     val slackUserConnection =

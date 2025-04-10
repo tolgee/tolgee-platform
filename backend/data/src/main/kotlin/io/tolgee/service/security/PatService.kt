@@ -32,26 +32,16 @@ class PatService(
 ) {
   private val cache: Cache? by lazy { cacheManager.getCache(Caches.PERSONAL_ACCESS_TOKENS) }
 
-  fun find(hash: String): Pat? {
-    return patRepository.findByTokenHash(hash)
-  }
+  fun find(hash: String): Pat? = patRepository.findByTokenHash(hash)
 
-  fun get(hash: String): Pat {
-    return find(hash) ?: throw NotFoundException(Message.PAT_NOT_FOUND)
-  }
+  fun get(hash: String): Pat = find(hash) ?: throw NotFoundException(Message.PAT_NOT_FOUND)
 
-  fun find(id: Long): Pat? {
-    return patRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): Pat? = patRepository.findById(id).orElse(null)
 
-  fun get(id: Long): Pat {
-    return find(id) ?: throw NotFoundException(Message.PAT_NOT_FOUND)
-  }
+  fun get(id: Long): Pat = find(id) ?: throw NotFoundException(Message.PAT_NOT_FOUND)
 
   @Cacheable(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#hash")
-  fun findDto(hash: String): PatDto? {
-    return find(hash)?.let { PatDto.fromEntity(it) }
-  }
+  fun findDto(hash: String): PatDto? = find(hash)?.let { PatDto.fromEntity(it) }
 
   @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#pat.tokenHash")
   fun save(pat: Pat): Pat {
@@ -61,9 +51,7 @@ class PatService(
     return this.patRepository.save(pat)
   }
 
-  private fun generateToken(): String {
-    return keyGenerator.generate(256)
-  }
+  private fun generateToken(): String = keyGenerator.generate(256)
 
   fun create(
     dto: CreatePatDto,
@@ -106,21 +94,15 @@ class PatService(
     return save(pat)
   }
 
-  fun hashToken(token: String): String {
-    return keyGenerator.hash(token)
-  }
+  fun hashToken(token: String): String = keyGenerator.hash(token)
 
   @CacheEvict(cacheNames = [Caches.PERSONAL_ACCESS_TOKENS], key = "#pat.tokenHash")
-  fun delete(pat: Pat) {
-    return patRepository.deleteById(pat.id)
-  }
+  fun delete(pat: Pat) = patRepository.deleteById(pat.id)
 
   fun findAll(
     userId: Long,
     pageable: Pageable,
-  ): Page<Pat> {
-    return patRepository.findAllByUserAccountId(userId, pageable)
-  }
+  ): Page<Pat> = patRepository.findAllByUserAccountId(userId, pageable)
 
   private fun Pat.regenerateToken() {
     val token = generateToken()
@@ -128,9 +110,7 @@ class PatService(
     this.tokenHash = hashToken(token)
   }
 
-  private fun Long?.epochToDate(): Date? {
-    return this?.let { Date(it) }
-  }
+  private fun Long?.epochToDate(): Date? = this?.let { Date(it) }
 
   @Async
   @Transactional

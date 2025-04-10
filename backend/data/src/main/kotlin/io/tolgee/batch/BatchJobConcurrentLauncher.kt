@@ -109,9 +109,10 @@ class BatchJobConcurrentLauncher(
           logItemsPulled(items)
 
           // when something handled, return true
-          items.map { executionItem ->
-            handleItem(executionItem)
-          }.any()
+          items
+            .map { executionItem ->
+              handleItem(executionItem)
+            }.any()
         }
       }
   }

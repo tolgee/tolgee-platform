@@ -24,7 +24,8 @@ class ImportSettings(
   @Id
   @ManyToOne
   val project: Project,
-) : AuditModel(), IImportSettings {
+) : AuditModel(),
+  IImportSettings {
   @ManyToOne
   @Id
   lateinit var userAccount: UserAccount

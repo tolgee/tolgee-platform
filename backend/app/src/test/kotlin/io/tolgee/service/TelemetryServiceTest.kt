@@ -53,7 +53,8 @@ class TelemetryServiceTest : AbstractSpringTest() {
       thenAnswer { }
       verify {
         Thread.sleep(5000)
-        this.captor.allValues.assert.hasSize(0)
+        this.captor.allValues.assert
+          .hasSize(0)
       }
     }
   }

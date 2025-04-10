@@ -40,9 +40,9 @@ class SavePointManager(
     field.isAccessible = false
   }
 
-  fun getSession(): SessionImpl {
-    return entityManager.unwrap(SessionImpl::class.java)
+  fun getSession(): SessionImpl =
+    entityManager
+      .unwrap(SessionImpl::class.java)
       ?.let { it as? SessionImpl ?: throw IllegalStateException("Session is not SessionImpl") }
       ?: throw IllegalStateException("Session is null")
-  }
 }

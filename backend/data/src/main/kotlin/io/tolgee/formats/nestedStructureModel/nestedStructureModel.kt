@@ -5,20 +5,21 @@ interface StructuredModelItem {
   val key: Any?
 }
 
-interface ContainerNode<T : Any> : MutableMap<T, StructuredModelItem>, StructuredModelItem
+interface ContainerNode<T : Any> :
+  MutableMap<T, StructuredModelItem>,
+  StructuredModelItem
 
 class ValueStructuredModelItem(
   val value: String?,
   override val parent: ContainerNode<*>?,
   override val key: Any?,
-) :
-  StructuredModelItem
+) : StructuredModelItem
 
 class ObjectStructuredModelItem(
   override val parent: ContainerNode<*>?,
   override val key: Any?,
-) :
-  LinkedHashMap<String, StructuredModelItem>(), ContainerNode<String>
+) : LinkedHashMap<String, StructuredModelItem>(),
+  ContainerNode<String>
 
 class ArrayStructuredModelItem(
   override val parent: ContainerNode<*>?,

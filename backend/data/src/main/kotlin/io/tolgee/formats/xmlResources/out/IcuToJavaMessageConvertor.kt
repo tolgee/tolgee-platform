@@ -9,13 +9,12 @@ class IcuToJavaMessageConvertor(
   private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean,
 ) {
-  fun convert(): PossiblePluralConversionResult {
-    return MessageConvertorFactory(
+  fun convert(): PossiblePluralConversionResult =
+    MessageConvertorFactory(
       message = message,
       forceIsPlural = forceIsPlural,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     ) {
       IcuToJavaPlaceholderConvertor()
     }.create().convert()
-  }
 }

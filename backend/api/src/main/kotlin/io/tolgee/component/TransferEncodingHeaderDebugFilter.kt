@@ -6,14 +6,14 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.filter.OncePerRequestFilter
 
-class TransferEncodingHeaderDebugFilter : OncePerRequestFilter(), Logging {
+class TransferEncodingHeaderDebugFilter :
+  OncePerRequestFilter(),
+  Logging {
   init {
     logger.debug("TransferEncodingHeaderDebugFilter init")
   }
 
-  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return !this.logger.isDebugEnabled
-  }
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean = !this.logger.isDebugEnabled
 
   override fun doFilterInternal(
     request: HttpServletRequest,

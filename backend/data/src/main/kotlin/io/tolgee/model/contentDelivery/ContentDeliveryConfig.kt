@@ -36,7 +36,8 @@ import java.util.*
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
-) : StandardAuditModel(), IExportParams {
+) : StandardAuditModel(),
+  IExportParams {
   @ActivityLoggedProp
   @ActivityDescribingProp
   lateinit var name: String

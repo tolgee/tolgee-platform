@@ -192,35 +192,36 @@ class TranslationsTestData {
     }
   }
 
-  fun addSentenceKey(): KeyBuilder {
-    return projectBuilder.addKey {
+  fun addSentenceKey(): KeyBuilder =
+    projectBuilder.addKey {
       name = "How strong of a variation to produce. At 0, " +
         "there will be no effect. At 1, you will get the " +
         "complete picture with variation seed (except for ancestral " +
         "samplers, where you will just get something)."
     }
-  }
 
   fun addKeysWithScreenshots() {
     var screenshot1: Screenshot? = null
 
-    projectBuilder.addKey {
-      name = "key with screenshot"
-    }.build {
-      screenshot1 = addScreenshot {}.self
-      addScreenshot {}
-    }
-    projectBuilder.addKey {
-      name = "key with screenshot 2"
-    }.build {
-      addScreenshot {}
-      projectBuilder.addScreenshotReference {
-        screenshot = screenshot1!!
-        key = this@build.self
-        originalText = "Oh yeah"
-        positions = mutableListOf(KeyInScreenshotPosition(100, 100, 50, 50))
+    projectBuilder
+      .addKey {
+        name = "key with screenshot"
+      }.build {
+        screenshot1 = addScreenshot {}.self
+        addScreenshot {}
       }
-    }
+    projectBuilder
+      .addKey {
+        name = "key with screenshot 2"
+      }.build {
+        addScreenshot {}
+        projectBuilder.addScreenshotReference {
+          screenshot = screenshot1!!
+          key = this@build.self
+          originalText = "Oh yeah"
+          positions = mutableListOf(KeyInScreenshotPosition(100, 100, 50, 50))
+        }
+      }
   }
 
   fun generateLotOfData(count: Long = 99) {
@@ -382,21 +383,20 @@ class TranslationsTestData {
         addTranslation {
           language = englishLanguage
           text = "d"
-        }
-          .build {
-            (1..3).forEach {
-              addComment {
-                author = user
-                text = "Comment $it"
-              }
+        }.build {
+          (1..3).forEach {
+            addComment {
+              author = user
+              text = "Comment $it"
             }
           }
+        }
       }
     }
   }
 
-  fun addUntranslated() {
-    return projectBuilder.run {
+  fun addUntranslated() =
+    projectBuilder.run {
       addKey {
         name = "lala"
       }.build {
@@ -407,7 +407,6 @@ class TranslationsTestData {
         }.self
       }
     }
-  }
 
   fun generateScopedData() {
     projectBuilder.run {
@@ -479,26 +478,26 @@ class TranslationsTestData {
     }
   }
 
-  fun addFailedBatchJob(): BatchJob {
-    return projectBuilder.addBatchJob {
-      status = BatchJobStatus.FAILED
-    }.build {
-      this.targetProvider = {
-        listOf(mapOf("keyId" to aKey.id, "languageId" to germanLanguage.id))
-      }
-      addChunkExecution {
-        this.retry = false
-        status = BatchJobChunkExecutionStatus.FAILED
+  fun addFailedBatchJob(): BatchJob =
+    projectBuilder
+      .addBatchJob {
+        status = BatchJobStatus.FAILED
       }.build {
-        this.successfulTargetsProvider = { emptyList() }
-      }
-    }.self
-  }
+        this.targetProvider = {
+          listOf(mapOf("keyId" to aKey.id, "languageId" to germanLanguage.id))
+        }
+        addChunkExecution {
+          this.retry = false
+          status = BatchJobChunkExecutionStatus.FAILED
+        }.build {
+          this.successfulTargetsProvider = { emptyList() }
+        }
+      }.self
 
-  fun addPluralKey(): Key {
-    return projectBuilder.addKey {
-      name = "plural_key"
-      isPlural = true
-    }.self
-  }
+  fun addPluralKey(): Key =
+    projectBuilder
+      .addKey {
+        name = "plural_key"
+        isPlural = true
+      }.self
 }

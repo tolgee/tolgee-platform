@@ -52,7 +52,5 @@ class YamlImportFormatDetector {
       )
   }
 
-  fun detectFormat(data: Map<*, *>): ImportFormat {
-    return detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.YAML_UNKNOWN
-  }
+  fun detectFormat(data: Map<*, *>): ImportFormat = detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.YAML_UNKNOWN
 }

@@ -40,7 +40,8 @@ class TextToComposeXmlConvertorTest {
   fun `unsupported tags are converted to CDATA nodes`() {
     var nodes =
       "What a <unsupported attr=\"https://example.com\">link ' %% \" </unsupported>."
-        .convertedNodes().toList()
+        .convertedNodes()
+        .toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
       "<unsupported attr=\"https://example.com\">link \' \\% \" " +
@@ -116,19 +117,22 @@ class TextToComposeXmlConvertorTest {
 
   @Test
   fun `doesnt fail with malformed XML #4`() {
-    "<outer><inner>content with < unescaped</inner></outer>".assertSingleTextNode()
+    "<outer><inner>content with < unescaped</inner></outer>"
+      .assertSingleTextNode()
       .isEqualTo("<outer><inner>content with < unescaped</inner></outer>")
   }
 
   @Test
   fun `preserves special characters in malformed XML`() {
-    "<tag attr='value\">text with ' and \" characters</tag".assertSingleTextNode()
+    "<tag attr='value\">text with ' and \" characters</tag"
+      .assertSingleTextNode()
       .isEqualTo("<tag attr='value\">text with ' and \" characters</tag")
   }
 
   @Test
   fun `preserves whitespace in malformed XML`() {
-    "<tag>   text with \n newlines and \t tabs   </tag".assertSingleTextNode()
+    "<tag>   text with \n newlines and \t tabs   </tag"
+      .assertSingleTextNode()
       .isEqualTo("<tag>   text with \n newlines and \t tabs   </tag")
   }
 

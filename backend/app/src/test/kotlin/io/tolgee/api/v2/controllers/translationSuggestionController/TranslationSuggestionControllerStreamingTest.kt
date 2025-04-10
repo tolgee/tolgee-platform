@@ -67,11 +67,16 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
         ),
       ).andDo {
         it.asyncResult
-      }.andReturn().response.contentAsString
+      }.andReturn()
+        .response.contentAsString
 
-    response.split("\n").filter { it.isNotBlank() }.map {
-      jacksonObjectMapper().readValue(it, Any::class.java)
-    }.assert.hasSize(4)
+    response
+      .split("\n")
+      .filter { it.isNotBlank() }
+      .map {
+        jacksonObjectMapper().readValue(it, Any::class.java)
+      }.assert
+      .hasSize(4)
   }
 
   @Test
@@ -106,11 +111,16 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
         ),
       ).andDo {
         it.asyncResult
-      }.andReturn().response.contentAsString
+      }.andReturn()
+        .response.contentAsString
 
-    response.split("\n").filter { it.isNotBlank() }.map {
-      jacksonObjectMapper().readValue(it, Any::class.java)
-    }.assert.hasSize(3)
+    response
+      .split("\n")
+      .filter { it.isNotBlank() }
+      .map {
+        jacksonObjectMapper().readValue(it, Any::class.java)
+      }.assert
+      .hasSize(3)
 
     response.assert.doesNotContain("DEEPL")
   }

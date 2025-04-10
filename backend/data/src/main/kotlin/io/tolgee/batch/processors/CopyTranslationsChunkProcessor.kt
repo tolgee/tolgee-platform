@@ -33,22 +33,15 @@ class CopyTranslationsChunkProcessor(
     }
   }
 
-  override fun getParamsType(): Class<CopyTranslationJobParams> {
-    return CopyTranslationJobParams::class.java
-  }
+  override fun getParamsType(): Class<CopyTranslationJobParams> = CopyTranslationJobParams::class.java
 
-  override fun getTarget(data: CopyTranslationRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: CopyTranslationRequest): List<Long> = data.keyIds
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getParams(data: CopyTranslationRequest): CopyTranslationJobParams {
-    return CopyTranslationJobParams().apply {
+  override fun getParams(data: CopyTranslationRequest): CopyTranslationJobParams =
+    CopyTranslationJobParams().apply {
       sourceLanguageId = data.sourceLanguageId
       targetLanguageIds = data.targetLanguageIds
     }
-  }
 }

@@ -23,10 +23,15 @@ class KeyWithDataModelAssembler(
       name = entity.name,
       namespace = entity.namespace?.name,
       translations =
-        entity.translations.map {
-          it.language.tag to translationModelAssembler.toModel(it)
-        }.toMap(),
-      tags = entity.keyMeta?.tags?.map { tagModelAssembler.toModel(it) }?.toSet() ?: setOf(),
+        entity.translations
+          .map {
+            it.language.tag to translationModelAssembler.toModel(it)
+          }.toMap(),
+      tags =
+        entity.keyMeta
+          ?.tags
+          ?.map { tagModelAssembler.toModel(it) }
+          ?.toSet() ?: setOf(),
       screenshots = entity.keyScreenshotReferences.map { it.screenshot }.map { screenshotModelAssembler.toModel(it) },
       description = entity.keyMeta?.description,
       isPlural = entity.isPlural,

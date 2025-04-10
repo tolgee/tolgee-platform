@@ -80,7 +80,8 @@ class SsoMultiTenantsMocks(
     private fun generateTestJwt(claims: Claims): String {
       val testSecret = "test-256-bit-secretAAAAAAAAAAAAAAA"
       val key = Keys.hmacShaKeyFor(testSecret.toByteArray())
-      return Jwts.builder()
+      return Jwts
+        .builder()
         .setClaims(claims)
         .signWith(key, SignatureAlgorithm.HS256)
         .compact()

@@ -4,7 +4,5 @@ import org.springframework.stereotype.Component
 
 @Component
 class MaxUploadedFilesByUserProvider {
-  operator fun invoke(): Long {
-    return 100L
-  }
+  operator fun invoke(): Long = 100L
 }

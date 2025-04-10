@@ -111,11 +111,12 @@ class PostgresEmbeddedRunner(
     while (running.get()) {
       try {
         val allNull =
-          loggerMap.entries.map { (inputStream, logger) ->
-            val line = inputStream.bufferedReader().readLine()
-            logLine(line, logger)
-            line == null
-          }.all { it }
+          loggerMap.entries
+            .map { (inputStream, logger) ->
+              val line = inputStream.bufferedReader().readLine()
+              logLine(line, logger)
+              line == null
+            }.all { it }
         if (allNull) {
           break
         }

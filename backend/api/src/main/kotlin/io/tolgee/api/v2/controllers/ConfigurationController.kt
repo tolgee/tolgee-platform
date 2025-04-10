@@ -18,7 +18,5 @@ class ConfigurationController(
 ) : IController {
   @GetMapping(value = ["configuration"])
   @Operation(summary = "Get server configuration")
-  fun getPublicConfiguration(): PublicConfigurationDTO {
-    return publicConfigurationAssembler.toDto()
-  }
+  fun getPublicConfiguration(): PublicConfigurationDTO = publicConfigurationAssembler.toDto()
 }

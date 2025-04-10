@@ -73,28 +73,29 @@ class KeyMetaService(
   @Suppress("UNCHECKED_CAST")
   fun getWithFetchedData(import: Import): List<KeyMeta> {
     var result: List<KeyMeta> =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.importKey ik
             left join fetch ikm.comments ikc
             join ik.file if
             where if.import = :import 
             """,
-      )
-        .setParameter("import", import)
+        ).setParameter("import", import)
         .resultList as List<KeyMeta>
 
     result =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
             select distinct ikm from KeyMeta ikm
             join ikm.importKey ik
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ikm in :metas 
         """,
-      ).setParameter("metas", result)
+        ).setParameter("metas", result)
         .resultList as List<KeyMeta>
 
     return result
@@ -102,26 +103,27 @@ class KeyMetaService(
 
   fun getWithFetchedData(project: Project): List<KeyMeta> {
     var result: List<KeyMeta> =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.key k
             left join fetch ikm.comments ikc
             where k.project = :project 
             """,
-      )
-        .setParameter("project", project)
+        ).setParameter("project", project)
         .resultList as List<KeyMeta>
 
     result =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
             select distinct ikm from KeyMeta ikm
             join ikm.key k
             left join fetch ikm.codeReferences ikc
             where ikm in :metas 
         """,
-      ).setParameter("metas", result)
+        ).setParameter("metas", result)
         .resultList as List<KeyMeta>
 
     return result
@@ -152,35 +154,38 @@ class KeyMetaService(
 
   fun deleteAllByProject(projectId: Long) {
     tagService.deleteAllByProject(projectId)
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       delete from key_comment where key_meta_id in (
         select id from key_meta where key_id in (
           select id from key where project_id = :projectId
         )
       )
     """,
-    ).setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
 
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       delete from key_code_reference where key_meta_id in (
         select id from key_meta where key_id in (
           select id from key where project_id = :projectId
         )
       )
     """,
-    ).setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
 
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       delete from key_meta where key_id in (
         select id from key where project_id = :projectId
       )
       """,
-    ).setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
   }
 }

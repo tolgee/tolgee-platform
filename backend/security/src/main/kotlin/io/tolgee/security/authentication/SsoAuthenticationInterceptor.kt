@@ -21,7 +21,8 @@ class SsoAuthenticationInterceptor(
   private val tolgeeProperties: TolgeeProperties,
   @Lazy
   private val tenantService: TenantService,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -47,9 +48,7 @@ class SsoAuthenticationInterceptor(
     return true
   }
 
-  override fun getOrder(): Int {
-    return Ordered.HIGHEST_PRECEDENCE
-  }
+  override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE
 
   private fun checkNonSsoAccessAllowed(
     userAccount: UserAccountDto,

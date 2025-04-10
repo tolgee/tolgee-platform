@@ -29,12 +29,11 @@ class ImportFileProcessorFactory(
   @Qualifier("yamlObjectMapper")
   private val yamlObjectMapper: ObjectMapper,
 ) {
-  fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {
-    return when (file.name.fileNameExtension) {
+  fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor =
+    when (file.name.fileNameExtension) {
       "zip" -> ZipTypeProcessor()
       else -> throw ImportCannotParseFileException(file.name, "No matching processor")
     }
-  }
 
   fun getProcessor(
     file: ImportFileDto,
@@ -53,8 +52,8 @@ class ImportFileProcessorFactory(
   private fun getProcessor(
     importFileFormat: ImportFileFormat,
     context: FileProcessorContext,
-  ): ImportFileProcessor {
-    return when (importFileFormat) {
+  ): ImportFileProcessor =
+    when (importFileFormat) {
       ImportFileFormat.JSON -> JsonFileProcessor(context, objectMapper)
       ImportFileFormat.PO -> PoFileProcessor(context)
       ImportFileFormat.STRINGS -> StringsFileProcessor(context)
@@ -69,7 +68,6 @@ class ImportFileProcessorFactory(
       ImportFileFormat.XLSX -> XlsxFileProcessor(context)
       ImportFileFormat.XCSTRINGS -> XcstringsFileProcessor(context, objectMapper)
     }
-  }
 
   val String?.fileNameExtension: String?
     get() {

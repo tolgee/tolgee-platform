@@ -9,7 +9,6 @@ import org.springframework.web.client.RestTemplate
 class AzureContentDeliveryCachePurgingFactory(
   private val restTemplate: RestTemplate,
 ) : ContentDeliveryCachePurgingFactory {
-  override fun create(config: Any): AzureContentDeliveryCachePurging {
-    return AzureContentDeliveryCachePurging(config as AzureFrontDoorConfig, restTemplate, AzureCredentialProvider())
-  }
+  override fun create(config: Any): AzureContentDeliveryCachePurging =
+    AzureContentDeliveryCachePurging(config as AzureFrontDoorConfig, restTemplate, AzureCredentialProvider())
 }

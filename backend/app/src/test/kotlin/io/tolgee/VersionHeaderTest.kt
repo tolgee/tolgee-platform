@@ -11,9 +11,12 @@ class VersionHeaderTest : AbstractControllerTest() {
   @Test
   fun `adds header on endpoints`() {
     performGet("/v2/public/initial-data")
-      .andIsOk.andReturn()
-      .response.getHeader("X-Tolgee-Version")
-      .assert.isEqualTo("??")
+      .andIsOk
+      .andReturn()
+      .response
+      .getHeader("X-Tolgee-Version")
+      .assert
+      .isEqualTo("??")
   }
 
   @Test

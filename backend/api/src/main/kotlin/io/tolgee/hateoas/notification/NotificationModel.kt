@@ -16,7 +16,9 @@ data class NotificationModel(
   var originatingUser: SimpleUserAccountModel? = null,
   var linkedTask: TaskModel? = null,
   var createdAt: Date?,
-) : RepresentationModel<NotificationModel>(), Serializable, Cursorable {
+) : RepresentationModel<NotificationModel>(),
+  Serializable,
+  Cursorable {
   override fun toCursorValue(property: String): String? =
     when (property) {
       "id" -> id.toString()

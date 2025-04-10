@@ -48,7 +48,5 @@ class JsonFileExporter(
 
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
-  override fun produceFiles(): Map<String, InputStream> {
-    return genericExporter.produceFiles()
-  }
+  override fun produceFiles(): Map<String, InputStream> = genericExporter.produceFiles()
 }

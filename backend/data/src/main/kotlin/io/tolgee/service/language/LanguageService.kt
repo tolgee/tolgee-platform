@@ -136,10 +136,11 @@ class LanguageService(
   ): Set<LanguageDto> {
     val all = self.getProjectLanguages(projectId)
     val viewLanguageIds =
-      permissionService.getProjectPermissionData(
-        projectId,
-        userId,
-      ).computedPermissions.viewLanguageIds
+      permissionService
+        .getProjectPermissionData(
+          projectId,
+          userId,
+        ).computedPermissions.viewLanguageIds
 
     val permitted =
       if (viewLanguageIds.isNullOrEmpty()) {
@@ -152,70 +153,51 @@ class LanguageService(
       .sortedBy { it.id }
       // base first
       .sortedBy { if (it.base) 0 else 1 }
-      .take(2).toSet()
+      .take(2)
+      .toSet()
   }
 
   @Transactional
-  fun findAll(projectId: Long): Set<LanguageDto> {
-    return self.getProjectLanguages(projectId).toSet()
-  }
+  fun findAll(projectId: Long): Set<LanguageDto> = self.getProjectLanguages(projectId).toSet()
 
   fun get(
     languageId: Long,
     projectId: Long,
-  ): LanguageDto {
-    return find(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-  }
+  ): LanguageDto = find(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
   fun find(
     languageId: Long,
     projectId: Long,
-  ): LanguageDto? {
-    return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
-  }
+  ): LanguageDto? = self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
 
-  fun findEntity(id: Long): Language? {
-    return languageRepository.find(id)
-  }
+  fun findEntity(id: Long): Language? = languageRepository.find(id)
 
-  fun getEntity(id: Long): Language {
-    return this.findEntity(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-  }
+  fun getEntity(id: Long): Language = this.findEntity(id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
   fun getEntity(
     languageId: Long,
     projectId: Long,
-  ): Language {
-    return findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-  }
+  ): Language = findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
   fun findEntity(
     languageId: Long,
     projectId: Long,
-  ): Language? {
-    return languageRepository.find(languageId, projectId)
-  }
+  ): Language? = languageRepository.find(languageId, projectId)
 
   fun findByTag(
     tag: String,
     project: Project,
-  ): LanguageDto? {
-    return self.getProjectLanguages(project.id).singleOrNull { tag == it.tag }
-  }
+  ): LanguageDto? = self.getProjectLanguages(project.id).singleOrNull { tag == it.tag }
 
   fun getByTag(
     tag: String,
     project: Project,
-  ): LanguageDto {
-    return findByTag(tag, project) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
-  }
+  ): LanguageDto = findByTag(tag, project) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
   fun findByTag(
     tag: String?,
     projectId: Long,
-  ): LanguageDto? {
-    return self.getProjectLanguages(projectId).singleOrNull { tag == it.tag }
-  }
+  ): LanguageDto? = self.getProjectLanguages(projectId).singleOrNull { tag == it.tag }
 
   fun findByTags(
     tags: Collection<String>,
@@ -279,10 +261,11 @@ class LanguageService(
     languages: Set<String>,
   ): Set<LanguageDto> {
     val viewLanguageIds =
-      permissionService.getProjectPermissionData(
-        projectId,
-        userId,
-      ).computedPermissions.viewLanguageIds
+      permissionService
+        .getProjectPermissionData(
+          projectId,
+          userId,
+        ).computedPermissions.viewLanguageIds
     return if (viewLanguageIds.isNullOrEmpty()) {
       findByTags(languages, projectId)
     } else {
@@ -293,20 +276,19 @@ class LanguageService(
   fun findByName(
     name: String?,
     project: Project,
-  ): Optional<Language> {
-    return languageRepository.findByNameAndProject(name, project)
-  }
+  ): Optional<Language> = languageRepository.findByNameAndProject(name, project)
 
   fun deleteAllByProject(projectId: Long) {
     translationService.deleteAllByProject(projectId)
     autoTranslationService.deleteConfigsByProject(projectId)
-    entityManager.createNativeQuery(
-      "delete from language_stats " +
-        "where language_id in (select id from language where project_id = :projectId)",
-    )
-      .setParameter("projectId", projectId)
+    entityManager
+      .createNativeQuery(
+        "delete from language_stats " +
+          "where language_id in (select id from language where project_id = :projectId)",
+      ).setParameter("projectId", projectId)
       .executeUpdate()
-    entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
+    entityManager
+      .createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
       .setParameter("projectId", projectId)
       .executeUpdate()
     evictCacheForProject(projectId)
@@ -340,25 +322,17 @@ class LanguageService(
     projectId: Long,
     pageable: Pageable,
     filters: LanguageFilters?,
-  ): Page<LanguageDto> {
-    return this.languageRepository.findAllByProjectId(projectId, pageable, filters ?: LanguageFilters())
-  }
+  ): Page<LanguageDto> = this.languageRepository.findAllByProjectId(projectId, pageable, filters ?: LanguageFilters())
 
-  fun findByIdIn(ids: Iterable<Long>): List<Language> {
-    return languageRepository.findAllById(ids)
-  }
+  fun findByIdIn(ids: Iterable<Long>): List<Language> = languageRepository.findAllById(ids)
 
   fun getLanguageIdsByTags(
     projectId: Long,
     languageTags: Collection<String>,
-  ): Map<String, Language> {
-    return languageRepository.findAllByTagInAndProjectId(languageTags, projectId).associateBy { it.tag }
-  }
+  ): Map<String, Language> = languageRepository.findAllByTagInAndProjectId(languageTags, projectId).associateBy { it.tag }
 
   @Transactional
-  fun getDtosOfProjects(projectIds: List<Long>): Map<Long, List<LanguageDto>> {
-    return projectIds.associateWith { self.getProjectLanguages(it) }
-  }
+  fun getDtosOfProjects(projectIds: List<Long>): Map<Long, List<LanguageDto>> = projectIds.associateWith { self.getProjectLanguages(it) }
 
   @Cacheable(Caches.LANGUAGES, key = "#projectId")
   @Transactional

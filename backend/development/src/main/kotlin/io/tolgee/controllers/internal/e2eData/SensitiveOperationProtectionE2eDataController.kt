@@ -46,9 +46,7 @@ class SensitiveOperationProtectionE2eDataController(
 
   @GetMapping(value = ["/get-totp"])
   @Transactional
-  fun getTotp(): Map<String, String> {
-    return mapOf("otp" to mfaService.generateStringCode(SensitiveOperationProtectionTestData.TOTP_KEY))
-  }
+  fun getTotp(): Map<String, String> = mapOf("otp" to mfaService.generateStringCode(SensitiveOperationProtectionTestData.TOTP_KEY))
 
   override val testData: TestDataBuilder
     get() = SensitiveOperationProtectionTestData().root

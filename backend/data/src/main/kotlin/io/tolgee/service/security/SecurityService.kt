@@ -50,9 +50,7 @@ class SecurityService(
     }
   }
 
-  fun currentPermittedScopesContain(scope: Scope): Boolean {
-    return currentPermittedScopesContain(listOf(scope))
-  }
+  fun currentPermittedScopesContain(scope: Scope): Boolean = currentPermittedScopesContain(listOf(scope))
 
   fun currentPermittedScopesContain(scopes: Collection<Scope>?): Boolean {
     scopes ?: return true
@@ -64,9 +62,10 @@ class SecurityService(
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
     val projectScopes =
-      Scope.expand(
-        getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
-      ).toSet()
+      Scope
+        .expand(
+          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
+        ).toSet()
     val apiKey = activeApiKey ?: return projectScopes
 
     return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
@@ -441,9 +440,7 @@ class SecurityService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userId: Long = activeUser.id,
-  ): Array<Scope>? {
-    return permissionService.getProjectPermissionScopesNoApiKey(projectId, userId)
-  }
+  ): Array<Scope>? = permissionService.getProjectPermissionScopesNoApiKey(projectId, userId)
 
   fun checkKeyIdsExistAndIsFromProject(
     keyIds: List<Long>,
@@ -466,13 +463,9 @@ class SecurityService(
     }
   }
 
-  private fun isCurrentUserServerAdmin(): Boolean {
-    return isUserAdmin(activeUser)
-  }
+  private fun isCurrentUserServerAdmin(): Boolean = isUserAdmin(activeUser)
 
-  private fun isUserAdmin(user: UserAccountDto): Boolean {
-    return user.role == UserAccount.Role.ADMIN
-  }
+  private fun isUserAdmin(user: UserAccountDto): Boolean = user.role == UserAccount.Role.ADMIN
 
   private val activeUser: UserAccountDto
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)

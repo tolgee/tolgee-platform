@@ -192,9 +192,7 @@ class StoredDataImporter(
     translationService.saveAll(translationsToSave.map { it.second })
   }
 
-  private fun saveKeys(): Collection<Key> {
-    return saveKeys(keysToSave.values)
-  }
+  private fun saveKeys(): Collection<Key> = saveKeys(keysToSave.values)
 
   private fun saveKeys(keys: Collection<Key>): Collection<Key> {
     keyService.saveAll(keys)
@@ -299,22 +297,20 @@ class StoredDataImporter(
   private fun addKeyToSave(
     namespace: String?,
     keyName: String,
-  ): Key {
-    return keysToSave.computeIfAbsent(namespace to keyName) {
+  ): Key =
+    keysToSave.computeIfAbsent(namespace to keyName) {
       importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace)
     }
-  }
 
   private fun createNewKey(
     name: String,
     namespace: String?,
-  ): Key {
-    return Key(name = name).apply {
+  ): Key =
+    Key(name = name).apply {
       project = import.project
       this.namespace = getNamespace(namespace)
       newKeys.add(this)
     }
-  }
 
   private fun ImportTranslation.checkConflictResolved() {
     if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {

@@ -7,15 +7,16 @@ import io.tolgee.util.element
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class ResxWriter(private val model: List<ResxEntry>) {
-  fun produceFiles(): InputStream {
-    return buildDom {
+class ResxWriter(
+  private val model: List<ResxEntry>,
+) {
+  fun produceFiles(): InputStream =
+    buildDom {
       element("root") {
         addHeaders()
         model.forEach { addToElement(it) }
       }
     }.write().toByteArray().inputStream()
-  }
 
   private fun Element.addHeaders() {
     element("resheader") {

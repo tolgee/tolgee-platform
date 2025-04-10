@@ -12,7 +12,5 @@ data class MachineTranslationParams(
   var useAllEnabledServices: Boolean = false,
   var isBatch: Boolean = false,
 ) {
-  fun allTargetLanguages(): Set<Long> {
-    return (targetLanguageIds + listOfNotNull(targetLanguageId)).toSet()
-  }
+  fun allTargetLanguages(): Set<Long> = (targetLanguageIds + listOfNotNull(targetLanguageId)).toSet()
 }

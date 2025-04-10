@@ -65,11 +65,9 @@ class ProgressManager(
   fun rollbackSetToRunning(
     executionId: Long,
     batchJobId: Long,
-  ) {
-    return batchJobStateProvider.updateState(batchJobId) {
-      if (it[executionId]?.status == BatchJobChunkExecutionStatus.RUNNING) {
-        it.remove(executionId)
-      }
+  ) = batchJobStateProvider.updateState(batchJobId) {
+    if (it[executionId]?.status == BatchJobChunkExecutionStatus.RUNNING) {
+      it.remove(executionId)
     }
   }
 
@@ -111,7 +109,8 @@ class ProgressManager(
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
     logger.debug {
       val incompleteExecutions =
-        state.filter { !(it.value.transactionCommitted && it.value.status.completed) }
+        state
+          .filter { !(it.value.transactionCommitted && it.value.status.completed) }
           .map { it.key }
           .joinToString(", ")
       "Is job ${execution.batchJob.id} " +
@@ -181,9 +180,7 @@ class ProgressManager(
     return JobResultInfo(completedChunks, progress, isAnyCancelled, isAnyFailed)
   }
 
-  fun getJobCachedProgress(jobId: Long): Long? {
-    return batchJobStateProvider.getCached(jobId)?.getInfoForJobResult()?.progress
-  }
+  fun getJobCachedProgress(jobId: Long): Long? = batchJobStateProvider.getCached(jobId)?.getInfoForJobResult()?.progress
 
   fun publishSingleChunkProgress(
     jobId: Long,

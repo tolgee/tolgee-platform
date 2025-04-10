@@ -9,7 +9,5 @@ class ContentStorageProviderOssImpl : ContentStorageProvider {
   override fun getStorage(
     projectId: Long,
     contentStorageId: Long,
-  ): ContentStorage {
-    throw BadRequestException("Not implemented")
-  }
+  ): ContentStorage = throw BadRequestException("Not implemented")
 }

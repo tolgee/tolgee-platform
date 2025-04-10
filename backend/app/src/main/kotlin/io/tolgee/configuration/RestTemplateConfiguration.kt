@@ -15,13 +15,17 @@ class RestTemplateConfiguration {
   @Bean
   @Lazy
   @Primary
-  fun restTemplate(): RestTemplate {
-    return RestTemplate(
+  fun restTemplate(): RestTemplate =
+    RestTemplate(
       HttpComponentsClientHttpRequestFactory().apply {
-        this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
+        this.httpClient =
+          HttpClientBuilder
+            .create()
+            .disableCookieManagement()
+            .useSystemProperties()
+            .build()
       },
     ).removeXmlConverter()
-  }
 
   private fun RestTemplate.removeXmlConverter(): RestTemplate {
     messageConverters.removeIf { it is MappingJackson2XmlHttpMessageConverter }
@@ -29,9 +33,7 @@ class RestTemplateConfiguration {
   }
 
   @Bean(name = ["webhookRestTemplate"])
-  fun webhookRestTemplate(): RestTemplate {
-    return RestTemplate(getClientHttpRequestFactory()).removeXmlConverter()
-  }
+  fun webhookRestTemplate(): RestTemplate = RestTemplate(getClientHttpRequestFactory()).removeXmlConverter()
 
   private fun getClientHttpRequestFactory(): SimpleClientHttpRequestFactory {
     val clientHttpRequestFactory = SimpleClientHttpRequestFactory()

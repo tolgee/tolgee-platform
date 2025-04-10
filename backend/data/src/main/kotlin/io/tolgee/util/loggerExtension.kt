@@ -58,9 +58,7 @@ inline fun <reified T> Logger.traceMeasureTime(
 inline fun <reified T> Logger.infoMeasureTime(
   message: String,
   block: () -> T,
-): T {
-  return measureTime(message, this::info, block)
-}
+): T = measureTime(message, this::info, block)
 
 inline fun <reified T> Logger.measureTime(
   message: String,
@@ -75,8 +73,8 @@ inline fun <reified T> Logger.measureTime(
 inline fun <reified T> Logger.storeTraceTimeSum(
   id: String,
   block: () -> T,
-): T {
-  return if (this.isTraceEnabled) {
+): T =
+  if (this.isTraceEnabled) {
     val (result, duration) = measureTimedValue(block)
     Logging.timeSums.compute(this::class to id) { _, v ->
       (v ?: Duration.ZERO) + duration
@@ -85,7 +83,6 @@ inline fun <reified T> Logger.storeTraceTimeSum(
   } else {
     block()
   }
-}
 
 fun Logger.traceLogTimeSum(
   id: String,

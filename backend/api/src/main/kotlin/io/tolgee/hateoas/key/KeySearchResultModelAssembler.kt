@@ -11,7 +11,5 @@ class KeySearchResultModelAssembler :
     KeyController::class.java,
     KeySearchSearchResultModel::class.java,
   ) {
-  override fun toModel(view: KeySearchResultView): KeySearchSearchResultModel {
-    return KeySearchSearchResultModel(view)
-  }
+  override fun toModel(view: KeySearchResultView): KeySearchSearchResultModel = KeySearchSearchResultModel(view)
 }

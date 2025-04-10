@@ -63,11 +63,10 @@ class MtBatchTranslator(
   private fun translatePluralSeparately(
     item: MtBatchItemParams,
     baseTranslationText: String,
-  ): MtTranslatorResult {
-    return PluralTranslationUtil(context, baseTranslationText, item) { prepared ->
+  ): MtTranslatorResult =
+    PluralTranslationUtil(context, baseTranslationText, item) { prepared ->
       translateInSingleRequest(item, prepared)
     }.translate()
-  }
 
   private fun isDetectedPlural(
     keyId: Long?,
@@ -128,8 +127,8 @@ class MtBatchTranslator(
   private fun TranslateResult.getTranslatorResult(
     withReplacedParams: TextHelper.ReplaceIcuResult,
     item: MtBatchItemParams,
-  ): MtTranslatorResult {
-    return MtTranslatorResult(
+  ): MtTranslatorResult =
+    MtTranslatorResult(
       translatedText = translatedText?.replaceParams(withReplacedParams.params),
       actualPrice = actualPrice,
       contextDescription = contextDescription,
@@ -138,7 +137,6 @@ class MtBatchTranslator(
       baseBlank = baseBlank,
       exception = exception,
     )
-  }
 
   private fun getEmptyResult(item: MtBatchItemParams) =
     MtTranslatorResult(

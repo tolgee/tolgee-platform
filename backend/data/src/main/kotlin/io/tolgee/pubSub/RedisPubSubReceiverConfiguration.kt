@@ -29,24 +29,19 @@ class RedisPubSubReceiverConfiguration(
   }
 
   @Bean
-  fun redisPubsubReceiver(): RedisPubSubReceiver {
-    return RedisPubSubReceiver(template, applicationEventPublisher)
-  }
+  fun redisPubsubReceiver(): RedisPubSubReceiver = RedisPubSubReceiver(template, applicationEventPublisher)
 
   @Bean
-  fun redisWebsocketPubsubListenerAdapter(): MessageListenerAdapter {
-    return MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveWebsocketMessage.name)
-  }
+  fun redisWebsocketPubsubListenerAdapter(): MessageListenerAdapter =
+    MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveWebsocketMessage.name)
 
   @Bean
-  fun redisJobQueuePubsubListenerAdapter(): MessageListenerAdapter {
-    return MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveJobQueueMessage.name)
-  }
+  fun redisJobQueuePubsubListenerAdapter(): MessageListenerAdapter =
+    MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveJobQueueMessage.name)
 
   @Bean
-  fun redisJobCancelPubsubListenerAdapter(): MessageListenerAdapter {
-    return MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveJobCancel.name)
-  }
+  fun redisJobCancelPubsubListenerAdapter(): MessageListenerAdapter =
+    MessageListenerAdapter(redisPubsubReceiver(), RedisPubSubReceiver::receiveJobCancel.name)
 
   @Bean
   fun redisPubsubContainer(): RedisMessageListenerContainer {

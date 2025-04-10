@@ -22,8 +22,8 @@ class TranslationsViewQueryBuilder(
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
 ) {
-  private fun <T> getBaseQuery(query: CriteriaQuery<T>): QueryBase<T> {
-    return QueryBase(
+  private fun <T> getBaseQuery(query: CriteriaQuery<T>): QueryBase<T> =
+    QueryBase(
       cb = cb,
       projectId = projectId,
       query = query,
@@ -32,7 +32,6 @@ class TranslationsViewQueryBuilder(
       entityManager,
       authenticationFacade,
     )
-  }
 
   private fun getWhereConditions(queryBase: QueryBase<*>): MutableList<Predicate> {
     val where = queryBase.whereConditions.toMutableList()
@@ -66,13 +65,16 @@ class TranslationsViewQueryBuilder(
 
   private fun getOrderList(queryBase: QueryBase<Array<Any?>>): MutableList<Order> {
     val orderList =
-      sort.asSequence().filter { queryBase.querySelection[it.property] != null }.map {
-        val expression = queryBase.querySelection[it.property] as Expression<*>
-        when (it.direction) {
-          Sort.Direction.DESC -> cb.desc(expression)
-          else -> cb.asc(expression)
-        }
-      }.toMutableList()
+      sort
+        .asSequence()
+        .filter { queryBase.querySelection[it.property] != null }
+        .map {
+          val expression = queryBase.querySelection[it.property] as Expression<*>
+          when (it.direction) {
+            Sort.Direction.DESC -> cb.desc(expression)
+            else -> cb.asc(expression)
+          }
+        }.toMutableList()
 
     if (orderList.isEmpty()) {
       orderList.add(cb.asc(queryBase.keyNameExpression))

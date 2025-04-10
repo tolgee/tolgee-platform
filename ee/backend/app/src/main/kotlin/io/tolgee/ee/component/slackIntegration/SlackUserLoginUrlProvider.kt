@@ -58,12 +58,11 @@ class SlackUserLoginUrlProvider(
     slackUserId: String,
     workspaceId: Long?,
     slackTeamId: String,
-  ): SlackUserLoginDto {
-    return SlackUserLoginDto(
+  ): SlackUserLoginDto =
+    SlackUserLoginDto(
       slackUserId = slackUserId,
       slackChannelId = slackChannelId,
       workspaceId = workspaceId,
       slackTeamId = slackTeamId,
     )
-  }
 }

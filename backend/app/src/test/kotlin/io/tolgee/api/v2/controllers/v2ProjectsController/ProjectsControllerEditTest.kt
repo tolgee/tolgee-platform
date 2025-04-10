@@ -21,7 +21,10 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
     val content =
       EditProjectRequest(
         name = "new name",
-        baseLanguageId = base.project.languages.toList()[1].id,
+        baseLanguageId =
+          base.project.languages
+            .toList()[1]
+            .id,
         slug = "new-slug",
         icuPlaceholders = true,
         useNamespaces = true,
@@ -41,7 +44,10 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
     val content =
       EditProjectRequest(
         name = "",
-        baseLanguageId = base.project.languages.toList()[0].id,
+        baseLanguageId =
+          base.project.languages
+            .toList()[0]
+            .id,
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andIsBadRequest.andAssertThatJson {
       node("STANDARD_VALIDATION.name").isNotNull
@@ -57,7 +63,11 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
       )
     performAuthPut("/v2/projects/${base.project.id}", content).andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isEqualTo(content.name)
-      node("baseLanguage.id").isEqualTo(base.project.languages.toList()[0].id)
+      node("baseLanguage.id").isEqualTo(
+        base.project.languages
+          .toList()[0]
+          .id,
+      )
     }
   }
 
@@ -89,7 +99,10 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
     val content =
       EditProjectRequest(
         name = "new name",
-        baseLanguageId = base.project.languages.toList()[1].id,
+        baseLanguageId =
+          base.project.languages
+            .toList()[1]
+            .id,
         slug = slugToBeReused,
         icuPlaceholders = true,
         useNamespaces = true,
@@ -101,9 +114,11 @@ class ProjectsControllerEditTest : AuthorizedControllerTest() {
 
   private fun assert2ProjectsWithSameSlugExist(slug: String) {
     executeInNewTransaction {
-      entityManager.createQuery("from Project where slug = :slug", Project::class.java)
+      entityManager
+        .createQuery("from Project where slug = :slug", Project::class.java)
         .setParameter("slug", slug)
-        .resultList.assert.hasSize(2)
+        .resultList.assert
+        .hasSize(2)
     }
   }
 }

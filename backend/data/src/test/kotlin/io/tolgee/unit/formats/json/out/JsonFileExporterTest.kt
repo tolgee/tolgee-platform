@@ -304,16 +304,13 @@ class JsonFileExporterTest {
     files["cs-rCZ/hello.json"].assert.isNotNull()
   }
 
-  private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {
-    return this[fileName]!!.bufferedReader().readText()
-  }
+  private fun Map<String, InputStream>.getFileTextContent(fileName: String): String = this[fileName]!!.bufferedReader().readText()
 
-  private inline fun <reified T> Map<String, InputStream>.parseFileContent(fileName: String): T {
-    return jacksonObjectMapper().readValue(this.getFileTextContent(fileName))
-  }
+  private inline fun <reified T> Map<String, InputStream>.parseFileContent(fileName: String): T =
+    jacksonObjectMapper().readValue(this.getFileTextContent(fileName))
 
-  private fun generateTranslationsForKeys(keys: List<String>): List<ExportTranslationView> {
-    return keys.sorted().map { keyDef ->
+  private fun generateTranslationsForKeys(keys: List<String>): List<ExportTranslationView> =
+    keys.sorted().map { keyDef ->
       val split = keyDef.split(":").toMutableList()
       val keyName = split.removeLast()
       val namespace = split.removeLastOrNull()
@@ -322,19 +319,17 @@ class JsonFileExporterTest {
       key.translations["en"] = trans
       trans
     }
-  }
 
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = ExportParams(),
-  ): JsonFileExporter {
-    return JsonFileExporter(
+  ): JsonFileExporter =
+    JsonFileExporter(
       translations = translations,
       exportParams = exportParams,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
       customPrettyPrinter = CustomPrettyPrinter(),
     )
-  }
 }

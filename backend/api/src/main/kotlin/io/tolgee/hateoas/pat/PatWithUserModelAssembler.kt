@@ -14,10 +14,9 @@ class PatWithUserModelAssembler(
     PatController::class.java,
     PatWithUserModel::class.java,
   ) {
-  override fun toModel(entity: Pat): PatWithUserModel {
-    return PatWithUserModel(
+  override fun toModel(entity: Pat): PatWithUserModel =
+    PatWithUserModel(
       patModel = patModelAssembler.toModel(entity),
       user = simpleUserAccountModelAssembler.toModel(entity.userAccount),
     )
-  }
 }

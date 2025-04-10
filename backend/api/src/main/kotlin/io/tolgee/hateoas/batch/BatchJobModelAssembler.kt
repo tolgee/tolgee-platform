@@ -13,8 +13,8 @@ class BatchJobModelAssembler(
     BatchJobManagementController::class.java,
     BatchJobModel::class.java,
   ) {
-  override fun toModel(view: BatchJobView): BatchJobModel {
-    return BatchJobModel(
+  override fun toModel(view: BatchJobView): BatchJobModel =
+    BatchJobModel(
       id = view.batchJob.id,
       type = view.batchJob.type,
       status = view.batchJob.status,
@@ -26,5 +26,4 @@ class BatchJobModelAssembler(
       activityRevisionId = view.batchJob.activityRevision?.id,
       errorMessage = view.errorMessage?.code,
     )
-  }
 }

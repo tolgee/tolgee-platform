@@ -20,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
 
-class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
+class SlackIntegrationTest :
+  ProjectAuthControllerTest(),
+  Logging {
   @Autowired
   @MockBean
   lateinit var slackClient: Slack
@@ -44,7 +46,9 @@ class SlackIntegrationTest : ProjectAuthControllerTest(), Logging {
     val testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
-    val langTag = testData.projectBuilder.self.baseLanguage?.tag ?: ""
+    val langTag =
+      testData.projectBuilder.self.baseLanguage
+        ?.tag ?: ""
     loginAsUser(testData.user.username)
     Mockito.clearInvocations(mockedSlackClient.methodsClientMock)
     modifyTranslationData(testData.projectBuilder.self.id, langTag, testData.key.name)

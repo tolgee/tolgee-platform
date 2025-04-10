@@ -45,9 +45,10 @@ class MetadataProvider(
     targetLanguage: LanguageDto,
     closeKeyIds: List<Long>,
     excludeKeyId: Long?,
-  ): List<ExampleItem> {
-    return entityManager.createQuery(
-      """
+  ): List<ExampleItem> =
+    entityManager
+      .createQuery(
+        """
       select new 
          io.tolgee.component.machineTranslation.metadata.ExampleItem(source.text, target.text, key.name, ns.name) 
       from Translation source
@@ -62,36 +63,35 @@ class MetadataProvider(
           and target.text is not null 
           and target.text <> ''
     """,
-      ExampleItem::class.java,
-    )
-      .setParameter("excludeKeyId", excludeKeyId)
+        ExampleItem::class.java,
+      ).setParameter("excludeKeyId", excludeKeyId)
       .setParameter("targetLanguageId", targetLanguage.id)
       .setParameter("sourceLanguageId", sourceLanguage.id)
       .setParameter("closeKeyIds", closeKeyIds)
       .resultList
-  }
 
   private fun getExamples(
     targetLanguage: LanguageDto,
     isPlural: Boolean,
     text: String,
     keyId: Long?,
-  ): List<ExampleItem> {
-    return translationMemoryService.getSuggestions(
-      baseTranslationText = text,
-      isPlural = isPlural,
-      keyId = keyId,
-      targetLanguage = targetLanguage,
-      pageable = Pageable.ofSize(5),
-    ).content.map {
-      ExampleItem(
-        key = it.keyName,
-        keyNamespace = it.keyNamespace,
-        source = it.baseTranslationText,
-        target = it.targetTranslationText,
-      )
-    }
-  }
+  ): List<ExampleItem> =
+    translationMemoryService
+      .getSuggestions(
+        baseTranslationText = text,
+        isPlural = isPlural,
+        keyId = keyId,
+        targetLanguage = targetLanguage,
+        pageable = Pageable.ofSize(5),
+      ).content
+      .map {
+        ExampleItem(
+          key = it.keyName,
+          keyNamespace = it.keyNamespace,
+          source = it.baseTranslationText,
+          target = it.targetTranslationText,
+        )
+      }
 
   private val bigMetaService: BigMetaService by lazy {
     context.applicationContext.getBean(BigMetaService::class.java)

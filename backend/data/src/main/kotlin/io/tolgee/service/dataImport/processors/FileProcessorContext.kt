@@ -120,11 +120,10 @@ data class FileProcessorContext(
     return true
   }
 
-  private fun getOrCreateLanguage(languageName: String): ImportLanguage {
-    return languages[languageName] ?: ImportLanguage(languageName, fileEntity).also {
+  private fun getOrCreateLanguage(languageName: String): ImportLanguage =
+    languages[languageName] ?: ImportLanguage(languageName, fileEntity).also {
       languages[languageName] = it
     }
-  }
 
   fun addKeyDescription(
     key: String,
@@ -174,13 +173,9 @@ data class FileProcessorContext(
     }
   }
 
-  private fun getOrCreateKey(name: String): ImportKey {
-    return keys[name] ?: createKey(name)
-  }
+  private fun getOrCreateKey(name: String): ImportKey = keys[name] ?: createKey(name)
 
-  private fun createKey(name: String): ImportKey {
-    return ImportKey(name, this.fileEntity).also { keys[name] = it }
-  }
+  private fun createKey(name: String): ImportKey = ImportKey(name, this.fileEntity).also { keys[name] = it }
 
   private fun getOrCreateKeyMeta(key: String): KeyMeta {
     val keyEntity = getOrCreateKey(key)
@@ -193,7 +188,8 @@ data class FileProcessorContext(
   val mapping: ImportFileMapping? by lazy {
     val mappings = singleStepImportParams?.fileMappings ?: return@lazy null
 
-    mappings.filter { it.fileName == this.file.name }
+    mappings
+      .filter { it.fileName == this.file.name }
       .getOrThrowIfMoreThanOne {
         BadRequestException(Message.TOO_MANY_MAPPINGS_FOR_FILE, listOf(this.file.name))
       }

@@ -39,8 +39,8 @@ class ProjectPermissionFacade(
   fun getLanguages(
     params: RequestWithLanguagePermissions,
     projectId: Long,
-  ): LanguagePermissions {
-    return LanguagePermissions(
+  ): LanguagePermissions =
+    LanguagePermissions(
       view = this.getLanguagesAndCheckFromProject(params.viewLanguages, projectId),
       translate =
         this.getLanguagesAndCheckFromProject(
@@ -53,5 +53,4 @@ class ProjectPermissionFacade(
           projectId,
         ),
     )
-  }
 }

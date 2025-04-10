@@ -107,10 +107,14 @@ class ScreenshotService(
       this.originalText = info.text
       it.positions?.forEach { positionDto ->
         val xRatio =
-          newDimension?.width?.toDouble()
+          newDimension
+            ?.width
+            ?.toDouble()
             ?.div(originalDimension?.width?.toDouble() ?: 1.0) ?: 1.0
         val yRatio =
-          newDimension?.height?.toDouble()
+          newDimension
+            ?.height
+            ?.toDouble()
             ?.div(originalDimension?.height?.toDouble() ?: 1.0) ?: 1.0
         positions = positions ?: mutableListOf()
         positions!!.add(
@@ -125,9 +129,7 @@ class ScreenshotService(
     }
   }
 
-  fun Int.adjustByRation(ratio: Double): Int {
-    return (this * ratio).roundToInt()
-  }
+  fun Int.adjustByRation(ratio: Double): Int = (this * ratio).roundToInt()
 
   @Transactional
   fun saveUploadedImages(
@@ -150,26 +152,27 @@ class ScreenshotService(
   ): Map<Long, Screenshot> {
     val imageIds = screenshots.map { it.uploadedImageId }
     val images = imageUploadService.find(imageIds).associateBy { it.id }
-    return screenshots.map { screenshotInfo ->
-      val image =
-        images[screenshotInfo.uploadedImageId]
-          ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+    return screenshots
+      .map { screenshotInfo ->
+        val image =
+          images[screenshotInfo.uploadedImageId]
+            ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
 
-      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
-      }
-
-      val info =
-        screenshotInfo.let {
-          ScreenshotInfoDto(it.text, it.positions)
+        if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
+          throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
         }
 
-      val (screenshot, originalDimension, targetDimension) = saveScreenshot(image)
+        val info =
+          screenshotInfo.let {
+            ScreenshotInfoDto(it.text, it.positions)
+          }
 
-      addReference(key, screenshot, info, originalDimension, targetDimension)
+        val (screenshot, originalDimension, targetDimension) = saveScreenshot(image)
 
-      screenshotInfo.uploadedImageId to screenshot
-    }.toMap()
+        addReference(key, screenshot, info, originalDimension, targetDimension)
+
+        screenshotInfo.uploadedImageId to screenshot
+      }.toMap()
   }
 
   /**
@@ -232,9 +235,7 @@ class ScreenshotService(
   }
 
   @Transactional
-  fun findAll(key: Key): List<Screenshot> {
-    return screenshotRepository.findAllByKey(key)
-  }
+  fun findAll(key: Key): List<Screenshot> = screenshotRepository.findAllByKey(key)
 
   @Transactional
   fun delete(screenshots: Collection<Screenshot>) {
@@ -302,36 +303,34 @@ class ScreenshotService(
     screenshotRepository.deleteById(it)
   }
 
-  fun findByIdIn(ids: Collection<Long>): List<Screenshot> {
-    return screenshotRepository.findAllById(ids)
-  }
+  fun findByIdIn(ids: Collection<Long>): List<Screenshot> = screenshotRepository.findAllById(ids)
 
-  fun find(id: Long): Screenshot? {
-    return screenshotRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): Screenshot? = screenshotRepository.findById(id).orElse(null)
 
   fun deleteAllByProject(projectId: Long) {
     val all = screenshotRepository.getAllByKeyProjectId(projectId)
     all.forEach { this.deleteFile(it) }
 
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       DELETE FROM key_screenshot_reference WHERE key_id IN (
         SELECT id FROM key WHERE project_id = :projectId
       )
     """,
-    ).setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
 
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       DELETE FROM screenshot WHERE id IN (
         SELECT screenshot_id FROM key_screenshot_reference WHERE key_id IN (
           SELECT id FROM key WHERE project_id = :projectId
         )
       )
     """,
-    ).setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
   }
 
@@ -348,43 +347,37 @@ class ScreenshotService(
     fileStorage.deleteFile(screenshot.getFilePath())
   }
 
-  private fun Screenshot.getFilePath(): String {
-    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.filename}"
-  }
+  private fun Screenshot.getFilePath(): String = "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.filename}"
 
-  private fun Screenshot.getMiddleSizedPath(): String {
-    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.middleSizedFilename}"
-  }
+  private fun Screenshot.getMiddleSizedPath(): String = "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.middleSizedFilename}"
 
-  private fun Screenshot.getThumbnailPath(): String {
-    return "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.thumbnailFilename}"
-  }
+  private fun Screenshot.getThumbnailPath(): String = "$SCREENSHOTS_STORAGE_FOLDER_NAME/${this.thumbnailFilename}"
 
   fun saveAll(screenshots: List<Screenshot>) {
     screenshotRepository.saveAll(screenshots)
   }
 
-  fun getScreenshotsCountForKey(key: Key): Long {
-    return screenshotRepository.countByKey(key)
-  }
+  fun getScreenshotsCountForKey(key: Key): Long = screenshotRepository.countByKey(key)
 
-  fun getKeysWithScreenshots(ids: Collection<Long>): List<Key> {
-    return screenshotRepository.getKeysWithScreenshots(ids)
-  }
+  fun getKeysWithScreenshots(ids: Collection<Long>): List<Key> = screenshotRepository.getKeysWithScreenshots(ids)
 
   fun saveAllReferences(data: List<KeyScreenshotReference>) {
     keyScreenshotReferenceRepository.saveAll(data)
   }
 
-  fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
-    return this.getKeysWithScreenshots(keyIds)
-      .associate { it.id to it.keyScreenshotReferences.map { it.screenshot }.toSet().toList() }
-  }
+  fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> =
+    this
+      .getKeysWithScreenshots(keyIds)
+      .associate {
+        it.id to
+          it.keyScreenshotReferences
+            .map { it.screenshot }
+            .toSet()
+            .toList()
+      }
 
   fun getKeyScreenshotReferences(
     importedKeys: List<Key>,
     locations: List<String?>,
-  ): List<KeyScreenshotReference> {
-    return screenshotRepository.getKeyScreenshotReferences(importedKeys, locations)
-  }
+  ): List<KeyScreenshotReference> = screenshotRepository.getKeyScreenshotReferences(importedKeys, locations)
 }

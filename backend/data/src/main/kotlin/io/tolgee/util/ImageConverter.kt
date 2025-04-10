@@ -90,8 +90,16 @@ class ImageConverter(
       RenderingHints.VALUE_INTERPOLATION_BILINEAR,
     )
     g.drawImage(
-      sourceBufferedImage, 0, 0, targetDimension.width, targetDimension.height, 0, 0, sourceBufferedImage.width,
-      sourceBufferedImage.height, null,
+      sourceBufferedImage,
+      0,
+      0,
+      targetDimension.width,
+      targetDimension.height,
+      0,
+      0,
+      sourceBufferedImage.width,
+      sourceBufferedImage.height,
+      null,
     )
     g.dispose()
     return resized

@@ -28,7 +28,8 @@ class KeysDistance(
   var key1Id: Long = 0,
   @Id
   var key2Id: Long = 0,
-) : AuditModel(), Persistable<KeysDistanceId> {
+) : AuditModel(),
+  Persistable<KeysDistanceId> {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 
@@ -61,13 +62,9 @@ class KeysDistance(
     return result
   }
 
-  override fun getId(): KeysDistanceId? {
-    return KeysDistanceId(key1Id, key2Id)
-  }
+  override fun getId(): KeysDistanceId? = KeysDistanceId(key1Id, key2Id)
 
-  override fun isNew(): Boolean {
-    return new
-  }
+  override fun isNew(): Boolean = new
 
   @Transient
   @Column(insertable = false, updatable = false)

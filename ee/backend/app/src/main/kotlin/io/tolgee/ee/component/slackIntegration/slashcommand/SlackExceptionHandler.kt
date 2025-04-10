@@ -4,12 +4,11 @@ import io.tolgee.exceptions.SlackErrorException
 import org.springframework.stereotype.Component
 
 @Component
-class SlackExceptionHandler() {
-  fun handle(fn: () -> String?): String? {
-    return try {
+class SlackExceptionHandler {
+  fun handle(fn: () -> String?): String? =
+    try {
       fn()
     } catch (e: SlackErrorException) {
       e.blocks.asSlackResponseString
     }
-  }
 }

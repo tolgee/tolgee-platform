@@ -25,7 +25,8 @@ class MtCreditBucketService(
   private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
   private val machineTranslationProperties: MachineTranslationProperties,
-) : Logging, MtCreditsService {
+) : Logging,
+  MtCreditsService {
   override fun consumeCredits(
     organizationId: Long,
     creditsInCents: Int,
@@ -69,9 +70,7 @@ class MtCreditBucketService(
     }
   }
 
-  private fun shouldConsumeCredits(): Boolean {
-    return machineTranslationProperties.freeCreditsAmount > -1
-  }
+  private fun shouldConsumeCredits(): Boolean = machineTranslationProperties.freeCreditsAmount > -1
 
   /**
    * Since consumption does happen in a separate transaction,
@@ -159,9 +158,8 @@ class MtCreditBucketService(
   }
 
   @Transactional
-  override fun getCreditBalances(organizationId: Long): MtCreditBalanceDto {
-    return getCreditBalances(findOrCreateBucketByOrganizationId(organizationId))
-  }
+  override fun getCreditBalances(organizationId: Long): MtCreditBalanceDto =
+    getCreditBalances(findOrCreateBucketByOrganizationId(organizationId))
 
   private fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
     refillIfItsTime(bucket)
@@ -173,9 +171,7 @@ class MtCreditBucketService(
     )
   }
 
-  private fun MtCreditBucket.getNextRefillDate(): Date {
-    return this.refilled.addMonths(1)
-  }
+  private fun MtCreditBucket.getNextRefillDate(): Date = this.refilled.addMonths(1)
 
   fun refillBucket(bucket: MtCreditBucket) {
     refillBucket(bucket, getRefillAmount())
@@ -190,9 +186,7 @@ class MtCreditBucketService(
     bucket.bucketSize = bucket.credits
   }
 
-  private fun getRefillAmount(): Long {
-    return machineTranslationProperties.freeCreditsAmount
-  }
+  private fun getRefillAmount(): Long = machineTranslationProperties.freeCreditsAmount
 
   private fun refillIfItsTime(bucket: MtCreditBucket) {
     if (bucket.getNextRefillDate() <= currentDateProvider.date) {
@@ -200,20 +194,18 @@ class MtCreditBucketService(
     }
   }
 
-  private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
-    return tryUntilItDoesntBreakConstraint {
+  private fun findOrCreateBucket(organization: Organization): MtCreditBucket =
+    tryUntilItDoesntBreakConstraint {
       machineTranslationCreditBucketRepository.findByOrganization(organization) ?: createBucket(
         organization,
       )
     }
-  }
 
-  private fun createBucket(organization: Organization): MtCreditBucket {
-    return MtCreditBucket(organization = organization).apply {
+  private fun createBucket(organization: Organization): MtCreditBucket =
+    MtCreditBucket(organization = organization).apply {
       this.initCredits()
       save(this)
     }
-  }
 
   private fun MtCreditBucket.initCredits() {
     credits = getRefillAmount()

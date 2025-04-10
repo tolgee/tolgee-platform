@@ -36,30 +36,28 @@ class ImageStorageController(
     request: HttpServletRequest,
     @RequestParam("token") token: String?,
     response: HttpServletResponse,
-  ): ByteArray {
-    return getFile(
+  ): ByteArray =
+    getFile(
       urlPathPrefix = FileStoragePath.SCREENSHOTS,
       storageFolderName = SCREENSHOTS_STORAGE_FOLDER_NAME,
       token,
       request,
       response,
     )
-  }
 
   @GetMapping(value = ["/${FileStoragePath.UPLOADED_IMAGES}/**"])
   fun getUploadedImage(
     request: HttpServletRequest,
     @RequestParam("token") token: String?,
     response: HttpServletResponse,
-  ): ByteArray {
-    return getFile(
+  ): ByteArray =
+    getFile(
       urlPathPrefix = FileStoragePath.UPLOADED_IMAGES,
       storageFolderName = UPLOADED_IMAGES_STORAGE_FOLDER_NAME,
       token,
       request,
       response,
     )
-  }
 
   @GetMapping(value = ["/${FileStoragePath.AVATARS}/*"])
   fun getAvatar(
@@ -131,7 +129,5 @@ class ImageStorageController(
   private fun getFileName(
     request: HttpServletRequest,
     urlPathPrefix: String,
-  ): String {
-    return request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
-  }
+  ): String = request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
 }

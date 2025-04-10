@@ -16,7 +16,5 @@ class Sleeper : Logging {
   /**
    * This helps us to mock a sleep time in tests
    */
-  fun getDuration(timeInMs: Long): Long {
-    return timeInMs
-  }
+  fun getDuration(timeInMs: Long): Long = timeInMs
 }

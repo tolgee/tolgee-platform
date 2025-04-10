@@ -39,4 +39,6 @@ open class ApiKeyModel(
   """,
   )
   override var scopes: Set<String> = setOf(),
-) : RepresentationModel<ApiKeyModel>(), Serializable, IApiKeyModel
+) : RepresentationModel<ApiKeyModel>(),
+  Serializable,
+  IApiKeyModel

@@ -164,9 +164,7 @@ private class StringBuilderWithIndexes(
 
   override fun toString() = sb.toString()
 
-  fun originalString(): String {
-    return path.substring(start, end)
-  }
+  fun originalString(): String = path.substring(start, end)
 }
 
 val indexParseRegex by lazy {

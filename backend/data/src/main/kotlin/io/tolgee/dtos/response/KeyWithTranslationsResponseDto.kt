@@ -9,12 +9,11 @@ data class KeyWithTranslationsResponseDto(
 ) {
   companion object {
     @JvmStatic
-    fun fromQueryResult(keyWithTranslationsDTO: KeyWithTranslationsDto): KeyWithTranslationsResponseDto {
-      return KeyWithTranslationsResponseDto(
+    fun fromQueryResult(keyWithTranslationsDTO: KeyWithTranslationsDto): KeyWithTranslationsResponseDto =
+      KeyWithTranslationsResponseDto(
         keyWithTranslationsDTO.id,
         keyWithTranslationsDTO.path.fullPathString,
         keyWithTranslationsDTO.getTranslations(),
       )
-    }
   }
 }

@@ -124,10 +124,12 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1))
       .then { permission }
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
   }
 
@@ -140,14 +142,16 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     ).then { permission }
 
     permissionService.find(organizationId = 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,
         organizationId = 1,
       )
     permissionService.find(organizationId = 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,

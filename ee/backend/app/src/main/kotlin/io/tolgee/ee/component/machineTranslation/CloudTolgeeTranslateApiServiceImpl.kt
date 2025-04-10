@@ -36,7 +36,9 @@ class CloudTolgeeTranslateApiServiceImpl(
   private val restTemplate: RestTemplate,
   private val tokenBucketManager: TokenBucketManager,
   private val currentDateProvider: CurrentDateProvider,
-) : Logging, TolgeeTranslateApiService, CloudTolgeeTranslateApiService {
+) : Logging,
+  TolgeeTranslateApiService,
+  CloudTolgeeTranslateApiService {
   override fun translate(params: TolgeeTranslateParams): MtValueProvider.MtResult {
     val headers = HttpHeaders()
 
@@ -114,9 +116,8 @@ class CloudTolgeeTranslateApiServiceImpl(
     tokenBucketManager.setEmptyUntil(BUCKET_KEY, currentDateProvider.date.time + retryAfter * 1000)
   }
 
-  private fun HttpClientErrorException.TooManyRequests.parse(): TooManyRequestsData {
-    return jacksonObjectMapper().readValue(this.responseBodyAsString)
-  }
+  private fun HttpClientErrorException.TooManyRequests.parse(): TooManyRequestsData =
+    jacksonObjectMapper().readValue(this.responseBodyAsString)
 
   /**
    * Data structure for mapping the AzureCognitive JSON response objects.
@@ -145,7 +146,10 @@ class CloudTolgeeTranslateApiServiceImpl(
       var target: String,
     )
 
-    class TolgeeTranslateResponse(val output: String, val contextDescription: String?)
+    class TolgeeTranslateResponse(
+      val output: String,
+      val contextDescription: String?,
+    )
   }
 
   class TooManyRequestsData(

@@ -31,7 +31,9 @@ import java.util.*
  *
  * @since 1.3
  */
-open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
+open class MimeMessageParser(
+  message: jakarta.mail.internet.MimeMessage,
+) {
   /** The MimeMessage to convert  */
   private val mimeMessage: jakarta.mail.internet.MimeMessage
 
@@ -170,14 +172,20 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     if (isMimeType(
         part,
         "text/plain",
-      ) && plainContent == null && !jakarta.mail.Part.ATTACHMENT.equals(part.disposition, ignoreCase = true)
+      ) &&
+      plainContent == null &&
+      !jakarta.mail.Part.ATTACHMENT
+        .equals(part.disposition, ignoreCase = true)
     ) {
       plainContent = part.content.toString()
     } else {
       if (isMimeType(
           part,
           "text/html",
-        ) && htmlContent == null && !jakarta.mail.Part.ATTACHMENT.equals(part.disposition, ignoreCase = true)
+        ) &&
+        htmlContent == null &&
+        !jakarta.mail.Part.ATTACHMENT
+          .equals(part.disposition, ignoreCase = true)
       ) {
         htmlContent = part.content.toString()
       } else {
@@ -207,9 +215,7 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
    * @param contentId the string to strip
    * @return a stripped version of the content id
    */
-  private fun stripContentId(contentId: String?): String? {
-    return contentId?.trim { it <= ' ' }?.replace("[\\<\\>]".toRegex(), "")
-  }
+  private fun stripContentId(contentId: String?): String? = contentId?.trim { it <= ' ' }?.replace("[\\<\\>]".toRegex(), "")
 
   /**
    * Checks whether the MimePart contains an object of the given mime type.
@@ -263,9 +269,7 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
 
   /** @return Returns the mimeMessage.
    */
-  fun getMimeMessage(): jakarta.mail.internet.MimeMessage {
-    return mimeMessage
-  }
+  fun getMimeMessage(): jakarta.mail.internet.MimeMessage = mimeMessage
 
   val contentIds: Collection<String>
     /**
@@ -282,21 +286,15 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
 
   /** @return true if a plain content is available
    */
-  fun hasPlainContent(): Boolean {
-    return plainContent != null
-  }
+  fun hasPlainContent(): Boolean = plainContent != null
 
   /** @return true if HTML content is available
    */
-  fun hasHtmlContent(): Boolean {
-    return htmlContent != null
-  }
+  fun hasHtmlContent(): Boolean = htmlContent != null
 
   /** @return true if attachments are available
    */
-  fun hasAttachments(): Boolean {
-    return !attachmentList.isEmpty()
-  }
+  fun hasAttachments(): Boolean = !attachmentList.isEmpty()
 
   /**
    * Find an attachment using its name.
@@ -326,9 +324,7 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
    * @return the corresponding datasource or null if nothing was found
    * @since 1.3.4
    */
-  fun findAttachmentByCid(cid: String): jakarta.activation.DataSource? {
-    return cidMap[cid]
-  }
+  fun findAttachmentByCid(cid: String): jakarta.activation.DataSource? = cidMap[cid]
 
   /**
    * Determines the name of the data source if it is not already set.
@@ -350,7 +346,8 @@ open class MimeMessageParser(message: jakarta.mail.internet.MimeMessage) {
     }
     result =
       if (result != null && !result.isEmpty()) {
-        jakarta.mail.internet.MimeUtility.decodeText(result)
+        jakarta.mail.internet.MimeUtility
+          .decodeText(result)
       } else {
         null
       }

@@ -13,9 +13,7 @@ class PythonToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
-  ): String {
-    return baseToIcuPlaceholderConvertor.convert(matchResult, isInPlural)
-  }
+  ): String = baseToIcuPlaceholderConvertor.convert(matchResult, isInPlural)
 
   companion object {
     val PYTHON_PLACEHOLDER_REGEX =

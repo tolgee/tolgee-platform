@@ -99,59 +99,54 @@ class ActivityService(
     return pgObject
   }
 
-  private fun persistActivityRevision(activityRevision: ActivityRevision): ActivityRevision {
-    return if (activityRevision.id == 0L) {
+  private fun persistActivityRevision(activityRevision: ActivityRevision): ActivityRevision =
+    if (activityRevision.id == 0L) {
       entityManager.persist(activityRevision)
       entityManager.flushAndClear()
       activityRevision
     } else {
       entityManager.getReference(ActivityRevision::class.java, activityRevision.id)
     }
-  }
 
   @Transactional
   fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
-  ): Page<ProjectActivityView> {
-    return ProjectActivityViewByPageableProvider(
+  ): Page<ProjectActivityView> =
+    ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
       pageable = pageable,
     ).get()
-  }
 
   @Transactional
-  fun findProjectActivity(revisionId: Long): ProjectActivityView? {
-    return ProjectActivityViewByRevisionProvider(
+  fun findProjectActivity(revisionId: Long): ProjectActivityView? =
+    ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
       revisionId = revisionId,
     ).get()
-  }
 
   @Transactional
   fun findProjectActivity(
     projectId: Long,
     revisionId: Long,
-  ): ProjectActivityView? {
-    return ProjectActivityViewByRevisionProvider(
+  ): ProjectActivityView? =
+    ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
       revisionId = revisionId,
       projectId = projectId,
     ).get()
-  }
 
   @Transactional
   fun getTranslationHistory(
     translationId: Long,
     pageable: Pageable,
-  ): Page<TranslationHistoryView> {
-    return activityModifiedEntityRepository.getTranslationHistory(
+  ): Page<TranslationHistoryView> =
+    activityModifiedEntityRepository.getTranslationHistory(
       translationId = translationId,
       pageable = pageable,
       ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD),
     )
-  }
 
   fun getRevisionModifications(
     projectId: Long,
@@ -164,9 +159,7 @@ class ActivityService(
     return provider.get()
   }
 
-  fun findActivityRevisionInfo(id: Long): ActivityRevisionInfo? {
-    return activityRevisionRepository.findInfo(id)
-  }
+  fun findActivityRevisionInfo(id: Long): ActivityRevisionInfo? = activityRevisionRepository.findInfo(id)
 
   private fun ActivityRevision.shouldSaveWithoutModification(): Boolean {
     val type = this.type ?: return true

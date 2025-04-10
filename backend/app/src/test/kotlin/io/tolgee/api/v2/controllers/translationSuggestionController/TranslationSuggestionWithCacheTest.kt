@@ -111,8 +111,8 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
     userAccount = testData.user
   }
 
-  private fun performMtRequest(services: List<MtServiceType>? = null): ResultActions {
-    return performAuthPost(
+  private fun performMtRequest(services: List<MtServiceType>? = null): ResultActions =
+    performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(
         keyId = testData.beautifulKey.id,
@@ -120,5 +120,4 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
         services = services?.toSet(),
       ),
     )
-  }
 }

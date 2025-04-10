@@ -106,12 +106,11 @@ class Translation(
     this.resetFlags()
   }
 
-  fun isEmpty(): Boolean {
-    return this.text.isNullOrEmpty() &&
+  fun isEmpty(): Boolean =
+    this.text.isNullOrEmpty() &&
       !this.outdated &&
       this.mtProvider == null &&
       !this.auto
-  }
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -167,7 +166,8 @@ class Translation(
           translation.state = TranslationState.TRANSLATED
         }
         if (translation.text.isNullOrEmpty() &&
-          translation.state != TranslationState.UNTRANSLATED && translation.state != TranslationState.DISABLED
+          translation.state != TranslationState.UNTRANSLATED &&
+          translation.state != TranslationState.DISABLED
         ) {
           translation.state = TranslationState.UNTRANSLATED
         }

@@ -49,7 +49,9 @@ fun verifyWebhookSignatureHeader(
   return true
 }
 
-class SignatureVerificationException(message: String) : Exception(message)
+class SignatureVerificationException(
+  message: String,
+) : Exception(message)
 
 fun computeHmacSha256(
   key: String,

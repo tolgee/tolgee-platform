@@ -25,7 +25,8 @@ class AwsMtValueProvider(
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val result =
       translateService.translateText(
-        TranslateTextRequest.builder()
+        TranslateTextRequest
+          .builder()
           .sourceLanguageCode(params.sourceLanguageTag)
           .targetLanguageCode(params.targetLanguageTag)
           .settings(getSettings(params))
@@ -56,7 +57,8 @@ class AwsMtValueProvider(
 
   private fun getSettings(params: ProviderTranslateParams): TranslationSettings {
     val formality = getAwsFormality(params) ?: return TranslationSettings.builder().build()
-    return TranslationSettings.builder()
+    return TranslationSettings
+      .builder()
       .formality(formality)
       .build()
   }

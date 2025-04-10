@@ -62,8 +62,7 @@ class ScreenshotModelAssembler(
       location = entity.location,
       width = entity.width,
       height = entity.height,
-    )
-      .add(Link.of(fileUrl, "file"))
+    ).add(Link.of(fileUrl, "file"))
       .add(Link.of(thumbnailUrl, "thumbnail"))
   }
 
@@ -72,8 +71,11 @@ class ScreenshotModelAssembler(
     if (!fileUrl.matches(Regex("^https?://.*$"))) {
       val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
       fileUrl =
-        builder.replacePath(fileUrl)
-          .replaceQuery("").build().toUriString()
+        builder
+          .replacePath(fileUrl)
+          .replaceQuery("")
+          .build()
+          .toUriString()
     }
     return fileUrl
   }

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component
 class ContentStorageModelAssemblerEeImpl :
   RepresentationModelAssembler<ContentStorage, ContentStorageModel>,
   ContentStorageModelAssembler {
-  override fun toModel(entity: ContentStorage): ContentStorageModel {
-    return ContentStorageModel(
+  override fun toModel(entity: ContentStorage): ContentStorageModel =
+    ContentStorageModel(
       id = entity.id,
       name = entity.name,
       publicUrlPrefix = entity.publicUrlPrefix,
@@ -32,5 +32,4 @@ class ContentStorageModelAssemblerEeImpl :
           AzureContentStorageConfigModel(containerName = it.containerName)
         },
     )
-  }
 }

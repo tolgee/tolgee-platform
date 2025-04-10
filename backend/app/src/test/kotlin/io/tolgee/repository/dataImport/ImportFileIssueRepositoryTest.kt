@@ -24,10 +24,12 @@ class ImportFileIssueRepositoryTest : AbstractSpringTest() {
     testData.addFileIssues()
     testDataService.saveTestData(testData.root)
     val result =
-      importFileIssueRepository.findAllByFileIdView(
-        testData.importBuilder.data.importFiles[0].self.id,
-        PageRequest.of(0, 10),
-      ).content
+      importFileIssueRepository
+        .findAllByFileIdView(
+          testData.importBuilder.data.importFiles[0]
+            .self.id,
+          PageRequest.of(0, 10),
+        ).content
 
     assertThat(result).hasSize(4)
     assertThat(result[0].params).hasSize(1)

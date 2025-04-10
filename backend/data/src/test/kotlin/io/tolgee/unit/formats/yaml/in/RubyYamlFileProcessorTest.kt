@@ -34,7 +34,8 @@ class RubyYamlFileProcessorTest {
     mockUtil.mockIt("en.yml", "src/test/resources/import/yaml/ruby.yaml")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("cs", "relations.part_of_relations")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "relations.part_of_relations")
       .assertSinglePlural {
         hasText(
           """
@@ -48,15 +49,18 @@ class RubyYamlFileProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "redactions.edit.heading")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "redactions.edit.heading")
       .assertSingle {
         hasText("Upravit redakci {count, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "redactions.index.title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "redactions.index.title")
       .assertSingle {
         hasText("Seznam oprav {0, number} {1} {2, number, .00}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "some_text_with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "some_text_with_params")
       .assertSingle {
         hasText("Toto je text s parametry: {param1} a {param2}")
       }
@@ -71,7 +75,8 @@ class RubyYamlFileProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("cs", "relations.part_of_relations")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "relations.part_of_relations")
       .assertSinglePlural {
         hasText(
           """
@@ -85,15 +90,18 @@ class RubyYamlFileProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "redactions.edit.heading")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "redactions.edit.heading")
       .assertSingle {
         hasText("Upravit redakci %<count>d")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "redactions.index.title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "redactions.index.title")
       .assertSingle {
         hasText("Seznam oprav %d %s %.2f")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "some_text_with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "some_text_with_params")
       .assertSingle {
         hasText("Toto je text s parametry: %{param1} a %{param2}")
       }
@@ -104,7 +112,8 @@ class RubyYamlFileProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("cs", "relations.part_of_relations")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "relations.part_of_relations")
       .assertSinglePlural {
         hasText(
           """
@@ -118,15 +127,18 @@ class RubyYamlFileProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "redactions.edit.heading")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "redactions.edit.heading")
       .assertSingle {
         hasText("Upravit redakci %<count>d")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "redactions.index.title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "redactions.index.title")
       .assertSingle {
         hasText("Seznam oprav %d %s %.2f")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "some_text_with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "some_text_with_params")
       .assertSingle {
         hasText("Toto je text s parametry: %'{'param1'}' a %'{'param2'}'")
       }

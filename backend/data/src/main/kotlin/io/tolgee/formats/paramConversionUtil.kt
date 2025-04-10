@@ -21,8 +21,7 @@ fun convertFloatToIcu(
   return "{$name, number, $precisionString}"
 }
 
-fun usesUnsupportedFeature(parsed: ParsedCLikeParam) =
-  parsed.width != null || parsed.flags != null || parsed.length != null
+fun usesUnsupportedFeature(parsed: ParsedCLikeParam) = parsed.width != null || parsed.flags != null || parsed.length != null
 
 fun convertMessage(
   message: String,

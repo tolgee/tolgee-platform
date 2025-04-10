@@ -9,7 +9,5 @@ class CacheWithExpirationManager(
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-  fun getCache(name: String): CacheWithExpiration? {
-    return cacheManager.getCache(name)?.let { CacheWithExpiration(it, currentDateProvider) }
-  }
+  fun getCache(name: String): CacheWithExpiration? = cacheManager.getCache(name)?.let { CacheWithExpiration(it, currentDateProvider) }
 }

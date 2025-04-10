@@ -27,74 +27,91 @@ class ResxProcessorTest {
   fun `returns correct parsed result`() {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "Title")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "Title")
       .assertSingle {
         hasText("Classic American Cars")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "HeaderString1")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "HeaderString1")
       .assertSingle {
         hasText("Make")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "HeaderString2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "HeaderString2")
       .assertSingle {
         hasText("Model")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "HeaderString3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "HeaderString3")
       .assertSingle {
         hasText("Year")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "HeaderString4")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "HeaderString4")
       .assertSingle {
         hasText("Doors")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "HeaderString5")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "HeaderString5")
       .assertSingle {
         hasText("Cylinders")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test")
       .assertSingle {
         hasText("Text with placeholders {0} and tags </br> and complex tags <p>text</p>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test2")
       .assertSingle {
         hasText(
           "special \" \\\\ characters\n handling 	 could 耀 be  <value>asdf</value>    interesting " +
             "</value> <p>a</p> lot </data> also",
         )
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test3")
       .assertSingle {
         hasText("<value>asdf</value>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test4")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test4")
       .assertSingle {
         hasText("</value>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test5")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test5")
       .assertSingle {
         hasText("</data>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test6")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test6")
       .assertSingle {
         hasText("</root>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test7")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test7")
       .assertSingle {
         hasText("</asdf>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test8")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test8")
       .assertSingle {
         hasText("<p>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test9")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test9")
       .assertSingle {
         hasText("<p>a</p>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test10")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test10")
       .assertSingle {
         hasText("<p>{0}</p>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test11")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test11")
       .assertSingle {
         hasText("Text with placeholders {0} and tags </br> and complex tags <p>text</p>")
       }
@@ -105,11 +122,13 @@ class ResxProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "test")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test")
       .assertSingle {
         hasText("Text with placeholders {0} and tags </br> and complex tags <p>text</p>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test2")
       .assertSinglePlural {
         hasText(
           """
@@ -121,7 +140,8 @@ class ResxProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test3")
       .assertSingle {
         hasText("Text with named placeholders {asdf}")
       }
@@ -136,11 +156,13 @@ class ResxProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "test")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test")
       .assertSingle {
         hasText("Text with placeholders {0} and tags </br> and complex tags <p>text</p>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test2")
       .assertSinglePlural {
         hasText(
           """
@@ -152,7 +174,8 @@ class ResxProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test3")
       .assertSingle {
         hasText("Text with named placeholders {asdf}")
       }
@@ -167,11 +190,13 @@ class ResxProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "test")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test")
       .assertSingle {
         hasText("Text with placeholders {0} and tags </br> and complex tags <p>text</p>")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test2")
       .assertSinglePlural {
         hasText(
           """
@@ -183,7 +208,8 @@ class ResxProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "test3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "test3")
       .assertSingle {
         hasText("Text with named placeholders {asdf}")
       }

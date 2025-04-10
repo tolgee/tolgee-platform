@@ -12,4 +12,6 @@ open class RevealedApiKeyModel(
   apiKeyModel: ApiKeyModel,
   @Schema(description = "Resulting user's api key")
   var key: String = "",
-) : RepresentationModel<RevealedApiKeyModel>(), Serializable, IApiKeyModel by apiKeyModel
+) : RepresentationModel<RevealedApiKeyModel>(),
+  Serializable,
+  IApiKeyModel by apiKeyModel

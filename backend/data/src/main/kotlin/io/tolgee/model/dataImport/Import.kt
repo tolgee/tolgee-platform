@@ -23,7 +23,8 @@ class Import(
   @field:NotNull
   @ManyToOne(optional = false)
   val project: Project,
-) : StandardAuditModel(), SoftDeletable {
+) : StandardAuditModel(),
+  SoftDeletable {
   @field:NotNull
   @ManyToOne(optional = false)
   lateinit var author: UserAccount

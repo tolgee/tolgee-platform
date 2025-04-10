@@ -11,14 +11,16 @@ class PathDTO private constructor() {
     get() = fullPath.last()
   val fullPathString: String
     get() =
-      fullPath.stream().map { i: String ->
-        i.replace(
-          ("\\" + DELIMITER).toRegex(),
-          "\\\\" + DELIMITER,
+      fullPath
+        .stream()
+        .map { i: String ->
+          i.replace(
+            ("\\" + DELIMITER).toRegex(),
+            "\\\\" + DELIMITER,
+          )
+        }.collect(
+          Collectors.joining("."),
         )
-      }.collect(
-        Collectors.joining("."),
-      )
   val path: List<String>
     get() {
       val path = LinkedList(fullPath)
@@ -38,9 +40,7 @@ class PathDTO private constructor() {
     this.fullPath = fullPath
   }
 
-  override fun toString(): String {
-    return "PathDTO(fullPath=" + fullPath + ")"
-  }
+  override fun toString(): String = "PathDTO(fullPath=" + fullPath + ")"
 
   companion object {
     const val DELIMITER = '.'

@@ -4,7 +4,9 @@ import io.tolgee.constants.Message
 import org.springframework.http.HttpStatus
 import java.io.Serializable
 
-abstract class ErrorException : ExceptionWithMessage, ExpectedException {
+abstract class ErrorException :
+  ExceptionWithMessage,
+  ExpectedException {
   constructor(message: Message, params: List<Serializable?>? = null, cause: Exception? = null) : super(
     message,
     params,

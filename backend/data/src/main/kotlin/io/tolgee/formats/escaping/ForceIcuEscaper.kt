@@ -6,7 +6,10 @@ import io.tolgee.formats.escaping.ForceIcuEscaper.State.*
  * This class forcefully escapes syntax of ICU messages.
  * It's ported from Stapan Granat's JS code
  */
-class ForceIcuEscaper(private val input: String, private val escapeHash: Boolean = false) {
+class ForceIcuEscaper(
+  private val input: String,
+  private val escapeHash: Boolean = false,
+) {
   enum class State {
     StateText,
     StateEscapedMaybe,

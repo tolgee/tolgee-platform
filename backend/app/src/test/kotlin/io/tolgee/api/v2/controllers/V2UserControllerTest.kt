@@ -65,8 +65,10 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       )
     performAuthPut("/v2/user/password", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     val fromDb = userAccountService.findActive(initialUsername)
-    Assertions.assertThat(passwordEncoder.matches(requestDTO.password, fromDb!!.password))
-      .describedAs("Password is changed").isTrue
+    Assertions
+      .assertThat(passwordEncoder.matches(requestDTO.password, fromDb!!.password))
+      .describedAs("Password is changed")
+      .isTrue
 
     notificationUtil.newestInAppNotification().also {
       assertThat(it.type).isEqualTo(PASSWORD_CHANGED)
@@ -86,7 +88,8 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       )
     var mvcResult =
       performAuthPut("/v2/user", requestDTO)
-        .andIsBadRequest.andReturn()
+        .andIsBadRequest
+        .andReturn()
     val standardValidation = assertThat(mvcResult).error().isStandardValidation
     standardValidation.onField("name")
 
@@ -99,9 +102,12 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     dbPopulator.createUserIfNotExists(requestDTO.email)
     mvcResult =
       performAuthPut("/v2/user", requestDTO)
-        .andIsBadRequest.andReturn()
+        .andIsBadRequest
+        .andReturn()
     assertThat(mvcResult)
-      .error().isCustomValidation.hasMessage("username_already_exists")
+      .error()
+      .isCustomValidation
+      .hasMessage("username_already_exists")
   }
 
   @Test
@@ -113,7 +119,8 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       )
     val mvcResult =
       performAuthPut("/v2/user/password", requestDto)
-        .andIsBadRequest.andReturn()
+        .andIsBadRequest
+        .andReturn()
     val standardValidation = assertThat(mvcResult).error().isStandardValidation
     standardValidation.onField("password")
   }

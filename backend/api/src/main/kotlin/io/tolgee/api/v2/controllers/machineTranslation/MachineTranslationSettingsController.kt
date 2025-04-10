@@ -66,13 +66,14 @@ class MachineTranslationSettingsController(
   fun getMachineTranslationLanguageInfo(): CollectionModel<LanguageInfoModel> {
     val data = mtServiceConfigService.getLanguageInfo(projectHolder.project)
     return CollectionModel.of(
-      data.map {
-        LanguageInfoModel(
-          it.language?.id,
-          it.language?.tag,
-          supportedServices = it.supportedServices,
-        )
-      }.sortedBy { it.languageId },
+      data
+        .map {
+          LanguageInfoModel(
+            it.language?.id,
+            it.language?.tag,
+            supportedServices = it.supportedServices,
+          )
+        }.sortedBy { it.languageId },
     )
   }
 }

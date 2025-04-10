@@ -102,9 +102,7 @@ class ContentDeliveryConfigController(
   @AllowApiAccess
   fun get(
     @PathVariable id: Long,
-  ): ContentDeliveryConfigModel {
-    return contentDeliveryConfigModelAssembler.toModel(contentDeliveryService.get(projectHolder.project.id, id))
-  }
+  ): ContentDeliveryConfigModel = contentDeliveryConfigModelAssembler.toModel(contentDeliveryService.get(projectHolder.project.id, id))
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_PUBLISH])
   @PostMapping("/{id}")

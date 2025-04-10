@@ -31,7 +31,9 @@ class BatchClearTranslationsTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val allKeyIds = keys.map { it.id }.toList()
     val keyIds = allKeyIds.take(10)
-    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val allLanguageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
     val languagesToClearIds = listOf(testData.germanLanguage.id, testData.englishLanguage.id)
 
     performProjectAuthPost(

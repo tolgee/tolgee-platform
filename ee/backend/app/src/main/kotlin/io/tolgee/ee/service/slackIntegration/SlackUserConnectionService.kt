@@ -14,28 +14,18 @@ import org.springframework.transaction.annotation.Transactional
 class SlackUserConnectionService(
   private val slackUserConnectionRepository: SlackUserConnectionRepository,
 ) : Logging {
-  fun get(id: Long): SlackUserConnection {
-    return slackUserConnectionRepository.findById(id).get()
-  }
+  fun get(id: Long): SlackUserConnection = slackUserConnectionRepository.findById(id).get()
 
-  fun find(id: Long): SlackUserConnection? {
-    return slackUserConnectionRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): SlackUserConnection? = slackUserConnectionRepository.findById(id).orElse(null)
 
-  fun findByUserAccountId(id: Long): SlackUserConnection? {
-    return slackUserConnectionRepository.findByUserAccountId(id)
-  }
+  fun findByUserAccountId(id: Long): SlackUserConnection? = slackUserConnectionRepository.findByUserAccountId(id)
 
   fun findBySlackId(
     slackId: String,
     slackTeamId: String,
-  ): SlackUserConnection? {
-    return slackUserConnectionRepository.findBySlackUserIdAndSlackTeamId(slackId, slackTeamId)
-  }
+  ): SlackUserConnection? = slackUserConnectionRepository.findBySlackUserIdAndSlackTeamId(slackId, slackTeamId)
 
-  fun save(slackUserConnection: SlackUserConnection): SlackUserConnection {
-    return slackUserConnectionRepository.save(slackUserConnection)
-  }
+  fun save(slackUserConnection: SlackUserConnection): SlackUserConnection = slackUserConnectionRepository.save(slackUserConnection)
 
   fun isUserConnected(
     slackId: String,
@@ -74,9 +64,7 @@ class SlackUserConnectionService(
     }
   }
 
-  private fun delete(connection: SlackUserConnection) {
-    return slackUserConnectionRepository.delete(connection)
-  }
+  private fun delete(connection: SlackUserConnection) = slackUserConnectionRepository.delete(connection)
 
   @Transactional
   fun delete(

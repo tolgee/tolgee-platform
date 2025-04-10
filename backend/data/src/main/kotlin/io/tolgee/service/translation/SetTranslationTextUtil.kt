@@ -30,7 +30,8 @@ class SetTranslationTextUtil(
 
     return setForKey(
       key,
-      normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
+      normalized
+        .map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
       oldTranslations,
     ).mapKeys { it.key.tag }
@@ -42,9 +43,10 @@ class SetTranslationTextUtil(
     oldTranslations: Map<Language, String?>,
   ): Map<Language, Translation> {
     val result =
-      translations.entries.associate { (language, value) ->
-        language to setTranslationText(key, language, value)
-      }.mapValues { it.value }
+      translations.entries
+        .associate { (language, value) ->
+          language to setTranslationText(key, language, value)
+        }.mapValues { it.value }
 
     applicationContext.publishEvent(
       OnTranslationsSet(

@@ -90,11 +90,15 @@ class ImportTranslation(
       return "__null_value"
     }
     val hash =
-      MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
-        val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
-        buffer.putLong(it)
-        buffer.array().asSequence()
-      }.toList().toByteArray()
+      MurmurHash3
+        .hash128(this.toByteArray())
+        .asSequence()
+        .flatMap {
+          val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
+          buffer.putLong(it)
+          buffer.array().asSequence()
+        }.toList()
+        .toByteArray()
     return Base64.getEncoder().encodeToString(hash)
   }
 }

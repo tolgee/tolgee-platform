@@ -65,7 +65,11 @@ class SlackMessageContext(
    * If this is empty, it means that the operation is probably big
    */
   private val translationChangeSizeFromModifiedEntities: Long by lazy {
-    activityData?.modifiedEntities?.get("Translation")?.size?.toLong() ?: 0L
+    activityData
+      ?.modifiedEntities
+      ?.get("Translation")
+      ?.size
+      ?.toLong() ?: 0L
   }
 
   private fun getSlackNickName(authorId: Long): String? {
@@ -99,7 +103,6 @@ class SlackMessageContext(
     applicationContext.getBean(SlackUserConnectionService::class.java)
   }
 
-  private fun OrganizationSlackWorkspace?.getSlackToken(): String {
-    return this?.accessToken ?: tolgeeProperties.slack.token ?: throw SlackNotConfiguredException()
-  }
+  private fun OrganizationSlackWorkspace?.getSlackToken(): String =
+    this?.accessToken ?: tolgeeProperties.slack.token ?: throw SlackNotConfiguredException()
 }

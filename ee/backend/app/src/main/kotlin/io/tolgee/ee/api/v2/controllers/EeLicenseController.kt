@@ -44,9 +44,7 @@ class EeLicenseController(
   @RequiresSuperAuthentication
   fun prepareSetLicenseKey(
     @RequestBody body: SetLicenseKeyDto,
-  ): PrepareSetEeLicenceKeyModel {
-    return eeSubscriptionService.prepareSetLicenceKey(body.licenseKey)
-  }
+  ): PrepareSetEeLicenceKeyModel = eeSubscriptionService.prepareSetLicenceKey(body.licenseKey)
 
   @PutMapping("/refresh")
   @RequiresSuperAuthentication

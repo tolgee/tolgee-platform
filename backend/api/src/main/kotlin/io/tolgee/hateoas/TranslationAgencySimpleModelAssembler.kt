@@ -9,12 +9,11 @@ import org.springframework.stereotype.Component
 class TranslationAgencySimpleModelAssembler(
   private val avatarService: AvatarService,
 ) : RepresentationModelAssembler<TranslationAgency, TranslationAgencySimpleModel> {
-  override fun toModel(entity: TranslationAgency): TranslationAgencySimpleModel {
-    return TranslationAgencySimpleModel(
+  override fun toModel(entity: TranslationAgency): TranslationAgencySimpleModel =
+    TranslationAgencySimpleModel(
       id = entity.id,
       name = entity.name,
       url = entity.url,
       avatar = avatarService.getAvatarLinks(entity.avatarHash),
     )
-  }
 }

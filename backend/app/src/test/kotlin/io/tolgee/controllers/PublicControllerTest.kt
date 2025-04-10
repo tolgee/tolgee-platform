@@ -28,8 +28,7 @@ import org.springframework.http.HttpHeaders
 import kotlin.properties.Delegates
 
 @AutoConfigureMockMvc
-class PublicControllerTest :
-  AbstractControllerTest() {
+class PublicControllerTest : AbstractControllerTest() {
   private var canCreateOrganizations by Delegates.notNull<Boolean>()
   private var registrationsAllowed by Delegates.notNull<Boolean>()
 
@@ -151,7 +150,10 @@ class PublicControllerTest :
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaa", email = "")
     performPost("/api/public/sign_up", dto)
       .andIsBadRequest
-      .andAssertResponse.error().isStandardValidation.onField("email")
+      .andAssertResponse
+      .error()
+      .isStandardValidation
+      .onField("email")
   }
 
   @Test
@@ -159,7 +161,10 @@ class PublicControllerTest :
     val dto = SignUpDto(name = "", password = "aaaa", email = "aaa@aaa.cz")
     performPost("/api/public/sign_up", dto)
       .andIsBadRequest
-      .andAssertResponse.error().isStandardValidation.onField("name")
+      .andAssertResponse
+      .error()
+      .isStandardValidation
+      .onField("name")
   }
 
   @Test
@@ -167,6 +172,9 @@ class PublicControllerTest :
     val dto = SignUpDto(name = "", password = "aaaa", email = "aaaaaa.cz")
     performPost("/api/public/sign_up", dto)
       .andIsBadRequest
-      .andAssertResponse.error().isStandardValidation.onField("email")
+      .andAssertResponse
+      .error()
+      .isStandardValidation
+      .onField("email")
   }
 }

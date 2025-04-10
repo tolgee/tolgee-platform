@@ -94,9 +94,7 @@ class StringsdictWriter {
     dictFormatElement.add(formatSpecStringElement)
   }
 
-  private fun getFormatSpecString(pluralFormsValues: Collection<String>): String {
-    return getFormatSpecSignFromStrings(pluralFormsValues) ?: "lld"
-  }
+  private fun getFormatSpecString(pluralFormsValues: Collection<String>): String = getFormatSpecSignFromStrings(pluralFormsValues) ?: "lld"
 
   private fun getFormatSpecSignFromStrings(strings: Collection<String>): String? {
     val mostCommon = mostCommonMatch(strings)
@@ -117,11 +115,15 @@ class StringsdictWriter {
         matches[matchText] = matches.getOrDefault(matchText, 0) + 1
       }
     }
-    return matches.asSequence().sortedByDescending { it.value }.map { it.key }.toList()
+    return matches
+      .asSequence()
+      .sortedByDescending { it.value }
+      .map { it.key }
+      .toList()
   }
 
-  private fun String.escaped(): String {
-    return MobileStringEscaper(
+  private fun String.escaped(): String =
+    MobileStringEscaper(
       string = this,
       escapeApos = false,
       keepPercentSignEscaped = true,
@@ -130,7 +132,6 @@ class StringsdictWriter {
       escapeQuotes = false,
       utfSymbolCharacter = 'U',
     ).escape()
-  }
 
   val result: InputStream
     get() {

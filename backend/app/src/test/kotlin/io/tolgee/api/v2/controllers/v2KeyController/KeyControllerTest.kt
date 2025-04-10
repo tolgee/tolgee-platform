@@ -45,7 +45,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testData.addNKeys(120)
     saveTestDataAndPrepare()
     performProjectAuthGet("keys")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(20)
           node("[0].id").isValidId
@@ -55,7 +56,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         }
       }
     performProjectAuthGet("keys?page=1")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(20)
           node("[0].id").isValidId
@@ -71,7 +73,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
     val keyId = testData.keyWithReferences.id
     performProjectAuthGet("keys/$keyId")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("key_with_referecnces")
         node("namespace").isNull()
@@ -86,14 +89,16 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthPost("keys", CreateKeyDto(name = ""))
-      .andIsBadRequest.andPrettyPrint.andAssertThatJson {
+      .andIsBadRequest.andPrettyPrint
+      .andAssertThatJson {
         node("STANDARD_VALIDATION") {
           node("name").isString
         }
       }
 
     performProjectAuthPost("keys", CreateKeyDto(name = LONGER_NAME))
-      .andIsBadRequest.andPrettyPrint.andAssertThatJson {
+      .andIsBadRequest.andPrettyPrint
+      .andAssertThatJson {
         node("STANDARD_VALIDATION") {
           node("name").isEqualTo("length must be between 1 and 2000")
         }
@@ -108,7 +113,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost("keys", CreateKeyDto(name = "first_key"))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("key_exists")
+      .isCustomValidation
+      .hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
@@ -117,7 +123,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "test"))
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("name").isEqualTo("test")
       }
   }
@@ -128,7 +135,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "name", description = "desc"))
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("description").isEqualTo("desc")
       }
   }
@@ -151,7 +159,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project2 }
     performProjectAuthPut("keys/${testData.firstKey.id}", EditKeyDto(name = "aasda"))
-      .andIsBadRequest.andAssertThatJson {
+      .andIsBadRequest
+      .andAssertThatJson {
         node("code").isEqualTo("key_not_from_project")
       }
   }
@@ -199,7 +208,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project2 }
     performProjectAuthDelete("keys/${testData.firstKey.id}", null)
-      .andIsBadRequest.andAssertThatJson {
+      .andIsBadRequest
+      .andAssertThatJson {
         node("code").isEqualTo("key_not_from_project")
       }
   }
@@ -236,7 +246,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project2 }
     performProjectAuthDelete("keys/${testData.secondKey.id},${testData.firstKey.id}", null)
-      .andIsBadRequest.andAssertThatJson {
+      .andIsBadRequest
+      .andAssertThatJson {
         node("code").isEqualTo("key_not_from_project")
       }
   }
@@ -283,18 +294,31 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     executeInNewTransaction {
       val firstKey = keyService.get(testData.firstKey.id)
-      firstKey.translations.find { it.language.tag == "en" }.assert.isNull()
-      firstKey.keyMeta?.description.assert.isNull()
+      firstKey.translations
+        .find { it.language.tag == "en" }
+        .assert
+        .isNull()
+      firstKey.keyMeta
+        ?.description.assert
+        .isNull()
 
       val key =
         projectService.get(testData.project.id).keys.find {
           it.name == "new_key"
         }
-      key!!.keyMeta!!.description.assert.isEqualTo("description")
+      key!!
+        .keyMeta!!
+        .description.assert
+        .isEqualTo("description")
 
       key.assert.isNotNull()
-      key.keyMeta!!.tags.assert.hasSize(3)
-      key.translations.find { it.language.tag == "en" }!!.text.assert.isEqualTo("hello")
+      key.keyMeta!!
+        .tags.assert
+        .hasSize(3)
+      key.translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("hello")
     }
   }
 

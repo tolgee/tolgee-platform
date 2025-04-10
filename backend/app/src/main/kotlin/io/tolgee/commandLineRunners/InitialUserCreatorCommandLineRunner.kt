@@ -27,7 +27,8 @@ class InitialUserCreatorCommandLineRunner(
   private val passwordEncoder: PasswordEncoder,
   private val internalProperties: InternalProperties,
   private val quickStartService: QuickStartService,
-) : CommandLineRunner, ApplicationListener<ContextClosedEvent> {
+) : CommandLineRunner,
+  ApplicationListener<ContextClosedEvent> {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @Transactional

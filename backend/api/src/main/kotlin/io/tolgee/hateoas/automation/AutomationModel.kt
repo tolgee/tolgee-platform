@@ -11,4 +11,5 @@ class AutomationModel(
   val name: String,
   val triggers: List<AutomationTriggerModel>,
   val actions: List<AutomationActionModel>,
-) : RepresentationModel<AutomationModel>(), Serializable
+) : RepresentationModel<AutomationModel>(),
+  Serializable

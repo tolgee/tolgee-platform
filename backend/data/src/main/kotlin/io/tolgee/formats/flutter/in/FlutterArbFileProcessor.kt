@@ -10,8 +10,7 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 class FlutterArbFileProcessor(
   override val context: FileProcessorContext,
   private val objectMapper: ObjectMapper,
-) :
-  ImportFileProcessor() {
+) : ImportFileProcessor() {
   override fun process() {
     parsed.translations.forEach { (keyName, item) ->
       val converted = convertMessage(item.value)
@@ -40,14 +39,13 @@ class FlutterArbFileProcessor(
     }
   }
 
-  fun convertMessage(text: String?): MessageConvertorResult {
-    return ImportFormat.FLUTTER_ARB.messageConvertor.convert(
+  fun convertMessage(text: String?): MessageConvertorResult =
+    ImportFormat.FLUTTER_ARB.messageConvertor.convert(
       rawData = text,
       languageTag = guessedLanguage,
       convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
       isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
     )
-  }
 
   private val guessedLanguage: String by lazy {
     parsed.locale ?: guessLanguageFormFileName() ?: "unknown"

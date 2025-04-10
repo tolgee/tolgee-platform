@@ -35,9 +35,7 @@ class IcuToGenericFormatMessageConvertor(
       )
   }
 
-  fun getForcedPluralForms(): Map<String, String>? {
-    return getConvertorResult()?.formsResult
-  }
+  fun getForcedPluralForms(): Map<String, String>? = getConvertorResult()?.formsResult
 
   private fun getConvertorResult(): PossiblePluralConversionResult? {
     message ?: return null

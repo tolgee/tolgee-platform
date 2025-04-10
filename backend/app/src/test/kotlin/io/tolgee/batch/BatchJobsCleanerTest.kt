@@ -53,14 +53,38 @@ class BatchJobsCleanerTest : AbstractSpringTest() {
     val successWithRetriedChunks = createSuccessWithRetriedChunks()
 
     waitForNotThrowing(timeout = 2000, pollTime = 100) {
-      batchJobService.getJobDto(cancelledJob.id).status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-      batchJobService.getJobDto(failedJob.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
-      batchJobService.getJobDto(successBatchJob.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-      batchJobService.getJobDto(noExecutionBatchJob.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
-      batchJobService.getJobDto(runningJob.id).status.assert.isEqualTo(BatchJobStatus.RUNNING)
-      batchJobService.getJobDto(pendingJob.id).status.assert.isEqualTo(BatchJobStatus.PENDING)
-      batchJobService.getJobDto(dontTouchJob.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
-      batchJobService.getJobDto(successWithRetriedChunks.id).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      batchJobService
+        .getJobDto(cancelledJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.CANCELLED)
+      batchJobService
+        .getJobDto(failedJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.FAILED)
+      batchJobService
+        .getJobDto(successBatchJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
+      batchJobService
+        .getJobDto(noExecutionBatchJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
+      batchJobService
+        .getJobDto(runningJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.RUNNING)
+      batchJobService
+        .getJobDto(pendingJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.PENDING)
+      batchJobService
+        .getJobDto(dontTouchJob.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.FAILED)
+      batchJobService
+        .getJobDto(successWithRetriedChunks.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
     }
   }
 

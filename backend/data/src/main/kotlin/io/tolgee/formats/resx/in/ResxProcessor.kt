@@ -8,7 +8,9 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 
-class ResxProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
+class ResxProcessor(
+  override val context: FileProcessorContext,
+) : ImportFileProcessor() {
   override fun process() {
     try {
       val parser = ResxParser(xmlEventReader)

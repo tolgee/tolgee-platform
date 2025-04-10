@@ -6,11 +6,7 @@ import jakarta.persistence.Converter
 
 @Converter()
 class ThirdPartyAuthTypeConverter : AttributeConverter<ThirdPartyAuthType, String> {
-  override fun convertToDatabaseColumn(attribute: ThirdPartyAuthType?): String? {
-    return attribute?.code()
-  }
+  override fun convertToDatabaseColumn(attribute: ThirdPartyAuthType?): String? = attribute?.code()
 
-  override fun convertToEntityAttribute(dbData: String?): ThirdPartyAuthType? {
-    return dbData?.uppercase()?.let { ThirdPartyAuthType.valueOf(it) }
-  }
+  override fun convertToEntityAttribute(dbData: String?): ThirdPartyAuthType? = dbData?.uppercase()?.let { ThirdPartyAuthType.valueOf(it) }
 }

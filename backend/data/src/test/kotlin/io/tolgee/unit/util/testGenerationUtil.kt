@@ -21,12 +21,15 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
     code.appendLine("""${i(indent)}${"\"\"\""}.trimIndent()""")
   }
   val escape = { str: String?, newLines: Boolean ->
-    str?.replace("\\", "\\\\")?.replace("\"", "\\\"").let {
-      if (newLines) {
-        return@let it?.replace("\n", "\\n")
-      }
-      it
-    }?.replace("\$", "\${'$'}")
+    str
+      ?.replace("\\", "\\\\")
+      ?.replace("\"", "\\\"")
+      .let {
+        if (newLines) {
+          return@let it?.replace("\n", "\\n")
+        }
+        it
+      }?.replace("\$", "\${'$'}")
   }
   code.appendLine("${i(2)}mockUtil.fileProcessorContext.assertLanguagesCount($languageCount)")
   fileProcessorContext.translations.forEach { (keyName, translations) ->
@@ -92,15 +95,14 @@ private fun List<ImportTranslation>.firstIfAllSameOrNull(): ImportTranslation? {
  * When editing, do it in the debug window and copy the result to the test file
  */
 @Suppress("unused")
-fun generateTestsForExportResult(data: Map<String, String>): String {
-  return data.map {
-    "data.assertFile(\"${it.key}\", \"\"\"\n" +
-      "    |${
-        it.value
-          .replace("\$", "\${'$'}")
-          .replace("\n", "\n    |")
-      }\n" +
-      "    \"\"\".trimMargin())"
-  }
-    .joinToString("\n")
-}
+fun generateTestsForExportResult(data: Map<String, String>): String =
+  data
+    .map {
+      "data.assertFile(\"${it.key}\", \"\"\"\n" +
+        "    |${
+          it.value
+            .replace("\$", "\${'$'}")
+            .replace("\n", "\n    |")
+        }\n" +
+        "    \"\"\".trimMargin())"
+    }.joinToString("\n")

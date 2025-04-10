@@ -19,8 +19,8 @@ class ApiKeyDTO(
   var scopes: Set<String> = setOf(),
 ) {
   companion object {
-    fun fromEntity(apiKey: ApiKey): ApiKeyDTO {
-      return ApiKeyDTO(
+    fun fromEntity(apiKey: ApiKey): ApiKeyDTO =
+      ApiKeyDTO(
         key = apiKey.encodedKey?.let { PROJECT_API_KEY_PREFIX + it },
         id = apiKey.id,
         description = apiKey.description,
@@ -29,6 +29,5 @@ class ApiKeyDTO(
         projectName = apiKey.project.name,
         scopes = apiKey.scopesEnum.mapNotNull { it?.value }.toSet(),
       )
-    }
   }
 }

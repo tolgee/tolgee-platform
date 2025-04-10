@@ -38,16 +38,17 @@ class MtBatchTranslatorTest {
     val translator = MtBatchTranslator(context)
 
     val translated =
-      translator.translate(
-        listOf(
-          MtBatchItemParams(
-            keyId = 1,
-            baseTranslationText = preparedKey.baseTranslation,
-            targetLanguageId = 1,
-            service = MtServiceType.GOOGLE,
+      translator
+        .translate(
+          listOf(
+            MtBatchItemParams(
+              keyId = 1,
+              baseTranslationText = preparedKey.baseTranslation,
+              targetLanguageId = 1,
+              service = MtServiceType.GOOGLE,
+            ),
           ),
-        ),
-      ).first()
+        ).first()
 
     translated.translatedText.assert.isEqualTo(
       "{value, plural,\n" +
@@ -69,16 +70,17 @@ class MtBatchTranslatorTest {
     val translator = MtBatchTranslator(context)
 
     val translated =
-      translator.translate(
-        listOf(
-          MtBatchItemParams(
-            keyId = 1,
-            baseTranslationText = preparedKey.baseTranslation,
-            targetLanguageId = 1,
-            service = MtServiceType.TOLGEE,
+      translator
+        .translate(
+          listOf(
+            MtBatchItemParams(
+              keyId = 1,
+              baseTranslationText = preparedKey.baseTranslation,
+              targetLanguageId = 1,
+              service = MtServiceType.TOLGEE,
+            ),
           ),
-        ),
-      ).first()
+        ).first()
 
     translated.translatedText.assert.isEqualTo(
       "{value, plural,\n" +
@@ -180,16 +182,15 @@ class MtBatchTranslatorTest {
     ).thenReturn(translationMemoryServiceMock)
     doAnswer {
       Page.empty<TranslationMemoryItemView>()
-    }
-      .whenever(
-        translationMemoryServiceMock,
-      ).getSuggestions(
-        any<String>(),
-        any<Boolean>(),
-        notNull(),
-        any<LanguageDto>(),
-        any<Pageable>(),
-      )
+    }.whenever(
+      translationMemoryServiceMock,
+    ).getSuggestions(
+      any<String>(),
+      any<Boolean>(),
+      notNull(),
+      any<LanguageDto>(),
+      any<Pageable>(),
+    )
     val bigMetaServiceMock = mock<BigMetaService>()
     whenever(applicationContextMock.getBean(BigMetaService::class.java)).thenReturn(bigMetaServiceMock)
     whenever(bigMetaServiceMock.getCloseKeyIds(any())).thenReturn(emptyList())

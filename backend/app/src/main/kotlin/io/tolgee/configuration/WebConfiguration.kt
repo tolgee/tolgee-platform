@@ -44,13 +44,15 @@ class WebConfiguration(
   }
 
   override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-    registry.addResourceHandler("/**/*.js", "/**/*.woff2", "/**/*.css", "/**/*.svg")
+    registry
+      .addResourceHandler("/**/*.js", "/**/*.woff2", "/**/*.css", "/**/*.svg")
       .addResourceLocations("classpath:/static/")
       .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
   }
 
   override fun addCorsMappings(registry: CorsRegistry) {
-    registry.addMapping("/**")
+    registry
+      .addMapping("/**")
       .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
       .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME, TestClockHeaderFilter.TOLGEE_TEST_CLOCK_HEADER_NAME)
   }
@@ -60,15 +62,11 @@ class WebConfiguration(
   }
 
   @Bean
-  fun secureRandom(): SecureRandom {
-    return SecureRandom()
-  }
+  fun secureRandom(): SecureRandom = SecureRandom()
 
   @Bean
   @Primary
-  fun objectMapper(): ObjectMapper {
-    return jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-  }
+  fun objectMapper(): ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
   @Bean
   fun multipartConfigElement(): MultipartConfigElement {

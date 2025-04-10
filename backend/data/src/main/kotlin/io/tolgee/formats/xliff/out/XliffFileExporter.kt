@@ -33,9 +33,11 @@ class XliffFileExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return models.asSequence().map { (fileName, resultItem) ->
-      fileName to XliffFileWriter(xliffModel = resultItem, enableXmlContent = true).produceFiles()
-    }.toMap()
+    return models
+      .asSequence()
+      .map { (fileName, resultItem) ->
+        fileName to XliffFileWriter(xliffModel = resultItem, enableXmlContent = true).produceFiles()
+      }.toMap()
   }
 
   private fun prepare() {
@@ -90,16 +92,18 @@ class XliffFileExporter(
 
   private fun getResultXliffFile(translation: ExportTranslationView): XliffFile {
     val absolutePath = filePathProvider.getFilePath(translation)
-    return models.computeIfAbsent(absolutePath) {
-      XliffModel().apply {
-        files.add(
-          XliffFile().apply {
-            this.sourceLanguage = baseLanguage.tag
-            this.targetLanguage = translation.languageTag
-          },
-        )
-      }
-    }.files.first()
+    return models
+      .computeIfAbsent(absolutePath) {
+        XliffModel().apply {
+          files.add(
+            XliffFile().apply {
+              this.sourceLanguage = baseLanguage.tag
+              this.targetLanguage = translation.languageTag
+            },
+          )
+        }
+      }.files
+      .first()
   }
 
   private val filePathProvider by lazy {

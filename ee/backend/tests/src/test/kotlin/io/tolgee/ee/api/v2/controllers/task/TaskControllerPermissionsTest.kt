@@ -76,7 +76,14 @@ class TaskControllerPermissionsTest : ProjectAuthControllerTest("/v2/projects/")
 
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}/keys",
-      UpdateTaskKeysRequest(addKeys = mutableSetOf(testData.keysOutOfTask.first().self.id)),
+      UpdateTaskKeysRequest(
+        addKeys =
+          mutableSetOf(
+            testData.keysOutOfTask
+              .first()
+              .self.id,
+          ),
+      ),
     ).andIsForbidden
     performProjectAuthPut(
       "tasks/${testData.translateTask.self.number}",

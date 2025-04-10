@@ -14,7 +14,8 @@ data class ProjectDto(
   override var avatarHash: String? = null,
   override var icuPlaceholders: Boolean,
   var useNamespaces: Boolean,
-) : Serializable, ISimpleProject {
+) : Serializable,
+  ISimpleProject {
   companion object {
     fun fromEntity(entity: Project) =
       ProjectDto(

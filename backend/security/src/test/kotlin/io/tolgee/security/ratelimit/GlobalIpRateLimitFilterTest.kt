@@ -62,7 +62,8 @@ class GlobalIpRateLimitFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito.`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+    Mockito
+      .`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
       .thenThrow(RateLimitedException(1000, true))
 
     assertThrows<RateLimitedException> { rateLimitFilter.doFilter(req, res, chain) }
@@ -75,7 +76,8 @@ class GlobalIpRateLimitFilterTest {
     val chain = MockFilterChain()
     req.method = "OPTIONS"
 
-    Mockito.`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
+    Mockito
+      .`when`(rateLimitService.consumeGlobalIpRateLimitPolicy(any()))
       .thenThrow(RateLimitedException(1000, true))
 
     assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }

@@ -245,9 +245,7 @@ class PoParser(
     }
   }
 
-  private fun StringBuilder.isKeyword(keyword: String): Boolean {
-    return toString() == keyword
-  }
+  private fun StringBuilder.isKeyword(keyword: String): Boolean = toString() == keyword
 
   private fun handleNewLine() {
     if (hashed) {
@@ -258,9 +256,7 @@ class PoParser(
     currentLine++
   }
 
-  private fun Char.throwUnexpected() {
-    throw PoParserException("Unexpected character '$this'", currentLine, currentPosition)
-  }
+  private fun Char.throwUnexpected(): Nothing = throw PoParserException("Unexpected character '$this'", currentLine, currentPosition)
 
   private val createdTranslation: PoParsedTranslation
     get() {

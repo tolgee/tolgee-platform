@@ -57,13 +57,12 @@ class AllOrganizationOwnerJobConfiguration {
   lateinit var platformTransactionManager: PlatformTransactionManager
 
   @Bean(JOB_NAME)
-  fun job(jobRepository: JobRepository): Job {
-    return JobBuilder(JOB_NAME, jobRepository)
+  fun job(jobRepository: JobRepository): Job =
+    JobBuilder(JOB_NAME, jobRepository)
       .flow(getNoOrgProjectsStep(jobRepository))
       .next(getNoRoleUserStep(jobRepository))
       .end()
       .build()
-  }
 
   val noOrgProjectReader: ItemReader<Project>
     get() =
@@ -101,13 +100,12 @@ class AllOrganizationOwnerJobConfiguration {
       }
     }
 
-  fun getNoOrgProjectsStep(jobRepository: JobRepository): Step {
-    return StepBuilder("noOrProjectStep", jobRepository)
+  fun getNoOrgProjectsStep(jobRepository: JobRepository): Step =
+    StepBuilder("noOrProjectStep", jobRepository)
       .chunk<Project, Project>(STEP_SIZE, platformTransactionManager)
       .reader(noOrgProjectReader)
       .writer(noOrgProjectWriter)
       .build()
-  }
 
   val noRoleUserReader: ItemReader<UserAccount>
     get() =

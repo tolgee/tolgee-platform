@@ -64,7 +64,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
       it.isArray.hasSize(1)
-      it.node("[0].computedPermission.permittedLanguageIds")
+      it
+        .node("[0].computedPermission.permittedLanguageIds")
         .isArray
         .hasSize(1)
         .containsAll(listOf(baseTestData.englishLanguage.id))
@@ -78,7 +79,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
 
     performAuthGet("/v2/projects/with-stats?sort=id")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.projects") {
           isArray.hasSize(2)
           node("[0].organizationOwner.name").isEqualTo("test_username")
@@ -113,7 +115,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.userWithTranslatePermission
 
     performAuthGet("/v2/projects/with-stats?sort=id")
-      .andIsOk.andAssertThatJson.node("_embedded.projects")
+      .andIsOk.andAssertThatJson
+      .node("_embedded.projects")
       .let {
         it.isArray.hasSize(1)
         it.node("[0].computedPermission.permittedLanguageIds").isArray.hasSize(2).containsAll(
@@ -140,7 +143,15 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performAuthGet("/v2/projects/${base.project.id}").andPrettyPrint.andAssertThatJson.let {
       it.node("organizationOwner.name").isEqualTo(base.userAccount.username)
       it.node("directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
-      it.node("computedPermission.permittedLanguageIds").isArray.hasSize(1).contains(base.project.languages.first().id)
+      it
+        .node("computedPermission.permittedLanguageIds")
+        .isArray
+        .hasSize(1)
+        .contains(
+          base.project.languages
+            .first()
+            .id,
+        )
     }
   }
 
@@ -173,12 +184,14 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthGet("/v2/projects/${directPermissionProject.id}/users?sort=id")
       .andIsOk.andPrettyPrint.andAssertThatJson
-      .node("_embedded.users").let {
+      .node("_embedded.users")
+      .let {
         it.isArray.hasSize(3)
         it.node("[0].organizationRole").isEqualTo("MEMBER")
         it.node("[1].organizationRole").isEqualTo("OWNER")
         it.node("[2].directPermission.scopes").isPermissionScopes(ProjectPermissionType.TRANSLATE)
-        it.node("[2].computedPermission.permittedLanguageIds")
+        it
+          .node("[2].computedPermission.permittedLanguageIds")
           .isArray
           .hasSize(2)
           .containsAll(directPermissionProject.languages.map { it.id })
@@ -194,7 +207,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
-      .andIsBadRequest.andReturn().let {
+      .andIsBadRequest
+      .andReturn()
+      .let {
         assertThat(it).error().hasCode("user_has_no_project_access")
       }
   }
@@ -209,7 +224,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
-      .andIsBadRequest.andReturn().let {
+      .andIsBadRequest
+      .andReturn()
+      .let {
         assertThat(it).error().hasCode("user_is_organization_owner")
       }
   }
@@ -226,7 +243,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${usersAndOrganizations[1].id}/set-permissions/EDIT", null)
-      .andIsBadRequest.andReturn().let {
+      .andIsBadRequest
+      .andReturn()
+      .let {
         assertThat(it).error().hasCode("cannot_set_your_own_permissions")
       }
   }
@@ -243,7 +262,8 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
-    permissionService.getProjectPermissionScopesNoApiKey(repo.id, user)
+    permissionService
+      .getProjectPermissionScopesNoApiKey(repo.id, user)
       .let { assertThat(it).isEmpty() }
   }
 
@@ -254,7 +274,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser("jirina")
 
     performAuthPut("/v2/projects/${base.project.id}/users/${base.userAccount.id}/revoke-access", null)
-      .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("can_not_revoke_own_permissions") }
+      .andIsBadRequest
+      .andReturn()
+      .let { assertThat(it).error().hasCode("can_not_revoke_own_permissions") }
   }
 
   @Test
@@ -267,7 +289,9 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null)
-      .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("user_is_organization_member") }
+      .andIsBadRequest
+      .andReturn()
+      .let { assertThat(it).error().hasCode("user_is_organization_member") }
   }
 
   @Test

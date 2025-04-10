@@ -13,4 +13,5 @@ class PermissionWithAgencyModel(
   override val viewLanguageIds: Collection<Long>?,
   override val stateChangeLanguageIds: Collection<Long>?,
   val agency: TranslationAgencySimpleModel?,
-) : RepresentationModel<PermissionModel>(), IDeprecatedPermissionModel
+) : RepresentationModel<PermissionModel>(),
+  IDeprecatedPermissionModel

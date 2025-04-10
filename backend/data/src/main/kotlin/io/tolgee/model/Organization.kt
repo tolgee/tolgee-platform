@@ -40,7 +40,9 @@ class Organization(
   open var slug: String = "",
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null,
-) : ModelWithAvatar, AuditModel(), SoftDeletable {
+) : AuditModel(),
+  ModelWithAvatar,
+  SoftDeletable {
   @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
   lateinit var basePermission: Permission
 

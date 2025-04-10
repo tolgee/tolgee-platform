@@ -167,14 +167,19 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
 
     executeInNewTransaction {
-      getLastRevisionModificationsOfType(TaskKey::class).single()
-        .modifications["done"]!!.new!!.assert.isEqualTo(true)
+      getLastRevisionModificationsOfType(TaskKey::class)
+        .single()
+        .modifications["done"]!!
+        .new!!
+        .assert
+        .isEqualTo(true)
     }
   }
 
-  fun PropertyModification.toLongLists(): Pair<List<Long>?, List<Long>> {
-    return (this.old as List<Int>?)?.map { it.toLong() } to (this.new as List<Int>).map { it.toLong() }
-  }
+  fun PropertyModification.toLongLists(): Pair<List<Long>?, List<Long>> =
+    (this.old as List<Int>?)?.map {
+      it.toLong()
+    } to (this.new as List<Int>).map { it.toLong() }
 
   private fun saveTestDataAndPrepare() {
     testDataService.saveTestData(testData.root)
@@ -188,9 +193,8 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
     return result to sessionFactory.statistics.prepareStatementCount
   }
 
-  private fun ActivityModifiedEntity.hasKeyAndTaskDescription(): Boolean {
-    return this.describingRelations?.get("key") != null && this.describingRelations?.get("task") != null
-  }
+  private fun ActivityModifiedEntity.hasKeyAndTaskDescription(): Boolean =
+    this.describingRelations?.get("key") != null && this.describingRelations?.get("task") != null
 
   private fun getLastRevisionTaskAssignees(): Pair<List<Long>?, List<Long>> {
     val assigneesModification =

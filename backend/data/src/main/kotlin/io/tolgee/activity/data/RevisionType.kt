@@ -6,15 +6,9 @@ enum class RevisionType {
   DEL,
   ;
 
-  fun isAdd(): Boolean {
-    return this == ADD
-  }
+  fun isAdd(): Boolean = this == ADD
 
-  fun isMod(): Boolean {
-    return this == MOD
-  }
+  fun isMod(): Boolean = this == MOD
 
-  fun isDel(): Boolean {
-    return this == DEL
-  }
+  fun isDel(): Boolean = this == DEL
 }

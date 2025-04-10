@@ -24,7 +24,8 @@ class KeyCodeReference(
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   var author: UserAccount? = null,
-) : StandardAuditModel(), WithKeyMetaReference {
+) : StandardAuditModel(),
+  WithKeyMetaReference {
   @field:NotBlank
   @Column(length = 300)
   var path: String = ""
@@ -33,7 +34,5 @@ class KeyCodeReference(
 
   var fromImport: Boolean = false
 
-  override fun toString(): String {
-    return "KeyCodeReference(path='$path', line=$line)"
-  }
+  override fun toString(): String = "KeyCodeReference(path='$path', line=$line)"
 }

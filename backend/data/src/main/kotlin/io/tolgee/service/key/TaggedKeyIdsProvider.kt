@@ -61,7 +61,6 @@ class TaggedKeyIdsProvider(
     return query.resultList as List<Long>
   }
 
-  fun Collection<String>.applyWildcards(projectId: Long): Collection<String> {
-    return WildcardTagsProvider(entityManager).getTagsWithAppliedWildcards(projectId, this)
-  }
+  fun Collection<String>.applyWildcards(projectId: Long): Collection<String> =
+    WildcardTagsProvider(entityManager).getTagsWithAppliedWildcards(projectId, this)
 }

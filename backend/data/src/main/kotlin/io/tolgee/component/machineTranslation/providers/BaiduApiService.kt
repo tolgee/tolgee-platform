@@ -49,7 +49,10 @@ class BaiduApiService(
         requestBody,
       )
 
-    return response.body?.transResult?.first()?.dst
+    return response.body
+      ?.transResult
+      ?.first()
+      ?.dst
       ?: throw RuntimeException(response.toString())
   }
 

@@ -6,26 +6,24 @@ import io.tolgee.formats.importCommon.ImportFormat
 import java.util.concurrent.atomic.AtomicLong
 
 object FormatDetectionUtil {
-  fun isValidBCP47Tag(tag: String): Boolean {
-    return try {
+  fun isValidBCP47Tag(tag: String): Boolean =
+    try {
       val locale = ULocale.forLanguageTag(tag)
       locale.toLanguageTag() == tag
     } catch (e: IllformedLocaleException) {
       false
     }
-  }
 
   fun regexFactor(
     regex: Regex,
     weight: Double = 1.0,
-  ): Factor {
-    return Factor(weight) { it: Any? ->
+  ): Factor =
+    Factor(weight) { it: Any? ->
       val hits = AtomicLong(0)
       val total = AtomicLong(0)
       processMapRecursive(it, regex, hits, total)
       hits.get().toDouble() / total.get().toDouble()
     }
-  }
 
   private fun processMapRecursive(
     data: Any?,
@@ -62,7 +60,10 @@ object FormatDetectionUtil {
     return scores.filter { it.second != 0.0 }.maxByOrNull { it.second }?.first
   }
 
-  data class Factor(val weight: Double, val matcher: (Any?) -> Double)
+  data class Factor(
+    val weight: Double,
+    val matcher: (Any?) -> Double,
+  )
 
   val ICU_DETECTION_REGEX =
     (
@@ -71,6 +72,5 @@ object FormatDetectionUtil {
         "\\w+(\\s*,\\s*)?(((plural)\\s*,\\s*)?(.*other\\s*\\{.*\\}.*)|number,?.*)?" +
         "\\}" +
         "(?:\\W|\$)"
-    )
-      .toRegex()
+    ).toRegex()
 }

@@ -17,12 +17,10 @@ class StringsWriter {
     content.append("\"${key.escaped()}\" = \"${value.escaped()}\";\n\n")
   }
 
-  private fun escapeComment(s: String): String {
-    return s.replace("*/", "*\\/")
-  }
+  private fun escapeComment(s: String): String = s.replace("*/", "*\\/")
 
-  private fun String.escaped(): String {
-    return MobileStringEscaper(
+  private fun String.escaped(): String =
+    MobileStringEscaper(
       string = this,
       escapeApos = false,
       keepPercentSignEscaped = true,
@@ -31,7 +29,6 @@ class StringsWriter {
       escapeQuotes = true,
       utfSymbolCharacter = 'U',
     ).escape()
-  }
 
   val result: String
     get() = content.toString()

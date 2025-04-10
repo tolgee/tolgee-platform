@@ -96,7 +96,10 @@ class PatControllerTest : AuthorizedControllerTest() {
       node("expiresAt").isEqualTo(expiresAt)
     }
 
-    patService.get(testData.expiredPat.id).token.assert.isNotEqualTo(oldToken)
+    patService
+      .get(testData.expiredPat.id)
+      .token.assert
+      .isNotEqualTo(oldToken)
   }
 
   @Test
@@ -112,7 +115,10 @@ class PatControllerTest : AuthorizedControllerTest() {
       node("expiresAt").isEqualTo(null)
     }
 
-    patService.get(testData.expiredPat.id).token.assert.isNotEqualTo(oldToken)
+    patService
+      .get(testData.expiredPat.id)
+      .token.assert
+      .isNotEqualTo(oldToken)
   }
 
   @Test

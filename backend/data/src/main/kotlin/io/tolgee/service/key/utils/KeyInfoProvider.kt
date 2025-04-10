@@ -52,7 +52,8 @@ class KeyInfoProvider(
     val screenshots = screenshotService.getScreenshotsForKeys(result.map { it.id })
 
     val translations =
-      translationService.getForKeys(result.map { it.id }, dto.languageTags)
+      translationService
+        .getForKeys(result.map { it.id }, dto.languageTags)
         .groupBy { it.key.id }
 
     result.map {

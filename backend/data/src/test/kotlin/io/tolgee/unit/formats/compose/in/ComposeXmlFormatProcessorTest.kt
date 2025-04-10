@@ -27,12 +27,14 @@ class ComposeXmlFormatProcessorTest {
   fun `returns correct parsed result`() {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "app_name")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "app_name")
       .assertSingle {
         hasText("Tolgee test")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -45,27 +47,32 @@ class ComposeXmlFormatProcessorTest {
         isPluralOptimized()
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[1]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[1]")
       .assertSingle {
         hasText("Second item")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_spaces")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_spaces")
       .assertSingle {
         hasText("Hello!")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_html")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_html")
       .assertSingle {
         hasText("<b>Hello!</b>")
       }
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %5${'$'}+d")
       }
@@ -92,7 +99,8 @@ class ComposeXmlFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -104,11 +112,13 @@ class ComposeXmlFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item %1${'$'}d {escape}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("%1${'$'}d %4${'$'}s %3${'$'}.2f %4${'$'}e %5${'$'}+d {escape}")
       }
@@ -119,7 +129,8 @@ class ComposeXmlFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -131,11 +142,13 @@ class ComposeXmlFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item %1${'$'}d '{'escape'}'")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("%1${'$'}d %4${'$'}s %3${'$'}.2f %4${'$'}e %5${'$'}+d '{'escape'}'")
       }
@@ -146,7 +159,8 @@ class ComposeXmlFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "dogs_count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "dogs_count")
       .assertSinglePlural {
         hasText(
           """
@@ -158,15 +172,18 @@ class ComposeXmlFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[0]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[0]")
       .assertSingle {
         hasText("First item {0, number} '{'escape'}'")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "string_array[1]")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "string_array[1]")
       .assertSingle {
         hasText("Second item {0, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "with_params")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "with_params")
       .assertSingle {
         hasText("{0, number} {3} {2, number, .00} {3, number, scientific} %5${'$'}+d '{'escape'}'")
       }

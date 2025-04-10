@@ -27,12 +27,11 @@ private fun findPluralFormExample(
   variant: String,
   rules: PluralRules,
   list: Array<out Number>,
-): Number {
-  return list.find {
+): Number =
+  list.find {
     val double = it.toDouble()
     rules.select(double) == variant
   } ?: 10
-}
 
 fun getPluralFormExamples(languageTag: String): Map<String, Number> {
   val locale = getULocaleFromTag(languageTag)
@@ -40,11 +39,10 @@ fun getPluralFormExamples(languageTag: String): Map<String, Number> {
   return getPluralFormExamples(rules)
 }
 
-fun getPluralFormExamples(rules: PluralRules): Map<String, Number> {
-  return rules.orderedKeywords.associateWith {
+fun getPluralFormExamples(rules: PluralRules): Map<String, Number> =
+  rules.orderedKeywords.associateWith {
     getVariantExample(rules, it)
   }
-}
 
 val PluralRules.orderedKeywords
   get() = keywords.toSortedSet { a, b -> ALL_KEYWORDS.indexOf(a) - ALL_KEYWORDS.indexOf(b) }
@@ -52,8 +50,8 @@ val PluralRules.orderedKeywords
 fun getVariantExample(
   rules: PluralRules,
   variant: String,
-): Number {
-  return when (variant) {
+): Number =
+  when (variant) {
     "zero" -> findPluralFormExample("zero", rules, arrayOf(0))
     "one" -> findPluralFormExample("one", rules, arrayOf(1))
     "two" -> findPluralFormExample("two", rules, arrayOf(2))
@@ -62,4 +60,3 @@ fun getVariantExample(
     "other" -> findPluralFormExample("other", rules, POSSIBLE_OTHER)
     else -> variant.substring(1).toDoubleOrNull() ?: 10
   }
-}

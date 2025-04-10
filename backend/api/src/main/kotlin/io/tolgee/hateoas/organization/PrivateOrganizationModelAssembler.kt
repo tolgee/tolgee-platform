@@ -15,12 +15,11 @@ class PrivateOrganizationModelAssembler(
   fun toModel(
     view: PrivateOrganizationView,
     features: Array<Feature>,
-  ): PrivateOrganizationModel {
-    return PrivateOrganizationModel(
+  ): PrivateOrganizationModel =
+    PrivateOrganizationModel(
       organizationModel = organizationModelAssembler.toModel(view.organization),
       enabledFeatures = features,
       quickStart = view.quickStart?.let { quickStartModelAssembler.toModel(it) },
       activeCloudSubscription = cloudSubscriptionModelProvider?.provide(view.organization.id),
     )
-  }
 }

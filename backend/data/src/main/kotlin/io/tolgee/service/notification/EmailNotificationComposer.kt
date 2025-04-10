@@ -12,8 +12,7 @@ class EmailNotificationComposer(
   private val mfaEmailComposer: MfaEmailComposer,
   private val passwordChangedEmailComposer: PasswordChangedEmailComposer,
 ) {
-  fun composeEmailSubject(notification: Notification) =
-    i18n.translate("notifications.email.subject.${notification.type}")
+  fun composeEmailSubject(notification: Notification) = i18n.translate("notifications.email.subject.${notification.type}")
 
   fun composeEmailText(notification: Notification) =
     when (notification.type) {

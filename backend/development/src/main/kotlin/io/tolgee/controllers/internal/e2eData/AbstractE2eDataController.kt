@@ -51,8 +51,8 @@ abstract class AbstractE2eDataController {
     return getStandardResult(data)
   }
 
-  fun getStandardResult(data: TestDataBuilder): StandardTestDataResult {
-    return StandardTestDataResult(
+  fun getStandardResult(data: TestDataBuilder): StandardTestDataResult =
+    StandardTestDataResult(
       projects =
         data.data.projects.map {
           StandardTestDataResult.ProjectModel(name = it.self.name, id = it.self.id)
@@ -66,7 +66,6 @@ abstract class AbstractE2eDataController {
           StandardTestDataResult.OrganizationModel(id = it.self.id, name = it.self.name, slug = it.self.slug)
         },
     )
-  }
 
   @GetMapping(value = ["/clean"])
   open fun cleanup(): Any? {

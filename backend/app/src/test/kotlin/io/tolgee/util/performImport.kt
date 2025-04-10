@@ -59,6 +59,4 @@ fun performSingleStepImport(
   return mvc.perform(AuthorizedRequestFactory.addToken(builder))
 }
 
-private fun mapToQueryString(map: Map<String, Any?>): String {
-  return map.entries.joinToString("&") { "${it.key}=${it.value}" }
-}
+private fun mapToQueryString(map: Map<String, Any?>): String = map.entries.joinToString("&") { "${it.key}=${it.value}" }

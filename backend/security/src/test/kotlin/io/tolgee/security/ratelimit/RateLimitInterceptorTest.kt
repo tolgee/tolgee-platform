@@ -69,7 +69,8 @@ class RateLimitInterceptorTest {
     )
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(rateLimitInterceptor)
       .build()
 
@@ -268,39 +269,27 @@ class RateLimitInterceptorTest {
   @RestController
   class TestController {
     @GetMapping("/")
-    fun noRateLimit(): String {
-      return "henlo!"
-    }
+    fun noRateLimit(): String = "henlo!"
 
     @GetMapping("/rate-limited")
     @RateLimited(2)
-    fun rateLimited(): String {
-      return "henlo!"
-    }
+    fun rateLimited(): String = "henlo!"
 
     @GetMapping("/rate-limited-2")
     @RateLimited(2)
-    fun rateLimited2(): String {
-      return "henlo!"
-    }
+    fun rateLimited2(): String = "henlo!"
 
     @GetMapping("/rate-limited-auth")
     @RateLimited(2, isAuthentication = true)
-    fun rateLimitedAuth(): String {
-      return "henlo!"
-    }
+    fun rateLimitedAuth(): String = "henlo!"
 
     @GetMapping("/rate-limited-shared")
     @RateLimited(2, bucketName = "shared")
-    fun rateLimitedShared1(): String {
-      return "henlo!"
-    }
+    fun rateLimitedShared1(): String = "henlo!"
 
     @GetMapping("/rate-limited-shared-2")
     @RateLimited(2, bucketName = "shared")
-    fun rateLimitedShared2(): String {
-      return "henlo!"
-    }
+    fun rateLimitedShared2(): String = "henlo!"
   }
 
   class FakeController {

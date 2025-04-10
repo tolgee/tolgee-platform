@@ -31,7 +31,9 @@ class ApplicationStopper(
     if (internalProperties.stopRightAfterStart) {
       log.info("Exiting: StopRightAfterStart property is set to true")
       var exitStatus = 1
-      if (event.exception.javaClass.name.contains("SQLGrammarException")) {
+      if (event.exception.javaClass.name
+          .contains("SQLGrammarException")
+      ) {
         exitStatus = 0
       }
 

@@ -8,7 +8,7 @@ import io.tolgee.formats.paramConvertors.`in`.PhpToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.PythonToIcuPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.`in`.RubyToIcuPlaceholderConvertor
 
-class PoFormatDetector() {
+class PoFormatDetector {
   companion object {
     private val possibleFormats =
       mapOf(
@@ -69,7 +69,6 @@ class PoFormatDetector() {
     }
   }
 
-  fun detectFormat(data: List<String>): ImportFormat {
-    return FormatDetectionUtil.detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.PO_PHP
-  }
+  fun detectFormat(data: List<String>): ImportFormat =
+    FormatDetectionUtil.detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.PO_PHP
 }

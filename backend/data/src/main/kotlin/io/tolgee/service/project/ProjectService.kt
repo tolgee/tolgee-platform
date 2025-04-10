@@ -114,29 +114,20 @@ class ProjectService(
 
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
-  fun findDto(id: Long): ProjectDto? {
-    return projectRepository.find(id)?.let {
+  fun findDto(id: Long): ProjectDto? =
+    projectRepository.find(id)?.let {
       ProjectDto.fromEntity(it)
     }
-  }
 
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
-  fun getDto(id: Long): ProjectDto {
-    return findDto(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
-  }
+  fun getDto(id: Long): ProjectDto = findDto(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
 
-  fun get(id: Long): Project {
-    return find(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
-  }
+  fun get(id: Long): Project = find(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
 
-  fun find(id: Long): Project? {
-    return projectRepository.find(id)
-  }
+  fun find(id: Long): Project? = projectRepository.find(id)
 
-  fun findAll(ids: List<Long>): List<Project> {
-    return projectRepository.findAllById(ids)
-  }
+  fun findAll(ids: List<Long>): List<Project> = projectRepository.findAllById(ids)
 
   @Transactional
   fun getView(id: Long): ProjectWithLanguagesView {
@@ -157,7 +148,8 @@ class ProjectService(
     dto: EditProjectRequest,
   ): Project {
     val project =
-      projectRepository.findById(id)
+      projectRepository
+        .findById(id)
         .orElseThrow { NotFoundException() }!!
 
     if (!dto.useNamespaces && project.namespaces.isNotEmpty()) {
@@ -205,27 +197,27 @@ class ProjectService(
     return project
   }
 
-  fun findAllPermitted(userAccount: UserAccount): List<ProjectDTO> {
-    return projectRepository.findAllPermitted(userAccount.id).asSequence()
+  fun findAllPermitted(userAccount: UserAccount): List<ProjectDTO> =
+    projectRepository
+      .findAllPermitted(userAccount.id)
+      .asSequence()
       .map { result ->
         val project = result[0] as Project
         val permission = result[1] as Permission?
         val organization = result[2] as Organization
         val organizationRole = result[3] as OrganizationRole?
         val scopes =
-          permissionService.computeProjectPermission(
-            organizationRole?.type,
-            organization.basePermission,
-            permission,
-            userAccount.role ?: UserAccount.Role.USER,
-          ).scopes
+          permissionService
+            .computeProjectPermission(
+              organizationRole?.type,
+              organization.basePermission,
+              permission,
+              userAccount.role ?: UserAccount.Role.USER,
+            ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()
-  }
 
-  fun findAllInOrganization(organizationId: Long): List<Project> {
-    return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
-  }
+  fun findAllInOrganization(organizationId: Long): List<Project> = this.projectRepository.findAllByOrganizationOwnerId(organizationId)
 
   private fun addPermittedLanguagesToProjects(
     projectsPage: Page<ProjectView>,
@@ -312,9 +304,7 @@ class ProjectService(
    * It saves updated project and returns project's new baseLanguage
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  fun getOrAssignBaseLanguage(projectId: Long): LanguageDto {
-    return languageService.getProjectBaseLanguage(projectId)
-  }
+  fun getOrAssignBaseLanguage(projectId: Long): LanguageDto = languageService.getProjectBaseLanguage(projectId)
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)
   fun deleteAllByName(name: String) {
@@ -338,9 +328,7 @@ class ProjectService(
     avatarService.setAvatar(project, avatar)
   }
 
-  fun validateSlugUniqueness(slug: String): Boolean {
-    return projectRepository.countAllBySlug(slug) < 1
-  }
+  fun validateSlugUniqueness(slug: String): Boolean = projectRepository.countAllBySlug(slug) < 1
 
   fun generateSlug(
     name: String,
@@ -359,15 +347,14 @@ class ProjectService(
     search: String?,
     organizationId: Long? = null,
     filters: ProjectFilters? = null,
-  ): Page<ProjectWithLanguagesView> {
-    return findPermittedInOrganizationPaged(
+  ): Page<ProjectWithLanguagesView> =
+    findPermittedInOrganizationPaged(
       pageable = pageable,
       search = search,
       organizationId = organizationId,
       userAccountId = authenticationFacade.authenticatedUser.id,
       filters = filters,
     )
-  }
 
   fun findPermittedInOrganizationPaged(
     pageable: Pageable,
@@ -422,9 +409,7 @@ class ProjectService(
   fun findAllByNameAndOrganizationOwner(
     name: String,
     organization: Organization,
-  ): List<Project> {
-    return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
-  }
+  ): List<Project> = projectRepository.findAllByNameAndOrganizationOwner(name, organization)
 
   fun getProjectsWithDirectPermissions(
     id: Long,

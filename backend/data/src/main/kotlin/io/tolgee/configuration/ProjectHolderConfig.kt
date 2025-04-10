@@ -20,16 +20,12 @@ class ProjectHolderConfig {
   @Bean
   @Scope(SCOPE_TRANSACTION, proxyMode = ScopedProxyMode.TARGET_CLASS)
   @Qualifier("transactionProjectHolder")
-  fun transactionProjectHolder(projectService: ProjectService): ProjectHolder {
-    return ProjectHolder(projectService)
-  }
+  fun transactionProjectHolder(projectService: ProjectService): ProjectHolder = ProjectHolder(projectService)
 
   @Bean
   @RequestScope
   @Qualifier("requestProjectHolder")
-  fun requestProjectHolder(projectService: ProjectService): ProjectHolder {
-    return ProjectHolder(projectService)
-  }
+  fun requestProjectHolder(projectService: ProjectService): ProjectHolder = ProjectHolder(projectService)
 
   @Bean
   @Primary

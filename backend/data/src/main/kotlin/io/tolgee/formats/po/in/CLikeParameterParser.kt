@@ -12,8 +12,16 @@ class CLikeParameterParser {
       argName =
         match.groups.getGroupOrNull("argname")?.value
           ?: match.groups.getGroupOrNull("argname2")?.value,
-      width = match.groups.getGroupOrNull("width")?.value?.toIntOrNull(),
-      precision = match.groups.getGroupOrNull("precision")?.value?.toInt(),
+      width =
+        match.groups
+          .getGroupOrNull("width")
+          ?.value
+          ?.toIntOrNull(),
+      precision =
+        match.groups
+          .getGroupOrNull("precision")
+          ?.value
+          ?.toInt(),
       length = match.groups.getGroupOrNull("length")?.value,
       specifier = specifier,
       flags = match.groups.getGroupOrNull("flags")?.value,

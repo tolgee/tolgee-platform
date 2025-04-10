@@ -21,13 +21,9 @@ class CachedPermissionService(
   @set:Autowired
   lateinit var projectService: ProjectService
 
-  fun find(id: Long): Permission? {
-    return permissionRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): Permission? = permissionRepository.findById(id).orElse(null)
 
-  fun create(permission: Permission): Permission {
-    return permissionRepository.save(permission)
-  }
+  fun create(permission: Permission): Permission = permissionRepository.save(permission)
 
   @CacheEvict(
     cacheNames = [Caches.PERMISSIONS],
@@ -46,27 +42,27 @@ class CachedPermissionService(
     projectId: Long? = null,
     userId: Long? = null,
     organizationId: Long? = null,
-  ): PermissionDto? {
-    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
-      projectId = projectId,
-      userId = userId,
-      organizationId = organizationId,
-    )?.let { permission ->
-      PermissionDto(
-        id = permission.id,
-        userId = permission.user?.id,
-        invitationId = permission.invitation?.id,
-        scopes = permission.scopes,
-        projectId = permission.project?.id,
-        organizationId = permission.organization?.id,
-        translateLanguageIds = permission.translateLanguageIds,
-        viewLanguageIds = permission.viewLanguageIds,
-        stateChangeLanguageIds = permission.stateChangeLanguageIds,
-        type = permission.type,
-        granular = permission.granular,
-      )
-    }
-  }
+  ): PermissionDto? =
+    permissionRepository
+      .findOneByProjectIdAndUserIdAndOrganizationId(
+        projectId = projectId,
+        userId = userId,
+        organizationId = organizationId,
+      )?.let { permission ->
+        PermissionDto(
+          id = permission.id,
+          userId = permission.user?.id,
+          invitationId = permission.invitation?.id,
+          scopes = permission.scopes,
+          projectId = permission.project?.id,
+          organizationId = permission.organization?.id,
+          translateLanguageIds = permission.translateLanguageIds,
+          viewLanguageIds = permission.viewLanguageIds,
+          stateChangeLanguageIds = permission.stateChangeLanguageIds,
+          type = permission.type,
+          granular = permission.granular,
+        )
+      }
 
   @CacheEvict(
     cacheNames = [Caches.PERMISSIONS],
@@ -85,7 +81,5 @@ class CachedPermissionService(
     cacheNames = [Caches.PERMISSIONS],
     key = "{#result.user?.id, #result.project?.id, #result.organization?.id}",
   )
-  fun save(permission: Permission): Permission {
-    return permissionRepository.save(permission)
-  }
+  fun save(permission: Permission): Permission = permissionRepository.save(permission)
 }

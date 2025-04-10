@@ -63,10 +63,18 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         fileStorage.fileExists("screenshots/" + screenshots[0].filename).assert.isTrue()
         val reference = screenshots[0].keyScreenshotReferences[0]
         reference.originalText.assert.isEqualTo(text)
-        reference.positions!![0].x.assert.isEqualTo(200)
-        reference.positions!![0].y.assert.isEqualTo(100)
-        reference.positions!![0].width.assert.isEqualTo(40)
-        reference.positions!![0].height.assert.isEqualTo(40)
+        reference.positions!![0]
+          .x.assert
+          .isEqualTo(200)
+        reference.positions!![0]
+          .y.assert
+          .isEqualTo(100)
+        reference.positions!![0]
+          .width.assert
+          .isEqualTo(40)
+        reference.positions!![0]
+          .height.assert
+          .isEqualTo(40)
       }
     }
   }
@@ -140,18 +148,18 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun getScreenshotFile() {
+  fun testGetScreenshotFile() {
     val screenshot =
       executeInNewTransaction {
         val key = keyService.create(project, CreateKeyDto("test"))
         screenshotService.store(screenshotFile, key, null)
       }
     val result =
-      performGet("/screenshots/${screenshot.filename}").andIsOk
+      performGet("/screenshots/${screenshot.filename}")
+        .andIsOk
         .andExpect(
           header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"),
-        )
-        .andReturn()
+        ).andReturn()
     performGet("/screenshots/${screenshot.thumbnailFilename}").andIsOk
     assertThat(result.response.contentAsByteArray).isEqualTo(fileStorage.readFile("screenshots/" + screenshot.filename))
   }
@@ -164,9 +172,10 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         val key = keyService.create(project, CreateKeyDto("test"))
 
         val list =
-          (1..20).map {
-            screenshotService.store(screenshotFile, key, null)
-          }.toCollection(mutableListOf())
+          (1..20)
+            .map {
+              screenshotService.store(screenshotFile, key, null)
+            }.toCollection(mutableListOf())
         key to list
       }
     val chunked = list.chunked(10)

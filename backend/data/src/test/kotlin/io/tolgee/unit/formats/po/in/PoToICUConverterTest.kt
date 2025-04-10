@@ -20,16 +20,17 @@ class PoToICUConverterTest {
   @Test
   fun testPhpPlurals() {
     val result =
-      getPhpConvertor().convert(
-        rawData =
-          mapOf(
-            0 to "Petr má jednoho psa.",
-            1 to "Petr má %d psi.",
-            2 to "Petr má %d psů.",
-          ),
-        languageTag = "cs",
-        convertPlaceholders = true,
-      ).message
+      getPhpConvertor()
+        .convert(
+          rawData =
+            mapOf(
+              0 to "Petr má jednoho psa.",
+              1 to "Petr má %d psi.",
+              2 to "Petr má %d psů.",
+            ),
+          languageTag = "cs",
+          convertPlaceholders = true,
+        ).message
     assertThat(result).isEqualTo(
       "{0, plural,\n" +
         "one {Petr má jednoho psa.}\n" +
@@ -42,16 +43,17 @@ class PoToICUConverterTest {
   @Test
   fun `php plurals with hashtags works`() {
     val result =
-      getPhpConvertor().convert(
-        rawData =
-          mapOf(
-            0 to "Petr má jeden znak #.",
-            1 to "Petr má %d znaky #.",
-            2 to "Petr má %d znaků #.",
-          ),
-        languageTag = "cs",
-        convertPlaceholders = true,
-      ).message
+      getPhpConvertor()
+        .convert(
+          rawData =
+            mapOf(
+              0 to "Petr má jeden znak #.",
+              1 to "Petr má %d znaky #.",
+              2 to "Petr má %d znaků #.",
+            ),
+          languageTag = "cs",
+          convertPlaceholders = true,
+        ).message
     assertThat(result).isEqualTo(
       "{0, plural,\n" +
         "one {Petr má jeden znak '#'.}\n" +
@@ -64,16 +66,17 @@ class PoToICUConverterTest {
   @Test
   fun `php plurals with hashtags and disabled placeholders works`() {
     val result =
-      getPhpConvertor().convert(
-        rawData =
-          mapOf(
-            0 to "Petr má jeden znak #.",
-            1 to "Petr má %d znaky #.",
-            2 to "Petr má %d znaků #.",
-          ),
-        languageTag = "cs",
-        convertPlaceholders = false,
-      ).message
+      getPhpConvertor()
+        .convert(
+          rawData =
+            mapOf(
+              0 to "Petr má jeden znak #.",
+              1 to "Petr má %d znaky #.",
+              2 to "Petr má %d znaků #.",
+            ),
+          languageTag = "cs",
+          convertPlaceholders = false,
+        ).message
     assertThat(result).isEqualTo(
       "{value, plural,\n" +
         "one {Petr má jeden znak '#'.}\n" +
@@ -102,11 +105,12 @@ class PoToICUConverterTest {
   @Test
   fun `php message with hashtag and disabled placeholders works`() {
     val result =
-      getPhpConvertor().convert(
-        "hello this is hashtag # and it should not be escaped",
-        "en",
-        convertPlaceholders = false,
-      ).message
+      getPhpConvertor()
+        .convert(
+          "hello this is hashtag # and it should not be escaped",
+          "en",
+          convertPlaceholders = false,
+        ).message
     assertThat(result).isEqualTo("hello this is hashtag # and it should not be escaped")
   }
 
@@ -134,11 +138,12 @@ class PoToICUConverterTest {
   @Test
   fun testPythonMessage() {
     val result =
-      getPythonConvertor().convert(
-        "%(one)s %(two)d %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld {hey}",
-        "cs",
-        true,
-      ).message
+      getPythonConvertor()
+        .convert(
+          "%(one)s %(two)d %(three)+- #0f %(four)+- #0lf %(five)+-hs %(six)0hs %(seven)ld {hey}",
+          "cs",
+          true,
+        ).message
     assertThat(
       result,
     ).isEqualTo(
@@ -151,11 +156,12 @@ class PoToICUConverterTest {
   @Test
   fun testPhpMessageKey() {
     val result =
-      getPhpConvertor().convert(
-        "%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s",
-        "cs",
-        true,
-      ).message
+      getPhpConvertor()
+        .convert(
+          "%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s",
+          "cs",
+          true,
+        ).message
 
     assertThat(result)
       .isEqualTo("{2, number} hello this is string {1}, this is digit {0, number}, and another digit {3}")

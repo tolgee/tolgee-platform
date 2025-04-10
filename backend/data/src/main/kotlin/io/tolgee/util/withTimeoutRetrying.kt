@@ -26,5 +26,6 @@ fun <T> withTimeoutRetrying(
   throw RepeatedTimeoutException(repeats)
 }
 
-class RepeatedTimeoutException(repeats: Int) :
-  RuntimeException("Retry failed $repeats times")
+class RepeatedTimeoutException(
+  repeats: Int,
+) : RuntimeException("Retry failed $repeats times")

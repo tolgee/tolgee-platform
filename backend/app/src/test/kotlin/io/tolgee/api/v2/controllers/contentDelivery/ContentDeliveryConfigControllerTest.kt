@@ -112,17 +112,15 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
 
   private fun FileStorage.getInvocations(): List<Invocation> = Mockito.mockingDetails(this).invocations.toList()
 
-  private fun FileStorage.getStoreFileInvocations(): List<Invocation> {
-    return getInvocations().filter { it.method.name == "storeFile" }
-  }
+  private fun FileStorage.getStoreFileInvocations(): List<Invocation> = getInvocations().filter { it.method.name == "storeFile" }
 
-  private fun FileStorage.getPruneDirectoryInvocations(): List<Invocation> {
-    return getInvocations().filter { it.method.name == "pruneDirectory" }
-  }
+  private fun FileStorage.getPruneDirectoryInvocations(): List<Invocation> = getInvocations().filter { it.method.name == "pruneDirectory" }
 
   private fun resetServerProperties() {
-    tolgeeProperties.contentDelivery.storage.s3.clear()
-    tolgeeProperties.contentDelivery.storage.azure.clear()
+    tolgeeProperties.contentDelivery.storage.s3
+      .clear()
+    tolgeeProperties.contentDelivery.storage.azure
+      .clear()
   }
 
   private fun mockS3FileStorage(): S3FileStorage {

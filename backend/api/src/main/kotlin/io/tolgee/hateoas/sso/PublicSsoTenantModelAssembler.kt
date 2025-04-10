@@ -6,15 +6,15 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class PublicSsoTenantModelAssembler : RepresentationModelAssemblerSupport<ISsoTenant, PublicSsoTenantModel>(
-  V2UserController::class.java,
-  PublicSsoTenantModel::class.java,
-) {
-  override fun toModel(tenant: ISsoTenant): PublicSsoTenantModel {
-    return PublicSsoTenantModel(
+class PublicSsoTenantModelAssembler :
+  RepresentationModelAssemblerSupport<ISsoTenant, PublicSsoTenantModel>(
+    V2UserController::class.java,
+    PublicSsoTenantModel::class.java,
+  ) {
+  override fun toModel(tenant: ISsoTenant): PublicSsoTenantModel =
+    PublicSsoTenantModel(
       domain = tenant.domain,
       global = tenant.global,
       force = tenant.force,
     )
-  }
 }

@@ -20,13 +20,9 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 class ScopeInfoController : IController {
   @GetMapping(value = ["/hierarchy"])
   @Operation(summary = "Returns hierarchy of scopes")
-  fun getHierarchy(search: String? = null): Scope.HierarchyItem {
-    return Scope.hierarchy
-  }
+  fun getHierarchy(search: String? = null): Scope.HierarchyItem = Scope.hierarchy
 
   @GetMapping(value = ["/roles"])
   @Operation(summary = "Returns user roles and their scopes")
-  fun getRoles(): Map<String, Array<Scope>> {
-    return ProjectPermissionType.getRoles()
-  }
+  fun getRoles(): Map<String, Array<Scope>> = ProjectPermissionType.getRoles()
 }

@@ -8,7 +8,8 @@ import java.io.Serializable
 class CreditBalanceModel(
   val creditBalance: Long,
   val bucketSize: Long,
-) : RepresentationModel<CreditBalanceModel>(), Serializable {
+) : RepresentationModel<CreditBalanceModel>(),
+  Serializable {
   @Schema(
     deprecated = true,
     description =

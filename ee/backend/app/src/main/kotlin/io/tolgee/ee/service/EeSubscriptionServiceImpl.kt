@@ -51,7 +51,8 @@ class EeSubscriptionServiceImpl(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
-) : EeSubscriptionProvider, Logging {
+) : EeSubscriptionProvider,
+  Logging {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
     const val PREPARE_SET_KEY_PATH: String = "/v2/public/licensing/prepare-set-key"
@@ -64,17 +65,11 @@ class EeSubscriptionServiceImpl(
   var bypassSeatCountCheck = false
 
   @Cacheable(Caches.EE_SUBSCRIPTION, key = "1")
-  override fun findSubscriptionDto(): EeSubscriptionDto? {
-    return this.findSubscriptionEntity()?.toDto()
-  }
+  override fun findSubscriptionDto(): EeSubscriptionDto? = this.findSubscriptionEntity()?.toDto()
 
-  fun findSubscriptionEntity(): EeSubscription? {
-    return eeSubscriptionRepository.findById(1).orElse(null)
-  }
+  fun findSubscriptionEntity(): EeSubscription? = eeSubscriptionRepository.findById(1).orElse(null)
 
-  fun isSubscribed(): Boolean {
-    return self.findSubscriptionDto() != null
-  }
+  fun isSubscribed(): Boolean = self.findSubscriptionDto() != null
 
   @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
   fun setLicenceKey(licenseKey: String): EeSubscription {
@@ -133,8 +128,8 @@ class EeSubscriptionServiceImpl(
     throw IllegalStateException("Licence not obtained")
   }
 
-  fun <T> catchingSeatsSpendingLimit(fn: () -> T): T {
-    return try {
+  fun <T> catchingSeatsSpendingLimit(fn: () -> T): T =
+    try {
       fn()
     } catch (e: HttpClientErrorException.BadRequest) {
       val body = e.parseBody()
@@ -143,14 +138,11 @@ class EeSubscriptionServiceImpl(
       }
       throw e
     }
-  }
 
   private inline fun <reified T> postRequest(
     url: String,
     body: Any,
-  ): T? {
-    return httpClient.requestForJson("${eeProperties.licenseServer}$url", body, HttpMethod.POST, T::class.java)
-  }
+  ): T? = httpClient.requestForJson("${eeProperties.licenseServer}$url", body, HttpMethod.POST, T::class.java)
 
   @Scheduled(fixedDelayString = """${'$'}{tolgee.ee.check-period-ms:300000}""")
   @Transactional
@@ -185,9 +177,8 @@ class EeSubscriptionServiceImpl(
     self.save(subscription)
   }
 
-  fun HttpClientErrorException.parseBody(): ErrorResponseBody {
-    return jacksonObjectMapper().readValue(this.responseBodyAsString, ErrorResponseBody::class.java)
-  }
+  fun HttpClientErrorException.parseBody(): ErrorResponseBody =
+    jacksonObjectMapper().readValue(this.responseBodyAsString, ErrorResponseBody::class.java)
 
   private fun updateLocalSubscription(
     responseBody: SelfHostedEeSubscriptionModel?,
@@ -297,9 +288,7 @@ class EeSubscriptionServiceImpl(
   }
 
   @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
-  fun save(subscription: EeSubscription): EeSubscription {
-    return eeSubscriptionRepository.save(subscription)
-  }
+  fun save(subscription: EeSubscription): EeSubscription = eeSubscriptionRepository.save(subscription)
 
   private fun reportUsageRemote(
     subscription: EeSubscriptionDto,

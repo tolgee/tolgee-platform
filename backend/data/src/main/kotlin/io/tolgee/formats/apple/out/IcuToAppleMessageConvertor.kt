@@ -9,9 +9,8 @@ class IcuToAppleMessageConvertor(
   private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
 ) {
-  fun convert(): PossiblePluralConversionResult {
-    return MessageConvertorFactory(message, forceIsPlural, isProjectIcuPlaceholdersEnabled) {
+  fun convert(): PossiblePluralConversionResult =
+    MessageConvertorFactory(message, forceIsPlural, isProjectIcuPlaceholdersEnabled) {
       IcuToApplePlaceholderConvertor()
     }.create().convert()
-  }
 }

@@ -21,8 +21,8 @@ data class ThirdPartyUserDetails(
       data: OAuthUserDetails,
       authType: ThirdPartyAuthType,
       invitationCode: String?,
-    ): ThirdPartyUserDetails {
-      return ThirdPartyUserDetails(
+    ): ThirdPartyUserDetails =
+      ThirdPartyUserDetails(
         authId = data.sub,
         username = data.email,
         name =
@@ -38,33 +38,30 @@ data class ThirdPartyUserDetails(
         refreshToken = data.refreshToken,
         tenant = data.tenant,
       )
-    }
 
     fun fromGithub(
       data: GithubUserResponse,
       email: String,
       invitationCode: String?,
-    ): ThirdPartyUserDetails {
-      return ThirdPartyUserDetails(
+    ): ThirdPartyUserDetails =
+      ThirdPartyUserDetails(
         authId = data.id!!,
         username = email,
         name = data.name ?: data.login,
         thirdPartyAuthType = ThirdPartyAuthType.GITHUB,
         invitationCode = invitationCode,
       )
-    }
 
     fun fromGoogle(
       data: GoogleUserResponse,
       invitationCode: String?,
-    ): ThirdPartyUserDetails {
-      return ThirdPartyUserDetails(
+    ): ThirdPartyUserDetails =
+      ThirdPartyUserDetails(
         authId = data.sub!!,
         username = data.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL),
         name = data.name ?: (data.given_name + " " + data.family_name),
         thirdPartyAuthType = ThirdPartyAuthType.GOOGLE,
         invitationCode = invitationCode,
       )
-    }
   }
 }

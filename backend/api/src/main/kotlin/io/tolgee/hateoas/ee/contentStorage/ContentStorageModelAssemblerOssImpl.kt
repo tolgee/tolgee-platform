@@ -7,7 +7,5 @@ import org.springframework.stereotype.Component
 
 @Component
 class ContentStorageModelAssemblerOssImpl : ContentStorageModelAssembler {
-  override fun toModel(entity: ContentStorage): ContentStorageModel {
-    throw NotImplementedInOss(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
-  }
+  override fun toModel(entity: ContentStorage): ContentStorageModel = throw NotImplementedInOss(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
 }

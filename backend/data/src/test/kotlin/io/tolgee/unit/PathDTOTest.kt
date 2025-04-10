@@ -11,9 +11,7 @@ class PathDTOTest {
       listOf(*TEST_FULL_PATH.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()),
     )
 
-  private fun getTestList(): LinkedList<String> {
-    return LinkedList(testList)
-  }
+  private fun getTestList(): LinkedList<String> = LinkedList(testList)
 
   @Test
   fun testFromFullPath() {

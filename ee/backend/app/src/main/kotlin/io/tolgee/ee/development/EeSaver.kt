@@ -6,7 +6,9 @@ import io.tolgee.ee.repository.EeSubscriptionRepository
 import org.springframework.stereotype.Component
 
 @Component
-class EeSaver(private val eeSubscriptionRepository: EeSubscriptionRepository) : AdditionalTestDataSaver {
+class EeSaver(
+  private val eeSubscriptionRepository: EeSubscriptionRepository,
+) : AdditionalTestDataSaver {
   override fun save(builder: TestDataBuilder) {
   }
 

@@ -17,4 +17,5 @@ open class PrivateOrganizationModel(
   val quickStart: QuickStartModel?,
   @get:Schema(example = "Current active subscription info")
   val activeCloudSubscription: PublicCloudSubscriptionModel?,
-) : IOrganizationModel by organizationModel, RepresentationModel<PrivateOrganizationModel>()
+) : RepresentationModel<PrivateOrganizationModel>(),
+  IOrganizationModel by organizationModel

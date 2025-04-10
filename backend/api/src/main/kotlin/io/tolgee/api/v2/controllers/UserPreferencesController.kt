@@ -34,11 +34,10 @@ class UserPreferencesController(
   @Operation(summary = "Get user's preferences")
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
-  fun get(): UserPreferencesModel {
-    return userPreferencesService.findOrCreate(authenticationFacade.authenticatedUser.id).let {
+  fun get(): UserPreferencesModel =
+    userPreferencesService.findOrCreate(authenticationFacade.authenticatedUser.id).let {
       UserPreferencesModel(language = it.language, preferredOrganizationId = it.preferredOrganization?.id)
     }
-  }
 
   @PutMapping("/set-language/{languageTag}")
   @Operation(summary = "Set user's UI language")

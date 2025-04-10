@@ -18,8 +18,8 @@ enum class SubscriptionStatus(
   ;
 
   companion object {
-    fun fromStripeStatus(stripeStatus: String?): SubscriptionStatus {
-      return when (stripeStatus) {
+    fun fromStripeStatus(stripeStatus: String?): SubscriptionStatus =
+      when (stripeStatus) {
         "active" -> ACTIVE
         "canceled" -> CANCELED
         "past_due" -> PAST_DUE
@@ -27,6 +27,5 @@ enum class SubscriptionStatus(
         "trialing" -> TRIALING
         else -> UNKNOWN
       }
-    }
   }
 }

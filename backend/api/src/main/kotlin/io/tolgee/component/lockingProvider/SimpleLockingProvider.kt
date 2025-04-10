@@ -11,9 +11,7 @@ class SimpleLockingProvider : LockingProvider {
   }
 
   @Synchronized
-  override fun getLock(name: String): Lock {
-    return map.getOrPut(name) { ReentrantLock() }
-  }
+  override fun getLock(name: String): Lock = map.getOrPut(name) { ReentrantLock() }
 
   override fun <T> withLocking(
     name: String,

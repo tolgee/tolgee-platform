@@ -92,9 +92,7 @@ class MfaService(
     return codes
   }
 
-  fun hasMfaEnabled(user: UserAccount): Boolean {
-    return mfaEnabled(user.totpKey)
-  }
+  fun hasMfaEnabled(user: UserAccount): Boolean = mfaEnabled(user.totpKey)
 
   fun checkMfa(
     user: UserAccount,
@@ -140,17 +138,12 @@ class MfaService(
     }
   }
 
-  fun generateCode(key: ByteArray): Int {
-    return totpGenerator.generateOneTimePassword(SecretKeySpec(key, SecurityConfiguration.OTP_ALGORITHM), Instant.now())
-  }
+  fun generateCode(key: ByteArray): Int =
+    totpGenerator.generateOneTimePassword(SecretKeySpec(key, SecurityConfiguration.OTP_ALGORITHM), Instant.now())
 
-  fun generateStringCode(key: ByteArray): String {
-    return generateCode(key).toString().padStart(6, '0')
-  }
+  fun generateStringCode(key: ByteArray): String = generateCode(key).toString().padStart(6, '0')
 
   companion object {
-    fun mfaEnabled(totpKeyOrNull: ByteArray?): Boolean {
-      return totpKeyOrNull?.isNotEmpty() == true
-    }
+    fun mfaEnabled(totpKeyOrNull: ByteArray?): Boolean = totpKeyOrNull?.isNotEmpty() == true
   }
 }

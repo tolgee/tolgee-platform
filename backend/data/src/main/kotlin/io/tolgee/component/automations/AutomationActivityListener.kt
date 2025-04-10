@@ -56,8 +56,8 @@ class AutomationActivityListener(
     }
   }
 
-  private fun isTranslationDataModification(event: OnProjectActivityStoredEvent): Boolean {
-    return event.activityRevision.modifiedEntities.any { modifiedEntity ->
+  private fun isTranslationDataModification(event: OnProjectActivityStoredEvent): Boolean =
+    event.activityRevision.modifiedEntities.any { modifiedEntity ->
       arrayOf(
         Translation::class,
         Key::class,
@@ -65,5 +65,4 @@ class AutomationActivityListener(
         Project::class,
       ).any { allowedClass -> allowedClass.simpleName == modifiedEntity.entityClass }
     }
-  }
 }

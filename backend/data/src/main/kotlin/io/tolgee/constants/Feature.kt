@@ -25,8 +25,6 @@ enum class Feature {
   ;
 
   companion object {
-    fun findByName(name: String): Feature? {
-      return entries.find { it.name == name }
-    }
+    fun findByName(name: String): Feature? = entries.find { it.name == name }
   }
 }

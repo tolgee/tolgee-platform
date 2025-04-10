@@ -48,7 +48,5 @@ class WildcardTagsProvider(
     return (wildcardTags + nonWildcardTags).toSet()
   }
 
-  private fun String.escapeLikeForPostgres(): String {
-    return replace("%", "!%")
-  }
+  private fun String.escapeLikeForPostgres(): String = replace("%", "!%")
 }

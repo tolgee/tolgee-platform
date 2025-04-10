@@ -34,21 +34,14 @@ class ClearTranslationsChunkProcessor(
     }
   }
 
-  override fun getParamsType(): Class<ClearTranslationsJobParams> {
-    return ClearTranslationsJobParams::class.java
-  }
+  override fun getParamsType(): Class<ClearTranslationsJobParams> = ClearTranslationsJobParams::class.java
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getTarget(data: ClearTranslationsRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: ClearTranslationsRequest): List<Long> = data.keyIds
 
-  override fun getParams(data: ClearTranslationsRequest): ClearTranslationsJobParams {
-    return ClearTranslationsJobParams().apply {
+  override fun getParams(data: ClearTranslationsRequest): ClearTranslationsJobParams =
+    ClearTranslationsJobParams().apply {
       languageIds = data.languageIds
     }
-  }
 }

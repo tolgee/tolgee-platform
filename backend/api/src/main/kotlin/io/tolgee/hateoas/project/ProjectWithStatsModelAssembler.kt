@@ -40,12 +40,13 @@ class ProjectWithStatsModelAssembler(
         projectService.getOrAssignBaseLanguage(view.id)
       }
     val computedPermissions =
-      permissionService.computeProjectPermission(
-        view.organizationRole,
-        view.organizationOwner.basePermission,
-        view.directPermission,
-        UserAccount.Role.USER,
-      ).getAdminPermissions(userRole = authenticationFacade.authenticatedUserOrNull?.role)
+      permissionService
+        .computeProjectPermission(
+          view.organizationRole,
+          view.organizationOwner.basePermission,
+          view.directPermission,
+          UserAccount.Role.USER,
+        ).getAdminPermissions(userRole = authenticationFacade.authenticatedUserOrNull?.role)
 
     return ProjectWithStatsModel(
       id = view.id,

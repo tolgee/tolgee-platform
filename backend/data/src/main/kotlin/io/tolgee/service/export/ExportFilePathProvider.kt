@@ -26,25 +26,20 @@ class ExportFilePathProvider(
       .finalizePath()
   }
 
-  fun replaceExtensionAndFinalize(path: String): String {
-    return path.replaceExtensionIfEnabled(true)
+  fun replaceExtensionAndFinalize(path: String): String =
+    path
+      .replaceExtensionIfEnabled(true)
       .finalizePath()
-  }
 
-  private fun String.finalizePath(): String {
-    return this
+  private fun String.finalizePath(): String =
+    this
       .replaceMultipleSlashes()
       .removeZipSlipString()
       .removeLeadingSlash()
-  }
 
-  private fun String.removeLeadingSlash(): String {
-    return this.removePrefix("/")
-  }
+  private fun String.removeLeadingSlash(): String = this.removePrefix("/")
 
-  private fun getTemplate(): String {
-    return params.fileStructureTemplate ?: params.format.defaultFileStructureTemplate
-  }
+  private fun getTemplate(): String = params.fileStructureTemplate ?: params.format.defaultFileStructureTemplate
 
   private fun validateAndGetTemplate(): String {
     validateTemplate()
@@ -92,30 +87,28 @@ class ExportFilePathProvider(
     if (replaceExtension) {
       val placeholder = ExportFilePathPlaceholder.EXTENSION
 
-      return this.replace(
-        "/+\\.${placeholder.placeholderForRegex}".toRegex(),
-        ".${placeholder.placeholder}",
-      )
-        .replacePlaceholder(placeholder, extension)
+      return this
+        .replace(
+          "/+\\.${placeholder.placeholderForRegex}".toRegex(),
+          ".${placeholder.placeholder}",
+        ).replacePlaceholder(placeholder, extension)
     }
     return this
   }
 
-  private fun String.replaceLanguageTag(languageTag: String): String {
-    return this.replacePlaceholder(ExportFilePathPlaceholder.LANGUAGE_TAG, languageTag)
+  private fun String.replaceLanguageTag(languageTag: String): String =
+    this
+      .replacePlaceholder(ExportFilePathPlaceholder.LANGUAGE_TAG, languageTag)
       .replacePlaceholder(
         ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
         convertBCP47ToAndroidResourceFormat(languageTag),
-      )
-      .replacePlaceholder(
+      ).replacePlaceholder(
         ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
         getSnakeLanguageTag(languageTag),
       )
-  }
 
-  fun getFilePath(exportTranslationView: ExportTranslationView): String {
-    return getFilePath(exportTranslationView.key.namespace, exportTranslationView.languageTag)
-  }
+  fun getFilePath(exportTranslationView: ExportTranslationView): String =
+    getFilePath(exportTranslationView.key.namespace, exportTranslationView.languageTag)
 
   fun getSnakeLanguageTag(languageTag: String) = languageTag.replace("-", "_")
 
@@ -137,6 +130,4 @@ class ExportFilePathProvider(
   }
 }
 
-private fun String.removeZipSlipString(): String {
-  return this.replace("../", "")
-}
+private fun String.removeZipSlipString(): String = this.replace("../", "")

@@ -10,9 +10,7 @@ import java.security.SecureRandom
 class KeyGenerator(
   private val random: SecureRandom,
 ) {
-  fun generate(bits: Int = 256): String {
-    return BigInteger(bits, random).toString(32)
-  }
+  fun generate(bits: Int = 256): String = BigInteger(bits, random).toString(32)
 
   fun hash(it: String): String {
     val sha = DigestUtils.sha256(it.toByteArray())

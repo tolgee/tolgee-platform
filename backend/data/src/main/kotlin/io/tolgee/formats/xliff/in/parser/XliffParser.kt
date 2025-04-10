@@ -54,13 +54,16 @@ class XliffParser(
                 result.files.add(file)
                 file.original =
                   startElement
-                    .getAttributeByName(QName(null, "original"))?.value
+                    .getAttributeByName(QName(null, "original"))
+                    ?.value
                 file.sourceLanguage =
                   startElement
-                    .getAttributeByName(QName(null, "source-language"))?.value
+                    .getAttributeByName(QName(null, "source-language"))
+                    ?.value
                 file.targetLanguage =
                   startElement
-                    .getAttributeByName(QName(null, "target-language"))?.value
+                    .getAttributeByName(QName(null, "target-language"))
+                    ?.value
               }
 
               "trans-unit" -> {

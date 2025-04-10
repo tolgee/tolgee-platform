@@ -13,8 +13,10 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 
-class AppleXliffFileProcessor(override val context: FileProcessorContext, private val parsed: XliffModel) :
-  ImportFileProcessor() {
+class AppleXliffFileProcessor(
+  override val context: FileProcessorContext,
+  private val parsed: XliffModel,
+) : ImportFileProcessor() {
   /**
    * file -> Map (KeyName -> Map (Form -> Pair (Source, Target )))
    */
@@ -208,14 +210,13 @@ class AppleXliffFileProcessor(override val context: FileProcessorContext, privat
     }
   }
 
-  private fun convertMessage(message: String): MessageConvertorResult {
-    return messageConvertor.convert(
+  private fun convertMessage(message: String): MessageConvertorResult =
+    messageConvertor.convert(
       message,
       "who-knows",
       context.importSettings.convertPlaceholdersToIcu,
       context.projectIcuPlaceholdersEnabled,
     )
-  }
 
   companion object {
     private val importFormat = ImportFormat.APPLE_XLIFF

@@ -24,4 +24,5 @@ class ApiKeyPermissionsModel(
   )
   override val type: ProjectPermissionType?,
   var project: SimpleProjectModel,
-) : RepresentationModel<ApiKeyPermissionsModel>(), IPermissionModel
+) : RepresentationModel<ApiKeyPermissionsModel>(),
+  IPermissionModel

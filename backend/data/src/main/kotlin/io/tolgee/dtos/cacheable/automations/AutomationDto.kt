@@ -7,8 +7,8 @@ data class AutomationDto(
   val actions: List<AutomationActionDto>,
 ) {
   companion object {
-    fun fromEntity(entity: Automation): AutomationDto {
-      return AutomationDto(
+    fun fromEntity(entity: Automation): AutomationDto =
+      AutomationDto(
         triggers =
           entity.triggers.map {
             AutomationTriggerDto(
@@ -20,6 +20,5 @@ data class AutomationDto(
           },
         actions = entity.actions.map { AutomationActionDto(it.id, it.type) },
       )
-    }
   }
 }

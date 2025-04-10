@@ -49,14 +49,14 @@ class OrganizationProjectController(
     @PathVariable("id") id: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
-  ): PagedModel<ProjectModel> {
-    return organizationService.find(id)?.let { organization ->
-      projectService.findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
+  ): PagedModel<ProjectModel> =
+    organizationService.find(id)?.let { organization ->
+      projectService
+        .findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
         .let { projects ->
           pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
         }
     } ?: throw NotFoundException()
-  }
 
   @GetMapping("/{slug:.*[a-z].*}/projects")
   @Operation(
@@ -68,11 +68,10 @@ class OrganizationProjectController(
     @PathVariable("slug") slug: String,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
-  ): PagedModel<ProjectModel> {
-    return organizationService.find(slug)?.let {
+  ): PagedModel<ProjectModel> =
+    organizationService.find(slug)?.let {
       getAllProjects(it.id, pageable, search)
     } ?: throw NotFoundException()
-  }
 
   @Operation(
     summary = "Get all projects with stats",

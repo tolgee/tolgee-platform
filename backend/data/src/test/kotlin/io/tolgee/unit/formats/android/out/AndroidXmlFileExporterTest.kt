@@ -313,15 +313,12 @@ class AndroidXmlFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-  ): XmlResourcesExporter {
-    return XmlResourcesExporter(
+  ): XmlResourcesExporter =
+    XmlResourcesExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
-  }
 
-  private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.format = ExportFormat.ANDROID_XML }
-  }
+  private fun getExportParams(): ExportParams = ExportParams().also { it.format = ExportFormat.ANDROID_XML }
 }

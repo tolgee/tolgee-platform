@@ -57,8 +57,9 @@ class TranslationViewDataProvider(
       return
     }
 
-    em.createNativeQuery(
-      """
+    em
+      .createNativeQuery(
+        """
         CREATE TEMP TABLE temp_unsuccessful_job_keys AS
             WITH unsuccessful_targets AS (
                 SELECT *
@@ -76,13 +77,13 @@ class TranslationViewDataProvider(
             SELECT DISTINCT (target -> 'keyId')\:\:bigint AS key_id
             FROM unsuccessful_targets;
       """,
-    )
-      .setParameter("batchJobId", filterFailedKeysOfJob)
+      ).setParameter("batchJobId", filterFailedKeysOfJob)
       .executeUpdate()
   }
 
   private fun deleteFailedKeysInJobTempTable() {
-    em.createNativeQuery("DROP TABLE IF EXISTS temp_unsuccessful_job_keys")
+    em
+      .createNativeQuery("DROP TABLE IF EXISTS temp_unsuccessful_job_keys")
       .executeUpdate()
   }
 

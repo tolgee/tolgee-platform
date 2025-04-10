@@ -45,13 +45,12 @@ class GenericStructuredProcessor(
     }
   }
 
-  private fun convert(data: Any?): List<MessageConvertorResult>? {
-    return convertor.convert(
+  private fun convert(data: Any?): List<MessageConvertorResult>? =
+    convertor.convert(
       rawData = data,
       projectIcuPlaceholdersEnabled = context.projectIcuPlaceholdersEnabled,
       convertPlaceholdersToIcu = context.importSettings.convertPlaceholdersToIcu,
     )
-  }
 
   private fun List<*>.parseList(keyPrefix: String) {
     this.forEachIndexed { idx, it ->

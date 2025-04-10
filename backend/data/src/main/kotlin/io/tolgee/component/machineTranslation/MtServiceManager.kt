@@ -31,8 +31,8 @@ class MtServiceManager(
   private fun findInCache(
     params: ProviderTranslateParams,
     serviceType: MtServiceType,
-  ): TranslateResult? {
-    return params.findInCacheByParams(serviceType)?.let {
+  ): TranslateResult? =
+    params.findInCacheByParams(serviceType)?.let {
       TranslateResult(
         translatedText = it.translatedText,
         contextDescription = it.contextDescription,
@@ -41,7 +41,6 @@ class MtServiceManager(
         params.textRaw.isEmpty(),
       )
     }
-  }
 
   fun translate(params: TranslationParams): TranslateResult {
     val provider = params.serviceInfo.serviceType.getProvider()
@@ -181,7 +180,5 @@ class MtServiceManager(
 
   private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
 
-  fun MtServiceType.getProvider(): MtValueProvider {
-    return applicationContext.getBean(this.providerClass)
-  }
+  fun MtServiceType.getProvider(): MtValueProvider = applicationContext.getBean(this.providerClass)
 }

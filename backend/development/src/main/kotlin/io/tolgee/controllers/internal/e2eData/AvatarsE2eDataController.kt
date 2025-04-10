@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/avatars"])
 @Transactional
-class AvatarsE2eDataController() : AbstractE2eDataController() {
+class AvatarsE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData(): Map<String, *> {

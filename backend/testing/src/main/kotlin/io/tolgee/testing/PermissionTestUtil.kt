@@ -32,8 +32,8 @@ class PermissionTestUtil(
   fun performSetPermissions(
     type: String,
     getQueryFn: (langByTag: LangByTag) -> String,
-  ): ResultActions {
-    return withPermissionsTestData { project, user ->
+  ): ResultActions =
+    withPermissionsTestData { project, user ->
       val languages = project.languages.toList()
       val langByTag = { tag: String -> languages.find { it.tag == tag }!!.id }
       val query = getQueryFn(langByTag)
@@ -51,7 +51,6 @@ class PermissionTestUtil(
         null,
       )
     }
-  }
 
   fun checkSetPermissionsWithLanguages(
     type: String,
@@ -70,11 +69,12 @@ class PermissionTestUtil(
           "/$type?$query"
         }
 
-      test.performAuthPut(
-        "/v2/projects/${project.id}/users/${user.id}" +
-          "/set-permissions$typeAndQuery",
-        null,
-      ).andIsOk
+      test
+        .performAuthPut(
+          "/v2/projects/${project.id}/users/${user.id}" +
+            "/set-permissions$typeAndQuery",
+          null,
+        ).andIsOk
 
       checkFn(permissionService.getProjectPermissionData(project.id, user.id), langByTag)
     }

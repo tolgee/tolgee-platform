@@ -159,11 +159,12 @@ open class ChunkProcessingUtil(
   }
 
   private val previousSuccessfulTargets by lazy {
-    previousExecutions.flatMap {
-      // this is important!!
-      // we want the equals check to be run on the correct type with correct class instances
-      convertChunkToItsType(it.successTargets)
-    }.toSet()
+    previousExecutions
+      .flatMap {
+        // this is important!!
+        // we want the equals check to be run on the correct type with correct class instances
+        convertChunkToItsType(it.successTargets)
+      }.toSet()
   }
 
   /**
@@ -203,21 +204,20 @@ open class ChunkProcessingUtil(
 
   @Suppress("UNCHECKED_CAST")
   private val previousExecutions: List<BatchJobChunkExecution> by lazy {
-    entityManager.createQuery(
-      """
-      from BatchJobChunkExecution 
-      where chunkNumber = :chunkNumber 
-          and batchJob.id = :batchJobId
-          and status = :status
-      """.trimIndent(),
-    )
-      .setParameter("chunkNumber", execution.chunkNumber)
+    entityManager
+      .createQuery(
+        """
+        from BatchJobChunkExecution 
+        where chunkNumber = :chunkNumber 
+            and batchJob.id = :batchJobId
+            and status = :status
+        """.trimIndent(),
+      ).setParameter("chunkNumber", execution.chunkNumber)
       .setParameter("batchJobId", job.id)
       .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.NO_WAIT,
-      )
-      .resultList as List<BatchJobChunkExecution>
+      ).resultList as List<BatchJobChunkExecution>
   }
 }

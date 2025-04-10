@@ -10,9 +10,8 @@ class PostHogConfiguration(
   private val properties: PostHogProperties,
 ) {
   @Bean(destroyMethod = "shutdown")
-  fun postHog(): PostHog? {
-    return properties.apiKey?.let { postHogApiKey ->
+  fun postHog(): PostHog? =
+    properties.apiKey?.let { postHogApiKey ->
       PostHog.Builder(postHogApiKey).also { builder -> properties.host?.let { builder.host(it) } }.build()
     }
-  }
 }

@@ -13,13 +13,12 @@ class PublicInvitationModelAssembler(
     V2InvitationController::class.java,
     PublicInvitationModel::class.java,
   ) {
-  override fun toModel(entity: Invitation): PublicInvitationModel {
-    return PublicInvitationModel(
+  override fun toModel(entity: Invitation): PublicInvitationModel =
+    PublicInvitationModel(
       id = entity.id!!,
       code = entity.code,
       projectName = entity.permission?.project?.name,
       organizationName = entity.organizationRole?.organization?.name,
       createdBy = entity.createdBy?.let { simpleUserAccountModelAssembler.toModel(it) },
     )
-  }
 }

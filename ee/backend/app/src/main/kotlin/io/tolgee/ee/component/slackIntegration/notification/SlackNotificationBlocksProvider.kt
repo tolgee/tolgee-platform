@@ -32,13 +32,12 @@ class SlackNotificationBlocksProvider(
       }
     }
 
-  fun getAuthorBlocks(authorContext: String): List<LayoutBlock> {
-    return withBlocks {
+  fun getAuthorBlocks(authorContext: String): List<LayoutBlock> =
+    withBlocks {
       context {
         markdownText(authorContext)
       }
     }
-  }
 
   fun getKeyInfoBlock(
     context: SlackMessageContext,
@@ -105,7 +104,8 @@ class SlackNotificationBlocksProvider(
   }
 
   fun getRedirectButtonAttachment(url: String): Attachment =
-    Attachment.builder()
+    Attachment
+      .builder()
       .blocks(
         withBlocks {
           actions {
@@ -113,8 +113,7 @@ class SlackNotificationBlocksProvider(
             redirectOnPlatformButton(url)
           }
         },
-      )
-      .color("#00000000")
+      ).color("#00000000")
       .build()
 
   private fun ActionsBlockBuilder.redirectOnPlatformButton(tolgeeUrl: String) {
@@ -211,19 +210,19 @@ class SlackNotificationBlocksProvider(
       } else {
         getBlocksEmptyTranslation(context, translation)
       }
-    return Attachment.builder()
+    return Attachment
+      .builder()
       .color(color)
       .blocks(blocksBody)
       .fallback(translation.text ?: "")
       .build()
   }
 
-  private fun determineColorByState(state: TranslationState?): String {
-    return when (state) {
+  private fun determineColorByState(state: TranslationState?): String =
+    when (state) {
       TranslationState.TRANSLATED -> "#FFCE00"
       TranslationState.UNTRANSLATED -> "#BCC2CB"
       TranslationState.REVIEWED -> "#00B962"
       else -> "#BCC2CB"
     }
-  }
 }

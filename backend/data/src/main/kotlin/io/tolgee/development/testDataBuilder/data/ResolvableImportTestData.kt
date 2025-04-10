@@ -105,11 +105,11 @@ class ResolvableImportTestData : BaseTestData() {
     }
   }
 
-  fun addLotOfKeys(count: Int): List<Key> {
-    return (1..count).map {
-      projectBuilder.addKey(keyName = "key-lot-$it") {
-        addTranslation("en", "existing translation")
-      }.self
+  fun addLotOfKeys(count: Int): List<Key> =
+    (1..count).map {
+      projectBuilder
+        .addKey(keyName = "key-lot-$it") {
+          addTranslation("en", "existing translation")
+        }.self
     }
-  }
 }

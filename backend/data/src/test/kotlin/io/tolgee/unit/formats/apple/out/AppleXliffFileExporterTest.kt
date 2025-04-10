@@ -459,17 +459,14 @@ class AppleXliffFileExporterTest {
     baseTranslations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-  ): AppleXliffExporter {
-    return AppleXliffExporter(
+  ): AppleXliffExporter =
+    AppleXliffExporter(
       translations = translations,
       exportParams = params,
       baseTranslationsProvider = { baseTranslations },
       baseLanguageTag = "tag",
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
-  }
 
-  private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.format = ExportFormat.APPLE_XLIFF }
-  }
+  private fun getExportParams(): ExportParams = ExportParams().also { it.format = ExportFormat.APPLE_XLIFF }
 }

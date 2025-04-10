@@ -32,9 +32,7 @@ class YamlFileProcessor(
     processLanguageData(detectedFormat, firstLanguageTagGuessOrUnknown, data)
   }
 
-  private fun getFormat(dataMap: Map<*, *>): ImportFormat {
-    return context.mapping?.format ?: YamlImportFormatDetector().detectFormat(dataMap)
-  }
+  private fun getFormat(dataMap: Map<*, *>): ImportFormat = context.mapping?.format ?: YamlImportFormatDetector().detectFormat(dataMap)
 
   private fun processLanguageData(
     detectedFormat: ImportFormat,

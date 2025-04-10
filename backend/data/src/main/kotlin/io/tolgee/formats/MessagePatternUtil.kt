@@ -49,9 +49,7 @@ object MessagePatternUtil {
    * or does not represent a MessageFormat pattern
    * @stable ICU 49
    */
-  fun buildMessageNode(patternString: String?): MessageNode {
-    return buildMessageNode(MessagePattern(patternString))
-  }
+  fun buildMessageNode(patternString: String?): MessageNode = buildMessageNode(MessagePattern(patternString))
 
   /**
    * Factory method, builds and returns a MessageNode from a MessagePattern.
@@ -283,9 +281,7 @@ object MessagePatternUtil {
      * {@inheritDoc}
      * @stable ICU 49
      */
-    override fun toString(): String {
-      return list.toString()
-    }
+    override fun toString(): String = list.toString()
 
     fun addContentsNode(node: MessageContentsNode) {
       if (node is TextNode && !list.isEmpty()) {
@@ -324,8 +320,7 @@ object MessagePatternUtil {
     val type: Type,
     start: Int,
     limit: Int,
-  ) :
-    Node(owningPattern, start, limit) {
+  ) : Node(owningPattern, start, limit) {
     /**
      * The type of a piece of MessageNode contents.
      * @stable ICU 49
@@ -368,9 +363,7 @@ object MessagePatternUtil {
       fun createReplaceNumberNode(
         owningPattern: MessagePattern,
         start: Int,
-      ): MessageContentsNode {
-        return MessageContentsNode(owningPattern, Type.REPLACE_NUMBER, start, start)
-      }
+      ): MessageContentsNode = MessageContentsNode(owningPattern, Type.REPLACE_NUMBER, start, start)
     }
   }
 
@@ -393,9 +386,7 @@ object MessagePatternUtil {
      * {@inheritDoc}
      * @stable ICU 49
      */
-    override fun toString(): String {
-      return "«$text»"
-    }
+    override fun toString(): String = "«$text»"
 
     fun getText(keepEscaping: Boolean): String {
       if (keepEscaping) {
@@ -480,9 +471,7 @@ object MessagePatternUtil {
         owningPattern: MessagePattern,
         start: Int,
         limit: Int,
-      ): ArgNode {
-        return ArgNode(owningPattern, start, limit)
-      }
+      ): ArgNode = ArgNode(owningPattern, start, limit)
     }
   }
 
@@ -505,9 +494,7 @@ object MessagePatternUtil {
      * @return true if this is a plural style with an explicit offset
      * @stable ICU 49
      */
-    fun hasExplicitOffset(): Boolean {
-      return explicitOffset
-    }
+    fun hasExplicitOffset(): Boolean = explicitOffset
 
     val variants: List<VariantNode>
       /**
@@ -613,7 +600,11 @@ object MessagePatternUtil {
     override fun toString(): String {
       val sb = StringBuilder()
       if (isSelectorNumeric) {
-        sb.append(selectorValue).append(" (").append(selector).append(") {")
+        sb
+          .append(selectorValue)
+          .append(" (")
+          .append(selector)
+          .append(") {")
       } else {
         sb.append(selector).append(" {")
       }

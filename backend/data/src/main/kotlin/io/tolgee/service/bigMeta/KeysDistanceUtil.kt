@@ -48,7 +48,8 @@ class KeysDistanceUtil(
         if (index2 >= index1) return@forEach2
         val key2Id = getKeyId(item2.namespace, item2.keyName) ?: return@forEach2
         val distance =
-          distances.get(key1Id, key2Id)
+          distances
+            .get(key1Id, key2Id)
             ?.also {
               it.distance = computeDistance(it.distance, it.hits, index1 = index1, index2 = index2)
               it.hits++
@@ -77,17 +78,20 @@ class KeysDistanceUtil(
     distinctKeys.map { getKeyId(it.namespace, it.keyName) }.forEachIndexed { index, keyId ->
       // by this, we are pushing unprovided keys out of the "focus zone", so they should "converge" to become deleted
       val maxDistance = MAX_STORED
-      otherThanCurrent.asSequence().filter {
-        it.key.first == keyId || it.key.second == keyId
-      }.sortedBy { it.value.distance }.forEachIndexed { index, (key, value) ->
-        value.distance =
-          computeDistance(
-            oldDistance = value.distance,
-            hits = value.hits,
-            newDistance = maxDistance,
-          )
-        value.hits++
-      }
+      otherThanCurrent
+        .asSequence()
+        .filter {
+          it.key.first == keyId || it.key.second == keyId
+        }.sortedBy { it.value.distance }
+        .forEachIndexed { index, (key, value) ->
+          value.distance =
+            computeDistance(
+              oldDistance = value.distance,
+              hits = value.hits,
+              newDistance = maxDistance,
+            )
+          value.hits++
+        }
     }
 
     otherThanCurrent
@@ -106,7 +110,8 @@ class KeysDistanceUtil(
   }
 
   private val existing: DistancesMap by lazy {
-    bigMetaService.findExistingKeyDistances(keys, project)
+    bigMetaService
+      .findExistingKeyDistances(keys, project)
       .associateBy {
         (it.key1Id to it.key2Id)
       }
@@ -115,9 +120,7 @@ class KeysDistanceUtil(
   private fun getKeyId(
     namespace: String?,
     keyName: String,
-  ): Long? {
-    return keyIdMap[namespace to keyName]
-  }
+  ): Long? = keyIdMap[namespace to keyName]
 
   private val distances: DistancesMutableMap by lazy {
     existing.toMutableMap()
@@ -134,16 +137,12 @@ class KeysDistanceUtil(
   private fun DistancesMap.containsKey(
     key1Id: Long,
     key2Id: Long,
-  ): Boolean {
-    return this.containsKey(getDistancesMapKey(key1Id, key2Id))
-  }
+  ): Boolean = this.containsKey(getDistancesMapKey(key1Id, key2Id))
 
   fun DistancesMap.get(
     key1Id: Long,
     key2Id: Long,
-  ): KeysDistanceDto? {
-    return this[getDistancesMapKey(key1Id, key2Id)]
-  }
+  ): KeysDistanceDto? = this[getDistancesMapKey(key1Id, key2Id)]
 
   private fun getDistancesMapKey(
     key1Id: Long,
@@ -154,8 +153,8 @@ class KeysDistanceUtil(
     key1Id: Long,
     key2Id: Long,
     newDistance: Double,
-  ): KeysDistanceDto {
-    return KeysDistanceDto(
+  ): KeysDistanceDto =
+    KeysDistanceDto(
       key1Id = min(a = key1Id, b = key2Id),
       key2Id = max(key1Id, key2Id),
       projectId = project.id,
@@ -165,7 +164,6 @@ class KeysDistanceUtil(
     ).apply {
       distances[this.key1Id to this.key2Id] = this
     }
-  }
 
   private fun computeDistance(
     oldDistance: Double = 0.0,
@@ -181,9 +179,7 @@ class KeysDistanceUtil(
     oldDistance: Double = 0.0,
     hits: Long = 0,
     newDistance: Int,
-  ): Double {
-    return (oldDistance * hits + newDistance) / (hits + 1)
-  }
+  ): Double = (oldDistance * hits + newDistance) / (hits + 1)
 }
 
 private typealias DistancesMutableMap = MutableMap<Pair<Long, Long>, KeysDistanceDto>

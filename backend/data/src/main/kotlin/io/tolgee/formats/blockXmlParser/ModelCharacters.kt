@@ -13,7 +13,5 @@ class ModelCharacters(
     return BlockXmlParser.escapeXml(characters)
   }
 
-  override fun getText(): String {
-    return characters
-  }
+  override fun getText(): String = characters
 }

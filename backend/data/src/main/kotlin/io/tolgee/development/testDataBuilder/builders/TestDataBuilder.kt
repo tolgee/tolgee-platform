@@ -5,7 +5,9 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
-class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
+class TestDataBuilder(
+  fn: (TestDataBuilder.() -> Unit) = {},
+) {
   companion object {
     operator fun invoke(fn: (TestDataBuilder.() -> Unit) = {}) = TestDataBuilder(fn)
   }

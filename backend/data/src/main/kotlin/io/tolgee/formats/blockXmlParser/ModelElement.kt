@@ -71,7 +71,5 @@ class ModelElement(
     stringBuilder.append(">")
   }
 
-  override fun getText(): String {
-    return children.joinToString("") { it.getText() }
-  }
+  override fun getText(): String = children.joinToString("") { it.getText() }
 }

@@ -12,25 +12,17 @@ class IcuToPythonPlaceholderConvertor : FromIcuPlaceholderConvertor {
       getArgNameString(it)
     }
 
-  override fun convert(node: MessagePatternUtil.ArgNode): String {
-    return baseToCLikePlaceholderConvertor.convert(node)
-  }
+  override fun convert(node: MessagePatternUtil.ArgNode): String = baseToCLikePlaceholderConvertor.convert(node)
 
   override fun convertText(
     node: MessagePatternUtil.TextNode,
     keepEscaping: Boolean,
-  ): String {
-    return escapePercentSign(node.getText(keepEscaping))
-  }
+  ): String = escapePercentSign(node.getText(keepEscaping))
 
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
-  ): String {
-    return if (argName != null) "%($argName)d" else "%d"
-  }
+  ): String = if (argName != null) "%($argName)d" else "%d"
 
-  private fun getArgNameString(node: MessagePatternUtil.ArgNode): String {
-    return "(${node.name})"
-  }
+  private fun getArgNameString(node: MessagePatternUtil.ArgNode): String = "(${node.name})"
 }

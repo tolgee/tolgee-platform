@@ -55,9 +55,7 @@ class LocalFileStorage(
     }
   }
 
-  override fun fileExists(storageFilePath: String): Boolean {
-    return getLocalFile(storageFilePath).exists()
-  }
+  override fun fileExists(storageFilePath: String): Boolean = getLocalFile(storageFilePath).exists()
 
   private fun getLocalFile(storageFilePath: String): File {
     val dataRoot = localDataPath.removeTrailingSlash()

@@ -135,25 +135,21 @@ class PropertiesFileExporterTest {
     return getExporter(built.translations, true)
   }
 
-  private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {
-    return this[fileName]!!.bufferedReader().readText()
-  }
+  private fun Map<String, InputStream>.getFileTextContent(fileName: String): String = this[fileName]!!.bufferedReader().readText()
 
-  private inline fun <reified T> Map<String, InputStream>.parseFileContent(fileName: String): T {
-    return jacksonObjectMapper().readValue(this.getFileTextContent(fileName))
-  }
+  private inline fun <reified T> Map<String, InputStream>.parseFileContent(fileName: String): T =
+    jacksonObjectMapper().readValue(this.getFileTextContent(fileName))
 
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-  ): PropertiesFileExporter {
-    return PropertiesFileExporter(
+  ): PropertiesFileExporter =
+    PropertiesFileExporter(
       translations = translations,
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
     )
-  }
 
   private fun getExportParams() = ExportParams().also { it.format = ExportFormat.PROPERTIES }
 }

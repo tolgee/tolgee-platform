@@ -5,7 +5,5 @@ import org.springframework.stereotype.Component
 
 @Component
 class EnabledFeaturesProviderOssImpl : EnabledFeaturesProvider {
-  override fun get(organizationId: Long?): Array<Feature> {
-    return emptyArray()
-  }
+  override fun get(organizationId: Long?): Array<Feature> = emptyArray()
 }
