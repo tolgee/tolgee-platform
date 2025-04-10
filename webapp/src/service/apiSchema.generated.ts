@@ -205,6 +205,9 @@ export interface paths {
     put: operations["update_9"];
     delete: operations["delete_12"];
   };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations": {
+    post: operations["update_12"];
+  };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsWithTranslations": {
     get: operations["getAllWithTranslations"];
   };
@@ -1650,7 +1653,11 @@ export interface components {
     };
     CreateGlossaryTermResponse: {
       term: components["schemas"]["GlossaryTermModel"];
-      translation: components["schemas"]["GlossaryTermTranslationModel"];
+      translation?: components["schemas"]["GlossaryTermTranslationModel"];
+    };
+    CreateGlossaryTermTranslationRequest: {
+      languageCode: string;
+      text: string;
     };
     CreateKeyDto: {
       /**
@@ -8174,6 +8181,7 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        languageTags?: string[];
       };
     };
     responses: {
@@ -8415,6 +8423,60 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  update_12: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+        termId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryTermTranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateGlossaryTermTranslationRequest"];
       };
     };
   };

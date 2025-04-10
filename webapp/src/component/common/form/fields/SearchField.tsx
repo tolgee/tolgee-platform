@@ -8,7 +8,7 @@ import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 const SearchField = (
   props: {
     initial?: string;
-    onSearch: (value: string) => void;
+    onSearch?: (value: string) => void;
   } & ComponentProps<typeof TextField>
 ) => {
   const [search, setSearch] = useState(props.initial || '');
@@ -20,7 +20,7 @@ const SearchField = (
 
   useEffect(() => {
     if (debouncedSearch !== props.initial) {
-      onSearch(debouncedSearch);
+      onSearch?.(debouncedSearch);
     }
   }, [debouncedSearch]);
 

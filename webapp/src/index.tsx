@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { StrictMode, Suspense } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
 import {
@@ -61,46 +61,48 @@ const tolgee = Tolgee()
 
 const MainWrapper = () => {
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider>
-        <CssBaseline />
-        <LoadingProvider>
-          <GlobalLoading />
-          <Suspense fallback={<FullPageLoading />}>
-            <TolgeeProvider
-              tolgee={tolgee}
-              fallback={<FullPageLoading />}
-              options={{ useSuspense: false }}
-            >
-              <BrowserRouter>
-                <QueryClientProvider client={queryClient}>
-                  {/* @ts-ignore */}
-                  <ErrorBoundary>
-                    <SnackbarProvider
-                      anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
-                      SnackbarProps={{
-                        // @ts-ignore
-                        'data-cy': 'notistack-snackbar',
-                      }}
-                    >
-                      <GlobalContext>
-                        <BottomPanelProvider>
-                          <GlobalStyles />
-                          <MuiLocalizationProvider>
-                            <App />
-                            <GlobalErrorModal />
-                          </MuiLocalizationProvider>
-                        </BottomPanelProvider>
-                      </GlobalContext>
-                    </SnackbarProvider>
-                  </ErrorBoundary>
-                </QueryClientProvider>
-              </BrowserRouter>
-            </TolgeeProvider>
-          </Suspense>
-        </LoadingProvider>
-      </ThemeProvider>
-    </StyledEngineProvider>
+    <StrictMode>
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider>
+          <CssBaseline />
+          <LoadingProvider>
+            <GlobalLoading />
+            <Suspense fallback={<FullPageLoading />}>
+              <TolgeeProvider
+                tolgee={tolgee}
+                fallback={<FullPageLoading />}
+                options={{ useSuspense: false }}
+              >
+                <BrowserRouter>
+                  <QueryClientProvider client={queryClient}>
+                    {/* @ts-ignore */}
+                    <ErrorBoundary>
+                      <SnackbarProvider
+                        anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+                        SnackbarProps={{
+                          // @ts-ignore
+                          'data-cy': 'notistack-snackbar',
+                        }}
+                      >
+                        <GlobalContext>
+                          <BottomPanelProvider>
+                            <GlobalStyles />
+                            <MuiLocalizationProvider>
+                              <App />
+                              <GlobalErrorModal />
+                            </MuiLocalizationProvider>
+                          </BottomPanelProvider>
+                        </GlobalContext>
+                      </SnackbarProvider>
+                    </ErrorBoundary>
+                  </QueryClientProvider>
+                </BrowserRouter>
+              </TolgeeProvider>
+            </Suspense>
+          </LoadingProvider>
+        </ThemeProvider>
+      </StyledEngineProvider>
+    </StrictMode>
   );
 };
 

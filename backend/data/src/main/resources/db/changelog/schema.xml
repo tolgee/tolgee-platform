@@ -4284,4 +4284,7 @@
     <changeSet author="anty (generated)" id="1743523453022-9">
         <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="glossary" constraintName="FKtiuusr7urs46e15gjy94jhdfm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
+    <changeSet author="anty (generated)" id="1744285181273-1">
+        <addUniqueConstraint columnNames="term_id, language_code" constraintName="UKg4vsd2n9oxiunjyqj47nfj03b" tableName="glossary_term_translation"/>
+    </changeSet>
 </databaseChangeLog>
