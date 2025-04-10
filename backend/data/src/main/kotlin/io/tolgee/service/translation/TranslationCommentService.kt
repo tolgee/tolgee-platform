@@ -26,8 +26,8 @@ class TranslationCommentService(
     dto: ITranslationCommentDto,
     translation: Translation,
     author: UserAccount,
-  ): TranslationComment {
-    return TranslationComment(
+  ): TranslationComment =
+    TranslationComment(
       text = dto.text,
       state = dto.state,
       translation = translation,
@@ -35,48 +35,37 @@ class TranslationCommentService(
       it.author = author
       create(it)
     }
-  }
 
   @Transactional
-  fun find(id: Long): TranslationComment? {
-    return translationCommentRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): TranslationComment? = translationCommentRepository.findById(id).orElse(null)
 
   @Transactional
   fun find(
     projectId: Long,
     translationId: Long,
     commentId: Long,
-  ): TranslationComment? {
-    return translationCommentRepository.find(projectId, translationId, commentId)
-  }
+  ): TranslationComment? = translationCommentRepository.find(projectId, translationId, commentId)
 
   @Transactional
   fun get(
     projectId: Long,
     translationId: Long,
     commentId: Long,
-  ): TranslationComment {
-    return find(projectId, translationId, commentId) ?: throw NotFoundException()
-  }
+  ): TranslationComment = find(projectId, translationId, commentId) ?: throw NotFoundException()
 
   @Transactional
   fun findWithAuthorFetched(
     projectId: Long,
     translationId: Long,
     commentId: Long,
-  ): TranslationComment? {
-    return translationCommentRepository.findWithFetchedAuthor(projectId, translationId, commentId)
-  }
+  ): TranslationComment? = translationCommentRepository.findWithFetchedAuthor(projectId, translationId, commentId)
 
   @Transactional
   fun getWithAuthorFetched(
     projectId: Long,
     translationId: Long,
     commentId: Long,
-  ): TranslationComment {
-    return findWithAuthorFetched(projectId, translationId, commentId) ?: throw NotFoundException()
-  }
+  ): TranslationComment = findWithAuthorFetched(projectId, translationId, commentId) ?: throw NotFoundException()
 
   @Transactional
   fun update(
@@ -100,9 +89,7 @@ class TranslationCommentService(
   fun getPaged(
     translation: Translation,
     pageable: Pageable,
-  ): Page<TranslationComment> {
-    return translationCommentRepository.getPagedByTranslation(translation, pageable)
-  }
+  ): Page<TranslationComment> = translationCommentRepository.getPagedByTranslation(translation, pageable)
 
   @Transactional
   fun delete(entity: TranslationComment) {
@@ -110,13 +97,9 @@ class TranslationCommentService(
   }
 
   @Transactional
-  fun deleteByIds(ids: List<Long>) {
-    return translationCommentRepository.deleteAllByIdIn(ids)
-  }
+  fun deleteByIds(ids: List<Long>) = translationCommentRepository.deleteAllByIdIn(ids)
 
-  fun create(entity: TranslationComment): TranslationComment {
-    return translationCommentRepository.save(entity)
-  }
+  fun create(entity: TranslationComment): TranslationComment = translationCommentRepository.save(entity)
 
   fun saveAll(entities: Collection<TranslationComment>) {
     translationCommentRepository.saveAll(entities)
@@ -125,19 +108,17 @@ class TranslationCommentService(
   fun update(
     entity: TranslationComment,
     updatedBy: UserAccount = authenticationFacade.authenticatedUserEntity,
-  ): TranslationComment {
-    return translationCommentRepository.save(entity)
-  }
+  ): TranslationComment = translationCommentRepository.save(entity)
 
-  fun deleteByTranslationIdIn(ids: Collection<Long>) {
-    return translationCommentRepository.deleteByTranslationIdIn(ids)
-  }
+  fun deleteByTranslationIdIn(ids: Collection<Long>) = translationCommentRepository.deleteByTranslationIdIn(ids)
 
   fun deleteAllByProject(projectId: Long) {
-    entityManager.createNativeQuery(
-      "DELETE FROM translation_comment WHERE translation_id IN " +
-        "(SELECT id FROM translation WHERE key_id IN " +
-        "(SELECT id FROM key WHERE project_id = :projectId))",
-    ).setParameter("projectId", projectId).executeUpdate()
+    entityManager
+      .createNativeQuery(
+        "DELETE FROM translation_comment WHERE translation_id IN " +
+          "(SELECT id FROM translation WHERE key_id IN " +
+          "(SELECT id FROM key WHERE project_id = :projectId))",
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 }

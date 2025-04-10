@@ -26,7 +26,5 @@ class CsvFileProcessor(
     }
   }
 
-  private fun getFormat(data: Any?): ImportFormat {
-    return context.mapping?.format ?: CSVImportFormatDetector().detectFormat(data)
-  }
+  private fun getFormat(data: Any?): ImportFormat = context.mapping?.format ?: CSVImportFormatDetector().detectFormat(data)
 }

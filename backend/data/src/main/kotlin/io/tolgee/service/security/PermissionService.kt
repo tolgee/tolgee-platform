@@ -67,21 +67,16 @@ class PermissionService(
     projectId: Long? = null,
     userId: Long? = null,
     organizationId: Long? = null,
-  ): Permission? {
-    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
+  ): Permission? =
+    permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
       projectId = projectId,
       userId = userId,
       organizationId = organizationId,
     )
-  }
 
-  fun getAllOfProject(project: Project?): Set<Permission> {
-    return permissionRepository.getAllByProjectAndUserNotNull(project)
-  }
+  fun getAllOfProject(project: Project?): Set<Permission> = permissionRepository.getAllByProjectAndUserNotNull(project)
 
-  fun findById(id: Long): Permission? {
-    return cachedPermissionService.find(id)
-  }
+  fun findById(id: Long): Permission? = cachedPermissionService.find(id)
 
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
@@ -91,9 +86,7 @@ class PermissionService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
-  ): Array<Scope>? {
-    return getProjectPermissionData(projectId, userAccountId).computedPermissions.expandedScopes
-  }
+  ): Array<Scope>? = getProjectPermissionData(projectId, userAccountId).computedPermissions.expandedScopes
 
   fun getProjectPermissionData(
     project: ProjectDto,
@@ -128,9 +121,7 @@ class PermissionService(
   fun getUserProjectPermission(
     projectId: Long,
     userId: Long,
-  ): PermissionDto? {
-    return find(projectId, userId)
-  }
+  ): PermissionDto? = find(projectId, userId)
 
   fun getPermittedTranslateLanguagesForUserIds(
     userIds: List<Long>,
@@ -172,9 +163,7 @@ class PermissionService(
     return getProjectPermissionData(project, userAccountId)
   }
 
-  fun create(permission: Permission): Permission {
-    return cachedPermissionService.create(permission)
-  }
+  fun create(permission: Permission): Permission = cachedPermissionService.create(permission)
 
   fun delete(permission: Permission) {
     cachedPermissionService.delete(permission)
@@ -188,9 +177,7 @@ class PermissionService(
     delete(permission)
   }
 
-  fun get(permissionId: Long): Permission {
-    return this.cachedPermissionService.find(permissionId) ?: throw NotFoundException()
-  }
+  fun get(permissionId: Long): Permission = this.cachedPermissionService.find(permissionId) ?: throw NotFoundException()
 
   /**
    * Deletes all permissions in project
@@ -268,9 +255,7 @@ class PermissionService(
     projectId: Long? = null,
     userId: Long? = null,
     organizationId: Long? = null,
-  ): PermissionDto? {
-    return cachedPermissionService.find(projectId = projectId, userId = userId, organizationId = organizationId)
-  }
+  ): PermissionDto? = cachedPermissionService.find(projectId = projectId, userId = userId, organizationId = organizationId)
 
   fun acceptInvitation(
     permission: Permission,
@@ -396,9 +381,7 @@ class PermissionService(
     permissions.forEach { this.save(it) }
   }
 
-  fun save(permission: Permission): Permission {
-    return cachedPermissionService.save(permission)
-  }
+  fun save(permission: Permission): Permission = cachedPermissionService.save(permission)
 
   fun revoke(
     projectId: Long,
@@ -493,7 +476,5 @@ class PermissionService(
     permissionRepository.deleteAll(permissions)
   }
 
-  fun getAgencyPermissions(agencyId: Long): List<Permission> {
-    return permissionRepository.findAllByAgencyId(agencyId)
-  }
+  fun getAgencyPermissions(agencyId: Long): List<Permission> = permissionRepository.findAllByAgencyId(agencyId)
 }

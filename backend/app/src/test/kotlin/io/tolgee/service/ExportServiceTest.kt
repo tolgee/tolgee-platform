@@ -97,7 +97,13 @@ class ExportServiceTest : AbstractSpringTest() {
     assertThat(result).hasSize(1)
 
     val key = keyService.get(result[0].key.id)
-    assertThat(key.keyMeta?.tags?.toList()?.first()?.name).isEqualTo(tag)
+    assertThat(
+      key.keyMeta
+        ?.tags
+        ?.toList()
+        ?.first()
+        ?.name,
+    ).isEqualTo(tag)
   }
 
   @Test
@@ -184,6 +190,9 @@ class ExportServiceTest : AbstractSpringTest() {
     val result = provider.data
 
     result.assert.hasSize(4)
-    result.forEach { it.key.namespace.assert.isIn(null, "ns-1") }
+    result.forEach {
+      it.key.namespace.assert
+        .isIn(null, "ns-1")
+    }
   }
 }

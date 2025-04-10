@@ -21,9 +21,7 @@ class SqlController(
   @Transactional
   fun getList(
     @RequestBody query: String,
-  ): MutableList<Any?>? {
-    return entityManager.createNativeQuery(query).resultList
-  }
+  ): MutableList<Any?>? = entityManager.createNativeQuery(query).resultList
 
   @PostMapping(value = ["/execute"])
   @Transactional

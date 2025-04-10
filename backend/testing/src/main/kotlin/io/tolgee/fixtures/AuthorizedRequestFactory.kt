@@ -12,28 +12,19 @@ object AuthorizedRequestFactory {
   }
 
   @JvmStatic
-  fun loggedGet(url: String): MockHttpServletRequestBuilder {
-    return addToken(MockMvcRequestBuilders.get(url))
-  }
+  fun loggedGet(url: String): MockHttpServletRequestBuilder = addToken(MockMvcRequestBuilders.get(url))
 
   @JvmStatic
-  fun loggedPost(url: String): MockHttpServletRequestBuilder {
-    return addToken(MockMvcRequestBuilders.post(url))
-  }
+  fun loggedPost(url: String): MockHttpServletRequestBuilder = addToken(MockMvcRequestBuilders.post(url))
 
   @JvmStatic
-  fun loggedPut(url: String): MockHttpServletRequestBuilder {
-    return addToken(MockMvcRequestBuilders.put(url))
-  }
+  fun loggedPut(url: String): MockHttpServletRequestBuilder = addToken(MockMvcRequestBuilders.put(url))
 
   @JvmStatic
-  fun loggedDelete(url: String): MockHttpServletRequestBuilder {
-    return addToken(MockMvcRequestBuilders.delete(url))
-  }
+  fun loggedDelete(url: String): MockHttpServletRequestBuilder = addToken(MockMvcRequestBuilders.delete(url))
 
-  fun addToken(builder: MockHttpServletRequestBuilder): MockHttpServletRequestBuilder {
-    return builder.header("Authorization", getBearerTokenString(token))
-  }
+  fun addToken(builder: MockHttpServletRequestBuilder): MockHttpServletRequestBuilder =
+    builder.header("Authorization", getBearerTokenString(token))
 
   fun getBearerTokenString(token: String?) = String.format("Bearer %s", token)
 }

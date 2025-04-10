@@ -7,10 +7,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class LanguageConfigItemModelAssembler : RepresentationModelAssemblerSupport<MtServiceConfig, LanguageConfigItemModel>(
-  ProjectsController::class.java,
-  LanguageConfigItemModel::class.java,
-) {
+class LanguageConfigItemModelAssembler :
+  RepresentationModelAssemblerSupport<MtServiceConfig, LanguageConfigItemModel>(
+    ProjectsController::class.java,
+    LanguageConfigItemModel::class.java,
+  ) {
   override fun toModel(entity: MtServiceConfig) =
     LanguageConfigItemModel(
       targetLanguageId = entity.targetLanguage?.id,

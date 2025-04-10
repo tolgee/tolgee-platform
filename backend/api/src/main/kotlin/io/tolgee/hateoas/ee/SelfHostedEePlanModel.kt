@@ -32,7 +32,5 @@ open class SelfHostedEePlanModel(
   }
 
   @JsonGetter("enabledFeatures")
-  fun getJsonEnabledFeatures(): Array<Feature> {
-    return this.enabledFeatures
-  }
+  fun getJsonEnabledFeatures(): Array<Feature> = this.enabledFeatures
 }

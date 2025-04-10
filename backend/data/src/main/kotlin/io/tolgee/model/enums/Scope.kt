@@ -116,9 +116,10 @@ enum class Scope(
 
     private fun expand(item: HierarchyItem): MutableSet<Scope> {
       val descendants =
-        item.requires.flatMap {
-          expand(it)
-        }.toMutableSet()
+        item.requires
+          .flatMap {
+            expand(it)
+          }.toMutableSet()
 
       descendants.add(item.scope)
       return descendants
@@ -136,9 +137,7 @@ enum class Scope(
       return items
     }
 
-    private fun getScopeHierarchyItems(scope: Scope): Array<HierarchyItem> {
-      return getScopeHierarchyItems(root = hierarchy, scope).toTypedArray()
-    }
+    private fun getScopeHierarchyItems(scope: Scope): Array<HierarchyItem> = getScopeHierarchyItems(root = hierarchy, scope).toTypedArray()
 
     fun expand(scope: Scope): Array<Scope> {
       val hierarchyItems = getScopeHierarchyItems(scope)
@@ -157,9 +156,7 @@ enum class Scope(
       return permittedScopes.flatMap { expand(it).toList() }.toSet().toTypedArray()
     }
 
-    fun expand(permittedScopes: Collection<Scope>): Array<Scope> {
-      return expand(permittedScopes.toTypedArray())
-    }
+    fun expand(permittedScopes: Collection<Scope>): Array<Scope> = expand(permittedScopes.toTypedArray())
 
     /**
      * Returns all possible scopes that contain required scope
@@ -192,14 +189,18 @@ enum class Scope(
 
     fun parse(scopes: Collection<String>?): Set<Scope> {
       scopes ?: return setOf()
-      return scopes.map { stringScope ->
-        Scope.values().find { it.value == stringScope } ?: throw BadRequestException(
-          Message.SCOPE_NOT_FOUND,
-          listOf(stringScope),
-        )
-      }.toSet()
+      return scopes
+        .map { stringScope ->
+          Scope.values().find { it.value == stringScope } ?: throw BadRequestException(
+            Message.SCOPE_NOT_FOUND,
+            listOf(stringScope),
+          )
+        }.toSet()
     }
   }
 
-  data class HierarchyItem(val scope: Scope, val requires: List<HierarchyItem> = listOf())
+  data class HierarchyItem(
+    val scope: Scope,
+    val requires: List<HierarchyItem> = listOf(),
+  )
 }

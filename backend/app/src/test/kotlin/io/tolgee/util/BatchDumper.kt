@@ -70,13 +70,12 @@ class BatchDumper(
     }
   }
 
-  fun <T> finallyDump(fn: () -> T): T {
-    return try {
+  fun <T> finallyDump(fn: () -> T): T =
+    try {
       fn()
     } finally {
       this.dump(getSingleJob().id)
     }
-  }
 
   fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult
 

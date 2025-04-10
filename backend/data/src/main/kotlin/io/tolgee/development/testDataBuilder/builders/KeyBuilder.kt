@@ -81,12 +81,11 @@ class KeyBuilder(
   fun addTranslation(
     languageTag: String,
     text: String?,
-  ): TranslationBuilder {
-    return addTranslation {
+  ): TranslationBuilder =
+    addTranslation {
       this.language = projectBuilder.getLanguageByTag(languageTag)!!.self
       this.text = text
     }
-  }
 
   fun setDescription(description: String) {
     val meta = this.data.meta ?: addMeta { }
@@ -98,7 +97,13 @@ class KeyBuilder(
 
     val tags =
       projectBuilder.data.keys
-        .mapNotNull { it.data.meta?.self?.tags }.flatten().filter { it.name == name }.distinct()
+        .mapNotNull {
+          it.data.meta
+            ?.self
+            ?.tags
+        }.flatten()
+        .filter { it.name == name }
+        .distinct()
 
     if (tags.size > 1) {
       throw IllegalStateException("More than one tag with name $name in the project")

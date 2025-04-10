@@ -12,7 +12,10 @@ import java.util.*
 
 @Entity
 @Table()
-class TranslationAgency : StandardAuditModel(), ModelWithAvatar, EntityWithId {
+class TranslationAgency :
+  StandardAuditModel(),
+  ModelWithAvatar,
+  EntityWithId {
   @field:Size(max = 255)
   @Column(length = 255)
   var name: String = ""

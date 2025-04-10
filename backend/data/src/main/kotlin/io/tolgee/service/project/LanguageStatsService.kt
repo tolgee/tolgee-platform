@@ -43,7 +43,8 @@ class LanguageStatsService(
               ?: return@tx
           val projectStats = projectStatsService.getProjectStats(projectId)
           val languageStats =
-            languageStatsRepository.getAllByProjectIds(listOf(projectId))
+            languageStatsRepository
+              .getAllByProjectIds(listOf(projectId))
               .associateBy { it.language.id }
               .toMutableMap()
 
@@ -110,15 +111,10 @@ class LanguageStatsService(
     return languageStatsRepository.getDtosByProjectIds(projectIds).groupByProjects()
   }
 
-  private fun List<LanguageStatsDto>.groupByProjects(): Map<Long, List<LanguageStatsDto>> {
-    return this.groupBy { it.projectId }
-  }
+  private fun List<LanguageStatsDto>.groupByProjects(): Map<Long, List<LanguageStatsDto>> = this.groupBy { it.projectId }
 
-  fun getLanguageStats(projectId: Long): List<LanguageStatsDto> {
-    return getLanguageStatsDtos(listOf(projectId))[projectId] ?: emptyList()
-  }
+  fun getLanguageStats(projectId: Long): List<LanguageStatsDto> = getLanguageStatsDtos(listOf(projectId))[projectId] ?: emptyList()
 
-  private fun getLanguageStatsRaw(projectId: Long): List<ProjectLanguageStatsResultView> {
-    return LanguageStatsProvider(entityManager, listOf(projectId)).getResultForSingleProject()
-  }
+  private fun getLanguageStatsRaw(projectId: Long): List<ProjectLanguageStatsResultView> =
+    LanguageStatsProvider(entityManager, listOf(projectId)).getResultForSingleProject()
 }

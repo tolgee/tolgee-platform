@@ -17,4 +17,5 @@ open class ProjectAiPromptCustomizationModel(
         "This is an project of translations for out paper selling app.",
   )
   val description: String?,
-) : RepresentationModel<ProjectAiPromptCustomizationModel>(), Serializable
+) : RepresentationModel<ProjectAiPromptCustomizationModel>(),
+  Serializable

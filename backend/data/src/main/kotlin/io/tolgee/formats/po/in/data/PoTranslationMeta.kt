@@ -7,9 +7,8 @@ class PoTranslationMeta {
   var flags: MutableList<String> = mutableListOf()
   var context: MutableList<String> = mutableListOf()
 
-  override fun toString(): String {
-    return """PoTranslationMeta(translatorComments=$translatorComments, 
+  override fun toString(): String =
+    """PoTranslationMeta(translatorComments=$translatorComments, 
             |extractedComments=$extractedComments, reference=$references, flags=$flags)
-      """.trimMargin()
-  }
+    """.trimMargin()
 }

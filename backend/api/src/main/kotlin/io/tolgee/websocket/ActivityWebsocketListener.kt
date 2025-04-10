@@ -156,13 +156,14 @@ class ActivityWebsocketListener(
     data["modifications"] = it.modifications
     data["changeType"] = it.revisionType
     data["relations"] =
-      it.describingRelations?.map { relationsEntry ->
-        relationsEntry.key to
-          relationDescriptionExtractor.extract(
-            relationsEntry.value,
-            it.activityRevision.describingRelations,
-          )
-      }?.toMap()
+      it.describingRelations
+        ?.map { relationsEntry ->
+          relationsEntry.key to
+            relationDescriptionExtractor.extract(
+              relationsEntry.value,
+              it.activityRevision.describingRelations,
+            )
+        }?.toMap()
     return data
   }
 }

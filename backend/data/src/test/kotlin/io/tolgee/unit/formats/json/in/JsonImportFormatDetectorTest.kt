@@ -43,12 +43,11 @@ class JsonImportFormatDetectorTest {
     "src/test/resources/import/json/unknown.json".assertDetected(ImportFormat.JSON_ICU)
   }
 
-  private fun parseFile(path: String): Map<*, *> {
-    return jacksonObjectMapper().readValue<Map<*, *>>(
+  private fun parseFile(path: String): Map<*, *> =
+    jacksonObjectMapper().readValue<Map<*, *>>(
       File(path)
         .readBytes(),
     )
-  }
 
   private fun String.assertDetected(format: ImportFormat) {
     val parsed = parseFile(this)

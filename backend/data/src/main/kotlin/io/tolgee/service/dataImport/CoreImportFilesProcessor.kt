@@ -251,15 +251,18 @@ class CoreImportFilesProcessor(
     languageEntity.existingLanguage = existingLanguageDto?.id?.let { languageService.getEntity(it) }
   }
 
-  private fun FileProcessorContext.findExistingLanguage(languageEntity: ImportLanguage): LanguageDto? {
-    return findExistingLanguageInMappings(languageEntity)
+  private fun FileProcessorContext.findExistingLanguage(languageEntity: ImportLanguage): LanguageDto? =
+    findExistingLanguageInMappings(languageEntity)
       ?: findMatchingExistingLanguage(languageEntity.name)
-  }
 
   private fun findMatchingExistingLanguage(importLanguageName: String): LanguageDto? {
     val possibleTag =
-      """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?""".toRegex()
-        .matchEntire(importLanguageName)?.groups?.get(1)?.value
+      """(?:.*?)/?([a-zA-Z0-9-_]+)[^/]*?"""
+        .toRegex()
+        .matchEntire(importLanguageName)
+        ?.groups
+        ?.get(1)
+        ?.value
         ?: return null
 
     val candidate = languageService.findByTag(possibleTag, import.project.id)
@@ -280,7 +283,8 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.findInLanguageMappings(languageEntity: ImportLanguage): String? {
     val languageMappings = singleStepImportParams?.languageMappings ?: return null
     val found =
-      languageMappings.filter { it.importLanguage == languageEntity.name }
+      languageMappings
+        .filter { it.importLanguage == languageEntity.name }
         .getOrThrowIfMoreThanOne {
           BadRequestException(Message.MULTIPLE_MAPPINGS_FOR_SAME_FILE_LANGUAGE_NAME)
         }
@@ -292,17 +296,17 @@ class CoreImportFilesProcessor(
     importDataManager.storedTranslations[translation.language]!!.let { it[translation.key]!!.add(translation) }
   }
 
-  private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-    return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
-      this.keys.computeIfAbsent(name) {
-        ImportKey(name = name, this.fileEntity)
-      }.also {
-        if (saveData) {
-          importService.saveKey(it)
+  private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey =
+    importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
+      this.keys
+        .computeIfAbsent(name) {
+          ImportKey(name = name, this.fileEntity)
+        }.also {
+          if (saveData) {
+            importService.saveKey(it)
+          }
         }
-      }
     }
-  }
 
   private fun FileProcessorContext.processTranslations() {
     this.translations.forEach { entry ->

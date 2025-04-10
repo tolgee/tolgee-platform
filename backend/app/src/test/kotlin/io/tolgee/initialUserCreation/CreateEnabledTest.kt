@@ -141,9 +141,7 @@ class CreateEnabledTest : AbstractTransactionalTest() {
     }
   }
 
-  private fun getPasswordFileContents(): ByteArray {
-    return fileStorage.readFile(FILE_NAME)
-  }
+  private fun getPasswordFileContents(): ByteArray = fileStorage.readFile(FILE_NAME)
 
   companion object {
     const val FILE_NAME = "initial.pwd"

@@ -7,12 +7,13 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class PatModelAssembler() : RepresentationModelAssemblerSupport<Pat, PatModel>(
-  PatController::class.java,
-  PatModel::class.java,
-) {
-  override fun toModel(entity: Pat): PatModel {
-    return PatModel(
+class PatModelAssembler :
+  RepresentationModelAssemblerSupport<Pat, PatModel>(
+    PatController::class.java,
+    PatModel::class.java,
+  ) {
+  override fun toModel(entity: Pat): PatModel =
+    PatModel(
       id = entity.id,
       description = entity.description,
       expiresAt = entity.expiresAt?.time,
@@ -20,5 +21,4 @@ class PatModelAssembler() : RepresentationModelAssemblerSupport<Pat, PatModel>(
       updatedAt = entity.updatedAt?.time ?: Date().time,
       lastUsedAt = entity.lastUsedAt?.time,
     )
-  }
 }

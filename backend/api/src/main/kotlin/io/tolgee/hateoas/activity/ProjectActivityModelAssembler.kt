@@ -16,8 +16,8 @@ class ProjectActivityModelAssembler(
     ProjectActivityModel::class.java,
   ),
   IProjectActivityModelAssembler {
-  override fun toModel(view: ProjectActivityView): ProjectActivityModel {
-    return ProjectActivityModel(
+  override fun toModel(view: ProjectActivityView): ProjectActivityModel =
+    ProjectActivityModel(
       revisionId = view.revisionId,
       timestamp = view.timestamp,
       type = view.type,
@@ -36,7 +36,6 @@ class ProjectActivityModelAssembler(
       counts = view.counts,
       params = view.params,
     )
-  }
 
   private fun getModifiedEntities(view: ProjectActivityView) =
     view.modifications

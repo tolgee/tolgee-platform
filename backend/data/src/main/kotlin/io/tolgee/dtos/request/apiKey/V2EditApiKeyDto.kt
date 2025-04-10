@@ -26,7 +26,5 @@ data class V2EditApiKeyDto(
 
   @Suppress("unused")
   @JsonGetter("scopes")
-  fun jsonGetScopes(): Set<String> {
-    return scopes.map { obj: Scope -> obj.value }.toSet()
-  }
+  fun jsonGetScopes(): Set<String> = scopes.map { obj: Scope -> obj.value }.toSet()
 }

@@ -9,9 +9,12 @@ import io.tolgee.util.element
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class XmlResourcesFileWriter(private val model: XmlResourcesStringsModel, private val exportFormat: ExportFormat) {
-  fun produceFiles(): InputStream {
-    return buildDom {
+class XmlResourcesFileWriter(
+  private val model: XmlResourcesStringsModel,
+  private val exportFormat: ExportFormat,
+) {
+  fun produceFiles(): InputStream =
+    buildDom {
       element("resources") {
         if (isAndroid) {
           attr("xmlns:xliff", "urn:oasis:names:tc:xliff:document:1.2")
@@ -19,7 +22,6 @@ class XmlResourcesFileWriter(private val model: XmlResourcesStringsModel, privat
         model.items.forEach { this.addToElement(it) }
       }
     }.write().toByteArray().inputStream()
-  }
 
   private fun Element.addToElement(unit: Map.Entry<String, XmlResourcesNode>) {
     when (val node = unit.value) {

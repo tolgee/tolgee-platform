@@ -15,8 +15,8 @@ class ContentDeliveryConfigModelAssembler(
     ContentDeliveryConfigController::class.java,
     ContentDeliveryConfigModel::class.java,
   ) {
-  override fun toModel(entity: ContentDeliveryConfig): ContentDeliveryConfigModel {
-    return ContentDeliveryConfigModel(
+  override fun toModel(entity: ContentDeliveryConfig): ContentDeliveryConfigModel =
+    ContentDeliveryConfigModel(
       id = entity.id,
       name = entity.name,
       slug = entity.slug,
@@ -30,7 +30,6 @@ class ContentDeliveryConfigModelAssembler(
     ).also {
       it.copyPropsFrom(entity)
     }
-  }
 
   private fun getPublicUrl(entity: ContentDeliveryConfig): String? {
     if (entity.contentStorage != null) {

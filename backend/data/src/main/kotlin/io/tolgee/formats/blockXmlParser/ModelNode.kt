@@ -21,9 +21,7 @@ abstract class ModelNode(
   val isLastChild: Boolean
     get() = parent?.children?.lastOrNull() === this
 
-  override fun hashCode(): Int {
-    return id
-  }
+  override fun hashCode(): Int = id
 
   abstract fun getText(): String
 }

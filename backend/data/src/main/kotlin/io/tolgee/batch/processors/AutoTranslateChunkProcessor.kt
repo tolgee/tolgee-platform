@@ -33,21 +33,13 @@ class AutoTranslateChunkProcessor(
     }
   }
 
-  override fun getParamsType(): Class<AutoTranslationJobParams> {
-    return AutoTranslationJobParams::class.java
-  }
+  override fun getParamsType(): Class<AutoTranslationJobParams> = AutoTranslationJobParams::class.java
 
-  override fun getTarget(data: AutoTranslationRequest): List<BatchTranslationTargetItem> {
-    return data.target
-  }
+  override fun getTarget(data: AutoTranslationRequest): List<BatchTranslationTargetItem> = data.target
 
-  override fun getMaxPerJobConcurrency(): Int {
-    return 1
-  }
+  override fun getMaxPerJobConcurrency(): Int = 1
 
-  override fun getJobCharacter(): JobCharacter {
-    return JobCharacter.SLOW
-  }
+  override fun getJobCharacter(): JobCharacter = JobCharacter.SLOW
 
   override fun getChunkSize(
     request: AutoTranslationRequest,
@@ -63,11 +55,7 @@ class AutoTranslateChunkProcessor(
     return 2
   }
 
-  override fun getTargetItemType(): Class<BatchTranslationTargetItem> {
-    return BatchTranslationTargetItem::class.java
-  }
+  override fun getTargetItemType(): Class<BatchTranslationTargetItem> = BatchTranslationTargetItem::class.java
 
-  override fun getParams(data: AutoTranslationRequest): AutoTranslationJobParams {
-    return AutoTranslationJobParams()
-  }
+  override fun getParams(data: AutoTranslationRequest): AutoTranslationJobParams = AutoTranslationJobParams()
 }

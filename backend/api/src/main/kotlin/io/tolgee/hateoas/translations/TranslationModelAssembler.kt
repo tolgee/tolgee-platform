@@ -6,12 +6,13 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class TranslationModelAssembler : RepresentationModelAssemblerSupport<Translation, TranslationModel>(
-  TranslationsController::class.java,
-  TranslationModel::class.java,
-) {
-  override fun toModel(entity: Translation): TranslationModel {
-    return TranslationModel(
+class TranslationModelAssembler :
+  RepresentationModelAssemblerSupport<Translation, TranslationModel>(
+    TranslationsController::class.java,
+    TranslationModel::class.java,
+  ) {
+  override fun toModel(entity: Translation): TranslationModel =
+    TranslationModel(
       id = entity.id,
       text = entity.text,
       state = entity.state,
@@ -19,5 +20,4 @@ class TranslationModelAssembler : RepresentationModelAssemblerSupport<Translatio
       mtProvider = entity.mtProvider,
       outdated = entity.outdated,
     )
-  }
 }

@@ -53,7 +53,8 @@ class Key(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var name: String = "",
-) : StandardAuditModel(), WithKeyMeta {
+) : StandardAuditModel(),
+  WithKeyMeta {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -111,7 +112,5 @@ class Key(
     }
   }
 
-  override fun hashCode(): Int {
-    return id.hashCode() * name.hashCode()
-  }
+  override fun hashCode(): Int = id.hashCode() * name.hashCode()
 }

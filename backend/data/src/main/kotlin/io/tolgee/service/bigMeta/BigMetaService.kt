@@ -42,9 +42,7 @@ class BigMetaService(
   @Autowired
   private lateinit var self: BigMetaService
 
-  fun saveKeyDistance(keysDistance: KeysDistance): KeysDistance {
-    return keysDistanceRepository.save(keysDistance)
-  }
+  fun saveKeyDistance(keysDistance: KeysDistance): KeysDistance = keysDistanceRepository.save(keysDistance)
 
   @Transactional
   fun store(
@@ -144,7 +142,8 @@ class BigMetaService(
     projectId: Long,
   ): List<KeyIdFindResult> {
     // we need to chunk it to avoid stack overflow
-    return relatedKeysInOrder.chunked(1000)
+    return relatedKeysInOrder
+      .chunked(1000)
       .flatMap { relatedKeysInOrderChunk ->
         val query = getKeyIdsForItemsQuery(relatedKeysInOrderChunk, projectId)
         entityManager.createQuery(query).resultList
@@ -161,9 +160,10 @@ class BigMetaService(
   }
 
   @Transactional
-  fun findExistingKeysDistancesDtosByIds(keyIds: List<Long>): Set<KeysDistanceDto> {
-    return entityManager.createQuery(
-      """
+  fun findExistingKeysDistancesDtosByIds(keyIds: List<Long>): Set<KeysDistanceDto> =
+    entityManager
+      .createQuery(
+        """
        select new io.tolgee.service.bigMeta.KeysDistanceDto(kd.key1Id, kd.key2Id, kd.distance, kd.project.id, kd.hits, true) from KeysDistance kd
         where kd.key1Id in (
             select kd2.key1Id from KeysDistance kd2 where kd2.key1Id in :data or kd2.key2Id in :data
@@ -171,19 +171,14 @@ class BigMetaService(
             select kd3.key2Id from KeysDistance kd3 where kd3.key1Id in :data or kd3.key2Id in :data
         )
     """,
-      KeysDistanceDto::class.java,
-    )
-      .setParameter("data", keyIds)
-      .resultList.toSet()
-  }
+        KeysDistanceDto::class.java,
+      ).setParameter("data", keyIds)
+      .resultList
+      .toSet()
 
-  fun get(id: Long): KeysDistance {
-    return find(id) ?: throw NotFoundException()
-  }
+  fun get(id: Long): KeysDistance = find(id) ?: throw NotFoundException()
 
-  fun find(id: Long): KeysDistance? {
-    return this.keysDistanceRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): KeysDistance? = this.keysDistanceRepository.findById(id).orElse(null)
 
   fun getCloseKeyIds(keyId: Long): List<Long> = this.keysDistanceRepository.getCloseKeys(keyId)
 
@@ -197,7 +192,9 @@ class BigMetaService(
   fun onKeyDeleted(event: OnProjectActivityEvent) {
     runSentryCatching {
       val ids =
-        event.modifiedEntities[Key::class]?.values?.filter { it.revisionType.isDel() }
+        event.modifiedEntities[Key::class]
+          ?.values
+          ?.filter { it.revisionType.isDel() }
           ?.map { it.entityId }
 
       if (ids.isNullOrEmpty()) {
@@ -205,12 +202,14 @@ class BigMetaService(
       }
 
       executeInNewTransaction(transactionManager) {
-        entityManager.createQuery(
-          """
+        entityManager
+          .createQuery(
+            """
       delete from KeysDistance kd 
       where kd.key1Id in :ids or kd.key2Id in :ids
       """,
-        ).setParameter("ids", ids).executeUpdate()
+          ).setParameter("ids", ids)
+          .executeUpdate()
       }
     }
   }

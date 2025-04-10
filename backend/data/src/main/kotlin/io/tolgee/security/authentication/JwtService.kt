@@ -45,7 +45,8 @@ class JwtService(
   private val userAccountService: UserAccountService,
 ) {
   private val jwtParser: JwtParser =
-    Jwts.parserBuilder()
+    Jwts
+      .parserBuilder()
       .setClock { currentDateProvider.date }
       .setSigningKey(signingKey)
       .build()
@@ -65,7 +66,8 @@ class JwtService(
 
     val expiration = Date(now.time + authenticationProperties.jwtExpiration)
     val builder =
-      Jwts.builder()
+      Jwts
+        .builder()
         .signWith(signingKey)
         .setIssuedAt(now)
         .setAudience(JWT_TOKEN_AUDIENCE)
@@ -98,7 +100,8 @@ class JwtService(
     val now = currentDateProvider.date
 
     val builder =
-      Jwts.builder()
+      Jwts
+        .builder()
         .signWith(signingKey)
         .setIssuedAt(now)
         .setAudience(JWT_TICKET_AUDIENCE)

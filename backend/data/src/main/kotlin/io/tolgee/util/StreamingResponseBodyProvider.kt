@@ -35,8 +35,8 @@ class StreamingResponseBodyProvider(
   private val entityManager: EntityManager,
   private val objectMapper: ObjectMapper,
 ) : Logging {
-  fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody {
-    return StreamingResponseBody {
+  fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody =
+    StreamingResponseBody {
       val session = entityManager.unwrap(Session::class.java)
 
       session.doWork { connection ->
@@ -48,10 +48,9 @@ class StreamingResponseBodyProvider(
       // Manually dispose the connection because spring has a hard time doing so by itself
       session.close()
     }
-  }
 
-  fun streamNdJson(stream: (write: (message: Any?) -> Unit) -> Unit): ResponseEntity<StreamingResponseBody> {
-    return ResponseEntity.ok().disableAccelBuffering().body(
+  fun streamNdJson(stream: (write: (message: Any?) -> Unit) -> Unit): ResponseEntity<StreamingResponseBody> =
+    ResponseEntity.ok().disableAccelBuffering().body(
       this.createStreamingResponseBody { outputStream ->
         OutputStreamWriter(outputStream).use { writer ->
           val write =
@@ -69,7 +68,6 @@ class StreamingResponseBodyProvider(
         }
       },
     )
-  }
 
   fun OutputStreamWriter.writeJson(message: Any?) {
     this.write(
@@ -89,5 +87,7 @@ class StreamingResponseBodyProvider(
         )
     }
 
-  data class StreamedErrorMessage(val error: ErrorResponseBody)
+  data class StreamedErrorMessage(
+    val error: ErrorResponseBody,
+  )
 }

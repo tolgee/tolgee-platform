@@ -6,8 +6,6 @@ class AnnouncementDto(
   val type: Announcement,
 ) {
   companion object {
-    fun fromEntity(announcementEnum: Announcement): AnnouncementDto {
-      return AnnouncementDto(type = announcementEnum)
-    }
+    fun fromEntity(announcementEnum: Announcement): AnnouncementDto = AnnouncementDto(type = announcementEnum)
   }
 }

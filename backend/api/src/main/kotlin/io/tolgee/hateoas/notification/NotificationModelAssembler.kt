@@ -28,7 +28,6 @@ class NotificationModelAssembler(
       notificationsWithModel
     }
 
-  override fun toModel(view: Notification): NotificationModel {
-    return prefetchedNotifications[view] ?: throw IllegalStateException("Notification $view was not found")
-  }
+  override fun toModel(view: Notification): NotificationModel =
+    prefetchedNotifications[view] ?: throw IllegalStateException("Notification $view was not found")
 }

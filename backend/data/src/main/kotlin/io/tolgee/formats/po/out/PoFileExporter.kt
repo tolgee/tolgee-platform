@@ -23,9 +23,11 @@ class PoFileExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepareResult()
-    return preparedResult.asSequence().map { (fileName, content) ->
-      fileName to content.toString().byteInputStream()
-    }.toMap()
+    return preparedResult
+      .asSequence()
+      .map { (fileName, content) ->
+        fileName to content.toString().byteInputStream()
+      }.toMap()
   }
 
   private fun prepareResult() {
@@ -39,15 +41,14 @@ class PoFileExporter(
     }
   }
 
-  private fun convertMessage(translation: ExportTranslationView): ToPoConversionResult {
-    return IcuToPoMessageConvertor(
+  private fun convertMessage(translation: ExportTranslationView): ToPoConversionResult =
+    IcuToPoMessageConvertor(
       message = translation.text ?: "",
       languageTag = translation.languageTag,
       placeholderConvertor = messageFormat.paramConvertorFactory(),
       forceIsPlural = translation.key.isPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     ).convert()
-  }
 
   private fun StringBuilder.writeMsgId(keyName: String) {
     this.append(convertToPoMultilineString("msgid", keyName))

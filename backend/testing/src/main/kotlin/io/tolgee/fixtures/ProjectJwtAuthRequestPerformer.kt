@@ -16,33 +16,23 @@ class ProjectJwtAuthRequestPerformer(
   override fun performProjectAuthPut(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return super.performAuthPut(projectUrlPrefix + project.id + "/" + url, content)
-  }
+  ): ResultActions = super.performAuthPut(projectUrlPrefix + project.id + "/" + url, content)
 
   override fun performProjectAuthPost(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return performAuthPost(projectUrlPrefix + project.id + "/" + url, content)
-  }
+  ): ResultActions = performAuthPost(projectUrlPrefix + project.id + "/" + url, content)
 
-  override fun performProjectAuthGet(url: String): ResultActions {
-    return performAuthGet(projectUrlPrefix + project.id + "/" + url)
-  }
+  override fun performProjectAuthGet(url: String): ResultActions = performAuthGet(projectUrlPrefix + project.id + "/" + url)
 
   override fun performProjectAuthDelete(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return performAuthDelete(projectUrlPrefix + project.id + "/" + url, content)
-  }
+  ): ResultActions = performAuthDelete(projectUrlPrefix + project.id + "/" + url, content)
 
   override fun performProjectAuthMultipart(
     url: String,
     files: List<MockMultipartFile>,
     params: Map<String, Array<String>>,
-  ): ResultActions {
-    return performAuthMultipart(projectUrlPrefix + project.id + "/" + url, files, params)
-  }
+  ): ResultActions = performAuthMultipart(projectUrlPrefix + project.id + "/" + url, files, params)
 }

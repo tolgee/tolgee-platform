@@ -8,9 +8,8 @@ class IcuToFlutterArbMessageConvertor(
   private val forceIsPlural: Boolean,
   private val isProjectIcuPlaceholdersEnabled: Boolean,
 ) {
-  fun convert(): PossiblePluralConversionResult {
-    return MessageConvertorFactory(message, forceIsPlural, isProjectIcuPlaceholdersEnabled) {
+  fun convert(): PossiblePluralConversionResult =
+    MessageConvertorFactory(message, forceIsPlural, isProjectIcuPlaceholdersEnabled) {
       FlutterArbFromIcuPlaceholderConvertor()
     }.create().convert()
-  }
 }

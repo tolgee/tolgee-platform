@@ -23,7 +23,5 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class CacheConfiguration : CachingConfigurerSupport() {
-  override fun errorHandler(): CacheErrorHandler {
-    return TolgeeCacheErrorHandler()
-  }
+  override fun errorHandler(): CacheErrorHandler = TolgeeCacheErrorHandler()
 }

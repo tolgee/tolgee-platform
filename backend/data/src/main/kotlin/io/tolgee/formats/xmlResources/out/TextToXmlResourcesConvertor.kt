@@ -40,7 +40,12 @@ class TextToXmlResourcesConvertor(
     escapeTextNodes()
 
     return ContentToAppend(
-      children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
+      children =
+        parsed.childNodes
+          .item(0)
+          .childNodes
+          .asSequence()
+          .toList(),
     )
   }
 
@@ -121,9 +126,7 @@ class TextToXmlResourcesConvertor(
     this.asSequence().forEach(action)
   }
 
-  private fun NodeList.asSequence(): Sequence<Node> {
-    return (0 until this.length).asSequence().map { this.item(it) }
-  }
+  private fun NodeList.asSequence(): Sequence<Node> = (0 until this.length).asSequence().map { this.item(it) }
 
   private fun Document.analyze(): AnalysisResult {
     var containsTags = false
@@ -177,18 +180,15 @@ class TextToXmlResourcesConvertor(
   private fun Node.getEscapedText(
     keepPercentSignEscaped: Boolean,
     quoteMoreWhitespaces: Boolean,
-  ): String {
-    return this.textContent.escape(
+  ): String =
+    this.textContent.escape(
       escapeApos = isParentRoot(),
       keepPercentSignEscaped = keepPercentSignEscaped,
       quoteMoreWhitespaces = quoteMoreWhitespaces,
       escapeNewLines = !analysisResult.containsXml,
     )
-  }
 
-  private fun Node.isParentRoot(): Boolean {
-    return this.parentNode.nodeName == "root" && this.parentNode.parentNode === this.ownerDocument
-  }
+  private fun Node.isParentRoot(): Boolean = this.parentNode.nodeName == "root" && this.parentNode.parentNode === this.ownerDocument
 
   private val documentBuilder: DocumentBuilder by lazy { documentBuilderFactory.newDocumentBuilder() }
 
@@ -212,8 +212,8 @@ class TextToXmlResourcesConvertor(
      */
     quoteMoreWhitespaces: Boolean,
     escapeNewLines: Boolean,
-  ): String {
-    return MobileStringEscaper(
+  ): String =
+    MobileStringEscaper(
       string = this,
       escapeApos = isAndroid && escapeApos,
       keepPercentSignEscaped = keepPercentSignEscaped,
@@ -222,12 +222,14 @@ class TextToXmlResourcesConvertor(
       utfSymbolCharacter = 'u',
       escapeQuotes = isAndroid,
     ).escape()
-  }
 
   val isAndroid
     get() = format == ExportFormat.ANDROID_XML
 
-  data class ContentToAppend(val text: String? = null, val children: Collection<Node>? = null)
+  data class ContentToAppend(
+    val text: String? = null,
+    val children: Collection<Node>? = null,
+  )
 
   private data class AnalysisResult(
     val containsXml: Boolean,

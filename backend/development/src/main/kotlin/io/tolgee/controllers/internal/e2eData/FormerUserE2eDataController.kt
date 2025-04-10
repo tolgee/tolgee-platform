@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/former-user"])
 @Transactional
-class FormerUserE2eDataController() : AbstractE2eDataController() {
+class FormerUserE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   fun generateBasicTestData(): Map<String, Any> {
     val testData =

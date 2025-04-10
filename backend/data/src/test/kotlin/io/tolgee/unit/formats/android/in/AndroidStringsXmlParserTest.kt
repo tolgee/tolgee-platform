@@ -71,15 +71,14 @@ class AndroidStringsXmlParserTest {
     return inputFactory.createXMLEventReader(data.byteInputStream())
   }
 
-  private fun getReaderWithSingleStringUnit(data: String): XMLEventReader {
-    return getReader(
+  private fun getReaderWithSingleStringUnit(data: String): XMLEventReader =
+    getReader(
       """
       <resources>
         <string name="name">$data</string>
       </resources>
       """.trimIndent(),
     )
-  }
 
   private fun parse(reader: XMLEventReader): XmlResourcesStringsModel {
     val parser =

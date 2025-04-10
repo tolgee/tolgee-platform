@@ -13,8 +13,8 @@ import java.math.RoundingMode
 
 @Component
 class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> {
-  override fun toModel(data: UsageData): UsageModel {
-    return UsageModel(
+  override fun toModel(data: UsageData): UsageModel =
+    UsageModel(
       subscriptionPrice = data.subscriptionPrice,
       seats = this.periodToModel(data.seatsUsage),
       translations = this.periodToModel(data.translationsUsage),
@@ -22,16 +22,14 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
       total = data.total,
       appliedStripeCredits = data.appliedStripeCredits,
     )
-  }
 
-  fun sumToModel(sum: SumUsageItem): SumUsageItemModel {
-    return SumUsageItemModel(
+  fun sumToModel(sum: SumUsageItem): SumUsageItemModel =
+    SumUsageItemModel(
       total = sum.total,
       unusedQuantity = sum.unusedQuantity,
       usedQuantity = sum.usedQuantity,
       usedQuantityOverPlan = sum.usedQuantityOverPlan,
     )
-  }
 
   fun periodToModel(periods: List<ProportionalUsagePeriod>): AverageProportionalUsageItemModel {
     val total = periods.sumOf { it.total }
@@ -49,7 +47,9 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
     if (sumMs == 0L) {
       return 0.toBigDecimal()
     }
-    return this.sumOf { property(it) * it.milliseconds }.toBigDecimal()
+    return this
+      .sumOf { property(it) * it.milliseconds }
+      .toBigDecimal()
       .divide(sumMs.toBigDecimal(), 2, RoundingMode.HALF_UP)
   }
 }

@@ -90,19 +90,16 @@ class LanguageDeletedPermissionUpdater(
   private fun shouldLowerPermissions(
     languages: MutableSet<Language>,
     type: ProjectPermissionType,
-  ): Boolean {
-    return hasOnlyAccessToDeletedLanguage(languages) && hasPermissionType(type)
-  }
+  ): Boolean = hasOnlyAccessToDeletedLanguage(languages) && hasPermissionType(type)
 
   private fun shouldLowerPermissions(
     languages: MutableSet<Language>,
     scope: Scope,
-  ): Boolean {
-    return hasOnlyAccessToDeletedLanguage(languages) && hasScope(scope)
-  }
+  ): Boolean = hasOnlyAccessToDeletedLanguage(languages) && hasScope(scope)
 
   private fun scopesWithout(scope: Scope) =
-    Scope.expand(permission.scopes)
+    Scope
+      .expand(permission.scopes)
       .toMutableList()
       .also { it.remove(scope) }
       .toTypedArray()

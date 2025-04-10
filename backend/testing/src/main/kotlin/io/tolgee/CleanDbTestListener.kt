@@ -122,17 +122,15 @@ class CleanDbTestListener : TestExecutionListener {
     return tables
   }
 
-  private fun generateDisableConstraintsSQL(tables: List<String>): List<String> {
-    return tables.map { table ->
+  private fun generateDisableConstraintsSQL(tables: List<String>): List<String> =
+    tables.map { table ->
       "ALTER TABLE $table DISABLE TRIGGER ALL"
     }
-  }
 
-  private fun generateEnableConstraintsSQL(tables: List<String>): List<String> {
-    return tables.map { table ->
+  private fun generateEnableConstraintsSQL(tables: List<String>): List<String> =
+    tables.map { table ->
       "ALTER TABLE $table ENABLE TRIGGER ALL"
     }
-  }
 
   @Throws(Exception::class)
   override fun afterTestMethod(testContext: TestContext) {
@@ -149,8 +147,7 @@ class CleanDbTestListener : TestExecutionListener {
     }
   }
 
-  private fun shouldClenBeforeClass(testContext: TestContext) =
-    testContext.testClass.isAnnotationPresent(CleanDbBeforeClass::class.java)
+  private fun shouldClenBeforeClass(testContext: TestContext) = testContext.testClass.isAnnotationPresent(CleanDbBeforeClass::class.java)
 
   @Throws(Exception::class)
   override fun prepareTestInstance(testContext: TestContext) {

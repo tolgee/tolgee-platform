@@ -51,8 +51,10 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
       node("fileUrl").isString.startsWith("http://").endsWith(".png")
       node("requestFilename").isString.satisfies {
         val file = fileStorage.fileExists("uploadedImages/" + it).assert.isTrue()
-        fileStorage.readFile("uploadedImages/" + it)
-          .size.assert.isCloseTo(5538, Offset.offset(500))
+        fileStorage
+          .readFile("uploadedImages/" + it)
+          .size.assert
+          .isCloseTo(5538, Offset.offset(500))
       }
     }
   }
@@ -79,11 +81,11 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   fun `returns file`() {
     val image = imageUploadService.store(screenshotFile, userAccount!!, null)
     val result =
-      performAuthGet("/uploaded-images/${image.filenameWithExtension}").andIsOk
+      performAuthGet("/uploaded-images/${image.filenameWithExtension}")
+        .andIsOk
         .andExpect(
           header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"),
-        )
-        .andReturn()
+        ).andReturn()
     assertThat(result.response.contentAsByteArray)
       .isEqualTo(
         fileStorage.readFile("uploadedImages/${image.filenameWithExtension}"),
@@ -94,9 +96,10 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   fun delete() {
     whenever(maxUploadedFilesByUserProvider.invoke()).thenAnswer { 30L }
     val list =
-      (1..20).map {
-        imageUploadService.store(screenshotFile, userAccount!!, null)
-      }.toCollection(mutableListOf())
+      (1..20)
+        .map {
+          imageUploadService.store(screenshotFile, userAccount!!, null)
+        }.toCollection(mutableListOf())
 
     val idsToDelete = list.take(10).map { it.id }.joinToString(",")
 

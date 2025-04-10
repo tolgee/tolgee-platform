@@ -47,8 +47,8 @@ class SlackErrorProvider(
     }
   }
 
-  fun getInvalidCommandError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getInvalidCommandError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.command-not-recognized"))
       }
@@ -59,10 +59,9 @@ class SlackErrorProvider(
         helpButton()
       }
     }
-  }
 
-  fun getInvalidParameterError(parameter: String): List<LayoutBlock> {
-    return withBlocks {
+  fun getInvalidParameterError(parameter: String): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.wrong-parameter").format(parameter))
       }
@@ -70,26 +69,23 @@ class SlackErrorProvider(
         helpButton()
       }
     }
-  }
 
-  fun getInvalidLangTagError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getInvalidLangTagError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.invalid-lang-tag"))
       }
     }
-  }
 
-  fun getInvalidGlobalSubscriptionError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getInvalidGlobalSubscriptionError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.global-subscription-error"))
       }
     }
-  }
 
-  fun getNotSubscribedYetError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getNotSubscribedYetError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(
           i18n.translate("slack.common.message.not-subscribed-yet"),
@@ -102,10 +98,9 @@ class SlackErrorProvider(
         helpButton()
       }
     }
-  }
 
-  fun getNotSubscribedToLanguageOrBadLanguageTagError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getNotSubscribedToLanguageOrBadLanguageTagError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(
           i18n.translate("slack.common.message.unsubscribe_bad-request"),
@@ -115,40 +110,36 @@ class SlackErrorProvider(
         helpButton()
       }
     }
-  }
 
-  fun getNoPermissionError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getNoPermissionError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(
           i18n.translate("slack-insufficient-permissions-error"),
         )
       }
     }
-  }
 
-  fun getFeatureDisabledError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getFeatureDisabledError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(
           i18n.translate("slack.common.message.feature-not-available"),
         )
       }
     }
-  }
 
-  fun getProjectNotFoundError(projectId: Long): List<LayoutBlock> {
-    return withBlocks {
+  fun getProjectNotFoundError(projectId: Long): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(
           i18n.translate("slack.common.message.slack-project-not-found-error").format(projectId),
         )
       }
     }
-  }
 
-  fun getWorkspaceNotFoundError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getWorkspaceNotFoundError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.slack-workspace-not-connected-to-any-organization"))
       }
@@ -161,15 +152,13 @@ class SlackErrorProvider(
         }
       }
     }
-  }
 
-  fun getInvalidSignatureError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getInvalidSignatureError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(i18n.translate("slack-invalid-signature"))
       }
     }
-  }
 
   private fun ActionsBlockBuilder.helpButton() {
     button {
@@ -178,11 +167,10 @@ class SlackErrorProvider(
     }
   }
 
-  fun getBotNotInChannelError(): List<LayoutBlock> {
-    return withBlocks {
+  fun getBotNotInChannelError(): List<LayoutBlock> =
+    withBlocks {
       section {
         markdownText(i18n.translate("slack.common.message.bot-not-in-channel"))
       }
     }
-  }
 }

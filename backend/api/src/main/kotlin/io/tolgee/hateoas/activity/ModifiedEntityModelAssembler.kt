@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class ModifiedEntityModelAssembler : RepresentationModelAssembler<ModifiedEntityView, ModifiedEntityModel> {
-  override fun toModel(view: ModifiedEntityView): ModifiedEntityModel {
-    return ModifiedEntityModel(
+  override fun toModel(view: ModifiedEntityView): ModifiedEntityModel =
+    ModifiedEntityModel(
       entityClass = view.entityClass,
       entityId = view.entityId,
       description = view.description,
@@ -15,5 +15,4 @@ class ModifiedEntityModelAssembler : RepresentationModelAssembler<ModifiedEntity
       relations = view.describingRelations,
       exists = view.exists,
     )
-  }
 }

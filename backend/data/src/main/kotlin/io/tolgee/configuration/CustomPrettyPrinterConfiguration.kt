@@ -7,7 +7,5 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class CustomPrettyPrinterConfiguration {
   @Bean
-  fun customPrettyPrinter(): CustomPrettyPrinter {
-    return CustomPrettyPrinter()
-  }
+  fun customPrettyPrinter(): CustomPrettyPrinter = CustomPrettyPrinter()
 }

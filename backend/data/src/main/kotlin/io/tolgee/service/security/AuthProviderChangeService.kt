@@ -39,13 +39,9 @@ class AuthProviderChangeService(
   @Suppress("SelfReferenceConstructorParameter") @Lazy
   private val self: AuthProviderChangeService,
 ) {
-  fun getCurrent(user: UserAccount): AuthProviderDto? {
-    return user.asAuthProviderDto(tolgeeProperties)
-  }
+  fun getCurrent(user: UserAccount): AuthProviderDto? = user.asAuthProviderDto(tolgeeProperties)
 
-  fun getRequestedChange(userAccount: UserAccount): AuthProviderDto? {
-    return getActiveAuthProviderChangeRequest(userAccount)?.asAuthProviderDto()
-  }
+  fun getRequestedChange(userAccount: UserAccount): AuthProviderDto? = getActiveAuthProviderChangeRequest(userAccount)?.asAuthProviderDto()
 
   /**
    * Alters authentication flow of third party authentication to allow initiating third party provider change
@@ -185,13 +181,12 @@ class AuthProviderChangeService(
     applyDomain(req)
   }
 
-  private fun UserAccount.AccountType?.transformWith(req: AuthProviderChangeRequest): UserAccount.AccountType? {
-    return when (req.authType) {
+  private fun UserAccount.AccountType?.transformWith(req: AuthProviderChangeRequest): UserAccount.AccountType? =
+    when (req.authType) {
       ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL -> UserAccount.AccountType.MANAGED
       ThirdPartyAuthType.GOOGLE, ThirdPartyAuthType.GITHUB, ThirdPartyAuthType.OAUTH2 -> this
       null -> UserAccount.AccountType.LOCAL
     }
-  }
 
   private fun UserAccount.resetEmailVerification() {
     if (thirdPartyAuthType == null) {

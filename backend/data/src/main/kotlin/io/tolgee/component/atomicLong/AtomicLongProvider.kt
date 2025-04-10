@@ -17,8 +17,8 @@ class AtomicLongProvider(
   fun get(
     name: String,
     defaultProvider: () -> Long,
-  ): TolgeeAtomicLong {
-    return if (isUsingRedisProvider.areWeUsingRedis) {
+  ): TolgeeAtomicLong =
+    if (isUsingRedisProvider.areWeUsingRedis) {
       // we need to lock it, because we don't want to set the default multiple times
       val lock = redissonClient.getLock("lock_$name")
       try {
@@ -37,7 +37,6 @@ class AtomicLongProvider(
     } else {
       MemoryTolgeeAtomicLong(name, defaultProvider)
     }
-  }
 
   val redissonClient: RedissonClient by lazy {
     applicationContext.getBean(RedissonClient::class.java)

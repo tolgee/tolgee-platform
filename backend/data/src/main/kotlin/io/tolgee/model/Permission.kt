@@ -52,7 +52,8 @@ class Permission(
   var invitation: Invitation? = null,
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   var agency: TranslationAgency? = null,
-) : AuditModel(), IPermission {
+) : AuditModel(),
+  IPermission {
   @Type(
     EnumArrayType::class,
     parameters = [
@@ -166,7 +167,8 @@ class Permission(
         if (!((permission._scopes == null) xor (permission.type == null))) {
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
-        if (permission.organization != null && (
+        if (permission.organization != null &&
+          (
             permission.viewLanguages.isNotEmpty() ||
               permission.translateLanguages.isNotEmpty() ||
               permission.stateChangeLanguages.isNotEmpty()

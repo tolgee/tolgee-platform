@@ -27,7 +27,8 @@ class TolgeeTranslationProviderImpl(
   private val eeTolgeeTranslateApiService: EeTolgeeTranslateApiService,
   private val eeSubscriptionInfoProvider: EeSubscriptionInfoProvider,
   private val publicBillingConfProvider: PublicBillingConfProvider,
-) : AbstractMtValueProvider(), TolgeeTranslationProvider {
+) : AbstractMtValueProvider(),
+  TolgeeTranslationProvider {
   override val isEnabled: Boolean get() = apiService != null
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
@@ -60,10 +61,9 @@ class TolgeeTranslationProviderImpl(
       return null
     }
 
-  fun ProviderTranslateParams.metadataOrThrow(): Metadata {
-    return this.metadata
+  fun ProviderTranslateParams.metadataOrThrow(): Metadata =
+    this.metadata
       ?: throw IllegalArgumentException("Metadata must be set for Tolgee translation")
-  }
 
   // empty array meaning all is supported
   override val supportedLanguages = arrayOf<String>()

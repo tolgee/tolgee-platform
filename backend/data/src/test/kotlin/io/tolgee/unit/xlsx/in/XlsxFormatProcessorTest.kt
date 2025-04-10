@@ -32,39 +32,48 @@ class XlsxFormatProcessorTest {
     mockUtil.mockIt("example.xlsx", "src/test/resources/import/xlsx/example.xlsx")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("value")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "key")
       .assertSingle {
         hasText("hodnota")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyDeep.inner")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyDeep.inner")
       .assertSingle {
         hasText("value")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyDeep.inner")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyDeep.inner")
       .assertSingle {
         hasText("hodnota")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolate")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyInterpolate")
       .assertSingle {
         hasText("replace this {value}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolate")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyInterpolate")
       .assertSingle {
         hasText("nahradit toto {value}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolateWithFormatting")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyInterpolateWithFormatting")
       .assertSingle {
         hasText("replace this {value, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolateWithFormatting")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyInterpolateWithFormatting")
       .assertSingle {
         hasText("nahradit toto {value, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyPluralSimple")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyPluralSimple")
       .assertSinglePlural {
         hasText(
           """
@@ -76,7 +85,8 @@ class XlsxFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyPluralSimple")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyPluralSimple")
       .assertSinglePlural {
         hasText(
           """
@@ -88,35 +98,43 @@ class XlsxFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "escapedCharacters")
       .assertSingle {
         hasText("this is a \"quote\"")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "escapedCharacters")
       .assertSingle {
         hasText("toto je \"citace\"")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "escapedCharacters2")
       .assertSingle {
         hasText("this is a\nnew line")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "escapedCharacters2")
       .assertSingle {
         hasText("toto je\nnový řádek")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "escapedCharacters3")
       .assertSingle {
         hasText("this is a \\ backslash")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "escapedCharacters3")
       .assertSingle {
         hasText("toto je zpětné \\ lomítko")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "escapedCharacters4")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "escapedCharacters4")
       .assertSingle {
         hasText("this is a , comma")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "escapedCharacters4")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "escapedCharacters4")
       .assertSingle {
         hasText("toto je , čárka")
       }
@@ -131,39 +149,48 @@ class XlsxFormatProcessorTest {
     mockUtil.mockIt("example.xlsx", "src/test/resources/import/xlsx/example_semicolon.xlsx")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("value")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "key")
       .assertSingle {
         hasText("hodnota")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyDeep.inner")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyDeep.inner")
       .assertSingle {
         hasText("value")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyDeep.inner")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyDeep.inner")
       .assertSingle {
         hasText("hodnota")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolate")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyInterpolate")
       .assertSingle {
         hasText("replace this {value}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolate")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyInterpolate")
       .assertSingle {
         hasText("nahradit toto {value}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolateWithFormatting")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyInterpolateWithFormatting")
       .assertSingle {
         hasText("replace this {value, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolateWithFormatting")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyInterpolateWithFormatting")
       .assertSingle {
         hasText("nahradit toto {value, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyPluralSimple")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyPluralSimple")
       .assertSinglePlural {
         hasText(
           """
@@ -175,7 +202,8 @@ class XlsxFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyPluralSimple")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyPluralSimple")
       .assertSinglePlural {
         hasText(
           """
@@ -198,39 +226,48 @@ class XlsxFormatProcessorTest {
     mockUtil.mockIt("example.xlsx", "src/test/resources/import/xlsx/example_tab.xlsx")
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("value")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "key")
       .assertSingle {
         hasText("hodnota")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyDeep.inner")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyDeep.inner")
       .assertSingle {
         hasText("value")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyDeep.inner")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyDeep.inner")
       .assertSingle {
         hasText("hodnota")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolate")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyInterpolate")
       .assertSingle {
         hasText("replace this {value}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolate")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyInterpolate")
       .assertSingle {
         hasText("nahradit toto {value}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyInterpolateWithFormatting")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyInterpolateWithFormatting")
       .assertSingle {
         hasText("replace this {value, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyInterpolateWithFormatting")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyInterpolateWithFormatting")
       .assertSingle {
         hasText("nahradit toto {value, number}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "keyPluralSimple")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "keyPluralSimple")
       .assertSinglePlural {
         hasText(
           """
@@ -242,7 +279,8 @@ class XlsxFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "keyPluralSimple")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "keyPluralSimple")
       .assertSinglePlural {
         hasText(
           """
@@ -265,15 +303,18 @@ class XlsxFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "key")
       .assertSingle {
         hasText("Ahoj {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -285,7 +326,8 @@ class XlsxFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -308,15 +350,18 @@ class XlsxFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "key")
       .assertSingle {
         hasText("Ahoj {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -328,7 +373,8 @@ class XlsxFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -351,15 +397,18 @@ class XlsxFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "key")
       .assertSingle {
         hasText("Ahoj {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -371,7 +420,8 @@ class XlsxFormatProcessorTest {
         )
         isPluralOptimized()
       }
-    mockUtil.fileProcessorContext.assertTranslations("cs", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("cs", "plural")
       .assertSinglePlural {
         hasText(
           """

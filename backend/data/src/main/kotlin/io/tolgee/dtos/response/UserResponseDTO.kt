@@ -9,13 +9,12 @@ data class UserResponseDTO(
   var emailAwaitingVerification: String? = null,
 ) {
   companion object {
-    fun fromEntity(userAccount: UserAccount): UserResponseDTO {
-      return UserResponseDTO(
+    fun fromEntity(userAccount: UserAccount): UserResponseDTO =
+      UserResponseDTO(
         name = userAccount.name,
         username = userAccount.username,
         id = userAccount.id,
         emailAwaitingVerification = userAccount.emailVerification?.newEmail,
       )
-    }
   }
 }

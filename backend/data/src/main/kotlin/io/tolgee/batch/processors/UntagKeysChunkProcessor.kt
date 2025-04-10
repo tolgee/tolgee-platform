@@ -35,21 +35,14 @@ class UntagKeysChunkProcessor(
     }
   }
 
-  override fun getTarget(data: UntagKeysRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: UntagKeysRequest): List<Long> = data.keyIds
 
-  override fun getParamsType(): Class<UntagKeysParams> {
-    return UntagKeysParams::class.java
-  }
+  override fun getParamsType(): Class<UntagKeysParams> = UntagKeysParams::class.java
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getParams(data: UntagKeysRequest): UntagKeysParams {
-    return UntagKeysParams().apply {
+  override fun getParams(data: UntagKeysRequest): UntagKeysParams =
+    UntagKeysParams().apply {
       this.tags = data.tags
     }
-  }
 }

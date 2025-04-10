@@ -100,15 +100,12 @@ class ContentDeliveryConfigService(
     }
   }
 
-  fun generateSlug(): String {
-    return slugGenerator.generate(random32byteHexString(), 3, 50) {
+  fun generateSlug(): String =
+    slugGenerator.generate(random32byteHexString(), 3, 50) {
       contentDeliveryConfigRepository.isSlugUnique(it)
     }
-  }
 
-  fun random32byteHexString(): String {
-    return (1..32).joinToString("") { Random.nextInt(0, 16).toString(16) }
-  }
+  fun random32byteHexString(): String = (1..32).joinToString("") { Random.nextInt(0, 16).toString(16) }
 
   private fun getStorage(
     projectId: Long,
@@ -197,18 +194,12 @@ class ContentDeliveryConfigService(
   fun getAllInProject(
     projectId: Long,
     pageable: Pageable,
-  ): Page<ContentDeliveryConfig> {
-    return contentDeliveryConfigRepository.findAllByProjectId(projectId, pageable)
-  }
+  ): Page<ContentDeliveryConfig> = contentDeliveryConfigRepository.findAllByProjectId(projectId, pageable)
 
   fun get(
     projectId: Long,
     contentDeliveryConfigId: Long,
-  ): ContentDeliveryConfig {
-    return contentDeliveryConfigRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
-  }
+  ): ContentDeliveryConfig = contentDeliveryConfigRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
 
-  fun save(config: ContentDeliveryConfig): ContentDeliveryConfig {
-    return contentDeliveryConfigRepository.save(config)
-  }
+  fun save(config: ContentDeliveryConfig): ContentDeliveryConfig = contentDeliveryConfigRepository.save(config)
 }

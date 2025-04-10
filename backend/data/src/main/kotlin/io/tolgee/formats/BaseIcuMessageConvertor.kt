@@ -68,14 +68,13 @@ class BaseIcuMessageConvertor(
     }
   }
 
-  private fun getSingularResult(): PossiblePluralConversionResult {
-    return PossiblePluralConversionResult(
+  private fun getSingularResult(): PossiblePluralConversionResult =
+    PossiblePluralConversionResult(
       singleResult.toString(),
       null,
       null,
       firstArgName = firstArgName,
     )
-  }
 
   private fun catchingCannotParse(fn: () -> PossiblePluralConversionResult): PossiblePluralConversionResult {
     try {
@@ -196,9 +195,10 @@ class BaseIcuMessageConvertor(
   private val formArgumentConvertor =
     mutableMapOf<String?, FromIcuPlaceholderConvertor>()
 
-  private fun getFormPlaceholderConvertor(form: String?): FromIcuPlaceholderConvertor {
-    return formArgumentConvertor.computeIfAbsent(form) { argumentConvertorFactory() }
-  }
+  private fun getFormPlaceholderConvertor(form: String?): FromIcuPlaceholderConvertor =
+    formArgumentConvertor.computeIfAbsent(form) {
+      argumentConvertorFactory()
+    }
 
   private fun handlePlural(node: MessagePatternUtil.ArgNode) {
     pluralArgName = node.name

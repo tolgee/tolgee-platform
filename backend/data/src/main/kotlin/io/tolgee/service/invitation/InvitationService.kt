@@ -37,14 +37,13 @@ class InvitationService(
   private val businessEventPublisher: BusinessEventPublisher,
 ) : Logging {
   @Transactional
-  fun create(params: CreateProjectInvitationParams): Invitation {
-    return create(params) { invitation ->
+  fun create(params: CreateProjectInvitationParams): Invitation =
+    create(params) { invitation ->
       permissionService.createForInvitation(
         invitation = invitation,
         params,
       )
     }
-  }
 
   /**
    * Creates invitations for project
@@ -199,9 +198,7 @@ class InvitationService(
     return invitationRepository.findById(id) as Optional<Invitation>
   }
 
-  fun getForProject(project: Project): Set<Invitation> {
-    return invitationRepository.findAllByPermissionProjectOrderByCreatedAt(project)
-  }
+  fun getForProject(project: Project): Set<Invitation> = invitationRepository.findAllByPermissionProjectOrderByCreatedAt(project)
 
   @Transactional
   fun delete(invitation: Invitation) {
@@ -214,11 +211,10 @@ class InvitationService(
     invitationRepository.delete(invitation)
   }
 
-  fun getForOrganization(organization: Organization): List<Invitation> {
-    return traceLogMeasureTime("get invitations for organization") {
+  fun getForOrganization(organization: Organization): List<Invitation> =
+    traceLogMeasureTime("get invitations for organization") {
       invitationRepository.getAllForOrganization(organization)
     }
-  }
 
   private fun checkEmailNotAlreadyInvited(params: CreateProjectInvitationParams) {
     val email = params.email
@@ -237,14 +233,10 @@ class InvitationService(
   fun userOrInvitationWithEmailExists(
     email: String,
     project: Project,
-  ): Boolean {
-    return invitationRepository.countByUserOrInvitationWithEmailAndProject(email, project) > 0
-  }
+  ): Boolean = invitationRepository.countByUserOrInvitationWithEmailAndProject(email, project) > 0
 
   fun userOrInvitationWithEmailExists(
     email: String,
     organization: Organization,
-  ): Boolean {
-    return invitationRepository.countByUserOrInvitationWithEmailAndOrganization(email, organization) > 0
-  }
+  ): Boolean = invitationRepository.countByUserOrInvitationWithEmailAndOrganization(email, organization) > 0
 }

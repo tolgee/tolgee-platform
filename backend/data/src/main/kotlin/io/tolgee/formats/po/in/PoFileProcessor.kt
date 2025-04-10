@@ -111,7 +111,8 @@ class PoFileProcessor(
     }
 
     poParsedTranslation.meta.flags.forEach { flag ->
-      PoFormatDetector().detectByFlag(flag)
+      PoFormatDetector()
+        .detectByFlag(flag)
         ?.let { return it }
     }
 
@@ -126,7 +127,10 @@ class PoFileProcessor(
     val messages =
       parsed.translations.flatMap { poParsed ->
         if (poParsed.msgidPlural.isNotBlank() && !poParsed.msgstrPlurals.isNullOrEmpty()) {
-          poParsed.msgstrPlurals!!.values.asSequence().map { it.toString() }
+          poParsed.msgstrPlurals!!
+            .values
+            .asSequence()
+            .map { it.toString() }
         } else {
           sequence {
             yield(poParsed.msgstr.toString())

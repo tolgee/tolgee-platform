@@ -51,11 +51,10 @@ class ThirdPartyUserHandler(
     return createUser(data)
   }
 
-  private fun getManagingOrganization(data: ThirdPartyUserDetails): Organization? {
-    return data.tenant?.organizationId?.let {
+  private fun getManagingOrganization(data: ThirdPartyUserDetails): Organization? =
+    data.tenant?.organizationId?.let {
       organizationService.find(it) ?: throw AuthenticationException(Message.ORGANIZATION_NOT_FOUND)
     }
-  }
 
   private fun checkNotManagedByOrganization(domain: String?) {
     if (tenantService.getEnabledConfigByDomainOrNull(domain)?.organizationId != null) {
@@ -108,12 +107,11 @@ class ThirdPartyUserHandler(
     return user
   }
 
-  private fun guessAccountType(data: ThirdPartyUserDetails): AccountType {
-    return when (data.thirdPartyAuthType) {
+  private fun guessAccountType(data: ThirdPartyUserDetails): AccountType =
+    when (data.thirdPartyAuthType) {
       ThirdPartyAuthType.SSO, ThirdPartyAuthType.SSO_GLOBAL -> AccountType.MANAGED
       ThirdPartyAuthType.GITHUB, ThirdPartyAuthType.OAUTH2, ThirdPartyAuthType.GOOGLE -> AccountType.THIRD_PARTY
     }
-  }
 
   private fun createUser(data: ThirdPartyUserDetails): UserAccount {
     userAccountService.findActive(data.username)?.let {

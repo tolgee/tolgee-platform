@@ -29,9 +29,7 @@ class IcuToI18nextPlaceholderConvertor : FromIcuPlaceholderConvertor {
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
-  ): String {
-    return "{{$argName, number}}"
-  }
+  ): String = "{{$argName, number}}"
 
   private fun convertNumber(node: MessagePatternUtil.ArgNode): String {
     if (node.simpleStyle.trim() == "scientific") {

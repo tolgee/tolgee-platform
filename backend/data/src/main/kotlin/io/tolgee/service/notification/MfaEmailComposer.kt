@@ -17,9 +17,7 @@ class MfaEmailComposer(
       |${checkYourSecuritySettingsFooter()}
     """.trimMargin()
 
-  private fun multiFactorChangedMessage(notification: Notification): String {
-    return i18n.translate("notifications.email.mfa.${notification.type}")
-  }
+  private fun multiFactorChangedMessage(notification: Notification): String = i18n.translate("notifications.email.mfa.${notification.type}")
 
   private fun checkYourSecuritySettingsFooter() =
     i18n

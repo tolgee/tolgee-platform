@@ -6,7 +6,5 @@ interface PropChangesProvider {
   fun getChanges(
     old: Any?,
     new: Any?,
-  ): PropertyModification? {
-    return null
-  }
+  ): PropertyModification? = null
 }

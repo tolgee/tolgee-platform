@@ -33,27 +33,19 @@ class ProjectApiKeyAuthRequestPerformer(
   override fun performProjectAuthPut(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return performPut(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
-  }
+  ): ResultActions = performPut(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
 
   override fun performProjectAuthPost(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return performPost(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
-  }
+  ): ResultActions = performPost(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
 
-  override fun performProjectAuthGet(url: String): ResultActions {
-    return performGet(projectUrlPrefix + url.withApiKey, headersWithApiKey)
-  }
+  override fun performProjectAuthGet(url: String): ResultActions = performGet(projectUrlPrefix + url.withApiKey, headersWithApiKey)
 
   override fun performProjectAuthDelete(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return performDelete(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
-  }
+  ): ResultActions = performDelete(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
 
   override fun performProjectAuthMultipart(
     url: String,

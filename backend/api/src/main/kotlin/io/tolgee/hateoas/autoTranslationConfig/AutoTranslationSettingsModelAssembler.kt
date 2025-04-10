@@ -11,12 +11,11 @@ class AutoTranslationSettingsModelAssembler :
     AutoTranslationController::class.java,
     AutoTranslationConfigModel::class.java,
   ) {
-  override fun toModel(entity: AutoTranslationConfig): AutoTranslationConfigModel {
-    return AutoTranslationConfigModel(
+  override fun toModel(entity: AutoTranslationConfig): AutoTranslationConfigModel =
+    AutoTranslationConfigModel(
       languageId = entity.targetLanguage?.id,
       usingTranslationMemory = entity.usingTm,
       usingMachineTranslation = entity.usingPrimaryMtService,
       enableForImport = entity.enableForImport,
     )
-  }
 }

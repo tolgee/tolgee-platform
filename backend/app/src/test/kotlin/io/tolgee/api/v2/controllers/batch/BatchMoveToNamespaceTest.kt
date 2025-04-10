@@ -78,8 +78,14 @@ class BatchMoveToNamespaceTest : ProjectAuthControllerTest("/v2/projects/") {
     batchJobTestBase.waitForJobCompleted(result)
 
     val jobId = result.jobId
-    keyService.get(key.id).namespace.assert.isNull()
-    batchJobService.findJobDto(jobId)?.status.assert.isEqualTo(BatchJobStatus.FAILED)
+    keyService
+      .get(key.id)
+      .namespace.assert
+      .isNull()
+    batchJobService
+      .findJobDto(jobId)
+      ?.status.assert
+      .isEqualTo(BatchJobStatus.FAILED)
   }
 
   val ResultActions.jobId: Long

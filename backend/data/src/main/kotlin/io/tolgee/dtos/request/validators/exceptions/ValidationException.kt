@@ -5,7 +5,9 @@ import io.tolgee.dtos.request.validators.ValidationError
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.exceptions.ExpectedException
 
-class ValidationException : RuntimeException, ExpectedException {
+class ValidationException :
+  RuntimeException,
+  ExpectedException {
   val validationErrors: MutableSet<ValidationError> = LinkedHashSet()
 
   constructor(message: Message, vararg parameters: String) {

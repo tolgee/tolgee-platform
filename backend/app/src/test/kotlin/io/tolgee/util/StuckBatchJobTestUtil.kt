@@ -18,23 +18,23 @@ class StuckBatchJobTestUtil(
     project: Project,
     batchJobStatus: BatchJobStatus,
     executionStatuses: Set<BatchJobChunkExecutionStatus>,
-  ): BatchJob {
-    return createBatchJobWithExecutionStatuses(
+  ): BatchJob =
+    createBatchJobWithExecutionStatuses(
       project = project,
       batchJobStatus = batchJobStatus,
       executionStatuses =
-        executionStatuses.mapIndexed { index, status ->
-          index to listOf(status)
-        }.toMap(),
+        executionStatuses
+          .mapIndexed { index, status ->
+            index to listOf(status)
+          }.toMap(),
     )
-  }
 
   fun createBatchJobWithExecutionStatuses(
     project: Project,
     batchJobStatus: BatchJobStatus,
     executionStatuses: Map<Int, List<BatchJobChunkExecutionStatus>>,
-  ): BatchJob {
-    return executeInNewTransaction(transactionManager) {
+  ): BatchJob =
+    executeInNewTransaction(transactionManager) {
       val job =
         BatchJob().apply {
           status = batchJobStatus
@@ -56,5 +56,4 @@ class StuckBatchJobTestUtil(
       }
       job
     }
-  }
 }

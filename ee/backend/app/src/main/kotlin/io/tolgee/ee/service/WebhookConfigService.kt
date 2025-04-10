@@ -24,21 +24,16 @@ class WebhookConfigService(
   fun get(
     projectId: Long,
     id: Long,
-  ): WebhookConfig {
-    return webhookConfigRepository.findByIdAndProjectId(id, projectId)
+  ): WebhookConfig =
+    webhookConfigRepository.findByIdAndProjectId(id, projectId)
       ?: throw NotFoundException()
-  }
 
-  fun get(id: Long): WebhookConfig {
-    return webhookConfigRepository.findById(id).orElseThrow { NotFoundException() }
-  }
+  fun get(id: Long): WebhookConfig = webhookConfigRepository.findById(id).orElseThrow { NotFoundException() }
 
   fun findAllInProject(
     projectId: Long,
     pageable: Pageable,
-  ): Page<WebhookConfig> {
-    return webhookConfigRepository.findByProjectId(projectId, pageable)
-  }
+  ): Page<WebhookConfig> = webhookConfigRepository.findByProjectId(projectId, pageable)
 
   fun create(
     project: Project,
@@ -95,7 +90,5 @@ class WebhookConfigService(
     return "whsec_$hex"
   }
 
-  fun find(id: Long): WebhookConfig? {
-    return webhookConfigRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): WebhookConfig? = webhookConfigRepository.findById(id).orElse(null)
 }

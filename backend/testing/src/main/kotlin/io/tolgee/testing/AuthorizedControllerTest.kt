@@ -14,7 +14,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.time.Duration
 import java.util.*
 
-abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
+abstract class AuthorizedControllerTest :
+  AbstractControllerTest(),
+  AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
 
   var userAccount: UserAccount?
@@ -76,40 +78,30 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     _userAccount = null
   }
 
-  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
-    return requestPerformer.perform(builder)
-  }
+  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions = requestPerformer.perform(builder)
 
   override fun performDelete(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performDelete(url, content)
-  }
+  ): ResultActions = requestPerformer.performDelete(url, content)
 
   override fun performGet(
     url: String,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performGet(url, httpHeaders)
-  }
+  ): ResultActions = requestPerformer.performGet(url, httpHeaders)
 
   override fun performPost(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performPost(url, content, httpHeaders)
-  }
+  ): ResultActions = requestPerformer.performPost(url, content, httpHeaders)
 
   override fun performPut(
     url: String,
     content: Any?,
     httpHeaders: HttpHeaders,
-  ): ResultActions {
-    return requestPerformer.performPut(url, content, httpHeaders)
-  }
+  ): ResultActions = requestPerformer.performPut(url, content, httpHeaders)
 
   override fun performAuthPut(
     url: String,

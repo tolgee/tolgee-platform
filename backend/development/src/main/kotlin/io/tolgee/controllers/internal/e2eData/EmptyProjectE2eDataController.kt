@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/empty-project"])
 @Transactional
-class EmptyProjectE2eDataController() : AbstractE2eDataController() {
+class EmptyProjectE2eDataController : AbstractE2eDataController() {
   override val testData: TestDataBuilder
     get() = EmptyProjectTestData().root
 }

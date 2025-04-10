@@ -9,10 +9,9 @@ import org.springframework.web.client.RestTemplate
 class BunnyContentDeliveryCachePurgingFactory(
   private val restTemplate: RestTemplate,
 ) : ContentDeliveryCachePurgingFactory {
-  override fun create(config: Any): BunnyContentDeliveryCachePurging {
-    return BunnyContentDeliveryCachePurging(
+  override fun create(config: Any): BunnyContentDeliveryCachePurging =
+    BunnyContentDeliveryCachePurging(
       config as ContentDeliveryBunnyProperties,
       restTemplate,
     )
-  }
 }

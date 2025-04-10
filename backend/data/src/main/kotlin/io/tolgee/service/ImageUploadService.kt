@@ -79,9 +79,7 @@ class ImageUploadService(
     uploadedImageRepository.delete(uploadedImage)
   }
 
-  fun find(ids: Collection<Long>): List<UploadedImage> {
-    return uploadedImageRepository.findAllByIdIn(ids)
-  }
+  fun find(ids: Collection<Long>): List<UploadedImage> = uploadedImageRepository.findAllByIdIn(ids)
 
   @Transactional
   @Scheduled(fixedRate = 60000)
@@ -95,16 +93,15 @@ class ImageUploadService(
 
   private fun generateFilename(): String {
     val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    return ThreadLocalRandom.current()
+    return ThreadLocalRandom
+      .current()
       .ints(100L, 0, charPool.size)
       .asSequence()
       .map(charPool::get)
       .joinToString("")
   }
 
-  fun save(image: UploadedImage): UploadedImage {
-    return uploadedImageRepository.save(image)
-  }
+  fun save(image: UploadedImage): UploadedImage = uploadedImageRepository.save(image)
 
   fun validateIsImage(image: MultipartFile) {
     val contentTypes = listOf("image/png", "image/jpeg", "image/gif")

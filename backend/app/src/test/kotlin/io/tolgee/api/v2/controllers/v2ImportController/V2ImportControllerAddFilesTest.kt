@@ -108,7 +108,8 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     val base = dbPopulator.createBase()
 
     performImport(projectId = base.project.id, listOf(Pair("example.po", poFile)))
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(1)
       }.andReturn()
 
@@ -118,8 +119,18 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
       assertThat(it.files).hasSize(1)
       assertThat(it.files[0].languages[0].translations).hasSize(8)
       // correctly assigns isPlural
-      assertThat(it.files[0].keys[4].translations[0].isPlural).isTrue()
-      assertThat(it.files[0].keys[3].translations[0].isPlural).isFalse()
+      assertThat(
+        it.files[0]
+          .keys[4]
+          .translations[0]
+          .isPlural,
+      ).isTrue()
+      assertThat(
+        it.files[0]
+          .keys[3]
+          .translations[0]
+          .isPlural,
+      ).isFalse()
     }
   }
 
@@ -128,7 +139,8 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     val base = dbPopulator.createBase()
 
     performImport(projectId = base.project.id, listOf(Pair("example.xliff", xliffFile)))
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("result._embedded.languages").isArray.hasSize(2)
       }.andReturn()
   }
@@ -138,7 +150,8 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     val base = dbPopulator.createBase()
 
     performImport(projectId = base.project.id, listOf(Pair("error.json", errorJson)))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("errors[0].code").isEqualTo("cannot_parse_file")
         node("errors[0].params[0]").isEqualTo("error.json")
         node("errors[0].params[1]").isString.contains("Unrecognized token")
@@ -152,7 +165,8 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     val data = (1..101).map { "simple$it.json" to simpleJson }
 
     performImport(projectId = base.project.id, data)
-      .andIsBadRequest.andPrettyPrint.andAssertThatJson {
+      .andIsBadRequest.andPrettyPrint
+      .andAssertThatJson {
         node("code").isEqualTo("cannot_add_more_then_100_languages")
       }
   }
@@ -183,7 +197,10 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
     entityManager.clear()
 
     importService.find(base.project.id, base.userAccount.id)?.let {
-      it.files[0].keys.find { it.name == "this;nested;a" }.assert.isNotNull
+      it.files[0]
+        .keys
+        .find { it.name == "this;nested;a" }
+        .assert.isNotNull
     }
   }
 
@@ -217,7 +234,13 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
         assertThat(it.files).hasSize(1)
         assertThat(it.files[0].issues).hasSize(1)
         assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
-        assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("too_long")
+        assertThat(
+          it.files[0]
+            .issues[0]
+            .params
+            ?.get(0)
+            ?.value,
+        ).isEqualTo("too_long")
       }
     }
   }
@@ -260,9 +283,17 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
       importService.find(base.project.id, base.userAccount.id)?.let {
         assertThat(it.files).hasSize(4)
         val homepageEn = it.files.find { it.namespace == "homepage" && it.name == "homepage/en.json" }
-        homepageEn!!.languages[0].existingLanguage?.tag.assert.isEqualTo("en")
+        homepageEn!!
+          .languages[0]
+          .existingLanguage
+          ?.tag.assert
+          .isEqualTo("en")
         val movies = it.files.find { it.namespace == "movies" && it.name == "movies/de.json" }
-        movies!!.languages[0].existingLanguage?.tag.assert.isEqualTo("de")
+        movies!!
+          .languages[0]
+          .existingLanguage
+          ?.tag.assert
+          .isEqualTo("de")
       }
     }
   }

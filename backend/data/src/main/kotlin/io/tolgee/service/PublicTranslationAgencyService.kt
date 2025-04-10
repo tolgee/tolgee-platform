@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicTranslationAgencyService : TranslationAgencyService {
-  override fun findById(id: Long): TranslationAgency {
+  override fun findById(id: Long): TranslationAgency =
     throw BadRequestException(Message.FEATURE_NOT_ENABLED, listOf(Feature.ORDER_TRANSLATION))
-  }
 }

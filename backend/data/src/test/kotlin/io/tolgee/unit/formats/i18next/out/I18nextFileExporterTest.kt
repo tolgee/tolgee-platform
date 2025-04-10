@@ -126,13 +126,12 @@ class I18nextFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = ExportParams(),
-  ): JsonFileExporter {
-    return JsonFileExporter(
+  ): JsonFileExporter =
+    JsonFileExporter(
       translations = translations,
       exportParams = exportParams,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
       customPrettyPrinter = CustomPrettyPrinter(),
     )
-  }
 }

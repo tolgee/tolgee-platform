@@ -117,7 +117,8 @@ class OrganizationRoleService(
     if (this.isUserOwner(
         userId,
         organizationId,
-      ) || isServerAdmin
+      ) ||
+      isServerAdmin
     ) {
       return
     } else {
@@ -156,32 +157,23 @@ class OrganizationRoleService(
     return role.type == OrganizationRoleType.OWNER
   }
 
-  fun find(id: Long): OrganizationRole? {
-    return organizationRoleRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): OrganizationRole? = organizationRoleRepository.findById(id).orElse(null)
 
   fun getType(
     userId: Long,
     organizationId: Long,
-  ): OrganizationRoleType {
-    return self.findType(userId, organizationId)
+  ): OrganizationRoleType =
+    self.findType(userId, organizationId)
       ?: throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
-  }
 
-  fun getType(organizationId: Long): OrganizationRoleType {
-    return self.getType(authenticationFacade.authenticatedUser.id, organizationId)
-  }
+  fun getType(organizationId: Long): OrganizationRoleType = self.getType(authenticationFacade.authenticatedUser.id, organizationId)
 
-  fun findType(organizationId: Long): OrganizationRoleType? {
-    return self.findType(authenticationFacade.authenticatedUser.id, organizationId)
-  }
+  fun findType(organizationId: Long): OrganizationRoleType? = self.findType(authenticationFacade.authenticatedUser.id, organizationId)
 
   fun findType(
     userId: Long,
     organizationId: Long,
-  ): OrganizationRoleType? {
-    return self.getDto(organizationId, userId).type
-  }
+  ): OrganizationRoleType? = self.getDto(organizationId, userId).type
 
   @Cacheable(Caches.ORGANIZATION_ROLES, key = "{#organizationId, #userId}")
   fun getDto(
@@ -192,9 +184,7 @@ class OrganizationRoleService(
     return UserOrganizationRoleDto.fromEntity(userId, entity)
   }
 
-  fun getManagedBy(userId: Long): Organization? {
-    return organizationRoleRepository.findOneByUserIdAndManagedIsTrue(userId)?.organization
-  }
+  fun getManagedBy(userId: Long): Organization? = organizationRoleRepository.findOneByUserIdAndManagedIsTrue(userId)?.organization
 
   @CacheEvict(Caches.ORGANIZATION_ROLES, key = "{#organization.id, #user.id}")
   fun setManaged(
@@ -289,11 +279,10 @@ class OrganizationRoleService(
     invitation: Invitation,
     type: OrganizationRoleType,
     organization: Organization,
-  ): OrganizationRole {
-    return OrganizationRole(invitation = invitation, type = type, organization = organization).let {
+  ): OrganizationRole =
+    OrganizationRole(invitation = invitation, type = type, organization = organization).let {
       organizationRoleRepository.save(it)
     }
-  }
 
   fun acceptInvitation(
     organizationRole: OrganizationRole,
@@ -309,14 +298,13 @@ class OrganizationRoleService(
     }
   }
 
-  fun isAnotherOwnerInOrganization(id: Long): Boolean {
-    return this.organizationRoleRepository
+  fun isAnotherOwnerInOrganization(id: Long): Boolean =
+    this.organizationRoleRepository
       .countAllByOrganizationIdAndTypeAndUserIdNot(
         id,
         OrganizationRoleType.OWNER,
         authenticationFacade.authenticatedUser.id,
       ) > 0
-  }
 
   fun saveAll(organizationRoles: List<OrganizationRole>) {
     organizationRoleRepository.saveAll(organizationRoles)
@@ -342,7 +330,5 @@ class OrganizationRoleService(
   }
 
   @Transactional
-  fun getOwners(organization: Organization): List<UserAccount> {
-    return organizationRoleRepository.getOwners(organization)
-  }
+  fun getOwners(organization: Organization): List<UserAccount> = organizationRoleRepository.getOwners(organization)
 }

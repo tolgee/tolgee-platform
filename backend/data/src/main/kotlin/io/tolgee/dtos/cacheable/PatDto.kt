@@ -27,13 +27,12 @@ data class PatDto(
   val userAccountId: Long,
 ) : Serializable {
   companion object {
-    fun fromEntity(pat: Pat): PatDto {
-      return PatDto(
+    fun fromEntity(pat: Pat): PatDto =
+      PatDto(
         id = pat.id,
         hash = pat.tokenHash,
         expiresAt = pat.expiresAt,
         userAccountId = pat.userAccount.id,
       )
-    }
   }
 }

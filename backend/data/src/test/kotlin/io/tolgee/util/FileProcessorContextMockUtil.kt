@@ -89,35 +89,32 @@ class FileProcessorContextMockUtil {
       .thenReturn(languageService)
   }
 
-  private fun mockImportFileProcessorFactory(applicationContextMock: ApplicationContext): ImportFileProcessorFactory {
-    return ImportFileProcessorFactory(
+  private fun mockImportFileProcessorFactory(applicationContextMock: ApplicationContext): ImportFileProcessorFactory =
+    ImportFileProcessorFactory(
       objectMapper = jacksonObjectMapper(),
       yamlObjectMapper = ObjectMapper(YAMLFactory()),
     ).also {
       whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java))
         .thenReturn(it)
     }
-  }
 
-  private fun mockImportService(applicationContextMock: ApplicationContext): ImportService {
-    return mock<ImportService>().also {
+  private fun mockImportService(applicationContextMock: ApplicationContext): ImportService =
+    mock<ImportService>().also {
       whenever(applicationContextMock.getBean(ImportService::class.java))
         .thenReturn(it)
       mockSaveFile(it)
       importServiceMock = it
     }
-  }
 
   private fun mockSaveFile(it: ImportService) {
     whenever(it.saveFile(any())).then { it.arguments[0] as ImportFile }
   }
 
-  private fun mockTolgeeProperties(applicationContextMock: ApplicationContext): TolgeeProperties {
-    return TolgeeProperties().also {
+  private fun mockTolgeeProperties(applicationContextMock: ApplicationContext): TolgeeProperties =
+    TolgeeProperties().also {
       whenever(applicationContextMock.getBean(TolgeeProperties::class.java))
         .thenReturn(it)
     }
-  }
 
   private fun initImportMocks(
     fileName: String,
@@ -148,7 +145,8 @@ class FileProcessorContextMockUtil {
 
   fun getSavedTranslations(): List<ImportTranslation> {
     @Suppress("UNCHECKED_CAST")
-    return Mockito.mockingDetails(importServiceMock)
+    return Mockito
+      .mockingDetails(importServiceMock)
       .invocations
       .filter { it.method == ImportService::saveTranslations.javaMethod }
       .flatMap { it.arguments.first() as List<ImportTranslation> }

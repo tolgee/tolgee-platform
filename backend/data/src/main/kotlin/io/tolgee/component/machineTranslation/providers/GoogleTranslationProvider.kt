@@ -18,12 +18,13 @@ class GoogleTranslationProvider(
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val result =
-      translateService.translate(
-        params.text,
-        Translate.TranslateOption.sourceLanguage(params.sourceLanguageTag),
-        Translate.TranslateOption.targetLanguage(params.targetLanguageTag),
-        Translate.TranslateOption.format("text"),
-      ).translatedText
+      translateService
+        .translate(
+          params.text,
+          Translate.TranslateOption.sourceLanguage(params.sourceLanguageTag),
+          Translate.TranslateOption.targetLanguage(params.targetLanguageTag),
+          Translate.TranslateOption.format("text"),
+        ).translatedText
     return MtValueProvider.MtResult(
       result,
       params.text.length * 100,

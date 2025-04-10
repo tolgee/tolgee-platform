@@ -70,53 +70,33 @@ class ApiKeyService(
 
   private fun generateKey() = keyGenerator.generate(130)
 
-  fun getAllByUser(userAccountId: Long): Set<ApiKey> {
-    return apiKeyRepository.getAllByUserAccountIdOrderById(userAccountId)
-  }
+  fun getAllByUser(userAccountId: Long): Set<ApiKey> = apiKeyRepository.getAllByUserAccountIdOrderById(userAccountId)
 
   fun getAllByUser(
     userAccountId: Long,
     filterProjectId: Long?,
     pageable: Pageable,
-  ): Page<ApiKey> {
-    return apiKeyRepository.getAllByUserAccount(userAccountId, filterProjectId, pageable)
-  }
+  ): Page<ApiKey> = apiKeyRepository.getAllByUserAccount(userAccountId, filterProjectId, pageable)
 
-  fun getAllByProject(projectId: Long): Set<ApiKey> {
-    return apiKeyRepository.getAllByProjectId(projectId)
-  }
+  fun getAllByProject(projectId: Long): Set<ApiKey> = apiKeyRepository.getAllByProjectId(projectId)
 
   fun getAllByProject(
     projectId: Long,
     pageable: Pageable,
-  ): Page<ApiKey> {
-    return apiKeyRepository.getAllByProjectId(projectId, pageable)
-  }
+  ): Page<ApiKey> = apiKeyRepository.getAllByProjectId(projectId, pageable)
 
-  fun findOptional(apiKey: String): Optional<ApiKey> {
-    return apiKeyRepository.findByKeyHash(apiKey)
-  }
+  fun findOptional(apiKey: String): Optional<ApiKey> = apiKeyRepository.findByKeyHash(apiKey)
 
-  fun findOptional(id: Long): Optional<ApiKey> {
-    return apiKeyRepository.findById(id)
-  }
+  fun findOptional(id: Long): Optional<ApiKey> = apiKeyRepository.findById(id)
 
-  fun find(apiKey: String): ApiKey? {
-    return apiKeyRepository.findByKeyHash(apiKey).orElse(null)
-  }
+  fun find(apiKey: String): ApiKey? = apiKeyRepository.findByKeyHash(apiKey).orElse(null)
 
-  fun find(id: Long): ApiKey? {
-    return apiKeyRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): ApiKey? = apiKeyRepository.findById(id).orElse(null)
 
-  fun get(id: Long): ApiKey {
-    return find(id) ?: throw NotFoundException(Message.API_KEY_NOT_FOUND)
-  }
+  fun get(id: Long): ApiKey = find(id) ?: throw NotFoundException(Message.API_KEY_NOT_FOUND)
 
   @Cacheable(cacheNames = [Caches.PROJECT_API_KEYS], key = "#hash")
-  fun findDto(hash: String): ApiKeyDto? {
-    return find(hash)?.let { ApiKeyDto.fromEntity(it) }
-  }
+  fun findDto(hash: String): ApiKeyDto? = find(hash)?.let { ApiKeyDto.fromEntity(it) }
 
   @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#apiKey.keyHash")
   fun deleteApiKey(apiKey: ApiKey) {
@@ -175,12 +155,22 @@ class ApiKeyService(
     projectId: Long,
   ): String {
     val stringToEncode = "${projectId}_$key"
-    return BaseEncoding.base32().omitPadding().lowerCase().encode(stringToEncode.toByteArray())
+    return BaseEncoding
+      .base32()
+      .omitPadding()
+      .lowerCase()
+      .encode(stringToEncode.toByteArray())
   }
 
-  fun decodeKey(raw: String): DecodedApiKey? {
-    return try {
-      val decoded = BaseEncoding.base32().omitPadding().lowerCase().decode(raw).decodeToString()
+  fun decodeKey(raw: String): DecodedApiKey? =
+    try {
+      val decoded =
+        BaseEncoding
+          .base32()
+          .omitPadding()
+          .lowerCase()
+          .decode(raw)
+          .decodeToString()
       val (projectId, key) = decoded.split("_".toRegex(), 2)
       DecodedApiKey(projectId.toLong(), key)
     } catch (e: IllegalArgumentException) {
@@ -191,7 +181,6 @@ class ApiKeyService(
       Sentry.captureException(e)
       null
     }
-  }
 
   @Async
   @Transactional
@@ -244,7 +233,8 @@ class ApiKeyService(
 
   private fun logTransactionIsolation() {
     val isolationLevel =
-      entityManager.createNativeQuery("show transaction_isolation")
+      entityManager
+        .createNativeQuery("show transaction_isolation")
         .singleResult as String
     val message = "Transaction isolation level: $isolationLevel"
     Sentry.addBreadcrumb(message)

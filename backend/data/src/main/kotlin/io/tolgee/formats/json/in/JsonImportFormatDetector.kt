@@ -55,7 +55,5 @@ class JsonImportFormatDetector {
       )
   }
 
-  fun detectFormat(data: Any?): ImportFormat {
-    return detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.JSON_ICU
-  }
+  fun detectFormat(data: Any?): ImportFormat = detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.JSON_ICU
 }

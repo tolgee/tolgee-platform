@@ -48,7 +48,10 @@ import java.util.*
 )
 @ActivityLoggedEntity
 @ActivityReturnsExistence
-class Language : StandardAuditModel(), ILanguage, SoftDeletable {
+class Language :
+  StandardAuditModel(),
+  ILanguage,
+  SoftDeletable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language", orphanRemoval = true)
   var translations: MutableList<Translation> = mutableListOf()
 
@@ -102,9 +105,7 @@ class Language : StandardAuditModel(), ILanguage, SoftDeletable {
     flagEmoji = dto.flagEmoji
   }
 
-  override fun toString(): String {
-    return "Language(tag=$tag, name=$name, originalName=$originalName)"
-  }
+  override fun toString(): String = "Language(tag=$tag, name=$name, originalName=$originalName)"
 
   companion object {
     @JvmStatic

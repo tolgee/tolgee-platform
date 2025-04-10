@@ -18,8 +18,8 @@ class SimpleProjectModelAssembler(
     ProjectsController::class.java,
     SimpleProjectModel::class.java,
   ) {
-  override fun toModel(project: ISimpleProject): SimpleProjectModel {
-    return SimpleProjectModel(
+  override fun toModel(project: ISimpleProject): SimpleProjectModel =
+    SimpleProjectModel(
       id = project.id,
       name = project.name,
       description = project.description,
@@ -34,5 +34,4 @@ class SimpleProjectModelAssembler(
         },
       icuPlaceholders = project.icuPlaceholders,
     )
-  }
 }

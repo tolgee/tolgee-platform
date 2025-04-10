@@ -200,18 +200,19 @@ class BatchJobActionService(
 
   private fun getExecutionIfCanAcquireLockInDb(id: Long): BatchJobChunkExecution? {
     entityManager.createNativeQuery("""SET enable_seqscan=off""")
-    return entityManager.createQuery(
-      """
-      from BatchJobChunkExecution bjce
-      where bjce.id = :id
-      """.trimIndent(),
-      BatchJobChunkExecution::class.java,
-    )
-      .setParameter("id", id)
+    return entityManager
+      .createQuery(
+        """
+        from BatchJobChunkExecution bjce
+        where bjce.id = :id
+        """.trimIndent(),
+        BatchJobChunkExecution::class.java,
+      ).setParameter("id", id)
       .setLockMode(LockModeType.PESSIMISTIC_WRITE)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED,
-      ).resultList.singleOrNull()
+      ).resultList
+      .singleOrNull()
   }
 }

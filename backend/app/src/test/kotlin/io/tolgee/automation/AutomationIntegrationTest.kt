@@ -73,8 +73,10 @@ class AutomationIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     waitForNotThrowing(pollTime = 200) {
       contentDeliveryConfigService
         .get(testData.defaultServerContentDeliveryConfig.self.id)
-        .lastPublished!!.time
-        .assert.isEqualTo(currentDateProvider.date.time)
+        .lastPublished!!
+        .time
+        .assert
+        .isEqualTo(currentDateProvider.date.time)
     }
   }
 

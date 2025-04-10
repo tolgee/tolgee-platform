@@ -40,7 +40,5 @@ class XlsxImportFormatDetector {
       )
   }
 
-  fun detectFormat(data: Any?): ImportFormat {
-    return detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.XLSX_ICU
-  }
+  fun detectFormat(data: Any?): ImportFormat = detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.XLSX_ICU
 }

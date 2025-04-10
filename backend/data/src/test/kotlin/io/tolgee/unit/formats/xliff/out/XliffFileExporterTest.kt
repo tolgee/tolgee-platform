@@ -217,9 +217,7 @@ class XliffFileExporterTest {
   private val Node.text: String
     get() = this.textContent
 
-  private fun Element.attribute(name: String): Attr {
-    return this.getAttributeNode(name)
-  }
+  private fun Element.attribute(name: String): Attr = this.getAttributeNode(name)
 
   /**
    * Validate the xml file output against the xliff 1.2 Schema.
@@ -240,7 +238,8 @@ class XliffFileExporterTest {
       ).produceFiles()
 
     val validator: Validator
-    javaClass.classLoader.getResourceAsStream("import/xliff/xliff-core-1.2-transitional.xsd")
+    javaClass.classLoader
+      .getResourceAsStream("import/xliff/xliff-core-1.2-transitional.xsd")
       .use { xsdInputStream ->
         validator =
           try {
@@ -473,15 +472,14 @@ class XliffFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = getExportParams(),
-  ): XliffFileExporter {
-    return XliffFileExporter(
+  ): XliffFileExporter =
+    XliffFileExporter(
       translations = translations,
       exportParams = exportParams,
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
     )
-  }
 
   private fun getExportParams() = ExportParams()
 }

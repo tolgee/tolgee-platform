@@ -84,11 +84,13 @@ class BatchJobTestBase {
     waitForNotThrowing(pollTime = 1000, timeout = 60000) {
       @Suppress("UNCHECKED_CAST")
       val czechTranslations =
-        entityManager.createQuery(
-          """
-          from Translation t where t.key.id in :keyIds and t.language.tag = 'cs'
-          """.trimIndent(),
-        ).setParameter("keyIds", keyIds).resultList as List<Translation>
+        entityManager
+          .createQuery(
+            """
+            from Translation t where t.key.id in :keyIds and t.language.tag = 'cs'
+            """.trimIndent(),
+          ).setParameter("keyIds", keyIds)
+          .resultList as List<Translation>
       czechTranslations.assert.hasSize(keyCount)
       czechTranslations.forEach {
         it.text.assert.contains(expectedCsValue)

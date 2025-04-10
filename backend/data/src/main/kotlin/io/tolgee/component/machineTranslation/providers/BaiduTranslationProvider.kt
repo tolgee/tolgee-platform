@@ -30,9 +30,7 @@ class BaiduTranslationProvider(
     )
   }
 
-  fun getLanguageTag(tag: String): String {
-    return languageTagMap[tag.lowercase()] ?: tag.lowercase()
-  }
+  fun getLanguageTag(tag: String): String = languageTagMap[tag.lowercase()] ?: tag.lowercase()
 
   override val supportedLanguages =
     arrayOf(

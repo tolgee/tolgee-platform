@@ -27,14 +27,13 @@ data class OrganizationDto(
   val avatarHash: String?,
 ) : Serializable {
   companion object {
-    fun fromEntity(organization: Organization): OrganizationDto {
-      return OrganizationDto(
+    fun fromEntity(organization: Organization): OrganizationDto =
+      OrganizationDto(
         id = organization.id,
         name = organization.name,
         description = organization.description,
         slug = organization.slug,
         avatarHash = organization.avatarHash,
       )
-    }
   }
 }

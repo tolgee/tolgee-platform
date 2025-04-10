@@ -66,7 +66,8 @@ class BatchJobTestUtil(
         executeInNewTransaction(transactionManager) {
           val finishedJob = batchJobService.getJobDto(batchJob.id)
           logger.debug("Job status: ${finishedJob.status.name}")
-          finishedJob.status.completed.assert.isTrue()
+          finishedJob.status.completed.assert
+            .isTrue()
         }
       }
     } catch (e: Exception) {
@@ -118,7 +119,10 @@ class BatchJobTestUtil(
   ) {
     waitForNotThrowing {
       executeInNewTransaction(transactionManager) {
-        batchJobService.getView(job.id).errorMessage.assert.isEqualTo(message)
+        batchJobService
+          .getView(job.id)
+          .errorMessage.assert
+          .isEqualTo(message)
       }
     }
   }
@@ -164,13 +168,17 @@ class BatchJobTestUtil(
       }
 
     doThrow(*exceptions.toTypedArray())
-      .whenever(deleteKeysChunkProcessor).process(any(), any(), any(), any())
+      .whenever(deleteKeysChunkProcessor)
+      .process(any(), any(), any(), any())
   }
 
   fun fastForwardToFailedJob(job: BatchJob) {
     waitForNotThrowing {
       currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(1)
-      batchJobService.getJobEntity(job.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
+      batchJobService
+        .getJobEntity(job.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.FAILED)
     }
   }
 
@@ -191,8 +199,11 @@ class BatchJobTestUtil(
     count: Int,
   ) {
     waitForNotThrowing(pollTime = 100, timeout = 2000) {
-      entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
-        .setParameter("id", job.id).resultList.assert.hasSize(count)
+      entityManager
+        .createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
+        .setParameter("id", job.id)
+        .resultList.assert
+        .hasSize(count)
     }
   }
 
@@ -226,8 +237,7 @@ class BatchJobTestUtil(
           Thread.sleep(100)
         }
       }
-    }
-      .whenever(preTranslationByTmChunkProcessor)
+    }.whenever(preTranslationByTmChunkProcessor)
       .process(any(), any(), any(), any())
 
     return {
@@ -286,7 +296,8 @@ class BatchJobTestUtil(
         )
       }
 
-    doThrow(*exceptions.toTypedArray()).doAnswer { }
+    doThrow(*exceptions.toTypedArray())
+      .doAnswer { }
       .whenever(preTranslationByTmChunkProcessor)
       .process(any(), any(), any(), any())
   }
@@ -309,14 +320,16 @@ class BatchJobTestUtil(
   }
 
   fun getExecutions(jobIds: List<Long>): Map<Long, List<BatchJobChunkExecution>> =
-    entityManager.createQuery(
-      """from BatchJobChunkExecution b left join fetch b.batchJob where b.batchJob.id in :ids""",
-      BatchJobChunkExecution::class.java,
-    )
-      .setParameter("ids", jobIds).resultList.groupBy { it.batchJob.id }
+    entityManager
+      .createQuery(
+        """from BatchJobChunkExecution b left join fetch b.batchJob where b.batchJob.id in :ids""",
+        BatchJobChunkExecution::class.java,
+      ).setParameter("ids", jobIds)
+      .resultList
+      .groupBy { it.batchJob.id }
 
-  fun runChunkedJob(keyCount: Int): BatchJob {
-    return executeInNewTransaction(transactionManager) {
+  fun runChunkedJob(keyCount: Int): BatchJob =
+    executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
         request =
           PreTranslationByTmRequest().apply {
@@ -327,10 +340,9 @@ class BatchJobTestUtil(
         type = BatchJobType.PRE_TRANSLATE_BT_TM,
       )
     }
-  }
 
-  fun runSingleChunkJob(keyCount: Int): BatchJob {
-    return executeInNewTransaction(transactionManager) {
+  fun runSingleChunkJob(keyCount: Int): BatchJob =
+    executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
         request =
           DeleteKeysRequest().apply {
@@ -341,18 +353,13 @@ class BatchJobTestUtil(
         type = BatchJobType.DELETE_KEYS,
       )
     }
-  }
 
-  fun runDebouncedJob(): BatchJob {
-    return runAutomationJob(Duration.ofSeconds(10))
-  }
+  fun runDebouncedJob(): BatchJob = runAutomationJob(Duration.ofSeconds(10))
 
-  fun runNonExclusiveJob(): BatchJob {
-    return runAutomationJob(null)
-  }
+  fun runNonExclusiveJob(): BatchJob = runAutomationJob(null)
 
-  private fun runAutomationJob(duration: Duration?): BatchJob {
-    return executeInNewTransaction(transactionManager) {
+  private fun runAutomationJob(duration: Duration?): BatchJob =
+    executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
         request = AutomationBjRequest(1, 1, 1),
         project = testData.projectBuilder.self,
@@ -361,7 +368,6 @@ class BatchJobTestUtil(
         debounceDuration = duration,
       )
     }
-  }
 
   fun waitForQueueSize(size: Int) {
     waitForNotThrowing(pollTime = 50, timeout = 2000) {
@@ -394,7 +400,10 @@ class BatchJobTestUtil(
   }
 
   fun verifyExecutionPending(execution: BatchJobChunkExecution) {
-    batchJobService.getExecution(execution.id).status.assert.isEqualTo(BatchJobChunkExecutionStatus.PENDING)
+    batchJobService
+      .getExecution(execution.id)
+      .status.assert
+      .isEqualTo(BatchJobChunkExecutionStatus.PENDING)
   }
 
   fun verifyJobUnlocked(job: BatchJob) {
@@ -416,8 +425,8 @@ class BatchJobTestUtil(
   fun runChunkedJob(
     keyCount: Int,
     author: UserAccount = testData.user,
-  ): BatchJob {
-    return executeInNewTransaction(transactionManager) {
+  ): BatchJob =
+    executeInNewTransaction(transactionManager) {
       batchJobService.startJob(
         request =
           PreTranslationByTmRequest().apply {
@@ -429,7 +438,6 @@ class BatchJobTestUtil(
         isHidden = false,
       )
     }
-  }
 
   fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult
 

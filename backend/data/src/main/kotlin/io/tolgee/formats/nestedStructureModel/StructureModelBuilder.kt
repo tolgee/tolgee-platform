@@ -18,8 +18,8 @@ class StructureModelBuilder(
       return model?.toMapOrList()
     }
 
-  private fun StructuredModelItem.toMapOrList(): Any? {
-    return when (this) {
+  private fun StructuredModelItem.toMapOrList(): Any? =
+    when (this) {
       is ObjectStructuredModelItem ->
         mutableMapOf<String, Any?>().also { theMap ->
           this.forEach { (key, value) ->
@@ -37,7 +37,6 @@ class StructureModelBuilder(
       is ValueStructuredModelItem -> this.value
       else -> throw IllegalStateException("Uknown model type")
     }
-  }
 
   fun addValue(
     languageTag: String,
@@ -231,13 +230,12 @@ class StructureModelBuilder(
   private fun PathItem.createNode(
     parentNode: ContainerNode<*>?,
     key: Any?,
-  ): StructuredModelItem {
-    return when (this) {
+  ): StructuredModelItem =
+    when (this) {
       is ArrayPathItem -> ArrayStructuredModelItem(parentNode, key)
       is ObjectPathItem -> ObjectStructuredModelItem(parentNode, key)
       else -> throw IllegalStateException("Root item must be array or object")
     }
-  }
 
   private fun handleExistingNodeCollisionByJoiningLast2PathSegments(
     parentNode: StructuredModelItem,

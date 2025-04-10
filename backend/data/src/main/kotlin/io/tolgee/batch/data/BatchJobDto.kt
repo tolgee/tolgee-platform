@@ -28,8 +28,8 @@ class BatchJobDto(
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
 
   companion object {
-    fun fromEntity(entity: BatchJob): BatchJobDto {
-      return BatchJobDto(
+    fun fromEntity(entity: BatchJob): BatchJobDto =
+      BatchJobDto(
         id = entity.id,
         projectId = entity.project?.id,
         authorId = entity.author?.id,
@@ -49,6 +49,5 @@ class BatchJobDto(
         debounceMaxWaitTimeInMs = entity.debounceMaxWaitTimeInMs,
         lastDebouncingEvent = entity.lastDebouncingEvent?.time,
       )
-    }
   }
 }

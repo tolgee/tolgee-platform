@@ -43,11 +43,10 @@ class AiPromptCustomizationController(
   @Operation(summary = "Returns project level prompt customization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @UseDefaultPermissions
-  fun getPromptProjectCustomization(): ProjectAiPromptCustomizationModel {
-    return ProjectAiPromptCustomizationModel(
+  fun getPromptProjectCustomization(): ProjectAiPromptCustomizationModel =
+    ProjectAiPromptCustomizationModel(
       projectHolder.project.aiTranslatorPromptDescription,
     )
-  }
 
   @PutMapping("projects/{projectId:[0-9]+}/ai-prompt-customization")
   @Operation(summary = "Sets project level prompt customization")
@@ -93,11 +92,13 @@ class AiPromptCustomizationController(
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT])
   fun getLanguagePromptCustomizations(): CollectionModel<LanguageAiPromptCustomizationModel> {
     val languages =
-      languageService.getProjectLanguages(projectHolder.project.id).filter {
-        !it.base
-      }.sortedBy {
-        it.tag
-      }
+      languageService
+        .getProjectLanguages(projectHolder.project.id)
+        .filter {
+          !it.base
+        }.sortedBy {
+          it.tag
+        }
     return languageAiPromptCustomizationModelAssembler.toCollectionModel(languages)
   }
 }

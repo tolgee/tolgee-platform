@@ -45,21 +45,20 @@ class CloudflareContentDeliveryCachePurging(
   private fun getChunkedBody(
     paths: Set<String>,
     contentDeliveryConfig: ContentDeliveryConfig,
-  ): List<Map<String, List<Map<String, Any>>>> {
-    return paths.flatMap {
-      getFileItems(contentDeliveryConfig, it)
-    }
-      .chunked(config.maxFilesPerRequest)
+  ): List<Map<String, List<Map<String, Any>>>> =
+    paths
+      .flatMap {
+        getFileItems(contentDeliveryConfig, it)
+      }.chunked(config.maxFilesPerRequest)
       .map { fileItems ->
         mapOf("files" to fileItems)
       }
-  }
 
   private fun getFileItems(
     contentDeliveryConfig: ContentDeliveryConfig,
     path: String,
-  ): List<Map<String, Any>> {
-    return origins.map { origin ->
+  ): List<Map<String, Any>> =
+    origins.map { origin ->
       val map =
         mutableMapOf<String, Any>(
           "url" to "$prefix/${contentDeliveryConfig.slug}/$path",
@@ -74,7 +73,6 @@ class CloudflareContentDeliveryCachePurging(
 
       map
     }
-  }
 
   val origins by lazy {
     config.origins?.split(",") ?: listOf(null)

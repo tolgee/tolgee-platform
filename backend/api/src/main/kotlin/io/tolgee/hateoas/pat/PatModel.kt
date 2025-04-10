@@ -11,4 +11,5 @@ open class PatModel(
   override val createdAt: Long,
   override val updatedAt: Long,
   override val lastUsedAt: Long?,
-) : RepresentationModel<PatModel>(), IPatModel
+) : RepresentationModel<PatModel>(),
+  IPatModel

@@ -83,16 +83,12 @@ class ContentStorageService(
   fun getAllInProject(
     projectId: Long,
     pageable: Pageable,
-  ): Page<ContentStorage> {
-    return contentStorageRepository.findAllByProjectId(projectId, pageable)
-  }
+  ): Page<ContentStorage> = contentStorageRepository.findAllByProjectId(projectId, pageable)
 
   fun get(
     projectId: Long,
     contentDeliveryConfigId: Long,
-  ): ContentStorage {
-    return contentStorageRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
-  }
+  ): ContentStorage = contentStorageRepository.getByProjectIdAndId(projectId, contentDeliveryConfigId)
 
   fun testStorage(
     dto: ContentStorageRequest,
@@ -152,16 +148,13 @@ class ContentStorageService(
     return getProcessorForDto(dto).configDtoToEntity(dto, entity, entityManager)!!
   }
 
-  private fun getProcessorForDto(dto: ContentStorageRequest): ContentStorageConfigProcessor<*> {
-    return getProcessor(getStorageType(dto))
-  }
+  private fun getProcessorForDto(dto: ContentStorageRequest): ContentStorageConfigProcessor<*> = getProcessor(getStorageType(dto))
 
   private val processorCache = mutableMapOf<ContentStorageType, ContentStorageConfigProcessor<*>>()
 
-  fun getProcessor(type: ContentStorageType): ContentStorageConfigProcessor<*> {
-    return processorCache.computeIfAbsent(type) {
+  fun getProcessor(type: ContentStorageType): ContentStorageConfigProcessor<*> =
+    processorCache.computeIfAbsent(type) {
       contentStorageConfigProcessors.find { it.type == type }
         ?: throw IllegalStateException("Cannot find processor for type $type")
     }
-  }
 }

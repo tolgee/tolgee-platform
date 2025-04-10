@@ -43,7 +43,10 @@ class DeeplApiService(
         requestBody,
       )
 
-    return response.body?.translations?.first()?.text
+    return response.body
+      ?.translations
+      ?.first()
+      ?.text
       ?: throw RuntimeException(response.toString())
   }
 

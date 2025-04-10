@@ -33,19 +33,11 @@ class DeleteKeysChunkProcessor(
     }
   }
 
-  override fun getParamsType(): Class<Any?>? {
-    return null
-  }
+  override fun getParamsType(): Class<Any?>? = null
 
-  override fun getParams(data: DeleteKeysRequest): Any? {
-    return null
-  }
+  override fun getParams(data: DeleteKeysRequest): Any? = null
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getTarget(data: DeleteKeysRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: DeleteKeysRequest): List<Long> = data.keyIds
 }

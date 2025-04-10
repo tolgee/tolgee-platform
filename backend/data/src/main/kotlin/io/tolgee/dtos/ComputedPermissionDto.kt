@@ -80,8 +80,8 @@ class ComputedPermissionDto(
     private fun getEmptyPermission(
       scopes: Array<Scope>,
       type: ProjectPermissionType,
-    ): IPermission {
-      return object : IPermission {
+    ): IPermission =
+      object : IPermission {
         override val scopes: Array<Scope>
           get() = scopes
         override val projectId: Long?
@@ -99,7 +99,6 @@ class ComputedPermissionDto(
         override val granular: Boolean?
           get() = null
       }
-    }
 
     val NONE
       get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))

@@ -132,25 +132,33 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     performAuthPost("/v2/projects", request)
       .andPrettyPrint
       .andIsBadRequest
-      .andAssertError.isStandardValidation.onField("languages[0].tag").isEqualTo("can not contain coma")
+      .andAssertError.isStandardValidation
+      .onField("languages[0].tag")
+      .isEqualTo("can not contain coma")
   }
 
   private fun testCreateCorrectRequest() {
     val organization = dbPopulator.createOrganizationIfNotExist("nice", userAccount = userAccount!!)
     val request = CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id)
-    mvc.perform(
-      AuthorizedRequestFactory.loggedPost("/v2/projects")
-        .contentType(MediaType.APPLICATION_JSON).content(
-          jacksonObjectMapper().writeValueAsString(request),
-        ),
-    )
-      .andExpect(MockMvcResultMatchers.status().isOk)
+    mvc
+      .perform(
+        AuthorizedRequestFactory
+          .loggedPost("/v2/projects")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(
+            jacksonObjectMapper().writeValueAsString(request),
+          ),
+      ).andExpect(MockMvcResultMatchers.status().isOk)
       .andReturn()
     val projectDto = projectService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
     assertThat(projectDto).isNotNull
     val project = projectService.get(projectDto!!.id!!)
     assertThat(project.languages).isNotEmpty
-    val language = project.languages.stream().findFirst().orElse(null)
+    val language =
+      project.languages
+        .stream()
+        .findFirst()
+        .orElse(null)
     assertThat(language).isNotNull
     assertThat(language.tag).isEqualTo("en")
     assertThat(language.name).isEqualTo("English")
@@ -186,7 +194,8 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   @Test
   fun `sets proper baseLanguage on create when not provided`() {
     performAuthPost("/v2/projects", createForLanguagesDto.copy(baseLanguageTag = null))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").asNumber().satisfies {
           assertThat(projectService.get(it.toLong()).baseLanguage!!.tag)!!
             .isEqualTo("en")

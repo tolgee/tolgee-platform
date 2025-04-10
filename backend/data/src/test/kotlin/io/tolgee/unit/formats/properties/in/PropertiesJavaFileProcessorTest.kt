@@ -27,7 +27,8 @@ class PropertiesJavaFileProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key1")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key1")
       .assertSingle {
         hasText("Param %d")
       }
@@ -38,7 +39,8 @@ class PropertiesJavaFileProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key1")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key1")
       .assertSingle {
         hasText("Param %d")
       }
@@ -49,7 +51,8 @@ class PropertiesJavaFileProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key1")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key1")
       .assertSingle {
         hasText("Param {0, number}")
       }

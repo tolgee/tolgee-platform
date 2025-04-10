@@ -15,30 +15,20 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
 
   fun getTarget(data: RequestType): List<TargetItemType>
 
-  fun getExecuteAfter(data: RequestType): Date? {
-    return null
-  }
+  fun getExecuteAfter(data: RequestType): Date? = null
 
   fun getParams(data: RequestType): ParamsType
 
-  fun getParams(job: BatchJobDto): ParamsType {
-    return jacksonObjectMapper().convertValue(job.params, getParamsType())
-  }
+  fun getParams(job: BatchJobDto): ParamsType = jacksonObjectMapper().convertValue(job.params, getParamsType())
 
-  fun getMaxPerJobConcurrency(): Int {
-    return -1
-  }
+  fun getMaxPerJobConcurrency(): Int = -1
 
-  fun getJobCharacter(): JobCharacter {
-    return JobCharacter.FAST
-  }
+  fun getJobCharacter(): JobCharacter = JobCharacter.FAST
 
   fun getChunkSize(
     request: RequestType,
     projectId: Long?,
-  ): Int {
-    return 0
-  }
+  ): Int = 0
 
   fun getParamsType(): Class<ParamsType>?
 

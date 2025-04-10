@@ -138,27 +138,33 @@ class OpenApiGroupBuilder(
 
     builder.addOpenApiCustomizer { openApi ->
       val declaringClasses =
-        operationHandlers.mapNotNull {
-          it.value.method.declaringClass
-        }.toSet()
+        operationHandlers
+          .mapNotNull {
+            it.value.method.declaringClass
+          }.toSet()
 
       val tagOrders =
-        declaringClasses.flatMap { clazz ->
-          val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@flatMap listOf()
-          classTags[clazz]?.map { it to orderAnnotation.order } ?: listOf()
-        }.groupBy { it.first }.map {
-          val orders = it.value.map { it.second }.toSet()
-          if (orders.size > 1) {
-            throw RuntimeException("Multiple orders for tag ${it.key}: $orders")
-          }
-          it.key to orders.first()
-        }.toMap()
+        declaringClasses
+          .flatMap { clazz ->
+            val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@flatMap listOf()
+            classTags[clazz]?.map { it to orderAnnotation.order } ?: listOf()
+          }.groupBy { it.first }
+          .map {
+            val orders = it.value.map { it.second }.toSet()
+            if (orders.size > 1) {
+              throw RuntimeException("Multiple orders for tag ${it.key}: $orders")
+            }
+            it.key to orders.first()
+          }.toMap()
 
       val tagsMap = openApi?.tags?.associateBy { it.name }?.toMutableMap() ?: mutableMapOf()
       tagOrders.forEach { (tagName, order) ->
         val tag =
           tagsMap.computeIfAbsent(tagName) {
-            val tag = io.swagger.v3.oas.models.tags.Tag().name(tagName)
+            val tag =
+              io.swagger.v3.oas.models.tags
+                .Tag()
+                .name(tagName)
             openApi.tags.add(tag)
             tag
           }
@@ -256,20 +262,14 @@ class OpenApiGroupBuilder(
     }
   }
 
-  fun isApiAccessAllowed(handlerMethod: HandlerMethod): Boolean {
-    return handlerMethod.getMethodAnnotation(AllowApiAccess::class.java) != null
-  }
+  fun isApiAccessAllowed(handlerMethod: HandlerMethod): Boolean = handlerMethod.getMethodAnnotation(AllowApiAccess::class.java) != null
 
-  fun containsProjectIdParam(path: String): Boolean {
-    return path.contains("{${PROJECT_ID_PARAMETER}}")
-  }
+  fun containsProjectIdParam(path: String): Boolean = path.contains("{${PROJECT_ID_PARAMETER}}")
 
-  fun isProjectPath(path: String): Boolean {
-    return path.matches(PROJECTS_PATH_REGEX)
-  }
+  fun isProjectPath(path: String): Boolean = path.matches(PROJECTS_PATH_REGEX)
 
-  private fun PathItem.getHttpMethod(operation: Operation): PathItem.HttpMethod? {
-    return when (operation) {
+  private fun PathItem.getHttpMethod(operation: Operation): PathItem.HttpMethod? =
+    when (operation) {
       this.get -> PathItem.HttpMethod.GET
       this.delete -> PathItem.HttpMethod.DELETE
       this.head -> PathItem.HttpMethod.HEAD
@@ -280,7 +280,6 @@ class OpenApiGroupBuilder(
       this.trace -> PathItem.HttpMethod.TRACE
       else -> null
     }
-  }
 
   companion object {
     const val PROJECT_ID_PARAMETER = "projectId"

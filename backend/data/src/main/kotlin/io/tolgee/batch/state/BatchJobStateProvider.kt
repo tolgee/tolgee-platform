@@ -35,40 +35,34 @@ class BatchJobStateProvider(
   fun <T> updateState(
     jobId: Long,
     block: (MutableMap<Long, ExecutionState>) -> T,
-  ): T {
-    return lockingProvider.withLocking("batch_job_state_lock_$jobId") {
+  ): T =
+    lockingProvider.withLocking("batch_job_state_lock_$jobId") {
       val map = get(jobId)
       val result = block(map)
       getStatesMap()[jobId] = map
       result
     }
-  }
 
-  fun getStateForExecution(execution: BatchJobChunkExecution): ExecutionState {
-    return ExecutionState(
+  fun getStateForExecution(execution: BatchJobChunkExecution): ExecutionState =
+    ExecutionState(
       successTargets = execution.successTargets,
       status = execution.status,
       chunkNumber = execution.chunkNumber,
       retry = execution.retry,
       transactionCommitted = false,
     )
-  }
 
   /**
    * Doesn't init map if not exists
    */
-  fun getCached(jobId: Long): MutableMap<Long, ExecutionState>? {
-    return getStatesMap()[jobId]
-  }
+  fun getCached(jobId: Long): MutableMap<Long, ExecutionState>? = getStatesMap()[jobId]
 
   fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>? {
     logger.debug("Removing job state for job $jobId")
     return getStatesMap().remove(jobId)
   }
 
-  fun hasCachedJobState(jobId: Long): Boolean {
-    return getStatesMap().containsKey(jobId)
-  }
+  fun hasCachedJobState(jobId: Long): Boolean = getStatesMap().containsKey(jobId)
 
   private fun getStatesMap(): ConcurrentMap<Long, MutableMap<Long, ExecutionState>> {
     if (usingRedisProvider.areWeUsingRedis) {
@@ -77,15 +71,12 @@ class BatchJobStateProvider(
     return localJobStatesMap
   }
 
-  fun get(jobId: Long): MutableMap<Long, ExecutionState> {
-    return getStatesMap().getOrPut(jobId) {
+  fun get(jobId: Long): MutableMap<Long, ExecutionState> =
+    getStatesMap().getOrPut(jobId) {
       getInitialState(jobId)
     }
-  }
 
-  private fun getRedissonStatesMap(): RMap<Long, MutableMap<Long, ExecutionState>> {
-    return redissonClient.getMap("batch_job_state")
-  }
+  private fun getRedissonStatesMap(): RMap<Long, MutableMap<Long, ExecutionState>> = redissonClient.getMap("batch_job_state")
 
   fun getInitialState(jobId: Long): MutableMap<Long, ExecutionState> {
     logger.debug("Initializing batch job state for job $jobId")
@@ -95,26 +86,28 @@ class BatchJobStateProvider(
         platformTransactionManager,
         isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED,
       ) {
-        entityManager.createQuery(
-          """
+        entityManager
+          .createQuery(
+            """
       from BatchJobChunkExecution bjce
       where bjce.batchJob.id = :jobId
       """,
-          BatchJobChunkExecution::class.java,
-        )
-          .setParameter("jobId", jobId).resultList
+            BatchJobChunkExecution::class.java,
+          ).setParameter("jobId", jobId)
+          .resultList
       }
 
-    return executions.associate {
-      it.id to
-        ExecutionState(
-          it.successTargets,
-          it.status,
-          it.chunkNumber,
-          it.retry,
-          true,
-        )
-    }.toMutableMap()
+    return executions
+      .associate {
+        it.id to
+          ExecutionState(
+            it.successTargets,
+            it.status,
+            it.chunkNumber,
+            it.retry,
+            true,
+          )
+      }.toMutableMap()
   }
 
   /**
@@ -123,9 +116,10 @@ class BatchJobStateProvider(
   @Scheduled(fixedRate = 10000)
   fun clearUnusedStates() {
     val toRemove =
-      getStatesMap().filter {
-        it.value.all { (_, state) -> state.status.completed && state.status.completed }
-      }.keys
+      getStatesMap()
+        .filter {
+          it.value.all { (_, state) -> state.status.completed && state.status.completed }
+        }.keys
     getStatesMap().keys.removeAll(toRemove)
   }
 

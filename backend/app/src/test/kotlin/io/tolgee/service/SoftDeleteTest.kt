@@ -17,7 +17,8 @@ class SoftDeleteTest : AbstractSpringTest() {
       projectService.deleteProject(testData.projectBuilder.self.id)
     }
     val result =
-      entityManager.createNativeQuery("select deleted_at from project where id = :id")
+      entityManager
+        .createNativeQuery("select deleted_at from project where id = :id")
         .setParameter("id", testData.projectBuilder.self.id)
         .singleResult
 
@@ -37,12 +38,14 @@ class SoftDeleteTest : AbstractSpringTest() {
 
     executeInNewTransaction {
       projectService.findAllPermitted(testData.user).assert.isEmpty()
-      projectService.findPermittedInOrganizationPaged(
-        pageable = Pageable.ofSize(100),
-        search = null,
-        organizationId = testData.projectBuilder.self.organizationOwner.id,
-        userAccountId = testData.user.id,
-      ).assert.isEmpty()
+      projectService
+        .findPermittedInOrganizationPaged(
+          pageable = Pageable.ofSize(100),
+          search = null,
+          organizationId = testData.projectBuilder.self.organizationOwner.id,
+          userAccountId = testData.user.id,
+        ).assert
+        .isEmpty()
     }
   }
 }

@@ -14,12 +14,11 @@ class TaskPerUserReportModelAssembler(
     TaskController::class.java,
     TaskPerUserReportModel::class.java,
   ) {
-  override fun toModel(entity: TaskPerUserReportView): TaskPerUserReportModel {
-    return TaskPerUserReportModel(
+  override fun toModel(entity: TaskPerUserReportView): TaskPerUserReportModel =
+    TaskPerUserReportModel(
       user = simpleUserAccountModelAssembler.toModel(entity.user),
       doneItems = entity.doneItems,
       baseCharacterCount = entity.baseCharacterCount,
       baseWordCount = entity.baseWordCount,
     )
-  }
 }

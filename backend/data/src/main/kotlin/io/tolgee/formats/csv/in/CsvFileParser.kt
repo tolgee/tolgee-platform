@@ -23,7 +23,5 @@ class CsvFileParser(
     TableParser(rawData, languageFallback)
   }
 
-  fun parse(): List<TableEntry> {
-    return tableParser.parse()
-  }
+  fun parse(): List<TableEntry> = tableParser.parse()
 }

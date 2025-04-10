@@ -50,9 +50,7 @@ class ComposeStringUnescaper(
         }
       }
 
-  private fun Char.unescape(): String {
-    return toUnescape.getOrDefault(this, escapeMark + this.toString())
-  }
+  private fun Char.unescape(): String = toUnescape.getOrDefault(this, escapeMark + this.toString())
 
   enum class State {
     NORMAL,

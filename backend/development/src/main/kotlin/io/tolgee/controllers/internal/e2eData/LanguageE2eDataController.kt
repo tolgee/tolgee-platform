@@ -60,7 +60,11 @@ class LanguageE2eDataController(
           }
         }
       }
-    return mapOf<String, Any>("id" to data.data.projects[0].self.id)
+    return mapOf<String, Any>(
+      "id" to
+        data.data.projects[0]
+          .self.id,
+    )
   }
 
   @GetMapping(value = ["/clean"])

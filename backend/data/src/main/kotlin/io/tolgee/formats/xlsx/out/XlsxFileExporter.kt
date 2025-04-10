@@ -16,7 +16,11 @@ class XlsxFileExporter(
   override fun List<TableEntry>.toFileContents(): InputStream {
     val languageTags =
       exportParams.languages?.sorted()?.toTypedArray()
-        ?: this.map { it.language }.distinct().sorted().toTypedArray()
+        ?: this
+          .map { it.language }
+          .distinct()
+          .sorted()
+          .toTypedArray()
     return XlsxFileWriter(
       createdDate = currentDate,
       languageTags = languageTags,

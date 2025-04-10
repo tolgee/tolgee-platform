@@ -97,11 +97,13 @@ class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/pro
     performTmSuggestionExpectTwoResults(
       baseText =
         testData.projectBuilder
-          .getTranslation(pluralKeys.truePlural, testData.englishLanguage.tag)!!.text,
+          .getTranslation(pluralKeys.truePlural, testData.englishLanguage.tag)!!
+          .text,
       baseIsPlural = true,
       expectedResultValue =
         testData.projectBuilder
-          .getTranslation(pluralKeys.truePlural, testData.germanLanguage.tag)!!.text!!,
+          .getTranslation(pluralKeys.truePlural, testData.germanLanguage.tag)!!
+          .text!!,
     )
   }
 
@@ -113,11 +115,13 @@ class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/pro
     performTmSuggestionExpectTwoResults(
       baseText =
         testData.projectBuilder
-          .getTranslation(pluralKeys.falsePlural, testData.englishLanguage.tag)!!.text,
+          .getTranslation(pluralKeys.falsePlural, testData.englishLanguage.tag)!!
+          .text,
       baseIsPlural = false,
       expectedResultValue =
         testData.projectBuilder
-          .getTranslation(pluralKeys.falsePlural, testData.germanLanguage.tag)!!.text!!,
+          .getTranslation(pluralKeys.falsePlural, testData.germanLanguage.tag)!!
+          .text!!,
     )
   }
 

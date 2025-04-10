@@ -12,4 +12,5 @@ open class SumUsageItemModel(
   val unusedQuantity: Long = 0,
   val usedQuantity: Long = 0,
   val usedQuantityOverPlan: Long = 0,
-) : RepresentationModel<SumUsageItemModel>(), Serializable
+) : RepresentationModel<SumUsageItemModel>(),
+  Serializable

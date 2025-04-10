@@ -58,10 +58,11 @@ class FlutterArbFileExporter(
 
   private fun getPlaceholders(translation: ExportTranslationView): Map<String, Any?>? {
     val possibleMap = translation.key.custom?.get(FLUTTER_ARB_FILE_PLACEHOLDERS_CUSTOM_KEY) as? Map<*, *>
-    return possibleMap?.mapNotNull { (key, value) ->
-      if (key !is String) return@mapNotNull null
-      key to value
-    }?.toMap()
+    return possibleMap
+      ?.mapNotNull { (key, value) ->
+        if (key !is String) return@mapNotNull null
+        key to value
+      }?.toMap()
   }
 
   private fun getModel(translation: ExportTranslationView): FlutterArbModel {
@@ -73,9 +74,8 @@ class FlutterArbFileExporter(
     }
   }
 
-  private fun getFilePath(translation: ExportTranslationView): String {
-    return filePathProvider.getFilePath(namespace = translation.key.namespace, languageTag = translation.languageTag)
-  }
+  private fun getFilePath(translation: ExportTranslationView): String =
+    filePathProvider.getFilePath(namespace = translation.key.namespace, languageTag = translation.languageTag)
 
   private val filePathProvider by lazy {
     ExportFilePathProvider(
@@ -103,9 +103,9 @@ class FlutterArbFileExporter(
     return converted.singleResult!!
   }
 
-  override fun produceFiles(): Map<String, InputStream> {
-    return getModels().map { (path, model) ->
-      path to FlutterArbFileWriter(model, objectMapper).produceFile()
-    }.toMap()
-  }
+  override fun produceFiles(): Map<String, InputStream> =
+    getModels()
+      .map { (path, model) ->
+        path to FlutterArbFileWriter(model, objectMapper).produceFile()
+      }.toMap()
 }

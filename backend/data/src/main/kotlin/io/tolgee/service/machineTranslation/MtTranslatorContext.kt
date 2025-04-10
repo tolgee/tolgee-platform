@@ -78,7 +78,8 @@ class MtTranslatorContext(
       desired = desiredServices?.toSet(),
       enabled = enabledServices.map { it.serviceType },
     )
-    return enabledServices.filter { desiredServices?.contains(it.serviceType) ?: true }
+    return enabledServices
+      .filter { desiredServices?.contains(it.serviceType) ?: true }
       .toSet()
   }
 
@@ -87,31 +88,28 @@ class MtTranslatorContext(
     possibleTargetLanguages.addAll(all)
   }
 
-  fun getPluralForms(string: String): PluralForms? {
-    return pluralFormsCache.computeIfAbsentSupportNull(string) {
+  fun getPluralForms(string: String): PluralForms? =
+    pluralFormsCache.computeIfAbsentSupportNull(string) {
       io.tolgee.formats.getPluralForms(string)
     }
-  }
 
-  fun getPluralFormsReplacingReplaceParam(string: String): PluralForms? {
-    return pluralFormsWithReplacedReplaceNumberCache.computeIfAbsentSupportNull(string) {
+  fun getPluralFormsReplacingReplaceParam(string: String): PluralForms? =
+    pluralFormsWithReplacedReplaceNumberCache.computeIfAbsentSupportNull(string) {
       io.tolgee.formats.getPluralFormsReplacingReplaceParam(string, REPLACE_NUMBER_PLACEHOLDER)
     }
-  }
 
   /**
    * If some primary service is not found, we fetch all missing at once,
    * so it's fetched in one query, but only when required
    */
-  private fun getPrimaryService(targetLanguageId: Long): MtServiceInfo? {
-    return primaryServices[targetLanguageId] ?: let {
+  private fun getPrimaryService(targetLanguageId: Long): MtServiceInfo? =
+    primaryServices[targetLanguageId] ?: let {
       val missing = possibleTargetLanguages - primaryServices.keys
       mtServiceConfigService.getPrimaryServices(missing.toList(), projectId).forEach {
         primaryServices[it.key] = it.value
       }
       primaryServices[targetLanguageId]
     }
-  }
 
   fun prepareKeys(params: List<MtBatchItemParams>) {
     val keyIds = params.mapNotNull { it.keyId }.filter { !keys.containsKey(it) }
@@ -120,8 +118,9 @@ class MtTranslatorContext(
 
   fun prepareKeysByIds(keyIds: List<Long>) {
     val result =
-      entityManger.createQuery(
-        """
+      entityManger
+        .createQuery(
+          """
         select new io.tolgee.service.machineTranslation.KeyForMt(k.id, k.name, ns.name, km.description, t.text, k.isPlural )
         from Key k
         left join k.project.baseLanguage bl
@@ -130,9 +129,8 @@ class MtTranslatorContext(
         left join k.namespace ns
         where k.id in :keyIds and k.project.id = :projectId
       """,
-        KeyForMt::class.java,
-      )
-        .setParameter("keyIds", keyIds)
+          KeyForMt::class.java,
+        ).setParameter("keyIds", keyIds)
         .setParameter("projectId", projectId)
         .resultList
 
@@ -161,18 +159,19 @@ class MtTranslatorContext(
   fun getServiceInfo(
     languageId: Long,
     service: MtServiceType,
-  ): MtServiceInfo {
-    return enabledServices[languageId]?.singleOrNull { it.serviceType == service }
+  ): MtServiceInfo =
+    enabledServices[languageId]?.singleOrNull { it.serviceType == service }
       ?: primaryServices[languageId]
       ?: throw IllegalStateException("Service $service not enabled for language $languageId")
-  }
 
   fun prepareMetadata(batch: List<MtBatchItemParams>) {
     val newMetadataKeys =
-      batch.filter { needsMetadata(it) }.mapNotNull {
-        val baseTranslationText = it.baseTranslationText ?: return@mapNotNull null
-        MetadataKey(it.keyId, baseTranslationText, it.targetLanguageId)
-      }.filter { !metadata.containsKey(it) }
+      batch
+        .filter { needsMetadata(it) }
+        .mapNotNull {
+          val baseTranslationText = it.baseTranslationText ?: return@mapNotNull null
+          MetadataKey(it.keyId, baseTranslationText, it.targetLanguageId)
+        }.filter { !metadata.containsKey(it) }
     newMetadataKeys.forEach {
       storeMetadata(it)
     }
@@ -182,9 +181,7 @@ class MtTranslatorContext(
     metadata[metadataKey] = metadataProvider.get(metadataKey)
   }
 
-  fun getLanguage(languageId: Long): LanguageDto {
-    return languages[languageId] ?: throw IllegalStateException("Language $languageId not found")
-  }
+  fun getLanguage(languageId: Long): LanguageDto = languages[languageId] ?: throw IllegalStateException("Language $languageId not found")
 
   fun getMetadata(item: MtBatchItemParams): Metadata? {
     val baseTranslationText =
@@ -198,14 +195,13 @@ class MtTranslatorContext(
     return service.serviceType.usesMetadata
   }
 
-  private fun getEnabledServices(languageId: Long): Set<MtServiceInfo> {
-    return enabledServices.computeIfAbsent(languageId) {
+  private fun getEnabledServices(languageId: Long): Set<MtServiceInfo> =
+    enabledServices.computeIfAbsent(languageId) {
       val language =
         languages[it]
           ?: throw IllegalStateException("Language $it not found")
       mtServiceConfigService.getEnabledServiceInfos(language).toSet()
     }
-  }
 
   @Synchronized
   private fun <K, V> MutableMap<K, V>.computeIfAbsentSupportNull(
@@ -219,9 +215,7 @@ class MtTranslatorContext(
     return get(key)
   }
 
-  fun getKey(keyId: Long?): KeyForMt? {
-    return keys[keyId]
-  }
+  fun getKey(keyId: Long?): KeyForMt? = keys[keyId]
 
   private val languageService: LanguageService by lazy {
     applicationContext.getBean(LanguageService::class.java)

@@ -56,19 +56,18 @@ class ResxExporter(
   private fun getConvertedMessage(
     translation: ExportTranslationView,
     isPlural: Boolean = translation.key.isPlural,
-  ): String? {
-    return IcuToGenericFormatMessageConvertor(
+  ): String? =
+    IcuToGenericFormatMessageConvertor(
       translation.text,
       isPlural,
       isProjectIcuPlaceholdersEnabled,
     ) {
       IcuToIcuPlaceholderConvertor()
     }.convert()
-  }
 
-  override fun produceFiles(): Map<String, InputStream> {
-    return getModels().map { (path, model) ->
-      path to ResxWriter(model).produceFiles()
-    }.toMap()
-  }
+  override fun produceFiles(): Map<String, InputStream> =
+    getModels()
+      .map { (path, model) ->
+        path to ResxWriter(model).produceFiles()
+      }.toMap()
 }

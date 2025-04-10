@@ -12,9 +12,7 @@ class PluralTranslationUtil(
   private val item: MtBatchItemParams,
   private val translateFn: (String) -> MtTranslatorResult,
 ) {
-  fun translate(): MtTranslatorResult {
-    return result
-  }
+  fun translate(): MtTranslatorResult = result
 
   private val preparedFormSourceStrings: Sequence<Pair<String, String>> by lazy {
     val targetLanguageTag = context.getLanguage(item.targetLanguageId).tag
@@ -57,9 +55,7 @@ class PluralTranslationUtil(
     )
   }
 
-  private fun String.replaceNumberTags(): String {
-    return this.replace(TOLGEE_TAG_REGEX, "#")
-  }
+  private fun String.replaceNumberTags(): String = this.replace(TOLGEE_TAG_REGEX, "#")
 
   companion object {
     const val REPLACE_NUMBER_PLACEHOLDER = "{%{REPLACE_NUMBER}%}"
@@ -74,21 +70,18 @@ class PluralTranslationUtil(
       sourceLanguageTag: String,
       targetLanguageTag: String,
       pluralForms: PluralForms,
-    ): Map<String, String> {
-      return getSourceExamplesSequence(sourceLanguageTag, targetLanguageTag, pluralForms).toMap()
-    }
+    ): Map<String, String> = getSourceExamplesSequence(sourceLanguageTag, targetLanguageTag, pluralForms).toMap()
 
     private fun getSourceExamplesSequence(
       sourceLanguageTag: String,
       targetLanguageTag: String,
       pluralForms: PluralForms,
-    ): Sequence<Pair<String, String>> {
-      return getTargetNumberExamples(targetLanguageTag).asSequence().map {
+    ): Sequence<Pair<String, String>> =
+      getTargetNumberExamples(targetLanguageTag).asSequence().map {
         val form = getRulesByTag(sourceLanguageTag)?.select(it.value.toDouble())
         val formValue = pluralForms.forms[form] ?: pluralForms.forms[PluralRules.KEYWORD_OTHER] ?: ""
         it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value, addTag = false)
       }
-    }
 
     private fun String.replaceReplaceNumberPlaceholderWithExample(
       example: Number,
@@ -127,23 +120,24 @@ class PluralTranslationUtil(
         }
 
       val exactCases =
-        forms.forms.asSequence().filter {
-          it.key.startsWith("=")
-        }.mapNotNull {
-          val number = it.key.substring(1).toDoubleOrNull() ?: return@mapNotNull null
-          it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number)
-        }
+        forms.forms
+          .asSequence()
+          .filter {
+            it.key.startsWith("=")
+          }.mapNotNull {
+            val number = it.key.substring(1).toDoubleOrNull() ?: return@mapNotNull null
+            it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number)
+          }
 
       return keywordCases + exactCases
     }
 
-    private fun String.toDoubleOrNull(): Number? {
-      return try {
+    private fun String.toDoubleOrNull(): Number? =
+      try {
         this.toBigDecimalOrNull()
       } catch (e: NumberFormatException) {
         null
       }
-    }
 
     private fun getTargetExamples(targetLanguageTag: String): Map<String, Number> {
       val targetULocale = getULocaleFromTag(targetLanguageTag)

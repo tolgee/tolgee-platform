@@ -23,9 +23,7 @@ class AnnouncementService(
   fun isAnnouncementDismissed(
     announcement: Announcement,
     userId: Long,
-  ): Boolean {
-    return announcementRepository.isDismissed(userId, announcement)
-  }
+  ): Boolean = announcementRepository.isDismissed(userId, announcement)
 
   @CacheEvict(
     cacheNames = [Caches.DISMISSED_ANNOUNCEMENT],

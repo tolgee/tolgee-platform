@@ -29,7 +29,10 @@ class ProjectBuilder(
     Project().apply {
       if (organizationOwner == null) {
         if (testDataBuilder.data.organizations.size > 0) {
-          this.organizationOwner = testDataBuilder.data.organizations.first().self
+          this.organizationOwner =
+            testDataBuilder.data.organizations
+              .first()
+              .self
         }
         return@apply
       }
@@ -81,26 +84,21 @@ class ProjectBuilder(
     namespace: String? = null,
     keyName: String,
     ft: (KeyBuilder.() -> Unit)? = null,
-  ): KeyBuilder {
-    return addKey(keyName, ft).build { setNamespace(namespace) }
-  }
+  ): KeyBuilder = addKey(keyName, ft).build { setNamespace(namespace) }
 
-  fun addKey(keyName: String): KeyBuilder {
-    return addKey(keyName, null)
-  }
+  fun addKey(keyName: String): KeyBuilder = addKey(keyName, null)
 
   fun addKey(
     keyName: String,
     ft: (KeyBuilder.() -> Unit)?,
-  ): KeyBuilder {
-    return addKey {
+  ): KeyBuilder =
+    addKey {
       name = keyName
     }.apply {
       ft?.let {
         apply(it)
       }
     }
-  }
 
   fun addTranslation(ft: FT<Translation>) = addOperation(data.translations, ft)
 
@@ -120,48 +118,41 @@ class ProjectBuilder(
 
   fun addScreenshot(ft: FT<Screenshot>) = addOperation(data.screenshots, ft)
 
-  fun addEnglish(): LanguageBuilder {
-    return addLanguage {
+  fun addEnglish(): LanguageBuilder =
+    addLanguage {
       name = "English"
       tag = "en"
     }
-  }
 
-  fun addGerman(): LanguageBuilder {
-    return addLanguage {
+  fun addGerman(): LanguageBuilder =
+    addLanguage {
       name = "German"
       originalName = "Deutsch"
       tag = "de"
     }
-  }
 
-  fun addCzech(): LanguageBuilder {
-    return addLanguage {
+  fun addCzech(): LanguageBuilder =
+    addLanguage {
       name = "Czech"
       originalName = "Čeština"
       tag = "cs"
     }
-  }
 
-  fun addHindi(): LanguageBuilder {
-    return addLanguage {
+  fun addHindi(): LanguageBuilder =
+    addLanguage {
       name = "Hindi"
       originalName = "हिन्दी"
       tag = "hi"
     }
-  }
 
-  fun addFrench(): LanguageBuilder {
-    return addLanguage {
+  fun addFrench(): LanguageBuilder =
+    addLanguage {
       name = "French"
       originalName = "Français"
       tag = "fr"
     }
-  }
 
-  fun getLanguageByTag(tag: String): LanguageBuilder? {
-    return data.languages.find { it.self.tag == tag }
-  }
+  fun getLanguageByTag(tag: String): LanguageBuilder? = data.languages.find { it.self.tag == tag }
 
   fun addKeysDistance(
     key1: Key,
@@ -190,12 +181,16 @@ class ProjectBuilder(
     data.importSettings = ImportSettings(this.self).apply(ft)
   }
 
-  val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
+  val onlyUser get() =
+    this.self.organizationOwner.memberRoles
+      .singleOrNull()
+      ?.user
 
   fun getTranslation(
     key: Key,
     languageTag: String,
-  ): Translation? {
-    return this.data.translations.find { it.self.key == key && it.self.language.tag == languageTag }?.self
-  }
+  ): Translation? =
+    this.data.translations
+      .find { it.self.key == key && it.self.language.tag == languageTag }
+      ?.self
 }

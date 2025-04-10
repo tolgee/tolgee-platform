@@ -21,11 +21,13 @@ class XcstringsFormatProcessorTest {
   fun `returns correct parsed result`() {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2) // en, fr
-    mockUtil.fileProcessorContext.assertTranslations("en", "hello-world")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "hello-world")
       .assertSingle {
         hasText("Hello, World!")
       }
-    mockUtil.fileProcessorContext.assertTranslations("fr", "hello-world")
+    mockUtil.fileProcessorContext
+      .assertTranslations("fr", "hello-world")
       .assertSingle {
         hasText("Bonjour le monde!")
       }
@@ -34,7 +36,8 @@ class XcstringsFormatProcessorTest {
   @Test
   fun `handles plural translations correctly`() {
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "messages-count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "messages-count")
       .assertSinglePlural {
         hasText(
           """
@@ -53,7 +56,8 @@ class XcstringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "messages-count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "messages-count")
       .assertSinglePlural {
         hasText(
           """
@@ -72,7 +76,8 @@ class XcstringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "messages-count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "messages-count")
       .assertSinglePlural {
         hasText(
           """
@@ -123,7 +128,8 @@ class XcstringsFormatProcessorTest {
       projectIcuPlaceholdersEnabled = false,
     )
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "welcome-message-escaped")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "welcome-message-escaped")
       .assertSingle {
         hasText("Hello, %@ {meto}")
       }

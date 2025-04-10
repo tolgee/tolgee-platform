@@ -31,7 +31,9 @@ class BatchChangeTranslationStateTest : ProjectAuthControllerTest("/v2/projects/
 
     val allKeyIds = keys.map { it.id }.toList()
     val keyIds = allKeyIds.take(10)
-    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val allLanguageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
     val languagesToChangeStateIds = listOf(testData.germanLanguage.id, testData.englishLanguage.id)
 
     performProjectAuthPost(

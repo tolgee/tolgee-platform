@@ -43,8 +43,8 @@ class TelemetryService(
     }
   }
 
-  private fun getTelemetryData(): TelemetryReportRequest {
-    return TelemetryReportRequest().apply {
+  private fun getTelemetryData(): TelemetryReportRequest =
+    TelemetryReportRequest().apply {
       instanceId = instanceIdService.getInstanceId()
       projectsCount = getProjectsCount()
       translationsCount = getTranslationsCount()
@@ -52,50 +52,49 @@ class TelemetryService(
       distinctLanguagesCount = getDistinctLanguagesCount()
       usersCount = getUsersCount()
     }
-  }
 
-  private fun getUsersCount(): Long {
-    return entityManager.createQuery(
-      """
+  private fun getUsersCount(): Long =
+    entityManager
+      .createQuery(
+        """
       select count(u) from UserAccount u
     """,
-      Long::class.javaObjectType,
-    ).singleResult
-  }
+        Long::class.javaObjectType,
+      ).singleResult
 
-  private fun getDistinctLanguagesCount(): Long {
-    return entityManager.createQuery(
-      """
+  private fun getDistinctLanguagesCount(): Long =
+    entityManager
+      .createQuery(
+        """
       select count(distinct l.tag) from Language l
     """,
-      Long::class.javaObjectType,
-    ).singleResult
-  }
+        Long::class.javaObjectType,
+      ).singleResult
 
-  private fun getLanguagesCount(): Long {
-    return entityManager.createQuery(
-      """
+  private fun getLanguagesCount(): Long =
+    entityManager
+      .createQuery(
+        """
       select count(l) from Language l
     """,
-      Long::class.javaObjectType,
-    ).singleResult
-  }
+        Long::class.javaObjectType,
+      ).singleResult
 
-  private fun getTranslationsCount(): Long {
-    return entityManager.createQuery(
-      """
+  private fun getTranslationsCount(): Long =
+    entityManager
+      .createQuery(
+        """
       select count(t) from Translation t
     """,
-      Long::class.javaObjectType,
-    ).singleResult
-  }
+        Long::class.javaObjectType,
+      ).singleResult
 
-  private fun getProjectsCount(): Long {
-    return entityManager.createQuery(
-      """
+  private fun getProjectsCount(): Long =
+    entityManager
+      .createQuery(
+        """
       select count(p) from Project p
     """,
-      Long::class.javaObjectType,
-    ).singleResult
-  }
+        Long::class.javaObjectType,
+      ).singleResult
 }

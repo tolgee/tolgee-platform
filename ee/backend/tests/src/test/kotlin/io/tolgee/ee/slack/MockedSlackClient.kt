@@ -16,7 +16,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-class MockedSlackClient(val methodsClientMock: MethodsClient) {
+class MockedSlackClient(
+  val methodsClientMock: MethodsClient,
+) {
   val chatPostMessageRequests: List<ChatPostMessageRequest>
     get() =
       Mockito.mockingDetails(methodsClientMock).invocations.mapNotNull { invocation ->

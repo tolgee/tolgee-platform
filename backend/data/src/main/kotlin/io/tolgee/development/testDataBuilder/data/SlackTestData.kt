@@ -55,10 +55,14 @@ class SlackTestData {
             usingPrimaryMtService = true
           }
         }
-      projectBuilder.addKey("testKey").also { key = it.self }
+      projectBuilder
+        .addKey("testKey")
+        .also { key = it.self }
         .addTranslation("en", "Hello")
 
-      projectBuilder.addKey("testKey2").also { key2 = it.self }
+      projectBuilder
+        .addKey("testKey2")
+        .also { key2 = it.self }
         .addTranslation("en", "Hello")
 
       projectBuilder.addKey {
@@ -100,58 +104,61 @@ class SlackTestData {
       projectBuilder.addCzech()
 
       slackConfig =
-        projectBuilder.addSlackConfig {
-          this.channelId = "testChannel"
-          this.project = projectBuilder.self
-          this.userAccount = userAccountBuilder.self
-          isGlobalSubscription = true
-          events = mutableSetOf(SlackEventType.ALL)
-        }.build config@{
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 0L
-            this.languageTags = mutableSetOf("en", "fr")
-          }
+        projectBuilder
+          .addSlackConfig {
+            this.channelId = "testChannel"
+            this.project = projectBuilder.self
+            this.userAccount = userAccountBuilder.self
+            isGlobalSubscription = true
+            events = mutableSetOf(SlackEventType.ALL)
+          }.build config@{
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 0L
+              this.languageTags = mutableSetOf("en", "fr")
+            }
 
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 0L
-            this.languageTags = mutableSetOf("fr", "cz")
-          }
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 0L
+              this.languageTags = mutableSetOf("fr", "cz")
+            }
 
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 1L
-            this.languageTags = mutableSetOf("cz", "ru")
-          }
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 1L
+              this.languageTags = mutableSetOf("cz", "ru")
+            }
 
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 52L
-            this.languageTags = mutableSetOf("fr", "cz")
-          }
-        }.self
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 52L
+              this.languageTags = mutableSetOf("fr", "cz")
+            }
+          }.self
 
       automation =
-        projectBuilder.addAutomation {
-          this.triggers.add(
-            AutomationTrigger(this)
-              .also { it.type = AutomationTriggerType.ACTIVITY },
-          )
-          this.actions.add(
-            AutomationAction(this).also {
-              it.type = AutomationActionType.SLACK_SUBSCRIPTION
-              it.slackConfig = slackConfig
-            },
-          )
-        }.self
+        projectBuilder
+          .addAutomation {
+            this.triggers.add(
+              AutomationTrigger(this)
+                .also { it.type = AutomationTriggerType.ACTIVITY },
+            )
+            this.actions.add(
+              AutomationAction(this).also {
+                it.type = AutomationActionType.SLACK_SUBSCRIPTION
+                it.slackConfig = slackConfig
+              },
+            )
+          }.self
     }
 
-  fun add10Keys(): List<Key> {
-    return (1..10).map {
-      projectBuilder.addKey("key$it").build {
-        addTranslation("en", "Hello")
-      }.self
+  fun add10Keys(): List<Key> =
+    (1..10).map {
+      projectBuilder
+        .addKey("key$it")
+        .build {
+          addTranslation("en", "Hello")
+        }.self
     }
-  }
 }

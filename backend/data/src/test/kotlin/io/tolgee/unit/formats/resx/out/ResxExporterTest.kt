@@ -266,15 +266,12 @@ class ResxExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-  ): ResxExporter {
-    return ResxExporter(
+  ): ResxExporter =
+    ResxExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
-  }
 
-  private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.format = ExportFormat.RESX_ICU }
-  }
+  private fun getExportParams(): ExportParams = ExportParams().also { it.format = ExportFormat.RESX_ICU }
 }

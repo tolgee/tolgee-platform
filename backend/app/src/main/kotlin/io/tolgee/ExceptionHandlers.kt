@@ -41,9 +41,7 @@ import java.util.function.Consumer
 @RestControllerAdvice
 class ExceptionHandlers : Logging {
   @ExceptionHandler(MethodArgumentNotValidException::class)
-  fun handleValidationExceptions(
-    ex: MethodArgumentNotValidException,
-  ): ResponseEntity<Map<String, Map<String, String>>> {
+  fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, Map<String, String>>> {
     val errors: MutableMap<String, String> = HashMap()
     ex.bindingResult.allErrors.forEach(
       Consumer { error: ObjectError ->
@@ -59,17 +57,14 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-  fun handleValidationExceptions(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponseBody> {
-    return ResponseEntity(
+  fun handleValidationExceptions(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponseBody> =
+    ResponseEntity(
       ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOf(ex.parameter.parameterName) as List<Serializable>?),
       HttpStatus.BAD_REQUEST,
     )
-  }
 
   @ExceptionHandler(ValidationException::class)
-  fun handleCustomValidationExceptions(
-    ex: ValidationException,
-  ): ResponseEntity<Map<String, Map<String, List<String>>>> {
+  fun handleCustomValidationExceptions(ex: ValidationException): ResponseEntity<Map<String, Map<String, List<String>>>> {
     val errors: MutableMap<String, List<String>> = HashMap()
     for (validationError in ex.validationErrors) {
       errors[validationError.message.code] = Arrays.asList(*validationError.parameters)
@@ -108,9 +103,7 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler(MissingServletRequestPartException::class)
-  fun handleMissingServletRequestPartException(
-    ex: MissingServletRequestPartException,
-  ): ResponseEntity<Map<String, Map<String, String?>>> {
+  fun handleMissingServletRequestPartException(ex: MissingServletRequestPartException): ResponseEntity<Map<String, Map<String, String?>>> {
     val errors = Collections.singletonMap(ex.requestPartName, ex.message)
     return ResponseEntity(
       Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors),
@@ -189,12 +182,11 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException::class)
-  fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
-    return ResponseEntity(
+  fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> =
+    ResponseEntity(
       ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
       HttpStatus.BAD_REQUEST,
     )
-  }
 
   @ExceptionHandler(HttpMessageNotReadableException::class)
   fun handleMessageNotReadable(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponseBody> {
@@ -206,9 +198,8 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
-  fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
-    return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
-  }
+  fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> =
+    ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
 
   @ExceptionHandler(InvalidDataAccessApiUsageException::class)
   fun handleFileSizeLimitExceeded(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
@@ -232,12 +223,11 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler(RateLimitedException::class)
-  fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
-    return ResponseEntity(
+  fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> =
+    ResponseEntity(
       RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
       HttpStatus.TOO_MANY_REQUESTS,
     )
-  }
 
   @ExceptionHandler(NoResourceFoundException::class)
   fun handleNoResourceFound(ex: NoResourceFoundException): ResponseEntity<ErrorResponseBody> {

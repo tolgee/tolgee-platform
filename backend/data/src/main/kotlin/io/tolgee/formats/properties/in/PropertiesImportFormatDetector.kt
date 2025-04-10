@@ -20,7 +20,5 @@ class PropertiesImportFormatDetector {
       )
   }
 
-  fun detectFormat(data: Map<*, *>): ImportFormat {
-    return detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.PROPERTIES_UNKNOWN
-  }
+  fun detectFormat(data: Map<*, *>): ImportFormat = detectFromPossibleFormats(possibleFormats, data) ?: ImportFormat.PROPERTIES_UNKNOWN
 }

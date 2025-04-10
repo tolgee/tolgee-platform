@@ -10,14 +10,10 @@ import java.time.Duration
 @Configuration
 class SecurityConfiguration {
   @Bean
-  fun passwordEncoder(): PasswordEncoder {
-    return BCryptPasswordEncoder()
-  }
+  fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
   @Bean
-  fun totpGenerator(): TimeBasedOneTimePasswordGenerator {
-    return TimeBasedOneTimePasswordGenerator(Duration.ofSeconds(30L), 6, OTP_ALGORITHM)
-  }
+  fun totpGenerator(): TimeBasedOneTimePasswordGenerator = TimeBasedOneTimePasswordGenerator(Duration.ofSeconds(30L), 6, OTP_ALGORITHM)
 
   companion object {
     const val OTP_ALGORITHM = TimeBasedOneTimePasswordGenerator.TOTP_ALGORITHM_HMAC_SHA1

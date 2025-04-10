@@ -53,61 +53,43 @@ class KeyService(
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
 ) : Logging {
-  fun getAll(projectId: Long): Set<Key> {
-    return keyRepository.getAllByProjectId(projectId)
-  }
+  fun getAll(projectId: Long): Set<Key> = keyRepository.getAllByProjectId(projectId)
 
-  fun getAllSortedById(projectId: Long): List<KeyView> {
-    return keyRepository.getAllByProjectIdSortedById(projectId)
-  }
+  fun getAllSortedById(projectId: Long): List<KeyView> = keyRepository.getAllByProjectIdSortedById(projectId)
 
   fun get(
     projectId: Long,
     name: String,
     namespace: String?,
-  ): Key {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
+  ): Key =
+    keyRepository
+      .getByNameAndNamespace(projectId, name, namespace)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
-  }
 
   fun find(
     projectId: Long,
     name: String,
     namespace: String?,
-  ): Key? {
-    return this.findOptional(projectId, name, namespace).orElseGet { null }
-  }
+  ): Key? = this.findOptional(projectId, name, namespace).orElseGet { null }
 
   private fun findOptional(
     projectId: Long,
     name: String,
     namespace: String?,
-  ): Optional<Key> {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
-  }
+  ): Optional<Key> = keyRepository.getByNameAndNamespace(projectId, name, namespace)
 
-  fun get(id: Long): Key {
-    return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-  }
+  fun get(id: Long): Key = keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
 
   fun getView(
     projectId: Long,
     id: Long,
-  ): KeyView {
-    return keyRepository.findView(projectId, id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-  }
+  ): KeyView = keyRepository.findView(projectId, id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
 
-  fun find(id: Long): Key? {
-    return keyRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): Key? = keyRepository.findById(id).orElse(null)
 
-  fun findOptional(id: Long): Optional<Key> {
-    return keyRepository.findById(id)
-  }
+  fun findOptional(id: Long): Optional<Key> = keyRepository.findById(id)
 
-  fun findAllWithProjectsAndMetas(ids: Set<Long>): List<Key> {
-    return keyRepository.findWithProjectsAndMetas(ids)
-  }
+  fun findAllWithProjectsAndMetas(ids: Set<Long>): List<Key> = keyRepository.findWithProjectsAndMetas(ids)
 
   fun save(key: Key): Key {
     keyRepository.save(key)
@@ -127,12 +109,14 @@ class KeyService(
 
     val created = createTranslationsOnKeyCreate(dto, key)
 
-    dto.states?.map {
-      val translation =
-        created?.get(it.key)
-          ?: throw BadRequestException(Message.CANNOT_SET_STATE_FOR_MISSING_TRANSLATION)
-      translation to it.value.translationState
-    }?.toMap()?.let { translationService.setStateBatch(it) }
+    dto.states
+      ?.map {
+        val translation =
+          created?.get(it.key)
+            ?: throw BadRequestException(Message.CANNOT_SET_STATE_FOR_MISSING_TRANSLATION)
+        translation to it.value.translationState
+      }?.toMap()
+      ?.let { translationService.setStateBatch(it) }
 
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
@@ -327,7 +311,8 @@ class KeyService(
     keyMetaService.deleteAllByProject(projectId)
     screenshotService.deleteAllByProject(projectId)
 
-    entityManager.createNativeQuery("""delete from key where project_id = :projectId""")
+    entityManager
+      .createNativeQuery("""delete from key where project_id = :projectId""")
       .setParameter("projectId", projectId)
       .executeUpdate()
 
@@ -382,9 +367,7 @@ class KeyService(
   fun getKeysInfo(
     dto: GetKeysRequestDto,
     projectId: Long,
-  ): List<Pair<Key, List<Screenshot>>> {
-    return KeyInfoProvider(applicationContext, projectId, dto).get()
-  }
+  ): List<Pair<Key, List<Screenshot>>> = KeyInfoProvider(applicationContext, projectId, dto).get()
 
   fun getPaged(
     projectId: Long,
@@ -406,40 +389,35 @@ class KeyService(
     return result
   }
 
-  fun find(id: Collection<Long>): List<Key> {
-    return keyRepository.findAllByIdIn(id)
-  }
+  fun find(id: Collection<Long>): List<Key> = keyRepository.findAllByIdIn(id)
 
   fun find(
     projectId: Long,
     ids: Collection<Long>,
-  ): List<Key> {
-    return keyRepository.findAllByProjectIdAndIdIn(projectId, ids)
-  }
+  ): List<Key> = keyRepository.findAllByProjectIdAndIdIn(projectId, ids)
 
   @Transactional
   fun getDisabledLanguages(
     projectId: Long,
     keyId: Long,
-  ): List<Language> {
-    return keyRepository.getDisabledLanguages(projectId, keyId)
-  }
+  ): List<Language> = keyRepository.getDisabledLanguages(projectId, keyId)
 
   @Transactional
   fun getDisabledLanguages(projectId: Long): List<KeyDisabledLanguagesView> {
     val queryResult = keyRepository.getDisabledLanguages(projectId)
-    return queryResult.groupBy {
-      it.id
-    }.map {
-      KeyDisabledLanguagesView(
-        it.key,
-        it.value.first().name,
-        it.value.first().namespace,
-        it.value.map { disabledLanguage ->
-          KeyDisabledLanguagesView.KeyDisabledLanguageModel(disabledLanguage.languageId, disabledLanguage.languageTag)
-        },
-      )
-    }
+    return queryResult
+      .groupBy {
+        it.id
+      }.map {
+        KeyDisabledLanguagesView(
+          it.key,
+          it.value.first().name,
+          it.value.first().namespace,
+          it.value.map { disabledLanguage ->
+            KeyDisabledLanguagesView.KeyDisabledLanguageModel(disabledLanguage.languageId, disabledLanguage.languageTag)
+          },
+        )
+      }
   }
 
   @Transactional
@@ -482,14 +460,11 @@ class KeyService(
     return languages.sortedBy { languageIds.indexOf(it.id) }
   }
 
-  fun getViewsByKeyIds(ids: List<Long>): List<KeyView> {
-    return keyRepository.getViewsByKeyIds(ids)
-  }
+  fun getViewsByKeyIds(ids: List<Long>): List<KeyView> = keyRepository.getViewsByKeyIds(ids)
 
-  fun getByIds(ids: Collection<Long>): List<Key> {
-    return ids
+  fun getByIds(ids: Collection<Long>): List<Key> =
+    ids
       // limit of postgres in clause size
       .chunked(32000)
       .flatMap { keyRepository.findAllByIdIn(it) }
-  }
 }

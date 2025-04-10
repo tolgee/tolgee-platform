@@ -30,7 +30,10 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     executeInNewTransaction {
       val translations = getTestKeyTranslations()
       translations.assert.hasSize(1)
-      translations.single().text.assert.isEqualTo("Hello, World!")
+      translations
+        .single()
+        .text.assert
+        .isEqualTo("Hello, World!")
     }
   }
 
@@ -42,7 +45,11 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     executeInNewTransaction {
       val translations = getTestKeyTranslations()
       translations.assert.hasSize(2)
-      translations.map { it.text }.assert.contains("Hello, World!").contains("Hallo, Welt!")
+      translations
+        .map { it.text }
+        .assert
+        .contains("Hello, World!")
+        .contains("Hallo, Welt!")
     }
   }
 
@@ -54,7 +61,11 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     executeInNewTransaction {
       val translations = getTestKeyTranslations()
       translations.assert.hasSize(2)
-      translations.map { it.text }.assert.contains("Hello, World!").contains("Hallo, Welt!")
+      translations
+        .map { it.text }
+        .assert
+        .contains("Hello, World!")
+        .contains("Hallo, Welt!")
     }
   }
 
@@ -69,8 +80,8 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     }
   }
 
-  private fun performImportWithLanguages(languages: List<String>?): ResultActions {
-    return performImport(
+  private fun performImportWithLanguages(languages: List<String>?): ResultActions =
+    performImport(
       projectId = testData.project.id,
       listOf(Pair("Localizable.xcstrings", appleXcStrings)),
       params =
@@ -85,7 +96,6 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
             ),
         ),
     )
-  }
 
   private fun getTestKeyTranslations(namespace: String? = null) =
     keyService.get(projectId = project.id, name = "test", namespace = namespace).translations
@@ -94,9 +104,7 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     projectId: Long,
     files: List<Pair<String, Resource>>?,
     params: Map<String, Any?> = mapOf(),
-  ): ResultActions {
-    return performSingleStepImport(mvc, projectId, files, params)
-  }
+  ): ResultActions = performSingleStepImport(mvc, projectId, files, params)
 
   private fun saveAndPrepare() {
     testDataService.saveTestData(testData.root)

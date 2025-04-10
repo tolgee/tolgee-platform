@@ -197,28 +197,26 @@ class FlutterArbFileExporterTest {
   }
 }
 
-private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFileExporter {
-  return FlutterArbFileExporter(
+private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFileExporter =
+  FlutterArbFileExporter(
     translations = translations,
     exportParams = getExportParams(),
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
   )
-}
 
 private fun getExporter(
   translations: List<ExportTranslationView>,
   isProjectIcuPlaceholdersEnabled: Boolean = true,
   params: ExportParams = getExportParams(),
-): FlutterArbFileExporter {
-  return FlutterArbFileExporter(
+): FlutterArbFileExporter =
+  FlutterArbFileExporter(
     translations = translations,
     exportParams = params,
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
     isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
   )
-}
 
 private fun getExportParams() =
   ExportParams().also {

@@ -101,8 +101,8 @@ open class LanguageStatsProvider(
   private fun joinTargetTranslations(
     keyJoin: ListJoin<Project, Key>,
     state: TranslationState,
-  ): ListJoin<Key, Translation> {
-    return keyJoin.join(Key_.translations).also { translation ->
+  ): ListJoin<Key, Translation> =
+    keyJoin.join(Key_.translations).also { translation ->
       translation.on(
         cb.and(
           cb.equal(
@@ -115,5 +115,4 @@ open class LanguageStatsProvider(
         ),
       )
     }
-  }
 }

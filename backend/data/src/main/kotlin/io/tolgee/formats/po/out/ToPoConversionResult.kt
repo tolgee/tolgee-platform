@@ -10,7 +10,5 @@ class ToPoConversionResult(
     }
   }
 
-  fun isPlural(): Boolean {
-    return formsResult != null
-  }
+  fun isPlural(): Boolean = formsResult != null
 }

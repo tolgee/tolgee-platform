@@ -7,7 +7,5 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class SlackConfiguration {
   @Bean
-  fun slackClint(): Slack {
-    return Slack.getInstance()
-  }
+  fun slackClint(): Slack = Slack.getInstance()
 }

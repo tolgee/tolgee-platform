@@ -35,7 +35,8 @@ import org.springframework.web.servlet.HandlerInterceptor
 class AuthenticationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   private val authenticationProperties: AuthenticationProperties,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -79,19 +80,14 @@ class AuthenticationInterceptor(
     return true
   }
 
-  private fun requiresSuperAuthentication(handlerMethod: HandlerMethod): Boolean {
-    return AnnotationUtils.getAnnotation(handlerMethod.method, RequiresSuperAuthentication::class.java) != null
-  }
+  private fun requiresSuperAuthentication(handlerMethod: HandlerMethod): Boolean =
+    AnnotationUtils.getAnnotation(handlerMethod.method, RequiresSuperAuthentication::class.java) != null
 
-  private fun isPatAllowed(annotation: AllowApiAccess): Boolean {
-    return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAT
-  }
+  private fun isPatAllowed(annotation: AllowApiAccess): Boolean =
+    annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAT
 
-  private fun isPakAllowed(annotation: AllowApiAccess): Boolean {
-    return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAK
-  }
+  private fun isPakAllowed(annotation: AllowApiAccess): Boolean =
+    annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAK
 
-  override fun getOrder(): Int {
-    return Ordered.HIGHEST_PRECEDENCE
-  }
+  override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE
 }

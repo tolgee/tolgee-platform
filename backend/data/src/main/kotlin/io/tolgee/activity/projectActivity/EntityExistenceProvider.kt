@@ -39,8 +39,7 @@ class EntityExistenceProvider(
           return@mapNotNull (entityClassName to ids.map { it to existingIds.contains(it) })
         }
         return@mapNotNull null
-      }
-      .flatMap { (entityClassName, existingIds) -> existingIds.map { (entityClassName to it.first) to it.second } }
+      }.flatMap { (entityClassName, existingIds) -> existingIds.map { (entityClassName to it.first) to it.second } }
       .toMap()
   }
 }

@@ -4,17 +4,21 @@ interface PathItem {
   val originalPathString: String
 }
 
-class ArrayPathItem(var index: Int, override val originalPathString: String) : PathItem
+class ArrayPathItem(
+  var index: Int,
+  override val originalPathString: String,
+) : PathItem
 
-class ObjectPathItem(var key: String, override val originalPathString: String) : PathItem
+class ObjectPathItem(
+  var key: String,
+  override val originalPathString: String,
+) : PathItem
 
 fun getPathItems(
   path: String,
   arraySupport: Boolean,
   structureDelimiter: Char? = '.',
-): MutableList<PathItem> {
-  return PathParser(path, arraySupport, structureDelimiter).parse()
-}
+): MutableList<PathItem> = PathParser(path, arraySupport, structureDelimiter).parse()
 
 fun buildPath(
   items: List<PathItem>,

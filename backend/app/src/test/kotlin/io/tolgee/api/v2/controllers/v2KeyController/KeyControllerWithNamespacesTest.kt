@@ -40,7 +40,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   fun `creates key and namespace`() {
     enableNamespaces()
     performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to "new_ns"))
-      .andIsCreated.andAssertThatJson {
+      .andIsCreated
+      .andAssertThatJson {
         node("name").isEqualTo("super_key")
         node("namespace").isEqualTo("new_ns")
       }
@@ -62,7 +63,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   fun `creates key in existing namespace`() {
     enableNamespaces()
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", namespace = "ns-1"))
-      .andIsCreated.andAssertThatJson {
+      .andIsCreated
+      .andAssertThatJson {
         node("name").isEqualTo("super_key")
         node("namespace").isEqualTo("ns-1")
       }
@@ -75,7 +77,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
     enableNamespaces()
     performProjectAuthPost("keys", CreateKeyDto(name = "key", "ns-1"))
       .andAssertError
-      .isCustomValidation.hasMessage("key_exists")
+      .isCustomValidation
+      .hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
@@ -83,7 +86,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   fun `updates key in ns`() {
     enableNamespaces()
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", "ns-2"))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_k")
         node("namespace").isEqualTo("ns-2")
@@ -96,7 +100,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @Test
   fun `changes namespace to default`() {
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", null))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("namespace").isNull()
       }
   }
@@ -106,7 +111,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   fun `blank namespace doesn't create ns on update`() {
     enableNamespaces()
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", ""))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("namespace").isNull()
       }
     namespaceService.find("", project.id).assert.isNull()
@@ -130,17 +136,20 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
     performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName, "namespace" to ""))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("key_exists")
+      .isCustomValidation
+      .hasMessage("key_exists")
 
     performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName, "namespace" to null))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("key_exists")
+      .isCustomValidation
+      .hasMessage("key_exists")
 
     performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("key_exists")
+      .isCustomValidation
+      .hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
@@ -150,7 +159,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
     performProjectAuthPost("keys", CreateKeyDto(name = "key2", namespace = ""))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("key_exists")
+      .isCustomValidation
+      .hasMessage("key_exists")
   }
 
   @ProjectJWTAuthTestMethod
@@ -173,7 +183,9 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes all keys`() {
-    val ids = testData.projectBuilder.data.keys.map { it.self.id }
+    val ids =
+      testData.projectBuilder.data.keys
+        .map { it.self.id }
     performProjectAuthDelete("keys/${ids.joinToString(",")}").andIsOk
     executeInNewTransaction {
       ids.forEach { keyService.find(it).assert.isNull() }
@@ -186,28 +198,32 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @Test
   fun `key with namespace cannot be created when useNamespaces feature is disabled`() {
     performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to ""))
-      .andIsCreated.andAssertThatJson {
+      .andIsCreated
+      .andAssertThatJson {
         node("namespace").isNull()
       }
 
     performProjectAuthPost("keys", mapOf("name" to "super_key", "namespace" to "new_ns"))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+      .isCustomValidation
+      .hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `key with namespace cannot be edited when useNamespaces feature is disabled`() {
     performProjectAuthPut("keys/${testData.keyWithoutNs.id}", EditKeyDto(name = "super_k", ""))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("namespace").isNull()
       }
 
     performProjectAuthPut("keys/${testData.keyWithoutNs.id}", EditKeyDto(name = "super_k", "ns-2"))
       .andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+      .isCustomValidation
+      .hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
   }
 
   @ProjectJWTAuthTestMethod
@@ -223,10 +239,10 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
     performProjectAuthPut(
       "keys/${testData.keyWithoutNs.id}/complex-update",
       mapOf("name" to "new-name", "namespace" to "ns-2"),
-    )
-      .andIsBadRequest
+    ).andIsBadRequest
       .andAssertError
-      .isCustomValidation.hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
+      .isCustomValidation
+      .hasMessage("namespace_cannot_be_used_when_feature_is_disabled")
   }
 
   private fun enableNamespaces() {

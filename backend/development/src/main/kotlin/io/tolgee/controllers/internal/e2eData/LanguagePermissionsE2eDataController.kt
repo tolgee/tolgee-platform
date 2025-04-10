@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/language-permissions"])
 @Transactional
-class LanguagePermissionsE2eDataController() : AbstractE2eDataController() {
+class LanguagePermissionsE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData() {

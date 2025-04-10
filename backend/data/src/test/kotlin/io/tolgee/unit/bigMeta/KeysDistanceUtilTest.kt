@@ -64,9 +64,10 @@ class KeysDistanceUtilTest {
     toDelete.forKeyId(1).assert.hasSize(10)
   }
 
-  private fun MutableSet<KeysDistanceDto>.forKeyId(keyId: Long): List<KeysDistanceDto> {
-    return this.filter { it.key1Id == keyId || it.key2Id == keyId }
-  }
+  private fun MutableSet<KeysDistanceDto>.forKeyId(keyId: Long): List<KeysDistanceDto> =
+    this.filter {
+      it.key1Id == keyId || it.key2Id == keyId
+    }
 
   private fun getResult(): Pair<MutableSet<KeysDistanceDto>, MutableSet<KeysDistanceDto>> {
     initMocks(testData)
@@ -76,10 +77,9 @@ class KeysDistanceUtilTest {
   private fun MutableSet<KeysDistanceDto>.assertDistance(
     key1Id: Long,
     key2Id: Long,
-  ): ObjectAssert<KeysDistanceDto> {
-    return this.find { it.key1Id == key1Id && it.key2Id == key2Id }?.assert
+  ): ObjectAssert<KeysDistanceDto> =
+    this.find { it.key1Id == key1Id && it.key2Id == key2Id }?.assert
       ?: throw AssertionError("Distance not found")
-  }
 
   private fun ObjectAssert<KeysDistanceDto>.hitsEqualsTo(hits: Long): ObjectAssert<KeysDistanceDto> {
     this.extracting { it.hits }.isEqualTo(hits)

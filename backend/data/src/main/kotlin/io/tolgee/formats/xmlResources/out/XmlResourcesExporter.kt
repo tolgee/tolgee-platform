@@ -29,15 +29,16 @@ class XmlResourcesExporter(
   private fun getModels(): Map<String, XmlResourcesStringsModel> {
     prepare()
 
-    return fileUnits.map { (pathToFile, units) ->
-      val model = XmlResourcesStringsModel()
+    return fileUnits
+      .map { (pathToFile, units) ->
+        val model = XmlResourcesStringsModel()
 
-      units.forEach {
-        model.items[it.key] = it.value.node
-      }
+        units.forEach {
+          model.items[it.key] = it.value.node
+        }
 
-      pathToFile to model
-    }.toMap()
+        pathToFile to model
+      }.toMap()
   }
 
   private fun prepare() {
@@ -69,9 +70,7 @@ class XmlResourcesExporter(
     addToUnits(translation, stringUnit)
   }
 
-  private fun ExportTranslationView.isWrappedWithCdata(): Boolean {
-    return this.key.custom?.get(XML_RESOURCES_CDATA_CUSTOM_KEY) == true
-  }
+  private fun ExportTranslationView.isWrappedWithCdata(): Boolean = this.key.custom?.get(XML_RESOURCES_CDATA_CUSTOM_KEY) == true
 
   private fun buildStringArrayUnit(
     translation: ExportTranslationView,
@@ -137,9 +136,10 @@ class XmlResourcesExporter(
   ) {
     // Assuming your translation view contain a map of plural forms as value
     val pluralMap =
-      populateForms(translation.languageTag, pluralForms).map {
-        it.key to XmlResourcesStringValue(it.value, translation.isWrappedWithCdata())
-      }.toMap()
+      populateForms(translation.languageTag, pluralForms)
+        .map {
+          it.key to XmlResourcesStringValue(it.value, translation.isWrappedWithCdata())
+        }.toMap()
 
     val pluralUnit =
       PluralUnit().apply {
@@ -205,11 +205,11 @@ class XmlResourcesExporter(
     return converted
   }
 
-  override fun produceFiles(): Map<String, InputStream> {
-    return getModels().map { (path, model) ->
-      path to XmlResourcesFileWriter(model, exportParams.format).produceFiles()
-    }.toMap()
-  }
+  override fun produceFiles(): Map<String, InputStream> =
+    getModels()
+      .map { (path, model) ->
+        path to XmlResourcesFileWriter(model, exportParams.format).produceFiles()
+      }.toMap()
 
   companion object {
     val KEY_IS_ARRAY_REGEX by lazy {

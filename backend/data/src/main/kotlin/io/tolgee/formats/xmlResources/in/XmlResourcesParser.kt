@@ -67,7 +67,8 @@ class XmlResourcesParser(
               if (currentPluralEntry != null) {
                 currentPluralQuantity =
                   startElement
-                    .getAttributeByName(QName(null, "quantity"))?.value
+                    .getAttributeByName(QName(null, "quantity"))
+                    ?.value
               } else if (currentArrayEntry != null) {
                 isArrayItemOpen = true
                 arrayItemComment = currentComment
@@ -88,7 +89,12 @@ class XmlResourcesParser(
 
         event.isEndElement -> {
           currentComment = null
-          when (event.asEndElement().name.localPart.lowercase()) {
+          when (
+            event
+              .asEndElement()
+              .name.localPart
+              .lowercase()
+          ) {
             "string" -> {
               currentStringEntry?.value = getCurrentTextOrXml()
               currentStringEntry = null
@@ -131,13 +137,12 @@ class XmlResourcesParser(
   }
 
   private fun getKeyName(startElement: StartElement) =
-    startElement.getAttributeByName(
-      QName(null, "name"),
-    )?.value
+    startElement
+      .getAttributeByName(
+        QName(null, "name"),
+      )?.value
 
-  private fun getCurrentTextOrXml(): XmlResourcesStringValue {
-    return blockParser?.result ?: XmlResourcesStringValue("", false)
-  }
+  private fun getCurrentTextOrXml(): XmlResourcesStringValue = blockParser?.result ?: XmlResourcesStringValue("", false)
 
   private val isAnyToContentSaveOpen: Boolean
     get() {

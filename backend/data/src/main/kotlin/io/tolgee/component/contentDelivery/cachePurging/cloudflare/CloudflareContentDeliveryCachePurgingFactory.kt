@@ -9,10 +9,9 @@ import org.springframework.web.client.RestTemplate
 class CloudflareContentDeliveryCachePurgingFactory(
   private val restTemplate: RestTemplate,
 ) : ContentDeliveryCachePurgingFactory {
-  override fun create(config: Any): CloudflareContentDeliveryCachePurging {
-    return CloudflareContentDeliveryCachePurging(
+  override fun create(config: Any): CloudflareContentDeliveryCachePurging =
+    CloudflareContentDeliveryCachePurging(
       config as ContentDeliveryCloudflareProperties,
       restTemplate,
     )
-  }
 }

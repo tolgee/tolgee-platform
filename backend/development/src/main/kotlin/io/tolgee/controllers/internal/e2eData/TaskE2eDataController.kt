@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/task"])
 @Transactional
-class TaskE2eDataController() : AbstractE2eDataController() {
+class TaskE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData(): StandardTestDataResult {

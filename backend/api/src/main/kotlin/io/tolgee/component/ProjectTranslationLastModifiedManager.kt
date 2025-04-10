@@ -12,14 +12,13 @@ class ProjectTranslationLastModifiedManager(
   val currentDateProvider: CurrentDateProvider,
   val cacheManager: CacheManager,
 ) {
-  fun getLastModified(projectId: Long): Long {
-    return getCache()?.get(projectId)?.get() as? Long
+  fun getLastModified(projectId: Long): Long =
+    getCache()?.get(projectId)?.get() as? Long
       ?: let {
         val now = currentDateProvider.date.time
         getCache()?.put(projectId, now)
         now
       }
-  }
 
   private fun getCache(): Cache? = cacheManager.getCache(Caches.PROJECT_TRANSLATIONS_MODIFIED)
 

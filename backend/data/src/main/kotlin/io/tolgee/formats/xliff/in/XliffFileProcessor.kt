@@ -11,7 +11,9 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 
-class XliffFileProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
+class XliffFileProcessor(
+  override val context: FileProcessorContext,
+) : ImportFileProcessor() {
   override fun process() {
     val parsed =
       try {

@@ -174,7 +174,8 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun createLanguageTestValidation(repoId: Long) {
     val mvcResult =
       performCreate(repoId, languageDTO)
-        .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+        .andExpect(MockMvcResultMatchers.status().isBadRequest)
+        .andReturn()
     Assertions.assertThat(mvcResult.response.contentAsString).contains("language_tag_exists")
     Assertions.assertThat(mvcResult.response.contentAsString).contains("language_name_exists")
     performCreate(repoId, languageDTOBlank).andIsBadRequest.andAssertThatJson {
@@ -197,39 +198,31 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun performCreate(
     projectId: Long,
     content: LanguageRequest,
-  ): ResultActions {
-    return performAuthPost("/v2/projects/$projectId/languages", content)
-  }
+  ): ResultActions = performAuthPost("/v2/projects/$projectId/languages", content)
 
   private fun performEdit(
     projectId: Long,
     languageId: Long,
     content: LanguageRequest,
-  ): ResultActions {
-    return performAuthPut("/v2/projects/$projectId/languages/$languageId", content)
-  }
+  ): ResultActions = performAuthPut("/v2/projects/$projectId/languages/$languageId", content)
 
   private fun performDelete(
     projectId: Long,
     languageId: Long,
-  ): ResultActions {
-    return performAuthDelete("/v2/projects/$projectId/languages/$languageId", null)
-  }
+  ): ResultActions = performAuthDelete("/v2/projects/$projectId/languages/$languageId", null)
 
-  private fun performFindAll(projectId: Long): ResultActions {
-    return performAuthGet("/v2/projects/$projectId/languages")
-  }
+  private fun performFindAll(projectId: Long): ResultActions = performAuthGet("/v2/projects/$projectId/languages")
 
   @Suppress("UNCHECKED_CAST")
   private fun assertDeleteActivityCreated() {
     val result =
-      entityManager.createQuery(
-        """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
+      entityManager
+        .createQuery(
+          """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
             |join ar.modifiedEntities ame
             |where ar.type = :type
-        """.trimMargin(),
-      )
-        .setParameter("type", ActivityType.DELETE_LANGUAGE)
+          """.trimMargin(),
+        ).setParameter("type", ActivityType.DELETE_LANGUAGE)
         .resultList as List<Array<Any>>
     val modifications = result[0][1] as Map<String, PropertyModification>
     modifications["deletedAt"]!!.old.assert.isNull()

@@ -8,31 +8,25 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Component
 @Scope("prototype")
-class AuthorizedRequestPerformer : BaseRequestPerformer(), AuthRequestPerformer {
+class AuthorizedRequestPerformer :
+  BaseRequestPerformer(),
+  AuthRequestPerformer {
   override fun performAuthPut(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return mvc.perform(AuthorizedRequestFactory.loggedPut(url).withJsonContent(content))
-  }
+  ): ResultActions = mvc.perform(AuthorizedRequestFactory.loggedPut(url).withJsonContent(content))
 
   override fun performAuthPost(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return mvc.perform(AuthorizedRequestFactory.loggedPost(url).withJsonContent(content))
-  }
+  ): ResultActions = mvc.perform(AuthorizedRequestFactory.loggedPost(url).withJsonContent(content))
 
-  override fun performAuthGet(url: String): ResultActions {
-    return mvc.perform(AuthorizedRequestFactory.loggedGet(url))
-  }
+  override fun performAuthGet(url: String): ResultActions = mvc.perform(AuthorizedRequestFactory.loggedGet(url))
 
   override fun performAuthDelete(
     url: String,
     content: Any?,
-  ): ResultActions {
-    return mvc.perform(AuthorizedRequestFactory.loggedDelete(url).withJsonContent(content))
-  }
+  ): ResultActions = mvc.perform(AuthorizedRequestFactory.loggedDelete(url).withJsonContent(content))
 
   override fun performAuthMultipart(
     url: String,

@@ -59,7 +59,8 @@ class OrganizationAuthorizationInterceptorTest {
     )
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(organizationAuthenticationInterceptor)
       .build()
 
@@ -105,13 +106,15 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `it hides the organization if the user cannot see it`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+    Mockito
+      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(false)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsNotFound
     mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsNotFound
 
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+    Mockito
+      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(true)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk
@@ -119,14 +122,17 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `rejects access if the user does not have a sufficiently high role`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+    Mockito
+      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(true)
-    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
+    Mockito
+      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
       .thenReturn(false)
 
     mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsForbidden
 
-    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
+    Mockito
+      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
       .thenReturn(true)
 
     mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsOk

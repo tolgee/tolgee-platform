@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @Hidden
 @RequestMapping(value = ["internal/e2e-data/user-deletion"])
 @Transactional
-class UserDeletionE2eDataController() : AbstractE2eDataController() {
+class UserDeletionE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData() {

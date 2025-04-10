@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentStorageConfig> {
-  override fun getItemFromDto(dto: ContentStorageRequest): S3ContentStorageConfigDto? {
-    return dto.s3ContentStorageConfig
-  }
+  override fun getItemFromDto(dto: ContentStorageRequest): S3ContentStorageConfigDto? = dto.s3ContentStorageConfig
 
   override fun clearParentEntity(
     storageEntity: ContentStorage,

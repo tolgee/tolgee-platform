@@ -307,9 +307,7 @@ class TaskController(
   fun getBlockingTasks(
     @PathVariable
     taskNumber: Long,
-  ): List<Long> {
-    return taskService.getBlockingTasks(projectHolder.project.id, taskNumber)
-  }
+  ): List<Long> = taskService.getBlockingTasks(projectHolder.project.id, taskNumber)
 
   @PutMapping("/{taskNumber}/keys/{keyId}")
   @Operation(
@@ -342,9 +340,7 @@ class TaskController(
     dto: CalculateScopeRequest,
     @ParameterObject
     filters: TranslationScopeFilters,
-  ): KeysScopeView {
-    return taskService.calculateScope(projectHolder.projectEntity, dto, filters)
-  }
+  ): KeysScopeView = taskService.calculateScope(projectHolder.projectEntity, dto, filters)
 
   @GetMapping("/possible-assignees")
   @RequiresProjectPermissions([Scope.TASKS_EDIT])

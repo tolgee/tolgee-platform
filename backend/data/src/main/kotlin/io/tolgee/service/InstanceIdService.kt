@@ -14,8 +14,8 @@ class InstanceIdService(
   private val platformTransactionManager: PlatformTransactionManager,
 ) {
   @Transactional
-  fun getInstanceId(): String {
-    return tryUntilItDoesntBreakConstraint {
+  fun getInstanceId(): String =
+    tryUntilItDoesntBreakConstraint {
       executeInNewTransaction(platformTransactionManager) {
         val entity =
           entityManager.find(InstanceId::class.java, 1)
@@ -28,5 +28,4 @@ class InstanceIdService(
         entity.instanceId
       }
     }
-  }
 }

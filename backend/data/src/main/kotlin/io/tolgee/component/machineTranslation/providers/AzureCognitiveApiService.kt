@@ -43,7 +43,11 @@ class AzureCognitiveApiService(
         request,
       )
 
-    return response.body?.first?.translations?.first()?.text
+    return response.body
+      ?.first
+      ?.translations
+      ?.first()
+      ?.text
       ?: throw RuntimeException(response.toString())
   }
 
@@ -51,7 +55,9 @@ class AzureCognitiveApiService(
    * Data structure for mapping the AzureCognitive JSON response objects.
    */
   companion object {
-    class AzureCognitiveRequest(text: String) {
+    class AzureCognitiveRequest(
+      text: String,
+    ) {
       @JsonProperty("Text")
       var text: String? = text
     }

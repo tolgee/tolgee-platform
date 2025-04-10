@@ -5,8 +5,9 @@ import org.assertj.core.api.AbstractAssert
 import org.assertj.core.api.IntegerAssert
 import org.assertj.core.api.StringAssert
 
-class StandardValidationMessageAssert(val data: Map<String, String>) :
-  AbstractAssert<StandardValidationMessageAssert?, Map<String, String>>(
+class StandardValidationMessageAssert(
+  val data: Map<String, String>,
+) : AbstractAssert<StandardValidationMessageAssert?, Map<String, String>>(
     data,
     StandardValidationMessageAssert::class.java,
   ) {
@@ -28,7 +29,5 @@ class StandardValidationMessageAssert(val data: Map<String, String>) :
     return StringAssert(actual[field]).describedAs("Message assertion on field %s", field)
   }
 
-  fun errorCount(): IntegerAssert {
-    return IntegerAssert(actual!!.size)
-  }
+  fun errorCount(): IntegerAssert = IntegerAssert(actual!!.size)
 }

@@ -20,11 +20,10 @@ class BasePermissionView(
     get() = _scopes != null
 
   companion object {
-    fun of(entity: IPermission): BasePermissionView {
-      return BasePermissionView(
+    fun of(entity: IPermission): BasePermissionView =
+      BasePermissionView(
         _scopes = entity.scopes,
         type = entity.type,
       )
-    }
   }
 }

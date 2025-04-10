@@ -38,10 +38,9 @@ class MtServiceConfigService(
    *
    * @return enabled translation services for project
    */
-  fun getEnabledServiceInfos(language: LanguageDto): List<MtServiceInfo> {
-    return getEnabledServiceInfosByStoredConfig(language)
+  fun getEnabledServiceInfos(language: LanguageDto): List<MtServiceInfo> =
+    getEnabledServiceInfosByStoredConfig(language)
       ?: getEnabledServicesByDefaultServerConfig(language)
-  }
 
   fun getPrimaryServices(
     languagesIds: List<Long>,
@@ -59,23 +58,27 @@ class MtServiceConfigService(
     return MtServiceInfo(defaultPrimaryService, null)
   }
 
-  private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> {
-    return services.asSequence()
+  private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> =
+    services
+      .asSequence()
       .sortedBy { it.key.order }
       .sortedByDescending { it.value.first.defaultPrimary }
       .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
       .map { it.key }
       .map { MtServiceInfo(it, null) }
       .toMutableList()
-  }
 
-  private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
-    return services.filter { it.value.first.defaultPrimary && it.value.second.isEnabled }.keys.minByOrNull { it.order }
-  }
+  private fun getPrimaryServiceByDefaultConfig(): MtServiceType? =
+    services
+      .filter {
+        it.value.first.defaultPrimary && it.value.second.isEnabled
+      }.keys
+      .minByOrNull { it.order }
 
   private fun getEnabledServiceInfosByStoredConfig(language: LanguageDto): List<MtServiceInfo>? {
     getStoredConfig(language.id)?.let { storedConfig ->
-      return storedConfig.enabledServicesInfo.toList()
+      return storedConfig.enabledServicesInfo
+        .toList()
         // return just enabled services
         .filter {
           isServiceEnabledByServerConfig(it) && language.isSupportedBy(it.serviceType)
@@ -209,12 +212,11 @@ class MtServiceConfigService(
   private fun throwFormalityNotSupported(
     mtServiceInfo: MtServiceInfo,
     language: LanguageDto,
-  ) {
+  ): Unit =
     throw BadRequestException(
       Message.FORMALITY_NOT_SUPPORTED_BY_SERVICE,
       listOf(mtServiceInfo.serviceType.name, language.tag, mtServiceInfo.formality!!),
     )
-  }
 
   private fun getServiceProcessor(it: MtServiceInfo) = this.services[it.serviceType]?.second
 
@@ -258,8 +260,8 @@ class MtServiceConfigService(
   }
 
   @Transactional
-  fun getProjectSettings(project: Project): List<MtServiceConfig> {
-    return getStoredConfigs(project.id)
+  fun getProjectSettings(project: Project): List<MtServiceConfig> =
+    getStoredConfigs(project.id)
       .sortedBy { it.targetLanguage?.tag }
       .sortedBy { it.targetLanguage != null }
       .toMutableList()
@@ -277,17 +279,17 @@ class MtServiceConfigService(
               .toSortedSet()
         }
       }
-  }
 
-  private fun getDefaultConfig(project: Project): MtServiceConfig {
-    return MtServiceConfig().apply {
+  private fun getDefaultConfig(project: Project): MtServiceConfig =
+    MtServiceConfig().apply {
       enabledServices =
-        services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
-          .keys.toMutableSet()
+        services
+          .filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
+          .keys
+          .toMutableSet()
       this.project = project
       primaryService = getPrimaryServiceByDefaultConfig()
     }
-  }
 
   private fun save(entity: MtServiceConfig) {
     this.mtServiceConfigRepository.save(entity)
@@ -320,9 +322,7 @@ class MtServiceConfigService(
     }
   }
 
-  private fun getStoredConfigs(projectId: Long): List<MtServiceConfig> {
-    return mtServiceConfigRepository.findAllByProjectId(projectId)
-  }
+  private fun getStoredConfigs(projectId: Long): List<MtServiceConfig> = mtServiceConfigRepository.findAllByProjectId(projectId)
 
   fun getLanguageInfo(project: ProjectDto): List<MtLanguageInfo> {
     val result: MutableList<MtLanguageInfo> = mutableListOf()
@@ -330,11 +330,12 @@ class MtServiceConfigService(
       MtLanguageInfo(
         language = null,
         supportedServices =
-          services.filter {
-            it.value.second.isEnabled
-          }.map {
-            MtSupportedService(it.key, it.value.second.formalitySupportingLanguages !== null)
-          },
+          services
+            .filter {
+              it.value.second.isEnabled
+            }.map {
+              MtSupportedService(it.key, it.value.second.formalitySupportingLanguages !== null)
+            },
       ),
     )
     languageService.findAll(project.id).forEach { language ->

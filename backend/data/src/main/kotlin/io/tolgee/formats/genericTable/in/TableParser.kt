@@ -41,9 +41,8 @@ class TableParser(
       }
   }
 
-  fun parse(): List<TableEntry> {
-    return rows.flatMap {
+  fun parse(): List<TableEntry> =
+    rows.flatMap {
       it.rowToTableEntries()
     }
-  }
 }

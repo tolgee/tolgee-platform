@@ -16,91 +16,82 @@ import org.springframework.web.method.HandlerMethod
 @Configuration
 class OpenApiConfiguration {
   @Bean
-  fun openAPI(): OpenAPI? {
-    return OpenAPI()
+  fun openAPI(): OpenAPI? =
+    OpenAPI()
       .info(
-        Info().title("Tolgee API")
+        Info()
+          .title("Tolgee API")
           .description("Tolgee Platform REST API reference")
           .version("v1.0"),
-      )
-      .externalDocs(
+      ).externalDocs(
         ExternalDocumentation()
           .description("Tolgee documentation")
           .url("https://tolgee.io"),
       )
-  }
 
   @Bean
-  fun internalV1OpenApi(): GroupedOpenApi? {
-    return internalGroupForPaths(
+  fun internalV1OpenApi(): GroupedOpenApi? =
+    internalGroupForPaths(
       paths = arrayOf("/api/**"),
       excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "V1 Internal - for Tolgee Web application",
     )
-  }
 
   @Bean
-  fun internalV2OpenApi(): GroupedOpenApi? {
-    return internalGroupForPaths(
+  fun internalV2OpenApi(): GroupedOpenApi? =
+    internalGroupForPaths(
       paths = arrayOf("/v2/**"),
       excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "V2 Internal - for Tolgee Web application",
     )
-  }
 
   @Bean
-  fun internalAllOpenApi(): GroupedOpenApi? {
-    return internalGroupForPaths(
+  fun internalAllOpenApi(): GroupedOpenApi? =
+    internalGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
       excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "All Internal - for Tolgee Web application",
     )
-  }
 
   @Bean
-  fun apiKeyAllOpenApi(): GroupedOpenApi? {
-    return pakGroupForPaths(
+  fun apiKeyAllOpenApi(): GroupedOpenApi? =
+    pakGroupForPaths(
       paths = arrayOf("/api/**", "/v2/**"),
       excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (All)",
     )
-  }
 
   @Bean
-  fun apiKeyV1OpenApi(): GroupedOpenApi? {
-    return pakGroupForPaths(
+  fun apiKeyV1OpenApi(): GroupedOpenApi? =
+    pakGroupForPaths(
       paths = arrayOf("/api/**"),
       excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (V1)",
     )
-  }
 
   @Bean
-  fun apiKeyV2OpenApi(): GroupedOpenApi? {
-    return pakGroupForPaths(
+  fun apiKeyV2OpenApi(): GroupedOpenApi? =
+    pakGroupForPaths(
       paths = arrayOf("/v2/**"),
       excludedPaths = BILLING + arrayOf(API_REPOSITORY),
       name = "Accessible with Project API key (V2)",
     )
-  }
 
   @Bean
-  fun allPublicApi(): GroupedOpenApi? {
-    return publicApiGroupForPaths(
+  fun allPublicApi(): GroupedOpenApi? =
+    publicApiGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
       excludedPaths = arrayOf(API_REPOSITORY),
       name = "Public API (All)",
     )
-  }
 
   @Bean
-  fun billingOpenApi(): GroupedOpenApi? {
-    return internalGroupForPaths(
+  fun billingOpenApi(): GroupedOpenApi? =
+    internalGroupForPaths(
       paths = BILLING,
       excludedPaths = arrayOf("/v2/public/billing/webhook"),
       name = "V2 Billing",
     )
-  }
 
   private fun internalGroupForPaths(
     paths: Array<String>,
@@ -166,7 +157,8 @@ class OpenApiConfiguration {
     name: String,
   ): GroupedOpenApi? {
     return OpenApiGroupBuilder(name) {
-      builder.pathsToExclude(*excludedPaths)
+      builder
+        .pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
       customizeOperations { operation, handler, path ->
         if (isApiAccessAllowed(handler)) {
@@ -188,7 +180,8 @@ class OpenApiConfiguration {
     name: String,
   ): GroupedOpenApi? {
     return OpenApiGroupBuilder(name) {
-      builder.pathsToExclude(*excludedPaths)
+      builder
+        .pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
       customizeOperations { operation, handler, path ->
         val isProjectPath = isProjectPath(path)

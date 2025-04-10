@@ -20,7 +20,9 @@ class SlugGenerator {
     checkUniquenessCallback: (name: String) -> Boolean,
   ): String {
     var namePart =
-      StringUtils.stripAccents(name).lowercase(Locale.getDefault())
+      StringUtils
+        .stripAccents(name)
+        .lowercase(Locale.getDefault())
         .replace("[^a-z0-9]+".toRegex(), DELIMITER)
         .let { it.substring(0, min(it.length, maxLength)) }
 

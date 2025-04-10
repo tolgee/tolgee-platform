@@ -55,9 +55,7 @@ class SignUpService(
     invitationCode: String?,
     organizationName: String?,
     userSource: String? = null,
-  ): UserAccount {
-    return SignUpProcessor(applicationContext, entity, invitationCode, organizationName, userSource).process()
-  }
+  ): UserAccount = SignUpProcessor(applicationContext, entity, invitationCode, organizationName, userSource).process()
 
   fun dtoToEntity(request: SignUpDto): UserAccount {
     val encodedPassword = passwordEncoder.encode(request.password!!)

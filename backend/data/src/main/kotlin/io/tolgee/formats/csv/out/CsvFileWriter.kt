@@ -25,9 +25,10 @@ class CsvFileWriter(
     translations.forEach {
       writer.writeNext(
         arrayOf(it.key) +
-          languageTags.map { languageTag ->
-            it.value.getOrDefault(languageTag, null) ?: ""
-          }.toTypedArray(),
+          languageTags
+            .map { languageTag ->
+              it.value.getOrDefault(languageTag, null) ?: ""
+            }.toTypedArray(),
       )
     }
     return output.toString().byteInputStream()

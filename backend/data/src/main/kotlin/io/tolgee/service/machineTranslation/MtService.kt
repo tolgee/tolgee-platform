@@ -24,15 +24,11 @@ class MtService(
     projectId: Long,
     isBatch: Boolean,
     params: MachineTranslationParams,
-  ): List<MtTranslatorResult> {
-    return MtTranslator(projectId, applicationContext, isBatch).translate(listOf(params))
-  }
+  ): List<MtTranslatorResult> = MtTranslator(projectId, applicationContext, isBatch).translate(listOf(params))
 
   @Transactional
   fun getMtTranslator(
     projectId: Long,
     isBatch: Boolean,
-  ): MtTranslator {
-    return MtTranslator(projectId, applicationContext, isBatch)
-  }
+  ): MtTranslator = MtTranslator(projectId, applicationContext, isBatch)
 }

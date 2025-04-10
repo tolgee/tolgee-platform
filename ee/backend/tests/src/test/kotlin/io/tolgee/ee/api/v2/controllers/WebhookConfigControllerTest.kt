@@ -50,10 +50,12 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         Consumer {
           it.toLong().let { id ->
             webhookConfigService.find(id).assert.isNotNull()
-            entityManager.createQuery("""from AutomationAction aa where aa.webhookConfig.id = :id""")
+            entityManager
+              .createQuery("""from AutomationAction aa where aa.webhookConfig.id = :id""")
               .setParameter("id", id)
               .resultList
-              .assert.isNotEmpty()
+              .assert
+              .isNotEmpty()
           }
         },
       )
@@ -71,12 +73,11 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     createWebhook().andIsOk
   }
 
-  private fun createWebhook(): ResultActions {
-    return performProjectAuthPost(
+  private fun createWebhook(): ResultActions =
+    performProjectAuthPost(
       "webhook-configs",
       mapOf("url" to "https://hello.com"),
     )
-  }
 
   @Test
   @ProjectJWTAuthTestMethod

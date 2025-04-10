@@ -22,8 +22,8 @@ abstract class AbstractV2ImageUploadControllerTest : AuthorizedControllerTest() 
     File("${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages").deleteRecursively()
   }
 
-  protected fun performStoreImage(): ResultActions {
-    return performAuthMultipart(
+  protected fun performStoreImage(): ResultActions =
+    performAuthMultipart(
       url = "/v2/image-upload",
       files =
         listOf(
@@ -35,5 +35,4 @@ abstract class AbstractV2ImageUploadControllerTest : AuthorizedControllerTest() 
           ),
         ),
     )
-  }
 }

@@ -3,7 +3,7 @@ package io.tolgee.formats.paramConvertors.`in`
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 import io.tolgee.formats.po.`in`.ParsedCLikeParam
 
-class AppleToIcuPlaceholderConvertor() : ToIcuPlaceholderConvertor {
+class AppleToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   override val pluralArgName: String = "0"
 
   override val regex: Regex
@@ -19,9 +19,7 @@ class AppleToIcuPlaceholderConvertor() : ToIcuPlaceholderConvertor {
   override fun convert(
     matchResult: MatchResult,
     isInPlural: Boolean,
-  ): String {
-    return baseToIcuPlaceholderConvertor.convert(matchResult, isInPlural)
-  }
+  ): String = baseToIcuPlaceholderConvertor.convert(matchResult, isInPlural)
 
   companion object {
     val APPLE_PLACEHOLDER_REGEX =

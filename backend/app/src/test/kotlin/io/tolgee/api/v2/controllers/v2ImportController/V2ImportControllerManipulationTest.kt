@@ -16,7 +16,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   fun `it deletes import`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
 
     loginAsUser(user.username)
@@ -29,7 +31,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   fun `it deletes import language`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}"
@@ -41,7 +45,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   fun `it resolves import translation conflict (override)`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path =
@@ -57,7 +63,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   fun `it resolves import translation conflict (keep)`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path =
@@ -73,7 +81,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   fun `it resolves all language translation conflicts (override)`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}/resolve-all/set-override"
@@ -87,7 +97,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
   fun `it resolves all language translation conflicts (keep)`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path =
@@ -105,7 +117,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path =
@@ -136,7 +150,8 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
           .find { it.name == "de" }!!
       importLanguage.translations
         .any { it.conflict != null }
-        .assert.isEqualTo(false)
+        .assert
+        .isEqualTo(false)
     }
   }
 
@@ -164,7 +179,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val nsData = testData.addFilesWithNamespaces()
     nsData.importFrenchInNs.existingLanguage = null
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     // try to assign with another french but in different namespace
@@ -184,7 +201,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     val nsData = testData.addFilesWithNamespaces()
     nsData.importFrenchInNs.existingLanguage = null
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     // try to assign with another french but in different namespace
@@ -202,7 +221,9 @@ class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projec
     testData.setAllResolved()
     testData.setAllOverride()
     testDataService.saveTestData(testData.root)
-    val user = testData.root.data.userAccounts[0].self
+    val user =
+      testData.root.data.userAccounts[0]
+        .self
     val projectId = testData.project.id
     loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}/reset-existing"

@@ -79,9 +79,7 @@ class AuthenticationFilter(
     filterChain.doFilter(request, response)
   }
 
-  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return request.method == "OPTIONS"
-  }
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean = request.method == "OPTIONS"
 
   private fun doAuthenticate(request: HttpServletRequest) {
     val authorization = request.getHeader("Authorization")

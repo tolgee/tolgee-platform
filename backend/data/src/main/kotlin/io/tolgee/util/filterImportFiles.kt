@@ -11,9 +11,8 @@ val IGNORED_REGEXES by lazy {
   )
 }
 
-inline fun <reified T> filterFiles(files: List<Pair<String, T>>): Collection<T> {
-  return files
+inline fun <reified T> filterFiles(files: List<Pair<String, T>>): Collection<T> =
+  files
     .filter { file -> !IGNORED_REGEXES.any { it.matches(file.first) } }
     .map { it.second }
     .toList()
-}

@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class AzureContentStorageConfigProcessor : ContentStorageConfigProcessor<AzureContentStorageConfig> {
-  override fun getItemFromDto(dto: ContentStorageRequest): AzureContentStorageConfigDto? {
-    return dto.azureContentStorageConfig
-  }
+  override fun getItemFromDto(dto: ContentStorageRequest): AzureContentStorageConfigDto? = dto.azureContentStorageConfig
 
   override fun clearParentEntity(
     storageEntity: ContentStorage,

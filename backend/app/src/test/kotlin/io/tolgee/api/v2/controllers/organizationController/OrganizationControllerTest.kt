@@ -23,7 +23,8 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     loginAsUser(users[1].name)
 
     performAuthGet("/v2/organizations?size=100")
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.organizations") {
           isArray.hasSize(6)
           node("[0].name").isEqualTo("user-2's organization 1")
@@ -39,7 +40,8 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     loginAsUser(users[1].name)
 
     performAuthGet("/v2/organizations?size=4")
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.organizations") {
           isArray.hasSize(4)
         }
@@ -54,7 +56,8 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     userAccount = testData.franta
 
     performAuthGet("/v2/organizations?size=100")
-      .andPrettyPrint.andAssertThatJson.let {
+      .andPrettyPrint.andAssertThatJson
+      .let {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
         }
@@ -68,12 +71,14 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.franta
     val organization =
-      testData.root.data.organizations.map { it.self }
+      testData.root.data.organizations
+        .map { it.self }
         .filter { it.name == "test_username" }
         .single()
 
     performAuthGet("/v2/organizations/${organization.slug}/projects?size=100")
-      .andPrettyPrint.andAssertThatJson.let {
+      .andPrettyPrint.andAssertThatJson
+      .let {
         it.node("_embedded.projects").let {
           it.isArray.hasSize(1)
         }
@@ -87,7 +92,8 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
     loginAsUser(users[1].name)
 
     performAuthGet("/v2/organizations?size=100&filterCurrentUserOwner=true")
-      .andPrettyPrint.andAssertThatJson.let {
+      .andPrettyPrint.andAssertThatJson
+      .let {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
           it.node("[0].name").isEqualTo("user-2's organization 1")
@@ -107,7 +113,9 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
       .andIsOk
       .andPrettyPrint
       .andAssertThatJson
-      .node("_embedded.organizations").node("[0].name").isEqualTo("user-4's organization 3")
+      .node("_embedded.organizations")
+      .node("[0].name")
+      .isEqualTo("user-4's organization 3")
   }
 
   @Test
@@ -312,7 +320,10 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
         SetOrganizationRoleDto(OrganizationRoleType.MEMBER),
       ).andIsOk
 
-      organizationService.get(organization.id).basePermission.type.assert.isEqualTo(ProjectPermissionType.REVIEW)
+      organizationService
+        .get(organization.id)
+        .basePermission.type.assert
+        .isEqualTo(ProjectPermissionType.REVIEW)
     }
   }
 }

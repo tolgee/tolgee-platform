@@ -25,7 +25,8 @@ class EmailValidationInterceptorTest {
     EmailValidationInterceptor(authenticationFacade, emailVerificationService)
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(emailValidationInterceptor)
       .build()
 

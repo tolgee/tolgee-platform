@@ -35,25 +35,18 @@ class MachineTranslationChunkProcessor(
     )
   }
 
-  override fun getParamsType(): Class<MachineTranslationJobParams> {
-    return MachineTranslationJobParams::class.java
-  }
+  override fun getParamsType(): Class<MachineTranslationJobParams> = MachineTranslationJobParams::class.java
 
-  override fun getTarget(data: MachineTranslationRequest): List<BatchTranslationTargetItem> {
-    return data.keyIds.flatMap { keyId ->
+  override fun getTarget(data: MachineTranslationRequest): List<BatchTranslationTargetItem> =
+    data.keyIds.flatMap { keyId ->
       data.targetLanguageIds.map { languageId ->
         BatchTranslationTargetItem(keyId, languageId)
       }
     }
-  }
 
-  override fun getMaxPerJobConcurrency(): Int {
-    return 1
-  }
+  override fun getMaxPerJobConcurrency(): Int = 1
 
-  override fun getJobCharacter(): JobCharacter {
-    return JobCharacter.SLOW
-  }
+  override fun getJobCharacter(): JobCharacter = JobCharacter.SLOW
 
   override fun getChunkSize(
     request: MachineTranslationRequest,
@@ -68,13 +61,10 @@ class MachineTranslationChunkProcessor(
     return 5
   }
 
-  override fun getTargetItemType(): Class<BatchTranslationTargetItem> {
-    return BatchTranslationTargetItem::class.java
-  }
+  override fun getTargetItemType(): Class<BatchTranslationTargetItem> = BatchTranslationTargetItem::class.java
 
-  override fun getParams(data: MachineTranslationRequest): MachineTranslationJobParams {
-    return MachineTranslationJobParams().apply {
+  override fun getParams(data: MachineTranslationRequest): MachineTranslationJobParams =
+    MachineTranslationJobParams().apply {
       this.targetLanguageIds = data.targetLanguageIds
     }
-  }
 }

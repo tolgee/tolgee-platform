@@ -58,14 +58,15 @@ class TolgeeTranslatorWithBatchTest {
 
   @Test
   fun `it correctly handles Too Many Requests`() {
-    doThrow(getMockedTooManyRequestsError()).whenever(
-      restTemplate,
-    ).exchange(
-      argThat<String> { this.contains("/api/openai/translate") },
-      argThat<HttpMethod> { this == HttpMethod.POST },
-      any<HttpEntity<*>>(),
-      any<ParameterizedTypeReference<Any>>(),
-    )
+    doThrow(getMockedTooManyRequestsError())
+      .whenever(
+        restTemplate,
+      ).exchange(
+        argThat<String> { this.contains("/api/openai/translate") },
+        argThat<HttpMethod> { this == HttpMethod.POST },
+        any<HttpEntity<*>>(),
+        any<ParameterizedTypeReference<Any>>(),
+      )
 
     assertThrows<TranslationApiRateLimitException> {
       cloudTolgeeTranslateApiService.translate(

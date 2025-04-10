@@ -42,7 +42,9 @@ class PropertiesFileProcessor(
   }
 
   private val keyValueMap by lazy {
-    preparedConfig.keys.asSequence().map { key -> key to preparedConfig.getString(key) }
+    preparedConfig.keys
+      .asSequence()
+      .map { key -> key to preparedConfig.getString(key) }
       .toMap(LinkedHashMap())
   }
 
@@ -55,12 +57,11 @@ class PropertiesFileProcessor(
     format.messageConvertor
   }
 
-  private fun convert(data: Any?): MessageConvertorResult {
-    return convertor.convert(
+  private fun convert(data: Any?): MessageConvertorResult =
+    convertor.convert(
       rawData = data,
       languageTag = firstLanguageTagGuessOrUnknown,
       isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
       convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
     )
-  }
 }

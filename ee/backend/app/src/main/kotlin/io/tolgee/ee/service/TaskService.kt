@@ -120,9 +120,11 @@ class TaskService(
 
   fun getNextTaskNumber(projectId: Long): Long {
     val lastTaskNumber =
-      taskRepository.findByProjectOrderByNumberDesc(
-        entityManager.getReference(Project::class.java, projectId),
-      ).firstOrNull()?.number ?: 0L
+      taskRepository
+        .findByProjectOrderByNumberDesc(
+          entityManager.getReference(Project::class.java, projectId),
+        ).firstOrNull()
+        ?.number ?: 0L
     val projectLastTaskNumber = projectService.get(projectId).lastTaskNumber
     // use whichever is larger
     return max(lastTaskNumber, projectLastTaskNumber) + 1
@@ -266,11 +268,12 @@ class TaskService(
 
     dto.removeKeys?.let { toRemove ->
       val taskKeysToRemove =
-        task.keys.filter {
-          toRemove.contains(
-            it.key.id,
-          )
-        }.toMutableSet()
+        task.keys
+          .filter {
+            toRemove.contains(
+              it.key.id,
+            )
+          }.toMutableSet()
       task.keys = task.keys.subtract(taskKeysToRemove).toMutableSet()
       taskKeyRepository.deleteAll(taskKeysToRemove)
     }
@@ -335,18 +338,14 @@ class TaskService(
     projectId: Long,
     taskNumber: Long,
     userId: Long,
-  ): List<UserAccount> {
-    return taskRepository.findAssigneeById(projectId, taskNumber, userId)
-  }
+  ): List<UserAccount> = taskRepository.findAssigneeById(projectId, taskNumber, userId)
 
   override fun findAssigneeByKey(
     keyId: Long,
     languageId: Long,
     userId: Long,
     type: TaskType?,
-  ): List<UserAccount> {
-    return taskRepository.findAssigneeByKey(keyId, languageId, userId, type)
-  }
+  ): List<UserAccount> = taskRepository.findAssigneeByKey(keyId, languageId, userId, type)
 
   @Transactional
   fun calculateScope(
@@ -388,16 +387,12 @@ class TaskService(
   fun getTaskKeys(
     projectId: Long,
     taskNumber: Long,
-  ): List<Long> {
-    return taskRepository.getTaskKeys(projectId, taskNumber)
-  }
+  ): List<Long> = taskRepository.getTaskKeys(projectId, taskNumber)
 
   fun getBlockingTasks(
     projectId: Long,
     taskNumber: Long,
-  ): List<Long> {
-    return taskRepository.getBlockingTaskNumbers(projectId, taskNumber)
-  }
+  ): List<Long> = taskRepository.getBlockingTaskNumbers(projectId, taskNumber)
 
   override fun getKeysWithTasks(
     userId: Long,
@@ -416,13 +411,12 @@ class TaskService(
   fun getReport(
     projectEntity: Project,
     taskNumber: Long,
-  ): List<TaskPerUserReportView> {
-    return taskRepository.perUserReport(
+  ): List<TaskPerUserReportView> =
+    taskRepository.perUserReport(
       projectEntity.id,
       taskNumber,
       projectEntity.baseLanguage!!.id,
     )
-  }
 
   private fun getOnlyProjectKeys(
     projectId: Long,
@@ -430,28 +424,28 @@ class TaskService(
     type: TaskType,
     keys: Collection<Long>,
     filters: TranslationScopeFilters,
-  ): MutableSet<Long> {
-    return taskRepository.getKeysWithoutConflicts(
-      projectId,
-      languageId,
-      type.toString(),
-      keys,
-      filters,
-    ).toMutableSet()
-  }
+  ): MutableSet<Long> =
+    taskRepository
+      .getKeysWithoutConflicts(
+        projectId,
+        languageId,
+        type.toString(),
+        keys,
+        filters,
+      ).toMutableSet()
 
   private fun checkAssignees(
     assignees: MutableSet<Long>,
     projectId: Long,
-  ): MutableSet<UserAccount> {
-    return assignees.map {
-      val permission = securityService.getProjectPermissionScopesNoApiKey(projectId, it)
-      if (permission.isNullOrEmpty()) {
-        throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
-      }
-      entityManager.getReference(UserAccount::class.java, it)
-    }.toMutableSet()
-  }
+  ): MutableSet<UserAccount> =
+    assignees
+      .map {
+        val permission = securityService.getProjectPermissionScopesNoApiKey(projectId, it)
+        if (permission.isNullOrEmpty()) {
+          throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+        }
+        entityManager.getReference(UserAccount::class.java, it)
+      }.toMutableSet()
 
   private fun checkLanguage(
     language: Long,
@@ -504,18 +498,16 @@ class TaskService(
   private fun findByNumber(
     projectId: Long,
     taskNumber: Long,
-  ): Task {
-    return taskRepository.findByNumber(projectId, taskNumber)
+  ): Task =
+    taskRepository.findByNumber(projectId, taskNumber)
       ?: throw NotFoundException(Message.TASK_NOT_FOUND)
-  }
 
   private fun findTaskKey(
     taskId: Long,
     keyId: Long,
-  ): TaskKey {
-    return taskKeyRepository.findByTaskIdAndKeyId(taskId, keyId)
+  ): TaskKey =
+    taskKeyRepository.findByTaskIdAndKeyId(taskId, keyId)
       ?: throw NotFoundException(Message.TASK_NOT_FOUND)
-  }
 
   private fun getTaskWithScope(task: Task): TaskWithScopeView {
     val result = getTasksWithScope(listOf(task))
@@ -577,9 +569,7 @@ class TaskService(
     )
   }
 
-  override fun getAgencyTasks(agencyId: Long): List<Task> {
-    return taskRepository.getByAgencyId(agencyId)
-  }
+  override fun getAgencyTasks(agencyId: Long): List<Task> = taskRepository.getByAgencyId(agencyId)
 
   private fun notifyNewAssignee(
     user: UserAccount,

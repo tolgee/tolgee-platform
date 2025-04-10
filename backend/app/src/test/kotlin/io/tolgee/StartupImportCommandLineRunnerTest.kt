@@ -81,7 +81,9 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
       val projects = projectService.findAllByNameAndOrganizationOwner("examples", base.organization)
       assertThat(projects).isNotEmpty
       val project = projects.first()
-      project.baseLanguage!!.tag.assert.isEqualTo("de")
+      project.baseLanguage!!
+        .tag.assert
+        .isEqualTo("de")
       assertThat(project.useNamespaces).isFalse()
     }
   }

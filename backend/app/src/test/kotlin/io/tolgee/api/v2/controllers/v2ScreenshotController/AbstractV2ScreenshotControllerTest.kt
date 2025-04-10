@@ -32,8 +32,8 @@ abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/
     project: Project,
     key: Key,
     info: Any? = null,
-  ): ResultActions {
-    return performProjectAuthMultipart(
+  ): ResultActions =
+    performProjectAuthMultipart(
       url = "keys/${key.id}/screenshots",
       files =
         listOf(
@@ -51,10 +51,7 @@ abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/
           ),
         ),
     )
-  }
 
   @Suppress("RedundantModalityModifier")
-  protected final inline fun <reified T> MvcResult.parseResponseTo(): T {
-    return jacksonObjectMapper().readValue(this.response.contentAsString)
-  }
+  protected final inline fun <reified T> MvcResult.parseResponseTo(): T = jacksonObjectMapper().readValue(this.response.contentAsString)
 }

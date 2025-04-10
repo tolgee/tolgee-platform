@@ -8,7 +8,5 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class YamlObjectMapperConfiguration {
   @Bean("yamlObjectMapper")
-  fun yamlObjectMapper(): ObjectMapper {
-    return ObjectMapper(YAMLFactory())
-  }
+  fun yamlObjectMapper(): ObjectMapper = ObjectMapper(YAMLFactory())
 }

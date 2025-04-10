@@ -23,9 +23,10 @@ class NamespaceService(
     return getKeysInNamespaceCount(listOf(namespace.id)).values.firstOrNull()
   }
 
-  private fun getKeysInNamespaceCount(namespaceIds: List<Long>): Map<Long, Long> {
-    return namespaceRepository.getKeysInNamespaceCount(namespaceIds).associate { it[0] to it[1] }
-  }
+  private fun getKeysInNamespaceCount(namespaceIds: List<Long>): Map<Long, Long> =
+    namespaceRepository.getKeysInNamespaceCount(namespaceIds).associate {
+      it[0] to it[1]
+    }
 
   fun deleteUnusedNamespaces(namespaces: List<Namespace?>) {
     val namespaceIds = namespaces.mapNotNull { it?.id }.toSet()
@@ -79,11 +80,10 @@ class NamespaceService(
   fun findOrCreate(
     name: String?,
     projectId: Long,
-  ): Namespace? {
-    return tryUntilItDoesntBreakConstraint {
+  ): Namespace? =
+    tryUntilItDoesntBreakConstraint {
       find(getSafeNamespace(name), projectId) ?: create(name, projectId)
     }
-  }
 
   fun create(
     name: String?,
@@ -112,37 +112,27 @@ class NamespaceService(
     namespaceRepository.saveAll(entities)
   }
 
-  fun isDefaultUsed(projectId: Long): Boolean {
-    return namespaceRepository.isDefaultUsed(projectId)
-  }
+  fun isDefaultUsed(projectId: Long): Boolean = namespaceRepository.isDefaultUsed(projectId)
 
   fun get(
     projectId: Long,
     namespaceId: Long,
-  ): Namespace {
-    return this.find(projectId, namespaceId) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
-  }
+  ): Namespace = this.find(projectId, namespaceId) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
 
   fun get(
     projectId: Long,
     name: String,
-  ): Namespace {
-    return this.find(projectId, name) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
-  }
+  ): Namespace = this.find(projectId, name) ?: throw NotFoundException(Message.NAMESPACE_NOT_FOUND)
 
   fun find(
     projectId: Long,
     name: String,
-  ): Namespace? {
-    return namespaceRepository.findOneByProjectIdAndName(projectId, name)
-  }
+  ): Namespace? = namespaceRepository.findOneByProjectIdAndName(projectId, name)
 
   fun find(
     projectId: Long,
     namespaceId: Long,
-  ): Namespace? {
-    return namespaceRepository.findOneByProjectIdAndId(projectId, namespaceId)
-  }
+  ): Namespace? = namespaceRepository.findOneByProjectIdAndId(projectId, namespaceId)
 
   fun update(
     namespace: Namespace,

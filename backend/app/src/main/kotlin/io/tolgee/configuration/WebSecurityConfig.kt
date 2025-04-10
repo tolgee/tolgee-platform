@@ -109,27 +109,30 @@ class WebSecurityConfig(
   @Bean
   @Order(10)
   @ConditionalOnProperty(value = ["tolgee.internal.controller-enabled"], havingValue = "false", matchIfMissing = true)
-  fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
-    return httpSecurity
+  fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain =
+    httpSecurity
       .securityMatcher(*INTERNAL_ENDPOINTS)
       .authorizeRequests()
       .anyRequest()
       .denyAll()
       .and()
       .build()
-  }
 
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(rateLimitInterceptor)
     registry.addInterceptor(authenticationInterceptor)
-    registry.addInterceptor(emailValidationInterceptor)
+    registry
+      .addInterceptor(emailValidationInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
-    registry.addInterceptor(ssoAuthenticationInterceptor)
+    registry
+      .addInterceptor(ssoAuthenticationInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
 
-    registry.addInterceptor(organizationAuthorizationInterceptor)
+    registry
+      .addInterceptor(organizationAuthorizationInterceptor)
       .addPathPatterns("/v2/organizations/**")
-    registry.addInterceptor(projectAuthorizationInterceptor)
+    registry
+      .addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns("/v2/projects/**", "/api/project/**", "/api/repository/**")
   }
 

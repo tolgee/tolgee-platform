@@ -6,14 +6,13 @@ class MessageConvertorFactory(
   private val isProjectIcuPlaceholdersEnabled: Boolean = false,
   private val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
 ) {
-  fun create(): BaseIcuMessageConvertor {
-    return BaseIcuMessageConvertor(
+  fun create(): BaseIcuMessageConvertor =
+    BaseIcuMessageConvertor(
       message = message,
       argumentConvertorFactory = getParamConvertorFactory(),
       forceIsPlural = forceIsPlural,
       keepEscaping = keepEscaping,
     )
-  }
 
   private val keepEscaping by lazy {
     if (forceIsPlural) {

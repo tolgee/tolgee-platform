@@ -163,28 +163,29 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
     var file2Id: Long? = null
     var language1Id: Long? = null
     var language2Id: Long? = null
-    andIsOk.andAssertThatJson {
-      node("result._embedded.languages[0].importFileId").isNumber.satisfies(
-        Consumer {
-          file1Id = it.toLong()
-        },
-      )
-      node("result._embedded.languages[1].importFileId").isNumber.satisfies(
-        Consumer {
-          file2Id = it.toLong()
-        },
-      )
-      node("result._embedded.languages[0].id").isNumber.satisfies(
-        Consumer {
-          language1Id = it.toLong()
-        },
-      )
-      node("result._embedded.languages[1].id").isNumber.satisfies(
-        Consumer {
-          language2Id = it.toLong()
-        },
-      )
-    }.andIsOk
+    andIsOk
+      .andAssertThatJson {
+        node("result._embedded.languages[0].importFileId").isNumber.satisfies(
+          Consumer {
+            file1Id = it.toLong()
+          },
+        )
+        node("result._embedded.languages[1].importFileId").isNumber.satisfies(
+          Consumer {
+            file2Id = it.toLong()
+          },
+        )
+        node("result._embedded.languages[0].id").isNumber.satisfies(
+          Consumer {
+            language1Id = it.toLong()
+          },
+        )
+        node("result._embedded.languages[1].id").isNumber.satisfies(
+          Consumer {
+            language2Id = it.toLong()
+          },
+        )
+      }.andIsOk
     return ImportResult(
       file1Id!!,
       file2Id!!,
@@ -193,13 +194,10 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
     )
   }
 
-  private fun createAppleConflictingImport(testData: ImportCleanTestData): ImportResult {
-    return performImportWithAppleConflicts(testData).parseData()
-  }
+  private fun createAppleConflictingImport(testData: ImportCleanTestData): ImportResult =
+    performImportWithAppleConflicts(testData).parseData()
 
-  private fun createConflictingImport(testData: ImportCleanTestData): ImportResult {
-    return performImportWithConflicts(testData).parseData()
-  }
+  private fun createConflictingImport(testData: ImportCleanTestData): ImportResult = performImportWithConflicts(testData).parseData()
 
   private data class ImportResult(
     val file1Id: Long,
@@ -308,9 +306,7 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
     return mvc.perform(AuthorizedRequestFactory.addToken(builder))
   }
 
-  fun mapToQueryString(map: Map<String, Any?>): String {
-    return map.entries.joinToString("&") { "${it.key}=${it.value}" }
-  }
+  fun mapToQueryString(map: Map<String, Any?>): String = map.entries.joinToString("&") { "${it.key}=${it.value}" }
 
   private fun selectNamespace(fileId: Long) {
     performProjectAuthPut(

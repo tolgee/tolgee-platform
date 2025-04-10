@@ -34,7 +34,9 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
+class BatchJobManagementControllerCancellationTest :
+  ProjectAuthControllerTest("/v2/projects/"),
+  Logging {
   lateinit var testData: BatchJobsTestData
 
   @Autowired
@@ -114,7 +116,9 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
           "keyIds" to keyIds,
           "targetLanguageIds" to
             listOf(
-              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+              testData.projectBuilder
+                .getLanguageByTag("cs")!!
+                .self.id,
             ),
         ),
       ).andIsOk
@@ -129,13 +133,19 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
       waitForNotThrowing(pollTime = 100) {
         executeInNewTransaction {
-          util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+          util
+            .getSingleJob()
+            .status.assert
+            .isEqualTo(BatchJobStatus.CANCELLED)
           verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
 
           // assert activity stored
-          entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-            .setParameter("id", job.id).resultList
-            .assert.hasSize(1)
+          entityManager
+            .createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+            .setParameter("id", job.id)
+            .resultList
+            .assert
+            .hasSize(1)
         }
       }
     }
@@ -176,7 +186,10 @@ class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("
 
     performProjectAuthPut("batch-jobs/${job.id}/cancel").andIsOk
 
-    util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+    util
+      .getSingleJob()
+      .status.assert
+      .isEqualTo(BatchJobStatus.CANCELLED)
   }
 
   private fun saveAndPrepare() {

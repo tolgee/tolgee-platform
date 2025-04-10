@@ -20,16 +20,12 @@ class OrganizationHolderConfig {
   @Bean
   @Scope(SCOPE_TRANSACTION, proxyMode = ScopedProxyMode.TARGET_CLASS)
   @Qualifier("transactionOrganizationHolder")
-  fun transactionOrganizationHolder(organizationService: OrganizationService): OrganizationHolder {
-    return OrganizationHolder(organizationService)
-  }
+  fun transactionOrganizationHolder(organizationService: OrganizationService): OrganizationHolder = OrganizationHolder(organizationService)
 
   @Bean
   @RequestScope
   @Qualifier("requestOrganizationHolder")
-  fun requestOrganizationHolder(organizationService: OrganizationService): OrganizationHolder {
-    return OrganizationHolder(organizationService)
-  }
+  fun requestOrganizationHolder(organizationService: OrganizationService): OrganizationHolder = OrganizationHolder(organizationService)
 
   @Bean
   @Primary

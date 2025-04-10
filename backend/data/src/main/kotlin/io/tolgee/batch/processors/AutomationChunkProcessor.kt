@@ -24,19 +24,12 @@ class AutomationChunkProcessor(
     }
   }
 
-  override fun getTarget(data: AutomationBjRequest): List<AutomationTargetItem> {
-    return listOf(AutomationTargetItem(data.triggerId, data.actionId, data.activityRevisionId))
-  }
+  override fun getTarget(data: AutomationBjRequest): List<AutomationTargetItem> =
+    listOf(AutomationTargetItem(data.triggerId, data.actionId, data.activityRevisionId))
 
-  override fun getParamsType(): Class<AutomationBjParams> {
-    return AutomationBjParams::class.java
-  }
+  override fun getParamsType(): Class<AutomationBjParams> = AutomationBjParams::class.java
 
-  override fun getTargetItemType(): Class<AutomationTargetItem> {
-    return AutomationTargetItem::class.java
-  }
+  override fun getTargetItemType(): Class<AutomationTargetItem> = AutomationTargetItem::class.java
 
-  override fun getParams(data: AutomationBjRequest): AutomationBjParams {
-    return AutomationBjParams()
-  }
+  override fun getParams(data: AutomationBjRequest): AutomationBjParams = AutomationBjParams()
 }

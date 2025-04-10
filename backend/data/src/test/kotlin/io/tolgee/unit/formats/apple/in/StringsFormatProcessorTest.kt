@@ -55,7 +55,8 @@ class StringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "welcome_header")
       .assertSingle {
         hasText("Hello, %@ {meto}")
       }
@@ -66,7 +67,8 @@ class StringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "welcome_header")
       .assertSingle {
         hasText("Hello, %@ '{'meto'}'")
       }
@@ -77,7 +79,8 @@ class StringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "welcome_header")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "welcome_header")
       .assertSingle {
         hasText("Hello, {0} '{'meto'}'")
       }
@@ -133,14 +136,20 @@ class StringsFormatProcessorTest {
     key: String,
     translationText: String,
   ) {
-    mockUtil.fileProcessorContext.translations[key]!!.single().text.assert.isEqualTo(translationText)
+    mockUtil.fileProcessorContext.translations[key]!!
+      .single()
+      .text.assert
+      .isEqualTo(translationText)
   }
 
   private fun assertKeyDescription(
     keyName: String,
     expectedDescription: String?,
   ) {
-    val actualDescription = mockUtil.fileProcessorContext.keys[keyName]?.keyMeta?.description
+    val actualDescription =
+      mockUtil.fileProcessorContext.keys[keyName]
+        ?.keyMeta
+        ?.description
     actualDescription.assert.isEqualTo(expectedDescription)
   }
 }

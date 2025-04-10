@@ -247,12 +247,11 @@ class XlsxFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = ExportParams(),
-  ): XlsxFileExporter {
-    return XlsxFileExporter(
+  ): XlsxFileExporter =
+    XlsxFileExporter(
       currentDateProvider.date,
       translations = translations,
       exportParams = exportParams,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
-  }
 }

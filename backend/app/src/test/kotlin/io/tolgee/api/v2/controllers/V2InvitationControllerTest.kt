@@ -108,12 +108,13 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase()
     val project = base.project
     val code =
-      invitationService.create(
-        CreateProjectInvitationParams(
-          project,
-          ProjectPermissionType.EDIT,
-        ),
-      ).code
+      invitationService
+        .create(
+          CreateProjectInvitationParams(
+            project,
+            ProjectPermissionType.EDIT,
+          ),
+        ).code
 
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
@@ -127,14 +128,15 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase()
     val project = base.project
     val code =
-      invitationService.create(
-        CreateProjectInvitationParams(
-          project,
-          ProjectPermissionType.TRANSLATE,
-          LanguagePermissions(translate = project.languages, null, null),
-          null,
-        ),
-      ).code
+      invitationService
+        .create(
+          CreateProjectInvitationParams(
+            project,
+            ProjectPermissionType.TRANSLATE,
+            LanguagePermissions(translate = project.languages, null, null),
+            null,
+          ),
+        ).code
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
 

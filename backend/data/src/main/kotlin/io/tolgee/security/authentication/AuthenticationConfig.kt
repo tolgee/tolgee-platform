@@ -33,15 +33,12 @@ class AuthenticationConfig(
   @Bean("jwt_signing_key")
   fun jwtSigningKey(
     @Qualifier("jwt_signing_secret") bytes: ByteArray,
-  ): Key {
-    return Keys.hmacShaKeyFor(bytes)
-  }
+  ): Key = Keys.hmacShaKeyFor(bytes)
 
   @Bean("jwt_signing_secret")
-  fun jwtSigningSecret(): ByteArray {
-    return authenticationProperties.jwtSecret?.toByteArray()
+  fun jwtSigningSecret(): ByteArray =
+    authenticationProperties.jwtSecret?.toByteArray()
       ?: getOrGenerateJwtSecretFromFile()
-  }
 
   private fun getOrGenerateJwtSecretFromFile(): ByteArray {
     if (!fileStorage.fileExists(GENERATED_JWT_SECRET_FILE_NAME)) {

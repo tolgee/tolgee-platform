@@ -39,7 +39,8 @@ class ImageUploadServiceTest : AbstractSpringTest() {
     whenever(dateProvider.date)
       .thenReturn(
         Date.from(
-          Instant.now()
+          Instant
+            .now()
             .plus(2, ChronoUnit.HOURS)
             .minus(500, ChronoUnit.MILLIS),
         ),

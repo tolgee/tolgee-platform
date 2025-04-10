@@ -46,8 +46,8 @@ class ImportSettingsService(
   private fun getOrCreateSettings(
     userAccount: UserAccount,
     projectId: Long,
-  ): ImportSettings {
-    return (
+  ): ImportSettings =
+    (
       entityManager
         .find(ImportSettings::class.java, ImportSettingsId(userAccount.id, projectId))
         ?: ImportSettings(
@@ -56,5 +56,4 @@ class ImportSettingsService(
           this.userAccount = userAccount
         }
     )
-  }
 }

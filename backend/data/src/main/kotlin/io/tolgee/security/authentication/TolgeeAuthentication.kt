@@ -35,12 +35,10 @@ class TolgeeAuthentication(
   var projectApiKeyEntity: ApiKey? = null
   var personalAccessTokenEntity: Pat? = null
 
-  override fun getName(): String {
-    return userAccount.username
-  }
+  override fun getName(): String = userAccount.username
 
-  override fun getAuthorities(): Collection<GrantedAuthority> {
-    return when (userAccount.role) {
+  override fun getAuthorities(): Collection<GrantedAuthority> =
+    when (userAccount.role) {
       UserAccount.Role.USER -> listOf(SimpleGrantedAuthority(ROLE_USER))
       UserAccount.Role.ADMIN ->
         listOf(
@@ -49,27 +47,16 @@ class TolgeeAuthentication(
         )
       null -> emptyList()
     }
-  }
 
-  override fun getCredentials(): Any? {
-    return credentials
-  }
+  override fun getCredentials(): Any? = credentials
 
-  override fun getDetails(): TolgeeAuthenticationDetails? {
-    return details
-  }
+  override fun getDetails(): TolgeeAuthenticationDetails? = details
 
-  override fun getPrincipal(): UserAccountDto {
-    return userAccount
-  }
+  override fun getPrincipal(): UserAccountDto = userAccount
 
-  override fun isAuthenticated(): Boolean {
-    return true
-  }
+  override fun isAuthenticated(): Boolean = true
 
-  override fun setAuthenticated(isAuthenticated: Boolean) {
-    throw IllegalArgumentException("Implementation is immutable")
-  }
+  override fun setAuthenticated(isAuthenticated: Boolean): Unit = throw IllegalArgumentException("Implementation is immutable")
 
   companion object {
     const val ROLE_USER = "ROLE_USER"

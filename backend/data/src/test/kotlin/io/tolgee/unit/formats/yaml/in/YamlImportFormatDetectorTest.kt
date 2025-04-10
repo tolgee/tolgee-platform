@@ -39,12 +39,11 @@ class YamlImportFormatDetectorTest {
     "src/test/resources/import/yaml/unknown.yaml".assertDetected(ImportFormat.YAML_UNKNOWN)
   }
 
-  private fun parseFile(path: String): Map<*, *> {
-    return ObjectMapper(YAMLFactory()).readValue<Map<*, *>>(
+  private fun parseFile(path: String): Map<*, *> =
+    ObjectMapper(YAMLFactory()).readValue<Map<*, *>>(
       File(path)
         .readBytes(),
     )
-  }
 
   private fun String.assertDetected(format: ImportFormat) {
     val parsed = parseFile(this)

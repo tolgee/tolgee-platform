@@ -7,17 +7,17 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class WebhookConfigModelAssembler() : RepresentationModelAssemblerSupport<WebhookConfig, WebhookConfigModel>(
-  WebhookConfigController::class.java,
-  WebhookConfigModel::class.java,
-) {
-  override fun toModel(entity: WebhookConfig): WebhookConfigModel {
-    return WebhookConfigModel(
+class WebhookConfigModelAssembler :
+  RepresentationModelAssemblerSupport<WebhookConfig, WebhookConfigModel>(
+    WebhookConfigController::class.java,
+    WebhookConfigModel::class.java,
+  ) {
+  override fun toModel(entity: WebhookConfig): WebhookConfigModel =
+    WebhookConfigModel(
       id = entity.id,
       url = entity.url,
       entity.webhookSecret,
       entity.firstFailed?.time,
       entity.lastExecuted?.time,
     )
-  }
 }

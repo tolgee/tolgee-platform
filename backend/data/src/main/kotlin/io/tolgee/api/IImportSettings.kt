@@ -24,11 +24,10 @@ interface IImportSettings {
     this.createNewKeys = other.createNewKeys
   }
 
-  fun clone(): IImportSettings {
-    return object : IImportSettings {
+  fun clone(): IImportSettings =
+    object : IImportSettings {
       override var overrideKeyDescriptions: Boolean = this@IImportSettings.overrideKeyDescriptions
       override var convertPlaceholdersToIcu: Boolean = this@IImportSettings.convertPlaceholdersToIcu
       override var createNewKeys: Boolean = this@IImportSettings.createNewKeys
     }
-  }
 }

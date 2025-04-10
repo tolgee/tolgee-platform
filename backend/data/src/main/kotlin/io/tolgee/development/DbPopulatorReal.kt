@@ -64,8 +64,8 @@ class DbPopulatorReal(
     username: String,
     password: String? = null,
     name: String? = null,
-  ): UserAccount {
-    return userAccountService.findActive(username) ?: let {
+  ): UserAccount =
+    userAccountService.findActive(username) ?: let {
       val rawPassword =
         password
           ?: initialPasswordManager.initialPassword
@@ -78,7 +78,6 @@ class DbPopulatorReal(
         ),
       )
     }
-  }
 
   fun createOrganization(
     name: String,
@@ -165,29 +164,23 @@ class DbPopulatorReal(
     name: String,
     slug: String = name,
     userAccount: UserAccount,
-  ): Organization {
-    return organizationService.find(name) ?: let {
+  ): Organization =
+    organizationService.find(name) ?: let {
       organizationService.create(OrganizationDto(name, slug = slug), userAccount)
     }
-  }
 
   @Transactional
-  fun createBase(username: String): Base {
-    return createBase(UUID.randomUUID().toString(), username, null)
-  }
+  fun createBase(username: String): Base = createBase(UUID.randomUUID().toString(), username, null)
 
   @Transactional
-  fun createBase(): Base {
-    return createBase(tolgeeProperties.authentication.initialUsername)
-  }
+  fun createBase(): Base = createBase(tolgeeProperties.authentication.initialUsername)
 
-  fun populate(): Base {
-    return executeInNewTransaction(platformTransactionManager) {
+  fun populate(): Base =
+    executeInNewTransaction(platformTransactionManager) {
       populate(userName = tolgeeProperties.authentication.initialUsername)
     }.also {
       languageStatsService.refreshLanguageStats(it.project.id)
     }
-  }
 
   @Transactional
   fun populate(userName: String): Base {
@@ -287,9 +280,7 @@ class DbPopulatorReal(
   private fun createLanguage(
     name: String,
     project: Project,
-  ): Language {
-    return languageService.createLanguage(LanguageRequest(name, name, name), project)
-  }
+  ): Language = languageService.createLanguage(LanguageRequest(name, name, name), project)
 
   private fun createTranslation(
     project: Project,
@@ -300,8 +291,10 @@ class DbPopulatorReal(
   ) {
     val key = Key()
     key.name = "sampleApp." +
-      english.replace(" ", "_")
-        .lowercase(Locale.getDefault()).replace("\\.+$".toRegex(), "")
+      english
+        .replace(" ", "_")
+        .lowercase(Locale.getDefault())
+        .replace("\\.+$".toRegex(), "")
     key.project = project
     val translation = Translation()
     translation.language = en

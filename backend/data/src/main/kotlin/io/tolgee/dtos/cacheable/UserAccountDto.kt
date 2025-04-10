@@ -39,7 +39,5 @@ data class UserAccountDto(
       )
   }
 
-  override fun toString(): String {
-    return username
-  }
+  override fun toString(): String = username
 }

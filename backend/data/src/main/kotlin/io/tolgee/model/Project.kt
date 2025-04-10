@@ -55,7 +55,11 @@ class Project(
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   override var slug: String? = null,
-) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable, ISimpleProject {
+) : AuditModel(),
+  ModelWithAvatar,
+  EntityWithId,
+  SoftDeletable,
+  ISimpleProject {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()
@@ -133,17 +137,11 @@ class Project(
     this.organizationOwner = organizationOwner
   }
 
-  fun findLanguageOptional(tag: String): Optional<Language> {
-    return languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()
-  }
+  fun findLanguageOptional(tag: String): Optional<Language> = languages.stream().filter { l: Language -> (l.tag == tag) }.findFirst()
 
-  fun findLanguage(tag: String): Language? {
-    return findLanguageOptional(tag).orElse(null)
-  }
+  fun findLanguage(tag: String): Language? = findLanguageOptional(tag).orElse(null)
 
-  fun getLanguage(tag: String): Language {
-    return findLanguage(tag) ?: throw NotFoundException()
-  }
+  fun getLanguage(tag: String): Language = findLanguage(tag) ?: throw NotFoundException()
 
   companion object {
     @Configurable

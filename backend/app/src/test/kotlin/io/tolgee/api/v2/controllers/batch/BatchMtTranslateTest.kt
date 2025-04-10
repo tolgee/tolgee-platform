@@ -39,12 +39,15 @@ class BatchMtTranslateTest : ProjectAuthControllerTest("/v2/projects/") {
         "keyIds" to keyIds,
         "targetLanguageIds" to
           listOf(
-            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
-            testData.projectBuilder.getLanguageByTag("de")!!.self.id,
+            testData.projectBuilder
+              .getLanguageByTag("cs")!!
+              .self.id,
+            testData.projectBuilder
+              .getLanguageByTag("de")!!
+              .self.id,
           ),
       ),
-    )
-      .andIsOk
+    ).andIsOk
       .andAssertThatJson {
         node("id").isValidId
       }
@@ -52,13 +55,16 @@ class BatchMtTranslateTest : ProjectAuthControllerTest("/v2/projects/") {
     batchJobTestBase.waitForAllTranslated(keyIds, keyCount)
     executeInNewTransaction {
       val jobs =
-        entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
+        entityManager
+          .createQuery("""from BatchJob""", BatchJob::class.java)
           .resultList
       jobs.assert.hasSize(1)
       val job = jobs[0]
       job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
       job.activityRevision.assert.isNotNull
-      job.activityRevision!!.modifiedEntities.assert.hasSize(2000)
+      job.activityRevision!!
+        .modifiedEntities.assert
+        .hasSize(2000)
     }
   }
 }

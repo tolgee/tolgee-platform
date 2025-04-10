@@ -70,14 +70,13 @@ class Xliff12FileProcessor(
   fun convertMessage(
     rawData: String,
     languageTag: String,
-  ): MessageConvertorResult {
-    return convertor.convert(
+  ): MessageConvertorResult =
+    convertor.convert(
       rawData,
       languageTag,
       convertPlaceholders = context.importSettings.convertPlaceholdersToIcu,
       isProjectIcuEnabled = context.projectIcuPlaceholdersEnabled,
     )
-  }
 
   private val format by lazy {
     context.mapping?.format ?: XliffImportFormatDetector().detectFormat(parsed)

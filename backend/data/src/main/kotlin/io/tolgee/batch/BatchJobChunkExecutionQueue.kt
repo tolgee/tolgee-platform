@@ -32,7 +32,8 @@ class BatchJobChunkExecutionQueue(
   @Lazy
   private val redisTemplate: StringRedisTemplate,
   private val metrics: Metrics,
-) : Logging, InitializingBean {
+) : Logging,
+  InitializingBean {
   companion object {
     /**
      * It's static
@@ -57,16 +58,17 @@ class BatchJobChunkExecutionQueue(
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
     val data =
-      entityManager.createQuery(
-        """
-        select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
-        from BatchJobChunkExecution bjce
-        join bjce.batchJob bk
-        where bjce.status = :executionStatus
-        order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
-        """.trimIndent(),
-        BatchJobChunkExecutionDto::class.java,
-      ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
+      entityManager
+        .createQuery(
+          """
+          select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
+          from BatchJobChunkExecution bjce
+          join bjce.batchJob bk
+          where bjce.status = :executionStatus
+          order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
+          """.trimIndent(),
+          BatchJobChunkExecutionDto::class.java,
+        ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setHint(
           "jakarta.persistence.lock.timeout",
           LockOptions.SKIP_LOCKED,
@@ -162,18 +164,14 @@ class BatchJobChunkExecutionQueue(
     transform: (item: ExecutionQueueItem) -> String,
   ) = queue.joinToString(separator, transform = transform)
 
-  fun poll(): ExecutionQueueItem? {
-    return queue.poll()
-  }
+  fun poll(): ExecutionQueueItem? = queue.poll()
 
   fun clear() {
     logger.debug("Clearing queue")
     queue.clear()
   }
 
-  fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? {
-    return queue.find(function)
-  }
+  fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? = queue.find(function)
 
   fun peek(): ExecutionQueueItem = queue.peek()
 
@@ -181,15 +179,11 @@ class BatchJobChunkExecutionQueue(
 
   fun isEmpty(): Boolean = queue.isEmpty()
 
-  fun getJobCharacterCounts(): Map<JobCharacter, Int> {
-    return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
-  }
+  fun getJobCharacterCounts(): Map<JobCharacter, Int> = queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
 
   override fun afterPropertiesSet() {
     metrics.registerJobQueue(queue)
   }
 
-  fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> {
-    return queue.filter { it.jobId == jobId }
-  }
+  fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> = queue.filter { it.jobId == jobId }
 }

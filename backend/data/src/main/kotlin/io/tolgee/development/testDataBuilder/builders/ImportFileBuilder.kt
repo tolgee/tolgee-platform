@@ -6,7 +6,9 @@ import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 
-class ImportFileBuilder(importBuilder: ImportBuilder) : BaseEntityDataBuilder<ImportFile, ImportFileBuilder>() {
+class ImportFileBuilder(
+  importBuilder: ImportBuilder,
+) : BaseEntityDataBuilder<ImportFile, ImportFileBuilder>() {
   override var self: ImportFile = ImportFile("lang.json", importBuilder.self)
 
   class DATA {

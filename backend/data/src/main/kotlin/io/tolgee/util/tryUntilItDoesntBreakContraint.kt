@@ -33,5 +33,7 @@ inline fun <T> tryUntilItDoesntBreakConstraint(
   throw RepeatedlyThrowingConstraintViolationException(exception!!, repeats)
 }
 
-class RepeatedlyThrowingConstraintViolationException(cause: Throwable, repeats: Int) :
-  RuntimeException("Retry failed $repeats times.", cause)
+class RepeatedlyThrowingConstraintViolationException(
+  cause: Throwable,
+  repeats: Int,
+) : RuntimeException("Retry failed $repeats times.", cause)

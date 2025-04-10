@@ -5,7 +5,9 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.service.dataImport.ForceMode
 
-class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
+class SingleStepImportRequest :
+  ImportAddFilesParams(),
+  IImportSettings {
   @Schema(
     description =
       "Whether to override existing translation data.\n\n" +

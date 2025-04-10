@@ -50,7 +50,8 @@ class ImportDataManager(
     if (!saveData) {
       return@lazy mutableMapOf<Pair<ImportFile, String>, ImportKey>()
     }
-    importService.findKeys(import)
+    importService
+      .findKeys(import)
       .asSequence()
       .map { (it.file to it.name) to it }
       .toMap(mutableMapOf())
@@ -73,7 +74,8 @@ class ImportDataManager(
       if (language != null && result[language.id] == null) {
         result[language.id] =
           mutableMapOf<Pair<String?, String>, Translation>().apply {
-            translationService.getAllByLanguageId(language.id)
+            translationService
+              .getAllByLanguageId(language.id)
               .forEach { translation -> put(translation.key.namespace?.name to translation.key.name, translation) }
           }
       }
@@ -82,7 +84,8 @@ class ImportDataManager(
   }
 
   val existingKeys: MutableMap<Pair<String?, String>, Key> by lazy {
-    keyService.getAll(import.project.id)
+    keyService
+      .getAll(import.project.id)
       .asSequence()
       .map { (it.namespace?.name to it.name) to it }
       .toMap(mutableMapOf())
@@ -93,9 +96,12 @@ class ImportDataManager(
   }
 
   val existingMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
-    keyMetaService.getWithFetchedData(this.import.project).asSequence()
+    keyMetaService
+      .getWithFetchedData(this.import.project)
+      .asSequence()
       .map { (it.key!!.namespace?.name to it.key!!.name) to it }
-      .toMap().toMutableMap()
+      .toMap()
+      .toMutableMap()
   }
 
   val existingNamespaces by lazy {
@@ -120,9 +126,10 @@ class ImportDataManager(
     }
   }
 
-  fun getStoredTranslations(language: ImportLanguage): List<ImportTranslation> {
-    return this.populateStoredTranslations(language).flatMap { it.value }
-  }
+  fun getStoredTranslations(language: ImportLanguage): List<ImportTranslation> =
+    this.populateStoredTranslations(language).flatMap {
+      it.value
+    }
 
   private fun getStoredTranslations(
     keyName: String,
@@ -161,9 +168,10 @@ class ImportDataManager(
     }
   }
 
-  private fun getOrInitLanguageDataItem(language: ImportLanguage): MutableMap<ImportKey, MutableList<ImportTranslation>> {
-    return this.storedTranslations.computeIfAbsent(language) { mutableMapOf() }
-  }
+  private fun getOrInitLanguageDataItem(language: ImportLanguage): MutableMap<ImportKey, MutableList<ImportTranslation>> =
+    this.storedTranslations.computeIfAbsent(language) {
+      mutableMapOf()
+    }
 
   /**
    * @param removeEqual Whether translations with equal texts should be removed
@@ -241,14 +249,14 @@ class ImportDataManager(
     oldExistingLanguage: Language? = null,
   ) {
     val affectedLanguages =
-      storedLanguages.filter {
-        (
-          (editedLanguage.existingLanguage == it.existingLanguage && it.existingLanguage != null) ||
-            (oldExistingLanguage == it.existingLanguage && it.existingLanguage != null)
-        ) &&
-          it != editedLanguage
-      }
-        .sortedBy { it.id } + listOf(editedLanguage)
+      storedLanguages
+        .filter {
+          (
+            (editedLanguage.existingLanguage == it.existingLanguage && it.existingLanguage != null) ||
+              (oldExistingLanguage == it.existingLanguage && it.existingLanguage != null)
+          ) &&
+            it != editedLanguage
+        }.sortedBy { it.id } + listOf(editedLanguage)
     val affectedFiles = affectedLanguages.map { it.file }
     resetBetweenFileCollisionIssuesForFiles(affectedFiles.map { it.id }, affectedLanguages.map { it.id })
     val handledLanguages = mutableListOf<ImportLanguage>()
@@ -315,23 +323,24 @@ class ImportDataManager(
         otherLanguages,
       )
 
-    storedTranslations.firstOrNull {
-      it.isSelectedToImport
-    }?.let { collision ->
-      val handled = tryHandleUsingCollisionHandlers(listOf(newTranslation) + storedTranslations)
-      if (handled) {
-        return issues
+    storedTranslations
+      .firstOrNull {
+        it.isSelectedToImport
+      }?.let { collision ->
+        val handled = tryHandleUsingCollisionHandlers(listOf(newTranslation) + storedTranslations)
+        if (handled) {
+          return issues
+        }
+        issues.add(
+          FileIssueType.TRANSLATION_DEFINED_IN_ANOTHER_FILE to
+            mapOf(
+              FileIssueParamType.KEY_ID to collision.key.id.toString(),
+              FileIssueParamType.LANGUAGE_ID to collision.language.id.toString(),
+              FileIssueParamType.KEY_NAME to collision.key.name,
+              FileIssueParamType.LANGUAGE_NAME to collision.language.name,
+            ),
+        )
       }
-      issues.add(
-        FileIssueType.TRANSLATION_DEFINED_IN_ANOTHER_FILE to
-          mapOf(
-            FileIssueParamType.KEY_ID to collision.key.id.toString(),
-            FileIssueParamType.LANGUAGE_ID to collision.language.id.toString(),
-            FileIssueParamType.KEY_NAME to collision.key.name,
-            FileIssueParamType.LANGUAGE_NAME to collision.language.name,
-          ),
-      )
-    }
     return issues
   }
 
@@ -356,9 +365,8 @@ class ImportDataManager(
     importService.deleteAllBetweenFileCollisionsForFiles(fileIds, languageIds)
   }
 
-  fun checkForOtherFilesCollisions(newTranslation: ImportTranslation): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> {
-    return checkForOtherFilesCollisions(newTranslation, getLanguagesWithSameExisting(newTranslation.language))
-  }
+  fun checkForOtherFilesCollisions(newTranslation: ImportTranslation): MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>> =
+    checkForOtherFilesCollisions(newTranslation, getLanguagesWithSameExisting(newTranslation.language))
 
   fun applySettings(
     oldSettings: IImportSettings,

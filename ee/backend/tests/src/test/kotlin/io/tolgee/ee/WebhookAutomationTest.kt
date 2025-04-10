@@ -75,8 +75,11 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
     verifyWebhookExecuted(testData) {
       modifyTranslationData()
     }
-    webhookConfigService.get(testData.webhookConfig.self.id).firstFailed!!
-      .time.assert.isEqualTo(currentDateProvider.date.time)
+    webhookConfigService
+      .get(testData.webhookConfig.self.id)
+      .firstFailed!!
+      .time.assert
+      .isEqualTo(currentDateProvider.date.time)
 
     mockWebhookResponse(HttpStatus.OK)
 
@@ -89,7 +92,10 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
       modifyTranslationData()
     }
 
-    webhookConfigService.get(testData.webhookConfig.self.id).firstFailed.assert.isNull()
+    webhookConfigService
+      .get(testData.webhookConfig.self.id)
+      .firstFailed.assert
+      .isNull()
   }
 
   private fun mockWebhookResponse(httpStatus: HttpStatus) {
@@ -129,8 +135,14 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
     webhookTriggeringCallback()
     waitForNotThrowing {
       getWebhookRestTemplateInvocationCount().assert.isEqualTo(invocations + 1)
-      val callArguments = Mockito.mockingDetails(webhookRestTemplate).invocations.last().arguments
-      callArguments[0].assert
+      val callArguments =
+        Mockito
+          .mockingDetails(webhookRestTemplate)
+          .invocations
+          .last()
+          .arguments
+      callArguments[0]
+        .assert
         .isEqualTo(testData.webhookConfig.self.url)
       val httpEntity = callArguments[2] as HttpEntity<String>
 
@@ -143,8 +155,11 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
           node("revisionId").isNumber
         }
       }
-      webhookConfigService.get(testData.webhookConfig.self.id)
-        .lastExecuted!!.time.assert.isEqualTo(currentDateProvider.date.time)
+      webhookConfigService
+        .get(testData.webhookConfig.self.id)
+        .lastExecuted!!
+        .time.assert
+        .isEqualTo(currentDateProvider.date.time)
     }
   }
 

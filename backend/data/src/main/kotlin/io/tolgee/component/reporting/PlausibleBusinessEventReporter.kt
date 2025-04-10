@@ -81,33 +81,25 @@ class PlausibleBusinessEventReporter(
   private fun getEvent(
     data: OnBusinessEventToCaptureEvent,
     url: String,
-  ): PlausibleEvent {
-    return PlausibleEvent(
+  ): PlausibleEvent =
+    PlausibleEvent(
       name = data.eventName,
       url = url,
       domain = plausibleProperties.domain!!,
       props =
-        data.data?.mapNotNull {
-          it.key to it.value.toString()
-        }?.toMap(),
+        data.data
+          ?.mapNotNull {
+            it.key to it.value.toString()
+          }?.toMap(),
     )
-  }
 
-  private fun getUrl(): String? {
-    return getRequest()?.requestURL?.toString()
-  }
+  private fun getUrl(): String? = getRequest()?.requestURL?.toString()
 
-  private fun getIp(): String? {
-    return requestIpProvider.getClientIp()
-  }
+  private fun getIp(): String? = requestIpProvider.getClientIp()
 
-  private fun getRequest(): HttpServletRequest? {
-    return (RequestContextHolder.currentRequestAttributes() as? ServletRequestAttributes)?.request
-  }
+  private fun getRequest(): HttpServletRequest? = (RequestContextHolder.currentRequestAttributes() as? ServletRequestAttributes)?.request
 
-  private fun getUserAgent(): String? {
-    return getRequest()?.getHeader("User-Agent")
-  }
+  private fun getUserAgent(): String? = getRequest()?.getHeader("User-Agent")
 
   private val endpoint by lazy {
     plausibleProperties.url + "/api/event"

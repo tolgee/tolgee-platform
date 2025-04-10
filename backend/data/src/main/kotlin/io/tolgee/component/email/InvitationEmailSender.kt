@@ -54,7 +54,5 @@ class InvitationEmailSender(
     return "You have been invited to $toWhat $escapedName in Tolgee."
   }
 
-  fun getInvitationAcceptUrl(code: String): String {
-    return "${frontendUrlProvider.url}/accept_invitation/$code"
-  }
+  fun getInvitationAcceptUrl(code: String): String = "${frontendUrlProvider.url}/accept_invitation/$code"
 }

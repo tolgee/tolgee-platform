@@ -14,15 +14,11 @@ class MemoryTolgeeAtomicLong(
 
   private val it: AtomicLong by lazy { map.getOrPut(name) { AtomicLong(defaultProvider()) } }
 
-  override fun addAndGet(delta: Long): Long {
-    return it.addAndGet(delta)
-  }
+  override fun addAndGet(delta: Long): Long = it.addAndGet(delta)
 
   override fun delete() {
     map.remove(name)
   }
 
-  override fun get(): Long {
-    return it.get()
-  }
+  override fun get(): Long = it.get()
 }

@@ -183,7 +183,5 @@ class RateLimitService(
     return Bucket(bucket.tokens - 1, bucket.refillAt)
   }
 
-  private fun getLockName(policy: RateLimitPolicy): String {
-    return "tolgee.ratelimit.${policy.bucketName}"
-  }
+  private fun getLockName(policy: RateLimitPolicy): String = "tolgee.ratelimit.${policy.bucketName}"
 }

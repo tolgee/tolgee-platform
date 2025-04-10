@@ -525,10 +525,13 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
   }
 
   private fun verifyKeysDistancesStoredAsynchronously() {
-    entityManager.createQuery("from KeysDistance kd", KeysDistance::class.java)
-      .resultList.map { it.createdAt }
+    entityManager
+      .createQuery("from KeysDistance kd", KeysDistance::class.java)
+      .resultList
+      .map { it.createdAt }
       // this means the data is stored in 2 different transactions executed with different timestamps
       .distinct()
-      .assert.hasSize(2)
+      .assert
+      .hasSize(2)
   }
 }

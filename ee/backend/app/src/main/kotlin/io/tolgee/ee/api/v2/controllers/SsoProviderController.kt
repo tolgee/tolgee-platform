@@ -100,8 +100,8 @@ class SsoProviderController(
     }
   }
 
-  private fun CreateProviderRequest.toDto(): SsoTenantDto {
-    return SsoTenantDto(
+  private fun CreateProviderRequest.toDto(): SsoTenantDto =
+    SsoTenantDto(
       authorizationUri = this.authorizationUri,
       clientId = this.clientId,
       clientSecret = this.clientSecret,
@@ -110,5 +110,4 @@ class SsoProviderController(
       enabled = this.enabled,
       domain = this.domain,
     )
-  }
 }

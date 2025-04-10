@@ -49,7 +49,8 @@ class MtServicesConfiguration(
           )
       }
 
-    return TranslateClient.builder()
+    return TranslateClient
+      .builder()
       .credentialsProvider(chain)
       .region(Region.of(awsMachineTranslationProperties.region))
       .build()

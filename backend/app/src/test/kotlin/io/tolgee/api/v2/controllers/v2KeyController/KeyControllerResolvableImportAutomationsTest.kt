@@ -40,7 +40,8 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
     saveTestData()
     doImport(keyName)
     val translation =
-      keyService.get(testData.projectBuilder.self.id, keyName, null)
+      keyService
+        .get(testData.projectBuilder.self.id, keyName, null)
         .getLangTranslation(testData.secondLanguage)
     Assertions.assertThat(translation.outdated).isTrue
   }
@@ -49,12 +50,15 @@ class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
     waitForNotThrowing(timeout = 3_000) {
       transactionTemplate.execute {
         val translatedText =
-          keyService.get(testData.projectBuilder.self.id, keyName, null)
-            .getLangTranslation(testData.secondLanguage).text
+          keyService
+            .get(testData.projectBuilder.self.id, keyName, null)
+            .getLangTranslation(testData.secondLanguage)
+            .text
 
-        Assertions.assertThat(
-          translatedText,
-        ).isEqualTo("Translated with Google")
+        Assertions
+          .assertThat(
+            translatedText,
+          ).isEqualTo("Translated with Google")
       }
     }
   }

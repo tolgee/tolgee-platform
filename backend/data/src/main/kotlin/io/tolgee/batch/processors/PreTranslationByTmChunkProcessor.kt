@@ -24,11 +24,12 @@ class PreTranslationByTmChunkProcessor(
     val languages = languageService.findByIdIn(parameters.targetLanguageIds)
 
     val preparedChunk =
-      chunk.map { keyId ->
-        languages.map { language ->
-          BatchTranslationTargetItem(keyId, language.id)
-        }
-      }.flatten()
+      chunk
+        .map { keyId ->
+          languages.map { language ->
+            BatchTranslationTargetItem(keyId, language.id)
+          }
+        }.flatten()
 
     genericAutoTranslationChunkProcessor.process(
       job,
@@ -40,28 +41,19 @@ class PreTranslationByTmChunkProcessor(
     )
   }
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getTarget(data: PreTranslationByTmRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: PreTranslationByTmRequest): List<Long> = data.keyIds
 
-  override fun getParamsType(): Class<PreTranslationByTmJobParams> {
-    return PreTranslationByTmJobParams::class.java
-  }
+  override fun getParamsType(): Class<PreTranslationByTmJobParams> = PreTranslationByTmJobParams::class.java
 
   override fun getChunkSize(
     request: PreTranslationByTmRequest,
     projectId: Long?,
-  ): Int {
-    return 10
-  }
+  ): Int = 10
 
-  override fun getParams(data: PreTranslationByTmRequest): PreTranslationByTmJobParams {
-    return PreTranslationByTmJobParams().apply {
+  override fun getParams(data: PreTranslationByTmRequest): PreTranslationByTmJobParams =
+    PreTranslationByTmJobParams().apply {
       this.targetLanguageIds = data.targetLanguageIds
     }
-  }
 }

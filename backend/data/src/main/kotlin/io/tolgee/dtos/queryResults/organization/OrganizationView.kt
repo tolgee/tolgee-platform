@@ -42,8 +42,8 @@ class OrganizationView(
     fun of(
       entity: Organization,
       currentUserRole: OrganizationRoleType?,
-    ): OrganizationView {
-      return OrganizationView(
+    ): OrganizationView =
+      OrganizationView(
         id = entity.id,
         name = entity.name,
         slug = entity.slug,
@@ -52,6 +52,5 @@ class OrganizationView(
         currentUserRole = currentUserRole,
         avatarHash = entity.avatarHash,
       )
-    }
   }
 }

@@ -11,10 +11,9 @@ class ImportFileIssueParamModelAssembler :
     V2ImportController::class.java,
     ImportFileIssueParamModel::class.java,
   ) {
-  override fun toModel(view: ImportFileIssueParamView): ImportFileIssueParamModel {
-    return ImportFileIssueParamModel(
+  override fun toModel(view: ImportFileIssueParamView): ImportFileIssueParamModel =
+    ImportFileIssueParamModel(
       type = view.type,
       value = view.value,
     )
-  }
 }

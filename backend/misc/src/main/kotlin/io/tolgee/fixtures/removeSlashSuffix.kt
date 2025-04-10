@@ -1,8 +1,6 @@
 package io.tolgee.fixtures
 
-fun String.removeSlashSuffix(): String {
-  return REGEX.replace(this, "")
-}
+fun String.removeSlashSuffix(): String = REGEX.replace(this, "")
 
 private val REGEX by lazy {
   Regex("/+$")

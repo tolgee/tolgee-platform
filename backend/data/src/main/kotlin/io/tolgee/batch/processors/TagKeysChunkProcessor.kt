@@ -36,21 +36,14 @@ class TagKeysChunkProcessor(
     }
   }
 
-  override fun getTarget(data: TagKeysRequest): List<Long> {
-    return data.keyIds
-  }
+  override fun getTarget(data: TagKeysRequest): List<Long> = data.keyIds
 
-  override fun getParamsType(): Class<TagKeysParams> {
-    return TagKeysParams::class.java
-  }
+  override fun getParamsType(): Class<TagKeysParams> = TagKeysParams::class.java
 
-  override fun getTargetItemType(): Class<Long> {
-    return Long::class.java
-  }
+  override fun getTargetItemType(): Class<Long> = Long::class.java
 
-  override fun getParams(data: TagKeysRequest): TagKeysParams {
-    return TagKeysParams().apply {
+  override fun getParams(data: TagKeysRequest): TagKeysParams =
+    TagKeysParams().apply {
       this.tags = data.tags
     }
-  }
 }

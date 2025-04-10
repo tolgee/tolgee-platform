@@ -15,7 +15,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
 
 @Component
-class EmailTestUtil() {
+class EmailTestUtil {
   @Autowired
   @MockBean
   lateinit var javaMailSender: JavaMailSender
@@ -49,18 +49,19 @@ class EmailTestUtil() {
       messageArgumentCaptor.allValues.map {
         (
           (it.content as MimeMultipart)
-            .getBodyPart(0).content as MimeMultipart
-        )
-          .getBodyPart(0).content as String
+            .getBodyPart(0)
+            .content as MimeMultipart
+        ).getBodyPart(0)
+          .content as String
       }
 
-  fun emailToString(email: MimeMessage): String {
-    return (
+  fun emailToString(email: MimeMessage): String =
+    (
       (email.content as MimeMultipart)
-        .getBodyPart(0).content as MimeMultipart
-    )
-      .getBodyPart(0).content as String
-  }
+        .getBodyPart(0)
+        .content as MimeMultipart
+    ).getBodyPart(0)
+      .content as String
 
   fun verifyEmailSent() {
     verify(javaMailSender).send(any<MimeMessage>())
@@ -72,7 +73,5 @@ class EmailTestUtil() {
       return Assertions.assertThat(messageArgumentCaptor.firstValue.getHeader("To")[0] as String)
     }
 
-  fun findEmail(to: String): MimeMessage? {
-    return messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
-  }
+  fun findEmail(to: String): MimeMessage? = messageArgumentCaptor.allValues.find { it.getHeader("To")[0] == to }
 }

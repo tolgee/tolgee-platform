@@ -24,7 +24,9 @@ import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 
-abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
+abstract class AbstractAuthorizationInterceptor :
+  HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -45,9 +47,7 @@ abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
     return preHandleInternal(request, response, handler)
   }
 
-  override fun getOrder(): Int {
-    return Ordered.HIGHEST_PRECEDENCE
-  }
+  override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE
 
   abstract fun preHandleInternal(
     request: HttpServletRequest,

@@ -29,7 +29,9 @@ import java.util.*
     Index(columnList = "debouncing_key"),
   ],
 )
-class BatchJob : StandardAuditModel(), IBatchJob {
+class BatchJob :
+  StandardAuditModel(),
+  IBatchJob {
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   var project: Project? = null
 

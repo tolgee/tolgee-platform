@@ -43,8 +43,11 @@ class UploadedImageModelAssembler(
     if (!fileUrl.matches(Regex("^https?://.*$"))) {
       val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
       fileUrl =
-        builder.replacePath(fileUrl)
-          .replaceQuery("").build().toUriString()
+        builder
+          .replacePath(fileUrl)
+          .replaceQuery("")
+          .build()
+          .toUriString()
     }
 
     return UploadedImageModel(

@@ -39,13 +39,12 @@ class InitialPasswordManager(
       return cachedInitialPassword
     }
 
-  private fun generatePassword(): String {
-    return (1..40)
+  private fun generatePassword(): String =
+    (1..40)
       .asSequence()
       .map { secureRandom.nextInt(charPool.size) }
       .map(charPool::get)
       .joinToString("")
-  }
 
   val charPool by lazy {
     ('a'..'z') + ('A'..'Z') + ('0'..'9')

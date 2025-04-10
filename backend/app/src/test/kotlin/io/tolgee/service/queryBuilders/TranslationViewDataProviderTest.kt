@@ -25,10 +25,11 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
       translationViewDataProvider.getData(
         projectId = testData.project.id,
         languages =
-          languageService.dtosFromEntities(
-            listOf(testData.englishLanguage, testData.germanLanguage),
-            testData.project.id,
-          ).toSet(),
+          languageService
+            .dtosFromEntities(
+              listOf(testData.englishLanguage, testData.germanLanguage),
+              testData.project.id,
+            ).toSet(),
         PageRequest.of(
           0,
           10,
@@ -45,10 +46,11 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
       translationViewDataProvider.getData(
         projectId = testData.project.id,
         languages =
-          languageService.dtosFromEntities(
-            listOf(testData.englishLanguage),
-            testData.project.id,
-          ).toSet(),
+          languageService
+            .dtosFromEntities(
+              listOf(testData.englishLanguage),
+              testData.project.id,
+            ).toSet(),
         PageRequest.of(
           0,
           10,
@@ -64,17 +66,23 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
       translationViewDataProvider.getData(
         projectId = testData.project.id,
         languages =
-          languageService.dtosFromEntities(
-            listOf(testData.englishLanguage),
-            testData.project.id,
-          ).toSet(),
+          languageService
+            .dtosFromEntities(
+              listOf(testData.englishLanguage),
+              testData.project.id,
+            ).toSet(),
         PageRequest.of(0, 10),
         params =
           GetTranslationsParams().apply {
             search = "A tr"
           },
       )
-    assertThat(result.content.first().translations["en"]?.text).isEqualTo("A translation")
+    assertThat(
+      result.content
+        .first()
+        .translations["en"]
+        ?.text,
+    ).isEqualTo("A translation")
     assertThat(result.totalElements).isEqualTo(1)
   }
 
@@ -86,10 +94,11 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
       translationViewDataProvider.getData(
         projectId = testData.project.id,
         languages =
-          languageService.dtosFromEntities(
-            listOf(testData.englishLanguage, testData.germanLanguage),
-            testData.project.id,
-          ).toSet(),
+          languageService
+            .dtosFromEntities(
+              listOf(testData.englishLanguage, testData.germanLanguage),
+              testData.project.id,
+            ).toSet(),
         PageRequest.of(0, 10),
         params = GetTranslationsParams(),
       )
@@ -108,10 +117,11 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
       translationViewDataProvider.getData(
         projectId = testData.project.id,
         languages =
-          languageService.dtosFromEntities(
-            listOf(testData.germanLanguage),
-            testData.project.id,
-          ).toSet(),
+          languageService
+            .dtosFromEntities(
+              listOf(testData.germanLanguage),
+              testData.project.id,
+            ).toSet(),
         PageRequest.of(0, 10),
         params =
           GetTranslationsParams().apply {
@@ -119,7 +129,9 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
           },
       )
     result.content.assert.hasSize(1)
-    result.content[0].keyName.assert.isEqualTo("A key")
+    result.content[0]
+      .keyName.assert
+      .isEqualTo("A key")
   }
 
   private fun generateCommentStatesTestData(): TranslationsTestData {

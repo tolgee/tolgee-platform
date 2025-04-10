@@ -79,7 +79,8 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
   private fun assertThatActualTranslationsEqualToExpected(request: ChatPostMessageRequest) {
     val actualMap =
       request.attachments
-        .dropLast(1).associate {
+        .dropLast(1)
+        .associate {
           val keyLanguage = ((it.blocks[0] as SectionBlock).text.text).removePrefix("null ").trim()
           val keyTranslation = (it.blocks[1] as SectionBlock).text.text
           keyLanguage to keyTranslation

@@ -112,10 +112,9 @@ class ContentStorageController(
   @AllowApiAccess
   fun get(
     @PathVariable contentStorageId: Long,
-  ): ContentStorageModel {
-    return contentStorageModelAssemblerEeImpl
+  ): ContentStorageModel =
+    contentStorageModelAssemblerEeImpl
       .toModel(contentStorageService.get(projectHolder.project.id, contentStorageId))
-  }
 
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @PostMapping("/test")

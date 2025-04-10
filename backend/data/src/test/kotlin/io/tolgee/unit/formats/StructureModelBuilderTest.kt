@@ -260,7 +260,10 @@ class StructureModelBuilderTest {
     }
   }
 
-  class PluralValue(val key: String, val pluralForms: Map<String, String>)
+  class PluralValue(
+    val key: String,
+    val pluralForms: Map<String, String>,
+  )
 
   private inline fun List<Any>.testResult(
     delimiter: Char,

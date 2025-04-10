@@ -12,11 +12,14 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlContent: Boolean) {
+class XliffFileWriter(
+  private val xliffModel: XliffModel,
+  private val enableXmlContent: Boolean,
+) {
   private lateinit var xliffElement: Element
 
-  fun produceFiles(): InputStream {
-    return buildDom {
+  fun produceFiles(): InputStream =
+    buildDom {
       xliffElement = createBaseDocumentStructure()
 
       for (xliffFile in xliffModel.files) {
@@ -26,14 +29,12 @@ class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlC
         }
       }
     }.write().toByteArray().inputStream()
-  }
 
-  private fun Document.createBaseDocumentStructure(): Element {
-    return element("xliff") {
+  private fun Document.createBaseDocumentStructure(): Element =
+    element("xliff") {
       attr("version", "1.2")
       attr("xmlns", "urn:oasis:names:tc:xliff:document:1.2")
     }
-  }
 
   private fun createFileBody(file: XliffFile): Element {
     return xliffElement.element("file") {
@@ -76,8 +77,8 @@ class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlC
     }
   }
 
-  private fun String.escaped(): String {
-    return MobileStringEscaper(
+  private fun String.escaped(): String =
+    MobileStringEscaper(
       string = this,
       escapeApos = false,
       keepPercentSignEscaped = true,
@@ -86,7 +87,6 @@ class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlC
       escapeQuotes = false,
       utfSymbolCharacter = 'U',
     ).escape()
-  }
 
   private fun Element.appendXmlIfEnabledOrText(content: String?) {
     if (!enableXmlContent) {

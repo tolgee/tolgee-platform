@@ -65,8 +65,8 @@ class TranslationStatsJobTest : AbstractSpringTest() {
       .allMatch { it.characterCount != null }
   }
 
-  private fun prepareData(keysToCreateCount: Long = 10): TranslationsTestData {
-    return executeInNewTransaction {
+  private fun prepareData(keysToCreateCount: Long = 10): TranslationsTestData =
+    executeInNewTransaction {
       val testData = TranslationsTestData()
       testData.generateLotOfData(keysToCreateCount)
       testDataService.saveTestData(testData.root)
@@ -82,5 +82,4 @@ class TranslationStatsJobTest : AbstractSpringTest() {
       assertThat(translations).allMatch { it.wordCount == null }.allMatch { it.characterCount == null }
       testData
     }
-  }
 }

@@ -40,7 +40,5 @@ class ModifiedEntityViewFactory(
   private fun extractCompressedRef(
     value: EntityDescriptionRef,
     describingEntities: List<ActivityDescribingEntity>,
-  ): ExistenceEntityDescription {
-    return CompressedRefExtractor(entityExistences).extract(value, describingEntities)
-  }
+  ): ExistenceEntityDescription = CompressedRefExtractor(entityExistences).extract(value, describingEntities)
 }

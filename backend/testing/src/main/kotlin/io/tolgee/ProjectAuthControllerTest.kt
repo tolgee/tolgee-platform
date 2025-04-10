@@ -16,7 +16,8 @@ import org.springframework.test.web.servlet.ResultActions
 
 abstract class ProjectAuthControllerTest(
   val projectUrlPrefix: String = "/api/project/",
-) : AuthorizedControllerTest(), AuthRequestPerformer {
+) : AuthorizedControllerTest(),
+  AuthRequestPerformer {
   // for api key auth methods
   val apiKey: ApiKeyDTO
     get() {
@@ -75,33 +76,23 @@ abstract class ProjectAuthControllerTest(
   fun performProjectAuthPut(
     url: String,
     content: Any? = null,
-  ): ResultActions {
-    return projectAuthRequestPerformer.performProjectAuthPut(url, content)
-  }
+  ): ResultActions = projectAuthRequestPerformer.performProjectAuthPut(url, content)
 
   fun performProjectAuthPost(
     url: String,
     content: Any? = null,
-  ): ResultActions {
-    return projectAuthRequestPerformer.performProjectAuthPost(url, content)
-  }
+  ): ResultActions = projectAuthRequestPerformer.performProjectAuthPost(url, content)
 
-  fun performProjectAuthGet(url: String): ResultActions {
-    return projectAuthRequestPerformer.performProjectAuthGet(url)
-  }
+  fun performProjectAuthGet(url: String): ResultActions = projectAuthRequestPerformer.performProjectAuthGet(url)
 
   fun performProjectAuthDelete(
     url: String,
     content: Any? = null,
-  ): ResultActions {
-    return projectAuthRequestPerformer.performProjectAuthDelete(url, content)
-  }
+  ): ResultActions = projectAuthRequestPerformer.performProjectAuthDelete(url, content)
 
   fun performProjectAuthMultipart(
     url: String,
     files: List<MockMultipartFile>,
     params: Map<String, Array<String>> = mapOf(),
-  ): ResultActions {
-    return projectAuthRequestPerformer.performProjectAuthMultipart(url, files, params)
-  }
+  ): ResultActions = projectAuthRequestPerformer.performProjectAuthMultipart(url, files, params)
 }

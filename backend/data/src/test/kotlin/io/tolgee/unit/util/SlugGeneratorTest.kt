@@ -56,7 +56,8 @@ class SlugGeneratorTest {
   @Test
   fun shortensAfterNumbers() {
     val callback = { slug: String ->
-      (0..9).map { "hello$it" to false }
+      (0..9)
+        .map { "hello$it" to false }
         .toMap()
         .toMutableMap()
         .also { it["hello-w"] = false }[slug] != false

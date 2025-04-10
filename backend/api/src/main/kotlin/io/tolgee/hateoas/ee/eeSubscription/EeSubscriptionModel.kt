@@ -19,4 +19,5 @@ open class EeSubscriptionModel(
   val status: SubscriptionStatus,
   val nonCommerical: Boolean,
   var lastValidCheck: Date?,
-) : RepresentationModel<EeSubscriptionModel>(), Serializable
+) : RepresentationModel<EeSubscriptionModel>(),
+  Serializable

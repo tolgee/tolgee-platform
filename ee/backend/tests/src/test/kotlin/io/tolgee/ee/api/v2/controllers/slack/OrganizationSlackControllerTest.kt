@@ -71,7 +71,9 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
     performAuthDelete(
       "/v2/organizations/${testData.organization.id}/slack/workspaces/${testData.slackWorkspace.id}",
     ).andIsOk
-    io.tolgee.testing.assertions.Assertions.assertThat(slackWorkspaceService.find(testData.slackWorkspace.id)).isNull()
+    io.tolgee.testing.assertions.Assertions
+      .assertThat(slackWorkspaceService.find(testData.slackWorkspace.id))
+      .isNull()
   }
 
   @Test
@@ -112,7 +114,8 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk
 
-    Assertions.assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id))
+    Assertions
+      .assertThat(slackWorkspaceService.findAllWorkspaces(testData.slackWorkspace.organization.id))
       .isNotEmpty()
   }
 

@@ -5,10 +5,9 @@ import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 
 @Component
-class KeyDisabledLanguagesModelAssembler :
-  RepresentationModelAssembler<KeyDisabledLanguagesView, KeyDisabledLanguagesModel> {
-  override fun toModel(view: KeyDisabledLanguagesView): KeyDisabledLanguagesModel {
-    return KeyDisabledLanguagesModel(
+class KeyDisabledLanguagesModelAssembler : RepresentationModelAssembler<KeyDisabledLanguagesView, KeyDisabledLanguagesModel> {
+  override fun toModel(view: KeyDisabledLanguagesView): KeyDisabledLanguagesModel =
+    KeyDisabledLanguagesModel(
       id = view.id,
       name = view.name,
       namespace = view.namespace,
@@ -20,5 +19,4 @@ class KeyDisabledLanguagesModelAssembler :
           )
         },
     )
-  }
 }

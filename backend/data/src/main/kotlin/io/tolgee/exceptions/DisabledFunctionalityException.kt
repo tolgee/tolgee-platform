@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @ResponseStatus(HttpStatus.CONFLICT)
-class DisabledFunctionalityException(message: Message) : ErrorException(message) {
+class DisabledFunctionalityException(
+  message: Message,
+) : ErrorException(message) {
   override val httpStatus: HttpStatus
     get() = HttpStatus.CONFLICT
 }

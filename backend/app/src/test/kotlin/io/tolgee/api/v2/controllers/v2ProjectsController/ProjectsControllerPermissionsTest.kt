@@ -27,7 +27,8 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
     permissionTestUtil.withPermissionsTestData { project, user ->
       performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-      permissionService.getProjectPermissionScopesNoApiKey(project.id, user)
+      permissionService
+        .getProjectPermissionScopesNoApiKey(project.id, user)
         .let { Assertions.assertThat(it).equalsPermissionType(ProjectPermissionType.EDIT) }
     }
   }
@@ -48,14 +49,16 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   fun `cannot set permission to user outside of project or organization`() {
     val testData = PermissionsTestData()
     val user =
-      testData.root.addUserAccount {
-        username = "pepa@seznam.cz"
-      }.self
+      testData.root
+        .addUserAccount {
+          username = "pepa@seznam.cz"
+        }.self
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin.self
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthPut("users/${user.id}/set-permissions/EDIT")
-      .andIsBadRequest.andHasErrorMessage(Message.USER_HAS_NO_PROJECT_ACCESS)
+      .andIsBadRequest
+      .andHasErrorMessage(Message.USER_HAS_NO_PROJECT_ACCESS)
   }
 
   @Test
@@ -71,10 +74,11 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
     userAccount = testData.admin.self
     this.projectSupplier = { testData.projectBuilder.self }
 
-    permissionService.getProjectPermissionData(
-      testData.projectBuilder.self.id,
-      me.id,
-    ).directPermissions.assert.isNotNull
+    permissionService
+      .getProjectPermissionData(
+        testData.projectBuilder.self.id,
+        me.id,
+      ).directPermissions.assert.isNotNull
     performProjectAuthPut("users/${me.id}/set-by-organization").andIsOk
     val permissionData = permissionService.getProjectPermissionData(testData.projectBuilder.self.id, me.id)
     permissionData.directPermissions.assert.isNull()
@@ -97,29 +101,33 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
 
   @Test
   fun `cannot save stateChangeLanguages when translate`() {
-    permissionTestUtil.performSetPermissions("TRANSLATE") { getLang ->
-      "stateChangeLanguages=${getLang("de")}"
-    }.andIsBadRequest
+    permissionTestUtil
+      .performSetPermissions("TRANSLATE") { getLang ->
+        "stateChangeLanguages=${getLang("de")}"
+      }.andIsBadRequest
   }
 
   @Test
   fun `cannot save viewLanguages when none`() {
-    permissionTestUtil.performSetPermissions("NONE") { getLang ->
-      "viewLanguages=${getLang("de")}"
-    }.andIsBadRequest
+    permissionTestUtil
+      .performSetPermissions("NONE") { getLang ->
+        "viewLanguages=${getLang("de")}"
+      }.andIsBadRequest
   }
 
   @Test
   fun `cannot save stateChangeLanguages when view`() {
-    permissionTestUtil.performSetPermissions("VIEW") { getLang ->
-      "stateChangeLanguages=${getLang("de")}"
-    }.andIsBadRequest
+    permissionTestUtil
+      .performSetPermissions("VIEW") { getLang ->
+        "stateChangeLanguages=${getLang("de")}"
+      }.andIsBadRequest
   }
 
   @Test
   fun `cannot save translationEditLangueges when view`() {
-    permissionTestUtil.performSetPermissions("VIEW") { getLang ->
-      "translateLanguages=${getLang("de")}"
-    }.andIsBadRequest
+    permissionTestUtil
+      .performSetPermissions("VIEW") { getLang ->
+        "translateLanguages=${getLang("de")}"
+      }.andIsBadRequest
   }
 }

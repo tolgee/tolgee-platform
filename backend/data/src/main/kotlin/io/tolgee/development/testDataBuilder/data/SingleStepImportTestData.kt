@@ -33,7 +33,11 @@ class SingleStepImportTestData : BaseTestData() {
   }
 
   fun setUserScopes(scopes: Array<Scope>) {
-    userAccountBuilder.defaultOrganizationBuilder.data.roles.first().self.type = OrganizationRoleType.MEMBER
-    projectBuilder.data.permissions.first().self.scopes = scopes
+    userAccountBuilder.defaultOrganizationBuilder.data.roles
+      .first()
+      .self.type = OrganizationRoleType.MEMBER
+    projectBuilder.data.permissions
+      .first()
+      .self.scopes = scopes
   }
 }

@@ -63,7 +63,8 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
       verify {
         performAuthPut("/v2/ee-license/set-license-key", mapOf("licenseKey" to "mock-mock"))
-          .andIsOk.andPrettyPrint.andAssertThatJson {
+          .andIsOk.andPrettyPrint
+          .andAssertThatJson {
           }
         val body = captor.allValues.single().body as String
 
@@ -143,7 +144,11 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
           null,
         ).andIsOk
 
-        eeSubscriptionRepository.findAll().single().status.assert.isEqualTo(SubscriptionStatus.ACTIVE)
+        eeSubscriptionRepository
+          .findAll()
+          .single()
+          .status.assert
+          .isEqualTo(SubscriptionStatus.ACTIVE)
         captor.allValues.assert.hasSize(1)
       }
     }
@@ -227,7 +232,5 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
     return jacksonObjectMapper().readValue(json, MutableMap::class.java) as MutableMap<String, Any?>
   }
 
-  private fun Map<String, Any?>.toJson(): String {
-    return jacksonObjectMapper().writeValueAsString(this)
-  }
+  private fun Map<String, Any?>.toJson(): String = jacksonObjectMapper().writeValueAsString(this)
 }

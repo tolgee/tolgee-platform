@@ -13,8 +13,6 @@ open class ProjectDTO(
     fun fromEntityAndPermission(
       project: Project,
       scopes: Array<Scope>,
-    ): ProjectDTO {
-      return ProjectDTO(project.id, project.name, scopes)
-    }
+    ): ProjectDTO = ProjectDTO(project.id, project.name, scopes)
   }
 }

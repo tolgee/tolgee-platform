@@ -49,14 +49,13 @@ open class S3FileStorage(
     return
   }
 
-  override fun fileExists(storageFilePath: String): Boolean {
-    return try {
+  override fun fileExists(storageFilePath: String): Boolean =
+    try {
       s3.headObject { b -> b.bucket(bucketName).key(storageFilePath) }
       true
     } catch (e: NoSuchKeyException) {
       false
     }
-  }
 
   override fun pruneDirectory(path: String) {
     try {
@@ -64,7 +63,8 @@ open class S3FileStorage(
       val adjustedPath = if (path.endsWith("/")) path else "$path/"
 
       val objectsToDelete =
-        s3.listObjectsV2 { it.bucket(bucketName).prefix(adjustedPath) }
+        s3
+          .listObjectsV2 { it.bucket(bucketName).prefix(adjustedPath) }
           .contents()
           .map { it.key() }
           .toSet()
@@ -72,12 +72,12 @@ open class S3FileStorage(
 
       if (objectsToDelete.isNotEmpty()) {
         val deleteObjectsRequest =
-          DeleteObjectsRequest.builder()
+          DeleteObjectsRequest
+            .builder()
             .bucket(bucketName)
             .delete {
               it.objects(objectsToDelete)
-            }
-            .build()
+            }.build()
 
         s3.deleteObjects(deleteObjectsRequest)
       }

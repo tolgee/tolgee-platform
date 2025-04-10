@@ -23,7 +23,5 @@ class TestClockHeaderFilter(
     filterChain.doFilter(request, response)
   }
 
-  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return currentDateProvider.forcedDate == null
-  }
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean = currentDateProvider.forcedDate == null
 }

@@ -40,12 +40,11 @@ class TranslationStatsJobConfiguration {
   lateinit var platformTransactionManager: PlatformTransactionManager
 
   @Bean(JOB_NAME)
-  fun translationStatsJob(): Job {
-    return JobBuilder(JOB_NAME, jobRepository)
+  fun translationStatsJob(): Job =
+    JobBuilder(JOB_NAME, jobRepository)
       .flow(step)
       .end()
       .build()
-  }
 
   val reader: ItemReader<StatsMigrationTranslationView>
     get() =

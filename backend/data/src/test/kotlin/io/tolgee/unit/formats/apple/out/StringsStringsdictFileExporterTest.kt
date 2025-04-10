@@ -373,20 +373,18 @@ class StringsStringsdictFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-  ): AppleStringsStringsdictExporter {
-    return AppleStringsStringsdictExporter(
+  ): AppleStringsStringsdictExporter =
+    AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
     )
-  }
 
-  private fun getExporter(translations: List<ExportTranslationView>): AppleStringsStringsdictExporter {
-    return AppleStringsStringsdictExporter(
+  private fun getExporter(translations: List<ExportTranslationView>): AppleStringsStringsdictExporter =
+    AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = getExportParams(),
     )
-  }
 
   private fun getExportParams() = ExportParams().also { it.format = ExportFormat.APPLE_STRINGS_STRINGSDICT }
 }

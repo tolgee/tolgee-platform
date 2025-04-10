@@ -25,7 +25,10 @@ class InvitationTestUtil(
         fn(
           this,
         ) { tag ->
-          testData.projectBuilder.data.languages.find { it.self.tag == tag }?.self?.id
+          testData.projectBuilder.data.languages
+            .find { it.self.tag == tag }
+            ?.self
+            ?.id
             ?: throw NullPointerException("Language $tag not found")
         }
       },
@@ -51,6 +54,5 @@ class InvitationTestUtil(
   private val invitationService: InvitationService
     get() = applicationContext.getBean(InvitationService::class.java)
 
-  private fun parseCode(invitationJson: String) =
-    jacksonObjectMapper().readValue<Map<String, Any>>(invitationJson)["code"] as String
+  private fun parseCode(invitationJson: String) = jacksonObjectMapper().readValue<Map<String, Any>>(invitationJson)["code"] as String
 }

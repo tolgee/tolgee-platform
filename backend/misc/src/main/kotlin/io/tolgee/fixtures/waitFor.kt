@@ -23,7 +23,9 @@ fun waitFor(
 
 class WaitNotSatisfiedException : RuntimeException()
 
-class WaitNotSatisfiedStillThrowingException(throwable: Throwable) : RuntimeException(throwable)
+class WaitNotSatisfiedStillThrowingException(
+  throwable: Throwable,
+) : RuntimeException(throwable)
 
 fun waitForNotThrowing(
   throwableClass: KClass<out Throwable> = Throwable::class,

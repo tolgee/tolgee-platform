@@ -10,7 +10,9 @@ import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(name = "tenant")
-class SsoTenant : ISsoTenant, StandardAuditModel() {
+class SsoTenant :
+  StandardAuditModel(),
+  ISsoTenant {
   /**
    * The domain column uses unique constraint.
    * When the tenant is enabled the domain must not be empty and must be unique across all enabled tenants.

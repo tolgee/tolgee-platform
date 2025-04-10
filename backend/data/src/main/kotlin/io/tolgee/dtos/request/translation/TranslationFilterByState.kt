@@ -41,9 +41,7 @@ data class TranslationFilterByState(
       }
     }
 
-    private fun isMultipleFilters(strings: List<String>): Boolean {
-      return strings.all { it.contains(",") }
-    }
+    private fun isMultipleFilters(strings: List<String>): Boolean = strings.all { it.contains(",") }
 
     private fun getChunked(strings: List<String>): List<List<String>> {
       if (strings.size % 2 != 0) {

@@ -6,11 +6,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class WorkspaceModelAssembler : RepresentationModelAssembler<OrganizationSlackWorkspace, WorkspaceModel> {
-  override fun toModel(entity: OrganizationSlackWorkspace): WorkspaceModel {
-    return WorkspaceModel(
+  override fun toModel(entity: OrganizationSlackWorkspace): WorkspaceModel =
+    WorkspaceModel(
       id = entity.id,
       slackTeamName = entity.slackTeamName,
       slackTeamId = entity.slackTeamId,
     )
-  }
 }

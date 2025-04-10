@@ -12,16 +12,12 @@ class IcuToRubyPlaceholderConvertor : FromIcuPlaceholderConvertor {
       getArgNameString(it)
     }
 
-  override fun convert(node: MessagePatternUtil.ArgNode): String {
-    return baseToCLikePlaceholderConvertor.convert(node)
-  }
+  override fun convert(node: MessagePatternUtil.ArgNode): String = baseToCLikePlaceholderConvertor.convert(node)
 
   override fun convertText(
     node: MessagePatternUtil.TextNode,
     keepEscaping: Boolean,
-  ): String {
-    return baseToCLikePlaceholderConvertor.convertText(node.getText(keepEscaping))
-  }
+  ): String = baseToCLikePlaceholderConvertor.convertText(node.getText(keepEscaping))
 
   override fun convertReplaceNumber(
     node: MessagePatternUtil.MessageContentsNode,

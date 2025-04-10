@@ -81,19 +81,16 @@ class SavedSlackMessageService(
     return savedSlackMessageRepository.save(savedMessage)
   }
 
-  fun find(id: Long): SavedSlackMessage? {
-    return savedSlackMessageRepository.findById(id).orElse(null)
-  }
+  fun find(id: Long): SavedSlackMessage? = savedSlackMessageRepository.findById(id).orElse(null)
 
   fun find(
     keyId: Long,
     configId: Long,
-  ): List<SavedSlackMessage> {
-    return savedSlackMessageRepository.findByKeyIdAndSlackConfigId(
+  ): List<SavedSlackMessage> =
+    savedSlackMessageRepository.findByKeyIdAndSlackConfigId(
       keyId,
       configId,
     )
-  }
 
   fun findAll(
     messagesDto: List<SlackMessageDto>,
@@ -104,9 +101,7 @@ class SavedSlackMessageService(
     return savedSlackMessageRepository.findAllByKeyIdAndConfigId(keyIds, config)
   }
 
-  fun findAll(): List<SavedSlackMessage> {
-    return savedSlackMessageRepository.findAll()
-  }
+  fun findAll(): List<SavedSlackMessage> = savedSlackMessageRepository.findAll()
 
   @Scheduled(fixedDelay = 60000)
   @Transactional

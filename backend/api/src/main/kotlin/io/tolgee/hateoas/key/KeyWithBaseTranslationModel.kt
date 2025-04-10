@@ -16,4 +16,5 @@ open class KeyWithBaseTranslationModel(
   val namespace: String?,
   @Schema(description = "Base translation", example = "This is translation")
   val baseTranslation: String?,
-) : RepresentationModel<KeyWithBaseTranslationModel>(), Serializable
+) : RepresentationModel<KeyWithBaseTranslationModel>(),
+  Serializable

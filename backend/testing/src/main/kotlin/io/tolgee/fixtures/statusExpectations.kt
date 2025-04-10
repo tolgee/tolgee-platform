@@ -39,13 +39,12 @@ val ResultActions.andIsNotModified: ResultActions
 val ResultActions.andIsRateLimited: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isTooManyRequests) }
 
-fun ResultActions.andHasErrorMessage(message: Message): ResultActions {
-  return this.tryPrettyPrinting {
+fun ResultActions.andHasErrorMessage(message: Message): ResultActions =
+  this.tryPrettyPrinting {
     this.andAssertThatJson {
       node("code").isEqualTo(message.code)
     }
   }
-}
 
 val ResultActions.andIsForbidden: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isForbidden) }

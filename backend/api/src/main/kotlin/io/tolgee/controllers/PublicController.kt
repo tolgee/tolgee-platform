@@ -110,9 +110,7 @@ class PublicController(
   @OpenApiHideFromPublicDocs
   fun validateEmail(
     @RequestBody email: TextNode,
-  ): Boolean {
-    return userAccountService.findActive(email.asText()) == null
-  }
+  ): Boolean = userAccountService.findActive(email.asText()) == null
 
   @GetMapping("/authorize_oauth/{serviceType}")
   @Operation(
@@ -126,15 +124,14 @@ class PublicController(
     @RequestParam(value = "redirect_uri", required = true) redirectUri: String?,
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?,
     @RequestParam(value = "domain", required = false) domain: String?,
-  ): JwtAuthenticationResponse {
-    return thirdPartyAuthenticationService.authenticate(
+  ): JwtAuthenticationResponse =
+    thirdPartyAuthenticationService.authenticate(
       serviceType = serviceType,
       code = code,
       redirectUri = redirectUri,
       invitationCode = invitationCode,
       domain = domain,
     )
-  }
 
   @GetMapping("/invitation_info/{code}")
   @Operation(summary = "Info about invitation")

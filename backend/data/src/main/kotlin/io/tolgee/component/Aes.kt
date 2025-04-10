@@ -36,7 +36,8 @@ class Aes(
     val cipherInitVector = getGcmParameterSpec()
     cipher.init(Cipher.ENCRYPT_MODE, secretKey, cipherInitVector)
     val encryptedData = cipher.doFinal(toEncrypt)
-    return ByteBuffer.allocate(4 + cipherInitVector.iv.size + encryptedData.size)
+    return ByteBuffer
+      .allocate(4 + cipherInitVector.iv.size + encryptedData.size)
       .putInt(cipherInitVector.iv.size)
       .put(cipherInitVector.iv)
       .put(encryptedData)

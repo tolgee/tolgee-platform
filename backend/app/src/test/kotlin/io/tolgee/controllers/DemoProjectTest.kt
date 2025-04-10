@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 
 @AutoConfigureMockMvc
-class DemoProjectTest :
-  AbstractControllerTest() {
+class DemoProjectTest : AbstractControllerTest() {
   val demoOrganizationName = "Oh my organization"
 
   @Test
@@ -46,7 +45,8 @@ class DemoProjectTest :
       .single { it.language.tag == "de" }
       .comments
       .single()
-      .text.assert.isEqualTo("This is wrong!")
+      .text.assert
+      .isEqualTo("This is wrong!")
   }
 
   private fun assertStatsCreated() {
@@ -96,12 +96,18 @@ class DemoProjectTest :
 
   private fun assertTagged() {
     val key = getAddButtonKey()
-    key.keyMeta?.tags?.map { it.name }?.contains("button")
+    key.keyMeta
+      ?.tags
+      ?.map { it.name }
+      ?.contains("button")
   }
 
   fun assertDescriptionAdded() {
     val key = getAddButtonKey()
-    key.keyMeta!!.description.assert.isNotNull().isNotEmpty()
+    key.keyMeta!!
+      .description.assert
+      .isNotNull()
+      .isNotEmpty()
   }
 
   val keyCount = DemoProjectData.translations["en"]!!.size

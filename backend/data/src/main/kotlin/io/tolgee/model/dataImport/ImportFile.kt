@@ -59,14 +59,14 @@ class ImportFile(
   fun prepareIssue(
     type: FileIssueType,
     params: Map<FileIssueParamType, String>,
-  ): ImportFileIssue {
-    return ImportFileIssue(file = this, type = type).apply {
+  ): ImportFileIssue =
+    ImportFileIssue(file = this, type = type).apply {
       this.params =
-        params.map {
-          ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
-        }.toMutableList()
+        params
+          .map {
+            ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
+          }.toMutableList()
     }
-  }
 
   fun addKeyIsNotStringIssue(
     keyName: Any,
@@ -130,9 +130,8 @@ class ImportFile(
     return this
   }
 
-  fun addIssues(fileCollisions: MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>>): List<ImportFileIssue> {
-    return fileCollisions.map { (issueType, params) ->
+  fun addIssues(fileCollisions: MutableList<Pair<FileIssueType, Map<FileIssueParamType, String>>>): List<ImportFileIssue> =
+    fileCollisions.map { (issueType, params) ->
       addIssue(issueType, params)
     }
-  }
 }

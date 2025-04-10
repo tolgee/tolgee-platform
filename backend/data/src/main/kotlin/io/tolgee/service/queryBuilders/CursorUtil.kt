@@ -13,13 +13,15 @@ class CursorUtil {
       sort: Sort,
     ): String {
       val cursor =
-        sort.map {
-          it.property to
-            CursorValue(
-              direction = it.direction,
-              value = item?.toCursorValue(it.property),
-            )
-        }.toMap().toMutableMap()
+        sort
+          .map {
+            it.property to
+              CursorValue(
+                direction = it.direction,
+                value = item?.toCursorValue(it.property),
+              )
+          }.toMap()
+          .toMutableMap()
 
       val json = jacksonObjectMapper().writer().writeValueAsString(cursor)
       return Base64.getEncoder().encodeToString(json.toByteArray())

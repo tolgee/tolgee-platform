@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component
 @Component
 class EeSubscriptionModelAssembler(
   private val userAccountService: UserAccountService,
-) : RepresentationModelAssembler<EeSubscriptionDto, EeSubscriptionModel>, IEeSubscriptionModelAssembler {
+) : RepresentationModelAssembler<EeSubscriptionDto, EeSubscriptionModel>,
+  IEeSubscriptionModelAssembler {
   override fun toModel(eeSubscription: EeSubscriptionDto): EeSubscriptionModel {
     val currentUserCount = userAccountService.countAll()
 

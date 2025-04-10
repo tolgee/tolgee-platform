@@ -51,22 +51,20 @@ class LanguageValidator(
   private fun validateNameUniqueness(
     dto: LanguageRequest,
     project: Project?,
-  ): Optional<ValidationError> {
-    return if (languageService.findByName(dto.name, project!!).isPresent) {
+  ): Optional<ValidationError> =
+    if (languageService.findByName(dto.name, project!!).isPresent) {
       Optional.of(ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_NAME_EXISTS))
     } else {
       Optional.empty()
     }
-  }
 
   private fun validateTagUniqueness(
     dto: LanguageRequest,
     project: Project?,
-  ): Optional<ValidationError> {
-    return if (languageService.findByTag(dto.tag, project!!) != null) {
+  ): Optional<ValidationError> =
+    if (languageService.findByTag(dto.tag, project!!) != null) {
       Optional.of(ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_TAG_EXISTS))
     } else {
       Optional.empty()
     }
-  }
 }

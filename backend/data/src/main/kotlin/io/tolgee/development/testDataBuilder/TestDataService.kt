@@ -248,7 +248,10 @@ class TestDataService(
     }
 
     builder.data.slackConfigs.forEach { slackConfig ->
-      val messages = slackConfig.data.slackMessages.map { it.self }.toMutableList()
+      val messages =
+        slackConfig.data.slackMessages
+          .map { it.self }
+          .toMutableList()
       messages.forEach { entityManager.persist(it) }
     }
   }

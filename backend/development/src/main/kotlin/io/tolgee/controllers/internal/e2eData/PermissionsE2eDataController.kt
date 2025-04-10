@@ -19,7 +19,7 @@ import org.springframework.web.context.annotation.RequestScope
 @RequestMapping(value = ["internal/e2e-data/permissions"])
 @Transactional
 @RequestScope
-class PermissionsE2eDataController() : AbstractE2eDataController() {
+class PermissionsE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate-with-user"])
   @Transactional
   fun generateWithPermissions(

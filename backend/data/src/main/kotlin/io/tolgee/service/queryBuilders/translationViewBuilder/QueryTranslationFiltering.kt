@@ -62,15 +62,17 @@ class QueryTranslationFiltering(
   fun apply(languageSourceChangeMap: MutableMap<String, Expression<Boolean>>) {
     val conditions =
       (
-        params.filterOutdatedLanguage?.mapNotNull {
-          val field = languageSourceChangeMap[it] ?: return@mapNotNull null
-          cb.isTrue(field)
-        }?.toList() ?: listOf()
+        params.filterOutdatedLanguage
+          ?.mapNotNull {
+            val field = languageSourceChangeMap[it] ?: return@mapNotNull null
+            cb.isTrue(field)
+          }?.toList() ?: listOf()
       ) + (
-        params.filterNotOutdatedLanguage?.mapNotNull {
-          val field = languageSourceChangeMap[it] ?: return@mapNotNull null
-          cb.isFalse(field)
-        }?.toList() ?: listOf()
+        params.filterNotOutdatedLanguage
+          ?.mapNotNull {
+            val field = languageSourceChangeMap[it] ?: return@mapNotNull null
+            cb.isFalse(field)
+          }?.toList() ?: listOf()
       )
 
     if (conditions.isNotEmpty()) {

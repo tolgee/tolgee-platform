@@ -364,7 +364,5 @@ class PoFileExporterTest {
     )
   }
 
-  private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.messageFormat = ExportMessageFormat.PHP_SPRINTF }
-  }
+  private fun getExportParams(): ExportParams = ExportParams().also { it.messageFormat = ExportMessageFormat.PHP_SPRINTF }
 }

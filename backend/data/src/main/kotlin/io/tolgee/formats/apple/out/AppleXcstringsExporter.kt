@@ -66,14 +66,13 @@ class AppleXcstringsExporter(
     keyData.set<ObjectNode>("localizations", localizations)
   }
 
-  private fun getAppleState(state: TranslationState): String? {
-    return when (state) {
+  private fun getAppleState(state: TranslationState): String? =
+    when (state) {
       TranslationState.TRANSLATED -> "needs_review"
       TranslationState.REVIEWED -> "translated"
       TranslationState.UNTRANSLATED -> null
       TranslationState.DISABLED -> null
     }
-  }
 
   private fun handleSingleTranslation(
     localizations: ObjectNode,
@@ -136,16 +135,15 @@ class AppleXcstringsExporter(
     )
   }
 
-  private fun createKeyEntry(translation: ExportTranslationView): ObjectNode {
-    return objectMapper.createObjectNode().apply {
+  private fun createKeyEntry(translation: ExportTranslationView): ObjectNode =
+    objectMapper.createObjectNode().apply {
       translation.key.description?.let {
         put("extractionState", "manual")
       }
     }
-  }
 
-  private fun getBaseFilePath(translation: ExportTranslationView): String {
-    return ExportFilePathProvider(
+  private fun getBaseFilePath(translation: ExportTranslationView): String =
+    ExportFilePathProvider(
       exportParams,
       "xcstrings",
     ).getFilePath(
@@ -153,5 +151,4 @@ class AppleXcstringsExporter(
       null,
       replaceExtension = true,
     )
-  }
 }

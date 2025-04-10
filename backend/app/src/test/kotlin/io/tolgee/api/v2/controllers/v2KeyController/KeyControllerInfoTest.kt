@@ -49,34 +49,35 @@ class KeyControllerInfoTest : ProjectAuthControllerTest("/v2/projects/") {
       performProjectAuthPost(
         "keys/info",
         mapOf("keys" to keys, "languageTags" to listOf("de")),
-      ).andIsOk.andAssertThatJson {
-        node("_embedded.keys") {
-          isArray.hasSize(22)
-          node("[0]") {
-            node("custom") {
-              isObject.hasSize(1)
-              node("key").isEqualTo("value")
-            }
-          }
-          node("[20]") {
-            node("namespace").isEqualTo("namespace-1")
-            node("name").isEqualTo("key-1")
-            node("description").isEqualTo("description")
-            node("screenshots") {
-              isArray
-              node("[0]") {
-                node("keyReferences").isArray.hasSize(2)
+      ).andIsOk
+        .andAssertThatJson {
+          node("_embedded.keys") {
+            isArray.hasSize(22)
+            node("[0]") {
+              node("custom") {
+                isObject.hasSize(1)
+                node("key").isEqualTo("value")
               }
             }
-            node("translations") {
-              node("de") {
-                node("text").isEqualTo("existing translation")
+            node("[20]") {
+              node("namespace").isEqualTo("namespace-1")
+              node("name").isEqualTo("key-1")
+              node("description").isEqualTo("description")
+              node("screenshots") {
+                isArray
+                node("[0]") {
+                  node("keyReferences").isArray.hasSize(2)
+                }
               }
-              node("en").isAbsent()
+              node("translations") {
+                node("de") {
+                  node("text").isEqualTo("existing translation")
+                }
+                node("en").isAbsent()
+              }
             }
           }
-        }
-      }.andPrettyPrint
+        }.andPrettyPrint
     }
   }
 }

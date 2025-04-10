@@ -24,14 +24,13 @@ class KeyComment(
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   var author: UserAccount? = null,
-) : StandardAuditModel(), WithKeyMetaReference {
+) : StandardAuditModel(),
+  WithKeyMetaReference {
   var fromImport: Boolean = false
 
   @field:NotBlank
   @Column(columnDefinition = "text", length = 2000)
   var text: String = ""
 
-  override fun toString(): String {
-    return "KeyComment(text='$text', fromImport=$fromImport)"
-  }
+  override fun toString(): String = "KeyComment(text='$text', fromImport=$fromImport)"
 }

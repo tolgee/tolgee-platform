@@ -10,17 +10,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class TenantServiceOssStub : TenantService {
-  override fun getEnabledConfigByDomainOrNull(domain: String?): SsoTenantConfig? {
-    return null
-  }
+  override fun getEnabledConfigByDomainOrNull(domain: String?): SsoTenantConfig? = null
 
-  override fun getEnabledConfigByDomain(domain: String?): SsoTenantConfig {
+  override fun getEnabledConfigByDomain(domain: String?): SsoTenantConfig =
     throw NotFoundException(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED)
-  }
 
-  override fun isSsoForcedForDomain(domain: String?): Boolean {
-    return false
-  }
+  override fun isSsoForcedForDomain(domain: String?): Boolean = false
 
   override fun save(tenant: SsoTenant): SsoTenant {
     // no-op

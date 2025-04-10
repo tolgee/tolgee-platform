@@ -70,17 +70,18 @@ class NamespacesTestData : BaseTestData() {
     namespace: String?,
   ): Key {
     val keyBuilder =
-      this.addKey {
-        name = keyName
-      }.build {
-        setNamespace(namespace)?.self?.let {
-          namespaces[it.project to it.name] = it
+      this
+        .addKey {
+          name = keyName
+        }.build {
+          setNamespace(namespace)?.self?.let {
+            namespaces[it.project to it.name] = it
+          }
+          addTranslation {
+            language = englishLanguage
+            text = "hello"
+          }
         }
-        addTranslation {
-          language = englishLanguage
-          text = "hello"
-        }
-      }
     return keyBuilder.self
   }
 }

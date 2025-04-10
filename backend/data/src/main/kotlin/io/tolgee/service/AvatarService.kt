@@ -74,12 +74,11 @@ class AvatarService(
     }
   }
 
-  fun getAvatarLinks(hash: String?): Avatar? {
-    return hash?.let { it ->
+  fun getAvatarLinks(hash: String?): Avatar? =
+    hash?.let { it ->
       val paths = getAvatarPaths(it)
       getAvatarLinks(paths)
     }
-  }
 
   fun getAvatarLinks(paths: Avatar) =
     Avatar(

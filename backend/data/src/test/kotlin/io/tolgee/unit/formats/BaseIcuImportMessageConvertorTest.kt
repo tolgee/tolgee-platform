@@ -17,7 +17,8 @@ class BaseIcuImportMessageConvertorTest {
     forms["one"].assert.isEqualTo("Hello! I have # dog. Did you know? Here is a number {num, number}")
     forms["many"].assert.isEqualTo("Hello! I have # dogs. Did you know? Here is a number {num, number}")
     forms["other"].assert.isEqualTo("Hello! I have # dogs. Did you know? Here is a number {num, number}")
-    forms.keys.size.assert.isEqualTo(3)
+    forms.keys.size.assert
+      .isEqualTo(3)
   }
 
   @Test
@@ -29,7 +30,8 @@ class BaseIcuImportMessageConvertorTest {
         forceIsPlural = true,
       ).convert().formsResult!!
     forms["other"].assert.isEqualTo("Hello!")
-    forms.keys.size.assert.isEqualTo(1)
+    forms.keys.size.assert
+      .isEqualTo(1)
   }
 
   @Test

@@ -7,7 +7,5 @@ import org.springframework.stereotype.Component
 class AllCachesProvider(
   private val additionalCacheProviders: List<AdditionalCachesProvider>,
 ) {
-  fun getAllCaches(): List<String> {
-    return Caches.caches + additionalCacheProviders.flatMap { it.getAdditionalCaches() }
-  }
+  fun getAllCaches(): List<String> = Caches.caches + additionalCacheProviders.flatMap { it.getAdditionalCaches() }
 }

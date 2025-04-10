@@ -22,7 +22,9 @@ class AppleStringsStringsdictExporter(
     preparedFiles.forEach {
       if (it.value.hasSingle) {
         val path = stringsFilePathProvider.replaceExtensionAndFinalize(it.key)
-        result[path] = it.value.stringsWriter.result.byteInputStream()
+        result[path] =
+          it.value.stringsWriter.result
+            .byteInputStream()
       }
       if (it.value.hasPlural) {
         val path = stringsdictFilePathProvider.replaceExtensionAndFinalize(it.key)
@@ -32,13 +34,12 @@ class AppleStringsStringsdictExporter(
     return result
   }
 
-  private fun getBaseFilePath(translation: ExportTranslationView): String {
-    return stringsFilePathProvider.getFilePath(
+  private fun getBaseFilePath(translation: ExportTranslationView): String =
+    stringsFilePathProvider.getFilePath(
       translation.key.namespace,
       translation.languageTag,
       replaceExtension = false,
     )
-  }
 
   private val stringsFilePathProvider by lazy {
     ExportFilePathProvider(
@@ -86,9 +87,10 @@ class AppleStringsStringsdictExporter(
     preparedFile.stringsWriter.addEntry(rawData.key.name, convertedText, rawData.key.description)
   }
 
-  private fun getResultPreparedFile(translation: ExportTranslationView): PreparedFile {
-    return preparedFiles.getOrPut(getBaseFilePath(translation)) { PreparedFile() }
-  }
+  private fun getResultPreparedFile(translation: ExportTranslationView): PreparedFile =
+    preparedFiles.getOrPut(getBaseFilePath(translation)) {
+      PreparedFile()
+    }
 
   class PreparedFile {
     var hasPlural = false

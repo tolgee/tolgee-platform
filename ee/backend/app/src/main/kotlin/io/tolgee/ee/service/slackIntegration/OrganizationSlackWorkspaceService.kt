@@ -37,14 +37,11 @@ class OrganizationSlackWorkspaceService(
   private val slackClient: Slack,
 ) : Logging {
   @Transactional
-  fun findBySlackTeamId(teamId: String): OrganizationSlackWorkspace? {
-    return organizationSlackWorkspaceRepository.findBySlackTeamId(teamId)
-  }
+  fun findBySlackTeamId(teamId: String): OrganizationSlackWorkspace? = organizationSlackWorkspaceRepository.findBySlackTeamId(teamId)
 
   @Transactional
-  fun findAllWorkspaces(organizationId: Long): List<OrganizationSlackWorkspace> {
-    return organizationSlackWorkspaceRepository.findAllByOrganizationId(organizationId)
-  }
+  fun findAllWorkspaces(organizationId: Long): List<OrganizationSlackWorkspace> =
+    organizationSlackWorkspaceRepository.findAllByOrganizationId(organizationId)
 
   @Transactional
   fun delete(organizationId: Long) {
@@ -138,9 +135,8 @@ class OrganizationSlackWorkspaceService(
   }
 
   @Transactional
-  fun connect(organizationSlackWorkspace: OrganizationSlackWorkspace): OrganizationSlackWorkspace {
-    return organizationSlackWorkspaceRepository.save(organizationSlackWorkspace)
-  }
+  fun connect(organizationSlackWorkspace: OrganizationSlackWorkspace): OrganizationSlackWorkspace =
+    organizationSlackWorkspaceRepository.save(organizationSlackWorkspace)
 
   @Transactional
   fun disconnect(
@@ -153,7 +149,8 @@ class OrganizationSlackWorkspaceService(
     delete(organizationSlackWorkspace)
     val uninstall =
       slackClient.methods().appsUninstall(
-        AppsUninstallRequest.builder()
+        AppsUninstallRequest
+          .builder()
           .token(organizationSlackWorkspace.accessToken)
           .clientId(slackProperties.clientId)
           .clientSecret(slackProperties.clientSecret)
@@ -186,19 +183,15 @@ class OrganizationSlackWorkspaceService(
     delete(workspace)
   }
 
-  fun getRedirectUrl(organizationSlug: String): String {
-    return "${frontendUrlProvider.url}/organizations/$organizationSlug/apps/slack-oauth2-success"
-  }
+  fun getRedirectUrl(organizationSlug: String): String =
+    "${frontendUrlProvider.url}/organizations/$organizationSlug/apps/slack-oauth2-success"
 
-  fun get(workspaceId: Long): OrganizationSlackWorkspace {
-    return organizationSlackWorkspaceRepository.find(
+  fun get(workspaceId: Long): OrganizationSlackWorkspace =
+    organizationSlackWorkspaceRepository.find(
       workspaceId,
     ) ?: throw NotFoundException(Message.SLACK_WORKSPACE_NOT_FOUND)
-  }
 
-  fun find(workspaceId: Long): OrganizationSlackWorkspace? {
-    return organizationSlackWorkspaceRepository.find(workspaceId)
-  }
+  fun find(workspaceId: Long): OrganizationSlackWorkspace? = organizationSlackWorkspaceRepository.find(workspaceId)
 
   fun saveAll(organizationSlackWorkspaces: List<OrganizationSlackWorkspace>) {
     organizationSlackWorkspaceRepository.saveAll(organizationSlackWorkspaces)

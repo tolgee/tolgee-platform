@@ -48,9 +48,7 @@ class MtTranslator(
   fun getServicesToUseByDesiredServices(
     targetLanguageId: Long,
     desiredServices: Set<MtServiceType>?,
-  ): Set<MtServiceInfo> {
-    return context.getServicesToUseByDesiredServices(targetLanguageId, desiredServices)
-  }
+  ): Set<MtServiceInfo> = context.getServicesToUseByDesiredServices(targetLanguageId, desiredServices)
 
   /**
    * We can get request to translate to multiple languages or using multiple services,

@@ -16,7 +16,8 @@ data class PermissionDto(
   override val granular: Boolean?,
   override val viewLanguageIds: Set<Long>?,
   override val stateChangeLanguageIds: Set<Long>?,
-) : Serializable, IPermission {
+) : Serializable,
+  IPermission {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false

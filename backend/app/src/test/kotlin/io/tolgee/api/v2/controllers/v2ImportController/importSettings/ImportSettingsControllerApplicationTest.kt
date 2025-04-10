@@ -154,7 +154,9 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
   ) {
     executeInNewTransaction {
       val keyRefreshed = keyService.get(key.id)
-      keyRefreshed.keyMeta!!.description.assert.isEqualTo(description)
+      keyRefreshed.keyMeta!!
+        .description.assert
+        .isEqualTo(description)
     }
   }
 
@@ -169,11 +171,13 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
       "We connect developers and translators around the globe " +
         "in Tolgee for a fantastic localization experience."
     val key =
-      testData.projectBuilder.addKey(keyName).build {
-        addMeta {
-          description = "This is a description"
-        }
-      }.self
+      testData.projectBuilder
+        .addKey(keyName)
+        .build {
+          addMeta {
+            description = "This is a description"
+          }
+        }.self
     return key
   }
 
@@ -204,13 +208,17 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
     translation: String,
   ) {
     executeInNewTransaction {
-      importService.find(
-        project.id,
-        userAccount!!.id,
-      )!!
-        .files.first()
-        .languages.first()
-        .translations.find { it.key.name == keyName }!!
+      importService
+        .find(
+          project.id,
+          userAccount!!.id,
+        )!!
+        .files
+        .first()
+        .languages
+        .first()
+        .translations
+        .find { it.key.name == keyName }!!
         .text.assert
         .isEqualTo(translation)
     }

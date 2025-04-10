@@ -16,12 +16,10 @@ class ContentDeliveryFileStorageProvider(
   private val s3FileStorageFactory: S3FileStorageFactory,
   private val azureFileStorageFactory: AzureFileStorageFactory,
 ) {
-  fun getContentStorageWithDefaultClient(): FileStorage {
-    return bypassForTesting() ?: defaultStorage
-  }
+  fun getContentStorageWithDefaultClient(): FileStorage = bypassForTesting() ?: defaultStorage
 
-  fun getStorage(config: StorageConfig): FileStorage {
-    return bypassForTesting() ?: when (config) {
+  fun getStorage(config: StorageConfig): FileStorage =
+    bypassForTesting() ?: when (config) {
       is AzureBlobConfig -> {
         azureFileStorageFactory.create(config)
       }
@@ -34,7 +32,6 @@ class ContentDeliveryFileStorageProvider(
         throw Exception("Unknown storage config")
       }
     }
-  }
 
   val defaultStorage by lazy {
     val props = getDefaultStorageProperties()
@@ -90,9 +87,7 @@ class ContentDeliveryFileStorageProvider(
   private val okFileStorage
     get() =
       object : FileStorage {
-        override fun readFile(storageFilePath: String): ByteArray {
-          return ByteArray(0)
-        }
+        override fun readFile(storageFilePath: String): ByteArray = ByteArray(0)
 
         override fun deleteFile(storageFilePath: String) {}
 
@@ -109,29 +104,22 @@ class ContentDeliveryFileStorageProvider(
   private val failingFileStorage
     get() =
       object : FileStorage {
-        override fun readFile(storageFilePath: String): ByteArray {
+        override fun readFile(storageFilePath: String): ByteArray =
           throw FileStoreException("Bypassed storage get exception", "test", IllegalStateException())
-        }
 
-        override fun deleteFile(storageFilePath: String) {
+        override fun deleteFile(storageFilePath: String): Unit =
           throw FileStoreException("Bypassed storage delete exception", "test", IllegalStateException())
-        }
 
         override fun storeFile(
           storageFilePath: String,
           bytes: ByteArray,
-        ) {
-          throw FileStoreException("Bypassed storage put exception", "test", IllegalStateException())
-        }
+        ): Unit = throw FileStoreException("Bypassed storage put exception", "test", IllegalStateException())
 
-        override fun fileExists(storageFilePath: String): Boolean {
+        override fun fileExists(storageFilePath: String): Boolean =
           throw FileStoreException("Bypassed storage exists exception", "test", IllegalStateException())
-        }
 
         override fun pruneDirectory(path: String) {}
 
-        override fun test() {
-          throw FileStoreException("Bypassed storage test exception", "test", IllegalStateException())
-        }
+        override fun test(): Unit = throw FileStoreException("Bypassed storage test exception", "test", IllegalStateException())
       }
 }

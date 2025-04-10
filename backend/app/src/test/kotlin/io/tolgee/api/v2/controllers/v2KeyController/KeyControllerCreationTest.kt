@@ -58,7 +58,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `creates key`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key"))
-      .andIsCreated.andPrettyPrint.andAssertThatJson {
+      .andIsCreated.andPrettyPrint
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_key")
       }
@@ -68,16 +69,19 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `creates key with description`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", description = "description"))
-      .andIsCreated.andPrettyPrint.andAssertThatJson {
+      .andIsCreated.andPrettyPrint
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_key")
         node("description").isEqualTo("description")
       }
 
     executeInNewTransaction {
-      keyService.find(project.id, "super_key", null)!!
+      keyService
+        .find(project.id, "super_key", null)!!
         .keyMeta!!
-        .description.assert.isEqualTo("description")
+        .description.assert
+        .isEqualTo("description")
     }
   }
 
@@ -94,7 +98,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `creates key with size 2000`() {
     performProjectAuthPost("keys", CreateKeyDto(name = KeyControllerTest.MAX_OK_NAME))
-      .andIsCreated.andPrettyPrint.andAssertThatJson {
+      .andIsCreated.andPrettyPrint
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo(KeyControllerTest.MAX_OK_NAME)
       }
@@ -104,7 +109,8 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `creates key with keys create scope`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
-      .andIsCreated.andPrettyPrint.andAssertThatJson {
+      .andIsCreated.andPrettyPrint
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_key")
       }
@@ -305,7 +311,10 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       node("id").isNumber.satisfies { id ->
         executeInNewTransaction {
           val key = keyService.get(id.toLong())
-          key.translations.find { it.language.tag == "en" }!!.state.assert.isEqualTo(TranslationState.REVIEWED)
+          key.translations
+            .find { it.language.tag == "en" }!!
+            .state.assert
+            .isEqualTo(TranslationState.REVIEWED)
         }
       }
     }

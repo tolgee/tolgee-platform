@@ -12,9 +12,7 @@ class TaskReportHelper(
   private val task: TaskWithScopeView,
   private val report: List<TaskPerUserReportView>,
 ) {
-  fun formatDate(date: Date): String {
-    return DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH).format(date)
-  }
+  fun formatDate(date: Date): String = DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH).format(date)
 
   fun formatLanguage(language: Language?): String {
     if (language == null) {
@@ -35,8 +33,8 @@ class TaskReportHelper(
     return result.toString()
   }
 
-  fun capitalize(text: String): String {
-    return text.lowercase().replaceFirstChar {
+  fun capitalize(text: String): String =
+    text.lowercase().replaceFirstChar {
       if (it.isLowerCase()) {
         it.titlecase(
           Locale.getDefault(),
@@ -45,7 +43,6 @@ class TaskReportHelper(
         it.toString()
       }
     }
-  }
 
   fun generateExcelReport(): XSSFWorkbook {
     val workbook = XSSFWorkbook()
