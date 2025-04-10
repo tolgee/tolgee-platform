@@ -49,17 +49,7 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
@@ -99,15 +89,14 @@ class ProjectsController(
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 
-  @GetMapping("/{projectId}")
+  @GetMapping("/{projectId:[0-9]+}")
   @Operation(summary = "Get one project")
   @UseDefaultPermissions
   @AllowApiAccess
   @OpenApiOrderExtension(2)
   fun get(
-    @PathVariable("projectId") projectId: Long,
   ): ProjectModel {
-    return projectService.getView(projectId).let {
+    return projectService.getView(projectHolder.project.id).let {
       projectModelAssembler.toModel(it)
     }
   }
@@ -130,7 +119,7 @@ class ProjectsController(
   }
 
   @Operation(summary = "Update project settings")
-  @PutMapping(value = ["/{projectId}"])
+  @PutMapping(value = ["/{projectId:[0-9]+}"])
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @RequiresSuperAuthentication
@@ -144,7 +133,7 @@ class ProjectsController(
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 
-  @DeleteMapping(value = ["/{projectId}"])
+  @DeleteMapping(value = ["/{projectId:[0-9]+}"])
   @Operation(summary = "Delete project")
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @RequiresSuperAuthentication
@@ -170,7 +159,7 @@ class ProjectsController(
     return projectWithStatsFacade.getPagedModelWithStats(projects)
   }
 
-  @GetMapping("/{projectId}/users")
+  @GetMapping("/{projectId:[0-9]+}/users")
   @Operation(
     summary = "Get users with project access",
     description = "Returns all project users, who have permission to access project",
@@ -221,7 +210,7 @@ class ProjectsController(
     return projectModelAssembler.toModel(projectService.getView(projectId))
   }
 
-  @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
+  @PutMapping("/{projectId:[0-9]+}/users/{userId}/set-permissions/{permissionType}")
   @Operation(summary = "Set direct permission to user")
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
@@ -239,7 +228,7 @@ class ProjectsController(
     )
   }
 
-  @PutMapping("/{projectId}/users/{userId}/set-by-organization")
+  @PutMapping("/{projectId:[0-9]+}/users/{userId}/set-by-organization")
   @Operation(
     summary = "Remove direct project permission",
     description =
@@ -258,7 +247,7 @@ class ProjectsController(
     )
   }
 
-  @PutMapping("/{projectId}/users/{userId}/revoke-access")
+  @PutMapping("/{projectId:[0-9]+}/users/{userId}/revoke-access")
   @Operation(summary = "Revoke project access")
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication

@@ -4,7 +4,7 @@
 package io.tolgee.constants
 
 import com.fasterxml.jackson.annotation.JsonValue
-import java.util.*
+import java.util.Locale
 
 enum class Message {
   UNAUTHENTICATED,
@@ -274,6 +274,7 @@ enum class Message {
   CANNOT_UPDATE_WITHOUT_MODIFICATION,
   CURRENT_SUBSCRIPTION_IS_NOT_TRIALING,
   SORTING_AND_PAGING_IS_NOT_SUPPORTED_WHEN_USING_CURSOR,
+	INVALID_PATH,
   ;
 
   val code: String

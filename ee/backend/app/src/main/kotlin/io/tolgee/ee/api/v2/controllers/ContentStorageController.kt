@@ -22,22 +22,14 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId}/content-storages",
+    "/v2/projects/{projectId:[0-9]+}/content-storages",
   ],
 )
 @Tag(name = "Content Storages")

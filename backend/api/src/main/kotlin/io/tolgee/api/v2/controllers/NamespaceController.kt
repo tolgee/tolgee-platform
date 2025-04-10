@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId}/",
+    "/v2/projects/{projectId:[0-9]+}/",
     "/v2/projects/",
   ],
 )
