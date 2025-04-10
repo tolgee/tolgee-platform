@@ -7,7 +7,6 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.model.UserAccount
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -116,6 +115,10 @@ class KeyUsageReportingTest : AbstractSpringTest() {
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
         isPayAsYouGo = true
+        includedKeys = 10
+        includedSeats = 10
+        keysLimit = 10
+        seatsLimit = 10
       },
     )
   }

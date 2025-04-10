@@ -10,13 +10,14 @@ import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
+import io.tolgee.ee.component.limitsAndReporting.SelfHostedLimitsProvider
+import io.tolgee.ee.component.limitsAndReporting.generic.KeysLimitChecker
+import io.tolgee.ee.component.limitsAndReporting.generic.SeatsLimitChecker
 import io.tolgee.ee.data.*
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
-import io.tolgee.exceptions.limits.PlanKeysLimitExceeded
-import io.tolgee.exceptions.limits.PlanSeatLimitExceeded
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.service.InstanceIdService
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.context.WebApplicationContext
 import java.util.*
 
 @Service
@@ -48,6 +50,8 @@ class EeSubscriptionServiceImpl(
   private val self: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
   private val keyService: KeyService,
+  private val selfHostedLimitsProvider: SelfHostedLimitsProvider,
+  private val applicationContext: WebApplicationContext,
 ) : EeSubscriptionProvider, Logging {
   companion object {
     const val SET_PATH: String = "/v2/public/licensing/set-key"
@@ -112,6 +116,8 @@ class EeSubscriptionServiceImpl(
       entity.includedKeys = responseBody.plan.includedUsage.keys
       entity.includedSeats = responseBody.plan.includedUsage.seats
       entity.isPayAsYouGo = responseBody.plan.isPayAsYouGo
+      entity.keysLimit = responseBody.limits.keys.limit
+      entity.seatsLimit = responseBody.limits.seats.limit
       return self.save(entity)
     }
 
@@ -247,38 +253,24 @@ class EeSubscriptionServiceImpl(
     subscription: EeSubscriptionDto?,
     seats: Long,
   ) {
-    if (bypassSeatCountCheck || isCloud || subscription?.isPayAsYouGo == true) {
-      return
-    }
-
-    val limit = subscription?.includedSeats ?: 10
-
-    if (seats > limit) {
-      when (subscription) {
-        null -> throw BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
-        else -> throw PlanSeatLimitExceeded(seats, limit)
+    object : SeatsLimitChecker(
+      required = seats,
+      limits = selfHostedLimitsProvider.getLimits(),
+    ) {
+      override fun getIncludedUsageExceededException(): BadRequestException {
+        self.findSubscriptionDto()
+          ?: return BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+        return super.getIncludedUsageExceededException()
       }
-    }
+    }.check()
   }
 
   @Transactional
-  fun checkKeyCount(
-    keys: Long,
-  ) {
-    val subscription = findSubscriptionDto()
-
-    if (
-      isCloud ||
-      subscription == null ||
-      subscription.isPayAsYouGo ||
-      subscription.includedKeys < 0
-    ) {
-      return
-    }
-
-    if (keys > subscription.includedKeys) {
-      throw PlanKeysLimitExceeded(keys, subscription.includedKeys)
-    }
+  fun checkKeyCount(keys: Long) {
+    KeysLimitChecker(
+      required = keys,
+      limits = selfHostedLimitsProvider.getLimits(),
+    ).check()
   }
 
   fun reportUsage(
@@ -309,7 +301,6 @@ class EeSubscriptionServiceImpl(
         self.save(entity)
         throw e
       }
-      throw e
     }
   }
 

@@ -85,6 +85,9 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         subscription.assert.isNotNull
         subscription!!.includedKeys.assert.isEqualTo(10)
         subscription.includedSeats.assert.isEqualTo(10)
+        subscription.seatsLimit.assert.isEqualTo(10)
+        subscription.includedKeys.assert.isEqualTo(10)
+        subscription.keysLimit.assert.isEqualTo(10)
         subscription.isPayAsYouGo.assert.isEqualTo(false)
       }
     }

@@ -88,4 +88,18 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1744282308926-1">
+        <addColumn tableName="ee_subscription">
+            <column name="keys_limit" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1744282308926-2">
+        <addColumn tableName="ee_subscription">
+            <column name="seats_limit" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

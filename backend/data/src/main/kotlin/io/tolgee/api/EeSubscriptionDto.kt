@@ -20,5 +20,7 @@ data class EeSubscriptionDto(
   var nonCommercial: Boolean = false,
   var includedKeys: Long,
   var includedSeats: Long,
-  var isPayAsYouGo: Boolean
+  var isPayAsYouGo: Boolean,
+  var keysLimit: Long,
+  var seatsLimit: Long,
 )

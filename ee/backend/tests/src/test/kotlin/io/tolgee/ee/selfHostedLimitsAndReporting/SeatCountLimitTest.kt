@@ -4,11 +4,11 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
-import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.exceptions.limits.PlanLimitExceededKeysException
-import io.tolgee.exceptions.limits.PlanSpendingLimitExceededKeysException
+import io.tolgee.exceptions.limits.PlanLimitExceededSeatsException
+import io.tolgee.exceptions.limits.PlanSpendingLimitExceededSeatsException
+import io.tolgee.model.UserAccount
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @SpringBootTest()
-class KeyCountLimitTest : AbstractSpringTest() {
+class SeatCountLimitTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
@@ -29,50 +29,54 @@ class KeyCountLimitTest : AbstractSpringTest() {
   @Test
   fun `throws when over the limit`() {
     saveSubscription {
-      includedKeys = 1
+      includedSeats = 1
     }
-    val testData = saveTestData(1)
-    assertThrows<PlanLimitExceededKeysException> {
-      createKey(testData)
+    saveTestData(1)
+    assertThrows<PlanLimitExceededSeatsException> {
+      createUser()
     }
   }
 
   @Test
   fun `does not throw when unlimited (-1)`() {
     saveSubscription {
-      includedKeys = -1
-      keysLimit = -1
+      includedSeats = -1
+      seatsLimit = -1
     }
-    val testData = saveTestData(1)
-    createKey(testData)
+    saveTestData(1)
+    createUser()
   }
 
   @Test
   fun `does not throw when pay as you go`() {
     saveSubscription {
       this.isPayAsYouGo = true
-      this.keysLimit = 10
-      this.includedKeys = 1
+      this.seatsLimit = 10
     }
-    val testData = saveTestData(1)
-    createKey(testData)
+    saveTestData(1)
+    createUser()
   }
 
   @Test
   fun `throws when pay as you go and over the limit`() {
     saveSubscription {
       this.isPayAsYouGo = true
-      this.includedKeys = 0
-      this.keysLimit = 1
+      this.includedSeats = 1
+      this.seatsLimit = 1
     }
-    val testData = saveTestData(1)
-    assertThrows<PlanSpendingLimitExceededKeysException> {
-      createKey(testData)
+    saveTestData(1)
+    assertThrows<PlanSpendingLimitExceededSeatsException> {
+      createUser()
     }
   }
 
-  private fun createKey(testData: BaseTestData) {
-    keyService.create(testData.project, CreateKeyDto(name = "Over limit key"))
+  private fun createUser() {
+    userAccountService.createUser(
+      UserAccount(
+        name = "Over the limit",
+        username = "overthelimit@ttt.tt",
+      ),
+    )
   }
 
   private fun saveSubscription(build: EeSubscription.() -> Unit = {}) {
@@ -95,10 +99,10 @@ class KeyCountLimitTest : AbstractSpringTest() {
     )
   }
 
-  private fun saveTestData(keyCount: Long = 1): BaseTestData {
+  private fun saveTestData(userCount: Long = 1): BaseTestData {
     val testData = BaseTestData()
-    (1..keyCount).forEach {
-      testData.projectBuilder.addKey("$it")
+    (1..userCount).forEach {
+      testData.userAccountBuilder
     }
     testDataService.saveTestData(testData.root)
     return testData

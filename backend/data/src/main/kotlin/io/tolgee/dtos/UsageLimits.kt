@@ -11,11 +11,20 @@ data class UsageLimits(
   val strings: Limit,
   val keys: Limit,
   val seats: Limit,
+  val mtCreditsInCents: Limit,
 ) {
   data class Limit(
-    /** What's included in the plan */
+    /**
+     * What's included in the plan
+     *
+     * -1 if unlimited
+     */
     val included: Long,
-    /** What's the maximum value before using all the usage from spending limit */
+    /**
+     *  What's the maximum value before using all the usage from spending limit
+     *
+     * -1 if unlimited
+     */
     val limit: Long,
   )
 }

@@ -2,17 +2,11 @@ package io.tolgee.ee.model
 
 import io.hypersistence.utils.hibernate.type.array.EnumArrayType
 import io.tolgee.api.EeSubscriptionDto
-import io.tolgee.api.IEeSubscription
 import io.tolgee.api.PlanWithIncludedKeysAndSeats
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.model.AuditModel
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Parameter
@@ -26,9 +20,9 @@ import java.util.*
  */
 @Entity
 @Table(schema = "ee")
-class EeSubscription : AuditModel(), IEeSubscription, PlanWithIncludedKeysAndSeats {
+class EeSubscription : AuditModel(), PlanWithIncludedKeysAndSeats {
   @field:Id
-  override val id: Int = 1
+  val id: Int = 1
 
   @field:NotBlank
   lateinit var licenseKey: String
@@ -36,22 +30,22 @@ class EeSubscription : AuditModel(), IEeSubscription, PlanWithIncludedKeysAndSea
   @field:ColumnDefault("Plan")
   lateinit var name: String
 
-  override var currentPeriodEnd: Date? = null
+  var currentPeriodEnd: Date? = null
 
-  override var cancelAtPeriodEnd: Boolean = false
+  var cancelAtPeriodEnd: Boolean = false
 
   @Type(EnumArrayType::class, parameters = [Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "varchar")])
   @Column(name = "enabled_features", columnDefinition = "varchar[]")
-  override var enabledFeatures: Array<Feature> = arrayOf()
+  var enabledFeatures: Array<Feature> = arrayOf()
     get() {
       return if (status != SubscriptionStatus.ERROR && status != SubscriptionStatus.CANCELED) field else arrayOf()
     }
 
   @Enumerated(EnumType.STRING)
   @ColumnDefault("ACTIVE")
-  override var status: SubscriptionStatus = SubscriptionStatus.ACTIVE
+  var status: SubscriptionStatus = SubscriptionStatus.ACTIVE
 
-  override var lastValidCheck: Date? = null
+  var lastValidCheck: Date? = null
 
   @ColumnDefault("false")
   var nonCommercial: Boolean = false
@@ -69,6 +63,8 @@ class EeSubscription : AuditModel(), IEeSubscription, PlanWithIncludedKeysAndSea
       includedSeats = includedSeats,
       includedKeys = includedKeys,
       isPayAsYouGo = isPayAsYouGo,
+      keysLimit = keysLimit,
+      seatsLimit = seatsLimit,
     )
   }
 
@@ -76,5 +72,15 @@ class EeSubscription : AuditModel(), IEeSubscription, PlanWithIncludedKeysAndSea
 
   override var includedSeats: Long = 0L
 
-  override var isPayAsYouGo: Boolean = false
+  /**
+   * How much keys can customer use until they reach spending limit
+   */
+  var keysLimit: Long = 0L
+
+  /**
+   * How much seats can customer use until they reach spending limit
+   */
+  var seatsLimit: Long = 0L
+
+  var isPayAsYouGo: Boolean = false
 }
