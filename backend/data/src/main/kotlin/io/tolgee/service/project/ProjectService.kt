@@ -14,6 +14,7 @@ import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.events.OnProjectSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.ProjectNotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
@@ -73,11 +74,11 @@ class ProjectService(
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun getDto(id: Long): ProjectDto {
-    return findDto(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    return findDto(id) ?: throw ProjectNotFoundException(id)
   }
 
   fun get(id: Long): Project {
-    return find(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    return find(id) ?: throw ProjectNotFoundException(id)
   }
 
   fun find(id: Long): Project? {
@@ -97,7 +98,7 @@ class ProjectService(
     val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
     val withoutPermittedLanguages =
       projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
-        ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+        ?: throw ProjectNotFoundException(id)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
       perms.directPermissions?.translateLanguageIds?.toList(),
