@@ -256,7 +256,7 @@ class PoParser(
     currentLine++
   }
 
-  private fun Char.throwUnexpected() = throw PoParserException("Unexpected character '$this'", currentLine, currentPosition)
+  private fun Char.throwUnexpected(): Nothing = throw PoParserException("Unexpected character '$this'", currentLine, currentPosition)
 
   private val createdTranslation: PoParsedTranslation
     get() {

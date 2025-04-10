@@ -77,9 +77,7 @@ import org.springframework.web.multipart.MultipartFile
 class OrganizationController(
   private val organizationService: OrganizationService,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
-  private val arrayUserResourcesAssembler: PagedResourcesAssembler<
-    Pair<UserAccountWithOrganizationRoleView, List<Project>>,
-  >,
+  private val arrayUserResourcesAssembler: PagedResourcesAssembler<Pair<UserAccountWithOrganizationRoleView, List<Project>>>,
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
