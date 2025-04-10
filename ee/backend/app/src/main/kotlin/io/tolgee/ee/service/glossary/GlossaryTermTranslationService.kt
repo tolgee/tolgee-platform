@@ -20,7 +20,11 @@ class GlossaryTermTranslationService(
   fun create(
     term: GlossaryTerm,
     dto: CreateGlossaryTermTranslationRequest,
-  ): GlossaryTermTranslation {
+  ): GlossaryTermTranslation? {
+    if (dto.text.isEmpty()) {
+      return null
+    }
+
     val translation =
       GlossaryTermTranslation(
         languageCode = dto.languageCode,
@@ -28,6 +32,24 @@ class GlossaryTermTranslationService(
       ).apply {
         this.term = term
       }
+    return glossaryTermTranslationRepository.save(translation)
+  }
+
+  fun updateOrCreate(
+    term: GlossaryTerm,
+    dto: CreateGlossaryTermTranslationRequest,
+  ): GlossaryTermTranslation? {
+    if (dto.text.isEmpty()) {
+      glossaryTermTranslationRepository.deleteByTermAndLanguageCode(term, dto.languageCode)
+      return null
+    }
+
+    val translation = glossaryTermTranslationRepository.findByTermAndLanguageCode(term, dto.languageCode)
+    if (translation == null) {
+      return create(term, dto)
+    }
+
+    translation.text = dto.text
     return glossaryTermTranslationRepository.save(translation)
   }
 }

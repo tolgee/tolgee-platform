@@ -8,6 +8,7 @@ import jakarta.persistence.*
 @Entity
 @ActivityLoggedEntity
 class GlossaryTerm(
+  @Column(columnDefinition = "text")
   @ActivityLoggedProp
   var description: String? = null,
 ) : StandardAuditModel() {

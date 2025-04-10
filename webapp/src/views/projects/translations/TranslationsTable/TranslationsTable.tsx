@@ -14,9 +14,9 @@ import { useNsBanners } from '../context/useNsBanners';
 import { NAMESPACE_BANNER_SPACING } from '../cell/styles';
 import { ReactList } from 'tg.component/reactList/ReactList';
 import clsx from 'clsx';
-import { useScrollStatus } from './useScrollStatus';
 import { useColumns } from '../useColumns';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
+import { useScrollStatus } from 'tg.component/common/useScrollStatus';
 
 const ARROW_SIZE = 50;
 

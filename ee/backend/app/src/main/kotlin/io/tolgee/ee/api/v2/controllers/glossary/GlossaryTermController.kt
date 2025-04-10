@@ -9,7 +9,6 @@ import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermModel
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermWithTranslationsModel
 import io.tolgee.ee.data.glossary.CreateGlossaryTermRequest
 import io.tolgee.ee.data.glossary.CreateGlossaryTermResponse
-import io.tolgee.ee.data.glossary.GlossaryTermWithTranslationsView
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.OrganizationRoleType
@@ -23,15 +22,7 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}")
@@ -42,7 +33,6 @@ class GlossaryTermController(
   private val glossaryTermWithTranslationsModelAssembler: GlossaryTermWithTranslationsModelAssembler,
   private val glossaryTermTranslationModelAssembler: GlossaryTermTranslationModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<GlossaryTerm>,
-  private val pagedWithTranslationsAssembler: PagedResourcesAssembler<GlossaryTermWithTranslationsView>,
 ) {
   @PostMapping("/terms")
   @Operation(summary = "Create a new glossary term")
@@ -59,7 +49,7 @@ class GlossaryTermController(
     val (term, translation) = glossaryTermService.create(organizationId, glossaryId, dto)
     return CreateGlossaryTermResponse(
       term = glossaryTermModelAssembler.toModel(term),
-      translation = glossaryTermTranslationModelAssembler.toModel(translation),
+      translation = translation?.let { glossaryTermTranslationModelAssembler.toModel(translation) },
     )
   }
 
@@ -111,8 +101,9 @@ class GlossaryTermController(
     @PathVariable glossaryId: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search", required = false) search: String?,
+    @RequestParam("languageTags", required = false) languageTags: List<String>?,
   ): PagedModel<GlossaryTermModel> {
-    val terms = glossaryTermService.findAllPaged(organizationId, glossaryId, pageable, search)
+    val terms = glossaryTermService.findAllPaged(organizationId, glossaryId, pageable, search, languageTags?.toSet())
     return pagedAssembler.toModel(terms, glossaryTermModelAssembler)
   }
 
@@ -128,13 +119,13 @@ class GlossaryTermController(
     @RequestParam("languageTags", required = false) languageTags: List<String>?,
   ): PagedModel<GlossaryTermWithTranslationsModel> {
     val terms =
-      glossaryTermService.findAllPagedWithTranslations(
+      glossaryTermService.findAllPaged(
         organizationId,
         glossaryId,
         pageable,
         search,
         languageTags?.toSet(),
       )
-    return pagedWithTranslationsAssembler.toModel(terms, glossaryTermWithTranslationsModelAssembler)
+    return pagedAssembler.toModel(terms, glossaryTermWithTranslationsModelAssembler)
   }
 }

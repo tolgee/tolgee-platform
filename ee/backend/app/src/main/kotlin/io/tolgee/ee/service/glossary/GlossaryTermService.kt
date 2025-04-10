@@ -3,7 +3,6 @@ package io.tolgee.ee.service.glossary
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.glossary.CreateGlossaryTermRequest
 import io.tolgee.ee.data.glossary.CreateGlossaryTermTranslationRequest
-import io.tolgee.ee.data.glossary.GlossaryTermWithTranslationsView
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermRequest
 import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
@@ -40,21 +39,22 @@ class GlossaryTermService(
     glossaryId: Long,
     pageable: Pageable,
     search: String?,
+    languageTags: Set<String>?,
   ): Page<GlossaryTerm> {
     val glossary = glossaryService.get(organizationId, glossaryId)
-    return glossaryTermRepository.findByGlossaryPaged(glossary, pageable, search)
+    return glossaryTermRepository.findByGlossaryPaged(glossary, pageable, search, languageTags)
   }
 
-  fun findAllPagedWithTranslations(
-    organizationId: Long,
-    glossaryId: Long,
-    pageable: Pageable,
-    search: String?,
-    languageTags: Set<String>?,
-  ): Page<GlossaryTermWithTranslationsView> {
-    val glossary = glossaryService.get(organizationId, glossaryId)
-    return glossaryTermRepository.findByGlossaryPagedWithTranslations(glossary, pageable, search, languageTags)
-  }
+//  fun findAllPagedWithTranslations(
+//    organizationId: Long,
+//    glossaryId: Long,
+//    pageable: Pageable,
+//    search: String?,
+//    languageTags: Set<String>?,
+//  ): Page<GlossaryTermWithTranslationsView> {
+//    val glossary = glossaryService.get(organizationId, glossaryId)
+//    return glossaryTermRepository.findByGlossaryPagedWithTranslations(glossary, pageable, search, languageTags)
+//  }
 
   fun get(
     organizationId: Long,
@@ -69,19 +69,19 @@ class GlossaryTermService(
     organizationId: Long,
     glossaryId: Long,
     request: CreateGlossaryTermRequest,
-  ): Pair<GlossaryTerm, GlossaryTermTranslation> {
+  ): Pair<GlossaryTerm, GlossaryTermTranslation?> {
     val glossary = glossaryService.get(organizationId, glossaryId)
     val glossaryTerm =
       GlossaryTerm(
         description = request.description,
       ).apply {
         this.glossary = glossary
-        this.description = request.description
+        description = request.description
 
-        this.flagNonTranslatable = flagNonTranslatable
-        this.flagCaseSensitive = flagCaseSensitive
-        this.flagAbbreviation = flagAbbreviation
-        this.flagForbiddenTerm = flagForbiddenTerm
+        flagNonTranslatable = request.flagNonTranslatable
+        flagCaseSensitive = request.flagCaseSensitive
+        flagAbbreviation = request.flagAbbreviation
+        flagForbiddenTerm = request.flagForbiddenTerm
       }
     val translation =
       CreateGlossaryTermTranslationRequest().apply {

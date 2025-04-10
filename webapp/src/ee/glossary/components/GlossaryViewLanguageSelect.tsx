@@ -86,19 +86,28 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
 
   const data: OrganizationLanguageModel[] = useMemo(() => {
     const priorityLangs =
-      priorityDataLoadable.data?.map((l) => {
-        const languageData = languageInfo[l.tag];
-        return {
-          base: l.base,
-          tag: l.tag,
-          flagEmoji: languageData?.flags?.[0] || '',
-          originalName: languageData?.originalName || l.tag,
-          name: languageData?.englishName || l.tag,
-        };
-      }) || [];
+      priorityDataLoadable.data
+        ?.toSorted((a, b) => {
+          if (a.base === b.base) return 0;
+          return a.base ? -1 : 1;
+        })
+        ?.map((l) => {
+          const languageData = languageInfo[l.tag];
+          return {
+            base: l.base,
+            tag: l.tag,
+            flagEmoji: languageData?.flags?.[0] || '',
+            originalName: languageData?.originalName || l.tag,
+            name: languageData?.englishName || l.tag,
+          };
+        }) || [];
     const extraLangs =
       dataExtra
         ?.filter((l) => !priorityLangs.some((pl) => pl.tag === l.tag))
+        ?.toSorted((a, b) => {
+          if (a.base === b.base) return 0;
+          return a.base ? -1 : 1;
+        })
         ?.map((l) => ({ ...l, base: false })) || [];
     return [...priorityLangs, ...extraLangs];
   }, [priorityDataLoadable.data, dataExtra]);
