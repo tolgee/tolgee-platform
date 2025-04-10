@@ -251,7 +251,7 @@ class AuthProviderChangeService(
       throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
     }
 
-    if (!organizationRoleService.isUserMemberOrOwner(userAccount.id, organization.id)) {
+    if (!organizationRoleService.isUserMember(userAccount.id, organization.id)) {
       organizationRoleService.grantMemberRoleToUser(userAccount, organization)
     }
     organizationRoleService.setManaged(userAccount, organization, true)

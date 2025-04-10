@@ -99,7 +99,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
       performAuthGet("/v2/invitations/${invitation.code}/accept").andIsOk
       assertThatThrownBy { invitationService.getInvitation(invitation.code) }
         .isInstanceOf(BadRequestException::class.java)
-      organizationRoleService.isUserMemberOrOwner(invitedUser.id, organization.id).let {
+      organizationRoleService.isUserMember(invitedUser.id, organization.id).let {
         assertThat(it).isTrue
       }
     }
