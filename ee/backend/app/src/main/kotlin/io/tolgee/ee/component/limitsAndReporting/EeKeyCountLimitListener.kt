@@ -2,7 +2,7 @@ package io.tolgee.ee.component.limitsAndReporting
 
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.TransactionScopeConfig
-import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.ee.component.limitsAndReporting.generic.KeysLimitChecker
 import io.tolgee.events.EntityPreCommitEvent
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeyService
@@ -27,10 +27,10 @@ import org.springframework.transaction.PlatformTransactionManager
 @Scope(TransactionScopeConfig.SCOPE_TRANSACTION)
 @Component
 class EeKeyCountLimitListener(
-  private val eeSubscriptionService: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
   private val keyService: KeyService,
   private val transactionManager: PlatformTransactionManager,
+  private val selfHostedLimitsProvider: SelfHostedLimitsProvider,
 ) : Logging {
   private var keyCount: Long? = null
 
@@ -44,16 +44,31 @@ class EeKeyCountLimitListener(
     onKeyCountChanged()
   }
 
+  private val initialKeyCount: Long by lazy {
+    executeInNewTransaction(transactionManager) {
+      keyService.countAllOnInstance()
+    }
+  }
+
   private fun increaseKeyCount(value: Long) {
     if (keyCount == null) {
-      executeInNewTransaction(transactionManager) {
-        keyCount = keyService.countAllOnInstance()
-      }
+      keyCount = initialKeyCount
     }
     keyCount = keyCount!! + value
   }
 
   fun onKeyCountChanged() {
-    eeSubscriptionService.checkKeyCount(keyCount!!)
+    if (initialKeyCount > keyCount!!) {
+      return
+    }
+
+    KeysLimitChecker(
+      required = keyCount,
+      limits = limits
+    ).check()
+  }
+
+  private val limits by lazy {
+    selfHostedLimitsProvider.getLimits()
   }
 }

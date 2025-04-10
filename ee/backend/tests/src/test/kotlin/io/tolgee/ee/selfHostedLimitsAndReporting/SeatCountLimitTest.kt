@@ -30,6 +30,7 @@ class SeatCountLimitTest : AbstractSpringTest() {
   fun `throws when over the limit`() {
     saveSubscription {
       includedSeats = 1
+      seatsLimit = 1
     }
     saveTestData(1)
     assertThrows<PlanLimitExceededSeatsException> {
@@ -51,6 +52,7 @@ class SeatCountLimitTest : AbstractSpringTest() {
   fun `does not throw when pay as you go`() {
     saveSubscription {
       this.isPayAsYouGo = true
+      this.includedSeats = 0
       this.seatsLimit = 10
     }
     saveTestData(1)
@@ -68,6 +70,23 @@ class SeatCountLimitTest : AbstractSpringTest() {
     assertThrows<PlanSpendingLimitExceededSeatsException> {
       createUser()
     }
+  }
+
+  @Test
+  fun `does not throw when removing users`() {
+    saveSubscription {
+      includedSeats = 2
+      seatsLimit = 2
+    }
+
+    val testData = saveTestData(2)
+
+    saveSubscription {
+      includedKeys = 0
+      keysLimit = 0
+    }
+    val userToDelete = testData.root.data.userAccounts.first().self.id
+    userAccountService.delete(userToDelete)
   }
 
   private fun createUser() {
