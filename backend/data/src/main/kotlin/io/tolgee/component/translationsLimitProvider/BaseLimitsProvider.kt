@@ -8,6 +8,12 @@ class BaseLimitsProvider : LimitsProvider {
   override fun getLimits(organizationId: Long): UsageLimits {
     return UsageLimits(
       isPayAsYouGo = false,
+      isTrial = false,
+      strings =
+        UsageLimits.Limit(
+          included = -1,
+          limit = -1,
+        ),
       keys =
         UsageLimits.Limit(
           included = -1,
@@ -18,12 +24,11 @@ class BaseLimitsProvider : LimitsProvider {
           included = -1,
           limit = -1,
         ),
-      strings =
+      mtCreditsInCents =
         UsageLimits.Limit(
           included = -1,
           limit = -1,
         ),
-      isTrial = false,
     )
   }
 }

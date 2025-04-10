@@ -3,8 +3,8 @@ package io.tolgee.exceptions.limits
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 
-class SeatSpendingLimitExceeded(required: Long, limit: Long) :
+class PlanSpendingLimitExceededKeysException(required: Long, limit: Long) :
   BadRequestException(
-    Message.SEATS_SPENDING_LIMIT_EXCEEDED,
+    Message.KEYS_SPENDING_LIMIT_EXCEEDED,
     params = listOf(required, limit),
   )

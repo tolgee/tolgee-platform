@@ -30,7 +30,7 @@ class EeKeyCountLimitListener(
   private val eeSubscriptionService: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
   private val keyService: KeyService,
-  private val transactionManager: PlatformTransactionManager
+  private val transactionManager: PlatformTransactionManager,
 ) : Logging {
   private var keyCount: Long? = null
 

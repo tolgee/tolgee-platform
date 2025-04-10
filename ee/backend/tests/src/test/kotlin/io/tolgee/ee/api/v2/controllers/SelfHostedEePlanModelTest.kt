@@ -1,4 +1,4 @@
-package io.tolgee.ee.unit
+package io.tolgee.ee.api.v2.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

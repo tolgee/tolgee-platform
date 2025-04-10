@@ -15,6 +15,7 @@ class SignUpProcessor(
   private val entity: UserAccount,
   private val invitationCode: String?,
   private val organizationNameSuggestion: String?,
+  /** The answer for the "Where did you hear about us? */
   private val userSource: String?,
 ) {
   private val tolgeeProperties by lazy {

@@ -6,7 +6,8 @@ import io.tolgee.fixtures.HttpClientMocker
 import io.tolgee.hateoas.ee.*
 import io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel
 import io.tolgee.hateoas.ee.uasge.UsageModel
-import org.springframework.beans.factory.annotation.Autowired
+import io.tolgee.hateoas.limits.LimitModel
+import io.tolgee.hateoas.limits.SelfHostedUsageLimitsModel
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
@@ -50,6 +51,24 @@ class EeLicensingMockRequestUtil(
       licenseKey = "mocked_license_key",
       estimatedCosts = 200.toBigDecimal(),
       currentPeriodStart = 1622313600000,
+      limits =
+        SelfHostedUsageLimitsModel(
+          keys =
+            LimitModel(
+              mockedPlan.includedUsage.keys,
+              mockedPlan.includedUsage.keys,
+            ),
+          seats =
+            LimitModel(
+              mockedPlan.includedUsage.seats,
+              mockedPlan.includedUsage.seats,
+            ),
+          mtCreditsInCents =
+            LimitModel(
+              mockedPlan.includedUsage.mtCredits,
+              mockedPlan.includedUsage.mtCredits,
+            ),
+        ),
     )
 
   final val mockedPrepareResponse =

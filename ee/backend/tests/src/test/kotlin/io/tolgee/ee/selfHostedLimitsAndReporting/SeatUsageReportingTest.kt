@@ -3,7 +3,6 @@ package io.tolgee.ee.selfHostedLimitsAndReporting
 import io.tolgee.AbstractSpringTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
@@ -87,6 +86,10 @@ class SeatUsageReportingTest : AbstractSpringTest() {
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
         isPayAsYouGo = true
+        includedKeys = 10
+        includedSeats = 10
+        keysLimit = 10
+        seatsLimit = 10
       },
     )
   }

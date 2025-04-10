@@ -157,7 +157,13 @@ class UserAccountService(
 
   @Transactional
   fun createUser(
+    /**
+     * the user account to be created
+     */
     userAccount: UserAccount,
+    /**
+     * The answer for the "Where did you hear about us?"
+     */
     userSource: String? = null,
   ): UserAccount {
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
