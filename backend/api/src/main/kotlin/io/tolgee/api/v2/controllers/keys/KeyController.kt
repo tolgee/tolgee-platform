@@ -19,14 +19,7 @@ import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.hateoas.key.KeyImportResolvableResultModel
-import io.tolgee.hateoas.key.KeyModel
-import io.tolgee.hateoas.key.KeyModelAssembler
-import io.tolgee.hateoas.key.KeySearchResultModelAssembler
-import io.tolgee.hateoas.key.KeySearchSearchResultModel
-import io.tolgee.hateoas.key.KeyWithDataModel
-import io.tolgee.hateoas.key.KeyWithDataModelAssembler
-import io.tolgee.hateoas.key.KeyWithScreenshotsModelAssembler
+import io.tolgee.hateoas.key.*
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
@@ -56,17 +49,7 @@ import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -167,7 +150,15 @@ class KeyController(
     key.checkInProject()
     checkNamespaceFeature(dto.namespace)
     keyService.edit(id, dto)
-    val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom)
+    val view =
+      KeyView(
+        key.id,
+        key.name,
+        key?.namespace?.name,
+        key.keyMeta?.description,
+        key.keyMeta?.custom,
+        key.isPlural,
+      )
     return keyModelAssembler.toModel(view)
   }
 

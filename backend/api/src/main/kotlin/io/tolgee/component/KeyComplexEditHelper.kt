@@ -6,6 +6,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.PossibleConvertToIcuPluralResult
 import io.tolgee.hateoas.key.KeyWithDataModel
 import io.tolgee.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.model.Language
@@ -129,7 +130,7 @@ class KeyComplexEditHelper(
 
     if (isIsPluralChanged) {
       key.isPlural = dto.isPlural!!
-      key.pluralArgName = dto.pluralArgName ?: key.pluralArgName
+      key.pluralArgName = newPluralArgName
       translationService.onKeyIsPluralChanged(
         mapOf(key.id to newPluralArgName),
         dto.isPlural!!,
@@ -198,7 +199,9 @@ class KeyComplexEditHelper(
       )
 
       val modifiedTranslations = getModifiedTranslationsByTag()
-      val normalizedPlurals = validateAndNormalizePlurals(modifiedTranslations)
+      val conversionResult = validateAndNormalizePlurals(modifiedTranslations)
+      val normalizedPlurals = conversionResult.convertedStrings
+      newPluralArgName = conversionResult.argName
 
       val existingTranslationsByTag = getExistingTranslationsByTag()
       val oldTranslations =
@@ -221,16 +224,22 @@ class KeyComplexEditHelper(
     }
   }
 
-  private fun validateAndNormalizePlurals(modifiedTranslations: Map<Language, String?>): Map<Language, String?> {
-    if (newIsPlural) {
-      return translationService.validateAndNormalizePlurals(modifiedTranslations, newPluralArgName)
-    }
-    return modifiedTranslations
+  private fun validateAndNormalizePlurals(modifiedTranslations: Map<Language, String?>):
+    PossibleConvertToIcuPluralResult<Language> {
+    return translationService.validateAndNormalizePlurals(modifiedTranslations, newIsPlural, explicitPluralArgName)
   }
 
-  private val newPluralArgName: String? by lazy {
+  private val explicitPluralArgName: String? by lazy {
     dto.pluralArgName ?: key.pluralArgName
   }
+
+  private var newPluralArgName: String? = null
+    get() {
+      if (field == null) {
+        return explicitPluralArgName
+      }
+      return field
+    }
 
   private fun getExistingTranslationsByTag() =
     existingTranslations.map { languageByTag(it.key) to it.value.text }.toMap()

@@ -18,5 +18,6 @@ class KeyModelAssembler : RepresentationModelAssemblerSupport<KeyView, KeyModel>
       namespace = view.namespace,
       description = view.description,
       custom = view.custom as? Map<String, Any?>?,
+      isPlural = view.isPlural,
     )
 }
