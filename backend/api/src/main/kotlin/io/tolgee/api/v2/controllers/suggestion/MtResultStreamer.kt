@@ -41,12 +41,12 @@ class MtResultStreamer(
 
     return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
       this.outputStream = outputStream
-      writer.writeJson(info)
+      writer.writeJsonSync(info)
       if (!baseBlank) {
         writeServiceResultsAsync()
       }
 
-      writer.close()
+      writer.closeSync()
     }
   }
 
@@ -95,12 +95,9 @@ class MtResultStreamer(
       translated
         ?.let { it.translatedText?.let { text -> TranslationItemModel(text, it.contextDescription) } }
 
-    writer.writeJson(
-      StreamedSuggestionItem(
-        service,
-        model,
-      ),
-    )
+    val item = StreamedSuggestionItem(service, model)
+
+    writer.writeJsonSync(item)
   }
 
   private fun getTranslatedValue(
@@ -125,24 +122,32 @@ class MtResultStreamer(
     service: MtServiceType,
   ) {
     val exceptionWithMessage = (e as? ExceptionWithMessage)
-    writer.writeJson(
+    val item =
       StreamedSuggestionItem(
         service,
         null,
         errorMessage = exceptionWithMessage?.tolgeeMessage,
         errorParams = exceptionWithMessage?.params,
         errorException = e::class.qualifiedName,
-      ),
-    )
+      )
+    writer.writeJsonSync(item)
     if (e !is BadRequestException && e !is NotFoundException) {
       Sentry.captureException(e)
     }
   }
 
-  private fun OutputStreamWriter.writeJson(data: Any) {
+  private fun OutputStreamWriter.writeJsonSync(data: Any) {
     val string = objectMapper.writeValueAsString(data)
-    this.write(string + "\n")
-    this.flush()
+    synchronized(this) {
+      this.write(string + "\n")
+      this.flush()
+    }
+  }
+
+  private fun OutputStreamWriter.closeSync() {
+    synchronized(this) {
+      this.close()
+    }
   }
 
   private val machineTranslationSuggestionFacade by lazy {
