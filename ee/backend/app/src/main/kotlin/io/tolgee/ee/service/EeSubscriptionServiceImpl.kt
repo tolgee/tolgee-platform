@@ -265,14 +265,6 @@ class EeSubscriptionServiceImpl(
     }.check()
   }
 
-  @Transactional
-  fun checkKeyCount(keys: Long) {
-    KeysLimitChecker(
-      required = keys,
-      limits = selfHostedLimitsProvider.getLimits(),
-    ).check()
-  }
-
   fun reportUsage(
     subscription: EeSubscriptionDto?,
     keys: Long? = null,

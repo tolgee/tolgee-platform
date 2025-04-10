@@ -48,6 +48,22 @@ class KeyCountLimitTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `does not throw when removing keys`(){
+    saveSubscription {
+      includedKeys = 2
+      keysLimit = 2
+    }
+    val testData = saveTestData(2)
+
+    saveSubscription {
+      includedKeys = 0
+      keysLimit = 0
+    }
+    val keyToDelete = testData.projectBuilder.data.keys.first().self
+    keyService.delete(keyToDelete.id)
+  }
+
+  @Test
   fun `does not throw when pay as you go`() {
     saveSubscription {
       this.isPayAsYouGo = true
