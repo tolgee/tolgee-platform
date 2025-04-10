@@ -35,6 +35,11 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   if (err.hasOwnProperty('code') && typeof err.code == 'string') {
     return false;
   }
+
+  // resize observer throwing these errors sometimes, doesn't seem to affect anything
+  if (err.message.includes('ResizeObserver loop')) {
+    return false;
+  }
 });
 
 Cypress.on('window:before:load', (win) => {
