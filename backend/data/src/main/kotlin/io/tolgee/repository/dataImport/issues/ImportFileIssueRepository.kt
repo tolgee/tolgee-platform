@@ -24,7 +24,7 @@ interface ImportFileIssueRepository : JpaRepository<ImportFileIssue, Long> {
   @Transactional
   @Query(
     """delete from ImportFileIssue ifi where ifi.file in 
-        (select f from ImportFile f where f.import = :import)""",
+        (select f from ImportFile f where f.importEntity = :import)""",
   )
   @Modifying
   fun deleteAllByImport(import: Import)
