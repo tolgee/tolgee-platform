@@ -11,7 +11,6 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
 import io.tolgee.ee.component.limitsAndReporting.SelfHostedLimitsProvider
-import io.tolgee.ee.component.limitsAndReporting.generic.KeysLimitChecker
 import io.tolgee.ee.component.limitsAndReporting.generic.SeatsLimitChecker
 import io.tolgee.ee.data.*
 import io.tolgee.ee.model.EeSubscription
@@ -92,7 +91,7 @@ class EeSubscriptionServiceImpl(
       }
 
     val responseBody =
-      catchingSeatsSpendingLimit {
+      catchingSpendingLimits {
         try {
           postRequest<SelfHostedEeSubscriptionModel>(
             SET_PATH,
@@ -127,7 +126,7 @@ class EeSubscriptionServiceImpl(
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
     val seats = userAccountService.countAllEnabled()
     val responseBody =
-      catchingSeatsSpendingLimit {
+      catchingSpendingLimits {
         try {
           postRequest<PrepareSetEeLicenceKeyModel>(
             PREPARE_SET_KEY_PATH,
@@ -145,12 +144,17 @@ class EeSubscriptionServiceImpl(
     throw IllegalStateException("Licence not obtained")
   }
 
-  fun <T> catchingSeatsSpendingLimit(fn: () -> T): T {
+  fun <T> catchingSpendingLimits(fn: () -> T): T {
     return try {
       fn()
     } catch (e: HttpClientErrorException.BadRequest) {
       val body = e.parseBody()
-      if (body.code == Message.SEATS_SPENDING_LIMIT_EXCEEDED.code) {
+      // TODO: TEST THIS
+      when (body.code) {
+        Message.SEATS_SPENDING_LIMIT_EXCEEDED.code,
+        Message.KEYS_SPENDING_LIMIT_EXCEEDED.code,
+        Message.PLAN_KEY_LIMIT_EXCEEDED.code,
+        Message.PLAN_SEAT_LIMIT_EXCEEDED.code ->
         throw BadRequestException(body.code, body.params)
       }
       throw e
@@ -271,7 +275,7 @@ class EeSubscriptionServiceImpl(
     seats: Long? = null,
   ) {
     if (subscription != null) {
-      catchingSeatsSpendingLimit {
+      catchingSpendingLimits {
         catchingLicenseNotFound {
           reportUsageRemote(subscription = subscription, keys = keys, seats = seats)
         }
