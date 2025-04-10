@@ -68,4 +68,6 @@ class OrganizationBuilder(
     }.build(buildRole)
     return invitationBuilder
   }
+
+  val projects get() = testDataBuilder.data.projects.filter { it.self.organizationOwner.id == self.id }
 }
