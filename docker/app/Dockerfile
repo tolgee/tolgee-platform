@@ -2,8 +2,17 @@ FROM postgres:16.8
 
 ENTRYPOINT []
 
-RUN apk --no-cache add openjdk21
-RUN apk --no-cache add libxml2
+RUN <<EOF
+  set -eux
+  apt -qq update
+  apt -qq -y install wget
+  wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null
+  echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+  apt -qq update
+  apt -qq -y install temurin-21-jdk libxml2
+  apt -qq -y remove wget --purge --auto-remove
+  rm -rf /var/lib/apt/lists/*
+EOF
 
 #############
 ### Tolgee  #
