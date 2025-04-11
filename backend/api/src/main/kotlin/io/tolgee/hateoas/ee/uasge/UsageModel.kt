@@ -7,7 +7,6 @@ import java.io.Serializable
 import java.math.BigDecimal
 
 @Suppress("unused")
-@Relation(collectionRelation = "invoices", itemRelation = "invoice")
 open class UsageModel(
   val subscriptionPrice: BigDecimal? = 0.toBigDecimal(),
   @Schema(
