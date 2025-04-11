@@ -165,6 +165,9 @@ export interface paths {
   "/v2/public/billing/plans": {
     get: operations["getPlans"];
   };
+  "/v2/public/licensing/current-subscription-usage": {
+    post: operations["getSubscriptionUsage"];
+  };
   "/v2/public/licensing/prepare-set-key": {
     post: operations["prepareSetLicenseKey"];
   };
@@ -485,6 +488,20 @@ export interface components {
       sendReadOnlyInvitation: boolean;
       tasks: components["schemas"]["CreateTaskRequest"][];
     };
+    CurrentUsageItemModel: {
+      /** Format: int64 */
+      current: number;
+      /** Format: int64 */
+      included: number;
+      /** Format: int64 */
+      limit: number;
+    };
+    CurrentUsageModel: {
+      creditsInCents: components["schemas"]["CurrentUsageItemModel"];
+      keys: components["schemas"]["CurrentUsageItemModel"];
+      seats: components["schemas"]["CurrentUsageItemModel"];
+      strings: components["schemas"]["CurrentUsageItemModel"];
+    };
     ErrorResponseBody: {
       code: string;
       params?: { [key: string]: unknown }[];
@@ -761,7 +778,8 @@ export interface components {
         | "strings_metric_are_not_supported"
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
-        | "plan_seat_limit_exceeded";
+        | "plan_seat_limit_exceeded"
+        | "instance_not_using_license_key";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -772,6 +790,9 @@ export interface components {
     };
     GetMySubscriptionDto: {
       instanceId: string;
+      licenseKey: string;
+    };
+    GetMySubscriptionUsageRequest: {
       licenseKey: string;
     };
     GoToCustomerPortalModel: {
@@ -807,6 +828,22 @@ export interface components {
       taxRatePercentage?: number;
       /** @description The Total amount with tax */
       total: number;
+    };
+    LimitModel: {
+      /**
+       * Format: int64
+       * @description What's included in the plan.
+       *
+       * -1 if unlimited
+       */
+      included: number;
+      /**
+       * Format: int64
+       * @description What's the maximum value before using all the usage from spending limit.
+       *
+       * -1 if unlimited
+       */
+      limit: number;
     };
     Metadata: {
       closeItems: components["schemas"]["ExampleItem"][];
@@ -979,6 +1016,8 @@ export interface components {
       usage: components["schemas"]["UsageModel"];
     };
     PrepareSetLicenseKeyDto: {
+      /** Format: int64 */
+      keys: number;
       licenseKey: string;
       /** Format: int64 */
       seats: number;
@@ -1140,6 +1179,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       licenseKey?: string;
+      limits: components["schemas"]["SelfHostedUsageLimitsModel"];
       plan: components["schemas"]["SelfHostedEePlanAdministrationModel"];
       status:
         | "ACTIVE"
@@ -1163,6 +1203,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       licenseKey?: string;
+      limits: components["schemas"]["SelfHostedUsageLimitsModel"];
       plan: components["schemas"]["SelfHostedEePlanModel"];
       status:
         | "ACTIVE"
@@ -1173,6 +1214,11 @@ export interface components {
         | "TRIALING"
         | "KEY_USED_BY_ANOTHER_INSTANCE"
         | "UNKNOWN";
+    };
+    SelfHostedUsageLimitsModel: {
+      keys: components["schemas"]["LimitModel"];
+      mtCreditsInCents: components["schemas"]["LimitModel"];
+      seats: components["schemas"]["LimitModel"];
     };
     SetLicenseKeyLicensingDto: {
       instanceId: string;
@@ -4131,6 +4177,53 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  getSubscriptionUsage: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CurrentUsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetMySubscriptionUsageRequest"];
       };
     };
   };

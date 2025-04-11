@@ -12,7 +12,7 @@ export function EeLicenseHint() {
   return (
     <Alert severity="info">
       <T
-        keyName="ee_licence_key_hint"
+        keyName="ee_licence_create_manage_see_usage_hint"
         params={{
           a: link,
         }}
