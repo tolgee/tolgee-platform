@@ -16,7 +16,6 @@ import java.math.BigDecimal
 @Relation(collectionRelation = "subscriptions", itemRelation = "subscription")
 open class SelfHostedEeSubscriptionModel(
   val id: Long = 0,
-  val cancelAtPeriodEnd: Boolean = false,
   val currentPeriodStart: Long? = null,
   val currentPeriodEnd: Long? = null,
   val currentBillingPeriod: BillingPeriod = BillingPeriod.MONTHLY,
