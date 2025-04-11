@@ -22,6 +22,7 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
   );
 
   const mostCriticalProgress = Math.max(
+    creditProgress.progress,
     stringsProgress.progress,
     keysProgress.progress,
     seatsProgress.progress
@@ -47,7 +48,7 @@ export class ProgressItem {
   isInUse: boolean;
 
   constructor(public included: number, public used: number) {
-    this.isInUse = included > 0;
+    this.isInUse = included >= 0;
   }
 
   get progress() {

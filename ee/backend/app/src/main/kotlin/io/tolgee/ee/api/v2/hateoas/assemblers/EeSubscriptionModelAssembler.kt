@@ -24,6 +24,7 @@ class EeSubscriptionModelAssembler(
       status = eeSubscription.status,
       lastValidCheck = eeSubscription.lastValidCheck,
       nonCommerical = eeSubscription.nonCommercial,
+      isPayAsYouGo = eeSubscription.isPayAsYouGo,
     )
   }
 }

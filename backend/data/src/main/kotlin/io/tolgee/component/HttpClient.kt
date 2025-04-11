@@ -33,6 +33,11 @@ class HttpClient(
         String::class.java,
       )
 
+    if(result == Unit::class.java) {
+      @Suppress("UNCHECKED_CAST")
+      return Unit as T
+    }
+
     return response.body.let { stringResponseBody ->
       jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

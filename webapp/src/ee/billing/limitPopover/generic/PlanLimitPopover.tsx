@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import {
   Button,
+  CircularProgress,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -16,9 +17,10 @@ import {
 import { ProgressData } from '../../component/getProgressData';
 
 type PlanLimitPopoverProps = PlanLimitPopoverWrapperProps & {
-  isPayAsYouGo: boolean;
-  progressData: Partial<ProgressData>;
+  isPayAsYouGo?: boolean;
+  progressData?: Partial<ProgressData>;
   actionButton?: React.ReactNode;
+  loading?: boolean;
 };
 
 const StyledDialogContent = styled(DialogContent)`
@@ -33,6 +35,7 @@ export const PlanLimitPopover: FC<PlanLimitPopoverProps> = ({
   isPayAsYouGo,
   progressData,
   actionButton,
+  loading,
 }) => {
   return (
     <PlanLimitPopoverWrapper
@@ -47,7 +50,11 @@ export const PlanLimitPopover: FC<PlanLimitPopoverProps> = ({
         <DialogContentText id="alert-dialog-description">
           <T keyName="plan_limit_dialog_description" />
         </DialogContentText>
-        <UsageDetailed {...progressData} isPayAsYouGo={isPayAsYouGo} />
+        {progressData && isPayAsYouGo ? (
+          <UsageDetailed {...progressData} isPayAsYouGo={isPayAsYouGo} />
+        ) : (
+          loading && <CircularProgress />
+        )}
       </StyledDialogContent>
       <Button
         data-cy="global-confirmation-cancel"

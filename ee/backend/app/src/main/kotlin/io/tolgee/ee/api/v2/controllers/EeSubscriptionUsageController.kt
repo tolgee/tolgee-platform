@@ -3,7 +3,7 @@ package io.tolgee.ee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionUsageService
-import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
+import io.tolgee.hateoas.ee.uasge.current.CurrentUsageModel
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -23,9 +23,10 @@ import org.springframework.web.bind.annotation.RestController
 class EeSubscriptionUsageController(
   private val usageService: EeSubscriptionUsageService
 ) {
+  // TODO: TEST THIS
   @GetMapping("")
-  @Operation(summary = "Get the info about the current EE subscription")
-  fun getUsage(): UsageModel? {
+  @Operation(summary = "Get current usage for the current EE subscription")
+  fun getUsage(): CurrentUsageModel? {
     return usageService.getUsage()
   }
 }

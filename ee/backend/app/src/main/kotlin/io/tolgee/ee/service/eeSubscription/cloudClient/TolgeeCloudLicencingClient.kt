@@ -9,6 +9,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
+import io.tolgee.hateoas.ee.uasge.current.CurrentUsageModel
 import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
@@ -88,8 +89,8 @@ class TolgeeCloudLicencingClient(
     return httpClient.requestForJson("${eeProperties.licenseServer}$url", body, HttpMethod.POST, T::class.java)
   }
 
-  fun getUsageRemote(licenseKey: String): UsageModel {
-    return postRequest<UsageModel>(
+  fun getUsageRemote(licenseKey: String): CurrentUsageModel {
+    return postRequest<CurrentUsageModel>(
       SUBSCRIPTION_USAGE_PATH,
       GetMySubscriptionUsageRequest(licenseKey),
     )

@@ -111,6 +111,9 @@ export interface paths {
     post: operations["acceptChangeAuthProvider"];
     delete: operations["rejectChangeAuthProvider"];
   };
+  "/v2/ee-current-subscription-usage": {
+    get: operations["getUsage_1"];
+  };
   "/v2/ee-license/info": {
     get: operations["getInfo_5"];
   };
@@ -2053,10 +2056,10 @@ export interface components {
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "strings_metric_are_not_supported"
-        | "keys_seats_metric_are_not_supported_for_slots_fixed_type"
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
-        | "plan_seat_limit_exceeded";
+        | "plan_seat_limit_exceeded"
+        | "instance_not_using_license_key";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2471,7 +2474,6 @@ export interface components {
     };
     InitialDataModel: {
       announcement?: components["schemas"]["AnnouncementDto"];
-      eeSubscription?: components["schemas"]["EeSubscriptionModel"];
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
@@ -2918,6 +2920,8 @@ export interface components {
       translatedPercentage: number;
       /** Format: int64 */
       translatedWordCount: number;
+      /** Format: date-time */
+      translationsUpdatedAt?: string;
       /** Format: int64 */
       untranslatedKeyCount: number;
       /** Format: double */
@@ -3806,7 +3810,7 @@ export interface components {
       name: string;
       nonCommercial: boolean;
       public: boolean;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
     };
     /** @example Current active subscription info */
     PublicCloudSubscriptionModel: {
@@ -3907,11 +3911,6 @@ export interface components {
        * @description How seats are currently used by organization
        */
       currentSeats: number;
-      /**
-       * Format: int64
-       * @description How many translations slots are currently used by organization
-       */
-      currentTranslationSlots: number;
       /**
        * Format: int64
        * @description How many non-empty translations are currently stored by organization
@@ -4603,10 +4602,10 @@ export interface components {
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "strings_metric_are_not_supported"
-        | "keys_seats_metric_are_not_supported_for_slots_fixed_type"
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
-        | "plan_seat_limit_exceeded";
+        | "plan_seat_limit_exceeded"
+        | "instance_not_using_license_key";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -6561,6 +6560,48 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getUsage_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UsageModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

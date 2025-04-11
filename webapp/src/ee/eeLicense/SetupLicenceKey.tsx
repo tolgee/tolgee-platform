@@ -16,7 +16,7 @@ export const SetupLicenceKey = () => {
   const setKeyMutation = useApiMutation({
     url: '/v2/ee-license/set-license-key',
     method: 'put',
-    invalidatePrefix: ['/v2/ee-license'],
+    invalidatePrefix: ['/v2/ee-license', '/v2/ee-subscription-usage'],
     options: {
       onSuccess: () => refetchInitialData(),
     },
