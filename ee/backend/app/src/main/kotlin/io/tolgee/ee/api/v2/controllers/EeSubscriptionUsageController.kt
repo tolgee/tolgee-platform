@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
  * It doesn't make sense on Tolgee Cloud.
  */
 @RestController
-@RequestMapping("/v2/ee-current-subscription-usage/")
+@RequestMapping("/v2/ee-current-subscription-usage")
 @Tag(name = "EE Licence")
 @OpenApiEeExtension
 class EeSubscriptionUsageController(
