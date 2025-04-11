@@ -133,7 +133,6 @@ declare namespace DataCy {
         "billing-invoice-item-number" |
         "billing-invoice-usage-button" |
         "billing-invoices-list" |
-        "billing-limit-exceeded-popover" |
         "billing-period-switch" |
         "billing-plan" |
         "billing-plan-action-button" |

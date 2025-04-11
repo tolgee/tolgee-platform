@@ -5,7 +5,7 @@ import { BillingProgress } from './BillingProgress';
 import { ProgressData } from './getProgressData';
 
 export const UsageDetailed: React.FC<
-  ProgressData & { isPayAsYouGo: boolean }
+  Partial<ProgressData> & { isPayAsYouGo: boolean }
 > = (props) => {
   const items = [
     {
@@ -36,9 +36,12 @@ export const UsageDetailed: React.FC<
 
   return (
     <Box display="grid" gap={1}>
-      {items
-        .filter((item) => item.progress.isInUse)
-        .map((item, index) => (
+      {items.map((item, index) => {
+        if (!item.progress?.isInUse) {
+          return null;
+        }
+
+        return (
           <Box key={index}>
             <Typography variant="caption">
               {item.getLabel({
@@ -51,7 +54,8 @@ export const UsageDetailed: React.FC<
               isPayAsYouGo={props.isPayAsYouGo}
             />
           </Box>
-        ))}
+        );
+      })}
     </Box>
   );
 };

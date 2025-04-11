@@ -19,7 +19,7 @@ class HttpClient(
     method: HttpMethod,
     result: Class<T>,
     headers: HttpHeaders = HttpHeaders(),
-  ): T? {
+  ): T {
     val bodyJson = jacksonObjectMapper().writeValueAsString(body)
     headers.apply {
       contentType = MediaType.APPLICATION_JSON
@@ -33,8 +33,7 @@ class HttpClient(
         String::class.java,
       )
 
-    @Suppress("UNNECESSARY_SAFE_CALL")
-    return response?.body?.let { stringResponseBody ->
+    return response.body.let { stringResponseBody ->
       jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .readValue(stringResponseBody, result)

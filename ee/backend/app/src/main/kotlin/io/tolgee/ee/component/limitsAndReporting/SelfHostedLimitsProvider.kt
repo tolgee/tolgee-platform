@@ -1,7 +1,7 @@
 package io.tolgee.ee.component.limitsAndReporting
 
 import io.tolgee.dtos.UsageLimits
-import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 

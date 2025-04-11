@@ -1,7 +1,7 @@
 package io.tolgee.ee.component
 
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
-import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.NoActiveSubscriptionException
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.events.OnProjectActivityEvent
