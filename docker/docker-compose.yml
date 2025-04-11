@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16.8-alpine3.21
+    image: postgres:16.8
     volumes:
       - ../build/db-data:/var/lib/postgresql/data/
     environment:
