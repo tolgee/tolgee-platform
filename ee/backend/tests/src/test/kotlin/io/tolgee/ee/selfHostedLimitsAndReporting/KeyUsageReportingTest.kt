@@ -111,7 +111,6 @@ class KeyUsageReportingTest : AbstractSpringTest() {
         name = "Plaaan"
         status = SubscriptionStatus.ERROR
         currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
         isPayAsYouGo = true

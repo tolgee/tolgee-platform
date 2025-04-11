@@ -12,7 +12,6 @@ class SubscriptionFromModelAssigner(
   fun assign() {
     subscription.name = model.plan.name
     subscription.currentPeriodEnd = model.currentPeriodEnd?.let { Date(it) }
-    subscription.cancelAtPeriodEnd = model.cancelAtPeriodEnd
     subscription.enabledFeatures = model.plan.enabledFeatures
     subscription.nonCommercial = model.plan.nonCommercial
     subscription.includedKeys = model.plan.includedUsage.keys

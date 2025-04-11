@@ -91,7 +91,7 @@ class TolgeeCloudLicencingClient(
   fun getUsageRemote(licenseKey: String): UsageModel {
     return postRequest<UsageModel>(
       SUBSCRIPTION_USAGE_PATH,
-      GetEeSubscriptionUsageDto(licenseKey),
+      GetMySubscriptionUsageRequest(licenseKey),
     )
   }
 }

@@ -102,4 +102,7 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1744363908122-1">
+        <dropColumn columnName="cancel_at_period_end" tableName="ee_subscription"/>
+    </changeSet>
 </databaseChangeLog>

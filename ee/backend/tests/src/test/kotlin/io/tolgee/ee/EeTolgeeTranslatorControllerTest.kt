@@ -48,7 +48,6 @@ class EeTolgeeTranslatorControllerTest : ProjectAuthControllerTest("/v2/projects
         name = "Plaaan"
         status = SubscriptionStatus.ACTIVE
         currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
       },

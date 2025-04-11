@@ -33,9 +33,6 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
   @Autowired
-  private lateinit var eeLicensingMockRequestUtil: EeLicensingMockRequestUtil
-
-  @Autowired
   private lateinit var eeLicenseMockRequestUtil: EeLicensingMockRequestUtil
 
   @Test
@@ -46,7 +43,6 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
         name = "Plaaan"
         status = SubscriptionStatus.ERROR
         currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
       },
@@ -81,7 +77,6 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
         name = "Plaaan"
         status = SubscriptionStatus.ERROR
         currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
       },

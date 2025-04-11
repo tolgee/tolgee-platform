@@ -98,7 +98,6 @@ class KeyCountLimitTest : AbstractSpringTest() {
         name = "Plaaan"
         status = SubscriptionStatus.ERROR
         currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
         enabledFeatures = Feature.entries.toTypedArray()
         lastValidCheck = Date()
         this.includedKeys = 1

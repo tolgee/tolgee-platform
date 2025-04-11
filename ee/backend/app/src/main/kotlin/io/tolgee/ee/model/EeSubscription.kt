@@ -32,8 +32,6 @@ class EeSubscription : AuditModel(), PlanWithIncludedKeysAndSeats {
 
   var currentPeriodEnd: Date? = null
 
-  var cancelAtPeriodEnd: Boolean = false
-
   @Type(EnumArrayType::class, parameters = [Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "varchar")])
   @Column(name = "enabled_features", columnDefinition = "varchar[]")
   var enabledFeatures: Array<Feature> = arrayOf()
@@ -55,7 +53,6 @@ class EeSubscription : AuditModel(), PlanWithIncludedKeysAndSeats {
       licenseKey = licenseKey,
       name = name,
       currentPeriodEnd = currentPeriodEnd,
-      cancelAtPeriodEnd = cancelAtPeriodEnd,
       enabledFeatures = enabledFeatures,
       status = status,
       lastValidCheck = lastValidCheck,
