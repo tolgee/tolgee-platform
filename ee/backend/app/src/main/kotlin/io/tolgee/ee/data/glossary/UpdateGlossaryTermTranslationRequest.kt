@@ -3,7 +3,7 @@ package io.tolgee.ee.data.glossary
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
-class CreateGlossaryTermTranslationRequest {
+class UpdateGlossaryTermTranslationRequest {
   @field:Size(min = 0, max = 50)
   var text: String = ""
 

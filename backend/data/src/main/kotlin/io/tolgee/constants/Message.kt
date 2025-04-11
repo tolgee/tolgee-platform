@@ -283,6 +283,7 @@ enum class Message {
   INVALID_PATH,
   GLOSSARY_NOT_FOUND,
   GLOSSARY_TERM_NOT_FOUND,
+  GLOSSARY_TERM_TRANSLATION_NOT_FOUND,
   ;
 
   val code: String

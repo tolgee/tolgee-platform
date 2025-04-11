@@ -5,7 +5,7 @@ import { useTranslate } from '@tolgee/react';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import React, { useMemo, useState } from 'react';
-import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
+import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
 import { GlossaryViewBody } from 'tg.ee.module/glossary/components/GlossaryViewBody';
 
 export const GlossaryView = () => {
@@ -43,7 +43,7 @@ export const GlossaryView = () => {
     search: search,
     languageTags: selectedLanguagesWithBaseLanguage,
     size: 30,
-    // sort: ['id,desc'],
+    sort: ['id,desc'],
   };
   const termsLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsWithTranslations',
@@ -125,7 +125,7 @@ export const GlossaryView = () => {
       maxWidth="max"
     >
       {createDialogOpen && organization !== undefined && (
-        <GlossaryTermCreateDialog
+        <GlossaryTermCreateUpdateDialog
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
           onFinished={() => setCreateDialogOpen(false)}

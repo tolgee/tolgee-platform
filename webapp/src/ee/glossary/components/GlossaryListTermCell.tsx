@@ -7,6 +7,7 @@ import { useTranslate } from '@tolgee/react';
 import { PropsOf } from '@emotion/react';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import Box from '@mui/material/Box';
+import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
 
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
@@ -71,6 +72,8 @@ const CustomizedTag: React.VFC<PropsOf<typeof Chip>> = (props) => {
 };
 
 type Props = {
+  organizationId: number;
+  glossaryId: number;
   item: GlossaryTermWithTranslationsModel;
   editEnabled: boolean;
   baseLanguage: string | undefined;
@@ -79,21 +82,21 @@ type Props = {
 };
 
 export const GlossaryListTermCell: React.VFC<Props> = ({
+  organizationId,
+  glossaryId,
   item,
   editEnabled,
   baseLanguage,
   checked,
   onCheckedToggle,
 }) => {
+  const [isEditingTerm, setIsEditingTerm] = React.useState(false);
+
   const { t } = useTranslate();
 
   const baseTranslation = item.translations?.find(
     (t) => t.languageCode === baseLanguage
   );
-
-  const handleEdit = () => {
-    // TODO: edit term dialog
-  };
 
   const hasTags =
     item.flagNonTranslatable ||
@@ -106,7 +109,9 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
       className={clsx({
         clickable: editEnabled,
       })}
-      onClick={editEnabled ? handleEdit : undefined}
+      onClick={
+        editEnabled && !isEditingTerm ? () => setIsEditingTerm(true) : undefined
+      }
     >
       <StyledCheckbox checked={checked} onChange={onCheckedToggle} />
       <StyledText>
@@ -134,6 +139,16 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
             <CustomizedTag label={t('glossary_term_flag_forbidden_term')} />
           )}
         </StyledTags>
+      )}
+      {editEnabled && isEditingTerm && (
+        <GlossaryTermCreateUpdateDialog
+          open={isEditingTerm}
+          onClose={() => setIsEditingTerm(false)}
+          onFinished={() => setIsEditingTerm(false)}
+          organizationId={organizationId}
+          glossaryId={glossaryId}
+          editTermId={item.id}
+        />
       )}
     </StyledRowTermCell>
   );
