@@ -50,6 +50,7 @@ import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import { BillingMenuItemsProps } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
+import { OrganizationLLMProvidersView } from '../ee/llm/OrganizationLLMProvidersView';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -68,6 +69,7 @@ export type { TaskFilterType } from '../ee/task/components/taskFilter/TaskFilter
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
+export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 
 export const billingMenuItems = [
   BillingMenuItem,
@@ -145,6 +147,11 @@ export const routes = {
     const config = useConfig();
     return (
       <>
+        {config.llm.enabled && (
+          <PrivateRoute path={LINKS.ORGANIZATION_LLM_PROVIDERS.template}>
+            <OrganizationLLMProvidersView />
+          </PrivateRoute>
+        )}
         {config.billing.enabled && (
           <Switch>
             <PrivateRoute path={LINKS.ORGANIZATION_SUBSCRIPTIONS.template}>

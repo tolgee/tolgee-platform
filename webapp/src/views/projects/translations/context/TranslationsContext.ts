@@ -57,7 +57,14 @@ export const [
 ] = createProvider((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
-  const layout = useLayoutService({ sidePanelOpen });
+  const [aiPlayground] = useUrlSearchState('aiPlayground', {
+    defaultVal: undefined,
+    history: false,
+  });
+  const layout = useLayoutService({
+    sidePanelOpen,
+    wider: Boolean(aiPlayground),
+  });
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
@@ -226,6 +233,9 @@ export const [
     async selectAll() {
       const allItems = await translationService.getAllIds();
       return selectionService.select(allItems.ids);
+    },
+    async getAllIds() {
+      return (await translationService.getAllIds()).ids;
     },
     selectionClear() {
       return selectionService.clear();

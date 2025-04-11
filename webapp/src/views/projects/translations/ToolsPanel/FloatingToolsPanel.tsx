@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { styled } from '@mui/material';
+import { Box, Button, ButtonGroup, styled } from '@mui/material';
 
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { ToolsPanel } from './ToolsPanel';
 import { useHeaderNsContext } from '../context/HeaderNsContext';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { AiPlayground } from './AiPlayground';
 
 const StyledContainer = styled('div')`
   position: relative;
@@ -19,6 +21,11 @@ const StyledContainer = styled('div')`
   margin-bottom: -20px;
   overflow-y: auto;
   overflow-x: hidden;
+`;
+
+const StyledButton = styled(Button)`
+  font-size: 12px;
+  padding: 4px 8px;
 `;
 
 type Props = {
@@ -36,6 +43,11 @@ export const FloatingToolsPanel = ({ width }: Props) => {
   const needsNamespaceMargin = useTranslationsSelector(
     (c) => Boolean(c.translations?.[0]?.keyNamespace) && c.view === 'LIST'
   );
+
+  const [aiPlayground, setAiPlayground] = useUrlSearchState('aiPlayground', {
+    defaultVal: undefined,
+    history: false,
+  });
 
   useEffect(() => {
     function recalculate() {
@@ -65,7 +77,7 @@ export const FloatingToolsPanel = ({ width }: Props) => {
 
   return (
     <StyledContainer
-      key={`${keyId}.${language?.id}`}
+      key={aiPlayground ? undefined : `${keyId}.${language?.id}`}
       style={{
         top: topBannerHeight + topBarHeight + floatingBannerHeight,
         height: `calc(${-fixedTopDistance}px + 100vh)`,
@@ -79,7 +91,25 @@ export const FloatingToolsPanel = ({ width }: Props) => {
       }}
       ref={containerRef}
     >
-      <ToolsPanel />
+      <Box display="flex" justifyContent="center" paddingTop="8px">
+        <ButtonGroup size="small" variant="outlined">
+          <StyledButton
+            size="small"
+            color={!aiPlayground ? 'primary' : 'default'}
+            onClick={() => setAiPlayground(undefined)}
+          >
+            Translation tools
+          </StyledButton>
+          <StyledButton
+            size="small"
+            color={aiPlayground ? 'primary' : 'default'}
+            onClick={() => setAiPlayground('1')}
+          >
+            Ai playground
+          </StyledButton>
+        </ButtonGroup>
+      </Box>
+      {aiPlayground ? <AiPlayground /> : <ToolsPanel />}
     </StyledContainer>
   );
 };

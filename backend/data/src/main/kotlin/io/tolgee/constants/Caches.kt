@@ -20,6 +20,7 @@ interface Caches {
     const val LANGUAGES = "languages"
     const val ORGANIZATION_ROLES = "organizationRoles"
     const val SSO_TENANTS = "ssoTenants"
+    const val LLM_PROVIDERS = "llmProviders"
 
     val caches =
       listOf(
@@ -39,6 +40,7 @@ interface Caches {
         LANGUAGES,
         ORGANIZATION_ROLES,
         SSO_TENANTS,
+        LLM_PROVIDERS,
       )
   }
 }

@@ -55,7 +55,7 @@ export const TranslationVisual = ({
           lineHeight="1.3em"
         >
           <TranslationWithPlaceholders
-            content={content}
+            content={content || ''}
             pluralExampleValue={exampleValue}
             locale={locale}
             nested={Boolean(variant)}
