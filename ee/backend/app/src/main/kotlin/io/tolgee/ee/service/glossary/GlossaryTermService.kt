@@ -1,9 +1,7 @@
 package io.tolgee.ee.service.glossary
 
 import io.tolgee.constants.Message
-import io.tolgee.ee.data.glossary.CreateGlossaryTermRequest
-import io.tolgee.ee.data.glossary.CreateGlossaryTermTranslationRequest
-import io.tolgee.ee.data.glossary.UpdateGlossaryTermRequest
+import io.tolgee.ee.data.glossary.*
 import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.glossary.GlossaryTerm
@@ -69,7 +67,7 @@ class GlossaryTermService(
     organizationId: Long,
     glossaryId: Long,
     request: CreateGlossaryTermRequest,
-  ): Pair<GlossaryTerm, GlossaryTermTranslation?> {
+  ): GlossaryTerm {
     val glossary = glossaryService.get(organizationId, glossaryId)
     val glossaryTerm =
       GlossaryTerm(
@@ -83,12 +81,22 @@ class GlossaryTermService(
         flagAbbreviation = request.flagAbbreviation
         flagForbiddenTerm = request.flagForbiddenTerm
       }
+    return glossaryTermRepository.save(glossaryTerm)
+  }
+
+  fun createWithTranslation(
+    organizationId: Long,
+    glossaryId: Long,
+    request: CreateGlossaryTermWithTranslationRequest,
+  ): Pair<GlossaryTerm, GlossaryTermTranslation?> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    val glossaryTerm = create(organizationId, glossaryId, request)
     val translation =
-      CreateGlossaryTermTranslationRequest().apply {
+      UpdateGlossaryTermTranslationRequest().apply {
         languageCode = glossary.baseLanguageCode!!
         text = request.text
       }
-    return glossaryTermRepository.save(glossaryTerm) to
+    return glossaryTerm to
       glossaryTermTranslationService.create(
         glossaryTerm,
         translation,
@@ -110,6 +118,35 @@ class GlossaryTermService(
       flagForbiddenTerm = dto.flagForbiddenTerm ?: flagForbiddenTerm
     }
     return glossaryTermRepository.save(glossaryTerm)
+  }
+
+  fun updateWithTranslation(
+    organizationId: Long,
+    glossaryId: Long,
+    termId: Long,
+    request: UpdateGlossaryTermWithTranslationRequest,
+  ): Pair<GlossaryTerm, GlossaryTermTranslation?> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    val glossaryTerm = update(organizationId, glossaryId, termId, request)
+    val translationText = request.text
+    if (translationText == null) {
+      return glossaryTerm to
+        glossaryTermTranslationService.find(
+          glossaryTerm,
+          glossary.baseLanguageCode!!,
+        )
+    }
+
+    val translation =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageCode = glossary.baseLanguageCode!!
+        text = translationText
+      }
+    return glossaryTerm to
+      glossaryTermTranslationService.updateOrCreate(
+        glossaryTerm,
+        translation,
+      )
   }
 
   fun delete(

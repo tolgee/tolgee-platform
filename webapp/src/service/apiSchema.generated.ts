@@ -100,7 +100,7 @@ export interface paths {
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
-    get: operations["get_23"];
+    get: operations["get_24"];
   };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
@@ -159,7 +159,7 @@ export interface paths {
     post: operations["create_12"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_22"];
+    get: operations["get_23"];
     put: operations["update_10"];
     /** Deletes organization and all its data including projects */
     delete: operations["delete_13"];
@@ -207,6 +207,9 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations": {
     post: operations["update_12"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageCode}": {
+    get: operations["get_22"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsWithTranslations": {
     get: operations["getAllWithTranslations"];
@@ -1643,20 +1646,12 @@ export interface components {
       baseLanguageCode: string;
       name: string;
     };
-    CreateGlossaryTermRequest: {
+    CreateGlossaryTermWithTranslationRequest: {
       description?: string;
       flagAbbreviation: boolean;
       flagCaseSensitive: boolean;
       flagForbiddenTerm: boolean;
       flagNonTranslatable: boolean;
-      text: string;
-    };
-    CreateGlossaryTermResponse: {
-      term: components["schemas"]["GlossaryTermModel"];
-      translation?: components["schemas"]["GlossaryTermTranslationModel"];
-    };
-    CreateGlossaryTermTranslationRequest: {
-      languageCode: string;
       text: string;
     };
     CreateKeyDto: {
@@ -1737,6 +1732,10 @@ export interface components {
       languageId: number;
       name?: string;
       type: "TRANSLATE" | "REVIEW";
+    };
+    CreateUpdateGlossaryTermResponse: {
+      term: components["schemas"]["GlossaryTermModel"];
+      translation?: components["schemas"]["GlossaryTermTranslationModel"];
     };
     CreditBalanceModel: {
       /** Format: int64 */
@@ -2111,7 +2110,8 @@ export interface components {
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "glossary_not_found"
-        | "glossary_term_not_found";
+        | "glossary_term_not_found"
+        | "glossary_term_translation_not_found";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2279,10 +2279,8 @@ export interface components {
       id: number;
     };
     GlossaryTermTranslationModel: {
-      /** Format: int64 */
-      id: number;
       languageCode: string;
-      text?: string;
+      text: string;
     };
     GlossaryTermWithTranslationsModel: {
       description?: string;
@@ -4717,7 +4715,8 @@ export interface components {
         | "current_subscription_is_not_trialing"
         | "sorting_and_paging_is_not_supported_when_using_cursor"
         | "glossary_not_found"
-        | "glossary_term_not_found";
+        | "glossary_term_not_found"
+        | "glossary_term_translation_not_found";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -4994,12 +4993,17 @@ export interface components {
       baseLanguageCode: string;
       name: string;
     };
-    UpdateGlossaryTermRequest: {
+    UpdateGlossaryTermTranslationRequest: {
+      languageCode: string;
+      text: string;
+    };
+    UpdateGlossaryTermWithTranslationRequest: {
       description?: string;
       flagAbbreviation?: boolean;
       flagCaseSensitive?: boolean;
       flagForbiddenTerm?: boolean;
       flagNonTranslatable?: boolean;
+      text?: string;
     };
     UpdateNamespaceDto: {
       name: string;
@@ -6462,7 +6466,7 @@ export interface operations {
     };
   };
   /** Returns specific API key info */
-  get_23: {
+  get_24: {
     parameters: {
       path: {
         keyId: number;
@@ -7410,7 +7414,7 @@ export interface operations {
       };
     };
   };
-  get_22: {
+  get_23: {
     parameters: {
       path: {
         id: number;
@@ -8236,7 +8240,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CreateGlossaryTermResponse"];
+          "application/json": components["schemas"]["CreateUpdateGlossaryTermResponse"];
         };
       };
       /** Bad Request */
@@ -8274,7 +8278,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateGlossaryTermRequest"];
+        "application/json": components["schemas"]["CreateGlossaryTermWithTranslationRequest"];
       };
     };
   };
@@ -8339,7 +8343,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["GlossaryTermModel"];
+          "application/json": components["schemas"]["CreateUpdateGlossaryTermResponse"];
         };
       };
       /** Bad Request */
@@ -8377,7 +8381,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateGlossaryTermRequest"];
+        "application/json": components["schemas"]["UpdateGlossaryTermWithTranslationRequest"];
       };
     };
   };
@@ -8476,7 +8480,57 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateGlossaryTermTranslationRequest"];
+        "application/json": components["schemas"]["UpdateGlossaryTermTranslationRequest"];
+      };
+    };
+  };
+  get_22: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+        termId: number;
+        languageCode: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryTermTranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };

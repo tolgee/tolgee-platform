@@ -1,7 +1,9 @@
 package io.tolgee.ee.service.glossary
 
-import io.tolgee.ee.data.glossary.CreateGlossaryTermTranslationRequest
+import io.tolgee.constants.Message
+import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.repository.glossary.GlossaryTermTranslationRepository
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import org.springframework.stereotype.Service
@@ -19,7 +21,7 @@ class GlossaryTermTranslationService(
 
   fun create(
     term: GlossaryTerm,
-    dto: CreateGlossaryTermTranslationRequest,
+    dto: UpdateGlossaryTermTranslationRequest,
   ): GlossaryTermTranslation? {
     if (dto.text.isEmpty()) {
       return null
@@ -37,7 +39,7 @@ class GlossaryTermTranslationService(
 
   fun updateOrCreate(
     term: GlossaryTerm,
-    dto: CreateGlossaryTermTranslationRequest,
+    dto: UpdateGlossaryTermTranslationRequest,
   ): GlossaryTermTranslation? {
     if (dto.text.isEmpty()) {
       glossaryTermTranslationRepository.deleteByTermAndLanguageCode(term, dto.languageCode)
@@ -51,5 +53,19 @@ class GlossaryTermTranslationService(
 
     translation.text = dto.text
     return glossaryTermTranslationRepository.save(translation)
+  }
+
+  fun find(
+    term: GlossaryTerm,
+    languageCode: String,
+  ): GlossaryTermTranslation? {
+    return glossaryTermTranslationRepository.findByTermAndLanguageCode(term, languageCode)
+  }
+
+  fun get(
+    term: GlossaryTerm,
+    languageCode: String,
+  ): GlossaryTermTranslation {
+    return find(term, languageCode) ?: throw NotFoundException(Message.GLOSSARY_TERM_TRANSLATION_NOT_FOUND)
   }
 }

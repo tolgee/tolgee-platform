@@ -7,9 +7,9 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationMo
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermWithTranslationsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermModel
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermWithTranslationsModel
-import io.tolgee.ee.data.glossary.CreateGlossaryTermRequest
-import io.tolgee.ee.data.glossary.CreateGlossaryTermResponse
-import io.tolgee.ee.data.glossary.UpdateGlossaryTermRequest
+import io.tolgee.ee.data.glossary.CreateGlossaryTermWithTranslationRequest
+import io.tolgee.ee.data.glossary.CreateUpdateGlossaryTermResponse
+import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.glossary.GlossaryTerm
@@ -44,10 +44,10 @@ class GlossaryTermController(
     @PathVariable
     glossaryId: Long,
     @RequestBody
-    dto: CreateGlossaryTermRequest,
-  ): CreateGlossaryTermResponse {
-    val (term, translation) = glossaryTermService.create(organizationId, glossaryId, dto)
-    return CreateGlossaryTermResponse(
+    dto: CreateGlossaryTermWithTranslationRequest,
+  ): CreateUpdateGlossaryTermResponse {
+    val (term, translation) = glossaryTermService.createWithTranslation(organizationId, glossaryId, dto)
+    return CreateUpdateGlossaryTermResponse(
       term = glossaryTermModelAssembler.toModel(term),
       translation = translation?.let { glossaryTermTranslationModelAssembler.toModel(translation) },
     )
@@ -61,10 +61,13 @@ class GlossaryTermController(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
     @PathVariable termId: Long,
-    @RequestBody @Valid dto: UpdateGlossaryTermRequest,
-  ): GlossaryTermModel {
-    val updatedTerm = glossaryTermService.update(organizationId, glossaryId, termId, dto)
-    return glossaryTermModelAssembler.toModel(updatedTerm)
+    @RequestBody @Valid dto: UpdateGlossaryTermWithTranslationRequest,
+  ): CreateUpdateGlossaryTermResponse {
+    val (term, translation) = glossaryTermService.updateWithTranslation(organizationId, glossaryId, termId, dto)
+    return CreateUpdateGlossaryTermResponse(
+      term = glossaryTermModelAssembler.toModel(term),
+      translation = translation?.let { glossaryTermTranslationModelAssembler.toModel(translation) },
+    )
   }
 
   @DeleteMapping("/terms/{termId:[0-9]+}")
