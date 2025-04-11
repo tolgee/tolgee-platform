@@ -4,8 +4,8 @@ import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.fixtures.HttpClientMocker
 import io.tolgee.hateoas.ee.*
-import io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel
-import io.tolgee.hateoas.ee.uasge.UsageModel
+import io.tolgee.hateoas.ee.uasge.proportional.AverageProportionalUsageItemModel
+import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import io.tolgee.hateoas.limits.LimitModel
 import io.tolgee.hateoas.limits.SelfHostedUsageLimitsModel
 import org.springframework.stereotype.Component

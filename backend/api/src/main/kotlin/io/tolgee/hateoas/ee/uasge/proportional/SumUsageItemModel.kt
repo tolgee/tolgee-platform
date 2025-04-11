@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.ee.uasge
+package io.tolgee.hateoas.ee.uasge.proportional
 
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation

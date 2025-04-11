@@ -16,7 +16,7 @@ export const SetupLicenceKey = () => {
   const setKeyMutation = useApiMutation({
     url: '/v2/ee-license/set-license-key',
     method: 'put',
-    invalidatePrefix: '/v2/ee-license',
+    invalidatePrefix: ['/v2/ee-license'],
     options: {
       onSuccess: () => refetchInitialData(),
     },
@@ -41,23 +41,7 @@ export const SetupLicenceKey = () => {
               message: (
                 <Box>
                   <Box>
-                    <T
-                      keyName="ee-license-key-confirmation-message"
-                      params={{
-                        price: data.plan.prices.perSeat,
-                        includedSeats: data.plan.includedUsage.seats,
-                      }}
-                    />
-                  </Box>
-
-                  <Box>
-                    <T
-                      keyName="ee-license-key-confirmation-message-estimate"
-                      params={{
-                        additional:
-                          data.usage.total - data.usage.subscriptionPrice!,
-                      }}
-                    />
+                    <T keyName="ee-license-key-confirmation-message-generic" />
                   </Box>
                 </Box>
               ),
