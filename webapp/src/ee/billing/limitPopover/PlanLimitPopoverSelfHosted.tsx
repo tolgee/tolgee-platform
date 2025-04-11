@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { PlanLimitPopoverWrapperProps } from './generic/PlanLimitPopoverWrapper';
 import { ProgressItem } from '../component/getProgressData';
-import { PlanLimitPopover } from './generic/PlanLimitPopover';
+import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -34,7 +34,7 @@ export const PlanLimitPopoverSelfHosted: FC<
     usageLoadable.data && getProgressData({ usage: usageLoadable.data });
 
   return (
-    <PlanLimitPopover
+    <GenericPlanLimitPopover
       onClose={onClose}
       open={open}
       isPayAsYouGo={infoLoadable.data?.isPayAsYouGo}
@@ -47,31 +47,26 @@ export const PlanLimitPopoverSelfHosted: FC<
 const getProgressData = ({
   usage,
 }: {
-  usage: components['schemas']['Curre'];
+  usage: components['schemas']['CurrentUsageModel'];
 }) => {
   const keysProgress = new ProgressItem(
-    usage.keys.usedQuantity - usage.keys.usedQuantityOverPlan,
-    usage.keys.usedQuantity
+    usage.keys.included,
+    usage.keys.current
   );
 
   const seatsProgress = new ProgressItem(
-    usage.seats.usedQuantity - usage.seats.usedQuantityOverPlan,
-    usage.seats.usedQuantity
+    usage.seats.included,
+    usage.seats.current
   );
 
-  function getCreditProgress() {
-    if (!usage.credits) {
-      return undefined;
-    }
-    return new ProgressItem(
-      usage.credits.usedQuantity - usage.credits.usedQuantityOverPlan,
-      usage.credits.usedQuantity
-    );
-  }
+  const creditsProgress = new ProgressItem(
+    usage.creditsInCents.included / 100,
+    usage.creditsInCents.current / 100
+  );
 
   return {
     keysProgress,
     seatsProgress,
-    creditProgress: getCreditProgress(),
+    creditProgress: creditsProgress,
   };
 };
