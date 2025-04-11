@@ -3,7 +3,7 @@ package io.tolgee.ee.service.eeSubscription
 import io.tolgee.constants.Message
 import io.tolgee.ee.service.eeSubscription.cloudClient.TolgeeCloudLicencingClient
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.hateoas.ee.uasge.UsageModel
+import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 

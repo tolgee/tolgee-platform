@@ -9,7 +9,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
-import io.tolgee.hateoas.ee.uasge.UsageModel
+import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -23,7 +23,7 @@ class TolgeeCloudLicencingClient(
     const val SET_PATH: String = "/v2/public/licensing/set-key"
     const val PREPARE_SET_KEY_PATH: String = "/v2/public/licensing/prepare-set-key"
     const val SUBSCRIPTION_INFO_PATH: String = "/v2/public/licensing/subscription"
-    const val SUBSCRIPTION_USAGE_PATH: String = "/v2/public/licensing/subscription-usage"
+    const val SUBSCRIPTION_USAGE_PATH: String = "/v2/public/licensing/current-subscription-usage"
     const val REPORT_USAGE_PATH: String = "/v2/public/licensing/report-usage"
     const val RELEASE_KEY_PATH: String = "/v2/public/licensing/release-key"
     const val REPORT_ERROR_PATH: String = "/v2/public/licensing/report-error"

@@ -1,11 +1,15 @@
-package io.tolgee.hateoas.ee.uasge
+package io.tolgee.hateoas.ee.uasge.proportional
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
-import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
 import java.math.BigDecimal
 
+/**
+ * Presents usage to show usage for invoices or to show current expected usage.
+ *
+ * Is suitable for cases, where proportional usage is required.
+ */
 @Suppress("unused")
 open class UsageModel(
   val subscriptionPrice: BigDecimal? = 0.toBigDecimal(),

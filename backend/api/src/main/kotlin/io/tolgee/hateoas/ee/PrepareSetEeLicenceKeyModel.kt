@@ -1,6 +1,6 @@
 package io.tolgee.hateoas.ee
 
-import io.tolgee.hateoas.ee.uasge.UsageModel
+import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import org.springframework.hateoas.RepresentationModel
 
 @Suppress("unused")

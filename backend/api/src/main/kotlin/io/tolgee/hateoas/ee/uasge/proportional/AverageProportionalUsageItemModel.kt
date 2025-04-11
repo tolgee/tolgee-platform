@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.ee.uasge
+package io.tolgee.hateoas.ee.uasge.proportional
 
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -12,4 +12,4 @@ open class AverageProportionalUsageItemModel(
   val unusedQuantity: BigDecimal = 0.toBigDecimal(),
   val usedQuantity: BigDecimal = 0.toBigDecimal(),
   val usedQuantityOverPlan: BigDecimal = 0.toBigDecimal(),
-) : RepresentationModel<io.tolgee.hateoas.ee.uasge.AverageProportionalUsageItemModel>(), Serializable
+) : RepresentationModel<AverageProportionalUsageItemModel>(), Serializable

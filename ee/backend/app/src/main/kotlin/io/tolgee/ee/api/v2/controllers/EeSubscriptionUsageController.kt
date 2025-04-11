@@ -2,10 +2,8 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.ee.api.v2.hateoas.assemblers.EeSubscriptionModelAssembler
-import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionUsageService
-import io.tolgee.hateoas.ee.uasge.UsageModel
+import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
  * It doesn't make sense on Tolgee Cloud.
  */
 @RestController
-@RequestMapping("/v2/ee-subscription-usage/")
+@RequestMapping("/v2/ee-current-subscription-usage/")
 @Tag(name = "EE Licence")
 @OpenApiEeExtension
 class EeSubscriptionUsageController(
