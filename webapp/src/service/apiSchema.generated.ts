@@ -1698,6 +1698,20 @@ export interface components {
        */
       extraCreditBalance: number;
     };
+    CurrentUsageItemModel: {
+      /** Format: int64 */
+      current: number;
+      /** Format: int64 */
+      included: number;
+      /** Format: int64 */
+      limit: number;
+    };
+    CurrentUsageModel: {
+      creditsInCents: components["schemas"]["CurrentUsageItemModel"];
+      keys: components["schemas"]["CurrentUsageItemModel"];
+      seats: components["schemas"]["CurrentUsageItemModel"];
+      strings: components["schemas"]["CurrentUsageItemModel"];
+    };
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
       ids: number[];
@@ -1761,6 +1775,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
       )[];
+      isPayAsYouGo: boolean;
       /** Format: date-time */
       lastValidCheck?: string;
       licenseKey: string;
@@ -6599,7 +6614,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["UsageModel"];
+          "application/json": components["schemas"]["CurrentUsageModel"];
         };
       };
       /** Bad Request */

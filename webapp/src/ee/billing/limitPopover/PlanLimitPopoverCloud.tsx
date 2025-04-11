@@ -8,7 +8,7 @@ import {
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { getProgressData } from '../component/getProgressData';
-import { PlanLimitPopover } from './generic/PlanLimitPopover';
+import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
 import React from 'react';
 
 const StyledDialogContent = styled(DialogContent)`
@@ -40,7 +40,7 @@ export const PlanLimitPopoverCloud: React.FC<Props> = ({ open, onClose }) => {
   const progressData = usage && getProgressData({ usage });
 
   return progressData ? (
-    <PlanLimitPopover
+    <GenericPlanLimitPopover
       onClose={onClose}
       open={open}
       isPayAsYouGo={usage?.isPayAsYouGo}

@@ -29,7 +29,7 @@ const StyledDialogContent = styled(DialogContent)`
   max-width: 500px;
 `;
 
-export const PlanLimitPopover: FC<PlanLimitPopoverProps> = ({
+export const GenericPlanLimitPopover: FC<PlanLimitPopoverProps> = ({
   open,
   onClose,
   isPayAsYouGo,
@@ -50,7 +50,7 @@ export const PlanLimitPopover: FC<PlanLimitPopoverProps> = ({
         <DialogContentText id="alert-dialog-description">
           <T keyName="plan_limit_dialog_description" />
         </DialogContentText>
-        {progressData && isPayAsYouGo ? (
+        {progressData && isPayAsYouGo !== undefined ? (
           <UsageDetailed {...progressData} isPayAsYouGo={isPayAsYouGo} />
         ) : (
           loading && <CircularProgress />

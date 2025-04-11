@@ -47,14 +47,14 @@ class TolgeeCloudLicencingClient(
     keys: Long?,
     seats: Long?,
   ) {
-    postRequest<Any>(
+    postRequest<Unit>(
       REPORT_USAGE_PATH,
       ReportUsageDto(licenseKey = subscription.licenseKey, keys = keys, seats = seats),
     )
   }
 
   internal fun releaseKeyRemote(subscription: EeSubscription) {
-    postRequest<Any>(
+    postRequest<Unit>(
       RELEASE_KEY_PATH,
       ReleaseKeyDto(subscription.licenseKey),
     )
