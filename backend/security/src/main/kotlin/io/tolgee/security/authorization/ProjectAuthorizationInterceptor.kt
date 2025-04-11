@@ -20,6 +20,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.exceptions.ProjectNotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
@@ -81,7 +82,7 @@ class ProjectAuthorizationInterceptor(
         )
 
         // Security consideration: if the user cannot see the project, pretend it does not exist.
-        throw NotFoundException()
+        throw ProjectNotFoundException(project.id)
       }
 
       bypassed = true

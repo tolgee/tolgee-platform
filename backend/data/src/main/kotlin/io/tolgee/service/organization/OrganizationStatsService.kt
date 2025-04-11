@@ -1,8 +1,8 @@
 package io.tolgee.service.organization
 
+import io.tolgee.repository.OrganizationRepository.Companion.ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class OrganizationStatsService(
@@ -32,35 +32,33 @@ class OrganizationStatsService(
       .singleResult as Long
   }
 
-  fun getCurrentTranslationSlotCount(organizationId: Long): Long {
-    val result =
-      entityManager.createNativeQuery(
-        """
-        select 
-           (select sum(keyCount * languageCount) as translationCount
-            from (select p.id as projectId, count(l.id) as languageCount
-                  from project as p
-                           join language as l on l.project_id = p.id
-                  where p.organization_owner_id = :organizationId and p.deleted_at is null
-                  group by p.id) as languageCounts
-                     join (select p.id as projectId, count(k.id) as keyCount
-                           from project as p
-                                    join key as k on k.project_id = p.id
-                           where p.organization_owner_id = :organizationId and p.deleted_at is null
-                           group by p.id) as keyCounts on keyCounts.projectId = languageCounts.projectId)
-        """.trimIndent(),
-      ).setParameter("organizationId", organizationId).singleResult as BigDecimal? ?: 0
-    return result.toLong()
-  }
-
-  fun getCurrentTranslationCount(organizationId: Long): Long {
+  fun getSeatCountToCountSeats(organizationId: Long): Long {
     return entityManager.createQuery(
       """
-      select count(t) from Translation t where 
-        t.language.deletedAt is null and
-        t.key.project.organizationOwner.id = :organizationId and 
-        t.state <> io.tolgee.model.enums.TranslationState.UNTRANSLATED and t.key.project.deletedAt is null
+      select count(distinct ua.id) $ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
       """.trimIndent(),
-    ).setParameter("organizationId", organizationId).singleResult as Long? ?: 0
+    ).setParameter("organizationId", organizationId).singleResult as Long
+  }
+
+  fun getTranslationCount(organizationId: Long): Long {
+    return entityManager.createQuery(
+      """
+      select count(t.id) from Translation t
+      join t.key k
+      join k.project p on p.deletedAt is null
+      join t.language l on l.deletedAt is null
+      where p.organizationOwner.id = :organizationId and t.text is not null and t.text <> ''
+      """.trimIndent(),
+    ).setParameter("organizationId", organizationId).singleResult as Long
+  }
+
+  fun getKeyCount(organizationId: Long): Long {
+    return entityManager.createQuery(
+      """
+      select count(k.id) from Key k
+      join k.project p on p.deletedAt is null
+      where p.organizationOwner.id = :organizationId
+      """.trimIndent(),
+    ).setParameter("organizationId", organizationId).singleResult as Long
   }
 }

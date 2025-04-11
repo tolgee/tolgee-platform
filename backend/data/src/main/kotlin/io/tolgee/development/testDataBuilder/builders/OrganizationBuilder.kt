@@ -7,6 +7,7 @@ import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import org.springframework.core.io.ClassPathResource
@@ -56,4 +57,17 @@ class OrganizationBuilder(
     data.tenant = builder
     return builder
   }
+
+  fun inviteUser(buildRole: OrganizationRoleBuilder.() -> Unit = {}): InvitationBuilder {
+    val invitationBuilder = InvitationBuilder()
+    testDataBuilder.data.invitations.add(invitationBuilder)
+    addRole {
+      this.invitation = invitationBuilder.self
+      type = OrganizationRoleType.OWNER
+      invitationBuilder.self.organizationRole = this
+    }.build(buildRole)
+    return invitationBuilder
+  }
+
+  val projects get() = testDataBuilder.data.projects.filter { it.self.organizationOwner.id == self.id }
 }

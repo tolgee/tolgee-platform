@@ -10,10 +10,17 @@ export const ReachingTheLimitMessage: FC<SubscriptionsTrialAlertProps> = (
     return null;
   }
 
-  const runningOutOfMtCredits = props.usage.creditProgress > 0.9;
-  const runningOutOfTranslations = props.usage.translationsProgress > 0.9;
+  const runningOutOfMtCredits = props.usage.creditProgress.progress > 0.9;
+  const runningOutOfKeys = props.usage.keysProgress.progress > 0.9;
+  const runningOutOfSeats = props.usage.seatsProgress.progress > 0.9;
+  const runningOutOfStrings = props.usage.stringsProgress.progress > 0.9;
 
-  if (!runningOutOfMtCredits && !runningOutOfTranslations) {
+  if (
+    !runningOutOfMtCredits &&
+    !runningOutOfKeys &&
+    !runningOutOfSeats &&
+    !runningOutOfStrings
+  ) {
     return null;
   }
 

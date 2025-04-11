@@ -3,8 +3,9 @@ import {
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import React, { useEffect, useState } from 'react';
-import { PlanLimitPopover } from './PlanLimitPopover';
+import { PlanLimitPopoverCloud } from './PlanLimitPopoverCloud';
 import { SpendingLimitExceededPopover } from './SpendingLimitExceeded';
+import { PlanLimitPopover } from './PlanLimitPopover';
 
 export const GlobalLimitPopover: React.FC = () => {
   const { planLimitErrors, spendingLimitErrors } = useOrganizationUsage();
@@ -12,7 +13,7 @@ export const GlobalLimitPopover: React.FC = () => {
   const [spendingLimitErrOpen, setSpendingLimitErrOpen] = useState(false);
 
   useEffect(() => {
-    if (planLimitErrors === 1) {
+    if (planLimitErrors > 0) {
       setPlanLimitErrOpen(true);
     }
   }, [planLimitErrors]);
@@ -23,9 +24,7 @@ export const GlobalLimitPopover: React.FC = () => {
     }
   }, [spendingLimitErrors]);
 
-  const { preferredOrganization } = usePreferredOrganization();
-
-  return preferredOrganization ? (
+  return (
     <>
       <PlanLimitPopover
         open={planLimitErrOpen}
@@ -36,5 +35,5 @@ export const GlobalLimitPopover: React.FC = () => {
         onClose={() => setSpendingLimitErrOpen(false)}
       />
     </>
-  ) : null;
+  );
 };

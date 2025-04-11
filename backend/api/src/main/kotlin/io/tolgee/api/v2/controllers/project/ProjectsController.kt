@@ -269,7 +269,7 @@ class ProjectsController(
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CAN_NOT_REVOKE_OWN_PERMISSIONS)
     }
-    permissionService.revoke(projectId, userId)
+    permissionService.revoke(userId, projectId)
   }
 
   @PutMapping(value = ["/{projectId:[0-9]+}/leave"])

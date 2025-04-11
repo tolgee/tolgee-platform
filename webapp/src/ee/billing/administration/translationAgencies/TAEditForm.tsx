@@ -132,7 +132,7 @@ export function TAEditForm({
               variant="contained"
               color="primary"
               type="submit"
-              data-cy="administration-ee-plan-submit-button"
+              data-cy="form-submit-button"
             >
               {t('global_form_save')}
             </LoadingButton>

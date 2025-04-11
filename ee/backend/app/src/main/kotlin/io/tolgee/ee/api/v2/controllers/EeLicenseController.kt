@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.ee.api.v2.hateoas.assemblers.EeSubscriptionModelAssembler
 import io.tolgee.ee.data.SetLicenseKeyDto
-import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.eeSubscription.EeSubscriptionModel
 import io.tolgee.openApiDocs.OpenApiEeExtension
