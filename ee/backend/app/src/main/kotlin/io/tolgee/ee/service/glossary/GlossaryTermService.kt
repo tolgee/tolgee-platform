@@ -1,0 +1,164 @@
+package io.tolgee.ee.service.glossary
+
+import io.tolgee.constants.Message
+import io.tolgee.ee.data.glossary.*
+import io.tolgee.ee.repository.glossary.GlossaryTermRepository
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.model.glossary.GlossaryTermTranslation
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.stereotype.Service
+
+@Service
+class GlossaryTermService(
+  private val glossaryTermRepository: GlossaryTermRepository,
+  private val glossaryService: GlossaryService,
+  private val glossaryTermTranslationService: GlossaryTermTranslationService,
+) {
+  fun find(
+    organizationId: Long,
+    glossaryId: Long,
+    termId: Long,
+  ): GlossaryTerm? {
+    return glossaryTermRepository.find(organizationId, glossaryId, termId)
+  }
+
+  fun findAll(
+    organizationId: Long,
+    glossaryId: Long,
+  ): List<GlossaryTerm> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    return glossaryTermRepository.findByGlossary(glossary)
+  }
+
+  fun findAllPaged(
+    organizationId: Long,
+    glossaryId: Long,
+    pageable: Pageable,
+    search: String?,
+    languageTags: Set<String>?,
+  ): Page<GlossaryTerm> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    return glossaryTermRepository.findByGlossaryPaged(glossary, pageable, search, languageTags)
+  }
+
+//  fun findAllPagedWithTranslations(
+//    organizationId: Long,
+//    glossaryId: Long,
+//    pageable: Pageable,
+//    search: String?,
+//    languageTags: Set<String>?,
+//  ): Page<GlossaryTermWithTranslationsView> {
+//    val glossary = glossaryService.get(organizationId, glossaryId)
+//    return glossaryTermRepository.findByGlossaryPagedWithTranslations(glossary, pageable, search, languageTags)
+//  }
+
+  fun get(
+    organizationId: Long,
+    glossaryId: Long,
+    termId: Long,
+  ): GlossaryTerm {
+    return find(organizationId, glossaryId, termId)
+      ?: throw NotFoundException(Message.GLOSSARY_TERM_NOT_FOUND)
+  }
+
+  fun create(
+    organizationId: Long,
+    glossaryId: Long,
+    request: CreateGlossaryTermRequest,
+  ): GlossaryTerm {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    val glossaryTerm =
+      GlossaryTerm(
+        description = request.description,
+      ).apply {
+        this.glossary = glossary
+        description = request.description
+
+        flagNonTranslatable = request.flagNonTranslatable
+        flagCaseSensitive = request.flagCaseSensitive
+        flagAbbreviation = request.flagAbbreviation
+        flagForbiddenTerm = request.flagForbiddenTerm
+      }
+    return glossaryTermRepository.save(glossaryTerm)
+  }
+
+  fun createWithTranslation(
+    organizationId: Long,
+    glossaryId: Long,
+    request: CreateGlossaryTermWithTranslationRequest,
+  ): Pair<GlossaryTerm, GlossaryTermTranslation?> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    val glossaryTerm = create(organizationId, glossaryId, request)
+    val translation =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageCode = glossary.baseLanguageCode!!
+        text = request.text
+      }
+    return glossaryTerm to
+      glossaryTermTranslationService.create(
+        glossaryTerm,
+        translation,
+      )
+  }
+
+  fun update(
+    organizationId: Long,
+    glossaryId: Long,
+    termId: Long,
+    dto: UpdateGlossaryTermRequest,
+  ): GlossaryTerm {
+    val glossaryTerm = get(organizationId, glossaryId, termId)
+    glossaryTerm.apply {
+      description = dto.description
+      flagNonTranslatable = dto.flagNonTranslatable ?: flagNonTranslatable
+      flagCaseSensitive = dto.flagCaseSensitive ?: flagCaseSensitive
+      flagAbbreviation = dto.flagAbbreviation ?: flagAbbreviation
+      flagForbiddenTerm = dto.flagForbiddenTerm ?: flagForbiddenTerm
+    }
+    return glossaryTermRepository.save(glossaryTerm)
+  }
+
+  fun updateWithTranslation(
+    organizationId: Long,
+    glossaryId: Long,
+    termId: Long,
+    request: UpdateGlossaryTermWithTranslationRequest,
+  ): Pair<GlossaryTerm, GlossaryTermTranslation?> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    val glossaryTerm = update(organizationId, glossaryId, termId, request)
+    val translationText = request.text
+    if (translationText == null) {
+      return glossaryTerm to
+        glossaryTermTranslationService.find(
+          glossaryTerm,
+          glossary.baseLanguageCode!!,
+        )
+    }
+
+    val translation =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageCode = glossary.baseLanguageCode!!
+        text = translationText
+      }
+    return glossaryTerm to
+      glossaryTermTranslationService.updateOrCreate(
+        glossaryTerm,
+        translation,
+      )
+  }
+
+  fun delete(
+    organizationId: Long,
+    glossaryId: Long,
+    termId: Long,
+  ) {
+    val glossaryTerm = get(organizationId, glossaryId, termId)
+    delete(glossaryTerm)
+  }
+
+  fun delete(glossaryTerm: GlossaryTerm) {
+    glossaryTermRepository.delete(glossaryTerm)
+  }
+}

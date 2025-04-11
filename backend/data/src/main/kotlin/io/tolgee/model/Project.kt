@@ -7,6 +7,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
@@ -93,6 +94,9 @@ class Project(
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   @ActivityLoggedProp
   var defaultNamespace: Namespace? = null
+
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "assignedProjects")
+  var glossaries: MutableSet<Glossary> = mutableSetOf()
 
   @ActivityLoggedProp
   override var avatarHash: String? = null

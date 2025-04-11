@@ -1,0 +1,123 @@
+import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
+import React, { FC } from 'react';
+import { DotsVertical } from '@untitled-ui/icons-react';
+import { stopBubble } from 'tg.fixtures/eventHandler';
+import { components } from 'tg.service/apiSchema.generated';
+import { confirmation } from 'tg.hooks/confirmation';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { Link } from 'react-router-dom';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { GlossaryCreateEditDialog } from 'tg.ee.module/glossary/views/GlossaryCreateEditDialog';
+
+type SimpleOrganizationModel = components['schemas']['SimpleOrganizationModel'];
+type GlossaryModel = components['schemas']['GlossaryModel'];
+
+type Props = {
+  glossary: GlossaryModel;
+  organization: SimpleOrganizationModel;
+};
+
+export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
+  const { t } = useTranslate();
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [isEditing, setIsEditing] = React.useState(false);
+
+  const canManage = true; // TODO: Permissions
+
+  const deleteMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/organizations/{organizationId}/glossaries',
+  });
+
+  const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const onDelete = () => {
+    confirmation({
+      title: <T keyName="delete_glossary_confirmation_title" />,
+      message: <T keyName="delete_glossary_confirmation_message" />,
+      hardModeText: glossary.name.toUpperCase(),
+      onConfirm() {
+        deleteMutation.mutate({
+          path: {
+            organizationId: organization.id,
+            glossaryId: glossary.id,
+          },
+        });
+      },
+    });
+  };
+
+  // TODO: close menu when clicking on item
+
+  return (
+    <>
+      <Tooltip title={t('glossaries_list_more_button')}>
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpen(e);
+          }}
+          data-cy="glossaries-list-more-button"
+          aria-label={t('glossaries_list_more_button')}
+          size="small"
+        >
+          <DotsVertical />
+        </IconButton>
+      </Tooltip>
+
+      <Menu
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        id="glossary-item-menu"
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        onClick={stopBubble()}
+      >
+        <MenuItem
+          data-cy="glossary-view-button"
+          component={Link}
+          to={LINKS.ORGANIZATION_GLOSSARY.build({
+            [PARAMS.GLOSSARY_ID]: glossary.id,
+            [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+          })}
+        >
+          <T keyName="glossary_view_button" />
+        </MenuItem>
+        {canManage && (
+          <MenuItem
+            data-cy="glossary-edit-button"
+            onClick={() => setIsEditing(true)}
+          >
+            <T keyName="glossary_edit_button" />
+          </MenuItem>
+        )}
+        {canManage && (
+          <MenuItem data-cy="glossary-delete-button" onClick={onDelete}>
+            <T keyName="glossary_delete_button" />
+          </MenuItem>
+        )}
+
+        {isEditing && (
+          <GlossaryCreateEditDialog
+            open={isEditing}
+            onClose={() => setIsEditing(false)}
+            onFinished={() => setIsEditing(false)}
+            organizationId={organization.id}
+            editGlossaryId={glossary.id}
+          />
+        )}
+      </Menu>
+    </>
+  );
+};

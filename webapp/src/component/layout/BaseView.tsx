@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 import { Box, styled, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
@@ -15,6 +15,7 @@ const widthMap = {
   wide: 1200,
   normal: 900,
   narrow: 600,
+  max: undefined,
 };
 
 const StyledContainer = styled(Box)`
@@ -68,7 +69,7 @@ export interface BaseViewProps {
   stretch?: boolean;
 }
 
-export const BaseView = (props: BaseViewProps) => {
+export const BaseView: FC<BaseViewProps> = (props) => {
   const hideChildrenOnLoading =
     props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading;
 
@@ -79,7 +80,7 @@ export const BaseView = (props: BaseViewProps) => {
   const displayNavigation = props.customNavigation || props.navigation;
 
   const displayHeader =
-    props.title ||
+    props.title !== undefined ||
     props.customHeader ||
     props.onSearch ||
     props.onAdd ||
@@ -127,7 +128,7 @@ export const BaseView = (props: BaseViewProps) => {
               {props.customHeader || (
                 <Box display="flex" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap="8px">
-                    {props.title && (
+                    {props.title !== undefined && (
                       <Typography variant="h4">{props.title}</Typography>
                     )}
                     {typeof props.onSearch === 'function' && (
