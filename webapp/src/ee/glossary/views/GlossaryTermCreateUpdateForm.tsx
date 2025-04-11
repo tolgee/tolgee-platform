@@ -13,7 +13,7 @@ const StyledContainer = styled('div')`
     'flagAbbreviation    flagForbiddenTerm';
 `;
 
-export const GlossaryTermCreateForm: VFC = () => {
+export const GlossaryTermCreateUpdateForm: VFC = () => {
   const { t } = useTranslate();
 
   return (

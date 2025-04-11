@@ -4,13 +4,14 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermTranslationModel
-import io.tolgee.ee.data.glossary.CreateGlossaryTermTranslationRequest
+import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.ee.service.glossary.GlossaryTermTranslationService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.UseDefaultPermissions
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -35,10 +36,33 @@ class GlossaryTermTranslationController(
     @PathVariable
     termId: Long,
     @RequestBody
-    dto: CreateGlossaryTermTranslationRequest,
-  ): GlossaryTermTranslationModel? {
+    dto: UpdateGlossaryTermTranslationRequest,
+  ): GlossaryTermTranslationModel {
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     val translation = glossaryTermTranslationService.updateOrCreate(glossaryTerm, dto)
-    return translation?.let { modelAssembler.toModel(translation) }
+    return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(
+      dto.languageCode,
+    )
+  }
+
+  @GetMapping("/{languageCode}")
+  @Operation(summary = "Get glossary term translation for language")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @UseDefaultPermissions
+  fun get(
+    @PathVariable
+    organizationId: Long,
+    @PathVariable
+    glossaryId: Long,
+    @PathVariable
+    termId: Long,
+    @PathVariable
+    languageCode: String,
+  ): GlossaryTermTranslationModel {
+    val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
+    val translation = glossaryTermTranslationService.find(glossaryTerm, languageCode)
+    return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(
+      languageCode,
+    )
   }
 }

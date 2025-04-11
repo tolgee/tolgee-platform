@@ -18,7 +18,7 @@ import jakarta.persistence.UniqueConstraint
 )
 class GlossaryTermTranslation(
   var languageCode: String,
-  @Column(columnDefinition = "text")
+  @Column(columnDefinition = "text", nullable = false)
   @ActivityLoggedProp
   var text: String? = null,
 ) : StandardAuditModel() {

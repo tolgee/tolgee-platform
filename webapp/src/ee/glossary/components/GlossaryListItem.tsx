@@ -8,6 +8,9 @@ import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageI
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { GlossaryListItemMenu } from 'tg.ee.module/glossary/components/GlossaryListItemMenu';
 
+type SimpleOrganizationModel = components['schemas']['SimpleOrganizationModel'];
+type GlossaryModel = components['schemas']['GlossaryModel'];
+
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 70px;
@@ -65,16 +68,14 @@ const StyledNameText = styled(Typography)`
   word-break: break-word;
 `;
 
-type GlossaryModel = components['schemas']['GlossaryModel'];
-
 type Props = {
   glossary: GlossaryModel;
-  organizationSlug: string;
+  organization: SimpleOrganizationModel;
 };
 
 export const GlossaryListItem: React.VFC<Props> = ({
   glossary,
-  organizationSlug,
+  organization,
 }) => {
   const history = useHistory();
   const assignedProjects = glossary.assignedProjects._embedded?.projects;
@@ -100,7 +101,7 @@ export const GlossaryListItem: React.VFC<Props> = ({
         history.push(
           LINKS.ORGANIZATION_GLOSSARY.build({
             [PARAMS.GLOSSARY_ID]: glossary.id,
-            [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+            [PARAMS.ORGANIZATION_SLUG]: organization.slug,
           })
         )
       }
@@ -133,7 +134,7 @@ export const GlossaryListItem: React.VFC<Props> = ({
         <Box width="100%" display="flex" justifyContent="flex-end">
           <GlossaryListItemMenu
             glossary={glossary}
-            organizationSlug={organizationSlug}
+            organization={organization}
           />
         </Box>
       </StyledControls>

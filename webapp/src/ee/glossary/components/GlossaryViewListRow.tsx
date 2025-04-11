@@ -48,6 +48,8 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
   return (
     <StyledRow key={item.id}>
       <GlossaryListTermCell
+        organizationId={organizationId}
+        glossaryId={glossaryId}
         item={item}
         editEnabled={editEnabled}
         baseLanguage={baseLanguage}
