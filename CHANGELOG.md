@@ -1,3 +1,10 @@
+## [3.114.3](https://github.com/tolgee/tolgee-platform/compare/v3.114.2...v3.114.3) (2025-04-12)
+
+
+### Bug Fixes
+
+* body width as basis for other calculations instead of window size ([#3032](https://github.com/tolgee/tolgee-platform/issues/3032)) ([b2e9cc3](https://github.com/tolgee/tolgee-platform/commit/b2e9cc3c0919b579324fa6dc7f10f1e9d1c0c7ee))
+
 ## [3.114.2](https://github.com/tolgee/tolgee-platform/compare/v3.114.1...v3.114.2) (2025-04-10)
 
 
