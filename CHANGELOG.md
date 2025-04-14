@@ -1,3 +1,10 @@
+## [3.114.4](https://github.com/tolgee/tolgee-platform/compare/v3.114.3...v3.114.4) (2025-04-14)
+
+
+### Bug Fixes
+
+* tests in TranslationSuggestionControllerStreamingTest randomly failing with ConcurrentModificationException ([#3036](https://github.com/tolgee/tolgee-platform/issues/3036)) ([797de9f](https://github.com/tolgee/tolgee-platform/commit/797de9f791726bd4bf5851e5091d6df2ed6bcda9))
+
 ## [3.114.3](https://github.com/tolgee/tolgee-platform/compare/v3.114.2...v3.114.3) (2025-04-12)
 
 
