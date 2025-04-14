@@ -1,22 +1,18 @@
 import { FC, ReactNode } from 'react';
-import { Box, styled, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
-import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { Navigation } from 'tg.component/navigation/Navigation';
 
 import { SecondaryBar } from './SecondaryBar';
 import { useWindowTitle } from 'tg.hooks/useWindowTitle';
-import { BaseViewAddButton } from './BaseViewAddButton';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import {
+  BaseViewWidth,
+  getBaseViewWidth,
+} from 'tg.component/layout/BaseViewWidth';
+import { HeaderBar, HeaderBarProps } from 'tg.component/layout/HeaderBar';
 
 export const BASE_VIEW_PADDING = 24;
-
-const widthMap = {
-  wide: 1200,
-  normal: 900,
-  narrow: 600,
-  max: undefined,
-};
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -37,37 +33,21 @@ const StyledContainerInner = styled(Box)`
   margin-bottom: 0px;
 `;
 
-type BaseViewWidth = keyof typeof widthMap | number | undefined;
-
-export function getBaseViewWidth(width: BaseViewWidth) {
-  return typeof width === 'string' ? widthMap[width] : width;
-}
-
-export interface BaseViewProps {
+export type BaseViewProps = {
   windowTitle: string;
   loading?: boolean;
-  title?: ReactNode;
-  onAdd?: () => void;
-  addLinkTo?: string;
-  addLabel?: string;
-  addComponent?: React.ReactNode;
   children: (() => ReactNode) | ReactNode;
-  onSearch?: (string) => void;
-  searchPlaceholder?: string;
   navigation?: React.ComponentProps<typeof Navigation>['path'];
   customNavigation?: ReactNode;
-  customHeader?: ReactNode;
   navigationRight?: ReactNode;
-  switcher?: ReactNode;
   hideChildrenOnLoading?: boolean;
   maxWidth?: BaseViewWidth;
   allCentered?: boolean;
   'data-cy'?: string;
-  initialSearch?: string;
   overflow?: string;
   wrapperProps?: React.ComponentProps<typeof Box>;
   stretch?: boolean;
-}
+} & Omit<HeaderBarProps, 'noBorder'>;
 
 export const BaseView: FC<BaseViewProps> = (props) => {
   const hideChildrenOnLoading =
@@ -78,14 +58,6 @@ export const BaseView: FC<BaseViewProps> = (props) => {
   useWindowTitle(props.windowTitle);
 
   const displayNavigation = props.customNavigation || props.navigation;
-
-  const displayHeader =
-    props.title !== undefined ||
-    props.customHeader ||
-    props.onSearch ||
-    props.onAdd ||
-    props.addComponent ||
-    props.addLinkTo;
 
   const maxWidth = getBaseViewWidth(props.maxWidth);
 
@@ -119,49 +91,7 @@ export const BaseView: FC<BaseViewProps> = (props) => {
             </Box>
           </SecondaryBar>
         )}
-        {displayHeader && (
-          <SecondaryBar noBorder={Boolean(displayNavigation)}>
-            <StyledContainerInner
-              data-cy="global-base-view-title"
-              style={{ maxWidth }}
-            >
-              {props.customHeader || (
-                <Box display="flex" justifyContent="space-between">
-                  <Box display="flex" alignItems="center" gap="8px">
-                    {props.title !== undefined && (
-                      <Typography variant="h4">{props.title}</Typography>
-                    )}
-                    {typeof props.onSearch === 'function' && (
-                      <Box>
-                        <SecondaryBarSearchField
-                          onSearch={props.onSearch}
-                          initial={props.initialSearch}
-                          placeholder={props.searchPlaceholder}
-                        />
-                      </Box>
-                    )}
-                  </Box>
-                  <Box display="flex" gap={2}>
-                    {props.switcher && (
-                      <Box display="flex" alignItems="center">
-                        {props.switcher}
-                      </Box>
-                    )}
-                    {props.addComponent
-                      ? props.addComponent
-                      : (props.onAdd || props.addLinkTo) && (
-                          <BaseViewAddButton
-                            addLinkTo={props.addLinkTo}
-                            onClick={props.onAdd}
-                            label={props.addLabel}
-                          />
-                        )}
-                  </Box>
-                </Box>
-              )}
-            </StyledContainerInner>
-          </SecondaryBar>
-        )}
+        <HeaderBar noBorder={Boolean(displayNavigation)} {...props} />
         <StyledPaddingWrapper
           {...props.wrapperProps}
           gridRow={props.stretch ? 4 : undefined}
