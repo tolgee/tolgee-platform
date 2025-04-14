@@ -25,7 +25,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.Instant
-import java.util.*
+import java.util.Date
+import java.util.Optional
 
 @Service
 class InvitationService(
@@ -169,7 +170,7 @@ class InvitationService(
     userAccount: UserAccount,
     organizationRole: OrganizationRole,
   ) {
-    if (organizationRoleService.isUserMemberOrOwner(userAccount.id, organizationRole.organization!!.id)) {
+    if (organizationRoleService.isUserMember(userAccount.id, organizationRole.organization!!.id)) {
       throw BadRequestException(Message.USER_ALREADY_HAS_ROLE)
     }
     organizationRoleService.acceptInvitation(organizationRole, userAccount)
