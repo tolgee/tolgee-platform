@@ -2,12 +2,15 @@ package io.tolgee.ee.api.v2.controllers.glossary
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermTranslationModel
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.ee.service.glossary.GlossaryTermTranslationService
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresOrganizationRole
@@ -23,6 +26,8 @@ class GlossaryTermTranslationController(
   private val glossaryTermService: GlossaryTermService,
   private val glossaryTermTranslationService: GlossaryTermTranslationService,
   private val modelAssembler: GlossaryTermTranslationModelAssembler,
+  private val organizationHolder: OrganizationHolder,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping()
   @Operation(summary = "Set a new glossary term translation for language")
@@ -38,6 +43,11 @@ class GlossaryTermTranslationController(
     @RequestBody
     dto: UpdateGlossaryTermTranslationRequest,
   ): GlossaryTermTranslationModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     val translation = glossaryTermTranslationService.updateOrCreate(glossaryTerm, dto)
     return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(
@@ -59,6 +69,11 @@ class GlossaryTermTranslationController(
     @PathVariable
     languageCode: String,
   ): GlossaryTermTranslationModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     val translation = glossaryTermTranslationService.find(glossaryTerm, languageCode)
     return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(

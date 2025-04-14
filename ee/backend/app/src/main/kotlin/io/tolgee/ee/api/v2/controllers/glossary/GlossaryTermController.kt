@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers.glossary
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermWithTranslationsModelAssembler
@@ -13,6 +15,7 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresOrganizationRole
@@ -33,6 +36,8 @@ class GlossaryTermController(
   private val glossaryTermWithTranslationsModelAssembler: GlossaryTermWithTranslationsModelAssembler,
   private val glossaryTermTranslationModelAssembler: GlossaryTermTranslationModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<GlossaryTerm>,
+  private val organizationHolder: OrganizationHolder,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping("/terms")
   @Operation(summary = "Create a new glossary term")
@@ -46,6 +51,11 @@ class GlossaryTermController(
     @RequestBody
     dto: CreateGlossaryTermWithTranslationRequest,
   ): CreateUpdateGlossaryTermResponse {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     val (term, translation) = glossaryTermService.createWithTranslation(organizationId, glossaryId, dto)
     return CreateUpdateGlossaryTermResponse(
       term = glossaryTermModelAssembler.toModel(term),
@@ -63,6 +73,11 @@ class GlossaryTermController(
     @PathVariable termId: Long,
     @RequestBody @Valid dto: UpdateGlossaryTermWithTranslationRequest,
   ): CreateUpdateGlossaryTermResponse {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     val (term, translation) = glossaryTermService.updateWithTranslation(organizationId, glossaryId, termId, dto)
     return CreateUpdateGlossaryTermResponse(
       term = glossaryTermModelAssembler.toModel(term),
@@ -79,6 +94,11 @@ class GlossaryTermController(
     @PathVariable glossaryId: Long,
     @PathVariable termId: Long,
   ) {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     glossaryTermService.delete(organizationId, glossaryId, termId)
   }
 
@@ -91,6 +111,11 @@ class GlossaryTermController(
     @PathVariable glossaryId: Long,
     @PathVariable termId: Long,
   ): GlossaryTermModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     return glossaryTermModelAssembler.toModel(glossaryTerm)
   }
@@ -106,6 +131,11 @@ class GlossaryTermController(
     @RequestParam("search", required = false) search: String?,
     @RequestParam("languageTags", required = false) languageTags: List<String>?,
   ): PagedModel<GlossaryTermModel> {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     val terms = glossaryTermService.findAllPaged(organizationId, glossaryId, pageable, search, languageTags?.toSet())
     return pagedAssembler.toModel(terms, glossaryTermModelAssembler)
   }
@@ -121,6 +151,11 @@ class GlossaryTermController(
     @RequestParam("search", required = false) search: String?,
     @RequestParam("languageTags", required = false) languageTags: List<String>?,
   ): PagedModel<GlossaryTermWithTranslationsModel> {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
     val terms =
       glossaryTermService.findAllPaged(
         organizationId,
