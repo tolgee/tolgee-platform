@@ -36,6 +36,7 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
   };
 
   const onDelete = () => {
+    setAnchorEl(null);
     confirmation({
       title: <T keyName="delete_glossary_confirmation_title" />,
       message: <T keyName="delete_glossary_confirmation_message" />,
@@ -50,8 +51,6 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
       },
     });
   };
-
-  // TODO: close menu when clicking on item
 
   return (
     <>
@@ -97,7 +96,10 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
         {canManage && (
           <MenuItem
             data-cy="glossary-edit-button"
-            onClick={() => setIsEditing(true)}
+            onClick={() => {
+              setAnchorEl(null);
+              setIsEditing(true);
+            }}
           >
             <T keyName="glossary_edit_button" />
           </MenuItem>

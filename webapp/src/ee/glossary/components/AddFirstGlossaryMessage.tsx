@@ -45,7 +45,14 @@ export const AddFirstGlossaryMessage: React.VFC<
           <T keyName="glossaries_list_empty_title" />
         </Typography>
         <Typography mt={2}>
-          <T keyName="glossaries_list_empty_message" />
+          <T
+            keyName="glossaries_list_empty_message"
+            params={{
+              bestPractice: (
+                <a href="https://docs.tolgee.io/platform/projects_and_organizations/glossary" />
+              ),
+            }}
+          />
         </Typography>
       </StyledText>
       <StyledImage draggable="false" height={props.height || '170px'}>
