@@ -109,17 +109,17 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
             <T keyName="glossary_delete_button" />
           </MenuItem>
         )}
-
-        {isEditing && (
-          <GlossaryCreateEditDialog
-            open={isEditing}
-            onClose={() => setIsEditing(false)}
-            onFinished={() => setIsEditing(false)}
-            organizationId={organization.id}
-            editGlossaryId={glossary.id}
-          />
-        )}
       </Menu>
+
+      {isEditing && (
+        <GlossaryCreateEditDialog
+          open={isEditing}
+          onClose={() => setIsEditing(false)}
+          onFinished={() => setIsEditing(false)}
+          organizationId={organization.id}
+          editGlossaryId={glossary.id}
+        />
+      )}
     </>
   );
 };

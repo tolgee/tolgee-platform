@@ -265,7 +265,13 @@ export const GlossaryTermCreateUpdateDialog = ({
     );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      onClick={(e) => e.stopPropagation()}
+    >
       <DialogTitle>
         {initialTermId === undefined ? (
           <T keyName="glossary_term_create_title" />
