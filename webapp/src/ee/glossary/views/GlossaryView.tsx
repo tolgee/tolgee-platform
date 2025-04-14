@@ -7,6 +7,7 @@ import { useRouteMatch } from 'react-router-dom';
 import React, { useMemo, useState } from 'react';
 import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
 import { GlossaryViewBody } from 'tg.ee.module/glossary/components/GlossaryViewBody';
+import { GlossaryEmptyListMessage } from 'tg.ee.module/glossary/components/GlossaryEmptyListMessage';
 
 export const GlossaryView = () => {
   const [search, setSearch] = useState('');
@@ -148,7 +149,11 @@ export const GlossaryView = () => {
           onSearch={setSearch}
         />
       ) : (
-        <>Empty TODO</>
+        <GlossaryEmptyListMessage
+          loading={termsLoadable.isLoading}
+          onCreate={onCreate}
+          onImport={undefined /* TODO */}
+        />
       )}
     </BaseOrganizationSettingsView>
   );
