@@ -6,9 +6,11 @@ import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { GlossaryCreateEditDialog } from 'tg.ee.module/glossary/views/GlossaryCreateEditDialog';
 import { GlossaryListItem } from 'tg.ee.module/glossary/components/GlossaryListItem';
-import { styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { GlossariesEmptyListMessage } from 'tg.ee.module/glossary/components/GlossariesEmptyListMessage';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -24,6 +26,9 @@ export const GlossariesListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
+  const { isEnabled } = useEnabledFeatures();
+  const glossaryFeature = isEnabled('GLOSSARY');
 
   const organization = useOrganization();
 
@@ -81,24 +86,32 @@ export const GlossariesListView = () => {
             organizationId={organization!.id}
           />
         )}
-        <PaginatedHateoasList
-          wrapperComponentProps={{ className: 'listWrapper' }}
-          onPageChange={setPage}
-          loadable={glossaries}
-          renderItem={(g) => (
-            <GlossaryListItem
-              key={g.id}
-              glossary={g}
-              organization={organization!}
+        {glossaryFeature ? (
+          <PaginatedHateoasList
+            wrapperComponentProps={{ className: 'listWrapper' }}
+            onPageChange={setPage}
+            loadable={glossaries}
+            renderItem={(g) => (
+              <GlossaryListItem
+                key={g.id}
+                glossary={g}
+                organization={organization!}
+              />
+            )}
+            emptyPlaceholder={
+              <GlossariesEmptyListMessage
+                loading={glossaries.isFetching}
+                onCreateClick={onCreate}
+              />
+            }
+          />
+        ) : (
+          <Box>
+            <DisabledFeatureBanner
+              customMessage={t('glossaries_feature_description')}
             />
-          )}
-          emptyPlaceholder={
-            <GlossariesEmptyListMessage
-              loading={glossaries.isFetching}
-              onCreateClick={onCreate}
-            />
-          }
-        />
+          </Box>
+        )}
       </BaseOrganizationSettingsView>
     </StyledWrapper>
   );

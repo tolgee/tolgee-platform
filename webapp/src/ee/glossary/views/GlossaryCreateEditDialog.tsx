@@ -232,7 +232,12 @@ export const GlossaryCreateEditDialog = ({
     );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      onClick={(e) => e.stopPropagation()}
+    >
       {!glossaryFeature && (
         <DisabledFeatureBanner
           customMessage={t('glossaries_feature_description')}
