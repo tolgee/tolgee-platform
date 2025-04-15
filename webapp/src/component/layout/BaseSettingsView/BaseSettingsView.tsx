@@ -1,22 +1,20 @@
-import { Box, Container, styled, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
-import {
-  BaseView,
-  BaseViewProps,
-  getBaseViewWidth,
-} from 'tg.component/layout/BaseView';
+import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { SettingsMenu, SettingsMenuItem } from './SettingsMenu';
-import { BaseViewAddButton } from '../BaseViewAddButton';
+import { getBaseViewWidth } from 'tg.component/layout/BaseViewWidth';
+import { HeaderBar } from 'tg.component/layout/HeaderBar';
 
 const StyledWrapper = styled('div')`
-  display: flex;
+  display: grid;
   gap: 32px;
+  grid-template-columns: auto 1fr;
   @container main-container (max-width: 800px) {
-    flex-direction: column;
+    grid-template-columns: none;
   }
 `;
 
-const StyledContainer = styled(Container)`
+const StyledContainer = styled(Box)`
   display: flex;
   padding: 0px !important;
   container: main-container / inline-size;
@@ -36,17 +34,13 @@ type Props = BaseViewProps & {
 
 export const BaseSettingsView: React.FC<Props> = ({
   children,
-  title,
   menuItems,
-  addLinkTo,
   maxWidth = 'normal',
-  onAdd,
-  addLabel,
   ...otherProps
 }) => {
   const containerMaxWidth = getBaseViewWidth(maxWidth);
   return (
-    <BaseView {...otherProps}>
+    <BaseView {...otherProps} headerBarDisable>
       <StyledWrapper>
         <StyledMenu>
           <SettingsMenu items={menuItems} />
@@ -54,22 +48,12 @@ export const BaseSettingsView: React.FC<Props> = ({
 
         <StyledContainer style={{ maxWidth: containerMaxWidth }}>
           <StyledContent>
-            {title && (
-              <Box sx={{ mb: 2, display: 'flex' }}>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6">{title}</Typography>
-                </Box>
-                {(addLinkTo || onAdd) && (
-                  <Box>
-                    <BaseViewAddButton
-                      label={addLabel}
-                      addLinkTo={addLinkTo}
-                      onClick={onAdd}
-                    ></BaseViewAddButton>
-                  </Box>
-                )}
-              </Box>
-            )}
+            <HeaderBar
+              noBorder
+              reducedSpacing
+              titleVariant="h6"
+              {...otherProps}
+            />
             {children}
           </StyledContent>
         </StyledContainer>

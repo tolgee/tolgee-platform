@@ -3,8 +3,8 @@ import { Portal, styled, useMediaQuery } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import {
-  useTranslationsSelector,
   useTranslationsActions,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
@@ -14,9 +14,9 @@ import { useNsBanners } from '../context/useNsBanners';
 import { NAMESPACE_BANNER_SPACING } from '../cell/styles';
 import { ReactList } from 'tg.component/reactList/ReactList';
 import clsx from 'clsx';
-import { useScrollStatus } from './useScrollStatus';
 import { useColumns } from '../useColumns';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
+import { useScrollStatus } from 'tg.component/common/useScrollStatus';
 
 const ARROW_SIZE = 50;
 
@@ -280,8 +280,7 @@ export const TranslationsTable = ({ width }: Props) => {
                 language && (
                   <StyledHeaderCell key={i}>
                     <CellLanguage
-                      colIndex={i - 1}
-                      onResize={startResize}
+                      onResize={() => startResize(i - 1)}
                       language={language}
                     />
                   </StyledHeaderCell>
