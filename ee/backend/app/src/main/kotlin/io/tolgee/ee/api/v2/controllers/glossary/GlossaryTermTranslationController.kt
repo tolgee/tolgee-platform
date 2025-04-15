@@ -15,6 +15,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -33,6 +34,7 @@ class GlossaryTermTranslationController(
   @Operation(summary = "Set a new glossary term translation for language")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
   fun update(
     @PathVariable
     organizationId: Long,

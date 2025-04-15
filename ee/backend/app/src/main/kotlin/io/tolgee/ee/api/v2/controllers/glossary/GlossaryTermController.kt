@@ -25,6 +25,7 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -43,6 +44,7 @@ class GlossaryTermController(
   @Operation(summary = "Create a new glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
   fun create(
     @PathVariable
     organizationId: Long,
@@ -67,6 +69,7 @@ class GlossaryTermController(
   @Operation(summary = "Update glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
   fun update(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
@@ -89,6 +92,7 @@ class GlossaryTermController(
   @Operation(summary = "Delete glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
   fun delete(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,

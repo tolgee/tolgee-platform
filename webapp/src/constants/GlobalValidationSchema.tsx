@@ -488,7 +488,7 @@ export class Validation {
   static readonly GLOSSARY_TERM_CREATE_FORM = (t: TranslateFunction) =>
     Yup.object().shape({
       text: Yup.string().min(1).required(),
-      description: Yup.string().optional(),
+      description: Yup.string().optional().nullable(),
       nonTranslatable: Yup.boolean(),
       caseSensitive: Yup.boolean(),
       abbreviation: Yup.boolean(),
