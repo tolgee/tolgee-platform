@@ -43,10 +43,10 @@ class GlossaryController(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping
-  @Transactional
   @Operation(summary = "Create glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
   fun create(
     @PathVariable
     organizationId: Long,
@@ -66,6 +66,7 @@ class GlossaryController(
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
   fun update(
     @PathVariable
     organizationId: Long,
@@ -88,6 +89,7 @@ class GlossaryController(
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
   fun delete(
     @PathVariable
     organizationId: Long,

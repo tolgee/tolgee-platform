@@ -218,7 +218,9 @@ export const GlossaryCreateEditDialog = ({
                   loading={saveIsLoading}
                   data-cy="create-glossary-submit"
                 >
-                  {t('create_glossary_submit_button')}
+                  {initialGlossaryId === undefined
+                    ? t('create_glossary_submit_button')
+                    : t('edit_glossary_submit_button')}
                 </LoadingButton>
               </StyledActions>
             </StyledContainer>
