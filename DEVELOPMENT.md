@@ -3,13 +3,23 @@
 * [Java 21](https://openjdk.org/install)
 * [Docker](https://docs.docker.com/engine/install)
 * [Node.js 18](https://nodejs.org/en/download) (or higher)
+* [Google Chrome](https://www.google.com/chrome/)
 * [Intellij Idea](https://www.jetbrains.com/help/idea/installation-guide.html) (optional)
 
-## Clone this repo
+### On Linux
+  * Docker BuildX
+  * Docker composer
+
+## Working with repositories
+
+If you want to send PR, create a fork of the repo.
+
+Then clone it from your account.
 
 ```shell
 git clone --depth 1 git@github.com:tolgee/tolgee-platform.git
 ```
+
 
 ## Run the stack
 
@@ -26,6 +36,13 @@ git clone --depth 1 git@github.com:tolgee/tolgee-platform.git
      cd webapp && npm ci && npm run start
      ```
 3. Open your browser and go to http://localhost:3000.
+
+if you want to change the port you are running,
+add an `.env` file inside `webapp/.env` and add your preferred port in it
+
+```
+VITE_PORT=<PORT_NUMBER>
+```
 
 ## Testing
 

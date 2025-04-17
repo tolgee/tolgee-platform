@@ -140,7 +140,7 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun getScreenshotFile() {
+  fun testGetScreenshotFile() {
     val screenshot =
       executeInNewTransaction {
         val key = keyService.create(project, CreateKeyDto("test"))

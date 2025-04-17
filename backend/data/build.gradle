@@ -165,7 +165,6 @@ dependencies {
     implementation libs.postHog
     implementation libs.micrometerPrometheus
     implementation 'org.dom4j:dom4j:2.1.4'
-    implementation libs.jacksonKotlin
     implementation("org.apache.commons:commons-configuration2:2.10.1")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
 
@@ -208,6 +207,7 @@ dependencies {
     implementation libs.slackApiClient
     implementation libs.slackApiModelKotlinExtension
     implementation libs.slackApiClientKotlinExtension
+
 }
 
 test {

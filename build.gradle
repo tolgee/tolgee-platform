@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
+    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
 
 subprojects {
@@ -142,6 +142,7 @@ project(':server-app').afterEvaluate {
 ktlint {
     debug = true
     verbose = true
+    version = "1.5.0"
 }
 
 rootProject.subprojects {

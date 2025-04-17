@@ -68,6 +68,13 @@ kotlin {
     jvmToolchain(21)
 }
 
+
+ktlint {
+    debug = true
+    verbose = true
+    version = "1.5.0"
+}
+
 dependencies {
     /**
      * SPRING

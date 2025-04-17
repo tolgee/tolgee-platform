@@ -104,6 +104,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `blank namespace doesn't create ns on update`() {
+    enableNamespaces()
     performProjectAuthPut("keys/${testData.keyInNs1.id}", EditKeyDto(name = "super_k", ""))
       .andIsOk.andAssertThatJson {
         node("namespace").isNull()
@@ -125,6 +126,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
 
     val keyId = keyService.get(project.id, keyName, namespace).id
 
+    enableNamespaces()
     performProjectAuthPut("keys/$keyId/complex-update", mapOf("name" to keyName, "namespace" to ""))
       .andIsBadRequest
       .andAssertError
@@ -144,6 +146,7 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `does not create key when exists empty ns`() {
+    enableNamespaces()
     performProjectAuthPost("keys", CreateKeyDto(name = "key2", namespace = ""))
       .andIsBadRequest
       .andAssertError
