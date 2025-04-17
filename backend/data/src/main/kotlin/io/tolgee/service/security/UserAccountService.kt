@@ -27,6 +27,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.notification.NotificationService
@@ -69,6 +70,10 @@ class UserAccountService(
   @Lazy
   private val self: UserAccountService,
 ) : Logging {
+  @Autowired
+  @Lazy
+  private lateinit var aiPlaygroundResultService: AiPlaygroundResultService
+
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
 
@@ -226,6 +231,7 @@ class UserAccountService(
     toDelete.organizationRoles.forEach {
       entityManager.remove(it)
     }
+    aiPlaygroundResultService.deleteResultsByUser(toDelete.id)
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }

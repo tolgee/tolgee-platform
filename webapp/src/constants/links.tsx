@@ -271,6 +271,11 @@ export class LINKS {
     'invitations'
   );
 
+  static ORGANIZATION_LLM_PROVIDERS = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'llm-providers'
+  );
+
   static ORGANIZATION_BILLING = Link.ofParent(LINKS.ORGANIZATION, 'billing');
 
   static ORGANIZATION_SUBSCRIPTIONS = Link.ofParent(

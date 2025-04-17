@@ -141,7 +141,7 @@ class OpenApiConfiguration {
 
   private fun Operation.isProjectIdConsumed() =
     parameters?.any {
-      it.name == PROJECT_ID_PARAMETER
+      it.name == PROJECT_ID_PARAMETER && it.`in` == "path"
     } == true
 
   private fun Operation.addProjectIdPathParam() {

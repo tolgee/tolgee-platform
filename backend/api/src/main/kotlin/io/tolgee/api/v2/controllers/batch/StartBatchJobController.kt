@@ -23,6 +23,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -42,13 +43,14 @@ class StartBatchJobController(
   private val batchJobService: BatchJobService,
   private val authenticationFacade: AuthenticationFacade,
   private val batchJobModelAssembler: BatchJobModelAssembler,
+  private val aiPlaygroundResultService: AiPlaygroundResultService,
 ) {
   @PostMapping(value = ["/pre-translate-by-tm"])
   @Operation(
     summary = "Pre-translate by TM",
     description = "Pre-translate provided keys to provided languages by TM.",
   )
-  @RequiresProjectPermissions([ Scope.BATCH_PRE_TRANSLATE_BY_TM ])
+  @RequiresProjectPermissions([Scope.BATCH_PRE_TRANSLATE_BY_TM])
   @AllowApiAccess
   fun translate(
     @Valid @RequestBody
@@ -69,7 +71,7 @@ class StartBatchJobController(
     summary = "Machine Translation",
     description = "Translate provided keys to provided languages through primary MT provider.",
   )
-  @RequiresProjectPermissions([ Scope.BATCH_MACHINE_TRANSLATE ])
+  @RequiresProjectPermissions([Scope.BATCH_MACHINE_TRANSLATE])
   @AllowApiAccess
   fun machineTranslation(
     @Valid @RequestBody
@@ -85,9 +87,29 @@ class StartBatchJobController(
     ).model
   }
 
+  @PostMapping(value = ["/ai-playground-translate"])
+  @Operation(
+    summary = "Translates via llm and stores result in AiPlaygroundResult",
+  )
+  @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
+  @AllowApiAccess
+  fun aiPlaygroundTranslate(
+    @Valid @RequestBody
+    data: MachineTranslationRequest,
+  ): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    aiPlaygroundResultService.removeResults(projectHolder.project.id, authenticationFacade.authenticatedUserEntity.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.authenticatedUserEntity,
+      BatchJobType.AI_PLAYGROUND_TRANSLATE,
+    ).model
+  }
+
   @PostMapping(value = ["/delete-keys"])
   @Operation(summary = "Delete keys")
-  @RequiresProjectPermissions([ Scope.KEYS_DELETE ])
+  @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   fun deleteKeys(
     @Valid @RequestBody
@@ -104,7 +126,7 @@ class StartBatchJobController(
 
   @PostMapping(value = ["/set-translation-state"])
   @Operation(summary = "Set translation state")
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_STATE_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @AllowApiAccess
   fun setTranslationState(
     @Valid @RequestBody
@@ -125,7 +147,7 @@ class StartBatchJobController(
     summary = "Clear translation values",
     description = "Clear translation values for provided keys in selected languages.",
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun clearTranslations(
     @Valid @RequestBody
@@ -146,7 +168,7 @@ class StartBatchJobController(
     summary = "Copy translation values",
     description = "Copy translation values from one language to other languages.",
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun copyTranslations(
     @Valid @RequestBody
@@ -165,7 +187,7 @@ class StartBatchJobController(
 
   @PostMapping(value = ["/tag-keys"])
   @Operation(summary = "Add tags")
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   fun tagKeys(
     @Valid @RequestBody
@@ -183,7 +205,7 @@ class StartBatchJobController(
 
   @PostMapping(value = ["/untag-keys"])
   @Operation(summary = "Remove tags")
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   fun untagKeys(
     @Valid @RequestBody
@@ -200,7 +222,7 @@ class StartBatchJobController(
 
   @PostMapping(value = ["/set-keys-namespace"])
   @Operation(summary = "Set keys namespace")
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   fun setKeysNamespace(
     @Valid @RequestBody

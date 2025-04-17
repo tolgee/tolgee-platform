@@ -25,6 +25,7 @@ import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
@@ -111,6 +112,10 @@ class ProjectService(
   @set:Autowired
   @set:Lazy
   lateinit var bigMetaService: BigMetaService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var aiPlaygroundResultService: AiPlaygroundResultService
 
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
@@ -303,6 +308,7 @@ class ProjectService(
       avatarService.unlinkAvatarFiles(project)
       batchJobService.deleteAllByProjectId(project.id)
       bigMetaService.deleteAllByProjectId(project.id)
+      aiPlaygroundResultService.deleteResultsByProject(project.id)
       projectRepository.delete(project)
     }
   }

@@ -208,6 +208,11 @@ dependencies {
     implementation libs.slackApiClient
     implementation libs.slackApiModelKotlinExtension
     implementation libs.slackApiClientKotlinExtension
+
+    /**
+     * HANDLEBARS
+     */
+    implementation('com.github.jknack:handlebars:4.4.0')
 }
 
 test {

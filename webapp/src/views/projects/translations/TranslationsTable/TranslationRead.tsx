@@ -5,6 +5,7 @@ import { useTranslationCell } from '../useTranslationCell';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationFlags } from '../cell/TranslationFlags';
+import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -29,10 +30,14 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledTranslation = styled('div')`
+  display: grid;
+  grid-auto-rows: max-content;
   grid-area: translation;
   min-height: 23px;
   margin: 8px 12px 0px 16px;
   position: relative;
+  gap: 8px;
+  align-content: start;
 `;
 
 type Props = {
@@ -62,6 +67,8 @@ export const TranslationRead: React.FC<Props> = ({
     editEnabled,
     keyData,
     setAssignedTaskState,
+    aiPlaygroundEnabled,
+    aiPlaygroundData,
   } = tools;
 
   const toggleEdit = () => {
@@ -93,27 +100,37 @@ export const TranslationRead: React.FC<Props> = ({
           disabled={disabled}
           isPlural={keyData.keyIsPlural}
         />
+        {aiPlaygroundData && (
+          <AiPlaygroundPreview
+            translation={aiPlaygroundData.translation}
+            contextDescription={aiPlaygroundData.contextDescription}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+          />
+        )}
       </StyledTranslation>
       <TranslationFlags
         className="flags"
         keyData={keyData}
         lang={language.tag}
       />
-      <ControlsTranslation
-        onEdit={() => handleOpen()}
-        onComments={() => handleOpen('comments')}
-        commentsCount={translation?.commentCount}
-        unresolvedCommentCount={translation?.unresolvedCommentCount}
-        stateChangeEnabled={canChangeState}
-        editEnabled={editable}
-        state={state}
-        onStateChange={handleStateChange}
-        active={active}
-        lastFocusable={lastFocusable}
-        className="controls"
-        tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
-        onTaskStateChange={setAssignedTaskState}
-      />
+      {!aiPlaygroundEnabled && (
+        <ControlsTranslation
+          onEdit={() => handleOpen()}
+          onComments={() => handleOpen('comments')}
+          commentsCount={translation?.commentCount}
+          unresolvedCommentCount={translation?.unresolvedCommentCount}
+          stateChangeEnabled={canChangeState}
+          editEnabled={editable}
+          state={state}
+          onStateChange={handleStateChange}
+          active={active}
+          lastFocusable={lastFocusable}
+          className="controls"
+          tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
+          onTaskStateChange={setAssignedTaskState}
+        />
+      )}
     </StyledContainer>
   );
 };

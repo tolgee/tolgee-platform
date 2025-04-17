@@ -45,7 +45,7 @@ class MachineTranslationSettingsController(
 
   @PutMapping("/{projectId}/machine-translation-service-settings")
   @Operation(summary = "Sets machine translation settings")
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun setMachineTranslationSettings(
     @RequestBody dto: SetMachineTranslationSettingsDto,
@@ -61,7 +61,7 @@ class MachineTranslationSettingsController(
       "Get enabled services " +
         "and configured formality for each language",
   )
-  @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
+  @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   @AllowApiAccess
   fun getMachineTranslationLanguageInfo(): CollectionModel<LanguageInfoModel> {
     val data = mtServiceConfigService.getLanguageInfo(projectHolder.project)

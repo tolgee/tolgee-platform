@@ -38,7 +38,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   fun setup() {
     initMachineTranslationProperties(
       freeCreditsAmount = -1,
-      enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.TOLGEE, MtServiceType.DEEPL),
+      enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.PROMPT, MtServiceType.DEEPL),
     )
     Mockito.clearInvocations(mtService)
     internalProperties.fakeMtProviders = true

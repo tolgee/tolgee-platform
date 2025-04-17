@@ -2,14 +2,13 @@ import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-
-import { AiLanguagesTable } from './AiLanguagesTable';
-import { AiProjectDescription } from './AiProjectDescription';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
-// TODO: Move to EE
+import { AiLanguagesTable } from './AiLanguagesTable';
+import { AiProjectDescription } from './AiProjectDescription';
+
 export const AiCustomization = () => {
   const project = useProject();
   const { isEnabled } = useEnabledFeatures();

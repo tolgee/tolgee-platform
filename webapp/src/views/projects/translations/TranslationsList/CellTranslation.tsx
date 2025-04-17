@@ -4,6 +4,7 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import {
   CELL_CLICKABLE,
+  CELL_LOWERED,
   CELL_PLAIN,
   CELL_RAISED,
   StyledCell,
@@ -51,7 +52,11 @@ export const CellTranslation: React.FC<Props> = ({
     cellRef: cellRef,
   });
 
-  const { isEditing, editEnabled: canEditTranslation } = tools;
+  const {
+    isEditing,
+    editEnabled: canEditTranslation,
+    aiPlaygroundEnabled,
+  } = tools;
 
   const handleResize = () => {
     onResize?.(colIndex || 0);
@@ -66,7 +71,7 @@ export const CellTranslation: React.FC<Props> = ({
     <StyledCell
       className={clsx({
         [CELL_PLAIN]: true,
-        [CELL_RAISED]: isEditing,
+        [aiPlaygroundEnabled ? CELL_LOWERED : CELL_RAISED]: isEditing,
         [CELL_CLICKABLE]: editable && !isEditing,
         className,
       })}
@@ -76,7 +81,7 @@ export const CellTranslation: React.FC<Props> = ({
       data-cy-lang={language.tag}
     >
       <CellStateBar state={state} onResize={handleResize} />
-      {isEditing ? (
+      {isEditing && !aiPlaygroundEnabled ? (
         <TranslationWrite tools={tools} />
       ) : (
         <TranslationRead

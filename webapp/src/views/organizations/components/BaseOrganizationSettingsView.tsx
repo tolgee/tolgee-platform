@@ -77,6 +77,14 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_apps'),
     });
+    if (config.llm.enabled) {
+      menuItems.push({
+        link: LINKS.ORGANIZATION_LLM_PROVIDERS.build({
+          [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+        }),
+        label: t('organization_menu_llm_providers'),
+      });
+    }
     menuItems.push({
       link: LINKS.ORGANIZATION_SSO.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,

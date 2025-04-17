@@ -51,7 +51,11 @@ export const CellTranslation: React.FC<Props> = ({
     cellRef: cellRef,
   });
 
-  const { isEditing, editEnabled: canEditTranslation } = tools;
+  const {
+    isEditing,
+    editEnabled: canEditTranslation,
+    aiPlaygroundEnabled,
+  } = tools;
 
   const handleResize = () => {
     onResize?.(colIndex || 0);
@@ -76,7 +80,7 @@ export const CellTranslation: React.FC<Props> = ({
       data-cy-lang={language.tag}
     >
       <CellStateBar state={state} onResize={handleResize} />
-      {isEditing ? (
+      {isEditing && !aiPlaygroundEnabled ? (
         <TranslationWrite tools={tools} />
       ) : (
         <TranslationRead

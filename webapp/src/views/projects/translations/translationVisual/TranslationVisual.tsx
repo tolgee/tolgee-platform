@@ -44,6 +44,10 @@ export const TranslationVisual = ({
     );
   }
 
+  if (!text) {
+    return null;
+  }
+
   return (
     <TranslationPlurals
       value={value}
@@ -55,7 +59,7 @@ export const TranslationVisual = ({
           lineHeight="1.3em"
         >
           <TranslationWithPlaceholders
-            content={content}
+            content={content || ''}
             pluralExampleValue={exampleValue}
             locale={locale}
             nested={Boolean(variant)}

@@ -38,6 +38,7 @@ import { usePositionService } from './services/usePositionService';
 import { useLayoutService } from './services/useLayoutService';
 import { AddParams } from '../TranslationFilters/tools';
 import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
+import { useAiPlaygroundService } from './services/useAiPlaygroundService';
 
 type Props = {
   projectId: number;
@@ -48,6 +49,7 @@ type Props = {
   updateLocalStorageLanguages?: boolean;
   pageSize?: number;
   prefilter?: PrefilterType;
+  aiPlayground: boolean;
 };
 
 export const [
@@ -57,7 +59,10 @@ export const [
 ] = createProvider((props: Props) => {
   const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
-  const layout = useLayoutService({ sidePanelOpen });
+  const layout = useLayoutService({
+    sidePanelOpen: sidePanelOpen || props.aiPlayground,
+    wider: props.aiPlayground,
+  });
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
@@ -110,6 +115,14 @@ export const [
     initialLangs: initialLangs,
     baseLang: props.baseLang,
     prefilter: props.prefilter,
+  });
+
+  const aiPlaygroundService = useAiPlaygroundService({
+    translationService,
+    allLanguages: allowedLanguages ?? [],
+    translationsLanguages: translationService.translationsLanguages ?? [],
+    projectId: props.projectId,
+    enabled: props.aiPlayground,
   });
 
   const { setEventBlockers } = useWebsocketService(translationService);
@@ -227,6 +240,9 @@ export const [
       const allItems = await translationService.getAllIds();
       return selectionService.select(allItems.ids);
     },
+    async getAllIds() {
+      return (await translationService.getAllIds()).ids;
+    },
     selectionClear() {
       return selectionService.clear();
     },
@@ -335,6 +351,8 @@ export const [
     prefilter: props.prefilter,
     prefilteredTask: prefilteredTaskLoadable.data,
     layout,
+    aiPlaygroundData: aiPlaygroundService.data,
+    aiPlaygroundEnabled: props.aiPlayground,
   };
 
   return [state, actions];

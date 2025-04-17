@@ -37,6 +37,7 @@ export const CELL_HIGHLIGHT_ON_HOVER = 'cellhighlightOnHover';
 export const CELL_CLICKABLE = 'cellClickable';
 export const CELL_SPACE_TOP = 'cellSpaceTop';
 export const CELL_SPACE_BOTTOM = 'cellSpaceBottom';
+export const CELL_LOWERED = 'cellLowered';
 
 const combine = (first: string, second: string) =>
   `${first}.${second}, ${first} .${second}`;
@@ -93,6 +94,17 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
       theme.palette.mode === 'dark'
         ? '0px 0px 7px rgba(0, 0, 0, 1)'
         : '0px 0px 10px rgba(0, 0, 0, 0.2)'} !important;
+  }
+
+  ${combine('&', CELL_LOWERED)} {
+    z-index: 1;
+    --cell-background: ${({ theme }) => theme.palette.cell.selected};
+    background: ${({ theme }) => theme.palette.cell.selected} !important;
+    box-shadow: ${({ theme }) =>
+        theme.palette.mode === 'dark'
+          ? '0px 0px 8px 0px rgba(0, 0, 0, 0.6)'
+          : '0px 0px 8px 0px rgba(0, 0, 0, 0.2)'}
+      inset !important;
   }
 
   ${combine('&', CELL_SELECTED)} {

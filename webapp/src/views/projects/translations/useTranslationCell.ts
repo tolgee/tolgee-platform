@@ -190,6 +190,13 @@ export const useTranslationCell = ({
     ((assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE') ||
       satisfiesLanguageAccess('translations.edit', language.id)) &&
     !disabled;
+  const aiPlaygroundData = useTranslationsSelector(
+    (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
+  );
+
+  const aiPlaygroundEnabled = useTranslationsSelector(
+    (c) => c.aiPlaygroundEnabled
+  );
 
   return {
     keyId,
@@ -215,5 +222,7 @@ export const useTranslationCell = ({
     disabled,
     baseValue,
     baseText,
+    aiPlaygroundData,
+    aiPlaygroundEnabled,
   };
 };
