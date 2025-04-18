@@ -1698,6 +1698,7 @@ export interface components {
        */
       extraCreditBalance: number;
     };
+    /** @description For MT credits, the values are in full credits. Not Cents. */
     CurrentUsageItemModel: {
       /** Format: int64 */
       current: number;
@@ -1707,7 +1708,7 @@ export interface components {
       limit: number;
     };
     CurrentUsageModel: {
-      creditsInCents: components["schemas"]["CurrentUsageItemModel"];
+      credits: components["schemas"]["CurrentUsageItemModel"];
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];

@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.ee.uasge.current
 
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
@@ -12,6 +13,7 @@ import java.io.Serializable
 open class CurrentUsageModel(
   val seats: CurrentUsageItemModel,
   val strings: CurrentUsageItemModel,
-  val creditsInCents: CurrentUsageItemModel,
+  @Schema(description = "For MT credits, the values are in full credits. Not Cents.")
+  val credits: CurrentUsageItemModel,
   val keys: CurrentUsageItemModel,
 ) : RepresentationModel<CurrentUsageModel>(), Serializable
