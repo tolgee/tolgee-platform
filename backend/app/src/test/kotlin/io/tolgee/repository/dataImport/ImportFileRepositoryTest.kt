@@ -21,11 +21,11 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
   fun `creates and saves and gets ImportFile entity`() {
     val import = createBaseImport()
 
-    ImportFile(import = import, name = "en.json").let {
+    ImportFile(importEntity = import, name = "en.json").let {
       importFileRepository.save(it).let { saved ->
         importFileRepository.getOne(saved.id).let { got ->
           assertThat(got.name).isEqualTo(it.name)
-          assertThat(got.import).isEqualTo(import)
+          assertThat(got.importEntity).isEqualTo(import)
           assertThat(got.id).isGreaterThan(0L)
         }
       }
@@ -44,7 +44,7 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
         builder.toString()
       }
 
-    ImportFile(import = import, name = longName).let {
+    ImportFile(importEntity = import, name = longName).let {
       assertThatExceptionOfType(ConstraintViolationException::class.java)
         .isThrownBy {
           importFileRepository.save(it)

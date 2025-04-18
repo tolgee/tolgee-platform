@@ -16,7 +16,7 @@ interface ImportFileIssueParamRepository : JpaRepository<ImportFileIssueParam, L
   @Modifying
   @Query(
     """delete from ImportFileIssueParam ifip where ifip.issue in 
-        (select ifi from ifip.issue ifi join ifi.file if where if.import = :import)
+        (select ifi from ifip.issue ifi join ifi.file if where if.importEntity = :import)
         """,
   )
   fun deleteAllByImport(import: Import)
