@@ -1,39 +1,20 @@
 import { FC } from 'react';
-import { useTranslate } from '@tolgee/react';
-import { Box, Tooltip } from '@mui/material';
-import { PlanIncludedUsageFields } from '../../genericFields/PlanIncludedUsageFields';
 import { usePlanFormValues } from '../usePlanFormValues';
-import { PlanPricesFields } from '../../genericFields/PlanPricesFields';
+import { CloudPlanFormData } from '../types';
+import { PlanPricesAndLimits } from '../../genericFields/PlanPricesAndLimits';
 
 export const CloudPlanPricesAndLimits: FC<{
   parentName?: string;
   canEditPrices: boolean;
 }> = ({ parentName, canEditPrices }) => {
-  const { values } = usePlanFormValues(parentName);
+  const { values } = usePlanFormValues<CloudPlanFormData>(parentName);
 
   return (
-    <Wrapper canEditPrices={canEditPrices}>
-      <PlanPricesFields parentName={parentName} />
-      <PlanIncludedUsageFields
-        parentName={parentName}
-        metricType={values['metricType']}
-      />
-    </Wrapper>
+    <PlanPricesAndLimits
+      parentName={parentName}
+      canEditPrices={canEditPrices}
+      isPayAsYouGo={values.type === 'PAY_AS_YOU_GO'}
+      metricType={values.metricType}
+    />
   );
-};
-
-const Wrapper = ({ children, canEditPrices }) => {
-  const { t } = useTranslate();
-
-  if (!canEditPrices) {
-    return (
-      <Tooltip title={t('admin-billing-cannot-edit-prices-tooltip')}>
-        <span>
-          <Box sx={{ pointerEvents: 'none', opacity: 0.5 }}>{children}</Box>
-        </span>
-      </Tooltip>
-    );
-  }
-
-  return <>{children}</>;
 };

@@ -2,7 +2,6 @@ import { Box } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { PlanEnabledFeaturesField } from '../genericFields/PlanEnabledFeaturesField';
-import { PlanIncludedUsageFields } from '../genericFields/PlanIncludedUsageFields';
 import { PlanNonCommercialSwitch } from '../genericFields/PlanNonCommercialSwitch';
 import React, { ReactElement } from 'react';
 import { PlanStripeProductSelectField } from '../genericFields/PlanStripeProductSelectField';
@@ -12,7 +11,7 @@ import { PlanNameField } from '../genericFields/PlanNameField';
 import { SelfHostedEePlanFormData } from '../cloud/types';
 import { SelfHostedEePlanTypeSelectField } from './fields/SelfHostedEePlanTypeSelectField';
 import { PlanSaveButton } from '../genericFields/PlanSaveButton';
-import { PlanPricesFields } from '../genericFields/PlanPricesFields';
+import { SelfHostedEePlanPricesAndLimits } from './fields/SelfHostedEePlanPricesAndLimits';
 
 type Props = {
   initialData: SelfHostedEePlanFormData;
@@ -20,6 +19,7 @@ type Props = {
   loading: boolean | undefined;
   isUpdate: boolean;
   beforeFields?: ReactElement;
+  canEditPrices: boolean;
 };
 
 export function SelfHostedEePlanForm({
@@ -28,6 +28,7 @@ export function SelfHostedEePlanForm({
   loading,
   isUpdate,
   beforeFields,
+  canEditPrices,
 }: Props) {
   return (
     <Formik
@@ -55,8 +56,7 @@ export function SelfHostedEePlanForm({
             <SelfHostedEePlanTypeSelectField />
             <PlanStripeProductSelectField />
           </Box>
-          <PlanPricesFields />
-          <PlanIncludedUsageFields />
+          <SelfHostedEePlanPricesAndLimits canEditPrices={canEditPrices} />
           <PlanEnabledFeaturesField />
           <PlanNonCommercialSwitch />
           <PlanSaveButton loading={loading} />

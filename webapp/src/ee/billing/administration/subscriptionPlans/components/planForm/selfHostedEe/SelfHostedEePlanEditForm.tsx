@@ -36,6 +36,31 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
 
   const planData = planLoadable.data;
 
+  const onSubmit: React.ComponentProps<
+    typeof SelfHostedEePlanForm
+  >['onSubmit'] = (values) => {
+    planEditMutation.mutate(
+      {
+        path: { planId },
+        content: {
+          'application/json': {
+            ...values,
+            stripeProductId: values.stripeProductId!,
+            forOrganizationIds: values.public ? [] : values.forOrganizationIds,
+          },
+        },
+      },
+      {
+        onSuccess() {
+          messaging.success(
+            <T keyName="administration_ee_plan_updated_success" />
+          );
+          history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
+        },
+      }
+    );
+  };
+
   if (!planData) {
     return null;
   }
@@ -47,30 +72,8 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
         ...planData,
       }}
       isUpdate={true}
-      onSubmit={(values) => {
-        planEditMutation.mutate(
-          {
-            path: { planId },
-            content: {
-              'application/json': {
-                ...values,
-                stripeProductId: values.stripeProductId!,
-                forOrganizationIds: values.public
-                  ? []
-                  : values.forOrganizationIds,
-              },
-            },
-          },
-          {
-            onSuccess() {
-              messaging.success(
-                <T keyName="administration_ee_plan_updated_success" />
-              );
-              history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
-            },
-          }
-        );
-      }}
+      onSubmit={onSubmit}
+      canEditPrices={planData.canEditPrices}
     />
   );
 };
