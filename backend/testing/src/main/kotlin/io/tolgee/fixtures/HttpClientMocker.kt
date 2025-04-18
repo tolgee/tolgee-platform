@@ -1,6 +1,7 @@
 package io.tolgee.fixtures
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
