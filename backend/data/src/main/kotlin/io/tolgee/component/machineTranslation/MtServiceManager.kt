@@ -59,7 +59,7 @@ class MtServiceManager(
       return translateResult
     } catch (e: Exception) {
       handleSilentFail(params, e)
-      getEmptyResult(params.serviceInfo.serviceType, params.textRaw.isBlank())
+      getEmptyResult(params.serviceInfo.serviceType, params.textRaw.isBlank(), e)
     }
   }
 
@@ -119,13 +119,14 @@ class MtServiceManager(
     return getEmptyResult(serviceType, true)
   }
 
-  private fun getEmptyResult(serviceType: MtServiceType, baseBlank: Boolean): TranslateResult {
+  private fun getEmptyResult(serviceType: MtServiceType, baseBlank: Boolean, e: Exception? = null): TranslateResult {
     return TranslateResult(
       translatedText = null,
       contextDescription = null,
       actualPrice = 0,
       usedService = serviceType,
       baseBlank = baseBlank,
+      exception = e
     )
   }
 

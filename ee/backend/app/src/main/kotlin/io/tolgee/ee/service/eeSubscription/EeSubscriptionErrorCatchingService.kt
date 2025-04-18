@@ -3,10 +3,10 @@ package io.tolgee.ee.service.eeSubscription
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Message
-import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.service.NoActiveSubscriptionException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
@@ -62,6 +62,21 @@ class EeSubscriptionErrorCatchingService(
         setSubscriptionKeyUsedByOtherInstance()
       }
       return null
+    }
+  }
+
+  // TODO: Test this
+  fun <T> catchingOutOfCredits(fn: () -> T): T? {
+    try {
+      return fn()
+    } catch (e: HttpClientErrorException.BadRequest) {
+      if (e.message?.contains(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code) == true) {
+        throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED, e)
+      }
+      if (e.message?.contains(Message.OUT_OF_CREDITS.code) == true) {
+        throw OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS, e)
+      }
+      throw e
     }
   }
 
