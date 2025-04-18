@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-// TODO: Check whether is matters that I removed the eeSubscription from initial data
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
@@ -30,10 +29,6 @@ class InitialDataController(
   private val authenticationFacade: AuthenticationFacade,
   private val userPreferencesService: UserPreferencesService,
   private val preferredOrganizationFacade: PreferredOrganizationFacade,
-//  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-//  private val eeSubscriptionModelAssembler: IEeSubscriptionModelAssembler?,
-//  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-//  private val eeSubscriptionProvider: EeSubscriptionProvider?,
   private val announcementController: AnnouncementController,
   private val tenantService: TenantService,
   private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
@@ -45,12 +40,6 @@ class InitialDataController(
     val data =
       InitialDataModel(
         serverConfiguration = configurationController.getPublicConfiguration(),
-//        eeSubscription =
-//          eeSubscriptionProvider?.findSubscriptionDto()?.let {
-//            eeSubscriptionModelAssembler?.toModel(
-//              it,
-//            )
-//          },
       )
 
     val userAccount = authenticationFacade.authenticatedUserOrNull
