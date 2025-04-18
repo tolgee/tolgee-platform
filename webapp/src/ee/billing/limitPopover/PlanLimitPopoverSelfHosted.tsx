@@ -60,8 +60,8 @@ const getProgressData = ({
   );
 
   const creditsProgress = new ProgressItem(
-    usage.creditsInCents.included / 100,
-    usage.creditsInCents.current / 100
+    usage.credits.included,
+    usage.credits.current
   );
 
   return {
