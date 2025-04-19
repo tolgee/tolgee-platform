@@ -1,5 +1,5 @@
 import { createKey, login } from '../../common/apiCalls/common';
-import { emptyProject } from '../../common/apiCalls/testData/testData';
+import { emptyProjectTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import { visitTranslations } from '../../common/translations';
 
@@ -7,8 +7,8 @@ describe('Translations sorting', () => {
   let project: { name: string; id: number } = null;
 
   beforeEach(() => {
-    emptyProject.clean();
-    emptyProject
+    emptyProjectTestData.clean();
+    emptyProjectTestData
       .generateStandard()
       .then((data) => {
         project = data.body.projects[0];
@@ -22,7 +22,7 @@ describe('Translations sorting', () => {
   });
 
   afterEach(() => {
-    emptyProject.clean();
+    emptyProjectTestData.clean();
   });
 
   it('sort by key name a to z', () => {

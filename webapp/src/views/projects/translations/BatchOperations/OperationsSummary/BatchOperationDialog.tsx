@@ -37,7 +37,8 @@ export const BatchOperationDialog = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
-  const { incrementPlanLimitErrors } = useGlobalActions();
+  const { incrementPlanLimitErrors, incrementSpendingLimitErrors } =
+    useGlobalActions();
 
   const liveBatch = useProjectContext((c) =>
     c.batchOperations?.find((o) => o.id === operation.id)
@@ -77,6 +78,9 @@ export const BatchOperationDialog = ({
   useEffect(() => {
     if (data.errorMessage === 'out_of_credits') {
       incrementPlanLimitErrors();
+    }
+    if (data.errorMessage === 'credit_spending_limit_exceeded') {
+      incrementSpendingLimitErrors();
     }
   }, [data.errorMessage]);
 

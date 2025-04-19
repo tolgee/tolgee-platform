@@ -67,4 +67,42 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1742306073641-1">
+        <addColumn tableName="ee_subscription">
+            <column name="included_keys" type="BIGINT" defaultValue="-1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1742306073641-2">
+        <addColumn tableName="ee_subscription">
+            <column name="included_seats" type="BIGINT" defaultValue="-1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1742307074282-1">
+        <addColumn tableName="ee_subscription">
+            <column name="is_pay_as_you_go" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1744282308926-1">
+        <addColumn tableName="ee_subscription">
+            <column name="keys_limit" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1744282308926-2">
+        <addColumn tableName="ee_subscription">
+            <column name="seats_limit" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1744363908122-1">
+        <dropColumn columnName="cancel_at_period_end" tableName="ee_subscription"/>
+    </changeSet>
 </databaseChangeLog>

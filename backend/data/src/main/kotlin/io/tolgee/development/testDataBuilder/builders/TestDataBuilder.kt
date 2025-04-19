@@ -15,6 +15,7 @@ class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
     val projects = mutableListOf<ProjectBuilder>()
     val organizations = mutableListOf<OrganizationBuilder>()
     val mtCreditBuckets = mutableListOf<MtCreditBucketBuilder>()
+    val invitations = mutableListOf<InvitationBuilder>()
 
     /**
      * These data are populated by external modules and saved via one of the

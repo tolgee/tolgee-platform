@@ -44,7 +44,8 @@ class LanguageService(
   private val securityService: SecurityService,
   @Lazy
   private val autoTranslationService: AutoTranslationService,
-  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  @Suppress("SelfReferenceConstructorParameter")
+  @Lazy
   private val self: LanguageService,
   private val cacheManager: org.springframework.cache.CacheManager,
   private val currentDateProvider: CurrentDateProvider,
