@@ -42,7 +42,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   activeVariant,
 }) => {
   const { t } = useTranslate();
-  const { incrementPlanLimitErrors, incrementSpendingLimitErrors } =
+  const { increaseCreditPlanLimitErrors, increaseCreditSpendingLimitErrors } =
     useGlobalActions();
 
   const deps = {
@@ -80,12 +80,12 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   );
   const arrayResults = Object.values(data?.result || {});
 
-  const outOfCredit =
+  const outOfPlanCredits =
     arrayResults.every(
       (i) => i?.errorMessage?.toLowerCase() === 'out_of_credits'
     ) && Boolean(arrayResults.length);
 
-  const spendingLimitExceeded =
+  const outOfCreditsSpendingLimitExceeded =
     arrayResults.every(
       (i) => i?.errorMessage?.toLowerCase() === 'credit_spending_limit_exceeded'
     ) && Boolean(arrayResults.length);
@@ -93,13 +93,13 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   const contextPresent = keyData.contextPresent;
 
   useEffect(() => {
-    if (outOfCredit) {
-      incrementPlanLimitErrors();
+    if (outOfPlanCredits) {
+      increaseCreditPlanLimitErrors();
     }
-    if (spendingLimitExceeded) {
-      incrementSpendingLimitErrors();
+    if (outOfCreditsSpendingLimitExceeded) {
+      increaseCreditSpendingLimitErrors();
     }
-  }, [outOfCredit, spendingLimitExceeded]);
+  }, [outOfPlanCredits, outOfCreditsSpendingLimitExceeded]);
 
   useEffect(() => {
     setItemsCount(arrayResults.length);
@@ -117,7 +117,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
 
   return (
     <StyledContainer>
-      {outOfCredit ? (
+      {outOfPlanCredits ? (
         <OutOfCreditsWrapper>
           <StyledError
             sx={{ display: 'grid', gap: 0.5, justifyItems: 'start' }}
