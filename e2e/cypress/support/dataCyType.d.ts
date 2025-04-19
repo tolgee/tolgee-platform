@@ -200,6 +200,7 @@ declare namespace DataCy {
         "edit-pat-dialog-description-input" |
         "edit-pat-dialog-title" |
         "empty-scope-dialog" |
+        "error-message-" |
         "expected-usage-dialog" |
         "expiration-date-field" |
         "expiration-date-picker" |
@@ -432,6 +433,7 @@ declare namespace DataCy {
         "permissions-menu-inherited-message" |
         "permissions-menu-reset-to-organization" |
         "permissions-menu-save" |
+        "plan-limit-exceeded-popover" |
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
@@ -533,6 +535,9 @@ declare namespace DataCy {
         "sensitive-protection-dialog" |
         "settings-menu-item" |
         "sign-up-submit-button" |
+        "signup-error-free-seat-limit" |
+        "signup-error-plan-seat-limit" |
+        "signup-error-seats-spending-limit" |
         "spending-limit-exceeded-popover" |
         "sso-migration-info-text" |
         "storage-add-item-button" |

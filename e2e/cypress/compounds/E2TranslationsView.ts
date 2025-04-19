@@ -1,5 +1,6 @@
 import { HOST } from '../common/constants';
 import { E2KeyCreateDialog, KeyDialogFillProps } from './E2KeyCreateDialog';
+import { getTranslationCell } from '../common/translations';
 
 export class E2TranslationsView {
   visit(projectId: number) {
@@ -18,5 +19,9 @@ export class E2TranslationsView {
   createKey(props: KeyDialogFillProps) {
     const dialog = this.openKeyCreateDialog();
     dialog.fillAndSave(props);
+  }
+
+  getTranslationCell(key: string, languageTag: string) {
+    return getTranslationCell(key, languageTag);
   }
 }

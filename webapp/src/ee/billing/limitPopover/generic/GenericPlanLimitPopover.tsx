@@ -41,7 +41,7 @@ export const GenericPlanLimitPopover: FC<PlanLimitPopoverProps> = ({
     <PlanLimitPopoverWrapper
       open={open}
       onClose={onClose}
-      data-cy="spending-limit-exceeded-popover"
+      data-cy="plan-limit-exceeded-popover"
     >
       <DialogTitle id="alert-dialog-title">
         {<T keyName="plan_limit_dialog_title" />}

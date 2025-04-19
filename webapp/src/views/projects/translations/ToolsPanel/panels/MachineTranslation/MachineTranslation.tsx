@@ -42,7 +42,8 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   activeVariant,
 }) => {
   const { t } = useTranslate();
-  const { incrementPlanLimitErrors } = useGlobalActions();
+  const { incrementPlanLimitErrors, incrementSpendingLimitErrors } =
+    useGlobalActions();
 
   const deps = {
     keyId: keyData.keyId,
@@ -83,13 +84,22 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
     arrayResults.every(
       (i) => i?.errorMessage?.toLowerCase() === 'out_of_credits'
     ) && Boolean(arrayResults.length);
+
+  const spendingLimitExceeded =
+    arrayResults.every(
+      (i) => i?.errorMessage?.toLowerCase() === 'credit_spending_limit_exceeded'
+    ) && Boolean(arrayResults.length);
+
   const contextPresent = keyData.contextPresent;
 
   useEffect(() => {
     if (outOfCredit) {
       incrementPlanLimitErrors();
     }
-  }, [outOfCredit]);
+    if (spendingLimitExceeded) {
+      incrementSpendingLimitErrors();
+    }
+  }, [outOfCredit, spendingLimitExceeded]);
 
   useEffect(() => {
     setItemsCount(arrayResults.length);

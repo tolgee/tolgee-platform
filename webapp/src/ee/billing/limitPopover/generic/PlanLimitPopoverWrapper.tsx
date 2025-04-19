@@ -13,6 +13,7 @@ export const PlanLimitPopoverWrapper: FC<PlanLimitPopoverWrapperProps> = ({
   onClose,
   children,
   popoverProps,
+  ...props
 }) => {
   const anchorEl = document.getElementById(USAGE_ELEMENT_ID);
 
@@ -32,6 +33,7 @@ export const PlanLimitPopoverWrapper: FC<PlanLimitPopoverWrapperProps> = ({
             anchorOrigin: { horizontal: 'center', vertical: 'top' },
             transformOrigin: { horizontal: 'center', vertical: 'center' },
           })}
+      data-cy={props['data-cy']}
       {...popoverProps}
     >
       {children}
