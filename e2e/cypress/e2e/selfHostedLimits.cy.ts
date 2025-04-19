@@ -2,12 +2,11 @@ import 'cypress-file-upload';
 import { fillAndSubmitSignUpForm, visitSignUp } from '../common/login';
 import { waitForGlobalLoading } from '../common/loading';
 import { E2TranslationsView } from '../compounds/E2TranslationsView';
-import { confirmStandard, gcy } from '../common/shared';
+import { gcy } from '../common/shared';
 import { selfHostedLimitsTestData } from '../common/apiCalls/testData/testData';
 import { TestDataStandardResponse } from '../common/apiCalls/testData/generator';
 import { login } from '../common/apiCalls/common';
 import { visitTranslations } from '../common/translations';
-import { confirmation } from '../../../webapp/src/hooks/confirmation';
 
 /**
  * This is not a traditional test. We mock the results of the API calls,
