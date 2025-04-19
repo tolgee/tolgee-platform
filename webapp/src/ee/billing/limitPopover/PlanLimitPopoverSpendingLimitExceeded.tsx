@@ -26,7 +26,7 @@ type Props = {
   open: boolean;
 };
 
-export const SpendingLimitExceededPopover: React.FC<Props> = ({
+export const PlanLimitPopoverSpendingLimitExceeded: React.FC<Props> = ({
   open,
   onClose,
 }) => {

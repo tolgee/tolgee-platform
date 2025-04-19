@@ -19,11 +19,9 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useConfig } from 'tg.globalContext/helpers';
 import { PasswordLabel } from '../SetPasswordField';
-import { ResourceErrorComponent } from '../../common/form/ResourceErrorComponent';
-import { Alert } from '../../common/Alert';
 import { LabelHint } from 'tg.component/common/LabelHint';
-import { SpendingLimitExceededDescription } from './SpendingLimitExceededDesciption';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { SignUpError } from './SignUpError';
 
 const StyledInputFields = styled('div')`
   display: grid;
@@ -52,37 +50,6 @@ export type SignUpType = {
 type Props = {
   onSubmit: (v) => void;
   loadable: LoadableType;
-};
-
-const Error: React.FC<{ loadable: LoadableType }> = ({ loadable }) => {
-  if (loadable.error?.code === 'seats_spending_limit_exceeded') {
-    return (
-      <Alert severity="error">
-        <Typography variant="h5" sx={{ mb: 1 }}>
-          <T keyName="spending_limit_dialog_title" />
-        </Typography>
-        <SpendingLimitExceededDescription />
-      </Alert>
-    );
-  }
-
-  if (loadable.error?.code === 'free_self_hosted_seat_limit_exceeded') {
-    return (
-      <Alert severity="error">
-        <Typography variant="h5" sx={{ mb: 1 }}>
-          <T keyName="free_self_hosted_seat_limit_exceeded" />
-        </Typography>
-      </Alert>
-    );
-  }
-
-  return (
-    <>
-      {loadable && loadable.error && (
-        <ResourceErrorComponent error={loadable.error} />
-      )}
-    </>
-  );
 };
 
 export const SignUpForm = (props: Props) => {
@@ -127,7 +94,7 @@ export const SignUpForm = (props: Props) => {
         onSubmit={props.onSubmit}
       >
         <StyledInputFields>
-          <Error loadable={props.loadable} />
+          <SignUpError loadable={props.loadable} />
 
           <TextField
             autoComplete="name"
