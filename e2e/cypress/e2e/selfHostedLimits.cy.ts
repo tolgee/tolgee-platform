@@ -2,11 +2,12 @@ import 'cypress-file-upload';
 import { fillAndSubmitSignUpForm, visitSignUp } from '../common/login';
 import { waitForGlobalLoading } from '../common/loading';
 import { E2TranslationsView } from '../compounds/E2TranslationsView';
-import { gcy } from '../common/shared';
+import { confirmStandard, gcy } from '../common/shared';
 import { selfHostedLimitsTestData } from '../common/apiCalls/testData/testData';
 import { TestDataStandardResponse } from '../common/apiCalls/testData/generator';
 import { login } from '../common/apiCalls/common';
 import { visitTranslations } from '../common/translations';
+import { confirmation } from '../../../webapp/src/hooks/confirmation';
 
 /**
  * This is not a traditional test. We mock the results of the API calls,
@@ -75,8 +76,6 @@ describe('Self-hosted Limits', () => {
     it('shows error when exceeding key fixed limit when adding a new key', () => {
       loginAndVisitTranslations(testData);
       mockKeyCreation('plan_key_limit_exceeded');
-
-      // Mock the subscription usage and license info endpoints
       mockSubscriptionUsage();
       mockLicenseInfo();
       tryCreateKey();
@@ -98,6 +97,42 @@ describe('Self-hosted Limits', () => {
       mockMtStreamingWithError('credit_spending_limit_exceeded');
       openSuggestionPanel();
       assertSpendingLimitExceededPopoverVisible();
+    });
+
+    /**
+     * For mt credits limit, the popover is shown only once.
+     * We don't want to disturb the translators with the popover every time
+     */
+    it('the popover is not shown twice (fixed limit)', () => {
+      loginAndVisitTranslations(testData);
+      mockMtStreamingWithError('out_of_credits');
+
+      openSuggestionPanel();
+      assertPlanLimitPopoverWithUsageVisible();
+      cy.get('body').type('{esc}');
+      assertPlanLimitPopoverNotExists();
+      new E2TranslationsView().closeTranslationEdit();
+      openSuggestionPanel();
+      cy.waitForDom();
+      assertPlanLimitPopoverNotExists();
+    });
+
+    /**
+     * For mt credits limit, the popover is shown only once.
+     * We don't want to disturb the translators with the popover every time
+     */
+    it('the popover is not shown twice (spending limit)', () => {
+      loginAndVisitTranslations(testData);
+      mockMtStreamingWithError('credit_spending_limit_exceeded');
+
+      openSuggestionPanel();
+      assertSpendingLimitExceededPopoverVisible();
+      cy.get('body').type('{esc}');
+      assertSpendingLimitExceededPopoverNotExists();
+      new E2TranslationsView().closeTranslationEdit();
+      openSuggestionPanel();
+      cy.waitForDom();
+      assertSpendingLimitExceededPopoverNotExists();
     });
   });
 });
@@ -200,8 +235,16 @@ function assertPlanLimitPopoverWithUsageVisible() {
     .should('contain.text', '5000 / 10000');
 }
 
+function assertPlanLimitPopoverNotExists() {
+  gcy('plan-limit-exceeded-popover').should('not.exist');
+}
+
 function assertSpendingLimitExceededPopoverVisible() {
   gcy('spending-limit-exceeded-popover').should('be.visible');
+}
+
+function assertSpendingLimitExceededPopoverNotExists() {
+  gcy('spending-limit-exceeded-popover').should('not.exist');
 }
 
 function openSuggestionPanel() {
