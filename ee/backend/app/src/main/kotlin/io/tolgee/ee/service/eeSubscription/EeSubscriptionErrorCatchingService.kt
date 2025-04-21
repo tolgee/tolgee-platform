@@ -24,7 +24,6 @@ class EeSubscriptionErrorCatchingService(
       fn()
     } catch (e: HttpClientErrorException.BadRequest) {
       val body = e.parseBody()
-      // TODO: TEST THIS
       when (body.code) {
         Message.SEATS_SPENDING_LIMIT_EXCEEDED.code,
         Message.KEYS_SPENDING_LIMIT_EXCEEDED.code,
