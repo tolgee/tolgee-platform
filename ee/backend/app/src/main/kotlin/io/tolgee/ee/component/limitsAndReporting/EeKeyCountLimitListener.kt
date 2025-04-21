@@ -64,7 +64,7 @@ class EeKeyCountLimitListener(
 
     KeysLimitChecker(
       required = keyCount,
-      limits = limits
+      limits = limits,
     ).check()
   }
 

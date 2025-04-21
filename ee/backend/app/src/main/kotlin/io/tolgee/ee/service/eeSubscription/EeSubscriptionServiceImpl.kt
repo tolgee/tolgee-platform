@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.eeSubscription
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.EeSubscriptionDto
 import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.api.SubscriptionStatus
@@ -9,46 +8,44 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.ee.component.limitsAndReporting.SelfHostedLimitsProvider
 import io.tolgee.ee.component.limitsAndReporting.generic.SeatsLimitChecker
-import io.tolgee.ee.data.*
+import io.tolgee.ee.data.PrepareSetLicenseKeyDto
+import io.tolgee.ee.data.SetLicenseKeyLicensingDto
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.ee.service.NoActiveSubscriptionException
 import io.tolgee.ee.service.eeSubscription.cloudClient.TolgeeCloudLicencingClient
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.service.InstanceIdService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
-import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
-import java.util.*
 
 @Service
+@Suppress("SelfReferenceConstructorParameter")
 class EeSubscriptionServiceImpl(
   private val eeSubscriptionRepository: EeSubscriptionRepository,
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val instanceIdService: InstanceIdService,
-  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  @Lazy
   private val self: EeSubscriptionServiceImpl,
   private val keyService: KeyService,
   private val selfHostedLimitsProvider: SelfHostedLimitsProvider,
   private val client: TolgeeCloudLicencingClient,
-  private val catchingService: EeSubscriptionErrorCatchingService
+  private val catchingService: EeSubscriptionErrorCatchingService,
 ) : EeSubscriptionProvider, Logging {
   var bypassSeatCountCheck = false
 
-  @Cacheable(Caches.EE_SUBSCRIPTION, key = "1")
+  @Cacheable(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   override fun findSubscriptionDto(): EeSubscriptionDto? {
     return this.findSubscriptionEntity()?.toDto()
   }
@@ -61,7 +58,7 @@ class EeSubscriptionServiceImpl(
     return self.findSubscriptionDto() != null
   }
 
-  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
+  @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun setLicenceKey(licenseKey: String): EeSubscription {
     val seats = userAccountService.countAllEnabled()
     val keys = keyService.countAllOnInstance()
@@ -75,17 +72,17 @@ class EeSubscriptionServiceImpl(
         this.lastValidCheck = currentDateProvider.date
       }
 
-
-    val response = catchingService.catchingSpendingLimits {
-      client.setLicenseKeyRemote(
-        SetLicenseKeyLicensingDto(
-          licenseKey = licenseKey,
-          seats = seats,
-          keys = keys,
-          instanceId = instanceIdService.getInstanceId(),
+    val response =
+      catchingService.catchingSpendingLimits {
+        client.setLicenseKeyRemote(
+          SetLicenseKeyLicensingDto(
+            licenseKey = licenseKey,
+            seats = seats,
+            keys = keys,
+            instanceId = instanceIdService.getInstanceId(),
+          ),
         )
-      )
-    }
+      }
 
     SubscriptionFromModelAssigner(entity, response, currentDateProvider.date).assign()
     return self.save(entity)
@@ -93,10 +90,11 @@ class EeSubscriptionServiceImpl(
 
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
     val seats = userAccountService.countAllEnabled()
-    val responseBody = catchingService.catchingSpendingLimits {
-      client.prepareSetLicenseKeyRemote(PrepareSetLicenseKeyDto(licenseKey, seats))
-    }
-      return responseBody
+    val responseBody =
+      catchingService.catchingSpendingLimits {
+        client.prepareSetLicenseKeyRemote(PrepareSetLicenseKeyDto(licenseKey, seats))
+      }
+    return responseBody
   }
 
   @Scheduled(fixedDelayString = """${'$'}{tolgee.ee.check-period-ms:300000}""")
@@ -105,7 +103,7 @@ class EeSubscriptionServiceImpl(
     refreshSubscription()
   }
 
-  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
+  @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun refreshSubscription() {
     val subscription = this.findSubscriptionEntity()
     if (subscription != null) {
@@ -114,7 +112,7 @@ class EeSubscriptionServiceImpl(
           catchingService.catchingLicenseNotFound {
             catchingService.catchingLicenseUsedByAnotherInstance {
               client.getRemoteSubscriptionInfo(subscription.licenseKey, instanceIdService.getInstanceId())
-          }
+            }
           }
         } catch (e: Exception) {
           reportError(e.stackTraceToString())
@@ -145,10 +143,11 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun checkSeatCount(
-    subscription: EeSubscriptionDto?,
-    seats: Long,
-  ) {
+  fun checkSeatCount(seats: Long) {
+    if (bypassSeatCountCheck) {
+      return
+    }
+
     object : SeatsLimitChecker(
       required = seats,
       limits = selfHostedLimitsProvider.getLimits(),
@@ -161,13 +160,13 @@ class EeSubscriptionServiceImpl(
     }.check()
   }
 
-  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
+  @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun save(subscription: EeSubscription): EeSubscription {
     return eeSubscriptionRepository.save(subscription)
   }
 
   @Transactional
-  @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
+  @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun releaseSubscription() {
     val subscription = findSubscriptionEntity()
     if (subscription != null) {
@@ -184,27 +183,13 @@ class EeSubscriptionServiceImpl(
     }
   }
 
-  fun reportUsage(
-    subscription: EeSubscriptionDto?,
-    keys: Long? = null,
-    seats: Long? = null,
-  ) {
-    if (subscription != null) {
-      catchingService.catchingSpendingLimits {
-        catchingService.catchingLicenseNotFound {
-          client.reportUsageRemote(subscription = subscription, keys = keys, seats = seats)
-        }
-      }
-    }
-  }
-
   fun reportError(error: String) {
     try {
       findSubscriptionEntity()?.let {
         client.reportErrorRemote(error, it.licenseKey)
       }
     } catch (e: Exception) {
-      e.printStackTrace()
+      logger.error("Cannot report error", e)
     }
   }
 }

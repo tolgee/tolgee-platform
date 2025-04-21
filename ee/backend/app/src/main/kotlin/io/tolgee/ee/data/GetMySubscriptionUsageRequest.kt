@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotBlank
 
 class GetMySubscriptionUsageRequest(
   @field:NotBlank
-  var licenseKey: String
+  var licenseKey: String,
 )

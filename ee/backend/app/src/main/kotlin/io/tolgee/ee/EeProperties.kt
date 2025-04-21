@@ -5,4 +5,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.ee")
 class EeProperties(
   var licenseServer: String = "https://app.tolgee.io",
+  var reportUsageFixedDelayInMs: Long = 60_000,
 )

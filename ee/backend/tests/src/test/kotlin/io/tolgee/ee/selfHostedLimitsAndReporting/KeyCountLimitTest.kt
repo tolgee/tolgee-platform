@@ -48,7 +48,7 @@ class KeyCountLimitTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `does not throw when removing keys`(){
+  fun `does not throw when removing keys`() {
     saveSubscription {
       includedKeys = 2
       keysLimit = 2
@@ -87,7 +87,7 @@ class KeyCountLimitTest : AbstractSpringTest() {
     }
   }
 
-  //TODO: Test cannot create key when status subscription status is ERROR
+  // TODO: Test cannot create key when status subscription status is ERROR
 
   private fun createKey(testData: BaseTestData) {
     keyService.create(testData.project, CreateKeyDto(name = "Over limit key"))

@@ -65,7 +65,7 @@ class MtServiceManager(
 
   private fun getProviderTranslateParams(
     provider: MtValueProvider,
-    params: TranslationParams
+    params: TranslationParams,
   ): ProviderTranslateParams {
     val supportsFormality = provider.isLanguageFormalitySupported(params.targetLanguageTag)
 
@@ -104,7 +104,7 @@ class MtServiceManager(
   private fun getTranslateResult(
     mtResult: MtValueProvider.MtResult,
     serviceType: MtServiceType,
-    baseTextRaw: String
+    baseTextRaw: String,
   ): TranslateResult {
     return TranslateResult(
       translatedText = mtResult.translated,
@@ -119,14 +119,18 @@ class MtServiceManager(
     return getEmptyResult(serviceType, true)
   }
 
-  private fun getEmptyResult(serviceType: MtServiceType, baseBlank: Boolean, e: Exception? = null): TranslateResult {
+  private fun getEmptyResult(
+    serviceType: MtServiceType,
+    baseBlank: Boolean,
+    e: Exception? = null,
+  ): TranslateResult {
     return TranslateResult(
       translatedText = null,
       contextDescription = null,
       actualPrice = 0,
       usedService = serviceType,
       baseBlank = baseBlank,
-      exception = e
+      exception = e,
     )
   }
 

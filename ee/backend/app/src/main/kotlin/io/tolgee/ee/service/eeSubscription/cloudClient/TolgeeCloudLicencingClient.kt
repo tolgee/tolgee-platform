@@ -10,7 +10,6 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.hateoas.ee.uasge.current.CurrentUsageModel
-import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -30,7 +29,10 @@ class TolgeeCloudLicencingClient(
     const val REPORT_ERROR_PATH: String = "/v2/public/licensing/report-error"
   }
 
-  internal fun getRemoteSubscriptionInfo(licenseKey: String, instanceId: String): SelfHostedEeSubscriptionModel? {
+  internal fun getRemoteSubscriptionInfo(
+    licenseKey: String,
+    instanceId: String,
+  ): SelfHostedEeSubscriptionModel? {
     val responseBody =
       postRequest<SelfHostedEeSubscriptionModel>(
         SUBSCRIPTION_INFO_PATH,
@@ -39,8 +41,10 @@ class TolgeeCloudLicencingClient(
     return responseBody
   }
 
-  fun reportErrorRemote(error: String, licenseKey: String) =
-    postRequest<Any>(REPORT_ERROR_PATH, ReportErrorDto(error, licenseKey))
+  fun reportErrorRemote(
+    error: String,
+    licenseKey: String,
+  ) = postRequest<Any>(REPORT_ERROR_PATH, ReportErrorDto(error, licenseKey))
 
   fun reportUsageRemote(
     subscription: EeSubscriptionDto,
@@ -64,7 +68,7 @@ class TolgeeCloudLicencingClient(
     return try {
       postRequest<SelfHostedEeSubscriptionModel>(
         SET_PATH,
-        dto
+        dto,
       )
     } catch (e: HttpClientErrorException.NotFound) {
       throw BadRequestException(Message.LICENSE_KEY_NOT_FOUND)

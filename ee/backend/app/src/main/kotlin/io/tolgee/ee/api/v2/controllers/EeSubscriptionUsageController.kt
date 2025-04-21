@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "EE Licence")
 @OpenApiEeExtension
 class EeSubscriptionUsageController(
-  private val usageService: EeSubscriptionUsageService
+  private val usageService: EeSubscriptionUsageService,
 ) {
   @GetMapping("")
   @Operation(summary = "Get current usage for the current EE subscription")

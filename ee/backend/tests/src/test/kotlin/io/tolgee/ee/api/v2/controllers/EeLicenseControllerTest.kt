@@ -3,7 +3,6 @@ package io.tolgee.ee.api.v2.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
@@ -27,6 +26,7 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   @Autowired
   @MockBean
   lateinit var restTemplate: RestTemplate
+
   @BeforeEach
   fun setup() {
     var user: UserAccount? = null

@@ -3,7 +3,7 @@ package io.tolgee.component.machineTranslation
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.mtServiceConfig.Formality
 
-class   FakedMtResultProvider(
+class FakedMtResultProvider(
   private val sourceLanguageTag: String,
   private val targetLanguageTag: String,
   private val text: String,
@@ -15,7 +15,7 @@ class   FakedMtResultProvider(
     params.targetLanguageTag,
     params.text,
     params.serviceInfo.formality ?: Formality.DEFAULT,
-    params.serviceInfo.serviceType
+    params.serviceInfo.serviceType,
   )
 
   fun get(): MtValueProvider.MtResult {
@@ -26,7 +26,7 @@ class   FakedMtResultProvider(
     return MtValueProvider.MtResult(
       translated = fakedText,
       price = text.length * 100,
-      contextDescription = null
+      contextDescription = null,
     )
   }
 

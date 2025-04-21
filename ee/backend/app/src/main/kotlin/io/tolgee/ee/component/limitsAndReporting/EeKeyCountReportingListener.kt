@@ -1,8 +1,9 @@
 package io.tolgee.ee.component
 
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
-import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.NoActiveSubscriptionException
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.usageReporting.UsageReportingService
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Organization
@@ -23,12 +24,17 @@ import org.springframework.transaction.event.TransactionalEventListener
  * It reports:
  *  - When the key count is changed due to modifications in related entities.
  *  - When a project or organization is deleted, as these events also impact the key count.
+ *
+ * This listener uses the deferred reporting mechanism, which means that if multiple
+ * key count changes occur within a short time period (less than 1 minute), only one
+ * report will be sent to Tolgee Cloud, reducing API calls.
  */
 @Component
 class EeKeyCountReportingListener(
   private val eeSubscriptionService: EeSubscriptionServiceImpl,
   private val billingConfProvider: PublicBillingConfProvider,
   private val keyService: KeyService,
+  private val usageReportingService: UsageReportingService,
 ) : Logging {
   /**
    * Listens for project activity events and checks if any relevant entity modifications
@@ -62,11 +68,19 @@ class EeKeyCountReportingListener(
     onKeyCountChanged()
   }
 
+  /**
+   * Reports changes in key count to Tolgee Cloud.
+   *
+   * This method is called when key-related entities are modified or deleted.
+   * It uses the deferred reporting mechanism, which may delay the actual API call
+   * by up to 1 minute if another report was sent recently, preventing excessive
+   * API calls when many keys are modified in quick succession.
+   */
   fun onKeyCountChanged() {
     try {
       val keys = keyService.countAllOnInstance()
       val subscription = eeSubscriptionService.findSubscriptionDto()
-      eeSubscriptionService.reportUsage(subscription = subscription, keys = keys)
+      usageReportingService.reportUsage(subscription = subscription, keys = keys)
     } catch (e: NoActiveSubscriptionException) {
       logger.debug("No active subscription, skipping usage reporting.")
     }

@@ -21,7 +21,7 @@ class EeTolgeeTranslateApiServiceImpl(
   private val httpClient: HttpClient,
   private val subscriptionService: EeSubscriptionServiceImpl,
   private val eeSubscriptionServiceImpl: EeSubscriptionServiceImpl,
-  private val catchingService: EeSubscriptionErrorCatchingService
+  private val catchingService: EeSubscriptionErrorCatchingService,
 ) : TolgeeTranslateApiService, EeTolgeeTranslateApiService {
   companion object {
     const val API_PATH = "v2/public/translator/translate"

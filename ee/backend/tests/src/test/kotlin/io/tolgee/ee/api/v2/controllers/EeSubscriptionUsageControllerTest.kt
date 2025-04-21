@@ -1,22 +1,18 @@
 package io.tolgee.ee.api.v2.controllers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.hateoas.ee.uasge.current.CurrentUsageItemModel
 import io.tolgee.hateoas.ee.uasge.current.CurrentUsageModel
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
-import io.tolgee.testing.assert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -99,7 +95,7 @@ class EeSubscriptionUsageControllerTest : AuthorizedControllerTest() {
           }
 
         val body = this.captor.allValues.single().body
-        assertThatJson(body){
+        assertThatJson(body) {
           node("licenseKey").isEqualTo("mock")
         }
       }

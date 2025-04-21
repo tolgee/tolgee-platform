@@ -7,6 +7,8 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
+import io.tolgee.ee.service.eeSubscription.usageReporting.UsageReportingService
+import io.tolgee.ee.service.eeSubscription.usageReporting.UsageToReportService
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,10 +19,17 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.web.client.RestTemplate
+import java.time.Duration
 import java.util.*
 
 @SpringBootTest()
 class KeyUsageReportingTest : AbstractSpringTest() {
+  @Autowired
+  private lateinit var usageToReportService: UsageToReportService
+
+  @Autowired
+  private lateinit var usageReportingService: UsageReportingService
+
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
@@ -33,6 +42,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     eeLicenseMockRequestUtil = EeLicensingMockRequestUtil(restTemplate)
+    usageToReportService.delete()
   }
 
   @Test
@@ -41,8 +51,27 @@ class KeyUsageReportingTest : AbstractSpringTest() {
       // key add & delete
       val key = keyService.create(testData.project, "key1", null)
       captor.assertKeys(1)
+
+      // we need to move time, because the reporting is deferred
+      currentDateProvider.move(Duration.ofDays(1))
       keyService.delete(key.id)
       captor.assertKeys(0)
+    }
+  }
+
+  @Test
+  fun `it doesn't report that often`() {
+    testWithBaseTestData { testData, captor ->
+      // key add and delete
+      keyService.create(testData.project, "key1", null)
+      captor.assertKeys(1)
+      keyService.create(testData.project, "key2", null)
+      captor.assertKeys(1)
+
+      currentDateProvider.move(Duration.ofDays(1))
+      // normally, the reportPeriodically is called automatically with scheduling
+      usageReportingService.reportPeriodically()
+      captor.assertKeys(2)
     }
   }
 
@@ -68,6 +97,10 @@ class KeyUsageReportingTest : AbstractSpringTest() {
   fun `it reports key usage when project is deleted`() {
     testWithBaseTestData { testData, captor ->
       keyService.create(testData.project, "key1", null)
+
+      // we need to move time, because the reporting is deferred
+      currentDateProvider.move(Duration.ofDays(1))
+
       // delete the project
       projectService.deleteProject(testData.project.id)
       captor.assertKeys(0)
@@ -78,6 +111,8 @@ class KeyUsageReportingTest : AbstractSpringTest() {
   fun `it reports usage when organization is deleted`() {
     testWithBaseTestData { testData, captor ->
       keyService.create(testData.project, "key1", null)
+      // we need to move time, because the reporting is deferred
+      currentDateProvider.move(Duration.ofDays(1))
       // delete the organization
       organizationService.delete(testData.projectBuilder.self.organizationOwner)
       captor.assertKeys(0)
@@ -102,6 +137,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
         test(testData, captor)
       }
     }
+    testDataService.cleanTestData(testData.root)
   }
 
   private fun saveSubscription() {
@@ -109,9 +145,9 @@ class KeyUsageReportingTest : AbstractSpringTest() {
       EeSubscription().apply {
         licenseKey = "mock"
         name = "Plaaan"
-        status = SubscriptionStatus.ERROR
+        status = SubscriptionStatus.ACTIVE
         currentPeriodEnd = Date()
-        enabledFeatures = Feature.values()
+        enabledFeatures = Feature.entries.toTypedArray()
         lastValidCheck = Date()
         isPayAsYouGo = true
         includedKeys = 10

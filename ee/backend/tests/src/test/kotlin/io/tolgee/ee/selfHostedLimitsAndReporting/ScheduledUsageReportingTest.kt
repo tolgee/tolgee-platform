@@ -3,27 +3,31 @@ package io.tolgee.ee.selfHostedLimitsAndReporting
 import io.tolgee.AbstractSpringTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
+import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
-import io.tolgee.ee.repository.EeSubscriptionRepository
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.usageReporting.UsageToReportService
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.KArgumentCaptor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
-@SpringBootTest()
-class SeatUsageReportingTest : AbstractSpringTest() {
+@TestPropertySource(properties = ["tolgee.ee.reportUsageFixedDelayInMs=100"])
+class ScheduledUsageReportingTest : AbstractSpringTest() {
   @Autowired
-  private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
+  private lateinit var usageToReportService: UsageToReportService
+
+  @Autowired
+  private lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
 
   @MockBean
   @Autowired
@@ -37,9 +41,10 @@ class SeatUsageReportingTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `it reports seat usage`() {
+  fun `it reports usage periodically`() {
+    val testData = BaseTestData()
+    testDataService.saveTestData(testData.root)
     saveSubscription()
-
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
@@ -50,21 +55,32 @@ class SeatUsageReportingTest : AbstractSpringTest() {
       }
 
       verify {
-        val user1 = createUser(1)
-        captor.assertSeats(1)
+        usageToReportService.delete()
+        waitForNotThrowing(timeout = 10_000, pollTime = 100) {
+          captor.allValues.assert.hasSize(1)
+        }
 
-        // we need to move time, because the reporting is deferred
-        currentDateProvider.move(Duration.ofDays(1))
-        val user2 = createUser(2)
-        captor.assertSeats(2)
+        keyService.create(testData.project, "key1", null)
+
+        // It doesn't report until we move time
+        Thread.sleep(200)
+        captor.allValues.assert.hasSize(1)
 
         currentDateProvider.move(Duration.ofDays(1))
-        userAccountService.delete(user1.id)
-        captor.assertSeats(1)
+        waitForNotThrowing(timeout = 10_000, pollTime = 100) {
+          captor.allValues.assert.hasSize(2)
+        }
+
+        createUser(1)
+
+        // It doesn't report until we move time
+        Thread.sleep(200)
+        captor.allValues.assert.hasSize(2)
 
         currentDateProvider.move(Duration.ofDays(1))
-        userAccountService.disable(user2.id)
-        captor.assertSeats(0)
+        waitForNotThrowing(timeout = 10_000, pollTime = 100) {
+          captor.allValues.assert.hasSize(3)
+        }
       }
     }
   }
@@ -78,14 +94,14 @@ class SeatUsageReportingTest : AbstractSpringTest() {
       rawPassword = "12345678",
     )
 
-  private fun saveSubscription() {
-    eeSubscriptionRepository.save(
+  private fun saveSubscription(): EeSubscription {
+    return eeSubscriptionServiceImpl.save(
       EeSubscription().apply {
         licenseKey = "mock"
         name = "Plaaan"
-        status = SubscriptionStatus.ERROR
+        status = SubscriptionStatus.ACTIVE
         currentPeriodEnd = Date()
-        enabledFeatures = Feature.values()
+        enabledFeatures = Feature.entries.toTypedArray()
         lastValidCheck = Date()
         isPayAsYouGo = true
         includedKeys = 10
@@ -95,12 +111,4 @@ class SeatUsageReportingTest : AbstractSpringTest() {
       },
     )
   }
-
-  fun KArgumentCaptor<HttpEntity<*>>.assertSeats(seats: Long) {
-    val data = parseRequestArgs()
-    data["seats"].toString().assert.isEqualTo(seats.toString())
-  }
-
-  private fun KArgumentCaptor<HttpEntity<*>>.parseRequestArgs(): Map<*, *> =
-    objectMapper.readValue(this.lastValue.body as String, Map::class.java)
 }

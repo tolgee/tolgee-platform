@@ -7,7 +7,7 @@ import java.util.*
 class SubscriptionFromModelAssigner(
   private val subscription: EeSubscription,
   private val model: SelfHostedEeSubscriptionModel,
-  private val currentDate: Date
+  private val currentDate: Date,
 ) {
   fun assign() {
     subscription.name = model.plan.name

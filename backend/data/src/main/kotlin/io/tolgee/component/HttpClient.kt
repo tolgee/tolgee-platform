@@ -33,7 +33,7 @@ class HttpClient(
         String::class.java,
       )
 
-    if(result == Unit::class.java) {
+    if (result == Unit::class.java) {
       @Suppress("UNCHECKED_CAST")
       return Unit as T
     }

@@ -102,13 +102,15 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun mockBadRequest(errorCode: String): HttpClientErrorException {
     val badRequestMock =
-      spy(HttpClientErrorException.create(
-        HttpStatus.BAD_REQUEST,
-        "Mocked response",
-        null,
-        null,
-        null
-      ))
+      spy(
+        HttpClientErrorException.create(
+          HttpStatus.BAD_REQUEST,
+          "Mocked response",
+          null,
+          null,
+          null,
+        ),
+      )
     whenever(badRequestMock.message).thenReturn(errorCode)
     return badRequestMock
   }

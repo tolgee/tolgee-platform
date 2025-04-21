@@ -31,7 +31,7 @@ class SelfHostedLimitsTestData {
           user = this@SelfHostedLimitsTestData.user
           type = ProjectPermissionType.MANAGE
         }
-        
+
         englishLanguage =
           addLanguage {
             name = "English"
@@ -39,7 +39,7 @@ class SelfHostedLimitsTestData {
             originalName = "English"
             this@project.self.baseLanguage = this
           }.self
-          
+
         germanLanguage =
           addLanguage {
             name = "German"
@@ -55,7 +55,7 @@ class SelfHostedLimitsTestData {
             language = englishLanguage
             text = "test"
           }
-          
+
           addTranslation {
             language = germanLanguage
             text = "test"
