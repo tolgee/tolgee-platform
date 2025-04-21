@@ -43,7 +43,7 @@ export const SelfHostedEeSubscriptionMetrics: FC<
   const progressData = getSelfHostedProgressData({ usage: usageLoadable.data });
 
   return (
-    <StyledContent>
+    <StyledContent data-cy="self-hosted-ee-subscription-metrics">
       <SubscriptionMetrics
         metricType="KEYS_SEATS"
         progressData={progressData}

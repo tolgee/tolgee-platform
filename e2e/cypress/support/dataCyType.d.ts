@@ -530,6 +530,7 @@ declare namespace DataCy {
         "search-select-search" |
         "seat_spending_limit_exceeded_while_accepting_invitation_message" |
         "self-hosted-ee-active-plan" |
+        "self-hosted-ee-subscription-metrics" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
