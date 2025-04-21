@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController
 class EeSubscriptionUsageController(
   private val usageService: EeSubscriptionUsageService
 ) {
-  // TODO: TEST THIS
   @GetMapping("")
   @Operation(summary = "Get current usage for the current EE subscription")
   fun getUsage(): CurrentUsageModel? {

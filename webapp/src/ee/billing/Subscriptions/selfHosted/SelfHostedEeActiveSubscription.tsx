@@ -11,6 +11,12 @@ import { CollapsedFeatures } from 'tg.ee.module/billing/component/ActiveSubscrip
 import { IncludedUsage } from 'tg.ee.module/billing/component/Plan/IncludedUsage';
 import { PayAsYouGoPrices } from 'tg.ee.module/billing/component/Price/PayAsYouGoPrices';
 import { PricePrimary } from '../../component/Price/PricePrimary';
+import { SubscriptionMetrics } from '../../currentCloudSubscription/SubscriptionMetrics';
+import { useApiQuery, useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { getSelfHostedProgressData } from '../../getSelfHostedProgressData';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { SelfHostedEeSubscriptionMetrics } from './SelfHostedEeSubscriptionMetrics';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -63,7 +69,7 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
         </Box>
 
         <CollapsedFeatures features={plan.enabledFeatures} custom={custom} />
-
+        <SelfHostedEeSubscriptionMetrics subscription={subscription} />
         <Box
           display="flex"
           justifyContent="space-between"

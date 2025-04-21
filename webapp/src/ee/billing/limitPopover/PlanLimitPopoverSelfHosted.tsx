@@ -4,6 +4,7 @@ import { ProgressItem } from '../component/getProgressData';
 import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
+import { getSelfHostedProgressData } from '../getSelfHostedProgressData';
 
 type SelfHostedPlanLimitPopoverProps = PlanLimitPopoverWrapperProps;
 
@@ -31,7 +32,8 @@ export const PlanLimitPopoverSelfHosted: FC<
   });
 
   const progressData =
-    usageLoadable.data && getProgressData({ usage: usageLoadable.data });
+    usageLoadable.data &&
+    getSelfHostedProgressData({ usage: usageLoadable.data });
 
   return (
     <GenericPlanLimitPopover
@@ -42,31 +44,4 @@ export const PlanLimitPopoverSelfHosted: FC<
       loading={usageLoadable.isLoading || infoLoadable.isLoading}
     />
   );
-};
-
-const getProgressData = ({
-  usage,
-}: {
-  usage: components['schemas']['CurrentUsageModel'];
-}) => {
-  const keysProgress = new ProgressItem(
-    usage.keys.included,
-    usage.keys.current
-  );
-
-  const seatsProgress = new ProgressItem(
-    usage.seats.included,
-    usage.seats.current
-  );
-
-  const creditsProgress = new ProgressItem(
-    usage.credits.included,
-    usage.credits.current
-  );
-
-  return {
-    keysProgress,
-    seatsProgress,
-    creditProgress: creditsProgress,
-  };
 };

@@ -93,8 +93,6 @@ export const BillingProgress: React.FC<Props> = ({
     normalized > BILLING_CRITICAL_FRACTION * progressItem.included &&
     !isPayAsYouGo;
 
-  console.log({ normalized, critical, progressItem, isPayAsYouGo });
-
   const theme = useTheme();
 
   const extra =
@@ -115,7 +113,7 @@ export const BillingProgress: React.FC<Props> = ({
     labels.push({
       label: (
         <T
-          keyName="billing-progress-label-unused"
+          keyName="billing-progress-label-included-in-plan"
           params={{ value: progressItem.included }}
         />
       ),

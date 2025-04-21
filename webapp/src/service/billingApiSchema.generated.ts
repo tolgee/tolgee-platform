@@ -141,6 +141,9 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}": {
     delete: operations["cancelEeSubscription"];
   };
+  "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}/current-usage": {
+    get: operations["getCurrentUsage"];
+  };
   "/v2/organizations/{organizationId}/billing/self-hosted-ee/subscriptions/{subscriptionId}/expected-usage": {
     get: operations["getExpectedUsage"];
   };
@@ -488,6 +491,7 @@ export interface components {
       sendReadOnlyInvitation: boolean;
       tasks: components["schemas"]["CreateTaskRequest"][];
     };
+    /** @description For MT credits, the values are in full credits. Not Cents. */
     CurrentUsageItemModel: {
       /** Format: int64 */
       current: number;
@@ -497,7 +501,7 @@ export interface components {
       limit: number;
     };
     CurrentUsageModel: {
-      creditsInCents: components["schemas"]["CurrentUsageItemModel"];
+      credits: components["schemas"]["CurrentUsageItemModel"];
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
@@ -3763,6 +3767,54 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getCurrentUsage: {
+    parameters: {
+      path: {
+        organizationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CurrentUsageModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

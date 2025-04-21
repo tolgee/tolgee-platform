@@ -57,6 +57,7 @@ export const SelfHostedEePlanCreateForm: FC = () => {
       isUpdate={false}
       onSubmit={onSubmit}
       initialData={initialData}
+      canEditPrices={true}
       beforeFields={
         <>
           <CreatingPlanForOrganizationAlert

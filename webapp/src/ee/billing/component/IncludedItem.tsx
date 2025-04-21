@@ -185,6 +185,9 @@ export const IncludedSeats = ({
 
 const Container = ({
   count,
+  negotiableLabel,
+  unlimitedLabel,
+  numberLabel,
   ...containerProps
 }: ComponentProps<typeof Box> & {
   count: number;
@@ -203,15 +206,15 @@ const Container = ({
   numberLabel: ReactNode;
 }) => {
   if (count === -2) {
-    return <Box {...containerProps}>{containerProps.negotiableLabel}</Box>;
+    return <Box {...containerProps}>{negotiableLabel}</Box>;
   }
 
   if (count === -1) {
-    return <Box {...containerProps}>{containerProps.unlimitedLabel}</Box>;
+    return <Box {...containerProps}>{unlimitedLabel}</Box>;
   }
 
   if (count >= 0) {
-    return <Box {...containerProps}>{containerProps.numberLabel}</Box>;
+    return <Box {...containerProps}>{numberLabel}</Box>;
   }
 
   return null;

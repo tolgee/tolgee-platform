@@ -53,9 +53,6 @@ class EeSubscriptionUsageControllerTest : AuthorizedControllerTest() {
   lateinit var eeLicensingMockRequestUtil: EeLicensingMockRequestUtil
 
   @Autowired
-  private lateinit var eeSubscriptionService: EeSubscriptionServiceImpl
-
-  @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
   @Test

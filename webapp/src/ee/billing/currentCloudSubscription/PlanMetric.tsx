@@ -38,7 +38,6 @@ const StyledValue = styled('span')`
 type Props = {
   name: string | React.ReactNode;
   progress: ProgressItem;
-  periodEnd?: number;
   isPayAsYouGo?: boolean;
   'data-cy'?: string;
 };
