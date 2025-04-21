@@ -27,9 +27,6 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
   @Autowired
   @MockBean
   lateinit var restTemplate: RestTemplate
-
-  lateinit var testData: BaseTestData
-
   @BeforeEach
   fun setup() {
     var user: UserAccount? = null

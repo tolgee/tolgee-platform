@@ -65,7 +65,6 @@ class EeSubscriptionErrorCatchingService(
     }
   }
 
-  // TODO: Test this
   fun <T> catchingOutOfCredits(fn: () -> T): T? {
     try {
       return fn()

@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
 
-class EeTolgeeTranslatorControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class EeTolgeeTranslatorSuggestingTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: SuggestionTestData
 
   @Autowired

@@ -171,7 +171,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties
 
   @Autowired
-  lateinit var internalProperties: InternalProperties
+  open lateinit var internalProperties: InternalProperties
 
   @Autowired
   lateinit var mtServiceConfigService: MtServiceConfigService

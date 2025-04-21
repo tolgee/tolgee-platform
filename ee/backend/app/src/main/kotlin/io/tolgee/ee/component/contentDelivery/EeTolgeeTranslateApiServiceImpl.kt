@@ -33,7 +33,6 @@ class EeTolgeeTranslateApiServiceImpl(
       subscriptionService.findSubscriptionDto()?.licenseKey ?: throw IllegalStateException("Not Subscribed")
 
     try {
-
       return catchingService.catchingOutOfCredits {
         catchingService.catchingLicenseNotFound {
           httpClient.requestForJson(

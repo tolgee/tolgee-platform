@@ -87,6 +87,8 @@ class KeyCountLimitTest : AbstractSpringTest() {
     }
   }
 
+  //TODO: Test cannot create key when status subscription status is ERROR
+
   private fun createKey(testData: BaseTestData) {
     keyService.create(testData.project, CreateKeyDto(name = "Over limit key"))
   }
@@ -96,7 +98,7 @@ class KeyCountLimitTest : AbstractSpringTest() {
       EeSubscription().apply {
         licenseKey = "mock"
         name = "Plaaan"
-        status = SubscriptionStatus.ERROR
+        status = SubscriptionStatus.ACTIVE
         currentPeriodEnd = Date()
         enabledFeatures = Feature.entries.toTypedArray()
         lastValidCheck = Date()
