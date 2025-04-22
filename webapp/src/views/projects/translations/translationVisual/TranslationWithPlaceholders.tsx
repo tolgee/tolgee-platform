@@ -124,14 +124,13 @@ export const TranslationWithPlaceholders = ({
           key={index}
           placement="bottom-start"
           enterDelay={200}
-          components={{ Tooltip: GlossaryTooltip }}
-          componentsProps={{
-            tooltip: {
-              term: modifier.highlight?.value,
-              languageTag: locale,
-            } as any,
-          }}
-          title={' '} // can't be empty
+          components={{ Tooltip: 'div' }}
+          title={
+            <GlossaryTooltip
+              term={modifier.highlight?.value}
+              languageTag={locale}
+            />
+          }
         >
           <StyledHighlight>{text}</StyledHighlight>
         </Tooltip>

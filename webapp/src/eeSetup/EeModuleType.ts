@@ -52,5 +52,4 @@ export type GlossaryTermHighlightsProps = {
 export type GlossaryTooltipProps = {
   term: GlossaryTermWithTranslationsModel;
   languageTag: string;
-  ref?: React.Ref<HTMLDivElement>;
 };

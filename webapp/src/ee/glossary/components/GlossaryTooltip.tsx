@@ -32,23 +32,25 @@ const StyledDescription = styled(Typography)`
   font-size: 13px;
 `;
 
-export const GlossaryTooltip: React.ForwardRefExoticComponent<GlossaryTooltipProps> =
-  React.forwardRef(function GlossaryTooltip({ term, languageTag }, ref) {
-    const translation = term.translations.find(
-      (t) => t.languageTag === languageTag
-    );
-    return (
-      <StyledCard ref={ref}>
-        <StyledTitleWrapper>
-          <BookClosed />
-          <StyledTitle variant="body2">{translation?.text}</StyledTitle>
-        </StyledTitleWrapper>
-        <GlossaryTermTags term={term} />
-        {term.description && (
-          <StyledInnerCard>
-            <StyledDescription>{term.description}</StyledDescription>
-          </StyledInnerCard>
-        )}
-      </StyledCard>
-    );
-  });
+export const GlossaryTooltip: React.VFC<GlossaryTooltipProps> = ({
+  term,
+  languageTag,
+}) => {
+  const translation = term.translations.find(
+    (t) => t.languageTag === languageTag
+  );
+  return (
+    <StyledCard>
+      <StyledTitleWrapper>
+        <BookClosed />
+        <StyledTitle variant="body2">{translation?.text}</StyledTitle>
+      </StyledTitleWrapper>
+      <GlossaryTermTags term={term} />
+      {term.description && (
+        <StyledInnerCard>
+          <StyledDescription>{term.description}</StyledDescription>
+        </StyledInnerCard>
+      )}
+    </StyledCard>
+  );
+};
