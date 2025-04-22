@@ -3,12 +3,13 @@ package io.tolgee.ee.service.glossary
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.repository.glossary.GlossaryTermTranslationRepository
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import org.springframework.stereotype.Service
-import java.util.Locale
+import java.util.*
 
 @Service
 class GlossaryTermTranslationService(
@@ -43,6 +44,10 @@ class GlossaryTermTranslationService(
     term: GlossaryTerm,
     dto: UpdateGlossaryTermTranslationRequest,
   ): GlossaryTermTranslation? {
+    if (term.flagNonTranslatable && dto.languageTag != term.glossary.baseLanguageTag) {
+      throw BadRequestException(Message.GLOSSARY_NON_TRANSLATABLE_TERM_CANNOT_BE_TRANSLATED)
+    }
+
     if (dto.text.isEmpty()) {
       glossaryTermTranslationRepository.deleteByTermAndLanguageTag(term, dto.languageTag)
       return null
@@ -55,6 +60,10 @@ class GlossaryTermTranslationService(
 
     translation.text = dto.text
     return glossaryTermTranslationRepository.save(translation)
+  }
+
+  fun deleteAllNonBaseTranslations(term: GlossaryTerm) {
+    glossaryTermTranslationRepository.deleteAllByTermAndLanguageTagIsNot(term, term.glossary.baseLanguageTag!!)
   }
 
   fun find(
@@ -70,7 +79,7 @@ class GlossaryTermTranslationService(
     languageTag: String,
   ): Set<GlossaryTermTranslation> {
     val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
-    return glossaryTermTranslationRepository.findByLowercaseTextAndAssignedProject(
+    return glossaryTermTranslationRepository.findByLowercaseTextAndLanguageTagAndAssignedProject(
       words.map { it.lowercase(locale) },
       languageTag,
       project,

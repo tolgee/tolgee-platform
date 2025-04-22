@@ -93,6 +93,25 @@ export const GlossaryTermCreateUpdateDialog = ({
 
   const { t } = useTranslate();
 
+  const [initialTranslationValues, setInitialTranslationValues] = useState(
+    initialTermId === undefined ? translationInitialValues : undefined
+  );
+
+  const [initialTermValues, setInitialTermValues] = useState(
+    initialTermId === undefined ? termInitialValues : undefined
+  );
+
+  const initialValues: CreateOrUpdateGlossaryTermRequest | undefined =
+    initialTranslationValues &&
+      initialTermValues && {
+        text: initialTranslationValues.text ?? '',
+        description: initialTermValues.description,
+        flagNonTranslatable: initialTermValues.flagNonTranslatable,
+        flagCaseSensitive: initialTermValues.flagCaseSensitive,
+        flagAbbreviation: initialTermValues.flagAbbreviation,
+        flagForbiddenTerm: initialTermValues.flagForbiddenTerm,
+      };
+
   const [saveIsLoading, save] = (
     initialTermId === undefined
       ? () => {
@@ -133,49 +152,43 @@ export const GlossaryTermCreateUpdateDialog = ({
               '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
           });
           const save = async (values: CreateOrUpdateGlossaryTermRequest) => {
-            mutation.mutate(
-              {
-                path: {
-                  organizationId,
-                  glossaryId,
-                  termId: initialTermId,
+            const triggerSave = async () => {
+              mutation.mutate(
+                {
+                  path: {
+                    organizationId,
+                    glossaryId,
+                    termId: initialTermId,
+                  },
+                  content: {
+                    'application/json': values,
+                  },
                 },
-                content: {
-                  'application/json': values,
-                },
-              },
-              {
-                onSuccess() {
-                  messageService.success(
-                    <T keyName="glossary_term_edit_success_message" />
-                  );
-                  onFinished();
-                },
-              }
-            );
+                {
+                  onSuccess() {
+                    messageService.success(
+                      <T keyName="glossary_term_edit_success_message" />
+                    );
+                    onFinished();
+                  },
+                }
+              );
+            };
+
+            if (
+              initialTermValues?.flagNonTranslatable === false &&
+              values.flagNonTranslatable
+            ) {
+              // User is changing term to non-translatable - we will delete all translations of this term
+              // TODO: confirmation dialog - all term translations will be deleted
+              return;
+            }
+
+            triggerSave();
           };
           return [mutation.isLoading, save] as const;
         }
   )();
-
-  const [initialTranslationValues, setInitialTranslationValues] = useState(
-    initialTermId === undefined ? translationInitialValues : undefined
-  );
-
-  const [initialTermValues, setInitialTermValues] = useState(
-    initialTermId === undefined ? termInitialValues : undefined
-  );
-
-  const initialValues: CreateOrUpdateGlossaryTermRequest | undefined =
-    initialTranslationValues &&
-      initialTermValues && {
-        text: initialTranslationValues.text ?? '',
-        description: initialTermValues.description,
-        flagNonTranslatable: initialTermValues.flagNonTranslatable,
-        flagCaseSensitive: initialTermValues.flagCaseSensitive,
-        flagAbbreviation: initialTermValues.flagAbbreviation,
-        flagForbiddenTerm: initialTermValues.flagForbiddenTerm,
-      };
 
   const glossaryQuery = useApiQuery({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',

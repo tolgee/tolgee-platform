@@ -57,8 +57,9 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
         onCheckedToggle={onCheckedToggle}
       />
       {selectedLanguages?.map((tag, i) => {
+        const realTag = item.flagNonTranslatable ? baseLanguage : tag;
         const translation = item.translations?.find(
-          (t) => t.languageTag === tag
+          (t) => t.languageTag === realTag
         );
         return (
           <GlossaryListTranslationCell
@@ -68,7 +69,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
             termId={item.id}
             translation={translation}
             languageTag={tag}
-            editEnabled={editEnabled}
+            editEnabled={editEnabled && !item.flagNonTranslatable}
             isEditing={editingTermId === item.id && editingLanguageTag === tag}
             onEdit={() => onEditTranslation(item.id, tag)}
             onCancel={() => onEditTranslation(item.id, undefined)}

@@ -26,6 +26,14 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
     glossaryId: Long,
   ): Set<String>
 
+  @Query(
+    """
+      from GlossaryTermTranslation gtt
+      where
+        gtt.term = :term and
+        (gtt.languageTag = :languageTag or gtt.term.flagNonTranslatable)
+    """,
+  )
   fun findByTermAndLanguageTag(
     term: GlossaryTerm,
     languageTag: String,
@@ -36,17 +44,22 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
     languageTag: String,
   )
 
+  fun deleteAllByTermAndLanguageTagIsNot(
+    term: GlossaryTerm,
+    languageTag: String,
+  )
+
   @Query(
     """
-      from GlossaryTermTranslation g
+      from GlossaryTermTranslation gtt
         where
-            g.textLowercased in :texts and
-            g.languageTag = :languageTag and
-            :assignedProject member of g.term.glossary.assignedProjects and
-            g.term.glossary.deletedAt is null
+            gtt.textLowercased in :texts and
+            (gtt.languageTag = :languageTag or gtt.term.flagNonTranslatable) and
+            :assignedProject member of gtt.term.glossary.assignedProjects and
+            gtt.term.glossary.deletedAt is null
     """,
   )
-  fun findByLowercaseTextAndAssignedProject(
+  fun findByLowercaseTextAndLanguageTagAndAssignedProject(
     texts: Collection<String>,
     languageTag: String,
     assignedProject: Project,

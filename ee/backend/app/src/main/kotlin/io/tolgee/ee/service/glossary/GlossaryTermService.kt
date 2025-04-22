@@ -114,6 +114,9 @@ class GlossaryTermService(
     dto: UpdateGlossaryTermRequest,
   ): GlossaryTerm {
     val glossaryTerm = get(organizationId, glossaryId, termId)
+    if (!glossaryTerm.flagNonTranslatable && dto.flagNonTranslatable == true) {
+      glossaryTermTranslationService.deleteAllNonBaseTranslations(glossaryTerm)
+    }
     glossaryTerm.apply {
       description = dto.description
       flagNonTranslatable = dto.flagNonTranslatable ?: flagNonTranslatable
@@ -178,18 +181,23 @@ class GlossaryTermService(
     val textLowercased = text.lowercase(locale)
 
     return translations.flatMap { translation ->
-      findTranslationPositions(textLowercased, translation).map { position ->
+      findTranslationPositions(text, textLowercased, translation, locale).map { position ->
         GlossaryTermHighlight(position, translation)
       }
     }.toSet()
   }
 
   private fun findTranslationPositions(
+    textOriginal: String,
     textLowercased: String,
     translation: GlossaryTermTranslation,
+    locale: Locale,
   ): Sequence<Position> {
     val term = translation.text ?: return emptySequence()
-    val locale = Locale.forLanguageTag(translation.languageTag) ?: Locale.ROOT
+    if (translation.term.flagCaseSensitive) {
+      return findPositions(textOriginal, term)
+    }
+
     val termLowercase = term.lowercase(locale)
     return findPositions(textLowercased, termLowercase)
   }

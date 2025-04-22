@@ -75,7 +75,11 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
         editEnabled && !isEditingTerm ? () => setIsEditingTerm(true) : undefined
       }
     >
-      <StyledCheckbox checked={checked} onChange={onCheckedToggle} />
+      <StyledCheckbox
+        checked={checked}
+        onChange={onCheckedToggle}
+        onClick={(e) => e.stopPropagation()}
+      />
       <StyledText>
         <LimitedHeightText maxLines={3}>
           {baseTranslation?.text}
