@@ -71,6 +71,12 @@ class GlossaryService(
     val glossary = get(organizationId, glossaryId)
     glossary.name = dto.name
     glossary.baseLanguageTag = dto.baseLanguageTag
+    val newAssignedProjects = dto.assignedProjects
+    if (newAssignedProjects != null) {
+      glossary.assignedProjects.clear()
+      val projects = projectService.findAll(newAssignedProjects)
+      glossary.assignedProjects.addAll(projects)
+    }
     return glossaryRepository.save(glossary)
   }
 

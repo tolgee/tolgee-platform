@@ -132,6 +132,8 @@ export const GlossaryCreateEditDialog = ({
             const data: UpdateGlossaryRequest = {
               name: values.name,
               baseLanguageTag: values.baseLanguage!.tag,
+              assignedProjects:
+                values.assignedProjects?.map(({ id }) => id) || [],
             };
 
             mutation.mutate(
@@ -184,7 +186,11 @@ export const GlossaryCreateEditDialog = ({
         setInitialValues?.({
           name: data.name,
           baseLanguage: language,
-          assignedProjects: [],
+          assignedProjects:
+            data.assignedProjects._embedded?.projects?.map((p) => ({
+              id: p.id,
+              name: p.name,
+            })) || [],
         });
       },
       onError(e) {
@@ -206,7 +212,7 @@ export const GlossaryCreateEditDialog = ({
               <GlossaryCreateForm
                 disabled={!glossaryFeature}
                 organizationId={organizationId}
-                withAssignedProjects={initialGlossaryId === undefined}
+                withAssignedProjects
               />
               <StyledActions>
                 <Button onClick={onClose}>{t('global_cancel_button')}</Button>
