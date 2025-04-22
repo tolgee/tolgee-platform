@@ -264,6 +264,47 @@ export const GlossaryTermCreateUpdateDialog = ({
     },
   });
 
+  const deleteMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}',
+    method: 'delete',
+    invalidatePrefix:
+      '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
+  });
+  const onDelete = () => {
+    const termId = initialTermId;
+    if (termId === undefined) {
+      return;
+    }
+    confirmation({
+      title: <T keyName="glossary_term_delete_confirmation_title" />,
+      message: <T keyName="glossary_term_delete_confirmation_message" />,
+      onConfirm() {
+        deleteMutation.mutate(
+          {
+            path: {
+              organizationId,
+              glossaryId,
+              termId,
+            },
+          },
+          {
+            onSuccess() {
+              messageService.success(
+                <T keyName="glossary_term_delete_success_message" />
+              );
+              onClose();
+            },
+            onError() {
+              messageService.error(
+                <T keyName="glossary_term_delete_error_message" />
+              );
+            },
+          }
+        );
+      },
+    });
+  };
+
   const form =
     initialValues !== undefined ? (
       <Formik
@@ -275,6 +316,14 @@ export const GlossaryTermCreateUpdateDialog = ({
           <StyledContainer>
             <GlossaryTermCreateUpdateForm />
             <StyledActions>
+              {initialTermId !== undefined && (
+                <>
+                  <Button color="primary" onClick={onDelete}>
+                    {t('global_delete_button')}
+                  </Button>
+                  <Box flexGrow={1} />
+                </>
+              )}
               <Button onClick={onClose}>{t('global_cancel_button')}</Button>
               <LoadingButton
                 onClick={submitForm}
