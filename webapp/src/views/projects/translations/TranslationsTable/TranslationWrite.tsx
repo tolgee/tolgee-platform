@@ -132,7 +132,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
             locale={language.tag}
             isPlural={keyData.keyIsPlural}
             disabled={disabled}
-            active
+            showHighlights={language.base}
           />
         )}
       </StyledEditor>

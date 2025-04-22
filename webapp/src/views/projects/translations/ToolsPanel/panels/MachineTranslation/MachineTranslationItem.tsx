@@ -111,7 +111,6 @@ export const MachineTranslationItem = ({
                   content={text}
                   locale={languageTag}
                   nested={Boolean(pluralVariant)}
-                  active
                   pluralExampleValue={variantExample}
                 />
               )}

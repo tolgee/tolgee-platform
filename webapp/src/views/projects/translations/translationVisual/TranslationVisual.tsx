@@ -20,7 +20,7 @@ type Props = {
   locale: string;
   width?: number | string;
   disabled?: boolean;
-  active?: boolean;
+  showHighlights?: boolean;
   isPlural: boolean;
 };
 
@@ -30,7 +30,7 @@ export const TranslationVisual = ({
   locale,
   width,
   disabled,
-  active,
+  showHighlights,
   isPlural,
 }: Props) => {
   const project = useProject();
@@ -61,7 +61,7 @@ export const TranslationVisual = ({
             pluralExampleValue={exampleValue}
             locale={locale}
             nested={Boolean(variant)}
-            active={active}
+            showHighlights={showHighlights}
           />
         </LimitedHeightText>
       )}

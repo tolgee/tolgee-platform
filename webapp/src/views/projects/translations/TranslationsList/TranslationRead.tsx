@@ -120,7 +120,7 @@ export const TranslationRead: React.FC<Props> = ({
           text={translation?.text}
           locale={language.tag}
           disabled={disabled}
-          active={isEditingRow}
+          showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
         />
       </StyledTranslation>

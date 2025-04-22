@@ -27,7 +27,7 @@ type Props = {
   pluralExampleValue?: number | undefined;
   locale: string;
   nested: boolean;
-  active?: boolean;
+  showHighlights?: boolean;
 };
 
 type Modifier = {
@@ -71,7 +71,7 @@ export const TranslationWithPlaceholders = ({
   pluralExampleValue,
   locale,
   nested,
-  active,
+  showHighlights,
 }: Props) => {
   const project = useProject();
   const theme = useTheme();
@@ -86,7 +86,7 @@ export const TranslationWithPlaceholders = ({
   const glossaryTerms = useGlossaryTermHighlights({
     text: content,
     languageTag: locale,
-    enabled: active ?? false,
+    enabled: showHighlights ?? false,
   });
 
   const modifiers = sortModifiers(placeholders, glossaryTerms);
