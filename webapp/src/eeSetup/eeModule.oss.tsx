@@ -6,15 +6,14 @@ import type {
 } from './EeModuleType';
 
 const NotIncludedInOss = (name: string): ((props?: any) => any) => {
-  const Component = React.forwardRef((props, ref) => {
+  function NotIncludedInOss(props: any, ref: any) {
     return (
       <div {...props} ref={ref}>
         Not included in OSS ({name})
       </div>
     );
-  });
-  Component.displayName = `NotIncludedInOss(${name})`;
-  return Component;
+  }
+  return React.forwardRef(NotIncludedInOss);
 };
 
 const Empty: (props?: any) => any = () => {
