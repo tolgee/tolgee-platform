@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledFuture
 
 /**
  * Manages scheduled reporting tasks using manual scheduling instead of @Scheduled annotation.
- * 
+ *
  * This approach is used due to Spring's context caching in tests, which would make
  * scheduled tasks run multiple times across test executions. By managing scheduling
  * manually, we can cancel tasks when needed and only run them in required tests.

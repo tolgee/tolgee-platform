@@ -9,5 +9,5 @@ import io.tolgee.api.SubscriptionStatus
  * Don't add any sensitive information here! This is publicly visible.
  */
 data class InitialDataEeSubscriptionModel(
-  val status: SubscriptionStatus
+  val status: SubscriptionStatus,
 )

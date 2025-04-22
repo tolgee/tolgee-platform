@@ -48,7 +48,7 @@ class UsageReportingService(
 
   /**
    * Periodically reports usage data if needed.
-   * 
+   *
    * This method is called by the ScheduledReportingManager's scheduled task.
    * It uses manual scheduling instead of @Scheduled to avoid issues with
    * Spring's context caching in tests, allowing for better control over
