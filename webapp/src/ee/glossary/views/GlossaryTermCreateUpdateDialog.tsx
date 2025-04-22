@@ -8,9 +8,10 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { messageService } from 'tg.service/MessageService';
 import { GlossaryTermCreateUpdateForm } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateForm';
 import { components } from 'tg.service/apiSchema.generated';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import Box from '@mui/material/Box';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type CreateGlossaryTermWithTranslationRequest =
   components['schemas']['CreateGlossaryTermWithTranslationRequest'];
@@ -54,7 +55,8 @@ type Props = {
   onFinished: () => void;
   organizationId: number;
   glossaryId: number;
-  /** When undefined - create new Term; Otherwise edit existing Term
+  /**
+   * When undefined - create new Term; Otherwise edit existing Term
    * Immutable prop!
    * Don't switch between editing and creating
    * mode after initialization
@@ -66,7 +68,7 @@ const translationInitialValues: GlossaryTermTranslationModel = {
   text: '',
 };
 
-const termInitialValues: GlossaryTermModel = {
+const termInitialValues: Omit<GlossaryTermModel, 'glossary'> = {
   description: undefined,
   flagNonTranslatable: false,
   flagCaseSensitive: false,
@@ -180,7 +182,23 @@ export const GlossaryTermCreateUpdateDialog = ({
               values.flagNonTranslatable
             ) {
               // User is changing term to non-translatable - we will delete all translations of this term
-              // TODO: confirmation dialog - all term translations will be deleted
+              await new Promise((resolve, reject) => {
+                confirmation({
+                  title: (
+                    <T keyName="glossary_enable_non_translatable_flag_delete_term_translations_confirmation_title" />
+                  ),
+                  message: (
+                    <T keyName="glossary_enable_non_translatable_flag_delete_term_translations_confirmation_message" />
+                  ),
+                  onConfirm() {
+                    triggerSave();
+                    resolve(undefined);
+                  },
+                  onCancel() {
+                    reject(undefined);
+                  },
+                });
+              });
               return;
             }
 
