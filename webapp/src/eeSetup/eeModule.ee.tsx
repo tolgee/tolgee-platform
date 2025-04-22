@@ -51,7 +51,6 @@ import {
   BillingMenuItemsProps,
   GlossaryTermHighlightDto,
   GlossaryTermHighlightsProps,
-  GlossaryTooltipProps,
 } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
@@ -397,5 +396,4 @@ export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
 ): GlossaryTermHighlightDto[] => useGlossaryTermHighlightsInternal(props);
 
-export const GlossaryTooltip: React.ForwardRefExoticComponent<GlossaryTooltipProps> =
-  GlossaryTooltipInternal;
+export const GlossaryTooltip: React.ElementType = GlossaryTooltipInternal;

@@ -3,7 +3,6 @@ import type {
   BillingMenuItemsProps,
   GlossaryTermHighlightDto,
   GlossaryTermHighlightsProps,
-  GlossaryTooltipProps,
 } from './EeModuleType';
 
 const NotIncludedInOss = (name: string): ((props?: any) => any) => {
@@ -66,5 +65,5 @@ export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
 ): GlossaryTermHighlightDto[] => [];
 
-export const GlossaryTooltip: React.ForwardRefExoticComponent<GlossaryTooltipProps> =
+export const GlossaryTooltip: React.ElementType =
   NotIncludedInOss('Glossaries');
