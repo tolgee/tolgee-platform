@@ -5,10 +5,10 @@ import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "glossaryTermTranslations", itemRelation = "glossaryTermTranslation")
 class GlossaryTermTranslationModel(
-  val languageCode: String,
+  val languageTag: String,
   val text: String,
 ) : RepresentationModel<GlossaryTermTranslationModel>() {
   companion object {
-    fun defaultValue(languageCode: String) = GlossaryTermTranslationModel(languageCode, "")
+    fun defaultValue(languageTag: String) = GlossaryTermTranslationModel(languageTag, "")
   }
 }

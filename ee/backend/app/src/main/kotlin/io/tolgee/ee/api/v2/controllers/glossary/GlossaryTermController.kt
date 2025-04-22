@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}")
-@Tag(name = "Glossary Term")
+@Tag(name = "Glossary term")
 class GlossaryTermController(
   private val glossaryTermService: GlossaryTermService,
   private val glossaryTermModelAssembler: GlossaryTermModelAssembler,

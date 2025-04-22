@@ -1,11 +1,22 @@
-import type { BillingMenuItemsProps } from './EeModuleType';
+import React from 'react';
+import type {
+  BillingMenuItemsProps,
+  GlossaryTermHighlightDto,
+  GlossaryTermHighlightsProps,
+  GlossaryTooltipProps,
+} from './EeModuleType';
 
-const NotIncludedInOss =
-  (name: string): ((props?: any) => any) =>
-  // eslint-disable-next-line react/display-name
-  () => {
-    return <div>Not included in OSS ({name})</div>;
-  };
+const NotIncludedInOss = (name: string): ((props?: any) => any) => {
+  const Component = React.forwardRef((props, ref) => {
+    return (
+      <div {...props} ref={ref}>
+        Not included in OSS ({name})
+      </div>
+    );
+  });
+  Component.displayName = `NotIncludedInOss(${name})`;
+  return Component;
+};
 
 const Empty: (props?: any) => any = () => {
   return null;
@@ -50,3 +61,10 @@ export const TrialChip = Empty;
 export const TaskInfoMessage = Empty;
 
 export const CriticalUsageCircle = Empty;
+
+export const useGlossaryTermHighlights = (
+  props: GlossaryTermHighlightsProps
+): GlossaryTermHighlightDto[] => [];
+
+export const GlossaryTooltip: React.ForwardRefExoticComponent<GlossaryTooltipProps> =
+  NotIncludedInOss('Glossaries');

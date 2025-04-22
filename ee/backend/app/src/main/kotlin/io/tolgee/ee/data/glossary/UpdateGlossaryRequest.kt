@@ -8,5 +8,5 @@ class UpdateGlossaryRequest {
   var name: String = ""
 
   @field:NotBlank // TODO: if it stays as code we need stricter validation here
-  var baseLanguageCode: String? = null
+  var baseLanguageTag: String? = null
 }

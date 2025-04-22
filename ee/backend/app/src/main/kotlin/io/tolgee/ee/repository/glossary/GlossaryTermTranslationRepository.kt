@@ -1,5 +1,6 @@
 package io.tolgee.ee.repository.glossary
 
+import io.tolgee.model.Project
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import org.springframework.context.annotation.Lazy
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository
 interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslation, Long> {
   @Query(
     """
-    select distinct t.languageCode
+    select distinct t.languageTag
     from GlossaryTermTranslation t
     where t.term.glossary.id = :glossaryId
       and t.term.glossary.deletedAt is null
@@ -25,13 +26,29 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
     glossaryId: Long,
   ): Set<String>
 
-  fun findByTermAndLanguageCode(
+  fun findByTermAndLanguageTag(
     term: GlossaryTerm,
-    languageCode: String,
+    languageTag: String,
   ): GlossaryTermTranslation?
 
-  fun deleteByTermAndLanguageCode(
+  fun deleteByTermAndLanguageTag(
     term: GlossaryTerm,
-    languageCode: String,
+    languageTag: String,
   )
+
+  @Query(
+    """
+      from GlossaryTermTranslation g
+        where
+            g.textLowercased in :texts and
+            g.languageTag = :languageTag and
+            :assignedProject member of g.term.glossary.assignedProjects and
+            g.term.glossary.deletedAt is null
+    """,
+  )
+  fun findByLowercaseTextAndAssignedProject(
+    texts: Collection<String>,
+    languageTag: String,
+    assignedProject: Project,
+  ): Set<GlossaryTermTranslation>
 }

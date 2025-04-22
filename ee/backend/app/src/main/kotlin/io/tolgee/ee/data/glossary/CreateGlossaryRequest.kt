@@ -9,7 +9,7 @@ class CreateGlossaryRequest {
   var name: String = ""
 
   @field:NotBlank // TODO: if it stays as code we need stricter validation here
-  var baseLanguageCode: String? = null
+  var baseLanguageTag: String? = null
 
   @field:NotNull
   var assignedProjects: MutableSet<Long>? = null

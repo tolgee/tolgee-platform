@@ -79,7 +79,7 @@ export const GlossaryListItem: React.VFC<Props> = ({
 }) => {
   const history = useHistory();
   const assignedProjects = glossary.assignedProjects._embedded?.projects;
-  const languageTag = glossary.baseLanguageCode!;
+  const languageTag = glossary.baseLanguageTag!;
   const languageData = languageInfo[languageTag];
   const languages = [
     {

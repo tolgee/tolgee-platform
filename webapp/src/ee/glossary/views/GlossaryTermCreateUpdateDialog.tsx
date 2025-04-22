@@ -23,7 +23,7 @@ type CreateOrUpdateGlossaryTermRequest =
 type GlossaryTermModel = Omit<components['schemas']['GlossaryTermModel'], 'id'>;
 type GlossaryTermTranslationModel = Omit<
   components['schemas']['GlossaryTermTranslationModel'],
-  'languageCode'
+  'languageTag'
 >;
 
 const StyledContainer = styled('div')`
@@ -212,18 +212,18 @@ export const GlossaryTermCreateUpdateDialog = ({
   });
 
   useApiQuery({
-    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageCode}',
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageTag}',
     method: 'get',
     path: {
       organizationId,
       glossaryId,
       termId: initialTermId ?? -1,
-      languageCode: glossaryQuery.data?.baseLanguageCode ?? '',
+      languageTag: glossaryQuery.data?.baseLanguageTag ?? '',
     },
     options: {
       enabled:
         initialTermId !== undefined &&
-        glossaryQuery.data?.baseLanguageCode !== undefined,
+        glossaryQuery.data?.baseLanguageTag !== undefined,
       onSuccess(data) {
         setInitialTranslationValues?.(data);
       },

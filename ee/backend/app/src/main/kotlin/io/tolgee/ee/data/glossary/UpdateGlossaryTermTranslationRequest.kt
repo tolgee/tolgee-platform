@@ -8,5 +8,5 @@ class UpdateGlossaryTermTranslationRequest {
   var text: String = ""
 
   @field:NotBlank // TODO: if it stays as code we need stricter validation here
-  var languageCode: String = ""
+  var languageTag: String = ""
 }

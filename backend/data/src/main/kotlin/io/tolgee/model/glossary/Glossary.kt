@@ -28,12 +28,9 @@ class Glossary(
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp
   var name: String = "",
-//  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
-//  @ActivityLoggedProp
-//  var baseLanguage: Language? = null, // TODO: prob needs language entity modifications/custom language entity
   @ActivityLoggedProp
   @Column(nullable = false)
-  var baseLanguageCode: String? = null,
+  var baseLanguageTag: String? = null,
 ) : StandardAuditModel(), SoftDeletable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "glossary")
   var terms: MutableList<GlossaryTerm> = mutableListOf()

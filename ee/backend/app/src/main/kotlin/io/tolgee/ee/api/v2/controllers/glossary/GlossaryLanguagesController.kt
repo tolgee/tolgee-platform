@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}/languages")
-@Tag(name = "Glossary Languages")
+@Tag(name = "Glossary languages")
 class GlossaryLanguagesController(
   private val glossaryService: GlossaryService,
   private val glossaryTermTranslationService: GlossaryTermTranslationService,
@@ -43,7 +43,7 @@ class GlossaryLanguagesController(
     val glossary = glossaryService.get(organizationId, glossaryId)
     val languages = glossaryTermTranslationService.getDistinctLanguageTags(organizationId, glossaryId)
     return languages.map {
-      GlossaryLanguageDto(it, glossary.baseLanguageCode == it)
+      GlossaryLanguageDto(it, glossary.baseLanguageTag == it)
     }
   }
 }

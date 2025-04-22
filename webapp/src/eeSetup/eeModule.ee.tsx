@@ -47,10 +47,17 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
-import { BillingMenuItemsProps } from './EeModuleType';
+import {
+  BillingMenuItemsProps,
+  GlossaryTermHighlightDto,
+  GlossaryTermHighlightsProps,
+  GlossaryTooltipProps,
+} from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 import { GlossaryView } from '../ee/glossary/views/GlossaryView';
+import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
+import { GlossaryTooltip as GlossaryTooltipInternal } from '../ee/glossary/components/GlossaryTooltip';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -385,3 +392,10 @@ export const useAddAdministrationMenuItems = () => {
     { position: 'after', value: 'users' }
   );
 };
+
+export const useGlossaryTermHighlights = (
+  props: GlossaryTermHighlightsProps
+): GlossaryTermHighlightDto[] => useGlossaryTermHighlightsInternal(props);
+
+export const GlossaryTooltip: React.ForwardRefExoticComponent<GlossaryTooltipProps> =
+  GlossaryTooltipInternal;

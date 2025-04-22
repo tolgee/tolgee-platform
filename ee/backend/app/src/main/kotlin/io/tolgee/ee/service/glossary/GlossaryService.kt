@@ -54,7 +54,7 @@ class GlossaryService(
         name = dto.name,
       ).apply {
         organizationOwner = organization
-        baseLanguageCode = dto.baseLanguageCode
+        baseLanguageTag = dto.baseLanguageTag
 
         // TODO project permissions handling?
         val projects = projectService.findAll(dto.assignedProjects ?: emptySet())
@@ -70,7 +70,7 @@ class GlossaryService(
   ): Glossary {
     val glossary = get(organizationId, glossaryId)
     glossary.name = dto.name
-    glossary.baseLanguageCode = dto.baseLanguageCode
+    glossary.baseLanguageTag = dto.baseLanguageTag
     return glossaryRepository.save(glossary)
   }
 

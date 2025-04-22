@@ -33,10 +33,7 @@ export const GlossaryView = () => {
     if (selectedLanguages === undefined) {
       return undefined;
     }
-    return [
-      glossary.data?.baseLanguageCode || '',
-      ...(selectedLanguages ?? []),
-    ];
+    return [glossary.data?.baseLanguageTag || '', ...(selectedLanguages ?? [])];
   }, [selectedLanguages, glossary.data]);
 
   const path = { organizationId: organization!.id, glossaryId };
@@ -86,7 +83,7 @@ export const GlossaryView = () => {
 
   const updateSelectedLanguages = (languages: string[]) => {
     setSelectedLanguages(
-      languages.filter((l) => l !== glossary.data?.baseLanguageCode)
+      languages.filter((l) => l !== glossary.data?.baseLanguageTag)
     );
   };
 
@@ -140,7 +137,7 @@ export const GlossaryView = () => {
           glossaryId={glossaryId}
           data={terms}
           totalElements={totalTerms}
-          baseLanguage={glossary.data?.baseLanguageCode}
+          baseLanguage={glossary.data?.baseLanguageTag}
           selectedLanguages={selectedLanguages}
           selectedLanguagesWithBaseLanguage={selectedLanguagesWithBaseLanguage}
           updateSelectedLanguages={updateSelectedLanguages}

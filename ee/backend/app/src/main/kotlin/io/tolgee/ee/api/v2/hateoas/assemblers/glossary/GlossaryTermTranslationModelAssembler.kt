@@ -14,7 +14,7 @@ class GlossaryTermTranslationModelAssembler :
   ) {
   override fun toModel(entity: GlossaryTermTranslation): GlossaryTermTranslationModel {
     return GlossaryTermTranslationModel(
-      languageCode = entity.languageCode,
+      languageTag = entity.languageTag,
       text = entity.text ?: "",
     )
   }

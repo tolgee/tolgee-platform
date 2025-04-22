@@ -4202,7 +4202,7 @@
             <column name="path" type="TEXT">
             </column>
         </addColumn>
-    <changeSet author="anty (generated)" id="1743523453022-1">
+    <changeSet author="anty (generated)" id="1744881555572-1">
         <createTable tableName="glossary">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="glossaryPK"/>
@@ -4213,7 +4213,7 @@
             <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="base_language_code" type="VARCHAR(255)">
+            <column name="base_language_tag" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="deleted_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
@@ -4221,7 +4221,7 @@
             <column name="organization_owner_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-2">
+    <changeSet author="anty (generated)" id="1744881555572-2">
         <createTable tableName="glossary_project">
             <column name="project_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="glossary_projectPK"/>
@@ -4231,7 +4231,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-3">
+    <changeSet author="anty (generated)" id="1744881555572-3">
         <createTable tableName="glossary_term">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="glossary_termPK"/>
@@ -4242,7 +4242,7 @@
             <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="description" type="VARCHAR(255)"/>
+            <column name="description" type="TEXT"/>
             <column name="flag_abbreviation" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
@@ -4258,7 +4258,7 @@
             <column name="glossary_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-4">
+    <changeSet author="anty (generated)" id="1744881555572-4">
         <createTable tableName="glossary_term_translation">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="glossary_term_translationPK"/>
@@ -4269,27 +4269,37 @@
             <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="language_code" type="VARCHAR(255)"/>
-            <column name="text" type="VARCHAR(255)"/>
+            <column name="language_tag" type="VARCHAR(255)"/>
+            <column name="text" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text_lowercased" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
             <column name="term_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-5">
+    <changeSet author="anty (generated)" id="1744881555572-5">
+        <addUniqueConstraint columnNames="term_id, language_tag" constraintName="UKk2xdl8ycjxvfy7a8sxgbq6tc3" tableName="glossary_term_translation"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1744881555572-6">
+        <createIndex indexName="IDXfv0ojg4s2ibuf8rbt6ypr8np9" tableName="glossary_term_translation">
+            <column name="text_lowercased"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1744881555572-7">
         <addForeignKeyConstraint baseColumnNames="glossary_id" baseTableName="glossary_project" constraintName="FK5rc6dwok62j8pnnnlojfela6r" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-6">
+    <changeSet author="anty (generated)" id="1744881555572-8">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="glossary_project" constraintName="FKcsc92g97364ofbu2s0w39pf1o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="glossary" validate="true"/>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-7">
+    <changeSet author="anty (generated)" id="1744881555572-9">
         <addForeignKeyConstraint baseColumnNames="term_id" baseTableName="glossary_term_translation" constraintName="FKi4r73bypqbg79v8vmxc08lv9q" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="glossary_term" validate="true"/>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-8">
+    <changeSet author="anty (generated)" id="1744881555572-10">
         <addForeignKeyConstraint baseColumnNames="glossary_id" baseTableName="glossary_term" constraintName="FKqgqkew17tle3xkot7shvas8x1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="glossary" validate="true"/>
     </changeSet>
-    <changeSet author="anty (generated)" id="1743523453022-9">
+    <changeSet author="anty (generated)" id="1744881555572-11">
         <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="glossary" constraintName="FKtiuusr7urs46e15gjy94jhdfm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
-    </changeSet>
-    <changeSet author="anty (generated)" id="1744285181273-1">
-        <addUniqueConstraint columnNames="term_id, language_code" constraintName="UKg4vsd2n9oxiunjyqj47nfj03b" tableName="glossary_term_translation"/>
     </changeSet>
 </databaseChangeLog>

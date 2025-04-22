@@ -97,7 +97,7 @@ export const GlossaryCreateEditDialog = ({
           const save = async (values: CreateGlossaryForm) => {
             const data: CreateGlossaryRequest = {
               name: values.name,
-              baseLanguageCode: values.baseLanguage!.tag,
+              baseLanguageTag: values.baseLanguage!.tag,
               assignedProjects: values.assignedProjects?.map(({ id }) => id),
             };
 
@@ -131,7 +131,7 @@ export const GlossaryCreateEditDialog = ({
           const save = async (values: CreateGlossaryForm) => {
             const data: UpdateGlossaryRequest = {
               name: values.name,
-              baseLanguageCode: values.baseLanguage!.tag,
+              baseLanguageTag: values.baseLanguage!.tag,
             };
 
             mutation.mutate(
@@ -172,13 +172,13 @@ export const GlossaryCreateEditDialog = ({
     options: {
       enabled: initialGlossaryId !== undefined,
       onSuccess(data) {
-        const language = data.baseLanguageCode
+        const language = data.baseLanguageTag
           ? {
-              tag: data.baseLanguageCode,
-              flagEmoji: languageInfo[data.baseLanguageCode]?.flags?.[0] || '',
+              tag: data.baseLanguageTag,
+              flagEmoji: languageInfo[data.baseLanguageTag]?.flags?.[0] || '',
               name:
-                languageInfo[data.baseLanguageCode]?.englishName ||
-                data.baseLanguageCode,
+                languageInfo[data.baseLanguageTag]?.englishName ||
+                data.baseLanguageTag,
             }
           : undefined;
         setInitialValues?.({

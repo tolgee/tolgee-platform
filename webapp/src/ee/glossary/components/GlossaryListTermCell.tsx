@@ -1,13 +1,12 @@
-import { Checkbox, Chip, styled, useTheme } from '@mui/material';
+import { Checkbox, styled } from '@mui/material';
 import { GlossaryListStyledRowCell } from 'tg.ee.module/glossary/components/GlossaryListStyledRowCell';
 import clsx from 'clsx';
 import React from 'react';
 import { components } from 'tg.service/apiSchema.generated';
-import { useTranslate } from '@tolgee/react';
-import { PropsOf } from '@emotion/react';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import Box from '@mui/material/Box';
 import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
+import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
@@ -42,35 +41,6 @@ const StyledDescription = styled(Box)`
   font-size: ${({ theme }) => theme.typography.caption.fontSize};
 `;
 
-const StyledTags = styled('div')`
-  grid-area: tags;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  overflow: hidden;
-
-  margin: ${({ theme }) => theme.spacing(0.25, 0)};
-  position: relative;
-
-  & > * {
-    margin: ${({ theme }) => theme.spacing(0.25, 0.25)};
-  }
-`;
-
-const CustomizedTag: React.VFC<PropsOf<typeof Chip>> = (props) => {
-  const theme = useTheme();
-  return (
-    <Chip
-      style={{
-        backgroundColor:
-          theme.palette.tokens._components.chip.placeHolderPluralFill,
-      }}
-      size="small"
-      {...props}
-    />
-  );
-};
-
 type Props = {
   organizationId: number;
   glossaryId: number;
@@ -92,17 +62,9 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
 }) => {
   const [isEditingTerm, setIsEditingTerm] = React.useState(false);
 
-  const { t } = useTranslate();
-
   const baseTranslation = item.translations?.find(
-    (t) => t.languageCode === baseLanguage
+    (t) => t.languageTag === baseLanguage
   );
-
-  const hasTags =
-    item.flagNonTranslatable ||
-    item.flagCaseSensitive ||
-    item.flagAbbreviation ||
-    item.flagForbiddenTerm;
 
   return (
     <StyledRowTermCell
@@ -124,22 +86,7 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
           <LimitedHeightText maxLines={5}>{item.description}</LimitedHeightText>
         </StyledDescription>
       )}
-      {hasTags && (
-        <StyledTags>
-          {item.flagNonTranslatable && (
-            <CustomizedTag label={t('glossary_term_flag_non_translatable')} />
-          )}
-          {item.flagCaseSensitive && (
-            <CustomizedTag label={t('glossary_term_flag_case_sensitive')} />
-          )}
-          {item.flagAbbreviation && (
-            <CustomizedTag label={t('glossary_term_flag_abbreviation')} />
-          )}
-          {item.flagForbiddenTerm && (
-            <CustomizedTag label={t('glossary_term_flag_forbidden_term')} />
-          )}
-        </StyledTags>
-      )}
+      <GlossaryTermTags term={item} />
       {editEnabled && isEditingTerm && (
         <GlossaryTermCreateUpdateDialog
           open={isEditingTerm}

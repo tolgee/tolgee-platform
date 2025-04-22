@@ -4,11 +4,15 @@ import io.tolgee.constants.Message
 import io.tolgee.ee.data.glossary.*
 import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Project
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
+import io.tolgee.model.glossary.GlossaryTermTranslation.Companion.WORD_REGEX
+import io.tolgee.util.findAll
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.Locale
 
 @Service
 class GlossaryTermService(
@@ -93,7 +97,7 @@ class GlossaryTermService(
     val glossaryTerm = create(organizationId, glossaryId, request)
     val translation =
       UpdateGlossaryTermTranslationRequest().apply {
-        languageCode = glossary.baseLanguageCode!!
+        languageTag = glossary.baseLanguageTag!!
         text = request.text
       }
     return glossaryTerm to
@@ -133,13 +137,13 @@ class GlossaryTermService(
       return glossaryTerm to
         glossaryTermTranslationService.find(
           glossaryTerm,
-          glossary.baseLanguageCode!!,
+          glossary.baseLanguageTag!!,
         )
     }
 
     val translation =
       UpdateGlossaryTermTranslationRequest().apply {
-        languageCode = glossary.baseLanguageCode!!
+        languageTag = glossary.baseLanguageTag!!
         text = translationText
       }
     return glossaryTerm to
@@ -160,5 +164,42 @@ class GlossaryTermService(
 
   fun delete(glossaryTerm: GlossaryTerm) {
     glossaryTermRepository.delete(glossaryTerm)
+  }
+
+  fun getHighlights(
+    project: Project,
+    text: String,
+    languageTag: String,
+  ): Set<GlossaryTermHighlight> {
+    val words = text.findAll(WORD_REGEX).filter { it.isNotEmpty() }.toSet()
+    val translations = glossaryTermTranslationService.findAll(project, words, languageTag)
+
+    val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
+    val textLowercased = text.lowercase(locale)
+
+    return translations.flatMap { translation ->
+      findTranslationPositions(textLowercased, translation).map { position ->
+        GlossaryTermHighlight(position, translation)
+      }
+    }.toSet()
+  }
+
+  private fun findTranslationPositions(
+    textLowercased: String,
+    translation: GlossaryTermTranslation,
+  ): Sequence<Position> {
+    val term = translation.text ?: return emptySequence()
+    val locale = Locale.forLanguageTag(translation.languageTag) ?: Locale.ROOT
+    val termLowercase = term.lowercase(locale)
+    return findPositions(textLowercased, termLowercase)
+  }
+
+  private fun findPositions(
+    text: String,
+    search: String,
+  ): Sequence<Position> {
+    val regex = Regex.escape(search).toRegex()
+    val matches = regex.findAll(text)
+    return matches.map { Position(it.range.first, it.range.last + 1) }
   }
 }

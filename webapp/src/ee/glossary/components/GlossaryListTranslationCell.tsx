@@ -49,7 +49,7 @@ type Props = {
   glossaryId: number;
   termId: number;
   translation?: GlossaryTermTranslationModel;
-  languageCode: string;
+  languageTag: string;
   editEnabled: boolean;
   isEditing?: boolean;
   onEdit?: () => void;
@@ -62,7 +62,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
   glossaryId,
   termId,
   translation,
-  languageCode,
+  languageTag,
   editEnabled,
   isEditing,
   onEdit,
@@ -92,7 +92,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
         path: { organizationId, glossaryId, termId },
         content: {
           'application/json': {
-            languageCode,
+            languageTag: languageTag,
             text: value,
           },
         },

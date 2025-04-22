@@ -326,8 +326,8 @@ export const GlossaryViewBody: React.VFC<Props> = ({
                     glossaryId={glossaryId}
                     item={row}
                     baseLanguage={baseLanguage}
-                    onEditTranslation={(termId, languageCode) => {
-                      setEditingTranslation([termId, languageCode]);
+                    onEditTranslation={(termId, languageTag) => {
+                      setEditingTranslation([termId, languageTag]);
                     }}
                     editingTranslation={editingTranslation}
                     selectedLanguages={selectedLanguages}

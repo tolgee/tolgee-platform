@@ -25,7 +25,7 @@ type Props = {
   item: GlossaryTermWithTranslationsModel;
   baseLanguage: string | undefined;
   editingTranslation: [number | undefined, string | undefined];
-  onEditTranslation: (termId?: number, languageCode?: string) => void;
+  onEditTranslation: (termId?: number, languageTag?: string) => void;
   selectedLanguages: string[] | undefined;
   checked: boolean;
   onCheckedToggle: () => void;
@@ -43,7 +43,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
   onCheckedToggle,
 }) => {
   const editEnabled = true; // TODO: Permissions handling
-  const [editingTermId, editingLanguageCode] = editingTranslation;
+  const [editingTermId, editingLanguageTag] = editingTranslation;
 
   return (
     <StyledRow key={item.id}>
@@ -58,7 +58,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
       />
       {selectedLanguages?.map((tag, i) => {
         const translation = item.translations?.find(
-          (t) => t.languageCode === tag
+          (t) => t.languageTag === tag
         );
         return (
           <GlossaryListTranslationCell
@@ -67,9 +67,9 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
             glossaryId={glossaryId}
             termId={item.id}
             translation={translation}
-            languageCode={tag}
+            languageTag={tag}
             editEnabled={editEnabled}
-            isEditing={editingTermId === item.id && editingLanguageCode === tag}
+            isEditing={editingTermId === item.id && editingLanguageTag === tag}
             onEdit={() => onEditTranslation(item.id, tag)}
             onCancel={() => onEditTranslation(item.id, undefined)}
             onSave={() => onEditTranslation(item.id, undefined)}

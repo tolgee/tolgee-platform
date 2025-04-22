@@ -9,6 +9,6 @@ import org.springframework.hateoas.server.core.Relation
 class GlossaryModel(
   val id: Long,
   val name: String,
-  val baseLanguageCode: String?,
+  val baseLanguageTag: String?,
   val assignedProjects: CollectionModel<SimpleProjectModel>,
 ) : RepresentationModel<GlossaryModel>()

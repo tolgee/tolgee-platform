@@ -18,7 +18,7 @@ class GlossaryModelAssembler(
     return GlossaryModel(
       id = entity.id,
       name = entity.name,
-      baseLanguageCode = entity.baseLanguageCode,
+      baseLanguageTag = entity.baseLanguageTag,
       assignedProjects = simpleProjectModelAssembler.toCollectionModel(entity.assignedProjects),
     )
   }

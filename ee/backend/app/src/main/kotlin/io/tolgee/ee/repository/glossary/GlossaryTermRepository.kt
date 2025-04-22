@@ -34,8 +34,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     """
     from GlossaryTerm te
     left join GlossaryTermTranslation tr on tr.term.id = te.id
-      and tr.languageCode = te.glossary.baseLanguageCode
-      and (:languageTags is null or tr.languageCode in :languageTags)
+      and tr.languageTag = te.glossary.baseLanguageTag
+      and (:languageTags is null or tr.languageTag in :languageTags)
     where te.glossary.organizationOwner.id = :organizationId
       and te.glossary.organizationOwner.deletedAt is null
       and te.glossary.id = :glossaryId
@@ -58,8 +58,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     """
     from GlossaryTerm te
     left join GlossaryTermTranslation tr on tr.term.id = te.id
-      and tr.languageCode = te.glossary.baseLanguageCode
-      and (:languageTags is null or tr.languageCode in :languageTags)
+      and tr.languageTag = te.glossary.baseLanguageTag
+      and (:languageTags is null or tr.languageTag in :languageTags)
     where te.glossary = :glossary
       and (
         :search is null or
@@ -74,56 +74,4 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     search: String?,
     languageTags: Set<String>?,
   ): Page<GlossaryTerm>
-
-//  @Query(
-//    """
-//    select te.id as id,
-//      te.description as description,
-//      te.flagNonTranslatable as flagNonTranslatable,
-//      te.flagCaseSensitive as flagCaseSensitive,
-//      te.flagAbbreviation as flagAbbreviation,
-//      te.flagForbiddenTerm as flagForbiddenTerm,
-//      tr as translations
-//    from GlossaryTerm te
-//    left join GlossaryTermTranslation tr
-//      on tr.term.id = te.id
-//      and (:languageTags is null or tr.languageCode in :languageTags)
-//    left join GlossaryTermTranslation tr_search
-//      on tr_search.term.id = te.id
-//      and (:languageTags is null or tr_search.languageCode in :languageTags)
-//    where te.glossary = :glossary
-//      and (
-//        :search is null or
-//        lower(te.description) like lower(concat('%', cast(:search as text), '%')) or
-//        lower(tr_search.text) like lower(concat('%', cast(:search as text), '%'))
-//      )
-//  """,
-//  )
-// //  @Query(
-// //    """
-// //    select te.id as id,
-// //      te.description as description,
-// //      te.flagNonTranslatable as flagNonTranslatable,
-// //      te.flagCaseSensitive as flagCaseSensitive,
-// //      te.flagAbbreviation as flagAbbreviation,
-// //      te.flagForbiddenTerm as flagForbiddenTerm,
-// //      tr as translations
-// //    from GlossaryTerm te
-// //    left join GlossaryTermTranslation tr
-// //      on tr.term.id = te.id
-// //      and (:languageTags is null or tr.languageCode in :languageTags)
-// //    where te.glossary = :glossary
-// //      and (
-// //        :search is null or
-// //        lower(te.description) like lower(concat('%', cast(:search as text), '%')) or
-// //        lower(tr.text) like lower(concat('%', cast(:search as text), '%'))
-// //      )
-// //  """,
-// //  )
-//  fun findByGlossaryPagedWithTranslations(
-//    glossary: Glossary,
-//    pageable: Pageable,
-//    search: String?,
-//    languageTags: Set<String>?,
-//  ): Page<GlossaryTermWithTranslationsView>
 }

@@ -151,6 +151,7 @@ export const TranslationMemoryItem = ({
             content={targetText}
             locale={languageTag}
             nested={Boolean(pluralVariant)}
+            active
             pluralExampleValue={variantExample}
           />
         )}
@@ -165,6 +166,7 @@ export const TranslationMemoryItem = ({
             content={baseText}
             locale={baseLanguageTag}
             nested={Boolean(baseVariant)}
+            active
             pluralExampleValue={baseVariantExample}
           />
         )}

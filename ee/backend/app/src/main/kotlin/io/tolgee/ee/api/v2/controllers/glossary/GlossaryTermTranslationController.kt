@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(
   "/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}/terms/{termId:[0-9]+}/translations",
 )
-@Tag(name = "Glossary Term Translations")
+@Tag(name = "Glossary term translations")
 class GlossaryTermTranslationController(
   private val glossaryTermService: GlossaryTermService,
   private val glossaryTermTranslationService: GlossaryTermTranslationService,
@@ -53,11 +53,11 @@ class GlossaryTermTranslationController(
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     val translation = glossaryTermTranslationService.updateOrCreate(glossaryTerm, dto)
     return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(
-      dto.languageCode,
+      dto.languageTag,
     )
   }
 
-  @GetMapping("/{languageCode}")
+  @GetMapping("/{languageTag}")
   @Operation(summary = "Get glossary term translation for language")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
@@ -69,7 +69,7 @@ class GlossaryTermTranslationController(
     @PathVariable
     termId: Long,
     @PathVariable
-    languageCode: String,
+    languageTag: String,
   ): GlossaryTermTranslationModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
@@ -77,9 +77,9 @@ class GlossaryTermTranslationController(
     )
 
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
-    val translation = glossaryTermTranslationService.find(glossaryTerm, languageCode)
+    val translation = glossaryTermTranslationService.find(glossaryTerm, languageTag)
     return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(
-      languageCode,
+      languageTag,
     )
   }
 }

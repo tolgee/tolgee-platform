@@ -3,10 +3,7 @@ package io.tolgee.configuration.openApi
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.Paths
-import io.tolgee.openApiDocs.OpenApiCloudExtension
-import io.tolgee.openApiDocs.OpenApiEeExtension
-import io.tolgee.openApiDocs.OpenApiOrderExtension
-import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
+import io.tolgee.openApiDocs.*
 import io.tolgee.security.authentication.AllowApiAccess
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.web.method.HandlerMethod
@@ -74,9 +71,10 @@ class OpenApiGroupBuilder(
   private fun addMethodExtensions() {
     customizeOperations { operation, handlerMethod, _ ->
       addOperationOrder(handlerMethod, operation)
-      addOperationEeExtension(handlerMethod, operation)
-      addSelfHostedOperationEeExtension(handlerMethod, operation)
-      addCloudOperationEeExtension(handlerMethod, operation)
+      addExtensionFor(handlerMethod, operation, OpenApiEeExtension::class.java, "x-ee")
+      addExtensionFor(handlerMethod, operation, OpenApiCloudExtension::class.java, "x-cloud")
+      addExtensionFor(handlerMethod, operation, OpenApiSelfHostedExtension::class.java, "x-self-hosted")
+      addExtensionFor(handlerMethod, operation, OpenApiUnstableOperationExtension::class.java, "x-unstable")
       operation
     }
   }
@@ -91,40 +89,21 @@ class OpenApiGroupBuilder(
     }
   }
 
-  private fun addOperationEeExtension(
+  private fun <T : Annotation> addExtensionFor(
     handlerMethod: HandlerMethod,
     operation: Operation,
+    annotationClass: Class<T>,
+    extensionName: String,
+    value: ((T) -> Any?)? = null,
   ) {
-    val eeExtensionAnnotation =
-      handlerMethod.getMethodAnnotation(OpenApiEeExtension::class.java)
-        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiEeExtension::class.java) ?: null
-    if (eeExtensionAnnotation != null) {
-      operation.addExtension("x-ee", true)
+    val annotation =
+      handlerMethod.getMethodAnnotation(annotationClass)
+        ?: handlerMethod.method.declaringClass.getAnnotation(annotationClass) ?: null
+    if (annotation == null) {
+      return
     }
-  }
 
-  private fun addCloudOperationEeExtension(
-    handlerMethod: HandlerMethod,
-    operation: Operation,
-  ) {
-    val eeExtensionAnnotation =
-      handlerMethod.getMethodAnnotation(OpenApiCloudExtension::class.java)
-        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiCloudExtension::class.java) ?: null
-    if (eeExtensionAnnotation != null) {
-      operation.addExtension("x-cloud", true)
-    }
-  }
-
-  private fun addSelfHostedOperationEeExtension(
-    handlerMethod: HandlerMethod,
-    operation: Operation,
-  ) {
-    val eeExtensionAnnotation =
-      handlerMethod.getMethodAnnotation(OpenApiSelfHostedExtension::class.java)
-        ?: handlerMethod.method.declaringClass.getAnnotation(OpenApiSelfHostedExtension::class.java) ?: null
-    if (eeExtensionAnnotation != null) {
-      operation.addExtension("x-self-hosted", true)
-    }
+    operation.addExtension(extensionName, value?.invoke(annotation) ?: true)
   }
 
   private fun addTagOrders() {
