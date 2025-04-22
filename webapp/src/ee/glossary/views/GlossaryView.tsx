@@ -121,6 +121,7 @@ export const GlossaryView = () => {
       loading={glossary.isLoading || termsLoadable.isLoading}
       hideChildrenOnLoading={false}
       maxWidth="max"
+      allCentered={false}
     >
       {createDialogOpen && organization !== undefined && (
         <GlossaryTermCreateUpdateDialog

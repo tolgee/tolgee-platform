@@ -15,7 +15,7 @@ const StyledWrapper = styled('div')`
 `;
 
 const StyledContainer = styled(Box)`
-  display: flex;
+  display: grid;
   padding: 0px !important;
   container: main-container / inline-size;
 `;
@@ -36,18 +36,25 @@ export const BaseSettingsView: React.FC<Props> = ({
   children,
   menuItems,
   maxWidth = 'normal',
+  allCentered = true,
   ...otherProps
 }) => {
   const containerMaxWidth = getBaseViewWidth(maxWidth);
   return (
-    <BaseView {...otherProps} headerBarDisable>
+    <BaseView {...otherProps} allCentered={false} headerBarDisable>
       <StyledWrapper>
         <StyledMenu>
           <SettingsMenu items={menuItems} />
         </StyledMenu>
 
-        <StyledContainer style={{ maxWidth: containerMaxWidth }}>
-          <StyledContent>
+        <StyledContainer>
+          <StyledContent
+            justifySelf={allCentered ? 'center' : undefined}
+            width={
+              allCentered ? `min(${containerMaxWidth}px, 100%)` : undefined
+            }
+            maxWidth={containerMaxWidth}
+          >
             <HeaderBar
               noBorder
               reducedSpacing
