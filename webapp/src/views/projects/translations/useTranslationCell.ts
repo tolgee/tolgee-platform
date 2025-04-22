@@ -205,6 +205,7 @@ export const useTranslationCell = ({
     editVal: isEditing ? cursor : undefined,
     isEditing,
     isEditingRow,
+    editingLanguageTag: cursor?.language,
     autofocus: true,
     keyData,
     canChangeState,

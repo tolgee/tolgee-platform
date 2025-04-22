@@ -52,4 +52,5 @@ export type GlossaryTermHighlightsProps = {
 export type GlossaryTooltipProps = {
   term: GlossaryTermWithTranslationsModel;
   languageTag: string;
+  targetLanguageTag?: string;
 };

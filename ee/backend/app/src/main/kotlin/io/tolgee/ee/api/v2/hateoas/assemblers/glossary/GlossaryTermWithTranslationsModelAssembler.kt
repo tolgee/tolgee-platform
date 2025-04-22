@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class GlossaryTermWithTranslationsModelAssembler(
+  private val glossaryModelAssembler: GlossaryModelAssembler,
   private val glossaryTermTranslationModelAssembler: GlossaryTermTranslationModelAssembler,
 ) : RepresentationModelAssemblerSupport<GlossaryTerm, GlossaryTermWithTranslationsModel>(
     GlossaryTermController::class.java,
@@ -16,6 +17,7 @@ class GlossaryTermWithTranslationsModelAssembler(
   override fun toModel(entity: GlossaryTerm): GlossaryTermWithTranslationsModel {
     return GlossaryTermWithTranslationsModel(
       id = entity.id,
+      glossary = glossaryModelAssembler.toModel(entity.glossary),
       description = entity.description,
       flagNonTranslatable = entity.flagNonTranslatable,
       flagCaseSensitive = entity.flagCaseSensitive,

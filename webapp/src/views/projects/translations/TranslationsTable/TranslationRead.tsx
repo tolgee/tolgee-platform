@@ -54,6 +54,7 @@ export const TranslationRead: React.FC<Props> = ({
   const {
     isEditing,
     isEditingRow,
+    editingLanguageTag,
     handleOpen,
     handleClose,
     setState: handleStateChange,
@@ -91,6 +92,7 @@ export const TranslationRead: React.FC<Props> = ({
           width={width}
           text={translation?.text}
           locale={language.tag}
+          targetLocale={editingLanguageTag}
           disabled={disabled}
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}

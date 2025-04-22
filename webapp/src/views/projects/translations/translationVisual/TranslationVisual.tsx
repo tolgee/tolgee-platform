@@ -18,6 +18,7 @@ type Props = {
   maxLines?: number;
   text: string | undefined;
   locale: string;
+  targetLocale?: string;
   width?: number | string;
   disabled?: boolean;
   showHighlights?: boolean;
@@ -28,6 +29,7 @@ export const TranslationVisual = ({
   maxLines,
   text,
   locale,
+  targetLocale,
   width,
   disabled,
   showHighlights,
@@ -60,6 +62,7 @@ export const TranslationVisual = ({
             content={content}
             pluralExampleValue={exampleValue}
             locale={locale}
+            targetLocale={targetLocale}
             nested={Boolean(variant)}
             showHighlights={showHighlights}
           />

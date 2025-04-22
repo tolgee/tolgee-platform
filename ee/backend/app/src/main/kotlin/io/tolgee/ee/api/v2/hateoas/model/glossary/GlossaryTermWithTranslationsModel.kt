@@ -6,6 +6,7 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "glossaryTerms", itemRelation = "glossaryTerm")
 class GlossaryTermWithTranslationsModel(
   val id: Long,
+  val glossary: GlossaryModel,
   val description: String?,
   val flagNonTranslatable: Boolean,
   val flagCaseSensitive: Boolean,

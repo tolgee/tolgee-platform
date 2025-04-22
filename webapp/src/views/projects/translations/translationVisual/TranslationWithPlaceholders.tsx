@@ -26,6 +26,7 @@ type Props = {
   content: string;
   pluralExampleValue?: number | undefined;
   locale: string;
+  targetLocale?: string;
   nested: boolean;
   showHighlights?: boolean;
 };
@@ -70,6 +71,7 @@ export const TranslationWithPlaceholders = ({
   content,
   pluralExampleValue,
   locale,
+  targetLocale,
   nested,
   showHighlights,
 }: Props) => {
@@ -129,6 +131,7 @@ export const TranslationWithPlaceholders = ({
             <GlossaryTooltip
               term={modifier.highlight?.value}
               languageTag={locale}
+              targetLanguageTag={targetLocale}
             />
           }
         >
