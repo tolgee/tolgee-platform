@@ -12,6 +12,7 @@ import {
   selectInSelect,
 } from '../../common/shared';
 import { selectNamespace } from '../../compounds/E2NamespaceSelector';
+import { assertFilter } from '../../common/filters';
 
 describe('namespaces in translations', () => {
   beforeEach(() => {

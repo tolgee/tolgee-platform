@@ -8,11 +8,6 @@ import { PlanTitle } from '../PlanTitle';
 import { PlanType } from '../types';
 import { PricePrimary } from '../../Price/PricePrimary';
 import { PlanFeature } from '../../PlanFeature';
-import {
-  IncludedCredits,
-  IncludedSeats,
-  IncludedStrings,
-} from '../../IncludedItem';
 import { FreePlanLimits } from './FreePlanLimits';
 
 const StyledPlanContent = styled(PlanContent)`

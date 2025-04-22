@@ -1,4 +1,4 @@
-import { Button, DialogContent, styled } from '@mui/material';
+import { Button } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 
@@ -10,12 +10,6 @@ import {
 import { getProgressData } from '../component/getProgressData';
 import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
 import React from 'react';
-
-const StyledDialogContent = styled(DialogContent)`
-  display: grid;
-  gap: 16px;
-  max-width: 500px;
-`;
 
 type Props = {
   onClose: () => void;

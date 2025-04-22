@@ -60,8 +60,9 @@ class EeSubscriptionErrorCatchingService(
       val error = e.parseBody()
       if (error.code == Message.LICENSE_KEY_USED_BY_ANOTHER_INSTANCE.code) {
         setSubscriptionKeyUsedByOtherInstance()
+        return null
       }
-      return null
+      throw e
     }
   }
 

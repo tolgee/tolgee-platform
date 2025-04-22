@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { LINKS } from 'tg.constants/links';
 import { T } from '@tolgee/react';
 
 type SubscriptionsPopoverCreateCustomPlanButtonProps = {

@@ -13,7 +13,7 @@ export const CloudPlanMetricTypeSelectField: FC<
 > = ({ parentName }) => {
   const { t } = useTranslate();
 
-  const { values } = usePlanFormValues<CloudPlanFormData>(parentName);
+  const { values: _values } = usePlanFormValues<CloudPlanFormData>(parentName);
 
   const options = [
     { value: 'KEYS_SEATS', label: 'Keys & Seats' },

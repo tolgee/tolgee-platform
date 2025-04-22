@@ -7,14 +7,11 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
-import { assertMessage, dismissMenu, gcy, gcyAdvanced } from './shared';
+import { dismissMenu, gcy, gcyAdvanced } from './shared';
 import { buildXpath } from './XpathBuilder';
-import Chainable = Cypress.Chainable;
-import {
-  E2KeyCreateDialog,
-  KeyDialogFillProps,
-} from '../compounds/E2KeyCreateDialog';
+import { KeyDialogFillProps } from '../compounds/E2KeyCreateDialog';
 import { E2TranslationsView } from '../compounds/E2TranslationsView';
+import Chainable = Cypress.Chainable;
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');

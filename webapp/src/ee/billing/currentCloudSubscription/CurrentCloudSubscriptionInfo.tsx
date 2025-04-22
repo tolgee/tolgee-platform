@@ -12,12 +12,6 @@ import {
   StyledBillingSectionTitle,
 } from '../BillingSection';
 import { MtHint } from 'tg.component/billing/MtHint';
-import {
-  KeysHint,
-  SeatsHint,
-  StringsHint,
-} from 'tg.component/common/StringsHint';
-import { PlanMetric } from './PlanMetric';
 import { BillingPeriodInfo } from './BillingPeriodInfo';
 import { CloudEstimatedCosts } from './CloudEstimatedCosts';
 import { SubscriptionsTrialAlert } from './subscriptionsTrialAlert/SubscriptionsTrialAlert';

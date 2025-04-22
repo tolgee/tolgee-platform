@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { T } from '@tolgee/react';
 
 import { BILLING_CRITICAL_FRACTION } from './constants';
-import { ProgressData, ProgressItem } from './getProgressData';
+import { ProgressItem } from './getProgressData';
 
 const DOT_SIZE = 8;
 

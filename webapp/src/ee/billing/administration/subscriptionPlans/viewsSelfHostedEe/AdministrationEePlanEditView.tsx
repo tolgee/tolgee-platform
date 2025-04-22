@@ -1,17 +1,10 @@
-import { Box, Typography } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { Typography } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+import { useRouteMatch } from 'react-router-dom';
 
-import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
-import {
-  useBillingApiMutation,
-  useBillingApiQuery,
-} from 'tg.service/http/useQueryApi';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
-import { SelfHostedEePlanForm } from '../components/planForm/selfHostedEe/SelfHostedEePlanForm';
 import { SelfHostedEePlanEditForm } from '../components/planForm/selfHostedEe/SelfHostedEePlanEditForm';
 
 export const AdministrationEePlanEditView = () => {

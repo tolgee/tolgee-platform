@@ -75,9 +75,9 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
       EeSubscription().apply {
         licenseKey = "mock"
         name = "Plaaan"
-        status = SubscriptionStatus.ERROR
+        status = SubscriptionStatus.ACTIVE
         currentPeriodEnd = Date()
-        enabledFeatures = Feature.values()
+        enabledFeatures = Feature.entries.toTypedArray()
         lastValidCheck = Date()
       },
     )

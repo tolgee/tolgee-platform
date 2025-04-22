@@ -1,4 +1,4 @@
-import { assertMessage, gcyAdvanced } from '../common/shared';
+import { gcyAdvanced } from '../common/shared';
 import { E2NamespaceSelector } from './E2NamespaceSelector';
 
 export class E2KeyCreateDialog {

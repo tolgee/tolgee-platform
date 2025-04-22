@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { SelfHostedEePlanForm } from './SelfHostedEePlanForm';
 import { T } from '@tolgee/react';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { LINKS } from 'tg.constants/links';
 import {
   useBillingApiMutation,
   useBillingApiQuery,

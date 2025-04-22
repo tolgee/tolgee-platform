@@ -7,7 +7,6 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import { SelfHostedPlanSelectorField } from './SelfHostedPlanSelectorField';
 import { T } from '@tolgee/react';
-import { AssignCloudPlanValuesType } from '../cloudPlan/assignPlan/AssignCloudPlanDialog';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 type AssignSelfHostedPlanDialogProps = {

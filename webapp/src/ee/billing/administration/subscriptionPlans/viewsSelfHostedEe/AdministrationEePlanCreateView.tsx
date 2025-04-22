@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';

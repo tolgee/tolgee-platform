@@ -1,18 +1,8 @@
-import {
-  Chip,
-  Link,
-  ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
-  TableCell,
-  TableRow,
-  Typography,
-} from '@mui/material';
+import { Chip, Link, TableCell, TableRow } from '@mui/material';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AdministrationSubscriptionsCloudPlan } from './cloudPlan/AdministrationSubscriptionsCloudPlan';
 import React, { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { T } from '@tolgee/react';
 import { AdministrationSubscriptionsSelfHostedEe } from './selfHosted/AdministrationSubscriptionsSelfHostedEe';
 
 export const AdministrationSubscriptionsListItem: FC<{
