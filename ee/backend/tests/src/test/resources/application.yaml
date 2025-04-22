@@ -87,6 +87,8 @@ tolgee:
   telemetry:
     enabled: false
     server: http://localhost:8080
+  ee:
+    scheduled-reporting-enabled: false
 
 management:
   endpoint:
@@ -99,4 +101,4 @@ springdoc:
 
 logging:
   level:
-    "io.tolgee.ExceptionHandlers": DEBUG
+    "io.tolgee": DEBUG

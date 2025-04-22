@@ -3,7 +3,6 @@ package io.tolgee.ee.service.eeSubscription.usageReporting
 import io.tolgee.api.EeSubscriptionDto
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.ee.data.usageReporting.UsageToReportDto
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionErrorCatchingService
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
@@ -11,7 +10,6 @@ import io.tolgee.ee.service.eeSubscription.cloudClient.TolgeeCloudLicencingClien
 import io.tolgee.util.Logging
 import io.tolgee.util.addSeconds
 import io.tolgee.util.logger
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,7 +21,6 @@ class UsageReportingService(
   private val currentDateProvider: CurrentDateProvider,
   private val eeSubscriptionServiceImpl: EeSubscriptionServiceImpl,
   private val lockingProvider: LockingProvider,
-  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
   /**
    * Reports usage to Tolgee Cloud with a 1-minute deferral mechanism.
@@ -50,34 +47,34 @@ class UsageReportingService(
   }
 
   /**
-   * Periodically checks and reports any pending usage data.
-   *
-   * This scheduled method runs at fixed intervals (default: 60 seconds) to check if there's
-   * any usage data that needs to be reported. It only sends a report if the current usage
-   * differs from what was last reported, ensuring that we don't send redundant reports.
-   *
-   * This is part of the deferred reporting mechanism that ensures usage data is eventually
-   * reported even if immediate reporting was skipped due to the 1-minute deferral rule.
+   * Periodically reports usage data if needed.
+   * 
+   * This method is called by the ScheduledReportingManager's scheduled task.
+   * It uses manual scheduling instead of @Scheduled to avoid issues with
+   * Spring's context caching in tests, allowing for better control over
+   * when reporting occurs during test execution.
    */
-  @Scheduled(fixedDelayString = """${'$'}{tolgee.ee.reportUsageFixedDelayInMs:60000}""")
   @Transactional
-  @Synchronized
-  fun reportPeriodically() {
-    logger.debug("Reporting usage periodically")
-    lockingProvider.withLocking("report_usage_periodically") {
-      val subscription = eeSubscriptionServiceImpl.findSubscriptionDto() ?: return@withLocking
-      val usageToReport = usageToReportService.getUsageToReport()
+  fun reportIfNeeded() {
+    try {
+      lockingProvider.withLocking("report_usage_periodically") {
+        val subscription = eeSubscriptionServiceImpl.findSubscriptionDto() ?: return@withLocking
+        val usageToReport = usageToReportService.getUsageToReport()
 
-      if (isReportingTooSoon(usageToReport)) {
-        return@withLocking
-      }
+        if (isReportingTooSoon(usageToReport)) {
+          return@withLocking
+        }
 
-      if (
-        usageToReport.keysToReport != usageToReport.lastReportedKeys ||
-        usageToReport.seatsToReport != usageToReport.lastReportedSeats
-      ) {
-        reportAndStore(subscription, usageToReport.keysToReport, usageToReport.seatsToReport)
+        if (
+          usageToReport.keysToReport != usageToReport.lastReportedKeys ||
+          usageToReport.seatsToReport != usageToReport.lastReportedSeats
+        ) {
+          reportAndStore(subscription, usageToReport.keysToReport, usageToReport.seatsToReport)
+        }
       }
+    } catch (e: Exception) {
+      // Log the exception but don't rethrow to prevent task scheduling from being disrupted
+      logger.error("Error while reporting usage", e)
     }
   }
 

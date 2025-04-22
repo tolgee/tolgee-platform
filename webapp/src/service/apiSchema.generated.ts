@@ -2488,8 +2488,20 @@ export interface components {
        */
       text: string;
     };
+    InitialDataEeSubscriptionModel: {
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
+    };
     InitialDataModel: {
       announcement?: components["schemas"]["AnnouncementDto"];
+      eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];

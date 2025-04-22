@@ -1,4 +1,4 @@
-package io.tolgee.hateoas
+package io.tolgee.hateoas.initialData
 
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO
 import io.tolgee.dtos.response.AnnouncementDto
@@ -13,4 +13,5 @@ class InitialDataModel(
   var preferredOrganization: PrivateOrganizationModel? = null,
   var languageTag: String? = null,
   var announcement: AnnouncementDto? = null,
+  var eeSubscription: InitialDataEeSubscriptionModel? = null
 )

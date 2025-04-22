@@ -70,7 +70,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
 
       currentDateProvider.move(Duration.ofDays(1))
       // normally, the reportPeriodically is called automatically with scheduling
-      usageReportingService.reportPeriodically()
+      usageReportingService.reportIfNeeded()
       captor.assertKeys(2)
     }
   }

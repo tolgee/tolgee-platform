@@ -7,22 +7,47 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.usageReporting.ScheduledReportingManager
 import io.tolgee.ee.service.eeSubscription.usageReporting.UsageToReportService
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestMethodOrder
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpMethod
 import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
-import java.util.Date
+import java.util.*
+import kotlin.reflect.jvm.javaMethod
 
-@TestPropertySource(properties = ["tolgee.ee.reportUsageFixedDelayInMs=100"])
+@TestMethodOrder(OrderAnnotation::class)
+@TestPropertySource(
+  properties = [
+    "tolgee.ee.reportUsageFixedDelayInMs=100",
+    "tolgee.ee.scheduled-reporting-enabled=true",
+  ],
+)
 class ScheduledUsageReportingTest : AbstractSpringTest() {
+  companion object {
+    @BeforeAll
+    @JvmStatic
+    fun before() {
+      // We need to clear all scheduled tasks, because we can have some from other Spring Contexts created with
+      // other test classes
+      ScheduledReportingManager.Companion.cancelAll()
+    }
+  }
+
   @Autowired
   private lateinit var usageToReportService: UsageToReportService
 
@@ -35,13 +60,39 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
 
   private lateinit var eeLicenseMockRequestUtil: EeLicensingMockRequestUtil
 
+  @Autowired
+  @SpyBean
+  private lateinit var scheduledReportingManager: ScheduledReportingManager
+
   @BeforeEach
   fun setup() {
     eeLicenseMockRequestUtil = EeLicensingMockRequestUtil(restTemplate)
   }
 
+  @AfterEach
+  fun cleanup() {
+    Mockito.reset(scheduledReportingManager)
+  }
+
+  /**
+   * We canceled all scheduled tasks in @BeforeAll, to make sure that it's really scheduled, we need to test
+   * whether the scheduleReporting method is called on startup
+   */
   @Test
+  @Order(1)
+  fun `it schedules on startup`() {
+    val invocations =
+      Mockito.mockingDetails(scheduledReportingManager)
+        .invocations
+    invocations.filter { it.method == ScheduledReportingManager::scheduleReporting.javaMethod }
+      .assert.hasSize(1)
+  }
+
+  @Test
+  @Order(2)
   fun `it reports usage periodically`() {
+    // since we canceled all tasks, we need to reschedule
+    scheduledReportingManager.scheduleReporting()
     val testData = BaseTestData()
     testDataService.saveTestData(testData.root)
     saveSubscription()
