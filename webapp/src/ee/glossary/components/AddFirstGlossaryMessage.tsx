@@ -10,6 +10,8 @@ const StyledCard = styled(Card)`
   flex-direction: column;
   align-items: center;
   border-radius: 20px;
+  background-color: ${({ theme }) =>
+    theme.palette.tokens.background.onDefaultGrey};
 `;
 
 const StyledImage = styled(Box)`
@@ -39,7 +41,7 @@ export const AddFirstGlossaryMessage: React.VFC<
   AddFirstGlossaryMessageProps
 > = (props) => {
   return (
-    <StyledCard>
+    <StyledCard elevation={0}>
       <StyledText>
         <Typography variant="h4">
           <T keyName="glossaries_list_empty_title" />

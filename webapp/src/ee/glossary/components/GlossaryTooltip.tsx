@@ -5,6 +5,7 @@ import { ArrowNarrowRight, BookClosed } from '@untitled-ui/icons-react';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { FlagImage } from 'tg.component/languages/FlagImage';
+import { T } from '@tolgee/react';
 
 const StyledCard = styled(Card)`
   display: flex;
@@ -13,7 +14,8 @@ const StyledCard = styled(Card)`
   padding: ${({ theme }) => theme.spacing(2)};
   border-radius: ${({ theme }) => theme.spacing(2)};
   margin-top: ${({ theme }) => theme.spacing(1)};
-  max-width: 450px;
+  min-width: 400px;
+  max-width: 500px;
 `;
 
 const StyledInnerCard = styled(Card)`
@@ -32,6 +34,10 @@ const StyledTitle = styled(Typography)``;
 const StyledDescription = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.secondary};
   font-size: 13px;
+`;
+
+const StyledEmptyDescription = styled(StyledDescription)`
+  font-style: italic;
 `;
 
 export const GlossaryTooltip: React.VFC<GlossaryTooltipProps> = ({
@@ -71,11 +77,15 @@ export const GlossaryTooltip: React.VFC<GlossaryTooltipProps> = ({
           )}
       </StyledTitleWrapper>
       <GlossaryTermTags term={term} />
-      {term.description && (
-        <StyledInnerCard>
+      <StyledInnerCard elevation={0}>
+        {term.description ? (
           <StyledDescription>{term.description}</StyledDescription>
-        </StyledInnerCard>
-      )}
+        ) : (
+          <StyledEmptyDescription>
+            <T keyName="empty_description" />
+          </StyledEmptyDescription>
+        )}
+      </StyledInnerCard>
     </StyledCard>
   );
 };
