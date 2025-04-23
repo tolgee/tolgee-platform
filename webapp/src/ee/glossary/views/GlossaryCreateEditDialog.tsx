@@ -115,6 +115,7 @@ export const GlossaryCreateEditDialog = ({
                   messageService.success(
                     <T keyName="glossary_create_success_message" />
                   );
+                  // TODO: redirect to glossary edit page
                   onFinished();
                 },
               }

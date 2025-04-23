@@ -6,6 +6,7 @@ import {
   CellLanguageModel,
 } from 'tg.views/projects/translations/TranslationsTable/CellLanguage';
 import React from 'react';
+import { SelectionService } from 'tg.service/useSelectionService';
 
 const StyledHeaderRow = styled('div')`
   position: sticky;
@@ -31,16 +32,12 @@ const StyledHeaderLanguageCell = styled(StyledHeaderCell)`
 
 type Props = {
   selectedLanguages: string[] | undefined;
-  allTermsSelected: boolean;
-  someTermsSelected: boolean;
-  onToggleSelectAll: () => void;
+  selectionService: SelectionService<number>;
 };
 
 export const GlossaryViewListHeader: React.VFC<Props> = ({
   selectedLanguages,
-  allTermsSelected,
-  someTermsSelected,
-  onToggleSelectAll,
+  selectionService,
 }) => {
   return (
     <StyledHeaderRow
@@ -52,9 +49,11 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
     >
       <StyledHeaderCell key={0}>
         <Checkbox
-          checked={allTermsSelected}
-          onChange={onToggleSelectAll}
-          indeterminate={someTermsSelected}
+          size="small"
+          checked={selectionService.isAllSelected}
+          onChange={selectionService.toggleSelectAll}
+          indeterminate={selectionService.isSomeSelected}
+          disabled={selectionService.isLoading}
         />
         <Box>
           <T keyName="glossary_grid_term_text" />

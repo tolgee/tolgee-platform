@@ -7,6 +7,7 @@ import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import Box from '@mui/material/Box';
 import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
+import { SelectionService } from 'tg.service/useSelectionService';
 
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
@@ -47,8 +48,7 @@ type Props = {
   item: GlossaryTermWithTranslationsModel;
   editEnabled: boolean;
   baseLanguage: string | undefined;
-  checked: boolean;
-  onCheckedToggle: () => void;
+  selectionService: SelectionService<number>;
 };
 
 export const GlossaryListTermCell: React.VFC<Props> = ({
@@ -57,8 +57,7 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
   item,
   editEnabled,
   baseLanguage,
-  checked,
-  onCheckedToggle,
+  selectionService,
 }) => {
   const [isEditingTerm, setIsEditingTerm] = React.useState(false);
 
@@ -76,9 +75,11 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
       }
     >
       <StyledCheckbox
-        checked={checked}
-        onChange={onCheckedToggle}
+        size="small"
+        checked={selectionService.isSelected(item.id)}
+        onChange={() => selectionService.toggle(item.id)}
         onClick={(e) => e.stopPropagation()}
+        disabled={selectionService.isLoading}
       />
       <StyledText>
         <LimitedHeightText maxLines={3}>

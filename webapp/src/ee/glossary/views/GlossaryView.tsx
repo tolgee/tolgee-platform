@@ -2,7 +2,11 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
 import { useTranslate } from '@tolgee/react';
-import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  useApiInfiniteQuery,
+  useApiMutation,
+  useApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { useRouteMatch } from 'react-router-dom';
 import React, { useMemo, useState } from 'react';
 import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
@@ -71,6 +75,30 @@ export const GlossaryView = () => {
     },
   });
 
+  const getTermsIdsMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsIds',
+    method: 'get',
+  });
+
+  const fetchAllTermsIds = () => {
+    return new Promise<number[]>((resolve, reject) => {
+      getTermsIdsMutation.mutate(
+        {
+          path,
+          query,
+        },
+        {
+          onSuccess: (data) => {
+            resolve(data._embedded?.longList ?? []);
+          },
+          onError: (e) => {
+            reject(e);
+          },
+        }
+      );
+    });
+  };
+
   const terms = useMemo(
     () =>
       termsLoadable.data?.pages.flatMap(
@@ -137,6 +165,7 @@ export const GlossaryView = () => {
           organizationId={organization.id}
           glossaryId={glossaryId}
           data={terms}
+          fetchDataIds={fetchAllTermsIds}
           totalElements={totalTerms}
           baseLanguage={glossary.data?.baseLanguageTag}
           selectedLanguages={selectedLanguages}

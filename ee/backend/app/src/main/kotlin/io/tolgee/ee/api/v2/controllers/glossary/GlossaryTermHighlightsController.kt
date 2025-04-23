@@ -13,6 +13,7 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -38,7 +39,7 @@ class GlossaryTermHighlightsController(
     text: String,
     @RequestParam("languageTag")
     languageTag: String,
-  ): List<GlossaryTermHighlightDto> { // TODO: use CollectionModel
+  ): CollectionModel<GlossaryTermHighlightDto> { // TODO: use CollectionModel
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
@@ -46,6 +47,6 @@ class GlossaryTermHighlightsController(
 
     return glossaryTermService.getHighlights(projectHolder.projectEntity, text, languageTag).map {
       GlossaryTermHighlightDto(it.position, modelAssembler.toModel(it.value.term))
-    }.toList()
+    }.let { CollectionModel.of(it) }
   }
 }

@@ -12,6 +12,8 @@ import React, { useRef, useState } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useResizeObserver } from 'usehooks-ts';
 import { useScrollStatus } from 'tg.component/common/useScrollStatus';
+import { GlossaryBatchToolbar } from 'tg.ee.module/glossary/components/GlossaryBatchToolbar';
+import { useSelectionService } from 'tg.service/useSelectionService';
 
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
@@ -133,10 +135,17 @@ const StyledScrollArrow = styled('div')`
   }
 `;
 
+const StyledBatchToolbarWrapper = styled(Box)`
+  position: fixed;
+  bottom: 0;
+  z-index: ${({ theme }) => theme.zIndex.drawer};
+`;
+
 type Props = {
   organizationId: number;
   glossaryId: number;
   data?: GlossaryTermWithTranslationsModel[];
+  fetchDataIds: () => Promise<number[]>;
   totalElements?: number;
   baseLanguage?: string;
   selectedLanguages?: string[];
@@ -151,6 +160,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
   organizationId,
   glossaryId,
   data = [],
+  fetchDataIds,
   totalElements,
   baseLanguage,
   selectedLanguages,
@@ -169,29 +179,11 @@ export const GlossaryViewBody: React.VFC<Props> = ({
   const [editingTranslation, setEditingTranslation] = useState<
     [number | undefined, string | undefined]
   >([undefined, undefined]);
-  const [selectedTerms, setSelectedTerms] = useState<number[]>([]);
-  const [selectedTermsInverted, setSelectedTermsInverted] = useState(false);
 
-  const someTermsSelected =
-    selectedTerms.length > 0 && selectedTerms.length < data.length;
-  const allTermsSelected = selectedTermsInverted
-    ? selectedTerms.length === 0
-    : selectedTerms.length === data.length;
-
-  const toggleSelectAllTerms = () => {
-    setSelectedTerms([]);
-    if (selectedTermsInverted && selectedTerms.length === data.length) {
-      return;
-    }
-    setSelectedTermsInverted(!selectedTermsInverted);
-  };
-  const toggleSelectedTerm = (termId: number) => {
-    if (selectedTerms.includes(termId)) {
-      setSelectedTerms(selectedTerms.filter((id) => id !== termId));
-    } else {
-      setSelectedTerms([...selectedTerms, termId]);
-    }
-  };
+  const selectionService = useSelectionService<number>({
+    totalCount: totalElements,
+    itemsAll: fetchDataIds,
+  });
 
   const [tablePosition, setTablePosition] = useState({ left: 0, right: 0 });
   useResizeObserver({
@@ -220,6 +212,30 @@ export const GlossaryViewBody: React.VFC<Props> = ({
         left: position + (direction === 'left' ? -350 : +350),
       });
     }
+  };
+
+  const renderItem = (index: number) => {
+    const row = data[index];
+    const isLast = index === data.length - 1;
+    if (isLast) {
+      onFetchNextPage?.();
+    }
+
+    return (
+      <GlossaryViewListRow
+        key={row.id}
+        organizationId={organizationId}
+        glossaryId={glossaryId}
+        item={row}
+        baseLanguage={baseLanguage}
+        onEditTranslation={(termId, languageTag) => {
+          setEditingTranslation([termId, languageTag]);
+        }}
+        editingTranslation={editingTranslation}
+        selectedLanguages={selectedLanguages}
+        selectionService={selectionService}
+      />
+    );
   };
 
   return (
@@ -296,9 +312,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
 
             <GlossaryViewListHeader
               selectedLanguages={selectedLanguages}
-              allTermsSelected={allTermsSelected}
-              someTermsSelected={someTermsSelected}
-              onToggleSelectAll={toggleSelectAllTerms}
+              selectionService={selectionService}
             />
 
             <ReactList
@@ -306,41 +320,29 @@ export const GlossaryViewBody: React.VFC<Props> = ({
               threshold={800}
               type="variable"
               itemSizeEstimator={(index, cache) => {
-                return cache[index] || 84;
+                return cache[index] || 84; // TODO: different size based on if item contains description and flags
               }}
               // @ts-ignore
               scrollParentGetter={() => window}
               length={data.length}
               useTranslate3d
-              itemRenderer={(index) => {
-                const row = data[index];
-                const isLast = index === data.length - 1;
-                if (isLast) {
-                  onFetchNextPage?.();
-                }
-
-                return (
-                  <GlossaryViewListRow
-                    key={row.id}
-                    organizationId={organizationId}
-                    glossaryId={glossaryId}
-                    item={row}
-                    baseLanguage={baseLanguage}
-                    onEditTranslation={(termId, languageTag) => {
-                      setEditingTranslation([termId, languageTag]);
-                    }}
-                    editingTranslation={editingTranslation}
-                    selectedLanguages={selectedLanguages}
-                    checked={
-                      selectedTerms.includes(row.id) != selectedTermsInverted
-                    }
-                    onCheckedToggle={() => toggleSelectedTerm(row.id)}
-                  />
-                );
-              }}
+              itemRenderer={renderItem}
             />
           </StyledContent>
         </StyledVerticalScroll>
+        <Portal>
+          <StyledBatchToolbarWrapper
+            sx={{
+              left: verticalScrollRef.current?.getBoundingClientRect?.()?.left,
+            }}
+          >
+            <GlossaryBatchToolbar
+              organizationId={organizationId}
+              glossaryId={glossaryId}
+              selectionService={selectionService}
+            />
+          </StyledBatchToolbarWrapper>
+        </Portal>
       </StyledContainer>
     </>
   );

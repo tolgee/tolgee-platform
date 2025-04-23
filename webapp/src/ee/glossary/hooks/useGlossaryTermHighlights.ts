@@ -36,5 +36,5 @@ export const useGlossaryTermHighlights = ({
     return [];
   }
 
-  return highlights.data;
+  return highlights.data._embedded?.glossaryTermHighlightDtoList ?? [];
 };

@@ -3,6 +3,7 @@ import React from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { GlossaryListTranslationCell } from 'tg.ee.module/glossary/components/GlossaryListTranslationCell';
 import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryListTermCell';
+import { SelectionService } from 'tg.service/useSelectionService';
 
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
@@ -27,8 +28,7 @@ type Props = {
   editingTranslation: [number | undefined, string | undefined];
   onEditTranslation: (termId?: number, languageTag?: string) => void;
   selectedLanguages: string[] | undefined;
-  checked: boolean;
-  onCheckedToggle: () => void;
+  selectionService: SelectionService<number>;
 };
 
 export const GlossaryViewListRow: React.VFC<Props> = ({
@@ -39,8 +39,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
   editingTranslation,
   onEditTranslation,
   selectedLanguages,
-  checked,
-  onCheckedToggle,
+  selectionService,
 }) => {
   const editEnabled = true; // TODO: Permissions handling
   const [editingTermId, editingLanguageTag] = editingTranslation;
@@ -53,8 +52,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
         item={item}
         editEnabled={editEnabled}
         baseLanguage={baseLanguage}
-        checked={checked}
-        onCheckedToggle={onCheckedToggle}
+        selectionService={selectionService}
       />
       {selectedLanguages?.map((tag, i) => {
         const realTag = item.flagNonTranslatable ? baseLanguage : tag;

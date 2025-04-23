@@ -5,6 +5,7 @@ import io.tolgee.ee.data.glossary.*
 import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.model.glossary.GlossaryTermTranslation.Companion.WORD_REGEX
@@ -45,6 +46,16 @@ class GlossaryTermService(
   ): Page<GlossaryTerm> {
     val glossary = glossaryService.get(organizationId, glossaryId)
     return glossaryTermRepository.findByGlossaryPaged(glossary, pageable, search, languageTags)
+  }
+
+  fun findAllIds(
+    organizationId: Long,
+    glossaryId: Long,
+    search: String?,
+    languageTags: Set<String>?,
+  ): List<Long> {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    return glossaryTermRepository.findAllIds(glossary, search, languageTags)
   }
 
 //  fun findAllPagedWithTranslations(
@@ -167,6 +178,22 @@ class GlossaryTermService(
 
   fun delete(glossaryTerm: GlossaryTerm) {
     glossaryTermRepository.delete(glossaryTerm)
+  }
+
+  fun deleteMultiple(
+    organizationId: Long,
+    glossaryId: Long,
+    termIds: Collection<Long>,
+  ) {
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    deleteMultiple(glossary, termIds)
+  }
+
+  fun deleteMultiple(
+    glossary: Glossary,
+    termIds: Collection<Long>,
+  ) {
+    glossaryTermRepository.deleteByGlossaryAndIdIn(glossary, termIds)
   }
 
   fun getHighlights(

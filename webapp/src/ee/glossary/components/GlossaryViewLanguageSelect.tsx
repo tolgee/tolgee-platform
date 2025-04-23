@@ -40,7 +40,11 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     options: {
       onSuccess: (data) => {
         if (value === undefined) {
-          onValueChange(data.filter((l) => !l.base).map((l) => l.tag));
+          onValueChange(
+            data._embedded?.glossaryLanguageDtoList
+              ?.filter((l) => !l.base)
+              ?.map((l) => l.tag) ?? []
+          );
         }
       },
     },
@@ -86,7 +90,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
 
   const data: OrganizationLanguageModel[] = useMemo(() => {
     const priorityLangs =
-      priorityDataLoadable.data
+      priorityDataLoadable.data?._embedded?.glossaryLanguageDtoList
         ?.toSorted((a, b) => {
           if (a.base === b.base) return 0;
           return a.base ? -1 : 1;

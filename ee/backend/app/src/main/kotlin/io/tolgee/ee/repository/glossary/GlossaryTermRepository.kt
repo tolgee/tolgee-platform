@@ -74,4 +74,29 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     search: String?,
     languageTags: Set<String>?,
   ): Page<GlossaryTerm>
+
+  @Query(
+    """
+    select te.id from GlossaryTerm te
+    left join GlossaryTermTranslation tr on tr.term.id = te.id
+      and tr.languageTag = te.glossary.baseLanguageTag
+      and (:languageTags is null or tr.languageTag in :languageTags)
+    where te.glossary = :glossary
+      and (
+        :search is null or
+        lower(te.description) like lower(concat('%', cast(:search as text), '%')) or
+        lower(tr.text) like lower(concat('%', cast(:search as text), '%'))
+      )
+  """,
+  )
+  fun findAllIds(
+    glossary: Glossary,
+    search: String?,
+    languageTags: Set<String>?,
+  ): List<Long>
+
+  fun deleteByGlossaryAndIdIn(
+    glossary: Glossary,
+    ids: Collection<Long>,
+  )
 }

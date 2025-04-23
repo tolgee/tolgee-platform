@@ -11,6 +11,7 @@ import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermModel
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermWithTranslationsModel
 import io.tolgee.ee.data.glossary.CreateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.data.glossary.CreateUpdateGlossaryTermResponse
+import io.tolgee.ee.data.glossary.DeleteMultipleGlossaryTermsRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.OrganizationRoleType
@@ -24,6 +25,7 @@ import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -63,6 +65,24 @@ class GlossaryTermController(
       term = glossaryTermModelAssembler.toModel(term),
       translation = translation?.let { glossaryTermTranslationModelAssembler.toModel(translation) },
     )
+  }
+
+  @DeleteMapping("/terms")
+  @Operation(summary = "Batch delete multiple terms")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @Transactional
+  fun deleteMultiple(
+    @PathVariable organizationId: Long,
+    @PathVariable glossaryId: Long,
+    @RequestBody @Valid dto: DeleteMultipleGlossaryTermsRequest,
+  ) {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
+    glossaryTermService.deleteMultiple(organizationId, glossaryId, dto.termIds)
   }
 
   @PutMapping("/terms/{termId:[0-9]+}")
@@ -169,5 +189,24 @@ class GlossaryTermController(
         languageTags?.toSet(),
       )
     return pagedAssembler.toModel(terms, glossaryTermWithTranslationsModelAssembler)
+  }
+
+  @GetMapping("/termsIds")
+  @Operation(summary = "Get all glossary terms ids")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @UseDefaultPermissions
+  fun getAllIds(
+    @PathVariable organizationId: Long,
+    @PathVariable glossaryId: Long,
+    @RequestParam("search", required = false) search: String?,
+    @RequestParam("languageTags", required = false) languageTags: List<String>?,
+  ): CollectionModel<Long> {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
+    val terms = glossaryTermService.findAllIds(organizationId, glossaryId, search, languageTags?.toSet())
+    return CollectionModel.of(terms)
   }
 }

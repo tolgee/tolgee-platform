@@ -11,6 +11,7 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.UseDefaultPermissions
+import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -34,7 +35,7 @@ class GlossaryLanguagesController(
     organizationId: Long,
     @PathVariable
     glossaryId: Long,
-  ): List<GlossaryLanguageDto> {
+  ): CollectionModel<GlossaryLanguageDto> {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
@@ -44,6 +45,6 @@ class GlossaryLanguagesController(
     val languages = glossaryTermTranslationService.getDistinctLanguageTags(organizationId, glossaryId)
     return languages.map {
       GlossaryLanguageDto(it, glossary.baseLanguageTag == it)
-    }
+    }.let { CollectionModel.of(it) }
   }
 }
