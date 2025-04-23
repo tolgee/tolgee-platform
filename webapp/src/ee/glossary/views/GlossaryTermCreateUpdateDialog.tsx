@@ -294,11 +294,6 @@ export const GlossaryTermCreateUpdateDialog = ({
               );
               onClose();
             },
-            onError() {
-              messageService.error(
-                <T keyName="glossary_term_delete_error_message" />
-              );
-            },
           }
         );
       },
