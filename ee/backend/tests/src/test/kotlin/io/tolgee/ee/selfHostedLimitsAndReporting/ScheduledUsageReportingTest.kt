@@ -2,6 +2,7 @@ package io.tolgee.ee.selfHostedLimitsAndReporting
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.api.SubscriptionStatus
+import io.tolgee.component.SchedulingManager
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.EeLicensingMockRequestUtil
@@ -44,7 +45,7 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
     fun before() {
       // We need to clear all scheduled tasks, because we can have some from other Spring Contexts created with
       // other test classes
-      ScheduledReportingManager.Companion.cancelAll()
+      SchedulingManager.Companion.cancelAll()
     }
   }
 

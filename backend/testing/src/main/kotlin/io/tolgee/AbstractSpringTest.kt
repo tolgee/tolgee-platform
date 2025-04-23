@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.activity.ActivityService
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.SchedulingManager
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
@@ -229,6 +230,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var objectMapper: ObjectMapper
+
+  @Autowired
+  lateinit var schedulingManager: SchedulingManager
 
   @BeforeEach
   fun clearCaches() {
