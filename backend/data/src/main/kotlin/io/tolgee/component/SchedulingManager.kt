@@ -36,7 +36,10 @@ class SchedulingManager(
     }
   }
 
-  fun scheduleWithFixedDelay(runnable: Runnable, period: Duration): String {
+  fun scheduleWithFixedDelay(
+    runnable: Runnable,
+    period: Duration,
+  ): String {
     val future = taskScheduler.scheduleWithFixedDelay(runnable, period)
     val id = UUID.randomUUID().toString()
     scheduledTasks[id] = future

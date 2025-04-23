@@ -20,7 +20,7 @@ import java.time.Duration
 class ScheduledReportingManager(
   private val eeProperties: EeProperties,
   private val reportingService: UsageReportingService,
-  private val schedulingManager: SchedulingManager
+  private val schedulingManager: SchedulingManager,
 ) : Logging {
   @EventListener(ApplicationReadyEvent::class)
   fun scheduleReporting() {
