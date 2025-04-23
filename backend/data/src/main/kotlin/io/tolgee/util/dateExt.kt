@@ -4,27 +4,22 @@ import org.apache.commons.lang3.ObjectUtils.max
 import org.apache.commons.lang3.ObjectUtils.min
 import java.util.*
 
-fun Date.addMonths(months: Int): Date {
-  val calendar = toUtcCalendar()
-  calendar.add(Calendar.MONTH, months)
-  return calendar.time
-}
+fun Date.addMonths(months: Int): Date = addToCalendar(Calendar.MONTH, months)
 
-fun Date.addDays(days: Int): Date {
-  val calendar = toUtcCalendar()
-  calendar.add(Calendar.DAY_OF_MONTH, days)
-  return calendar.time
-}
+fun Date.addDays(days: Int): Date = addToCalendar(Calendar.DAY_OF_MONTH, days)
 
-fun Date.addMinutes(minutes: Int): Date {
-  val calendar = toUtcCalendar()
-  calendar.add(Calendar.MINUTE, minutes)
-  return calendar.time
-}
+fun Date.addMinutes(minutes: Int): Date = addToCalendar(Calendar.MINUTE, minutes)
 
-fun Date.addSeconds(seconds: Int): Date {
+fun Date.addSeconds(seconds: Int): Date = addToCalendar(Calendar.SECOND, seconds)
+
+fun Date.addMilliseconds(milliseconds: Int): Date = addToCalendar(Calendar.MILLISECOND, milliseconds)
+
+private fun Date.addToCalendar(
+  field: Int,
+  amount: Int,
+): Date {
   val calendar = toUtcCalendar()
-  calendar.add(Calendar.SECOND, seconds)
+  calendar.add(field, amount)
   return calendar.time
 }
 
