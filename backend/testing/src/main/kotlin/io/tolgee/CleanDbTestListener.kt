@@ -11,10 +11,6 @@ import org.springframework.test.context.TestExecutionListener
 import java.sql.BatchUpdateException
 import java.sql.ResultSet
 import java.sql.Statement
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import javax.sql.DataSource
 import kotlin.system.measureTimeMillis
 
@@ -48,9 +44,7 @@ class CleanDbTestListener : TestExecutionListener {
         var i = 0
         while (true) {
           try {
-            withTimeout(3000) {
-              doClean(testContext)
-            }
+            doClean(testContext)
             break
           } catch (e: Exception) {
             when (e) {
@@ -63,8 +57,8 @@ class CleanDbTestListener : TestExecutionListener {
             }
             logger.info(
               "Failed to clean DB, retrying in 1s. Attempt ${i + 1}, " +
-                  "error: ${e.message}, " +
-                  "stacktrace: ${e.stackTraceToString()}"
+                "error: ${e.message}, " +
+                "stacktrace: ${e.stackTraceToString()}",
             )
             i++
           }
@@ -161,22 +155,5 @@ class CleanDbTestListener : TestExecutionListener {
 
   @Throws(Exception::class)
   override fun prepareTestInstance(testContext: TestContext) {
-  }
-
-  private fun withTimeout(
-    timeout: Long,
-    block: () -> Unit,
-  ) {
-    val executor = Executors.newSingleThreadExecutor()
-    val future: Future<Any> = executor.submit<Any>(block)
-
-    try {
-      println(future[timeout, TimeUnit.MILLISECONDS])
-    } catch (e: TimeoutException) {
-      future.cancel(true)
-      throw e
-    }
-
-    executor.shutdownNow()
   }
 }
