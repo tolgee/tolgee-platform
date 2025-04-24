@@ -117,6 +117,7 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
           onClose={() => setIsEditing(false)}
           onFinished={() => setIsEditing(false)}
           organizationId={organization.id}
+          organizationSlug={organization.slug}
           editGlossaryId={glossary.id}
         />
       )}

@@ -60,6 +60,7 @@ export const GlossariesListView = () => {
     <StyledWrapper>
       <BaseOrganizationSettingsView
         windowTitle={t('organization_glossaries_title')}
+        title={t('organization_glossaries_title')}
         onSearch={showSearch ? setSearch : undefined}
         searchPlaceholder={t('glossaries_search_placeholder')}
         link={LINKS.ORGANIZATION_GLOSSARIES}
@@ -84,6 +85,7 @@ export const GlossariesListView = () => {
             onClose={() => setCreateDialogOpen(false)}
             onFinished={() => setCreateDialogOpen(false)}
             organizationId={organization!.id}
+            organizationSlug={organization!.slug}
           />
         )}
         {glossaryFeature ? (

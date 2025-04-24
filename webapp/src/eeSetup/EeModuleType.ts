@@ -44,13 +44,14 @@ export type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
 
 export type GlossaryTermHighlightsProps = {
-  text: string;
+  text: string | null | undefined;
   languageTag: string;
   enabled?: boolean;
 };
 
-export type GlossaryTooltipProps = {
+export type GlossaryTermPreviewProps = {
   term: GlossaryTermWithTranslationsModel;
   languageTag: string;
   targetLanguageTag?: string;
+  showIcon?: boolean;
 };

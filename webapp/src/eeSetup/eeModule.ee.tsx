@@ -2,7 +2,7 @@
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
-import { ClipboardCheck } from '@untitled-ui/icons-react';
+import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
 import { Link, Route, Switch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
@@ -51,13 +51,17 @@ import {
   BillingMenuItemsProps,
   GlossaryTermHighlightDto,
   GlossaryTermHighlightsProps,
-  GlossaryTooltipProps,
+  GlossaryTermPreviewProps,
 } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 import { GlossaryView } from '../ee/glossary/views/GlossaryView';
 import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
-import { GlossaryTooltip as GlossaryTooltipInternal } from '../ee/glossary/components/GlossaryTooltip';
+import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
+import {
+  glossariesCount,
+  GlossariesPanel,
+} from '../ee/glossary/components/GlossariesPanel';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -264,6 +268,20 @@ export const translationPanelAdder = addPanel(
   { position: 'after', value: 'history' }
 );
 
+export const glossaryPanelAdder = addPanel(
+  [
+    {
+      id: 'glossaries',
+      icon: <BookClosed />,
+      name: <T keyName="translation_tools_glossaries" />,
+      component: GlossariesPanel,
+      itemsCountFunction: glossariesCount,
+      displayPanel: ({ editEnabled }) => editEnabled,
+    },
+  ],
+  { position: 'after', value: 'translation_memory' }
+);
+
 export const useAddDeveloperViewItems = () => {
   const { t } = useTranslate();
   return addDeveloperViewItems(
@@ -397,5 +415,5 @@ export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
 ): GlossaryTermHighlightDto[] => useGlossaryTermHighlightsInternal(props);
 
-export const GlossaryTooltip: React.VFC<GlossaryTooltipProps> =
-  GlossaryTooltipInternal;
+export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
+  GlossaryTermPreviewInternal;

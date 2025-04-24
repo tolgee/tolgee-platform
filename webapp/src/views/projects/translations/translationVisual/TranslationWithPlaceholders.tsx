@@ -9,8 +9,9 @@ import { styled, useTheme, Tooltip } from '@mui/material';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { placeholderToElement } from './placeholderToElement';
 import { useProject } from 'tg.hooks/useProject';
-import { GlossaryTooltip, useGlossaryTermHighlights } from 'tg.ee';
+import { GlossaryTermPreview, useGlossaryTermHighlights } from 'tg.ee';
 import { GlossaryTermHighlightDto } from '../../../../eeSetup/EeModuleType';
+import { TooltipCard } from 'tg.component/common/TooltipCard';
 
 const StyledWrapper = styled('div')`
   white-space: pre-wrap;
@@ -126,12 +127,13 @@ export const TranslationWithPlaceholders = ({
           key={index}
           placement="bottom-start"
           enterDelay={200}
-          components={{ Tooltip: 'div' }}
+          components={{ Tooltip: TooltipCard }}
           title={
-            <GlossaryTooltip
+            <GlossaryTermPreview
               term={modifier.highlight?.value}
               languageTag={locale}
               targetLanguageTag={targetLocale}
+              showIcon
             />
           }
         >

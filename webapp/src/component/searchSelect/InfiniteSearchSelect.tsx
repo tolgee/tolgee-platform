@@ -155,6 +155,7 @@ export function InfiniteSearchSelect<T, S>({
             sx: { minWidth: anchorEl.current?.offsetWidth },
           }}
           onClose={close}
+          onClick={close}
         >
           <SmoothProgress
             loading={Boolean(

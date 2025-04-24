@@ -83,11 +83,7 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
 
   const setValue = (v?: SelectedLanguageModel) =>
     context.setFieldValue(name, v);
-  const toggleSelected = (item: OrganizationLanguageModel) => {
-    if (value?.tag === item.tag) {
-      setValue(undefined);
-      return;
-    }
+  const setSelected = (item: OrganizationLanguageModel) => {
     const itemSelected: SelectedLanguageModel = {
       tag: item.tag,
       name: item.name,
@@ -102,7 +98,7 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
       <SelectItem
         selected={selected}
         label={<LanguageValue language={item} />}
-        onClick={() => toggleSelected(item)}
+        onClick={() => setSelected(item)}
       />
     );
   }

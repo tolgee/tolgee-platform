@@ -432,3 +432,14 @@ export const getTaskUrl = (projectId: number, taskNumber: number) => {
     [PARAMS.PROJECT_ID]: projectId,
   })}?number=${taskNumber}`;
 };
+
+export const getGlossaryTermUrl = (
+  organizationSlug: string,
+  glossaryId: number,
+  termId: number
+) => {
+  return `${LINKS.ORGANIZATION_GLOSSARY.build({
+    [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+    [PARAMS.GLOSSARY_ID]: glossaryId,
+  })}?termId=${termId}`;
+};

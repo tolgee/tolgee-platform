@@ -1,21 +1,29 @@
-import { Box, Card, styled, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  IconButton,
+  styled,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import React from 'react';
-import { GlossaryTooltipProps } from '../../../eeSetup/EeModuleType';
-import { ArrowNarrowRight, BookClosed } from '@untitled-ui/icons-react';
+import { GlossaryTermPreviewProps } from '../../../eeSetup/EeModuleType';
+import {
+  ArrowNarrowRight,
+  BookClosed,
+  LinkExternal02,
+} from '@untitled-ui/icons-react';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { FlagImage } from 'tg.component/languages/FlagImage';
 import { T } from '@tolgee/react';
+import { Link } from 'react-router-dom';
+import { getGlossaryTermUrl } from 'tg.constants/links';
 
-const StyledCard = styled(Card)`
+const StyledContainer = styled(Box)`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(1.5)};
-  padding: ${({ theme }) => theme.spacing(2)};
-  border-radius: ${({ theme }) => theme.spacing(2)};
-  margin-top: ${({ theme }) => theme.spacing(1)};
-  min-width: 400px;
-  max-width: 500px;
 `;
 
 const StyledInnerCard = styled(Card)`
@@ -25,11 +33,22 @@ const StyledInnerCard = styled(Card)`
 
 const StyledTitleWrapper = styled(Box)`
   display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledTitleTextWrapper = styled(Box)`
+  display: flex;
+  align-items: center;
   gap: ${({ theme }) => theme.spacing(1)};
   margin-right: ${({ theme }) => theme.spacing(2)};
 `;
 
 const StyledTitle = styled(Typography)``;
+
+const StyledGap = styled('div')`
+  flex-grow: 1;
+`;
 
 const StyledDescription = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.secondary};
@@ -40,11 +59,13 @@ const StyledEmptyDescription = styled(StyledDescription)`
   font-style: italic;
 `;
 
-export const GlossaryTooltip: React.VFC<GlossaryTooltipProps> = ({
+export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   term,
   languageTag,
   targetLanguageTag,
+  showIcon,
 }) => {
+  const theme = useTheme();
   const realLanguageTag = term.flagNonTranslatable
     ? term.glossary.baseLanguageTag
     : languageTag;
@@ -58,23 +79,39 @@ export const GlossaryTooltip: React.VFC<GlossaryTooltipProps> = ({
     ? languageInfo[targetLanguageTag]?.flags?.[0]
     : undefined;
   return (
-    <StyledCard>
+    <StyledContainer>
       <StyledTitleWrapper>
-        <BookClosed />
-        <StyledTitle variant="body2">{translation?.text}</StyledTitle>
-        {targetTranslation &&
-          languageTag != targetLanguageTag &&
-          !term.flagNonTranslatable && (
-            <>
-              <ArrowNarrowRight />
-              {targetLanguageFlag && (
-                <FlagImage width={20} flagEmoji={targetLanguageFlag} />
-              )}
-              <StyledTitle variant="body2">
-                {targetTranslation.text}
-              </StyledTitle>
-            </>
+        {showIcon && <BookClosed />}
+        <StyledTitleTextWrapper>
+          <StyledTitle variant="body2">{translation?.text}</StyledTitle>
+          {targetTranslation &&
+            languageTag != targetLanguageTag &&
+            !term.flagNonTranslatable && (
+              <>
+                <ArrowNarrowRight />
+                {targetLanguageFlag && (
+                  <FlagImage width={20} flagEmoji={targetLanguageFlag} />
+                )}
+                <StyledTitle variant="body2">
+                  {targetTranslation.text}
+                </StyledTitle>
+              </>
+            )}
+        </StyledTitleTextWrapper>
+        <StyledGap />
+        <IconButton
+          sx={{
+            marginRight: theme.spacing(-1),
+          }}
+          component={Link}
+          to={getGlossaryTermUrl(
+            term.glossary.organizationOwner.slug,
+            term.glossary.id,
+            term.id
           )}
+        >
+          <LinkExternal02 />
+        </IconButton>
       </StyledTitleWrapper>
       <GlossaryTermTags term={term} />
       <StyledInnerCard elevation={0}>
@@ -86,6 +123,6 @@ export const GlossaryTooltip: React.VFC<GlossaryTooltipProps> = ({
           </StyledEmptyDescription>
         )}
       </StyledInnerCard>
-    </StyledCard>
+    </StyledContainer>
   );
 };

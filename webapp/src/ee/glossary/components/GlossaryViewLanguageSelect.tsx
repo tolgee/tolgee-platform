@@ -40,6 +40,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     options: {
       onSuccess: (data) => {
         if (value === undefined) {
+          // TODO: Maybe it would be better to select all languages by default?
           onValueChange(
             data._embedded?.glossaryLanguageDtoList
               ?.filter((l) => !l.base)

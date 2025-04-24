@@ -14,6 +14,8 @@ import { useEffect, useRef, useState } from 'react';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import Box from '@mui/material/Box';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
+import { useHistory } from 'react-router-dom';
+import { LINKS, PARAMS } from 'tg.constants/links';
 
 type CreateGlossaryRequest = components['schemas']['CreateGlossaryRequest'];
 type UpdateGlossaryRequest = components['schemas']['UpdateGlossaryRequest'];
@@ -62,6 +64,7 @@ type Props = {
   onClose: () => void;
   onFinished: () => void;
   organizationId: number;
+  organizationSlug: string;
   editGlossaryId?: number;
 };
 
@@ -70,6 +73,7 @@ export const GlossaryCreateEditDialog = ({
   onClose,
   onFinished,
   organizationId,
+  organizationSlug,
   editGlossaryId,
 }: Props) => {
   const initialGlossaryId = useRef(editGlossaryId).current;
@@ -82,6 +86,7 @@ export const GlossaryCreateEditDialog = ({
   }, [editGlossaryId]);
 
   const { t } = useTranslate();
+  const history = useHistory();
 
   const { isEnabled } = useEnabledFeatures();
   const glossaryFeature = isEnabled('GLOSSARY');
@@ -111,11 +116,16 @@ export const GlossaryCreateEditDialog = ({
                 },
               },
               {
-                onSuccess() {
+                onSuccess({ id }) {
                   messageService.success(
                     <T keyName="glossary_create_success_message" />
                   );
-                  // TODO: redirect to glossary edit page
+                  history.push(
+                    LINKS.ORGANIZATION_GLOSSARY.build({
+                      [PARAMS.GLOSSARY_ID]: id,
+                      [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+                    })
+                  );
                   onFinished();
                 },
               }
@@ -253,7 +263,11 @@ export const GlossaryCreateEditDialog = ({
         />
       )}
       <DialogTitle>
-        <T keyName="glossary_create_title" />
+        {initialGlossaryId === undefined ? (
+          <T keyName="glossary_create_title" />
+        ) : (
+          <T keyName="glossary_edit_title" />
+        )}
       </DialogTitle>
 
       {form}

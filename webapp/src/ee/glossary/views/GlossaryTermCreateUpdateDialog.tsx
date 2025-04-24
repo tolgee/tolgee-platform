@@ -313,7 +313,7 @@ export const GlossaryTermCreateUpdateDialog = ({
             <StyledActions>
               {initialTermId !== undefined && (
                 <>
-                  <Button color="primary" onClick={onDelete}>
+                  <Button variant="outlined" onClick={onDelete}>
                     {t('global_delete_button')}
                   </Button>
                   <Box flexGrow={1} />
