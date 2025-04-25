@@ -63,13 +63,14 @@ class MtServiceConfigService(
   }
 
   private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> {
-    val enabled = services.asSequence()
-      .sortedBy { it.key.order }
-      .sortedByDescending { it.value.first.defaultPrimary }
-      .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
-      .map { it.key }
-      .map { MtServiceInfo(it, null) }
-      .toMutableList()
+    val enabled =
+      services.asSequence()
+        .sortedBy { it.key.order }
+        .sortedByDescending { it.value.first.defaultPrimary }
+        .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
+        .map { it.key }
+        .map { MtServiceInfo(it, null) }
+        .toMutableList()
 
     logger.debug {
       enabled.map { it.serviceType }.joinToString()

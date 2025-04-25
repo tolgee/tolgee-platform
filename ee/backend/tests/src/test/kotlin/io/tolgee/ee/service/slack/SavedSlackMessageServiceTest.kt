@@ -15,7 +15,6 @@ class SavedSlackMessageServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var savedSlackMessageService: SavedSlackMessageService
 
-
   @BeforeEach
   fun before() {
     SchedulingManager.cancelAll()

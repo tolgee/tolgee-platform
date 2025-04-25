@@ -141,7 +141,6 @@ class Project(
     return findLanguageOptional(tag).orElse(null)
   }
 
-
   /**
    * organizationOwner is a lateinit var, and in should never be null, but for some edge cases on some old
    * instances it can still be missing.

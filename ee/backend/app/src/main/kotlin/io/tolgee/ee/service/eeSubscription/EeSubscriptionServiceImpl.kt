@@ -47,7 +47,7 @@ class EeSubscriptionServiceImpl(
   private val client: TolgeeCloudLicencingClient,
   private val catchingService: EeSubscriptionErrorCatchingService,
   private val schedulingManager: SchedulingManager,
-  private val eeProperties: EeProperties
+  private val eeProperties: EeProperties,
 ) : EeSubscriptionProvider, Logging {
   var bypassSeatCountCheck = false
 
@@ -107,7 +107,7 @@ class EeSubscriptionServiceImpl(
   @Transactional
   fun scheduleSubscriptionChecking() {
     schedulingManager.scheduleWithFixedDelay({
-    refreshSubscription()
+      refreshSubscription()
     }, Duration.ofMillis(eeProperties.checkPeriodInMs))
   }
 
