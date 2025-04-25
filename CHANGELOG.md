@@ -1,3 +1,38 @@
+## [3.114.4](https://github.com/tolgee/tolgee-platform/compare/v3.114.3...v3.114.4) (2025-04-14)
+
+
+### Bug Fixes
+
+* tests in TranslationSuggestionControllerStreamingTest randomly failing with ConcurrentModificationException ([#3036](https://github.com/tolgee/tolgee-platform/issues/3036)) ([797de9f](https://github.com/tolgee/tolgee-platform/commit/797de9f791726bd4bf5851e5091d6df2ed6bcda9))
+
+## [3.114.3](https://github.com/tolgee/tolgee-platform/compare/v3.114.2...v3.114.3) (2025-04-12)
+
+
+### Bug Fixes
+
+* body width as basis for other calculations instead of window size ([#3032](https://github.com/tolgee/tolgee-platform/issues/3032)) ([b2e9cc3](https://github.com/tolgee/tolgee-platform/commit/b2e9cc3c0919b579324fa6dc7f10f1e9d1c0c7ee))
+
+## [3.114.2](https://github.com/tolgee/tolgee-platform/compare/v3.114.1...v3.114.2) (2025-04-10)
+
+
+### Bug Fixes
+
+* Billing administration menu items not filtered ([#3037](https://github.com/tolgee/tolgee-platform/issues/3037)) ([c7a6f1f](https://github.com/tolgee/tolgee-platform/commit/c7a6f1fd34d29e3ab8e9f55ea4fcfbe8d78121f3))
+
+## [3.114.1](https://github.com/tolgee/tolgee-platform/compare/v3.114.0...v3.114.1) (2025-04-09)
+
+
+### Bug Fixes
+
+* translations table scrollers ([#3030](https://github.com/tolgee/tolgee-platform/issues/3030)) ([47e6ee4](https://github.com/tolgee/tolgee-platform/commit/47e6ee4346a0f43fd316e5ac37ad82a827199ceb))
+
+# [3.114.0](https://github.com/tolgee/tolgee-platform/compare/v3.113.2...v3.114.0) (2025-04-01)
+
+
+### Features
+
+* Add translation update time to the stats endpoint ([#3018](https://github.com/tolgee/tolgee-platform/issues/3018)) ([99ce9d7](https://github.com/tolgee/tolgee-platform/commit/99ce9d73396bfc09413146a49f5a1bbda3605b67)), closes [#3008](https://github.com/tolgee/tolgee-platform/issues/3008)
+
 ## [3.113.2](https://github.com/tolgee/tolgee-platform/compare/v3.113.1...v3.113.2) (2025-03-26)
 
 

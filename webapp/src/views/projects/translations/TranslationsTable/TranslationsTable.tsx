@@ -71,7 +71,8 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledVerticalScroll = styled('div')`
-  overflow-x: scroll;
+  overflow-x: auto;
+  scrollbar-width: none;
   overflow-y: hidden;
   scroll-behavior: smooth;
 `;
@@ -212,6 +213,7 @@ export const TranslationsTable = ({ width }: Props) => {
 
   const [scrollLeft, scrollRight] = useScrollStatus(verticalScrollRef, [
     fullWidth,
+    mainContentWidth,
   ]);
 
   function handleScroll(direction: 'left' | 'right') {
@@ -225,11 +227,12 @@ export const TranslationsTable = ({ width }: Props) => {
   }
 
   const [tablePosition, setTablePosition] = useState({ left: 0, right: 0 });
+
   useEffect(() => {
     const position = tableRef.current?.getBoundingClientRect();
     if (position) {
       const left = position?.left;
-      const right = window.innerWidth - position?.right;
+      const right = document.body.offsetWidth - position?.right;
       setTablePosition({ left, right });
     }
   }, [tableRef.current, mainContentWidth]);

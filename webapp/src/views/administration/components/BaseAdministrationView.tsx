@@ -45,10 +45,12 @@ export const BaseAdministrationView: React.FC<Props> = ({
     <BaseSettingsView
       {...otherProps}
       navigation={[...navigationPrefix, ...(navigation || [])]}
-      menuItems={menuItems.map((item) => ({
-        label: item.label,
-        link: item.link.build(),
-      }))}
+      menuItems={menuItems
+        .filter((i) => i.condition())
+        .map((item) => ({
+          label: item.label,
+          link: item.link.build(),
+        }))}
       hideChildrenOnLoading={false}
       maxWidth="normal"
     >
