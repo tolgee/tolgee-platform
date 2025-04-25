@@ -49,7 +49,7 @@ class EeTolgeeTranslateApiServiceImpl(
       } ?: throw EmptyBodyException()
     } catch (e: BadRequest) {
       if (e.message?.contains(Message.SUBSCRIPTION_NOT_ACTIVE.code) == true) {
-        eeSubscriptionServiceImpl.checkSubscription()
+        eeSubscriptionServiceImpl.refreshSubscription()
         throw BadRequestException(Message.SUBSCRIPTION_NOT_ACTIVE)
       }
       throw e

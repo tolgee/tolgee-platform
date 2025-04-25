@@ -4,8 +4,10 @@ import io.tolgee.api.EeSubscriptionDto
 import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.SchedulingManager
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.ee.EeProperties
 import io.tolgee.ee.component.limitsAndReporting.SelfHostedLimitsProvider
 import io.tolgee.ee.component.limitsAndReporting.generic.SeatsLimitChecker
 import io.tolgee.ee.data.PrepareSetLicenseKeyDto
@@ -21,13 +23,15 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
+import java.time.Duration
 
 @Service
 @Suppress("SelfReferenceConstructorParameter")
@@ -42,6 +46,8 @@ class EeSubscriptionServiceImpl(
   private val selfHostedLimitsProvider: SelfHostedLimitsProvider,
   private val client: TolgeeCloudLicencingClient,
   private val catchingService: EeSubscriptionErrorCatchingService,
+  private val schedulingManager: SchedulingManager,
+  private val eeProperties: EeProperties
 ) : EeSubscriptionProvider, Logging {
   var bypassSeatCountCheck = false
 
@@ -97,10 +103,12 @@ class EeSubscriptionServiceImpl(
     return responseBody
   }
 
-  @Scheduled(fixedDelayString = """${'$'}{tolgee.ee.check-period-ms:300000}""")
+  @EventListener(ApplicationReadyEvent::class)
   @Transactional
-  fun checkSubscription() {
+  fun scheduleSubscriptionChecking() {
+    schedulingManager.scheduleWithFixedDelay({
     refreshSubscription()
+    }, Duration.ofMillis(eeProperties.checkPeriodInMs))
   }
 
   @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")

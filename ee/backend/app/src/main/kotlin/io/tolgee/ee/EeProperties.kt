@@ -16,4 +16,10 @@ class EeProperties(
    */
   @DocProperty(hidden = true)
   var scheduledReportingEnabled: Boolean = true,
+
+  /**
+   * How often is the license checked with Tolgee Cloud
+   */
+  @DocProperty(hidden = true)
+  var checkPeriodInMs: Long = 1000 * 60 * 5,
 )
