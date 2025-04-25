@@ -119,7 +119,7 @@ class SeatCountLimitTest : AbstractSpringTest() {
 
   private fun saveTestData(userCount: Long = 1): BaseTestData {
     val testData = BaseTestData()
-    (1..userCount).forEach {
+    repeat((1..userCount).count()) {
       testData.userAccountBuilder
     }
     testDataService.saveTestData(testData.root)
