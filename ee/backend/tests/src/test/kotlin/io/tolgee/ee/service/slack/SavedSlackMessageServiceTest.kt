@@ -3,6 +3,7 @@ package io.tolgee.ee.service.slack
 import io.tolgee.AbstractSpringTest
 import io.tolgee.component.SchedulingManager
 import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.addMinutes
@@ -15,9 +16,13 @@ class SavedSlackMessageServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var savedSlackMessageService: SavedSlackMessageService
 
+  @Autowired
+  lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
+
   @BeforeEach
   fun before() {
     SchedulingManager.cancelAll()
+    eeSubscriptionServiceImpl.delete()
   }
 
   @AfterEach

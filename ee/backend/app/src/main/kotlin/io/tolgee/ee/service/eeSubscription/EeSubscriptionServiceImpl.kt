@@ -200,4 +200,13 @@ class EeSubscriptionServiceImpl(
       logger.error("Cannot report error", e)
     }
   }
+
+  /**
+   * Deletes the license entry.
+   * Only for testing
+   */
+  fun delete() {
+    val entity = findSubscriptionEntity() ?: return
+    eeSubscriptionRepository.delete(entity)
+  }
 }
