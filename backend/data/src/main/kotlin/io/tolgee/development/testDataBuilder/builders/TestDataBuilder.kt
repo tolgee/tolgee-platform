@@ -67,6 +67,13 @@ class TestDataBuilder(fn: (TestDataBuilder.() -> Unit) = {}) {
     return builder
   }
 
+  fun addAdmin() {
+    addUserAccount {
+      username = "admin@admin.com"
+      role = UserAccount.Role.ADMIN
+    }
+  }
+
   init {
     fn(this)
   }

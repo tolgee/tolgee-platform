@@ -23,7 +23,7 @@ export const AssignCloudPlanDialog: FC<{
   const assignMutation = useBillingApiMutation({
     url: '/v2/administration/organizations/{organizationId}/billing/assign-cloud-plan',
     method: 'put',
-    invalidatePrefix: '/v2/administration/billing',
+    invalidatePrefix: ['/v2/administration/billing', '/v2/organizations'],
   });
 
   const { t } = useTranslate();
