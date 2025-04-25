@@ -41,9 +41,6 @@ class OrganizationRoleService(
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
 ) {
-
-	private val OWNER_OR_MAINTAINER_ROLES = setOf(OrganizationRoleType.OWNER, OrganizationRoleType.MAINTAINER)
-
   fun canUserViewStrict(
     userId: Long,
     organizationId: Long,
@@ -110,9 +107,9 @@ class OrganizationRoleService(
       OrganizationRoleType.OWNER ->
         isUserOwner(userId, organizationId)
 
-			OrganizationRoleType.MAINTAINER ->
-				isUserOwnerOrMaintainer(userId, organizationId)
-		}
+      OrganizationRoleType.MAINTAINER ->
+        isUserOwnerOrMaintainer(userId, organizationId)
+    }
   }
 
   fun checkUserIsOwner(
@@ -131,7 +128,7 @@ class OrganizationRoleService(
     }
   }
 
-	fun checkUserIsOwnerOrMaintainer(
+  fun checkUserIsOwnerOrMaintainer(
     userId: Long,
     organizationId: Long,
   ) {
@@ -378,5 +375,9 @@ class OrganizationRoleService(
   @Transactional
   fun getOwners(organization: Organization): List<UserAccount> {
     return organizationRoleRepository.getOwners(organization)
+  }
+
+  companion object {
+    private val OWNER_OR_MAINTAINER_ROLES = setOf(OrganizationRoleType.OWNER, OrganizationRoleType.MAINTAINER)
   }
 }

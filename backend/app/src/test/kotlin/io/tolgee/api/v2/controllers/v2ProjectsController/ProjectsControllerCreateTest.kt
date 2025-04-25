@@ -110,9 +110,9 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   fun `should create project organization when user maintainer`() {
     val userAccount = dbPopulator.createUserIfNotExists("testuser")
     val organization = dbPopulator.createOrganization("Test Organization", userAccount)
-		val maintainerAccount = dbPopulator.createUserIfNotExists("maintainerUser")
-		organizationRoleService.grantRoleToUser(maintainerAccount, organization, OrganizationRoleType.MAINTAINER)
-		loginAsUser("maintainerUser")
+    val maintainerAccount = dbPopulator.createUserIfNotExists("maintainerUser")
+    organizationRoleService.grantRoleToUser(maintainerAccount, organization, OrganizationRoleType.MAINTAINER)
+    loginAsUser("maintainerUser")
     val request =
       CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
