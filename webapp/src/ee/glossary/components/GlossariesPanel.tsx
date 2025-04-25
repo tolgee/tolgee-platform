@@ -6,7 +6,7 @@ import {
 import { useGlossaryTermHighlights } from '../hooks/useGlossaryTermHighlights';
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
 import { T } from '@tolgee/react';
-import { Box, Button, styled } from '@mui/material';
+import { Box, Button, styled, Tooltip } from '@mui/material';
 import { LinkExternal02 } from '@untitled-ui/icons-react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -51,17 +51,23 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
         </TabMessage>
         <StyledContent>
           <Box>
-            <Button
-              color="primary"
-              variant="outlined"
-              startIcon={<LinkExternal02 />}
-              component={Link}
-              to={LINKS.ORGANIZATION_GLOSSARIES.build({
-                [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner!.slug,
-              })}
+            <Tooltip
+              title={
+                <T keyName="translation_tools_glossary_open_glossaries_tooltip" />
+              }
             >
-              <T keyName="translation_tools_glossary_open_glossaries" />
-            </Button>
+              <Button
+                color="primary"
+                variant="outlined"
+                startIcon={<LinkExternal02 />}
+                component={Link}
+                to={LINKS.ORGANIZATION_GLOSSARIES.build({
+                  [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner!.slug,
+                })}
+              >
+                <T keyName="translation_tools_glossary_open_glossaries" />
+              </Button>
+            </Tooltip>
           </Box>
         </StyledContent>
       </StyledContainer>

@@ -12,9 +12,12 @@ import React, { useMemo, useState } from 'react';
 import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
 import { GlossaryViewBody } from 'tg.ee.module/glossary/components/GlossaryViewBody';
 import { GlossaryEmptyListMessage } from 'tg.ee.module/glossary/components/GlossaryEmptyListMessage';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 export const GlossaryView = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useUrlSearchState('search', {
+    defaultVal: '',
+  });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<
     string[] | undefined
@@ -24,10 +27,6 @@ export const GlossaryView = () => {
   const match = useRouteMatch();
   const glossaryId = match.params[PARAMS.GLOSSARY_ID];
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
-  // const [termId, setTermId] = useUrlSearchState('termId', {
-  //   defaultVal: undefined,
-  // });
-  // TODO: scroll to term and highlight it for a short period of time
 
   const { t } = useTranslate();
 
@@ -168,6 +167,7 @@ export const GlossaryView = () => {
         <GlossaryViewBody
           organizationId={organization.id}
           glossaryId={glossaryId}
+          loading={termsLoadable.isLoading}
           data={terms}
           fetchDataIds={fetchAllTermsIds}
           totalElements={totalTerms}
@@ -180,7 +180,6 @@ export const GlossaryView = () => {
           onSearch={setSearch}
         />
       ) : (
-        // TODO: separate empty view when filters are present (+ allow clear filters)
         <GlossaryEmptyListMessage
           loading={termsLoadable.isLoading}
           onCreate={onCreate}

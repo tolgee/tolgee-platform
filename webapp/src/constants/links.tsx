@@ -433,13 +433,14 @@ export const getTaskUrl = (projectId: number, taskNumber: number) => {
   })}?number=${taskNumber}`;
 };
 
-export const getGlossaryTermUrl = (
+export const getGlossaryTermSearchUrl = (
   organizationSlug: string,
   glossaryId: number,
-  termId: number
+  search: string
 ) => {
+  const encodedSearch = encodeURIComponent(search.toString());
   return `${LINKS.ORGANIZATION_GLOSSARY.build({
     [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
     [PARAMS.GLOSSARY_ID]: glossaryId,
-  })}?termId=${termId}`;
+  })}?search=${encodedSearch}`;
 };

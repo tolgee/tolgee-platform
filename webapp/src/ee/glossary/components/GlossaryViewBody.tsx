@@ -1,4 +1,4 @@
-import { Box, Portal, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, Portal, styled, useMediaQuery } from '@mui/material';
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { GlossaryViewLanguageSelect } from 'tg.ee.module/glossary/components/GlossaryViewLanguageSelect';
 import { BaseViewAddButton } from 'tg.component/layout/BaseViewAddButton';
@@ -14,6 +14,7 @@ import { useResizeObserver } from 'usehooks-ts';
 import { useScrollStatus } from 'tg.component/common/useScrollStatus';
 import { GlossaryBatchToolbar } from 'tg.ee.module/glossary/components/GlossaryBatchToolbar';
 import { useSelectionService } from 'tg.service/useSelectionService';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
@@ -144,6 +145,7 @@ const StyledBatchToolbarWrapper = styled(Box)`
 type Props = {
   organizationId: number;
   glossaryId: number;
+  loading?: boolean;
   data?: GlossaryTermWithTranslationsModel[];
   fetchDataIds: () => Promise<number[]>;
   totalElements?: number;
@@ -159,6 +161,7 @@ type Props = {
 export const GlossaryViewBody: React.VFC<Props> = ({
   organizationId,
   glossaryId,
+  loading,
   data = [],
   fetchDataIds,
   totalElements,
@@ -173,6 +176,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
   const tableRef = useRef<HTMLDivElement>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
+  const clearSearchRef = useRef<(() => void) | null>(null);
 
   const { t } = useTranslate();
 
@@ -249,6 +253,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
                   <SecondaryBarSearchField
                     onSearch={onSearch}
                     placeholder={t('glossary_search_placeholder')}
+                    clearCallbackRef={clearSearchRef}
                   />
                 </Box>
               </Box>
@@ -299,37 +304,53 @@ export const GlossaryViewBody: React.VFC<Props> = ({
             </StyledScrollArrow>
           </Portal>
         )}
-        <StyledVerticalScroll ref={verticalScrollRef}>
-          <StyledContent>
-            <StyleTermsCount>
-              <T
-                keyName="glossary_view_terms_count"
-                params={{
-                  count: totalElements ?? 0,
-                }}
+        {data.length === 0 ? (
+          <EmptyListMessage
+            loading={loading}
+            hint={
+              <Button
+                onClick={clearSearchRef.current ?? undefined}
+                color="primary"
+              >
+                <T keyName="glossary_terms_nothing_found_action" />
+              </Button>
+            }
+          >
+            <T keyName="glossary_terms_nothing_found" />
+          </EmptyListMessage>
+        ) : (
+          <StyledVerticalScroll ref={verticalScrollRef}>
+            <StyledContent>
+              <StyleTermsCount>
+                <T
+                  keyName="glossary_view_terms_count"
+                  params={{
+                    count: totalElements ?? 0,
+                  }}
+                />
+              </StyleTermsCount>
+
+              <GlossaryViewListHeader
+                selectedLanguages={selectedLanguages}
+                selectionService={selectionService}
               />
-            </StyleTermsCount>
 
-            <GlossaryViewListHeader
-              selectedLanguages={selectedLanguages}
-              selectionService={selectionService}
-            />
-
-            <ReactList
-              ref={reactListRef}
-              threshold={800}
-              type="variable"
-              itemSizeEstimator={(index, cache) => {
-                return cache[index] || 84; // TODO: different size based on if item contains description and flags
-              }}
-              // @ts-ignore
-              scrollParentGetter={() => window}
-              length={data.length}
-              useTranslate3d
-              itemRenderer={renderItem}
-            />
-          </StyledContent>
-        </StyledVerticalScroll>
+              <ReactList
+                ref={reactListRef}
+                threshold={800}
+                type="variable"
+                itemSizeEstimator={(index, cache) => {
+                  return cache[index] || 84; // TODO: different size based on if item contains description and flags?
+                }}
+                // @ts-ignore
+                scrollParentGetter={() => window}
+                length={data.length}
+                useTranslate3d
+                itemRenderer={renderItem}
+              />
+            </StyledContent>
+          </StyledVerticalScroll>
+        )}
         <Portal>
           <StyledBatchToolbarWrapper
             sx={{

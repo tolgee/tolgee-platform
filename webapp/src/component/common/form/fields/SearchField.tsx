@@ -9,6 +9,7 @@ const SearchField = (
   props: {
     initial?: string;
     onSearch?: (value: string) => void;
+    clearCallbackRef?: React.MutableRefObject<(() => void) | null>;
   } & ComponentProps<typeof TextField>
 ) => {
   const [search, setSearch] = useState(props.initial || '');
@@ -16,13 +17,20 @@ const SearchField = (
   const theme = useTheme();
   const { t } = useTranslate();
 
-  const { onSearch, ...otherProps } = props;
+  const { onSearch, clearCallbackRef, ...otherProps } = props;
 
   useEffect(() => {
     if (debouncedSearch !== props.initial) {
       onSearch?.(debouncedSearch);
     }
   }, [debouncedSearch]);
+
+  if (clearCallbackRef !== undefined) {
+    clearCallbackRef.current = () => {
+      setSearch('');
+      onSearch?.('');
+    };
+  }
 
   return (
     <TextField

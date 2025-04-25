@@ -3,6 +3,7 @@ import {
   Card,
   IconButton,
   styled,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material';
@@ -18,7 +19,7 @@ import { languageInfo } from '@tginternal/language-util/lib/generated/languageIn
 import { FlagImage } from 'tg.component/languages/FlagImage';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { getGlossaryTermUrl } from 'tg.constants/links';
+import { getGlossaryTermSearchUrl } from 'tg.constants/links';
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -99,19 +100,23 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
             )}
         </StyledTitleTextWrapper>
         <StyledGap />
-        <IconButton
-          sx={{
-            marginRight: theme.spacing(-1),
-          }}
-          component={Link}
-          to={getGlossaryTermUrl(
-            term.glossary.organizationOwner.slug,
-            term.glossary.id,
-            term.id
-          )}
+        <Tooltip
+          title={<T keyName="glossary_term_preview_open_full_view_tooltip" />}
         >
-          <LinkExternal02 />
-        </IconButton>
+          <IconButton
+            sx={{
+              marginRight: theme.spacing(-1),
+            }}
+            component={Link}
+            to={getGlossaryTermSearchUrl(
+              term.glossary.organizationOwner.slug,
+              term.glossary.id,
+              translation?.text || ''
+            )}
+          >
+            <LinkExternal02 />
+          </IconButton>
+        </Tooltip>
       </StyledTitleWrapper>
       <GlossaryTermTags term={term} />
       <StyledInnerCard elevation={0}>
