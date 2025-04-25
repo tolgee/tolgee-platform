@@ -13,7 +13,11 @@ export const PlanPricesAndLimits: FC<{
 }> = ({ parentName = '', canEditPrices, isPayAsYouGo, metricType }) => {
   return (
     <Wrapper canEditPrices={canEditPrices}>
-      <PlanPricesFields parentName={parentName} isPayAsYouGo={isPayAsYouGo} />
+      <PlanPricesFields
+        parentName={parentName}
+        isPayAsYouGo={isPayAsYouGo}
+        metricType={metricType}
+      />
       <PlanIncludedUsageFields
         parentName={parentName}
         metricType={metricType}

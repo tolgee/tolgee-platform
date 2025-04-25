@@ -9,14 +9,14 @@ import { CloudPlanFormData, SelfHostedEePlanFormData } from '../cloud/types';
 import { useSetZeroPricesWhenFree } from '../../../../subscriptions/components/generic/useSetZeroPricesWhenFree';
 
 export interface PlanPricesFieldsProps {
-  parentName?: string;
-  metricType?: PlanType['metricType'];
+  parentName: string;
+  metricType: PlanType['metricType'];
   isPayAsYouGo: boolean;
 }
 
 export const PlanPricesFields: FC<PlanPricesFieldsProps> = ({
-  parentName = '',
-  metricType = 'KEYS_SEATS',
+  parentName,
+  metricType,
   isPayAsYouGo,
 }) => {
   const { values } = usePlanFormValues<
