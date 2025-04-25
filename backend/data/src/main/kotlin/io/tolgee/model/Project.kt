@@ -141,6 +141,15 @@ class Project(
     return findLanguageOptional(tag).orElse(null)
   }
 
+
+  /**
+   * organizationOwner is a lateinit var, and in should never be null, but for some edge cases on some old
+   * instances it can still be missing.
+   */
+  fun isOrganizationOwnerInitialized(): Boolean {
+    return this::organizationOwner.isInitialized
+  }
+
   companion object {
     @Configurable
     class ProjectListener {
