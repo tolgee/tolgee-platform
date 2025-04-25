@@ -79,6 +79,10 @@ export const assertMessage = (message: string) => {
   return gcy('notistack-snackbar').should('contain', message);
 };
 
+export const assertNotMessage = (message: string) => {
+  return gcy('notistack-snackbar').should('not.contain', message);
+};
+
 export const assertTooltip = (message: string) => {
   cy.xpath("//*[@role='tooltip']").should('contain', message);
 };

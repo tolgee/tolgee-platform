@@ -63,7 +63,7 @@ class EeKeyCountReportingListener(
     }
   }
 
-  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   fun onOrganizationDeleted(event: BeforeOrganizationDeleteEvent) {
     onKeyCountChanged()
   }
