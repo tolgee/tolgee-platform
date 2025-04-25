@@ -183,26 +183,13 @@ dependencies {
 
 }
 
-def setTestRetry(test) {
-    boolean isCiServer = System.getenv().containsKey("CI")
-    boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
-
-    test.retry {
-        if (isCiServer) {
-            maxFailures = 20
-            maxRetries = 5
-        }
-        failOnPassedAfterRetry = !isRelease
-    }
-}
-
 test {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     testLogging {
         events = ["passed", "failed", "skipped"]
     }
-    setTestRetry(it)
+    rootProject.setTestRetry(it)
 }
 
 tasks.register('runContextRecreatingTests', Test) {
@@ -211,7 +198,7 @@ tasks.register('runContextRecreatingTests', Test) {
         includeTags "contextRecreating"
     }
     maxHeapSize = "4096m"
-    setTestRetry(it)
+    rootProject.setTestRetry(it)
 }
 
 tasks.register('runStandardTests', Test) {
@@ -220,7 +207,7 @@ tasks.register('runStandardTests', Test) {
         excludeTags "contextRecreating", "websocket"
     }
     maxHeapSize = "4096m"
-    setTestRetry(it)
+    rootProject.setTestRetry(it)
 }
 
 tasks.register('runWebsocketTests', Test) {
@@ -229,7 +216,7 @@ tasks.register('runWebsocketTests', Test) {
         includeTags "websocket"
     }
     maxHeapSize = "4096m"
-    setTestRetry(it)
+    rootProject.setTestRetry(it)
 }
 
 tasks.register('runWithoutEeTests', Test) {
@@ -238,7 +225,7 @@ tasks.register('runWithoutEeTests', Test) {
         includeTags "withoutEe"
     }
     maxHeapSize = "4096m"
-    setTestRetry(it)
+    rootProject.setTestRetry(it)
 }
 
 springBoot {
