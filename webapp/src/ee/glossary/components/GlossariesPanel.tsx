@@ -59,6 +59,7 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
               <Button
                 color="primary"
                 variant="outlined"
+                size="small"
                 startIcon={<LinkExternal02 />}
                 component={Link}
                 to={LINKS.ORGANIZATION_GLOSSARIES.build({
