@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-imports */
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
-import React from 'react';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
 import { ClipboardCheck } from '@untitled-ui/icons-react';

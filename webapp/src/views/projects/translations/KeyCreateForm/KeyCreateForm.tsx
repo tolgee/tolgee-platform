@@ -84,7 +84,6 @@ export const KeyCreateForm: React.FC<Props> = ({
       },
       {
         onSuccess(data) {
-          console.log('success');
           messageService.success(<T keyName="translations_key_created" />);
           onSuccess?.(data);
           refetchUsage();
