@@ -147,7 +147,7 @@ class EeSubscriptionServiceImpl(
 
   private fun handleConstantlyFailingRemoteCheck(subscription: EeSubscription) {
     subscription.lastValidCheck?.let {
-      val isConstantlyFailing = currentDateProvider.date.time - it.time > 1000 * 60 * 60 * 24 * 2
+      val isConstantlyFailing = currentDateProvider.date.time - it.time > Duration.ofDays(2).toMillis()
       if (isConstantlyFailing) {
         logger.error(
           "Remote check for local subscription has been failing for too long. " +

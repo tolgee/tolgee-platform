@@ -23,7 +23,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import java.util.*
 import kotlin.properties.Delegates
 
 @Suppress("SpringBootApplicationProperties")
@@ -51,6 +50,7 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
     schedulingManager.cancelAll()
     setCheckPeriodProperty()
     eeSubscriptionServiceImpl.scheduleSubscriptionChecking()
+    currentDateProvider.forcedDate = currentDateProvider.date
   }
 
   @AfterEach
@@ -60,16 +60,7 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
 
   @Test
   fun `it checks for subscription changes`() {
-    eeSubscriptionRepository.save(
-      EeSubscription().apply {
-        licenseKey = "mock"
-        name = "Plaaan"
-        status = SubscriptionStatus.ACTIVE
-        currentPeriodEnd = Date()
-        enabledFeatures = Feature.entries.toTypedArray()
-        lastValidCheck = Date()
-      },
-    )
+    prepareSubscription()
 
     eeLicenseMockRequestUtil.mock {
       whenReq {
@@ -94,16 +85,7 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
 
   @Test
   fun `cancels subscription when other instance uses the key`() {
-    eeSubscriptionRepository.save(
-      EeSubscription().apply {
-        licenseKey = "mock"
-        name = "Plaaan"
-        status = SubscriptionStatus.ACTIVE
-        currentPeriodEnd = Date()
-        enabledFeatures = Feature.entries.toTypedArray()
-        lastValidCheck = Date()
-      },
-    )
+    prepareSubscription()
 
     eeLicenseMockRequestUtil.mock {
       whenReq {
@@ -142,5 +124,18 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
   private fun setCheckPeriodProperty() {
     oldCheckPeriodProperty = eeProperties.checkPeriodInMs
     eeProperties.checkPeriodInMs = 10
+  }
+
+  private fun EeSubscriptionProviderImplTest.prepareSubscription() {
+    eeSubscriptionRepository.save(
+      EeSubscription().apply {
+        licenseKey = "mock"
+        name = "Plaaan"
+        status = SubscriptionStatus.ACTIVE
+        currentPeriodEnd = currentDateProvider.date
+        enabledFeatures = Feature.entries.toTypedArray()
+        lastValidCheck = currentDateProvider.date
+      },
+    )
   }
 }
