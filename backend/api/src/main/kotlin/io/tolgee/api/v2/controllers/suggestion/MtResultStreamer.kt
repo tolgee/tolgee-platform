@@ -147,10 +147,12 @@ class MtResultStreamer(
 
   private fun OutputStreamWriter.writeJsonSync(data: Any) {
     val string = objectMapper.writeValueAsString(data)
+    logger.debug { "Sending to client: $string" }
     synchronized(this) {
       this.write(string + "\n")
       this.flush()
     }
+    logger.debug { "Sent to client using sync writer" }
   }
 
   private fun OutputStreamWriter.closeSync() {

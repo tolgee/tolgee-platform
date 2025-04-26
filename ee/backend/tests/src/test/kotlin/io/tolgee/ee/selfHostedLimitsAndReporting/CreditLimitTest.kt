@@ -6,6 +6,7 @@ import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
@@ -53,13 +54,11 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   fun setup() {
     saveTestDataAndPrepare()
     httpClientMocker = HttpClientMocker(restTemplate)
-    disableOtherMtProviders()
+    initMachineTranslationProperties(
+      freeCreditsAmount = -1,
+      enabledServices = setOf(MtServiceType.TOLGEE),
+    )
     whenever(internalProperties.fakeMtProviders).thenReturn(false)
-  }
-
-  private fun disableOtherMtProviders() {
-    googleMachineTranslationProperties.apiKey = null
-    awsMachineTranslationProperties.accessKey = null
   }
 
   @Test
@@ -90,7 +89,7 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
             ),
           )
             .andDo {
-              it.asyncResult
+              it.getAsyncResult(10000)
             }
             .andIsOk.andReturn().response.contentAsString
         val parsed = NdJsonParser(objectMapper).parse(response)
