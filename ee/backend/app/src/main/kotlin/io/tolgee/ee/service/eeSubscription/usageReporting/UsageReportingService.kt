@@ -59,7 +59,7 @@ class UsageReportingService(
     try {
       lockingProvider.withLocking("report_usage_periodically") {
         val subscription = eeSubscriptionServiceImpl.findSubscriptionDto() ?: return@withLocking
-        val usageToReport = usageToReportService.getUsageToReport()
+        val usageToReport = usageToReportService.findOrCreateUsageToReport()
 
         if (isReportingTooSoon(usageToReport)) {
           return@withLocking
@@ -123,7 +123,7 @@ class UsageReportingService(
    * @return true if the last report was sent less than 60 seconds ago, false otherwise
    */
   private fun isReportingTooSoon(): Boolean {
-    val usageToReport = usageToReportService.getUsageToReport()
+    val usageToReport = usageToReportService.findOrCreateUsageToReport()
     return isReportingTooSoon(usageToReport)
   }
 

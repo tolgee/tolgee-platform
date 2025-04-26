@@ -6,6 +6,7 @@ import io.tolgee.ee.data.usageReporting.UsageToReportDto
 import io.tolgee.ee.model.UsageToReport
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -41,14 +42,16 @@ class UsageToReportService(
    * @return A DTO containing the current usage data and reporting status
    */
   @Cacheable(Caches.EE_LAST_REPORTED_USAGE, key = "1")
-  fun getUsageToReport(): UsageToReportDto {
-    val dto = findDto()
+  fun findOrCreateUsageToReport(): UsageToReportDto {
+    return tryUntilItDoesntBreakConstraint {
+      val dto = findDto()
 
-    if (dto == null) {
-      create()
+      if (dto == null) {
+        create()
+      }
+
+      findDto() ?: throw IllegalStateException("Usage to report should be present in database")
     }
-
-    return findDto() ?: throw IllegalStateException("Usage to report should be present in database")
   }
 
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
@@ -82,6 +85,7 @@ class UsageToReportService(
         reportedAt = Date(1)
       }
     entityManager.persist(entity)
+    entityManager.flush()
   }
 
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
