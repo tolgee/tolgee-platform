@@ -53,6 +53,7 @@ class EeSubscriptionServiceImpl(
 
   @Cacheable(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   override fun findSubscriptionDto(): EeSubscriptionDto? {
+    logger.debug("EE subscription is being fetched from database.")
     return this.findSubscriptionEntity()?.toDto()
   }
 
@@ -66,6 +67,7 @@ class EeSubscriptionServiceImpl(
 
   @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun setLicenceKey(licenseKey: String): EeSubscription {
+    logger.debug("Setting new licence key for local subscription: $licenseKey. Evicting cache.")
     val seats = userAccountService.countAllEnabled()
     val keys = keyService.countAllOnInstance()
     this.findSubscriptionEntity()?.let {
@@ -114,7 +116,7 @@ class EeSubscriptionServiceImpl(
 
   @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun refreshSubscription() {
-    logger.debug("Refreshing local ee subscription...")
+    logger.debug("Refreshing local ee subscription, evicting cache.")
     val subscription = this.findSubscriptionEntity()
     if (subscription != null) {
       val responseBody =
@@ -176,6 +178,7 @@ class EeSubscriptionServiceImpl(
 
   @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun save(subscription: EeSubscription): EeSubscription {
+    logger.debug("Saving local ee subscription, evicting cache.")
     return eeSubscriptionRepository.save(subscription)
   }
 
@@ -211,7 +214,9 @@ class EeSubscriptionServiceImpl(
    * Deletes the license entry.
    * Only for testing
    */
+  @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun delete() {
+    logger.debug("Deleting local ee subscription, evicting cache.")
     val entity = findSubscriptionEntity() ?: return
     eeSubscriptionRepository.delete(entity)
   }

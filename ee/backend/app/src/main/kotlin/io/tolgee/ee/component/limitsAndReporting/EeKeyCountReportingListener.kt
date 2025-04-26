@@ -78,8 +78,13 @@ class EeKeyCountReportingListener(
    */
   fun onKeyCountChanged() {
     try {
+      logger.debug("Key count change detected. Reporting...")
       val keys = keyService.countAllOnInstance()
       val subscription = eeSubscriptionService.findSubscriptionDto()
+      if (subscription != null)
+        {
+          logger.debug("Local subscription with license key ${subscription.licenseKey} found.")
+        }
       usageReportingService.reportUsage(subscription = subscription, keys = keys)
     } catch (e: NoActiveSubscriptionException) {
       logger.debug("No active subscription, skipping usage reporting.")
