@@ -37,4 +37,6 @@ class InternalProperties {
   var disableInitialUserCreation: Boolean = false
 
   var useInMemoryFileStorage: Boolean = false
+
+  var clearLiquibaseChecksums: Boolean = false
 }

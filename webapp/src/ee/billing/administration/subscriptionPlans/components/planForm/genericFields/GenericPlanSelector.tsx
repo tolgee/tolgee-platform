@@ -4,6 +4,7 @@ import {
 } from 'tg.component/searchSelect/SearchSelect';
 import React from 'react';
 import { T } from '@tolgee/react';
+import { Box } from '@mui/material';
 
 type GenericPlanType = { id: number; name: string };
 
@@ -24,7 +25,11 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   plans,
 }: GenericPlanSelector<T>) => {
   if (!plans) {
-    return <T keyName="administration-assign-plan-no-plans-to-assign" />;
+    return (
+      <Box>
+        <T keyName="administration-assign-plan-no-plans-to-assign" />
+      </Box>
+    );
   }
 
   const selectItems = plans.map(

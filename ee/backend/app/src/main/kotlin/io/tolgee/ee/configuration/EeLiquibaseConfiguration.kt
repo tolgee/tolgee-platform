@@ -1,6 +1,7 @@
 package io.tolgee.ee.configuration
 
 import io.tolgee.PostgresRunner
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import liquibase.integration.spring.SpringLiquibase
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.context.annotation.Bean
@@ -11,7 +12,9 @@ import javax.sql.DataSource
 @Configuration
 @EnableJpaRepositories("io.tolgee.ee.repository")
 @EntityScan(basePackages = ["io.tolgee.ee.model"])
-class EeLiquibaseConfiguration {
+class EeLiquibaseConfiguration(
+  val tolgeeProperties: TolgeeProperties,
+) {
   @Bean("ee-liquibase")
   fun liquibase(
     dataSource: DataSource,
@@ -24,6 +27,7 @@ class EeLiquibaseConfiguration {
     liquibase.changeLog = "classpath:db/changelog/ee-schema.xml"
     liquibase.defaultSchema = "ee"
     liquibase.liquibaseSchema = "public"
+    liquibase.isClearCheckSums = tolgeeProperties.internal.clearLiquibaseChecksums
 
     return liquibase
   }
