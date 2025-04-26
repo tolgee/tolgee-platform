@@ -17,7 +17,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -28,7 +27,6 @@ import java.util.*
 import kotlin.properties.Delegates
 
 @Suppress("SpringBootApplicationProperties")
-@SpringBootTest(properties = ["tolgee.ee.check-period-ms=500"])
 class EeSubscriptionProviderImplTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeProperties: EeProperties
@@ -66,9 +64,9 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
       EeSubscription().apply {
         licenseKey = "mock"
         name = "Plaaan"
-        status = SubscriptionStatus.ERROR
+        status = SubscriptionStatus.ACTIVE
         currentPeriodEnd = Date()
-        enabledFeatures = Feature.values()
+        enabledFeatures = Feature.entries.toTypedArray()
         lastValidCheck = Date()
       },
     )

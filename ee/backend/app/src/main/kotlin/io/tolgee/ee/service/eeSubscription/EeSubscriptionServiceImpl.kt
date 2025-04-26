@@ -106,6 +106,7 @@ class EeSubscriptionServiceImpl(
   @EventListener(ApplicationReadyEvent::class)
   @Transactional
   fun scheduleSubscriptionChecking() {
+    logger.debug("Scheduling ee subscription checking with period ${eeProperties.checkPeriodInMs} ms.")
     schedulingManager.scheduleWithFixedDelay({
       refreshSubscription()
     }, Duration.ofMillis(eeProperties.checkPeriodInMs))
@@ -113,6 +114,7 @@ class EeSubscriptionServiceImpl(
 
   @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")
   fun refreshSubscription() {
+    logger.debug("Refreshing local ee subscription...")
     val subscription = this.findSubscriptionEntity()
     if (subscription != null) {
       val responseBody =
@@ -145,6 +147,10 @@ class EeSubscriptionServiceImpl(
     subscription.lastValidCheck?.let {
       val isConstantlyFailing = currentDateProvider.date.time - it.time > 1000 * 60 * 60 * 24 * 2
       if (isConstantlyFailing) {
+        logger.error(
+          "Remote check for local subscription has been failing for too long. " +
+            "Setting status to ERROR.",
+        )
         subscription.status = SubscriptionStatus.ERROR
         self.save(subscription)
       }
