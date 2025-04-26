@@ -22,13 +22,9 @@ export const CloudPlanSelector: FC<
     },
   });
 
-  if (!plansLoadable?.data?._embedded?.plans) {
-    return null;
-  }
-
   return (
     <GenericPlanSelector
-      plans={plansLoadable.data._embedded.plans}
+      plans={plansLoadable?.data?._embedded?.plans}
       {...props}
     />
   );

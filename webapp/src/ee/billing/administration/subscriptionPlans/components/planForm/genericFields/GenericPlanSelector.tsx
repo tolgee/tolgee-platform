@@ -3,6 +3,7 @@ import {
   SelectItem,
 } from 'tg.component/searchSelect/SearchSelect';
 import React from 'react';
+import { T } from '@tolgee/react';
 
 type GenericPlanType = { id: number; name: string };
 
@@ -12,7 +13,7 @@ export interface GenericPlanSelector<T extends GenericPlanType> {
   value?: number;
   onChange?: (value: number) => void;
   selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
-  plans: T[];
+  plans?: T[];
 }
 
 export const GenericPlanSelector = <T extends GenericPlanType>({
@@ -22,6 +23,10 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   onPlanChange,
   plans,
 }: GenericPlanSelector<T>) => {
+  if (!plans) {
+    return <T keyName="administration-assign-plan-no-plans-to-assign" />;
+  }
+
   const selectItems = plans.map(
     (plan) =>
       ({

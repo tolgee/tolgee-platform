@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { GenericPlanSelector } from '../../genericFields/GenericPlanSelector';
+import { T } from '@tolgee/react';
 
 export const SelfHostedEePlanSelector: FC<
   Omit<
@@ -19,13 +20,9 @@ export const SelfHostedEePlanSelector: FC<
     },
   });
 
-  if (!plansLoadable?.data?._embedded?.plans) {
-    return null;
-  }
-
   return (
     <GenericPlanSelector
-      plans={plansLoadable.data._embedded.plans}
+      plans={plansLoadable.data?._embedded?.plans}
       {...props}
     />
   );

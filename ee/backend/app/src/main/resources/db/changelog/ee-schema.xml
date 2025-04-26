@@ -90,14 +90,14 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1744282308926-1">
         <addColumn tableName="ee_subscription">
-            <column name="keys_limit" type="BIGINT">
+            <column name="keys_limit" type="BIGINT" defaultValue="-1">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1744282308926-2">
         <addColumn tableName="ee_subscription">
-            <column name="seats_limit" type="BIGINT">
+            <column name="seats_limit" type="BIGINT" defaultValue="-1">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
