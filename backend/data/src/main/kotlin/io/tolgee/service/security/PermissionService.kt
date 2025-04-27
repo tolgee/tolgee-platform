@@ -225,7 +225,7 @@ class PermissionService(
       when {
         organizationRole == OrganizationRoleType.OWNER -> ComputedPermissionDto.ORGANIZATION_OWNER
         directPermission != null -> ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
-        organizationRole == OrganizationRoleType.MEMBER ->
+        organizationRole == OrganizationRoleType.MEMBER || organizationRole == OrganizationRoleType.MAINTAINER ->
           ComputedPermissionDto(
             organizationBasePermission,
             ComputedPermissionOrigin.ORGANIZATION_BASE,

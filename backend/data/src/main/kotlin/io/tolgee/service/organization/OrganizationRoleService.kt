@@ -296,6 +296,13 @@ class OrganizationRoleService(
     self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
   }
 
+  fun grantMaintainerRoleToUser(
+    user: UserAccount,
+    organization: Organization,
+  ) {
+    self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MAINTAINER)
+  }
+
   fun grantOwnerRoleToUser(
     user: UserAccount,
     organization: Organization,
