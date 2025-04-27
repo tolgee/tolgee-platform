@@ -25,6 +25,5 @@ open class EeSubscriptionModel(
   val status: SubscriptionStatus,
   val nonCommerical: Boolean,
   var lastValidCheck: Date?,
-  // TODO: TEST THIS
   val isPayAsYouGo: Boolean,
 ) : RepresentationModel<EeSubscriptionModel>(), Serializable

@@ -5,15 +5,14 @@ import { useTranslate } from '@tolgee/react';
 import { SelfHostedEePlanModel } from '../../../../Subscriptions/selfHosted/PlansSelfHostedList';
 
 type SelfHostedPlanSelectorFieldProps = {
-  name: string;
   onPlanChange?: (plan: SelfHostedEePlanModel) => void;
 };
 
 export const SelfHostedPlanSelectorField: FC<
   SelfHostedPlanSelectorFieldProps
-> = ({ name, onPlanChange: onPlanChangeProp }) => {
+> = ({ onPlanChange: onPlanChangeProp }) => {
   const { t } = useTranslate();
-
+  const name = 'planId';
   const [field, meta] = useField(name);
   const context = useFormikContext();
 

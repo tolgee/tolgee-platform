@@ -200,7 +200,7 @@ declare namespace DataCy {
         "edit-pat-dialog-description-input" |
         "edit-pat-dialog-title" |
         "empty-scope-dialog" |
-        "error-message-" |
+        "error-message" |
         "expected-usage-dialog" |
         "expiration-date-field" |
         "expiration-date-picker" |

@@ -3,7 +3,7 @@ import { useFieldError } from 'tg.component/common/form/fields/useFieldError';
 import React from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useTranslate } from '@tolgee/react';
-import { CloudPlanSelector } from '../../../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanSelector';
+import { CloudPlanSelector } from '../../../../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanSelector';
 
 type CloudPlanSelectorFieldProps = {
   organizationId?: number;

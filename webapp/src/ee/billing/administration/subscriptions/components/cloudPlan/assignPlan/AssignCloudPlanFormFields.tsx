@@ -6,15 +6,16 @@ import {
   Switch as MuiSwitch,
   Tooltip,
 } from '@mui/material';
-import { AssignTrialDatePicker } from './AssignTrialDatePicker';
+import { AssignTrialDatePickerField } from './fields/AssignTrialDatePickerField';
 import { T, useTranslate } from '@tolgee/react';
-import { AssignCloudPlanSelectorField } from './AssignCloudPlanSelectorField';
+import { AssignCloudPlanSelectorField } from './fields/AssignCloudPlanSelectorField';
 import { CloudPlanFields } from '../../../../subscriptionPlans/components/planForm/cloud/fields/CloudPlanFields';
 import { AssignCloudPlanValuesType } from './AssignCloudPlanDialog';
 import { FormikProps, useFormikContext } from 'formik';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { getCloudPlanInitialValues } from '../../../../subscriptionPlans/components/planForm/cloud/getCloudPlanInitialValues';
 import { Switch } from 'tg.component/common/form/fields/Switch';
+import { AssignCloudPlanTrialSwitchField } from './fields/AssignCloudPlanTrialSwitchField';
 
 type AssignCloudPlanFormProps = {
   defaultTrialDate: Date;
@@ -52,34 +53,13 @@ export const AssignCloudPlanFormFields: FC<AssignCloudPlanFormProps> = ({
 
   return (
     <>
-      <FormControlLabel
-        control={
-          <Tooltip
-            title={
-              isCurrentlyPaying
-                ? t('assign-plan-trial-disabled-tooltip')
-                : undefined
-            }
-          >
-            <span>
-              <MuiSwitch
-                data-cy="administration-assign-plan-dialog-trial-switch"
-                disabled={isCurrentlyPaying}
-                checked={formikProps.values.trialEnd !== undefined}
-                onChange={(_, checked) => {
-                  checked
-                    ? formikProps.setFieldValue('trialEnd', defaultTrialDate)
-                    : formikProps.setFieldValue('trialEnd', undefined);
-                }}
-              />
-            </span>
-          </Tooltip>
-        }
-        label={t('administration-assign-plan-dialog-trial-switch')}
+      <AssignCloudPlanTrialSwitchField
+        isCurrentlyPaying={isCurrentlyPaying}
+        defaultTrialDate={defaultTrialDate}
       />
       {formikProps.values.trialEnd !== undefined && (
         <>
-          <AssignTrialDatePicker />
+          <AssignTrialDatePickerField />
           <FormHelperText>
             <T keyName="administration-subscription-assign-trial-plan-help" />
           </FormHelperText>

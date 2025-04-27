@@ -2,7 +2,7 @@ import { T } from '@tolgee/react';
 import { DateTimePickerField } from 'tg.component/common/form/fields/DateTimePickerField';
 import React from 'react';
 
-export const AssignTrialDatePicker = () => {
+export const AssignTrialDatePickerField = () => {
   return (
     <DateTimePickerField
       formControlProps={{

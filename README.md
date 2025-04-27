@@ -95,7 +95,7 @@ The docs cover all aspects of using Tolgee. Some highlights include:
 3. Follow a guide in the integration section of your project
 4. Have fun!
 
-![Integration guides](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/Tolgee-integration.gif)
+![Integration guides](Tolgee-integration.gif)
 
 ## Report a Bug
 

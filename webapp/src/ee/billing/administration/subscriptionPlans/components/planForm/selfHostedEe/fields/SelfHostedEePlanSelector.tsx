@@ -2,7 +2,6 @@ import React, { FC } from 'react';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { GenericPlanSelector } from '../../genericFields/GenericPlanSelector';
-import { T } from '@tolgee/react';
 
 export const SelfHostedEePlanSelector: FC<
   Omit<

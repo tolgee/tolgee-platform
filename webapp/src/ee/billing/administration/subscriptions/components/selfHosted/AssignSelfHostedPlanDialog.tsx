@@ -66,7 +66,6 @@ export const AssignSelfHostedPlanDialog: FC<
           fields={
             <>
               <SelfHostedPlanSelectorField
-                name="planId"
                 onPlanChange={(plan) => setSelectedPlan(plan)}
               />
               {!selectedPlan?.free && (

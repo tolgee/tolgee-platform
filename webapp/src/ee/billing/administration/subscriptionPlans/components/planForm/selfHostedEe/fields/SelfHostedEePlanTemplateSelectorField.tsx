@@ -26,6 +26,8 @@ export const SelfHostedEePlanTemplateSelectorField: FC = () => {
           const newValues = {
             ...getSelfHostedPlanInitialValues(plan),
             name: values.name,
+            // usually, we don't want to create public plans.
+            // also, usually it's a good idea to create private plans first
             public: false,
           };
           setValues(newValues);

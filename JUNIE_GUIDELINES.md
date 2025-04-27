@@ -108,57 +108,6 @@ Tolgee is organized into several key components:
          - `TranslationsTestData.kt` - Complex test data with translations
          - `SelfHostedLimitsTestData.kt` - Test data for self-hosted limits
 
-       - Basic structure:
-         ```kotlin
-         // File: YourFeatureTestData.kt
-         class YourFeatureTestData {
-           lateinit var user: UserAccount
-           lateinit var project: Project
-           lateinit var englishLanguage: Language
-           // Add other properties as needed
-
-           val root =
-             TestDataBuilder().apply {
-               val userAccountBuilder =
-                 addUserAccount {
-                   username = "test_user"
-                   name = "Test User"
-                   role = UserAccount.Role.USER
-                   user = this
-                 }
-
-               addProject {
-                 name = "Test Project"
-                 organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-                 project = this
-               }.build project@{
-                 addPermission {
-                   user = this@YourFeatureTestData.user
-                   type = ProjectPermissionType.MANAGE
-                 }
-
-                 englishLanguage =
-                   addLanguage {
-                     name = "English"
-                     tag = "en"
-                     originalName = "English"
-                     this@project.self.baseLanguage = this
-                   }.self
-
-                 // Add keys, translations, and other entities as needed
-                 addKey {
-                   name = "test_key"
-                 }.build {
-                   addTranslation {
-                     language = englishLanguage
-                     text = "Test translation"
-                   }
-                 }
-               }
-             }
-         }
-         ```
-
      - **Step 2: Create an E2E Data Controller**
        - Location: `/backend/development/src/main/kotlin/io/tolgee/controllers/internal/e2eData/`
        - Naming Convention: `YourFeatureE2eDataController.kt`
@@ -167,23 +116,7 @@ Tolgee is organized into several key components:
          - `EmptyProjectE2eDataController.kt` - Simple controller
          - `TranslationsE2eDataController.kt` - Controller with additional endpoints
          - `SelfHostedLimitsE2eDataController.kt` - Controller for self-hosted limits
-
-       - Basic structure:
-         ```kotlin
-         // File: YourFeatureE2eDataController.kt
-         @RestController
-         @CrossOrigin(origins = ["*"])
-         @Hidden
-         @RequestMapping(value = ["internal/e2e-data/your-feature"])
-         @Transactional
-         class YourFeatureE2eDataController : AbstractE2eDataController() {
-           override val testData: TestDataBuilder
-             get() = YourFeatureTestData().root
-
-           // Add custom endpoints if needed
-         }
-         ```
-
+         - 
      - **Step 3: Update the Frontend Test Data Object**
        - Location: `/e2e/cypress/common/apiCalls/testData/testData.ts`
        - Add a new test data object that references your backend endpoints:
@@ -213,15 +146,6 @@ Tolgee is organized into several key components:
            });
          });
          ```
-   - Use AbstractControllerTest for controller tests with authentication:
-     ```kotlin
-     class YourControllerTest : AbstractControllerTest() {
-       // Perform authenticated requests
-       fun testEndpoint() {
-         performGet("/your-endpoint", HttpHeaders())
-           .andExpect(status().isOk)
-       }
-     }
      ```
    - Use `.andAssertThatJson` for testing JSON responses:
      ```kotlin
@@ -326,18 +250,12 @@ Tolgee is organized into several key components:
      ```
    - These hooks provide type safety based on the API schema
 
-5. **Testing**:
+5. **E2E Testing**:
    - Currently, not many unit tests are written for frontend
    - Component testing with Testing Library is not yet implemented
    - For E2E tests with Cypress:
      - Always use data-cy attributes for selecting elements instead of text content
      - Make data-cy attributes as specific as possible to uniquely identify elements
-     - For error messages, include the error code in the data-cy attribute:
-       ```tsx
-       <Alert severity="error" data-cy={`error-message-${errorCode}`}>
-         <TranslatedError code={errorCode} />
-       </Alert>
-       ```
      - For specific UI components, use descriptive names that indicate the component's purpose:
        ```tsx
        <Alert severity="error" data-cy="signup-error-seats-spending-limit">
