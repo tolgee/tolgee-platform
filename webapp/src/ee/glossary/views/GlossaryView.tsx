@@ -178,6 +178,7 @@ export const GlossaryView = () => {
           onFetchNextPage={onFetchNextPage}
           onCreate={onCreate}
           onSearch={setSearch}
+          search={search}
         />
       ) : (
         <GlossaryEmptyListMessage

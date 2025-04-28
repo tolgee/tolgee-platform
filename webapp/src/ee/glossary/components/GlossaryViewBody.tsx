@@ -156,6 +156,7 @@ type Props = {
   onFetchNextPage?: () => void;
   onCreate?: () => void;
   onSearch?: (search: string) => void;
+  search?: string;
 };
 
 export const GlossaryViewBody: React.VFC<Props> = ({
@@ -172,6 +173,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
   onFetchNextPage,
   onCreate,
   onSearch,
+  search,
 }) => {
   const tableRef = useRef<HTMLDivElement>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
@@ -252,6 +254,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
                 <Box>
                   <SecondaryBarSearchField
                     onSearch={onSearch}
+                    initial={search}
                     placeholder={t('glossary_search_placeholder')}
                     clearCallbackRef={clearSearchRef}
                   />
