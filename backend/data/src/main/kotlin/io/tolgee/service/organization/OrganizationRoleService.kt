@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.EnumSet
 
 @Service
 @Transactional
@@ -385,6 +386,6 @@ class OrganizationRoleService(
   }
 
   companion object {
-    private val OWNER_OR_MAINTAINER_ROLES = setOf(OrganizationRoleType.OWNER, OrganizationRoleType.MAINTAINER)
+    private val OWNER_OR_MAINTAINER_ROLES = EnumSet.of(OrganizationRoleType.OWNER, OrganizationRoleType.MAINTAINER)
   }
 }
