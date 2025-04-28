@@ -65,17 +65,23 @@ class EeSubscription : AuditModel(), PlanWithIncludedKeysAndSeats {
     )
   }
 
+  /**
+   * How many keys are included in the subscription plan
+   */
   override var includedKeys: Long = 0L
 
+  /**
+   * How many seats are included in the subscription plan
+   */
   override var includedSeats: Long = 0L
 
   /**
-   * How much keys can customer use until they reach spending limit
+   * How many keys can a customer use until they reach spending limit
    */
   var keysLimit: Long = 0L
 
   /**
-   * How much seats can customer use until they reach spending limit
+   * How many seats can a customer use until they reach spending limit
    */
   var seatsLimit: Long = 0L
 

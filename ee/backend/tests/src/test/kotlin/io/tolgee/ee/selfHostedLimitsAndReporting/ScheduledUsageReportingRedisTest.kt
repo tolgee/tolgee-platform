@@ -19,6 +19,4 @@ class ScheduledUsageReportingRedisTest : ScheduledUsageReportingTest() {
       RedisTesting.stopRedis()
     }
   }
-
-  // TODO test it doesn't generate any SQLs
 }

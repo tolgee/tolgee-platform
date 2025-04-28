@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
 /**
- * Provides subscription limits on Tolgee Cloud instance
+ * Provides subscription limits stored on Self Hosted instance
  *
  */
 @Component

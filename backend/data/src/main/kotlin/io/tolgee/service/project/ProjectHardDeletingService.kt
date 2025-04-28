@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 
+@Suppress("SelfReferenceConstructorParameter")
 @Service
 class ProjectHardDeletingService(
   private val projectHolder: ProjectHolder,
@@ -44,7 +45,7 @@ class ProjectHardDeletingService(
   private val self: ProjectHardDeletingService,
 ) : Logging {
   @Transactional
-  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
   fun hardDeleteProject(project: Project) {
     traceLogMeasureTime("deleteProject") {
       try {

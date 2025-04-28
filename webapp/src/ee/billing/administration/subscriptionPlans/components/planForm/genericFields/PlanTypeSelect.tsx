@@ -32,7 +32,7 @@ export const PlanTypeSelect = ({
     if (!isCurrentValueEnabled) {
       onChange(enabledTypeOptions[0].value);
     }
-  }, [typeOptions]);
+  }, [typeOptions, onChange, value]);
 
   return (
     <Select

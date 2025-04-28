@@ -5,15 +5,19 @@ interface BypassableListener {
 
   fun <T> bypassingListener(fn: () -> T): T {
     val oldBypass = bypass
-    bypass = true
-    val ret = fn()
-    bypass = oldBypass
-    return ret
+    try {
+      bypass = true
+      val ret = fn()
+      return ret
+    } finally {
+      bypass = oldBypass
+    }
   }
 
-  fun <T> executeIfNotBypassed(fn: () -> T) {
+  fun <T> executeIfNotBypassed(fn: () -> T): T? {
     if (!bypass) {
-      fn()
+      return fn()
     }
+    return null
   }
 }

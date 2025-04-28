@@ -82,8 +82,8 @@ class SeatCountLimitTest : AbstractSpringTest() {
     val testData = saveTestData(2)
 
     saveSubscription {
-      includedKeys = 0
-      keysLimit = 0
+      includedSeats = 0
+      seatsLimit = 0
     }
     val userToDelete = testData.root.data.userAccounts.first().self.id
     userAccountService.delete(userToDelete)
@@ -119,8 +119,10 @@ class SeatCountLimitTest : AbstractSpringTest() {
 
   private fun saveTestData(userCount: Long = 1): BaseTestData {
     val testData = BaseTestData()
-    repeat((1..userCount).count()) {
-      testData.userAccountBuilder
+    repeat(userCount.toInt()) {
+      testData.root.addUserAccount {
+        username = "user$it"
+      }
     }
     testDataService.saveTestData(testData.root)
     return testData
