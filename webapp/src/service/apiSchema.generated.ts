@@ -1337,7 +1337,7 @@ export interface components {
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -1455,7 +1455,7 @@ export interface components {
        */
       contentStorageId?: number;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -1991,6 +1991,7 @@ export interface components {
         | "current_user_does_not_own_image"
         | "user_cannot_view_this_organization"
         | "user_is_not_owner_of_organization"
+        | "user_is_not_owner_or_maintainer_of_organization"
         | "pak_created_for_different_project"
         | "custom_slug_is_only_applicable_for_custom_storage"
         | "invalid_slug_format"
@@ -2089,7 +2090,7 @@ export interface components {
     };
     ExportParams: {
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -2913,6 +2914,8 @@ export interface components {
       translatedPercentage: number;
       /** Format: int64 */
       translatedWordCount: number;
+      /** Format: date-time */
+      translationsUpdatedAt?: string;
       /** Format: int64 */
       untranslatedKeyCount: number;
       /** Format: double */
@@ -3084,14 +3087,14 @@ export interface components {
       id: number;
       invitedUserEmail?: string;
       invitedUserName?: string;
-      type: "MEMBER" | "OWNER";
+      type: "MEMBER" | "OWNER" | "MAINTAINER";
     };
     OrganizationInviteUserDto: {
       /** @description Email to send invitation to */
       email?: string;
       /** @description Name of invited user */
       name?: string;
-      roleType: "MEMBER" | "OWNER";
+      roleType: "MEMBER" | "OWNER" | "MAINTAINER";
     };
     OrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -3101,7 +3104,7 @@ export interface components {
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
-      currentUserRole?: "MEMBER" | "OWNER";
+      currentUserRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       /** Format: int64 */
@@ -3509,7 +3512,7 @@ export interface components {
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
        */
-      currentUserRole?: "MEMBER" | "OWNER";
+      currentUserRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
       /** @example Features organization has enabled */
@@ -3707,7 +3710,7 @@ export interface components {
       id: number;
       name: string;
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
-      organizationRole?: "MEMBER" | "OWNER";
+      organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
       useNamespaces: boolean;
     };
@@ -3760,7 +3763,7 @@ export interface components {
       languages: components["schemas"]["LanguageModel"][];
       name: string;
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
-      organizationRole?: "MEMBER" | "OWNER";
+      organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };
@@ -4111,7 +4114,7 @@ export interface components {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
     };
     SetOrganizationRoleDto: {
-      roleType: "MEMBER" | "OWNER";
+      roleType: "MEMBER" | "OWNER" | "MAINTAINER";
     };
     SetProjectPromptCustomizationRequest: {
       /**
@@ -4506,6 +4509,7 @@ export interface components {
         | "current_user_does_not_own_image"
         | "user_cannot_view_this_organization"
         | "user_is_not_owner_of_organization"
+        | "user_is_not_owner_or_maintainer_of_organization"
         | "pak_created_for_different_project"
         | "custom_slug_is_only_applicable_for_custom_storage"
         | "invalid_slug_format"
@@ -4912,7 +4916,7 @@ export interface components {
       id: number;
       name?: string;
       organizationBasePermission: components["schemas"]["PermissionModel"];
-      organizationRole?: "MEMBER" | "OWNER";
+      organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       username: string;
     };
     UserAccountModel: {
@@ -4931,7 +4935,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       name: string;
-      organizationRole?: "MEMBER" | "OWNER";
+      organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       username: string;
     };
@@ -10853,7 +10857,7 @@ export interface operations {
          */
         supportArrays?: boolean;
         /**
-         * If true, HTML tags are escaped in the exported file.
+         * If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
          *
          * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
          */
@@ -13919,6 +13923,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        search?: string;
       };
       path: {
         projectId: number;
