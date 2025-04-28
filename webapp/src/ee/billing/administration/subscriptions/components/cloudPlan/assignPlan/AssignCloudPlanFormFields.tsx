@@ -1,11 +1,5 @@
 import React, { FC } from 'react';
-import {
-  Alert,
-  FormControlLabel,
-  FormHelperText,
-  Switch as MuiSwitch,
-  Tooltip,
-} from '@mui/material';
+import { Alert, FormHelperText } from '@mui/material';
 import { AssignTrialDatePickerField } from './fields/AssignTrialDatePickerField';
 import { T, useTranslate } from '@tolgee/react';
 import { AssignCloudPlanSelectorField } from './fields/AssignCloudPlanSelectorField';
