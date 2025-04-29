@@ -5,6 +5,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.fixtures.NdJsonParser
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Language
@@ -69,9 +70,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
         it.asyncResult
       }.andReturn().response.contentAsString
 
-    response.split("\n").filter { it.isNotBlank() }.map {
-      jacksonObjectMapper().readValue(it, Any::class.java)
-    }.assert.hasSize(4)
+    NdJsonParser(objectMapper).parse(response).assert.hasSize(4)
   }
 
   @Test

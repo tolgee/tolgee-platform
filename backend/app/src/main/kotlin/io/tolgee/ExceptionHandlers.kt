@@ -11,6 +11,7 @@ import io.tolgee.exceptions.*
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.util.Logging
+import io.tolgee.util.debug
 import io.tolgee.util.logger
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
@@ -207,6 +208,7 @@ class ExceptionHandlers : Logging {
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
   fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
+    logger.debug(ex.message, ex)
     return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
   }
 

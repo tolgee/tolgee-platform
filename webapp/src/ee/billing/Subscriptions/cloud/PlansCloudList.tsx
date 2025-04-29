@@ -3,10 +3,10 @@ import { styled } from '@mui/material';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanType } from '../../component/Plan/types';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
-import { FreePlan } from '../../component/Plan/FreePlan';
+import { FreePlan } from '../../component/Plan/freePlan/FreePlan';
 import { useCloudPlans } from './useCloudPlans';
-import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
 import { CloudPlanItem } from './CloudPlanItem';
+import { isPlanPeriodDependant } from '../../component/Plan/plansTools';
 
 type CloudSubscriptionModel = components['schemas']['CloudSubscriptionModel'];
 
@@ -28,12 +28,21 @@ export const PlansCloudList: React.FC<BillingPlansProps> = ({
   const { defaultPlan, plans } = useCloudPlans();
 
   function isActive(plan: PlanType) {
-    const planPeriod = plan.free ? undefined : period;
-    return (
-      activeSubscription.plan.id === plan.id &&
-      (activeSubscription.currentBillingPeriod === planPeriod ||
-        !isPlanPeriodDependant(plan.prices))
-    );
+    if (activeSubscription.plan.id !== plan.id) {
+      return false;
+    }
+
+    if (!isPlanPeriodDependant(plan.prices)) {
+      return true;
+    }
+
+    // if trial or free, we don't care about period
+    if (activeSubscription.status === 'TRIALING' || plan.free) {
+      return true;
+    }
+
+    // if the period is the same, it's active
+    return activeSubscription.currentBillingPeriod === period;
   }
 
   function isEnded(plan: PlanType) {

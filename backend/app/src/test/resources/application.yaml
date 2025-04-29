@@ -99,3 +99,8 @@ tolgee:
   batch:
     concurrency: 10
   front-end-url: https://dummy-url.com
+  ee:
+    scheduled-reporting-enabled: false
+logging:
+  level:
+    io.tolgee: DEBUG

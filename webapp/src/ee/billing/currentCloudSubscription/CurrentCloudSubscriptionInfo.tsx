@@ -11,14 +11,13 @@ import {
   StyledBillingSectionSubtitleSmall,
   StyledBillingSectionTitle,
 } from '../BillingSection';
-import { PlanMetric } from './PlanMetric';
 import { MtHint } from 'tg.component/billing/MtHint';
-import { StringsHint } from 'tg.component/common/StringsHint';
-import { getProgressData } from '../component/utils';
 import { BillingPeriodInfo } from './BillingPeriodInfo';
 import { CloudEstimatedCosts } from './CloudEstimatedCosts';
 import { SubscriptionsTrialAlert } from './subscriptionsTrialAlert/SubscriptionsTrialAlert';
 import { TrialInfo } from './TrialInfo';
+import { getProgressData } from '../component/getProgressData';
+import { SubscriptionMetrics } from './SubscriptionMetrics';
 
 type CloudSubscriptionModel =
   billingComponents['schemas']['CloudSubscriptionModel'];
@@ -44,16 +43,13 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
-  const progressData = getProgressData(usage);
+  const isPayAsYouGo =
+    activeSubscription.plan.type === 'PAY_AS_YOU_GO' &&
+    activeSubscription.status !== 'TRIALING';
 
-  const {
-    translationsUsed,
-    translationsMax,
-    creditMax,
-    creditUsed,
-    isPayAsYouGo,
-    usesSlots,
-  } = progressData;
+  const progressData = getProgressData({
+    usage: usage,
+  });
 
   const planName =
     activeSubscription.status === 'TRIALING' ? (
@@ -98,35 +94,10 @@ export const CurrentCloudSubscriptionInfo: FC<Props> = ({
               )}
           </Box>
 
-          <PlanMetric
-            name={
-              usesSlots ? (
-                t('billing_actual_used_translations')
-              ) : (
-                <T
-                  keyName="billing_actual_used_strings_with_hint"
-                  params={{ hint: <StringsHint /> }}
-                />
-              )
-            }
-            currentQuantity={translationsUsed}
-            totalQuantity={translationsMax}
-            periodEnd={activeSubscription.currentPeriodEnd}
+          <SubscriptionMetrics
+            metricType={activeSubscription.plan.metricType}
+            progressData={progressData}
             isPayAsYouGo={isPayAsYouGo}
-            data-cy="billing-actual-used-strings"
-          />
-          <PlanMetric
-            name={
-              <T
-                keyName="billing_actual_used_monthly_credits"
-                params={{ hint: <MtHint /> }}
-              />
-            }
-            currentQuantity={creditUsed}
-            totalQuantity={creditMax || 0}
-            periodEnd={activeSubscription.currentPeriodEnd}
-            isPayAsYouGo={isPayAsYouGo}
-            data-cy="billing-actual-used-monthly-credits"
           />
           <Box gridColumn="1">{t('billing_credits_refill')}</Box>
           <Box gridColumn="2 / -1" data-cy="billing-actual-period">

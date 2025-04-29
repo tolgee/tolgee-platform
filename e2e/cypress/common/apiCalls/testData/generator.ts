@@ -25,6 +25,7 @@ export type TestDataStandardResponse = {
   projects: { name: string; id: number }[];
   users: { username: string; name: string; id: number }[];
   organizations: { id: number; name: string; slug: string }[];
+  invitations: { code: string; projectId: number; organizationId: number }[];
 };
 
 export const generateTestDataObject = (resource: string) => ({

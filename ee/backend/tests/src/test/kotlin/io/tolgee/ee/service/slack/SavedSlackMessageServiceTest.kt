@@ -1,17 +1,29 @@
 package io.tolgee.ee.service.slack
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.component.SchedulingManager
 import io.tolgee.development.testDataBuilder.data.SlackTestData
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class SavedSlackMessageServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var savedSlackMessageService: SavedSlackMessageService
+
+  @Autowired
+  lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
+
+  @BeforeEach
+  fun before() {
+    SchedulingManager.cancelAll()
+    eeSubscriptionServiceImpl.delete()
+  }
 
   @AfterEach
   fun after() {
@@ -24,7 +36,7 @@ class SavedSlackMessageServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(125)
 
-    savedSlackMessageService.deleteOldMessage()
+    savedSlackMessageService.deleteOldMessages()
     Assertions.assertThat(savedSlackMessageService.findAll()).isEmpty()
   }
 

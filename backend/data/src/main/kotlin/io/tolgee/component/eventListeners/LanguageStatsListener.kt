@@ -6,6 +6,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.project.LanguageStatsService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.runSentryCatching
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -14,6 +15,7 @@ import org.springframework.transaction.event.TransactionalEventListener
 @Component
 class LanguageStatsListener(
   private var languageStatsService: LanguageStatsService,
+  private val projectService: ProjectService,
 ) {
   var bypass = false
 
@@ -23,6 +25,9 @@ class LanguageStatsListener(
     if (bypass) return
     runSentryCatching {
       val projectId = event.activityRevision.projectId ?: return
+
+      // exit when project doesn't exist anymore
+      projectService.findDto(projectId) ?: return
 
       val modifiedEntityClasses = event.modifiedEntities.keys.toSet()
       val isStatsModified =

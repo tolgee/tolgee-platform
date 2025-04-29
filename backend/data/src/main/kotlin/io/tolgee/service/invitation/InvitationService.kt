@@ -1,5 +1,6 @@
 package io.tolgee.service.invitation
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.email.InvitationEmailSender
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
@@ -20,11 +21,10 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.Logging
+import io.tolgee.util.addMonths
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Duration
-import java.time.Instant
 import java.util.*
 
 @Service
@@ -35,6 +35,7 @@ class InvitationService(
   private val permissionService: PermissionService,
   private val invitationEmailSender: InvitationEmailSender,
   private val businessEventPublisher: BusinessEventPublisher,
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   @Transactional
   fun create(params: CreateProjectInvitationParams): Invitation {
@@ -61,6 +62,11 @@ class InvitationService(
     val invitation = getInvitationInstance(params)
     invitation.permission = setPermissionFn(invitation)
     invitationEmailSender.sendInvitation(invitation)
+    return invitationRepository.save(invitation)
+  }
+
+  @Transactional
+  fun save(invitation: Invitation): Invitation {
     return invitationRepository.save(invitation)
   }
 
@@ -94,7 +100,7 @@ class InvitationService(
 
   @Transactional
   fun removeExpired() {
-    invitationRepository.deleteAllByCreatedAtLessThan(Date.from(Instant.now().minus(Duration.ofDays(30))))
+    invitationRepository.deleteAllByCreatedAtLessThan(currentDateProvider.date.addMonths(-1))
   }
 
   @Transactional

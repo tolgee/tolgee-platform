@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.component.PreferredOrganizationFacade
-import io.tolgee.hateoas.InitialDataModel
-import io.tolgee.hateoas.ee.IEeSubscriptionModelAssembler
+import io.tolgee.hateoas.initialData.InitialDataEeSubscriptionModel
+import io.tolgee.hateoas.initialData.InitialDataModel
 import io.tolgee.hateoas.sso.PublicSsoTenantModelAssembler
 import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -31,14 +31,11 @@ class InitialDataController(
   private val authenticationFacade: AuthenticationFacade,
   private val userPreferencesService: UserPreferencesService,
   private val preferredOrganizationFacade: PreferredOrganizationFacade,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val eeSubscriptionModelAssembler: IEeSubscriptionModelAssembler?,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val eeSubscriptionProvider: EeSubscriptionProvider?,
   private val announcementController: AnnouncementController,
   private val tenantService: TenantService,
   private val privateUserAccountModelAssembler: PrivateUserAccountModelAssembler,
   private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
+  private val eeSubscriptionProvider: EeSubscriptionProvider?,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(summary = "Get initial data", description = "Returns initial data required by the UI to load")
@@ -46,12 +43,6 @@ class InitialDataController(
     val data =
       InitialDataModel(
         serverConfiguration = configurationController.getPublicConfiguration(),
-        eeSubscription =
-          eeSubscriptionProvider?.findSubscriptionDto()?.let {
-            eeSubscriptionModelAssembler?.toModel(
-              it,
-            )
-          },
       )
 
     val userAccount = authenticationFacade.authenticatedUserOrNull
@@ -63,8 +54,14 @@ class InitialDataController(
       data.preferredOrganization = preferredOrganizationFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()
+      data.eeSubscription = getEeSubscriptionModel()
     }
 
     return data
+  }
+
+  private fun getEeSubscriptionModel(): InitialDataEeSubscriptionModel? {
+    val subscription = eeSubscriptionProvider?.findSubscriptionDto() ?: return null
+    return InitialDataEeSubscriptionModel(status = subscription.status)
   }
 }

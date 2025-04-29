@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
 class OrganizationRoleService(
   private val organizationRoleRepository: OrganizationRoleRepository,
   private val authenticationFacade: AuthenticationFacade,
@@ -210,6 +209,7 @@ class OrganizationRoleService(
   }
 
   @CacheEvict(Caches.ORGANIZATION_ROLES, key = "{#organization.id, #user.id}")
+  @Transactional
   fun grantRoleToUser(
     user: UserAccount,
     organization: Organization,
@@ -228,12 +228,13 @@ class OrganizationRoleService(
   }
 
   fun leave(organizationId: Long) {
-    this.removeUser(organizationId, authenticationFacade.authenticatedUser.id)
+    this.removeUser(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
+  @Transactional
   fun removeUser(
-    organizationId: Long,
     userId: Long,
+    organizationId: Long,
   ) {
     val managedBy = getManagedBy(userId)
     if (managedBy != null && managedBy.id == organizationId) {

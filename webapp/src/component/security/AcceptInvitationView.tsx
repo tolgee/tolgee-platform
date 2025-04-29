@@ -13,6 +13,8 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { ApiError } from 'tg.service/http/ApiError';
+import { useMessage } from 'tg.hooks/useSuccessMessage';
 
 export const FULL_PAGE_BREAK_POINT = '(max-width: 700px)';
 
@@ -44,6 +46,7 @@ const AcceptInvitationView: React.FC = () => {
   const history = useHistory();
   const match = useRouteMatch();
   const { t } = useTranslate();
+  const message = useMessage();
 
   useWindowTitle(t('accept_invitation_title'));
 
@@ -53,6 +56,28 @@ const AcceptInvitationView: React.FC = () => {
   const acceptCode = useApiMutation({
     url: '/v2/invitations/{code}/accept',
     method: 'get',
+    fetchOptions: {
+      disableErrorNotification: true,
+    },
+    options: {
+      onError(e: ApiError) {
+        if (e.code == 'plan_seat_limit_exceeded') {
+          message.error(
+            <span data-cy="plan_seat_limit_exceeded_while_accepting_invitation_message">
+              <T keyName="plan_seat_limit_exceeded_while_accepting_invitation_message" />
+            </span>
+          );
+          return;
+        }
+        if (e.code == 'seats_spending_limit_exceeded') {
+          message.error(
+            <span data-cy="seat_spending_limit_exceeded_while_accepting_invitation_message">
+              <T keyName="seat_spending_limit_exceeded_while_accepting_invitation_message" />
+            </span>
+          );
+        }
+      },
+    },
   });
 
   const invitationInfo = useApiQuery({
@@ -63,7 +88,7 @@ const AcceptInvitationView: React.FC = () => {
     },
     options: {
       onError(e) {
-        history.replace(LINKS.PROJECT.build());
+        history.replace(LINKS.ROOT.build());
         if (e.code) {
           messageService.error(<TranslatedError code={e.code} />);
         }
@@ -81,7 +106,11 @@ const AcceptInvitationView: React.FC = () => {
         {
           onSuccess() {
             refetchInitialData();
-            messageService.success(<T keyName="invitation_code_accepted" />);
+            messageService.success(
+              <span data-cy="invitation-accepted-success-message">
+                <T keyName="invitation_code_accepted" />
+              </span>
+            );
           },
           onSettled() {
             history.replace(LINKS.PROJECTS.build());

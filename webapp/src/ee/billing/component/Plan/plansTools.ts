@@ -1,5 +1,4 @@
 import { PlanType } from './types';
-import { components } from 'tg.service/apiSchema.generated';
 
 export function isSubset<T>(set: T[], subset: T[]): boolean {
   return subset.every((i) => set.includes(i));
@@ -30,13 +29,12 @@ export function excludePreviousPlanFeatures(
   }
 }
 
-export function isPlanLegacy(plan: {
-  includedUsage?: components['schemas']['PublicCloudPlanModel']['includedUsage'];
-}) {
-  const slots = plan.includedUsage?.translationSlots;
-  return slots !== undefined && slots !== -1;
-}
-
+/**
+ * @return Whether period plays any role in the plan visualization or active state.
+ *
+ * The plan can be paid, but can have 0 subscription price. In that case only usage is charged.
+ * We consider such plan period independent.
+ */
 export function isPlanPeriodDependant(prices: PlanType['prices'] | undefined) {
   return (
     prices && Boolean(prices.subscriptionYearly || prices.subscriptionMonthly)

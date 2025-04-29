@@ -1,15 +1,20 @@
 package io.tolgee.ee.service.slackIntegration
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.SchedulingManager
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.repository.slackIntegration.SavedSlackMessageRepository
 import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.util.addMinutes
+import io.tolgee.util.executeInNewTransaction
 import jakarta.transaction.Transactional
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Lazy
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
+import java.time.Duration.ofMinutes
 
 @Service
 class SavedSlackMessageService(
@@ -19,6 +24,8 @@ class SavedSlackMessageService(
   private val slackConfigRepository: SlackConfigRepository,
   private val currentDateProvider: CurrentDateProvider,
   private val slackMessageInfoService: SlackMessageInfoService,
+  private val schedulingManager: SchedulingManager,
+  private val transactionManager: PlatformTransactionManager,
 ) {
   @Transactional
   fun save(
@@ -108,9 +115,18 @@ class SavedSlackMessageService(
     return savedSlackMessageRepository.findAll()
   }
 
-  @Scheduled(fixedDelay = 60000)
+  @EventListener(ApplicationReadyEvent::class)
+  fun scheduleMessageCleaning() {
+    schedulingManager.scheduleWithFixedDelay({
+      executeInNewTransaction(transactionManager = transactionManager) {
+        @Suppress("SpringTransactionalMethodCallsInspection")
+        deleteOldMessages()
+      }
+    }, ofMinutes(1))
+  }
+
   @Transactional
-  fun deleteOldMessage() {
+  fun deleteOldMessages() {
     val cutoff = currentDateProvider.date.addMinutes(-120)
     val oldMessages = savedSlackMessageRepository.findOlderThan(cutoff)
 

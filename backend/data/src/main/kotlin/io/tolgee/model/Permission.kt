@@ -6,26 +6,10 @@ import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationAgency.TranslationAgency
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Index
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.JoinTable
-import jakarta.persistence.ManyToMany
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToOne
-import jakarta.persistence.PrePersist
-import jakarta.persistence.PreUpdate
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
+import org.springframework.beans.factory.annotation.Configurable
 
 @Suppress("LeakingThis")
 @Entity
@@ -138,10 +122,6 @@ class Permission(
   @ManyToOne
   var project: Project? = null
 
-  val userId: Long?
-    get() = this.user?.id
-  val invitationId: Long?
-    get() = this.invitation?.id
   override val projectId: Long?
     get() = this.project?.id
   override val organizationId: Long?
@@ -156,6 +136,7 @@ class Permission(
     get() = this.stateChangeLanguages.map { it.id }.toSet()
 
   companion object {
+    @Configurable
     class PermissionListeners {
       @PrePersist
       @PreUpdate

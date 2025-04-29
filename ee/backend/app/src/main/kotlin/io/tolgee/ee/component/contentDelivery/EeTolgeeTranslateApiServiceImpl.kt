@@ -7,9 +7,9 @@ import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateAp
 import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionErrorCatchingService
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.OutOfCreditsException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
@@ -21,6 +21,7 @@ class EeTolgeeTranslateApiServiceImpl(
   private val httpClient: HttpClient,
   private val subscriptionService: EeSubscriptionServiceImpl,
   private val eeSubscriptionServiceImpl: EeSubscriptionServiceImpl,
+  private val catchingService: EeSubscriptionErrorCatchingService,
 ) : TolgeeTranslateApiService, EeTolgeeTranslateApiService {
   companion object {
     const val API_PATH = "v2/public/translator/translate"
@@ -32,24 +33,23 @@ class EeTolgeeTranslateApiServiceImpl(
       subscriptionService.findSubscriptionDto()?.licenseKey ?: throw IllegalStateException("Not Subscribed")
 
     try {
-      return subscriptionService.catchingLicenseNotFound {
-        httpClient.requestForJson(
-          url = url,
-          body = params,
-          method = HttpMethod.POST,
-          result = MtValueProvider.MtResult::class.java,
-          headers =
-            HttpHeaders().apply {
-              this.add("License-Key", licenseKey)
-            },
-        ) ?: throw EmptyBodyException()
-      }
+      return catchingService.catchingOutOfCredits {
+        catchingService.catchingLicenseNotFound {
+          httpClient.requestForJson(
+            url = url,
+            body = params,
+            method = HttpMethod.POST,
+            result = MtValueProvider.MtResult::class.java,
+            headers =
+              HttpHeaders().apply {
+                this.add("License-Key", licenseKey)
+              },
+          )
+        }
+      } ?: throw EmptyBodyException()
     } catch (e: BadRequest) {
-      if (e.message?.contains(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code) == true) {
-        throw OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED, e)
-      }
       if (e.message?.contains(Message.SUBSCRIPTION_NOT_ACTIVE.code) == true) {
-        eeSubscriptionServiceImpl.checkSubscription()
+        eeSubscriptionServiceImpl.refreshSubscription()
         throw BadRequestException(Message.SUBSCRIPTION_NOT_ACTIVE)
       }
       throw e

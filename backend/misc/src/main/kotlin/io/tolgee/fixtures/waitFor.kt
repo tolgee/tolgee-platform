@@ -25,17 +25,18 @@ class WaitNotSatisfiedException : RuntimeException()
 
 class WaitNotSatisfiedStillThrowingException(throwable: Throwable) : RuntimeException(throwable)
 
-fun waitForNotThrowing(
+inline fun <reified T> waitForNotThrowing(
   throwableClass: KClass<out Throwable> = Throwable::class,
   timeout: Long = 10000,
   pollTime: Long = 10,
-  fn: () -> Unit,
-) {
+  crossinline fn: () -> T,
+): T {
   lateinit var throwable: Throwable
+  var result: T? = null
   try {
     waitFor(timeout, pollTime) {
       try {
-        fn()
+        result = fn()
         true
       } catch (t: Throwable) {
         if (throwableClass.java.isAssignableFrom(t::class.java)) {
@@ -45,6 +46,7 @@ fun waitForNotThrowing(
         throw t
       }
     }
+    return result!!
   } catch (e: WaitNotSatisfiedException) {
     throw WaitNotSatisfiedStillThrowingException(throwable)
   }

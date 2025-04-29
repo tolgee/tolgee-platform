@@ -401,8 +401,8 @@ class PermissionService(
   }
 
   fun revoke(
-    projectId: Long,
     userId: Long,
+    projectId: Long,
   ) {
     val data = this.getProjectPermissionData(projectId, userId)
     if (data.organizationRole != null) {

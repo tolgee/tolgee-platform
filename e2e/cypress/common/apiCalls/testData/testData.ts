@@ -1,6 +1,10 @@
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
 import { internalFetch } from '../common';
-import { cleanTestData, generateTestDataObject } from './generator';
+import {
+  cleanTestData,
+  generateTestDataObject,
+  TestDataStandardResponse,
+} from './generator';
 import { components } from '../../../../../webapp/src/service/apiSchema.generated';
 
 export type PermissionModelScopes =
@@ -85,7 +89,10 @@ export const translationsDisabled = generateTestDataObject(
   'translation-disabled'
 );
 
-export const emptyProject = generateTestDataObject('empty-project');
+export const emptyProjectTestData = generateTestDataObject('empty-project');
+
+export const selfHostedLimitsTestData =
+  generateTestDataObject('self-hosted-limits');
 
 export const translationsNsAndTagsTestData =
   generateTestDataObject('ns-and-tags');
@@ -150,3 +157,31 @@ export const generatePermissionsData = {
     return internalFetch('e2e-data/permissions/clean');
   },
 };
+
+export function getUserByUsernameFromTestData(
+  data: TestDataStandardResponse,
+  username: string
+) {
+  return data.users.find((user) => user.username === username);
+}
+
+export function getOrganizationByNameFromTestData(
+  data: TestDataStandardResponse,
+  name: string
+) {
+  return data.organizations.find((organization) => organization.name === name);
+}
+
+export function getProjectByNameFromTestData(
+  data: TestDataStandardResponse,
+  name: string
+) {
+  return data.projects.find((project) => project.name === name);
+}
+
+export function getInvitationsByProjectIdFromTestData(
+  data: TestDataStandardResponse,
+  projectId: number
+) {
+  return data.invitations.filter((i) => i.projectId === projectId);
+}

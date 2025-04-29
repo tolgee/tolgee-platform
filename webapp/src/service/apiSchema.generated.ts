@@ -111,6 +111,9 @@ export interface paths {
     post: operations["acceptChangeAuthProvider"];
     delete: operations["rejectChangeAuthProvider"];
   };
+  "/v2/ee-current-subscription-usage": {
+    get: operations["getUsage_1"];
+  };
   "/v2/ee-license/info": {
     get: operations["getInfo_5"];
   };
@@ -1337,7 +1340,7 @@ export interface components {
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -1455,7 +1458,7 @@ export interface components {
        */
       contentStorageId?: number;
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -1695,6 +1698,21 @@ export interface components {
        */
       extraCreditBalance: number;
     };
+    /** @description For MT credits, the values are in full credits. Not Cents. */
+    CurrentUsageItemModel: {
+      /** Format: int64 */
+      current: number;
+      /** Format: int64 */
+      included: number;
+      /** Format: int64 */
+      limit: number;
+    };
+    CurrentUsageModel: {
+      credits: components["schemas"]["CurrentUsageItemModel"];
+      keys: components["schemas"]["CurrentUsageItemModel"];
+      seats: components["schemas"]["CurrentUsageItemModel"];
+      strings: components["schemas"]["CurrentUsageItemModel"];
+    };
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
       ids: number[];
@@ -1758,6 +1776,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
       )[];
+      isPayAsYouGo: boolean;
       /** Format: date-time */
       lastValidCheck?: string;
       licenseKey: string;
@@ -2051,7 +2070,12 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported"
+        | "plan_key_limit_exceeded"
+        | "keys_spending_limit_exceeded"
+        | "plan_seat_limit_exceeded"
+        | "instance_not_using_license_key";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2089,7 +2113,7 @@ export interface components {
     };
     ExportParams: {
       /**
-       * @description If true, HTML tags are escaped in the exported file.
+       * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
@@ -2464,9 +2488,20 @@ export interface components {
        */
       text: string;
     };
+    InitialDataEeSubscriptionModel: {
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
+    };
     InitialDataModel: {
       announcement?: components["schemas"]["AnnouncementDto"];
-      eeSubscription?: components["schemas"]["EeSubscriptionModel"];
+      eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
@@ -2913,6 +2948,8 @@ export interface components {
       translatedPercentage: number;
       /** Format: int64 */
       translatedWordCount: number;
+      /** Format: date-time */
+      translationsUpdatedAt?: string;
       /** Format: int64 */
       untranslatedKeyCount: number;
       /** Format: double */
@@ -3472,16 +3509,17 @@ export interface components {
     };
     PlanIncludedUsageModel: {
       /** Format: int64 */
+      keys: number;
+      /** Format: int64 */
       mtCredits: number;
       /** Format: int64 */
       seats: number;
-      /** Format: int64 */
-      translationSlots: number;
       /** Format: int64 */
       translations: number;
     };
     PlanPricesModel: {
       perSeat: number;
+      perThousandKeys: number;
       perThousandMtCredits?: number;
       perThousandTranslations?: number;
       subscriptionMonthly: number;
@@ -3796,10 +3834,11 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       public: boolean;
-      type: "PAY_AS_YOU_GO" | "FIXED" | "SLOTS_FIXED";
+      type: "PAY_AS_YOU_GO" | "FIXED";
     };
     /** @example Current active subscription info */
     PublicCloudSubscriptionModel: {
@@ -3887,14 +3926,19 @@ export interface components {
       creditBalanceRefilledAt: number;
       /**
        * Format: int64
+       * @description How many keys are currently stored by organization
+       */
+      currentKeys: number;
+      /**
+       * Format: int64
        * @description Currently used credits over credits included in plan and extra credits
        */
       currentPayAsYouGoMtCredits: number;
       /**
        * Format: int64
-       * @description How many translations slots are currently used by organization
+       * @description How seats are currently used by organization
        */
-      currentTranslationSlots: number;
+      currentSeats: number;
       /**
        * Format: int64
        * @description How many non-empty translations are currently stored by organization
@@ -3910,31 +3954,48 @@ export interface components {
       extraCreditBalance: number;
       /**
        * Format: int64
+       * @description How many keys are included in current subscription plan. How many keys can organization use without additional costs.
+       */
+      includedKeys: number;
+      /**
+       * Format: int64
        * @description How many credits are included in your current plan
        */
       includedMtCredits: number;
       /**
        * Format: int64
-       * @description How many translation slots are included in current subscription plan. How many translation slots can organization use without additional costs
+       * @description How many seats are included in current subscription plan. How many seats can organization use without additional costs.
        */
-      includedTranslationSlots: number;
+      includedSeats: number;
       /**
        * Format: int64
        * @description How many translations are included in current subscription plan. How many translations can organization use without additional costs
        */
       includedTranslations: number;
+      /** @description Whether the current plan is pay-as-you-go of fixed. For pay-as-you-go plans, the spending limit is the top limit. */
+      isPayAsYouGo: boolean;
+      /**
+       * Format: int64
+       * @description How many keys can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
+       */
+      keysLimit: number;
       /** Format: int64 */
       organizationId: number;
       /**
        * Format: int64
-       * @description How many translations can be stored within your organization
+       * @description How many seats can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
        */
-      translationSlotsLimit: number;
+      seatsLimit: number;
       /**
        * Format: int64
        * @description How many translations can be stored until reaching the limit. (For pay us you go, the top limit is the spending limit)
        */
       translationsLimit: number;
+      /**
+       * Format: int64
+       * @description Currently used credits including credits used over the limit
+       */
+      usedMtCredits: number;
     };
     /** @example Quick start data for current user */
     QuickStartModel: {
@@ -4080,6 +4141,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      isPayAsYouGo: boolean;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -4566,7 +4628,12 @@ export interface components {
         | "cannot_cancel_trial"
         | "cannot_update_without_modification"
         | "current_subscription_is_not_trialing"
-        | "sorting_and_paging_is_not_supported_when_using_cursor";
+        | "sorting_and_paging_is_not_supported_when_using_cursor"
+        | "strings_metric_are_not_supported"
+        | "plan_key_limit_exceeded"
+        | "keys_spending_limit_exceeded"
+        | "plan_seat_limit_exceeded"
+        | "instance_not_using_license_key";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -4886,6 +4953,7 @@ export interface components {
       /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
       appliedStripeCredits?: number;
       credits?: components["schemas"]["SumUsageItemModel"];
+      keys: components["schemas"]["AverageProportionalUsageItemModel"];
       seats: components["schemas"]["AverageProportionalUsageItemModel"];
       subscriptionPrice?: number;
       total: number;
@@ -6520,6 +6588,48 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getUsage_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CurrentUsageModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -10853,7 +10963,7 @@ export interface operations {
          */
         supportArrays?: boolean;
         /**
-         * If true, HTML tags are escaped in the exported file.
+         * If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
          *
          * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
          */
@@ -13919,6 +14029,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        search?: string;
       };
       path: {
         projectId: number;

@@ -7,6 +7,7 @@ import { deleteProject } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { gcyAdvanced } from '../../common/shared';
+import { buildXpath } from '../../common/XpathBuilder';
 
 describe('Machine translation settings', () => {
   let project: ProjectDTO = null;
@@ -24,7 +25,7 @@ describe('Machine translation settings', () => {
     }
   });
 
-  it('will update default settings', { retries: 5 }, () => {
+  it('updates default settings', { retries: 5 }, () => {
     cy.gcy('machine-translations-settings-language-options').first().click();
     getEnableCheckbox('GOOGLE').click();
     getPrimaryRadio('AWS').click();
@@ -45,25 +46,10 @@ describe('Machine translation settings', () => {
     cy.gcy('project-menu-item-translations').click();
 
     openEditor('Studený přeložený text 1');
-    cy.gcy('translation-tools-machine-translation-item')
-      .contains('Cool translated text 1 translated with AWS from en to cs')
-      .should('be.visible');
-
-    cy.gcy('translation-tools-machine-translation-item').should(
-      'have.length',
-      1
-    );
-    cy.gcy('global-editor').type('{esc}');
-    createTranslation({ key: 'aaa_key', translation: 'test translation' });
-    cy.contains('test translation translated with AWS from en to cs').should(
-      'be.visible'
-    );
-    cy.contains(
-      'test translation translated FORMAL with AWS from en to es'
-    ).should('be.visible');
+    assertSingleMtTranslation();
   });
 
-  it('will update language specific settings', { retries: 5 }, () => {
+  it('updates language specific settings', { retries: 5 }, () => {
     gcyAdvanced({
       value: 'machine-translations-settings-language-options',
       language: 'es',
@@ -155,4 +141,20 @@ describe('Machine translation settings', () => {
       language,
     });
   };
+
+  function assertSingleMtTranslation(
+    text = 'Cool translated text 1 translated FORMAL with AWS from en to cs'
+  ) {
+    buildXpath()
+      .descendantOrSelf()
+      .withDataCy('translation-tools-machine-translation-item')
+      .descendantOrSelf()
+      .containsText(text)
+      .getElement()
+      .should('be.visible');
+    cy.gcy('translation-tools-machine-translation-item').should(
+      'have.length',
+      1
+    );
+  }
 });

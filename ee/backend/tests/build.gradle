@@ -13,6 +13,7 @@ plugins {
     id "java"
     id "kotlin-allopen"
     id "io.sentry.jvm.gradle"
+    id "org.gradle.test-retry"
 }
 
 apply plugin: "kotlin-allopen"
@@ -35,6 +36,7 @@ repositories {
 test {
     useJUnitPlatform()
     maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
 }
 
 dependencies {

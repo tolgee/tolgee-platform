@@ -10,8 +10,8 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
-import io.tolgee.exceptions.PlanTranslationLimitExceeded
-import io.tolgee.exceptions.TranslationSpendingLimitExceeded
+import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
+import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.AutoTranslationService
@@ -73,9 +73,9 @@ class GenericAutoTranslationChunkProcessor(
           increaseFactor = 1,
           maxRetries = -1,
         )
-      } catch (e: PlanTranslationLimitExceeded) {
+      } catch (e: PlanLimitExceededStringsException) {
         throw FailedDontRequeueException(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED, successfulTargets, e)
-      } catch (e: TranslationSpendingLimitExceeded) {
+      } catch (e: PlanSpendingLimitExceededStringsException) {
         throw FailedDontRequeueException(Message.TRANSLATION_SPENDING_LIMIT_EXCEEDED, successfulTargets, e)
       } catch (e: FormalityNotSupportedException) {
         throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
