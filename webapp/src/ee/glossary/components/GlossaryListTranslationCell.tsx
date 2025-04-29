@@ -110,6 +110,17 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
 
   const onHandleEdit = editEnabled && !isEditing ? handleEdit : undefined;
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        return;
+      }
+
+      e.preventDefault();
+      save();
+    }
+  };
+
   return (
     <Tooltip title={!editEnabled && editDisabledReason} placement="bottom">
       <StyledRowTranslationCell
@@ -132,6 +143,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
                 setValue(e.target.value);
               }}
               value={value}
+              onKeyDown={handleKeyDown}
               multiline
               minRows={3}
               autoFocus
