@@ -42,6 +42,11 @@ const StyledDescription = styled(Box)`
   font-size: ${({ theme }) => theme.typography.caption.fontSize};
 `;
 
+const StyledGlossaryTermTags = styled(GlossaryTermTags)`
+  grid-area: tags;
+  margin: ${({ theme }) => theme.spacing(0.25, 0)};
+`;
+
 type Props = {
   organizationId: number;
   glossaryId: number;
@@ -91,7 +96,7 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
           <LimitedHeightText maxLines={5}>{item.description}</LimitedHeightText>
         </StyledDescription>
       )}
-      <GlossaryTermTags term={item} />
+      <StyledGlossaryTermTags term={item} />
       {editEnabled && isEditingTerm && (
         <GlossaryTermCreateUpdateDialog
           open={isEditingTerm}

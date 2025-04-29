@@ -7,20 +7,12 @@ import { useTranslate } from '@tolgee/react';
 type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
 
 const StyledTags = styled('div')`
-  grid-area: tags;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   overflow: hidden;
 
   gap: ${({ theme }) => theme.spacing(0.5)};
-
-  margin: ${({ theme }) => theme.spacing(0.25, 0)};
-  position: relative;
-
-  & > * {
-    margin: ${({ theme }) => theme.spacing(0.25, 0)};
-  }
 `;
 
 const CustomizedTag: React.VFC<PropsOf<typeof Chip>> = (props) => {
