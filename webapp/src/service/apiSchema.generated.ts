@@ -82,7 +82,7 @@ export interface paths {
   "/v2/api-keys": {
     get: operations["allByUser"];
     /** Creates new API key with provided scopes */
-    post: operations["create_13"];
+    post: operations["create_15"];
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
@@ -92,15 +92,15 @@ export interface paths {
     get: operations["getCurrent_1"];
   };
   "/v2/api-keys/{apiKeyId}": {
-    put: operations["update_9"];
-    delete: operations["delete_13"];
+    put: operations["update_11"];
+    delete: operations["delete_15"];
   };
   "/v2/api-keys/{apiKeyId}/regenerate": {
     put: operations["regenerate_1"];
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
-    get: operations["get_21"];
+    get: operations["get_24"];
   };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
@@ -136,7 +136,7 @@ export interface paths {
     post: operations["upload"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_12"];
+    delete: operations["delete_14"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
@@ -162,10 +162,10 @@ export interface paths {
     post: operations["create_12"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_20"];
-    put: operations["update_8"];
+    get: operations["get_23"];
+    put: operations["update_10"];
     /** Deletes organization and all its data including projects */
-    delete: operations["delete_11"];
+    delete: operations["delete_13"];
   };
   "/v2/organizations/{id}/avatar": {
     put: operations["uploadAvatar_2"];
@@ -186,6 +186,40 @@ export interface paths {
   "/v2/organizations/{id}/users": {
     /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
     get: operations["getAllUsers_1"];
+  };
+  "/v2/organizations/{organizationId}/glossaries": {
+    get: operations["getAll_11"];
+    post: operations["create_13"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}": {
+    get: operations["get_20"];
+    put: operations["update_8"];
+    delete: operations["delete_11"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages": {
+    get: operations["getLanguages"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms": {
+    get: operations["getAll_12"];
+    post: operations["create_14"];
+    delete: operations["deleteMultiple"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}": {
+    get: operations["get_21"];
+    put: operations["update_9"];
+    delete: operations["delete_12"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations": {
+    post: operations["update_12"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageTag}": {
+    get: operations["get_22"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsIds": {
+    get: operations["getAllIds"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsWithTranslations": {
+    get: operations["getAllWithTranslations"];
   };
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
@@ -379,6 +413,9 @@ export interface paths {
     get: operations["exportData"];
     /** Exports data (post). Useful when exceeding allowed URL size. */
     post: operations["exportPost"];
+  };
+  "/v2/projects/{projectId}/glossary-highlights": {
+    get: operations["getHighlights"];
   };
   "/v2/projects/{projectId}/import": {
     /** Prepares provided files to import. */
@@ -1141,6 +1178,16 @@ export interface components {
         exportFormats?: components["schemas"]["ExportFormatModel"][];
       };
     };
+    CollectionModelGlossaryLanguageDto: {
+      _embedded?: {
+        glossaryLanguageDtoList?: components["schemas"]["GlossaryLanguageDto"][];
+      };
+    };
+    CollectionModelGlossaryTermHighlightDto: {
+      _embedded?: {
+        glossaryTermHighlightDtoList?: components["schemas"]["GlossaryTermHighlightDto"][];
+      };
+    };
     CollectionModelImportNamespaceModel: {
       _embedded?: {
         namespaces?: components["schemas"]["ImportNamespaceModel"][];
@@ -1186,6 +1233,11 @@ export interface components {
         languages?: components["schemas"]["LanguageModel"][];
       };
     };
+    CollectionModelLong: {
+      _embedded?: {
+        longList?: number[];
+      };
+    };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
@@ -1209,6 +1261,11 @@ export interface components {
     CollectionModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
+      };
+    };
+    CollectionModelSimpleProjectModel: {
+      _embedded?: {
+        projects?: components["schemas"]["SimpleProjectModel"][];
       };
     };
     CollectionModelUsedNamespaceModel: {
@@ -1609,6 +1666,19 @@ export interface components {
       projectId: number;
       scopes: string[];
     };
+    CreateGlossaryRequest: {
+      assignedProjects: number[];
+      baseLanguageTag: string;
+      name: string;
+    };
+    CreateGlossaryTermWithTranslationRequest: {
+      description?: string;
+      flagAbbreviation: boolean;
+      flagCaseSensitive: boolean;
+      flagForbiddenTerm: boolean;
+      flagNonTranslatable: boolean;
+      text: string;
+    };
     CreateKeyDto: {
       /**
        * @description Description of the key
@@ -1688,6 +1758,10 @@ export interface components {
       name?: string;
       type: "TRANSLATE" | "REVIEW";
     };
+    CreateUpdateGlossaryTermResponse: {
+      term: components["schemas"]["GlossaryTermModel"];
+      translation?: components["schemas"]["GlossaryTermTranslationModel"];
+    };
     CreditBalanceModel: {
       /** Format: int64 */
       bucketSize: number;
@@ -1724,6 +1798,9 @@ export interface components {
     };
     DeleteKeysRequest: {
       keyIds: number[];
+    };
+    DeleteMultipleGlossaryTermsRequest: {
+      termIds: number[];
     };
     DocItem: {
       description?: string;
@@ -1780,6 +1857,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -2082,7 +2160,11 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "instance_not_using_license_key"
-        | "invalid_path";
+        | "invalid_path"
+        | "glossary_not_found"
+        | "glossary_term_not_found"
+        | "glossary_term_translation_not_found"
+        | "glossary_non_translatable_term_cannot_be_translated";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2228,6 +2310,47 @@ export interface components {
       keys: components["schemas"]["KeyDefinitionDto"][];
       /** @description Tags to return language translations in */
       languageTags: string[];
+    };
+    GlossaryLanguageDto: {
+      base: boolean;
+      tag: string;
+    };
+    GlossaryModel: {
+      assignedProjects: components["schemas"]["CollectionModelSimpleProjectModel"];
+      baseLanguageTag?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      organizationOwner: components["schemas"]["SimpleOrganizationModel"];
+    };
+    GlossaryTermHighlightDto: {
+      position: components["schemas"]["Position"];
+      value: components["schemas"]["GlossaryTermWithTranslationsModel"];
+    };
+    GlossaryTermModel: {
+      description?: string;
+      flagAbbreviation: boolean;
+      flagCaseSensitive: boolean;
+      flagForbiddenTerm: boolean;
+      flagNonTranslatable: boolean;
+      glossary: components["schemas"]["GlossaryModel"];
+      /** Format: int64 */
+      id: number;
+    };
+    GlossaryTermTranslationModel: {
+      languageTag: string;
+      text: string;
+    };
+    GlossaryTermWithTranslationsModel: {
+      description?: string;
+      flagAbbreviation: boolean;
+      flagCaseSensitive: boolean;
+      flagForbiddenTerm: boolean;
+      flagNonTranslatable: boolean;
+      glossary: components["schemas"]["GlossaryModel"];
+      /** Format: int64 */
+      id: number;
+      translations: components["schemas"]["GlossaryTermTranslationModel"][];
     };
     HierarchyItem: {
       requires: components["schemas"]["HierarchyItem"][];
@@ -3220,6 +3343,24 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelGlossaryModel: {
+      _embedded?: {
+        glossaries?: components["schemas"]["GlossaryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelGlossaryTermModel: {
+      _embedded?: {
+        glossaryTerms?: components["schemas"]["GlossaryTermModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelGlossaryTermWithTranslationsModel: {
+      _embedded?: {
+        glossaryTerms?: components["schemas"]["GlossaryTermWithTranslationsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelImportFileIssueModel: {
       _embedded?: {
         importFileIssues?: components["schemas"]["ImportFileIssueModel"][];
@@ -3567,6 +3708,12 @@ export interface components {
       scriptUrl: string;
       url: string;
     };
+    Position: {
+      /** Format: int32 */
+      end: number;
+      /** Format: int32 */
+      start: number;
+    };
     PreTranslationByTmRequest: {
       keyIds: number[];
       targetLanguageIds: number[];
@@ -3607,6 +3754,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       /** Format: int64 */
       id: number;
@@ -3867,6 +4015,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -4176,6 +4325,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -4677,7 +4827,11 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "instance_not_using_license_key"
-        | "invalid_path";
+        | "invalid_path"
+        | "glossary_not_found"
+        | "glossary_term_not_found"
+        | "glossary_term_translation_not_found"
+        | "glossary_non_translatable_term_cannot_be_translated";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -4944,6 +5098,23 @@ export interface components {
     UntagKeysRequest: {
       keyIds: number[];
       tags: string[];
+    };
+    UpdateGlossaryRequest: {
+      assignedProjects?: number[];
+      baseLanguageTag: string;
+      name: string;
+    };
+    UpdateGlossaryTermTranslationRequest: {
+      languageTag: string;
+      text: string;
+    };
+    UpdateGlossaryTermWithTranslationRequest: {
+      description?: string;
+      flagAbbreviation?: boolean;
+      flagCaseSensitive?: boolean;
+      flagForbiddenTerm?: boolean;
+      flagNonTranslatable?: boolean;
+      text?: string;
     };
     UpdateNamespaceDto: {
       name: string;
@@ -6127,7 +6298,7 @@ export interface operations {
     };
   };
   /** Creates new API key with provided scopes */
-  create_13: {
+  create_15: {
     responses: {
       /** OK */
       200: {
@@ -6259,7 +6430,7 @@ export interface operations {
       };
     };
   };
-  update_9: {
+  update_11: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -6311,7 +6482,7 @@ export interface operations {
       };
     };
   };
-  delete_13: {
+  delete_15: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -6407,7 +6578,7 @@ export interface operations {
     };
   };
   /** Returns specific API key info */
-  get_21: {
+  get_24: {
     parameters: {
       path: {
         keyId: number;
@@ -6973,7 +7144,7 @@ export interface operations {
       };
     };
   };
-  delete_12: {
+  delete_14: {
     parameters: {
       path: {
         ids: number[];
@@ -7397,7 +7568,7 @@ export interface operations {
       };
     };
   };
-  get_20: {
+  get_23: {
     parameters: {
       path: {
         id: number;
@@ -7444,7 +7615,7 @@ export interface operations {
       };
     };
   };
-  update_8: {
+  update_10: {
     parameters: {
       path: {
         id: number;
@@ -7497,7 +7668,7 @@ export interface operations {
     };
   };
   /** Deletes organization and all its data including projects */
-  delete_11: {
+  delete_13: {
     parameters: {
       path: {
         id: number;
@@ -7817,6 +7988,829 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAll_11: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelGlossaryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  create_13: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateGlossaryRequest"];
+      };
+    };
+  };
+  get_20: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_8: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateGlossaryRequest"];
+      };
+    };
+  };
+  delete_11: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getLanguages: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelGlossaryLanguageDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAll_12: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+        languageTags?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelGlossaryTermModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  create_14: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateUpdateGlossaryTermResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateGlossaryTermWithTranslationRequest"];
+      };
+    };
+  };
+  deleteMultiple: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteMultipleGlossaryTermsRequest"];
+      };
+    };
+  };
+  get_21: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+        termId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryTermModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_9: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+        termId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateUpdateGlossaryTermResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateGlossaryTermWithTranslationRequest"];
+      };
+    };
+  };
+  delete_12: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+        termId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  update_12: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+        termId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryTermTranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateGlossaryTermTranslationRequest"];
+      };
+    };
+  };
+  get_22: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+        termId: number;
+        languageTag: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryTermTranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAllIds: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+      query: {
+        search?: string;
+        languageTags?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelLong"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAllWithTranslations: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+        languageTags?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelGlossaryTermWithTranslationsModel"];
         };
       };
       /** Bad Request */
@@ -11166,6 +12160,57 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExportParams"];
+      };
+    };
+  };
+  getHighlights: {
+    parameters: {
+      query: {
+        text: string;
+        languageTag: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelGlossaryTermHighlightDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
