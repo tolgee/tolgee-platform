@@ -102,7 +102,7 @@ class OrganizationRoleService(
     // If a new role gets added, this will not compile and will need to be addressed.
     return when (role) {
       OrganizationRoleType.MEMBER ->
-        isUserMember(userId, organizationId)
+        hasAnyOrganizationRole(userId, organizationId)
 
       OrganizationRoleType.OWNER ->
         isUserOwner(userId, organizationId)
@@ -157,13 +157,13 @@ class OrganizationRoleService(
     organizationId: Long,
   ) {
     val isServerAdmin = userAccountService.getDto(userId).role == UserAccount.Role.ADMIN
-    if (isUserMember(userId, organizationId) || isServerAdmin) {
+    if (hasAnyOrganizationRole(userId, organizationId) || isServerAdmin) {
       return
     }
     throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
   }
 
-  fun isUserMember(
+  fun hasAnyOrganizationRole(
     userId: Long,
     organizationId: Long,
   ): Boolean {

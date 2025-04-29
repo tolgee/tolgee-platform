@@ -79,7 +79,7 @@ class ThirdPartyUserHandler(
       throw BadRequestException(Message.INVITATION_ORGANIZATION_MISMATCH)
     }
 
-    if (!organizationRoleService.isUserMember(user.id, org.id)) {
+    if (!organizationRoleService.hasAnyOrganizationRole(user.id, org.id)) {
       organizationRoleService.grantMemberRoleToUser(user, org)
     }
     organizationRoleService.setManaged(user, org, true)
