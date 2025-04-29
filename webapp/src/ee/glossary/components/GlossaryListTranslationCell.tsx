@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Button, styled } from '@mui/material';
+import { Button, styled, Tooltip } from '@mui/material';
 import React from 'react';
 import { GlossaryListStyledRowCell } from 'tg.ee.module/glossary/components/GlossaryListStyledRowCell';
 import { components } from 'tg.service/apiSchema.generated';
@@ -51,6 +51,7 @@ type Props = {
   translation?: GlossaryTermTranslationModel;
   languageTag: string;
   editEnabled: boolean;
+  editDisabledReason?: React.ReactNode;
   isEditing?: boolean;
   onEdit?: () => void;
   onCancel?: () => void;
@@ -64,6 +65,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
   translation,
   languageTag,
   editEnabled,
+  editDisabledReason,
   isEditing,
   onEdit,
   onCancel,
@@ -109,51 +111,53 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
   const onHandleEdit = editEnabled && !isEditing ? handleEdit : undefined;
 
   return (
-    <StyledRowTranslationCell
-      className={clsx({
-        clickable: editEnabled,
-        editing: isEditing,
-      })}
-      onClick={onHandleEdit}
-    >
-      {!isEditing ? (
-        <Box overflow="hidden" gridArea="text">
-          <LimitedHeightText maxLines={3}>
-            {translation?.text}
-          </LimitedHeightText>
-        </Box>
-      ) : (
-        <StyledEditBox>
-          <TextField
-            onChange={(e) => {
-              setValue(e.target.value);
-            }}
-            value={value}
-            multiline
-            minRows={3}
-            autoFocus
-          />
-          <StyledControls>
-            <Button
-              onClick={onCancel}
-              color="primary"
-              variant="outlined"
-              size="small"
-            >
-              <T keyName="translate_glossary_term_cell_cancel" />
-            </Button>
-            <LoadingButton
-              onClick={save}
-              color="primary"
-              size="small"
-              variant="contained"
-              loading={isSaveLoading}
-            >
-              <T keyName="translate_glossary_term_cell_save" />
-            </LoadingButton>
-          </StyledControls>
-        </StyledEditBox>
-      )}
-    </StyledRowTranslationCell>
+    <Tooltip title={!editEnabled && editDisabledReason} placement="bottom">
+      <StyledRowTranslationCell
+        className={clsx({
+          clickable: editEnabled,
+          editing: isEditing,
+        })}
+        onClick={onHandleEdit}
+      >
+        {!isEditing ? (
+          <Box overflow="hidden" gridArea="text">
+            <LimitedHeightText maxLines={3}>
+              {translation?.text}
+            </LimitedHeightText>
+          </Box>
+        ) : (
+          <StyledEditBox>
+            <TextField
+              onChange={(e) => {
+                setValue(e.target.value);
+              }}
+              value={value}
+              multiline
+              minRows={3}
+              autoFocus
+            />
+            <StyledControls>
+              <Button
+                onClick={onCancel}
+                color="primary"
+                variant="outlined"
+                size="small"
+              >
+                <T keyName="translate_glossary_term_cell_cancel" />
+              </Button>
+              <LoadingButton
+                onClick={save}
+                color="primary"
+                size="small"
+                variant="contained"
+                loading={isSaveLoading}
+              >
+                <T keyName="translate_glossary_term_cell_save" />
+              </LoadingButton>
+            </StyledControls>
+          </StyledEditBox>
+        )}
+      </StyledRowTranslationCell>
+    </Tooltip>
   );
 };

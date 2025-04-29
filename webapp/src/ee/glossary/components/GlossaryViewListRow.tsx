@@ -4,6 +4,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { GlossaryListTranslationCell } from 'tg.ee.module/glossary/components/GlossaryListTranslationCell';
 import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryListTermCell';
 import { SelectionService } from 'tg.service/useSelectionService';
+import { T } from '@tolgee/react';
 
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
@@ -68,6 +69,11 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
             translation={translation}
             languageTag={tag}
             editEnabled={editEnabled && !item.flagNonTranslatable}
+            editDisabledReason={
+              item.flagNonTranslatable && (
+                <T keyName="glossary_term_edit_disabled_non_translatable_tooltip" />
+              )
+            }
             isEditing={editingTermId === item.id && editingLanguageTag === tag}
             onEdit={() => onEditTranslation(item.id, tag)}
             onCancel={() => onEditTranslation(item.id, undefined)}
