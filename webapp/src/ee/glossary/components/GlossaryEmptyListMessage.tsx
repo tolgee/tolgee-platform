@@ -24,6 +24,8 @@ const StyledCard = styled(Card)`
   border-radius: 20px;
   width: 490px;
   padding: ${({ theme }) => theme.spacing(4)};
+  background-color: ${({ theme }) =>
+    theme.palette.tokens.background.onDefaultGrey};
 `;
 
 const StyledPlusCircle = styled(PlusCircle)`
@@ -59,7 +61,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
   return (
     <EmptyState loading={loading} wrapperProps={wrapperProps}>
       <StyledBox>
-        <StyledCard>
+        <StyledCard elevation={0}>
           <StyledPlusCircle />
           <Typography variant="h4">
             <T keyName="glossary_empty_placeholder_add_term_title" />
@@ -76,7 +78,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             </Typography>
           </Link>
         </StyledCard>
-        <StyledCard>
+        <StyledCard elevation={0}>
           <StyledUploadCloud02 />
           <Typography variant="h4">
             <T keyName="glossary_empty_placeholder_import_terms_title" />
