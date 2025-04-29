@@ -105,9 +105,7 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
         >
           <IconButton
             sx={{
-              marginRight: theme.spacing(-1),
-              // width: 20,
-              // height: 20,
+              margin: theme.spacing(-1),
             }}
             component={Link}
             to={getGlossaryTermSearchUrl(
@@ -116,12 +114,7 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
               translation?.text || ''
             )}
           >
-            <LinkExternal02
-              style={{
-                width: 20,
-                height: 20,
-              }}
-            />
+            <LinkExternal02 />
           </IconButton>
         </Tooltip>
       </StyledTitleWrapper>

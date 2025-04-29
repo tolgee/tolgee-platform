@@ -31,7 +31,7 @@ const StyledCheckbox = styled(Checkbox)`
 const StyledText = styled(Box)`
   grid-area: text;
   overflow: hidden;
-  margin-bottom: ${({ theme }) => theme.spacing(1)};
+  margin-bottom: ${({ theme }) => theme.spacing(0.5)};
 `;
 
 const StyledDescription = styled(Box)`
@@ -42,9 +42,10 @@ const StyledDescription = styled(Box)`
   font-size: ${({ theme }) => theme.typography.caption.fontSize};
 `;
 
-const StyledGlossaryTermTags = styled(GlossaryTermTags)`
+const StyledTags = styled(Box)`
   grid-area: tags;
-  margin: ${({ theme }) => theme.spacing(0.25, 0)};
+  margin-top: ${({ theme }) => theme.spacing(0.5)};
+  margin-bottom: ${({ theme }) => theme.spacing(0.25)};
 `;
 
 type Props = {
@@ -96,7 +97,9 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
           <LimitedHeightText maxLines={5}>{item.description}</LimitedHeightText>
         </StyledDescription>
       )}
-      <StyledGlossaryTermTags term={item} />
+      <StyledTags>
+        <GlossaryTermTags term={item} />
+      </StyledTags>
       {editEnabled && isEditingTerm && (
         <GlossaryTermCreateUpdateDialog
           open={isEditingTerm}
