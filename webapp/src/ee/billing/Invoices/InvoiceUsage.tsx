@@ -53,7 +53,12 @@ export const InvoiceUsage: FC<{
               </Tooltip>
             </IconButton>
           </Box>
-          <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md">
+          <Dialog
+            open={open}
+            onClose={() => setOpen(false)}
+            maxWidth="md"
+            data-cy="invoice-details-dialog"
+          >
             <DialogTitle>{t('invoice_usage_dialog_title')}</DialogTitle>
             <DialogContent>
               {usage.data ? (

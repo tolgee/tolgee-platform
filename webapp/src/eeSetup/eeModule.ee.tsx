@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-imports */
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
-import React from 'react';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
 import { ClipboardCheck } from '@untitled-ui/icons-react';
@@ -19,13 +18,13 @@ import { LINKS } from '../constants/links';
 import { MyTasksView } from '../ee/task/views/myTasks/MyTasksView';
 import { useGlobalContext } from '../globalContext/GlobalContext';
 import { useUserTasks } from '../globalContext/useUserTasks';
-import { AdministrationCloudPlansView } from '../ee/billing/administration/subscriptionPlans/AdministrationCloudPlansView';
-import { AdministrationCloudPlanCreateView } from '../ee/billing/administration/subscriptionPlans/AdministrationCloudPlanCreateView';
-import { AdministrationCloudPlanEditView } from '../ee/billing/administration/subscriptionPlans/AdministrationCloudPlanEditView';
-import { AdministrationEePlansView } from '../ee/billing/administration/subscriptionPlans/AdministrationEePlansView';
-import { AdministrationEePlanCreateView } from '../ee/billing/administration/subscriptionPlans/AdministrationEePlanCreateView';
-import { AdministrationEePlanEditView } from '../ee/billing/administration/subscriptionPlans/AdministrationEePlanEditView';
-import { AdministrationEeLicenseView } from '../ee/billing/administration/subscriptionPlans/AdministrationEeLicenseView';
+import { AdministrationCloudPlansView } from '../ee/billing/administration/subscriptionPlans/viewsCloud/AdministrationCloudPlansView';
+import { AdministrationCloudPlanCreateView } from '../ee/billing/administration/subscriptionPlans/viewsCloud/AdministrationCloudPlanCreateView';
+import { AdministrationCloudPlanEditView } from '../ee/billing/administration/subscriptionPlans/viewsCloud/AdministrationCloudPlanEditView';
+import { AdministrationEePlansView } from '../ee/billing/administration/subscriptionPlans/viewsSelfHostedEe/AdministrationEePlansView';
+import { AdministrationEePlanCreateView } from '../ee/billing/administration/subscriptionPlans/viewsSelfHostedEe/AdministrationEePlanCreateView';
+import { AdministrationEePlanEditView } from '../ee/billing/administration/subscriptionPlans/viewsSelfHostedEe/AdministrationEePlanEditView';
+import { AdministrationEeLicenseView } from '../ee/billing/administration/AdministrationEeLicenseView';
 import { SlackApp } from '../ee/organizationApps/SlackApp';
 import { useConfig, useEnabledFeatures } from '../globalContext/helpers';
 import { OrganizationSubscriptionsView } from '../ee/billing/Subscriptions/OrganizationSubscriptionsView';
@@ -53,7 +52,7 @@ import { AdministrationSubscriptionsView } from '../ee/billing/administration/su
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
-export { Usage } from '../ee/billing/component/Usage';
+export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
 export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';
 export { PermissionsAdvancedEe } from '../ee/PermissionsAdvanced/PermissionsAdvancedEe';
 export { TranslationsTaskDetail } from '../ee/task/components/TranslationsTaskDetail';

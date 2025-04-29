@@ -14,6 +14,7 @@ const SSO_MIGRATION_PATHS = [
   LINKS.SSO_MIGRATION,
   LINKS.ACCEPT_AUTH_PROVIDER_CHANGE,
 ];
+import { errorAction } from './errorAction';
 
 export const handleApiError = (
   r: Response,
@@ -98,6 +99,12 @@ export const handleApiError = (
   }
 
   if (r.status == 400 && !options.disableErrorNotification) {
+    const handledByAction = errorAction(resObject.code);
+
+    if (handledByAction) {
+      return;
+    }
+
     const parsed = parseErrorResponse(resObject);
     parsed.forEach((message) =>
       messageService.error(<TranslatedError code={message} />)

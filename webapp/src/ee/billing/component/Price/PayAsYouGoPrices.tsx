@@ -24,7 +24,12 @@ export const PayAsYouGoPrices = ({
   className,
   hideTitle,
 }: Props) => {
-  const { perSeat, perThousandMtCredits, perThousandTranslations } = prices;
+  const {
+    perSeat,
+    perThousandMtCredits,
+    perThousandTranslations,
+    perThousandKeys,
+  } = prices;
   const { t } = useTranslate();
   const formatPrice = useMoneyFormatter();
 
@@ -42,14 +47,6 @@ export const PayAsYouGoPrices = ({
         </StyledTitle>
       )}
 
-      {Boolean(perSeat) && (
-        <PayAsYouGoRow
-          data-cy="billing-plan-price-extra-seat"
-          firstPart={t('billing-plan-price-extra-seat')}
-          secondPart={t('billing-plan-price-per-mo', { value: perSeat })}
-        />
-      )}
-
       {Boolean(perThousandTranslations) && (
         <PayAsYouGoRow
           data-cy="billing-plan-price-extra-thousand-strings"
@@ -59,6 +56,24 @@ export const PayAsYouGoPrices = ({
           secondPart={t('billing-plan-price-per-mo', {
             value: perThousandTranslations,
           })}
+        />
+      )}
+
+      {Boolean(perThousandKeys) && (
+        <PayAsYouGoRow
+          data-cy="billing-plan-price-extra-thousand-keys"
+          firstPart={t('billing-plan-price-extra-thousand-keys', { num: 1000 })}
+          secondPart={t('billing-plan-price-per-mo', {
+            value: perThousandKeys,
+          })}
+        />
+      )}
+
+      {Boolean(perSeat) && (
+        <PayAsYouGoRow
+          data-cy="billing-plan-price-extra-seat"
+          firstPart={t('billing-plan-price-extra-seat')}
+          secondPart={t('billing-plan-price-per-mo', { value: perSeat })}
         />
       )}
 

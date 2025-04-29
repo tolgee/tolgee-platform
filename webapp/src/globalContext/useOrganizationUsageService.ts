@@ -63,6 +63,32 @@ export const useOrganizationUsageService = ({
     setSpendingLimitErrors((v) => v + 1);
   };
 
+  /**
+   * For MT credit error, we want to show the error only once.
+   * We don't want to disturb the translators that much with the error.
+   */
+  const increaseCreditPlanLimitErrors = () => {
+    setPlanLimitErrors((v) => {
+      if (v > 0) {
+        return v;
+      }
+      return v + 1;
+    });
+  };
+
+  /**
+   * For MT credit error, we want to show the error only once.
+   * We don't want to disturb the translators that much with the error.
+   */
+  const increaseCreditSpendingLimitErrors = () => {
+    setSpendingLimitErrors((v) => {
+      if (v > 0) {
+        return v;
+      }
+      return v + 1;
+    });
+  };
+
   const refetchUsage = () => {
     if (usageEnabled) {
       usageLoadable.refetch();
@@ -86,6 +112,8 @@ export const useOrganizationUsageService = ({
       updateUsageData,
       incrementPlanLimitErrors,
       incrementSpendingLimitErrors,
+      increaseCreditPlanLimitErrors,
+      increaseCreditSpendingLimitErrors,
     },
   };
 };

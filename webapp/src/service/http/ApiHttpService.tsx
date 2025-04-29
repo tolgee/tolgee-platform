@@ -5,7 +5,6 @@ import { tokenService } from '../TokenService';
 import { getUtmCookie } from 'tg.fixtures/utmCookie';
 import { handleApiError } from './handleApiError';
 import { ApiError } from './ApiError';
-import { errorAction } from './errorAction';
 import { globalContext } from 'tg.globalContext/globalActions';
 import { testClockStore } from '../useTestClock';
 
@@ -61,12 +60,10 @@ export class ApiHttpService {
             if (r.status >= 400) {
               const responseData = await ApiHttpService.getResObject(r);
               const resultError = new ApiError('Api error', responseData);
+
               resultError.setErrorHandler(() =>
                 handleApiError(r, responseData, init, options)
               );
-              if (r.status === 400) {
-                errorAction(responseData.code);
-              }
 
               if (
                 r.status == 403 &&

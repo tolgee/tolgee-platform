@@ -6,7 +6,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
-import io.tolgee.ee.service.EeSubscriptionServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -35,6 +35,9 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         username = "franta"
         role = UserAccount.Role.ADMIN
         user = this
+      }
+      addProject { name = "test" }.build {
+        addKey("hehe")
       }
     }
     userAccount = user
@@ -73,8 +76,16 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
         req["licenseKey"].assert.isEqualTo("mock-mock")
         req["seats"].assert.isEqualTo(1)
+        req["keys"].assert.isEqualTo(1)
 
-        getSubscription().assert.isNotNull
+        val subscription = getSubscription()
+        subscription.assert.isNotNull
+        subscription!!.includedKeys.assert.isEqualTo(10)
+        subscription.includedSeats.assert.isEqualTo(10)
+        subscription.seatsLimit.assert.isEqualTo(10)
+        subscription.includedKeys.assert.isEqualTo(10)
+        subscription.keysLimit.assert.isEqualTo(10)
+        subscription.isPayAsYouGo.assert.isEqualTo(false)
       }
     }
   }
@@ -191,7 +202,6 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
         name = "Plaaan"
         status = SubscriptionStatus.ERROR
         currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
         enabledFeatures = Feature.values()
         lastValidCheck = Date()
       },

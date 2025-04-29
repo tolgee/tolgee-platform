@@ -15,7 +15,6 @@ import { ShowAllFeaturesLink } from './ShowAllFeatures';
 import { PlanType } from './types';
 import { IncludedUsage } from './IncludedUsage';
 import { ContactUsButton } from './ContactUsButton';
-import { isPlanLegacy } from './plansTools';
 import { Box, Chip, Theme, Tooltip, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
@@ -100,8 +99,8 @@ export const Plan: FC<Props> = ({
               <ShowAllFeaturesLink sx={{ alignSelf: 'center' }} />
             )}
             <IncludedUsage
+              metricType={plan.metricType}
               includedUsage={plan.includedUsage}
-              isLegacy={isPlanLegacy(plan)}
               highlightColor={highlightColor}
               sx={{ alignSelf: 'center' }}
             />

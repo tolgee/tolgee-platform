@@ -5,17 +5,15 @@ import { Pagination } from '@mui/material';
 export type OverridableListWrappers<
   WrapperComponent extends
     | keyof JSX.IntrinsicElements
-    | JSXElementConstructor<any>,
-  ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
+    | JSXElementConstructor<any> = typeof Paper,
+  ListComponent extends
+    | keyof JSX.IntrinsicElements
+    | JSXElementConstructor<any> = typeof List
 > = {
   wrapperComponent?: WrapperComponent;
-  wrapperComponentProps?: WrapperComponent extends typeof Paper
-    ? React.ComponentProps<typeof Paper>
-    : React.ComponentProps<WrapperComponent>;
+  wrapperComponentProps?: React.ComponentProps<WrapperComponent>;
   listComponent?: ListComponent;
-  listComponentProps?: ListComponent extends typeof List
-    ? React.ComponentProps<typeof List>
-    : React.ComponentProps<ListComponent>;
+  listComponentProps?: React.ComponentProps<ListComponent>;
 };
 
 export const SimpleList = <

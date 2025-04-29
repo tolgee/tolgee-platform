@@ -18,7 +18,6 @@ import io.tolgee.service.TenantService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
-import jakarta.transaction.Transactional
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -149,20 +148,20 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
     performPost("/api/public/sign_up", dto).andIsUnauthorized
   }
 
-  @Transactional
   @Test
   fun `sso auth doesn't create demo project and user organization`() {
     loginAsSsoUser(
       tokenResponse = SsoMultiTenantsMocks.defaultTokenResponse2,
     )
     val userName = SsoMultiTenantsMocks.jwtClaimsSet2.get("email") as String
-    val user = userAccountService.get(userName)
-    assertThat(user.organizationRoles.size).isEqualTo(1)
-    assertThat(user.organizationRoles[0].organization?.id).isEqualTo(testData.organization.id)
-    assertThat(user.organizationRoles[0].managed).isTrue
+    executeInNewTransaction {
+      val user = userAccountService.get(userName)
+      assertThat(user.organizationRoles.size).isEqualTo(1)
+      assertThat(user.organizationRoles[0].organization?.id).isEqualTo(testData.organization.id)
+      assertThat(user.organizationRoles[0].managed).isTrue
+    }
   }
 
-  @Transactional
   @Test
   fun `sso user can't create organization`() {
     loginAsSsoUser()

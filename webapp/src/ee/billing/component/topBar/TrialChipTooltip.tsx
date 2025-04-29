@@ -17,7 +17,6 @@ import { getHighlightColor } from '../Plan/Plan';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { IncludedFeatures } from '../Plan/IncludedFeatures';
 import { IncludedUsage } from '../Plan/IncludedUsage';
-import { isPlanLegacy } from '../Plan/plansTools';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Link } from 'react-router-dom';
 
@@ -122,8 +121,8 @@ export const TrialChipTooltip: FC<TrialChipTooltipProps> = ({
                   })}
                 />
                 <IncludedUsage
+                  metricType={plan.metricType}
                   includedUsage={plan.includedUsage}
-                  isLegacy={isPlanLegacy(plan)}
                   highlightColor={highlightColor}
                   sx={(theme: Theme) => ({
                     alignSelf: 'center',

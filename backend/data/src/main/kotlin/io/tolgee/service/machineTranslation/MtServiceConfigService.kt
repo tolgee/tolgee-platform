@@ -14,6 +14,9 @@ import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
 import io.tolgee.service.language.LanguageService
+import io.tolgee.util.Logging
+import io.tolgee.util.debug
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -26,7 +29,7 @@ class MtServiceConfigService(
   private val applicationContext: ApplicationContext,
   private val mtServiceConfigRepository: MtServiceConfigRepository,
   private val entityManager: EntityManager,
-) {
+) : Logging {
   @set:Autowired
   @set:Lazy
   lateinit var languageService: LanguageService
@@ -60,13 +63,20 @@ class MtServiceConfigService(
   }
 
   private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> {
-    return services.asSequence()
-      .sortedBy { it.key.order }
-      .sortedByDescending { it.value.first.defaultPrimary }
-      .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
-      .map { it.key }
-      .map { MtServiceInfo(it, null) }
-      .toMutableList()
+    val enabled =
+      services.asSequence()
+        .sortedBy { it.key.order }
+        .sortedByDescending { it.value.first.defaultPrimary }
+        .filter { it.value.first.defaultEnabled && it.value.second.isEnabled && language.isSupportedBy(it.key) }
+        .map { it.key }
+        .map { MtServiceInfo(it, null) }
+        .toMutableList()
+
+    logger.debug {
+      enabled.map { it.serviceType }.joinToString()
+      "Enabled services via server config: ${enabled.map { it.serviceType }}"
+    }
+    return enabled
   }
 
   private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {

@@ -6,25 +6,33 @@ import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeLicensingMockRequestUtil
+import io.tolgee.ee.EeProperties
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import kotlin.properties.Delegates
 
 @Suppress("SpringBootApplicationProperties")
-@SpringBootTest(properties = ["tolgee.ee.check-period-ms=500"])
 class EeSubscriptionProviderImplTest : AbstractSpringTest() {
+  @Autowired
+  private lateinit var eeProperties: EeProperties
+
+  @Autowired
+  private lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
+
   @Autowired
   @MockBean
   lateinit var restTemplate: RestTemplate
@@ -33,24 +41,26 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
   @Autowired
-  private lateinit var eeLicensingMockRequestUtil: EeLicensingMockRequestUtil
-
-  @Autowired
   private lateinit var eeLicenseMockRequestUtil: EeLicensingMockRequestUtil
+
+  var oldCheckPeriodProperty by Delegates.notNull<Long>()
+
+  @BeforeEach
+  fun setup() {
+    schedulingManager.cancelAll()
+    setCheckPeriodProperty()
+    eeSubscriptionServiceImpl.scheduleSubscriptionChecking()
+    currentDateProvider.forcedDate = currentDateProvider.date
+  }
+
+  @AfterEach
+  fun cleanup() {
+    eeProperties.checkPeriodInMs = oldCheckPeriodProperty
+  }
 
   @Test
   fun `it checks for subscription changes`() {
-    eeSubscriptionRepository.save(
-      EeSubscription().apply {
-        licenseKey = "mock"
-        name = "Plaaan"
-        status = SubscriptionStatus.ERROR
-        currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
-        enabledFeatures = Feature.values()
-        lastValidCheck = Date()
-      },
-    )
+    prepareSubscription()
 
     eeLicenseMockRequestUtil.mock {
       whenReq {
@@ -63,7 +73,7 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
       }
 
       verify {
-        waitForNotThrowing(pollTime = 1000) {
+        waitForNotThrowing(pollTime = 100, timeout = 2000) {
           captor.allValues.assert.hasSizeGreaterThan(0)
           executeInNewTransaction {
             eeSubscriptionRepository.findAll().single().status.assert.isEqualTo(SubscriptionStatus.ACTIVE)
@@ -75,17 +85,7 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
 
   @Test
   fun `cancels subscription when other instance uses the key`() {
-    eeSubscriptionRepository.save(
-      EeSubscription().apply {
-        licenseKey = "mock"
-        name = "Plaaan"
-        status = SubscriptionStatus.ERROR
-        currentPeriodEnd = Date()
-        cancelAtPeriodEnd = false
-        enabledFeatures = Feature.values()
-        lastValidCheck = Date()
-      },
-    )
+    prepareSubscription()
 
     eeLicenseMockRequestUtil.mock {
       whenReq {
@@ -110,7 +110,7 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
       )
 
       verify {
-        waitForNotThrowing(pollTime = 50) {
+        waitForNotThrowing(pollTime = 100, timeout = 2000) {
           captor.allValues.assert.hasSizeGreaterThan(0)
           eeSubscriptionRepository.findAll().single()
             .status
@@ -119,5 +119,23 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
         }
       }
     }
+  }
+
+  private fun setCheckPeriodProperty() {
+    oldCheckPeriodProperty = eeProperties.checkPeriodInMs
+    eeProperties.checkPeriodInMs = 10
+  }
+
+  private fun EeSubscriptionProviderImplTest.prepareSubscription() {
+    eeSubscriptionRepository.save(
+      EeSubscription().apply {
+        licenseKey = "mock"
+        name = "Plaaan"
+        status = SubscriptionStatus.ACTIVE
+        currentPeriodEnd = currentDateProvider.date
+        enabledFeatures = Feature.entries.toTypedArray()
+        lastValidCheck = currentDateProvider.date
+      },
+    )
   }
 }

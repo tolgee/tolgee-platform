@@ -3,6 +3,7 @@ import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Download02 } from '@untitled-ui/icons-react';
+import React from 'react';
 
 export const ItemRow = (props: {
   item:
@@ -10,6 +11,7 @@ export const ItemRow = (props: {
     | components['schemas']['SumUsageItemModel'];
   label: string;
   onDownloadReport?: () => void;
+  tableRowProps?: React.ComponentProps<typeof TableRow>;
 }) => {
   const formatMoney = useMoneyFormatter();
   const formatNumber = useNumberFormatter();
@@ -17,7 +19,7 @@ export const ItemRow = (props: {
   const { t } = useTranslate();
 
   return (
-    <TableRow>
+    <TableRow {...props.tableRowProps}>
       <TableCell>
         {props.label}{' '}
         {props.onDownloadReport && (

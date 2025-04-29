@@ -5,7 +5,7 @@ import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { BillingPeriodType } from '../../component/Price/PeriodSwitch';
-import { PlanType } from 'tg.ee.module/billing/component/Plan/types';
+import { PlanType } from '../../component/Plan/types';
 
 export const StyledContainer = styled(Box)`
   justify-self: center;
@@ -73,7 +73,7 @@ export const SelfHostedPlanAction = ({ plan, period, custom }: Props) => {
   return (
     <StyledContainer>
       <LoadingButton
-        data-cy="billing-self-hosted-ee-plan-subscribe-button"
+        data-cy="billing-plan-action-button"
         variant="contained"
         color={custom ? 'info' : 'primary'}
         size="medium"

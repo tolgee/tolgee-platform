@@ -1,4 +1,3 @@
-import React from 'react';
 import type { BillingMenuItemsProps } from './EeModuleType';
 
 const NotIncludedInOss =
@@ -17,7 +16,6 @@ export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
 export const billingMenuItems = [] as React.FC<BillingMenuItemsProps>[];
 export const apps = [] as React.FC[];
-export const Usage = Empty;
 export const AgencyLabel = NotIncludedInOss('AgencyLabel');
 export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;
@@ -50,3 +48,5 @@ export const useAddAdministrationMenuItems = () => (existingItems) =>
 export const TrialAnnouncement = Empty;
 export const TrialChip = Empty;
 export const TaskInfoMessage = Empty;
+
+export const CriticalUsageCircle = Empty;

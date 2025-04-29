@@ -21,6 +21,8 @@ interface Caches {
     const val ORGANIZATION_ROLES = "organizationRoles"
     const val SSO_TENANTS = "ssoTenants"
 
+    const val EE_LAST_REPORTED_USAGE = "eeLastReportedUsage"
+
     val caches =
       listOf(
         USER_ACCOUNTS,
@@ -39,6 +41,7 @@ interface Caches {
         LANGUAGES,
         ORGANIZATION_ROLES,
         SSO_TENANTS,
+        EE_LAST_REPORTED_USAGE,
       )
   }
 }

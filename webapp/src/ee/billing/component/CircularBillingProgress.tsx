@@ -45,19 +45,19 @@ const StyledCircleContentOver = styled(StyledCircleContent)`
 type Props = {
   value: number;
   maxValue: number;
-  canGoOver: boolean;
+  isPayAsYouGo: boolean;
   size?: number;
 };
 
 export const CircularBillingProgress = ({
   value,
   maxValue = 100,
-  canGoOver,
+  isPayAsYouGo,
   size = 28,
 }: Props) => {
   const normalized = value > maxValue ? maxValue : value < 0 ? 0 : value;
   const critical =
-    normalized > BILLING_CRITICAL_FRACTION * maxValue && !canGoOver;
+    normalized > BILLING_CRITICAL_FRACTION * maxValue && !isPayAsYouGo;
 
   const extra = value > maxValue ? value - maxValue : 0;
 
@@ -100,7 +100,7 @@ export const CircularBillingProgress = ({
             strokeDashoffset: extraProgressLength,
             transform: `scale(1, -1) rotate(${90 + rotation}deg)`,
           }}
-          className={clsx({ canGoOver })}
+          className={clsx({ isPayAsYouGo: isPayAsYouGo })}
         />
       )}
     </svg>

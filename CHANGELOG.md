@@ -1,3 +1,10 @@
+# [3.115.0](https://github.com/tolgee/tolgee-platform/compare/v3.114.4...v3.115.0) (2025-04-29)
+
+
+### Features
+
+* Add keys/strings as a metric ([#2942](https://github.com/tolgee/tolgee-platform/issues/2942)) ([4ba8027](https://github.com/tolgee/tolgee-platform/commit/4ba8027ad01051e291330d1e038f9ef3bebd7723))
+
 ## [3.114.4](https://github.com/tolgee/tolgee-platform/compare/v3.114.3...v3.114.4) (2025-04-14)
 
 

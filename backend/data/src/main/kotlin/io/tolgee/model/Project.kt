@@ -3,7 +3,6 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
@@ -126,6 +125,7 @@ class Project(
   @ColumnDefault("0")
   var lastTaskNumber: Long = 0
 
+  @ActivityLoggedProp
   override var deletedAt: Date? = null
 
   constructor(name: String, description: String? = null, slug: String?, organizationOwner: Organization) :
@@ -141,8 +141,12 @@ class Project(
     return findLanguageOptional(tag).orElse(null)
   }
 
-  fun getLanguage(tag: String): Language {
-    return findLanguage(tag) ?: throw NotFoundException()
+  /**
+   * organizationOwner is a lateinit var, and in should never be null, but for some edge cases on some old
+   * instances it can still be missing.
+   */
+  fun isOrganizationOwnerInitialized(): Boolean {
+    return this::organizationOwner.isInitialized
   }
 
   companion object {

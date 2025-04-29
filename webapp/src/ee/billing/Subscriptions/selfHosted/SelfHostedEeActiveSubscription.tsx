@@ -4,7 +4,6 @@ import { components } from 'tg.service/billingApiSchema.generated';
 
 import { SelfHostedEeSubscriptionActions } from './SelfHostedEeSubscriptionActions';
 import { PlanContainer, PlanContent } from '../../component/Plan/PlanStyles';
-import { isPlanLegacy } from '../../component/Plan/plansTools';
 import { ActiveSubscriptionBanner } from 'tg.ee.module/billing/component/ActiveSubscription/ActiveSubscriptionBanner';
 import { ActivePlanTitle } from 'tg.ee.module/billing/component/ActiveSubscription/ActivePlanTitle';
 import { SelfHostedEeEstimatedCosts } from 'tg.ee.module/billing/component/ActiveSubscription/SelfHostedEeEstimatedCosts';
@@ -12,6 +11,7 @@ import { CollapsedFeatures } from 'tg.ee.module/billing/component/ActiveSubscrip
 import { IncludedUsage } from 'tg.ee.module/billing/component/Plan/IncludedUsage';
 import { PayAsYouGoPrices } from 'tg.ee.module/billing/component/Price/PayAsYouGoPrices';
 import { PricePrimary } from '../../component/Price/PricePrimary';
+import { SelfHostedEeSubscriptionMetrics } from './SelfHostedEeSubscriptionMetrics';
 
 type SelfHostedEeSubscriptionModel =
   components['schemas']['SelfHostedEeSubscriptionModel'];
@@ -64,7 +64,7 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
         </Box>
 
         <CollapsedFeatures features={plan.enabledFeatures} custom={custom} />
-
+        <SelfHostedEeSubscriptionMetrics subscription={subscription} />
         <Box
           display="flex"
           justifyContent="space-between"
@@ -74,8 +74,8 @@ export const SelfHostedEeActiveSubscription: FC<Props> = ({
           mb={1}
         >
           <IncludedUsage
+            metricType={'KEYS_SEATS'}
             includedUsage={plan.includedUsage}
-            isLegacy={isPlanLegacy(plan)}
             highlightColor={highlightColor}
           />
           <PayAsYouGoPrices

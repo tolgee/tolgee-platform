@@ -12,6 +12,7 @@ buildscript {
 
 plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
+    id "org.gradle.test-retry"
 }
 
 subprojects {
@@ -172,5 +173,19 @@ subprojects {
         testLogging {
             events "passed", "skipped", "failed", "started"
         }
+    }
+}
+
+// Define the setTestRetry method at the root level so it can be used by all subprojects
+ext.setTestRetry = { test ->
+    boolean isCiServer = System.getenv().containsKey("CI")
+    boolean isRelease = System.getenv().get("CI_RELEASE") == "true"
+
+    test.retry {
+        if (isCiServer) {
+            maxFailures = 20
+            maxRetries = 5
+        }
+        failOnPassedAfterRetry = !isRelease
     }
 }

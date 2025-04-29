@@ -14,9 +14,11 @@ import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.machineTranslation.MachineTranslationParams
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.service.machineTranslation.MtTranslatorResult
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
+import io.tolgee.util.debug
 import io.tolgee.util.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -64,8 +66,15 @@ class MtResultStreamer(
     }
   }
 
-  private val servicesToUse
-    get() = mtTranslator.getServicesToUseByDesiredServices(dto.targetLanguageId, dto.services)
+  private val servicesToUse: Set<MtServiceInfo>
+    get() {
+      val services = mtTranslator.getServicesToUseByDesiredServices(dto.targetLanguageId, dto.services)
+      logger.debug {
+        val services = services.map { it.serviceType }.joinToString()
+        "Resolved services to use for translation: $services"
+      }
+      return services
+    }
 
   private fun writeServiceResult(service: MtServiceType) {
     try {
@@ -138,10 +147,12 @@ class MtResultStreamer(
 
   private fun OutputStreamWriter.writeJsonSync(data: Any) {
     val string = objectMapper.writeValueAsString(data)
+    logger.debug { "Sending to client: $string" }
     synchronized(this) {
       this.write(string + "\n")
       this.flush()
     }
+    logger.debug { "Sent to client using sync writer" }
   }
 
   private fun OutputStreamWriter.closeSync() {
