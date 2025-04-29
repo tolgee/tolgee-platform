@@ -1,5 +1,5 @@
 import { components } from 'tg.service/apiSchema.generated';
-import React, { ComponentProps, useMemo, useState } from 'react';
+import React, { ComponentProps, useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import { useTranslate } from '@tolgee/react';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -37,18 +37,6 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages',
     method: 'get',
     path: { organizationId, glossaryId },
-    options: {
-      onSuccess: (data) => {
-        if (value === undefined) {
-          // TODO: Maybe it would be better to select all languages by default?
-          onValueChange(
-            data._embedded?.glossaryLanguageDtoList
-              ?.filter((l) => !l.base)
-              ?.map((l) => l.tag) ?? []
-          );
-        }
-      },
-    },
   });
 
   const query = {
@@ -82,6 +70,24 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
       },
     },
   });
+
+  useEffect(() => {
+    if (value === undefined && priorityDataLoadable.data && dataLoadable.data) {
+      const langs =
+        priorityDataLoadable.data._embedded?.glossaryLanguageDtoList?.map(
+          (l) => l.tag
+        ) ?? [];
+      const extraLangs =
+        dataLoadable.data.pages[0]?._embedded?.languages?.map((l) => l.tag) ??
+        [];
+      extraLangs.forEach((l) => {
+        if (!langs.includes(l)) {
+          langs.push(l);
+        }
+      });
+      onValueChange(langs);
+    }
+  }, [value, priorityDataLoadable.data, dataLoadable.data]);
 
   const dataExtra = useMemo(() => {
     return dataLoadable.data?.pages.flatMap(
