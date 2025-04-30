@@ -1,3 +1,10 @@
+# [3.116.0](https://github.com/tolgee/tolgee-platform/compare/v3.115.0...v3.116.0) (2025-04-30)
+
+
+### Features
+
+* Add maintainer organization role ([#3043](https://github.com/tolgee/tolgee-platform/issues/3043)) ([2b628a0](https://github.com/tolgee/tolgee-platform/commit/2b628a085da1af2251d7d13da13fd61aa3aeb716)), closes [#3016](https://github.com/tolgee/tolgee-platform/issues/3016)
+
 # [3.115.0](https://github.com/tolgee/tolgee-platform/compare/v3.114.4...v3.115.0) (2025-04-29)
 
 
