@@ -49,14 +49,15 @@ export const ProjectListView = () => {
 
   const { t } = useTranslate();
 
-  const isOrganizationOwner =
-    preferredOrganization?.currentUserRole === 'OWNER';
+  const isOrganizationOwnerOrMaintainer = ['OWNER', 'MAINTAINER'].includes(
+    preferredOrganization?.currentUserRole || ''
+  );
 
   const isAdmin = useIsAdmin();
 
   const isAdminAccess = !preferredOrganization?.currentUserRole && isAdmin;
 
-  const addAllowed = isOrganizationOwner || isAdminAccess;
+  const addAllowed = isOrganizationOwnerOrMaintainer || isAdminAccess;
 
   const showSearch =
     search || (listPermitted.data?.page?.totalElements ?? 0) > 5;
@@ -98,7 +99,7 @@ export const ProjectListView = () => {
               <EmptyListMessage
                 loading={listPermitted.isFetching}
                 hint={
-                  isOrganizationOwner ? (
+                  isOrganizationOwnerOrMaintainer ? (
                     <Button
                       component={Link}
                       to={LINKS.PROJECT_ADD.build()}

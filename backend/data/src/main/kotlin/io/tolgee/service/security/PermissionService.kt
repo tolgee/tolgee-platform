@@ -225,7 +225,7 @@ class PermissionService(
       when {
         organizationRole == OrganizationRoleType.OWNER -> ComputedPermissionDto.ORGANIZATION_OWNER
         directPermission != null -> ComputedPermissionDto(directPermission, ComputedPermissionOrigin.DIRECT)
-        organizationRole == OrganizationRoleType.MEMBER ->
+        organizationRole == OrganizationRoleType.MEMBER || organizationRole == OrganizationRoleType.MAINTAINER ->
           ComputedPermissionDto(
             organizationBasePermission,
             ComputedPermissionOrigin.ORGANIZATION_BASE,
@@ -475,7 +475,7 @@ class PermissionService(
     userId: Long,
   ) {
     val project = projectService.get(projectId)
-    organizationRoleService.checkUserIsMemberOrOwner(userId, project.organizationOwner.id)
+    organizationRoleService.checkUserIsMember(userId, project.organizationOwner.id)
     val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
     delete(permission.id)
   }

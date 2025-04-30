@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.EnumSet
 
 @Service
 class OrganizationRoleService(
@@ -101,10 +102,13 @@ class OrganizationRoleService(
     // If a new role gets added, this will not compile and will need to be addressed.
     return when (role) {
       OrganizationRoleType.MEMBER ->
-        isUserMemberOrOwner(userId, organizationId)
+        hasAnyOrganizationRole(userId, organizationId)
 
       OrganizationRoleType.OWNER ->
         isUserOwner(userId, organizationId)
+
+      OrganizationRoleType.MAINTAINER ->
+        isUserOwnerOrMaintainer(userId, organizationId)
     }
   }
 
@@ -124,22 +128,42 @@ class OrganizationRoleService(
     }
   }
 
-  fun checkUserIsOwner(organizationId: Long) {
-    this.checkUserIsOwner(authenticationFacade.authenticatedUser.id, organizationId)
-  }
-
-  fun checkUserIsMemberOrOwner(
+  fun checkUserIsOwnerOrMaintainer(
     userId: Long,
     organizationId: Long,
   ) {
     val isServerAdmin = userAccountService.getDto(userId).role == UserAccount.Role.ADMIN
-    if (isUserMemberOrOwner(userId, organizationId) || isServerAdmin) {
+    if (this.isUserOwnerOrMaintainer(
+        userId,
+        organizationId,
+      ) || isServerAdmin
+    ) {
+      return
+    } else {
+      throw PermissionException(Message.USER_IS_NOT_OWNER_OR_MAINTAINER_OF_ORGANIZATION)
+    }
+  }
+
+  fun checkUserIsOwner(organizationId: Long) {
+    this.checkUserIsOwner(authenticationFacade.authenticatedUser.id, organizationId)
+  }
+
+  fun checkUserIsOwnerOrMaintainer(organizationId: Long) {
+    this.checkUserIsOwnerOrMaintainer(authenticationFacade.authenticatedUser.id, organizationId)
+  }
+
+  fun checkUserIsMember(
+    userId: Long,
+    organizationId: Long,
+  ) {
+    val isServerAdmin = userAccountService.getDto(userId).role == UserAccount.Role.ADMIN
+    if (hasAnyOrganizationRole(userId, organizationId) || isServerAdmin) {
       return
     }
     throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
   }
 
-  fun isUserMemberOrOwner(
+  fun hasAnyOrganizationRole(
     userId: Long,
     organizationId: Long,
   ): Boolean {
@@ -153,6 +177,14 @@ class OrganizationRoleService(
   ): Boolean {
     val role = self.getDto(organizationId, userId)
     return role.type == OrganizationRoleType.OWNER
+  }
+
+  fun isUserOwnerOrMaintainer(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean {
+    val role = self.getDto(organizationId, userId)
+    return OWNER_OR_MAINTAINER_ROLES.contains(role.type)
   }
 
   fun find(id: Long): OrganizationRole? {
@@ -266,6 +298,13 @@ class OrganizationRoleService(
     self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
   }
 
+  fun grantMaintainerRoleToUser(
+    user: UserAccount,
+    organization: Organization,
+  ) {
+    self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MAINTAINER)
+  }
+
   fun grantOwnerRoleToUser(
     user: UserAccount,
     organization: Organization,
@@ -345,5 +384,9 @@ class OrganizationRoleService(
   @Transactional
   fun getOwners(organization: Organization): List<UserAccount> {
     return organizationRoleRepository.getOwners(organization)
+  }
+
+  companion object {
+    private val OWNER_OR_MAINTAINER_ROLES = EnumSet.of(OrganizationRoleType.OWNER, OrganizationRoleType.MAINTAINER)
   }
 }

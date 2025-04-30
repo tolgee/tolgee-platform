@@ -22,6 +22,7 @@ import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -94,8 +95,12 @@ class ProjectsController(
     @RequestBody @Valid
     dto: CreateProjectRequest,
   ): ProjectModel {
-    organizationRoleService.checkUserIsOwner(dto.organizationId)
+    organizationRoleService.checkUserIsOwnerOrMaintainer(dto.organizationId)
     val project = projectCreationService.createProject(dto)
+    if (organizationRoleService.getType(dto.organizationId) == OrganizationRoleType.MAINTAINER) {
+      // Maintainers get full access to projects they create
+      permissionService.grantFullAccessToProject(authenticationFacade.authenticatedUserEntity, project)
+    }
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 

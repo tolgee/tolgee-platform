@@ -175,7 +175,7 @@ class InvitationService(
     userAccount: UserAccount,
     organizationRole: OrganizationRole,
   ) {
-    if (organizationRoleService.isUserMemberOrOwner(userAccount.id, organizationRole.organization!!.id)) {
+    if (organizationRoleService.hasAnyOrganizationRole(userAccount.id, organizationRole.organization!!.id)) {
       throw BadRequestException(Message.USER_ALREADY_HAS_ROLE)
     }
     organizationRoleService.acceptInvitation(organizationRole, userAccount)

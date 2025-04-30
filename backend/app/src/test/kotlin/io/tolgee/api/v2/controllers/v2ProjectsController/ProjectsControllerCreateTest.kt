@@ -5,6 +5,9 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.fixtures.*
+import io.tolgee.model.Project
+import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -103,6 +106,50 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
         }
       }
     }
+  }
+
+  @Test
+  fun `should create project organization when user maintainer`() {
+    val userAccount = dbPopulator.createUserIfNotExists("testuser")
+    val organization = dbPopulator.createOrganization("Test Organization", userAccount)
+    val maintainerAccount = dbPopulator.createUserIfNotExists("maintainerUser")
+    organizationRoleService.grantRoleToUser(maintainerAccount, organization, OrganizationRoleType.MAINTAINER)
+    loginAsUser("maintainerUser")
+    val request =
+      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
+      node("icuPlaceholders").isBoolean.isTrue
+      node("id").asNumber().satisfies {
+        projectService.get(it.toLong()).let {
+          assertThat(it.organizationOwner.id).isEqualTo(organization.id)
+          assertThat(
+            permissionService.getUserProjectPermission(it.id, maintainerAccount.id)?.type,
+          ).isEqualTo(ProjectPermissionType.MANAGE)
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `maintainer can't delete projects from organization`() {
+    val userAccount = dbPopulator.createUserIfNotExists("testuser")
+    val organization = dbPopulator.createOrganization("Test Organization", userAccount)
+    val maintainerAccount = dbPopulator.createUserIfNotExists("maintainerUser")
+    organizationRoleService.grantRoleToUser(maintainerAccount, organization, OrganizationRoleType.MAINTAINER)
+    loginAsUser("testuser")
+    val request =
+      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    var project: Project? = null
+    performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
+      node("id").asNumber().satisfies {
+        projectService.get(it.toLong()).let {
+          assertThat(it.organizationOwner.id).isEqualTo(organization.id)
+          project = it
+        }
+      }
+    }
+    loginAsUser("maintainerUser")
+    performAuthDelete("/v2/projects/${project!!.id}", null).andIsForbidden
   }
 
   @Test
