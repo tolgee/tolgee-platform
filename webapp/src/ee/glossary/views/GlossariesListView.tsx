@@ -56,6 +56,10 @@ export const GlossariesListView = () => {
     setCreateDialogOpen(true);
   };
 
+  const canCreate = ['OWNER', 'MAINTAINER'].includes(
+    organization?.currentUserRole || ''
+  );
+
   return (
     <StyledWrapper>
       <BaseOrganizationSettingsView
@@ -76,10 +80,10 @@ export const GlossariesListView = () => {
         hideChildrenOnLoading={false}
         maxWidth={1000}
         allCentered
-        onAdd={items && onCreate}
+        onAdd={canCreate && items ? onCreate : undefined}
         addLabel={t('glossaries_add_button')}
       >
-        {createDialogOpen && (
+        {canCreate && createDialogOpen && (
           <GlossaryCreateEditDialog
             open={createDialogOpen}
             onClose={() => setCreateDialogOpen(false)}
@@ -103,7 +107,7 @@ export const GlossariesListView = () => {
             emptyPlaceholder={
               <GlossariesEmptyListMessage
                 loading={glossaries.isFetching}
-                onCreateClick={onCreate}
+                onCreateClick={canCreate ? onCreate : undefined}
               />
             }
           />

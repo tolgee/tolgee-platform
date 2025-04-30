@@ -45,7 +45,7 @@ class GlossaryTermController(
   @PostMapping("/terms")
   @Operation(summary = "Create a new glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
   fun create(
     @PathVariable
@@ -70,7 +70,7 @@ class GlossaryTermController(
   @DeleteMapping("/terms")
   @Operation(summary = "Batch delete multiple terms")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
   fun deleteMultiple(
     @PathVariable organizationId: Long,
@@ -88,7 +88,7 @@ class GlossaryTermController(
   @PutMapping("/terms/{termId:[0-9]+}")
   @Operation(summary = "Update glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
   fun update(
     @PathVariable organizationId: Long,
@@ -111,7 +111,7 @@ class GlossaryTermController(
   @DeleteMapping("/terms/{termId:[0-9]+}")
   @Operation(summary = "Delete glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
   fun delete(
     @PathVariable organizationId: Long,

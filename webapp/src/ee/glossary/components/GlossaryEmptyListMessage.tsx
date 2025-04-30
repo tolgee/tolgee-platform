@@ -69,7 +69,12 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
           <StyledDescription variant="body1">
             <T keyName="glossary_empty_placeholder_add_term_description" />
           </StyledDescription>
-          <Button onClick={onCreate} variant="contained" color="primary">
+          <Button
+            onClick={onCreate}
+            disabled={!onCreate}
+            variant="contained"
+            color="primary"
+          >
             <T keyName="glossary_empty_placeholder_add_term_button" />
           </Button>
           <Link href="https://docs.tolgee.io/platform/projects_and_organizations/glossary">
@@ -86,7 +91,12 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
           <StyledDescription variant="body1">
             <T keyName="glossary_empty_placeholder_import_terms_description" />
           </StyledDescription>
-          <Button onClick={onImport} variant="contained" color="primary">
+          <Button
+            onClick={onImport}
+            disabled={!onImport}
+            variant="contained"
+            color="primary"
+          >
             <T keyName="glossary_empty_placeholder_import_terms_button" />
           </Button>
           <Link href="https://docs.tolgee.io/platform/projects_and_organizations/glossary/import/csv-format">

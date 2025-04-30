@@ -15,15 +15,22 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.Size
 import java.util.Date
 
-// TODO: unique organizationOwner+name
-
 @Entity
 @ActivityLoggedEntity
+@Table(
+  uniqueConstraints = [
+    UniqueConstraint(
+      columnNames = ["organization_owner_id", "name"],
+    ),
+  ],
+)
 class Glossary(
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp

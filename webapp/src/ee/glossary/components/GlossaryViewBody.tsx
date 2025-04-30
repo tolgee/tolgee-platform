@@ -7,7 +7,10 @@ import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 import { GlossaryViewListHeader } from 'tg.ee.module/glossary/components/GlossaryViewListHeader';
 import { ReactList } from 'tg.component/reactList/ReactList';
-import { GlossaryViewListRow } from 'tg.ee.module/glossary/components/GlossaryViewListRow';
+import {
+  estimateGlossaryViewListRowHeight,
+  GlossaryViewListRow,
+} from 'tg.ee.module/glossary/components/GlossaryViewListRow';
 import React, { useRef, useState } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useResizeObserver } from 'usehooks-ts';
@@ -16,6 +19,7 @@ import { GlossaryBatchToolbar } from 'tg.ee.module/glossary/components/GlossaryB
 import { useSelectionService } from 'tg.service/useSelectionService';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
+type OrganizationModel = components['schemas']['OrganizationModel'];
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
 
@@ -143,7 +147,7 @@ const StyledBatchToolbarWrapper = styled(Box)`
 `;
 
 type Props = {
-  organizationId: number;
+  organization: OrganizationModel;
   glossaryId: number;
   loading?: boolean;
   data?: GlossaryTermWithTranslationsModel[];
@@ -160,7 +164,7 @@ type Props = {
 };
 
 export const GlossaryViewBody: React.VFC<Props> = ({
-  organizationId,
+  organization,
   glossaryId,
   loading,
   data = [],
@@ -230,7 +234,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
     return (
       <GlossaryViewListRow
         key={row.id}
-        organizationId={organizationId}
+        organization={organization}
         glossaryId={glossaryId}
         item={row}
         baseLanguage={baseLanguage}
@@ -262,7 +266,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
               </Box>
               <Box display="flex" gap={2}>
                 <GlossaryViewLanguageSelect
-                  organizationId={organizationId}
+                  organizationId={organization.id}
                   glossaryId={glossaryId}
                   value={selectedLanguagesWithBaseLanguage}
                   onValueChange={updateSelectedLanguages}
@@ -270,10 +274,12 @@ export const GlossaryViewBody: React.VFC<Props> = ({
                     width: '250px',
                   }}
                 />
-                <BaseViewAddButton
-                  onClick={onCreate}
-                  label={t('glossary_add_button')}
-                />
+                {onCreate && (
+                  <BaseViewAddButton
+                    onClick={onCreate}
+                    label={t('glossary_add_button')}
+                  />
+                )}
               </Box>
             </Box>
           </StyledContainerInner>
@@ -342,9 +348,9 @@ export const GlossaryViewBody: React.VFC<Props> = ({
                 ref={reactListRef}
                 threshold={800}
                 type="variable"
-                itemSizeEstimator={(index, cache) => {
-                  return cache[index] || 84; // TODO: different size based on if item contains description and flags?
-                }}
+                itemSizeEstimator={(index, cache) =>
+                  cache[index] || estimateGlossaryViewListRowHeight(data[index])
+                }
                 // @ts-ignore
                 scrollParentGetter={() => window}
                 length={data.length}
@@ -361,7 +367,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
             }}
           >
             <GlossaryBatchToolbar
-              organizationId={organizationId}
+              organization={organization}
               glossaryId={glossaryId}
               selectionService={selectionService}
             />

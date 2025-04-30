@@ -13,6 +13,8 @@ import java.util.Date
 @Repository
 @Lazy
 interface GlossaryRepository : JpaRepository<Glossary, Long> {
+  // TODO: rework - use only glossary id for query, check organization id in service?
+
   @Query(
     """
     from Glossary

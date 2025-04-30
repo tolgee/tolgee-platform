@@ -10,12 +10,12 @@ import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlossaryCreateEditDialog } from 'tg.ee.module/glossary/views/GlossaryCreateEditDialog';
 
-type SimpleOrganizationModel = components['schemas']['SimpleOrganizationModel'];
+type OrganizationModel = components['schemas']['OrganizationModel'];
 type GlossaryModel = components['schemas']['GlossaryModel'];
 
 type Props = {
   glossary: GlossaryModel;
-  organization: SimpleOrganizationModel;
+  organization: OrganizationModel;
 };
 
 export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
@@ -23,7 +23,9 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const canManage = true; // TODO: Permissions
+  const canManage = ['OWNER', 'MAINTAINER'].includes(
+    organization.currentUserRole || ''
+  );
 
   const deleteMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
@@ -44,7 +46,7 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
       onConfirm() {
         deleteMutation.mutate({
           path: {
-            organizationId: organization.id,
+            organizationId: glossary.organizationOwner.id,
             glossaryId: glossary.id,
           },
         });

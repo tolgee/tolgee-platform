@@ -45,7 +45,7 @@ class GlossaryController(
   @PostMapping
   @Operation(summary = "Create glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
   fun create(
     @PathVariable
@@ -65,7 +65,7 @@ class GlossaryController(
   @PutMapping("/{glossaryId:[0-9]+}")
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
   fun update(
     @PathVariable
@@ -88,7 +88,7 @@ class GlossaryController(
   @DeleteMapping("/{glossaryId:[0-9]+}")
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER) // TODO special role for glossaries
+  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
   fun delete(
     @PathVariable

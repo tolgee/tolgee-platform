@@ -15,6 +15,9 @@ import { T } from '@tolgee/react';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
+import { components } from 'tg.service/apiSchema.generated';
+
+type OrganizationModel = components['schemas']['OrganizationModel'];
 
 const StyledCard = styled(Card)`
   display: flex;
@@ -41,13 +44,13 @@ const StyledCheckbox = styled(Checkbox)`
 `;
 
 type Props = {
-  organizationId: number;
+  organization: OrganizationModel;
   glossaryId: number;
   selectionService: SelectionService<number>;
 };
 
 export const GlossaryBatchToolbar: React.VFC<Props> = ({
-  organizationId,
+  organization,
   glossaryId,
   selectionService,
 }) => {
@@ -71,7 +74,7 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
         deleteSelectedMutation.mutate(
           {
             path: {
-              organizationId,
+              organizationId: organization.id,
               glossaryId,
             },
             content: {
@@ -95,6 +98,10 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
     });
   };
 
+  const canDelete = ['OWNER', 'MAINTAINER'].includes(
+    organization.currentUserRole || ''
+  );
+
   return (
     <StyledCard
       sx={{
@@ -115,6 +122,7 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
       </Select>
       <LoadingButton
         disableElevation
+        disabled={!canDelete}
         variant="contained"
         color="primary"
         sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40, padding: 0 }}

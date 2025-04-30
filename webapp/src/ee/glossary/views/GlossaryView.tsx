@@ -122,6 +122,10 @@ export const GlossaryView = () => {
     setCreateDialogOpen(true);
   };
 
+  const canCreate = ['OWNER', 'MAINTAINER'].includes(
+    organization?.currentUserRole || ''
+  );
+
   const onFetchNextPage = () => {
     if (!termsLoadable.isFetching && termsLoadable.hasNextPage) {
       termsLoadable.fetchNextPage();
@@ -154,7 +158,7 @@ export const GlossaryView = () => {
       maxWidth="max"
       allCentered={false}
     >
-      {createDialogOpen && organization !== undefined && (
+      {canCreate && createDialogOpen && organization !== undefined && (
         <GlossaryTermCreateUpdateDialog
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
@@ -165,7 +169,7 @@ export const GlossaryView = () => {
       )}
       {(terms.length > 0 || search.length > 0) && organization !== undefined ? (
         <GlossaryViewBody
-          organizationId={organization.id}
+          organization={organization}
           glossaryId={glossaryId}
           loading={termsLoadable.isLoading}
           data={terms}
@@ -176,14 +180,14 @@ export const GlossaryView = () => {
           selectedLanguagesWithBaseLanguage={selectedLanguagesWithBaseLanguage}
           updateSelectedLanguages={updateSelectedLanguages}
           onFetchNextPage={onFetchNextPage}
-          onCreate={onCreate}
+          onCreate={canCreate ? onCreate : undefined}
           onSearch={setSearch}
           search={search}
         />
       ) : (
         <GlossaryEmptyListMessage
           loading={termsLoadable.isLoading}
-          onCreate={onCreate}
+          onCreate={canCreate ? onCreate : undefined}
           onImport={undefined /* TODO */}
         />
       )}

@@ -8,7 +8,7 @@ import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageI
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { GlossaryListItemMenu } from 'tg.ee.module/glossary/components/GlossaryListItemMenu';
 
-type SimpleOrganizationModel = components['schemas']['SimpleOrganizationModel'];
+type OrganizationModel = components['schemas']['OrganizationModel'];
 type GlossaryModel = components['schemas']['GlossaryModel'];
 
 const StyledContainer = styled('div')`
@@ -70,7 +70,7 @@ const StyledNameText = styled(Typography)`
 
 type Props = {
   glossary: GlossaryModel;
-  organization: SimpleOrganizationModel;
+  organization: OrganizationModel;
 };
 
 export const GlossaryListItem: React.VFC<Props> = ({
@@ -90,8 +90,9 @@ export const GlossaryListItem: React.VFC<Props> = ({
       originalName: languageData?.originalName || languageTag,
       tag: languageTag,
     },
+    // Future improvement - display all languages used in glossary
+    // not just base language
   ];
-  // TODO: All languages used in glossary - will need backend changes
 
   return (
     <StyledContainer

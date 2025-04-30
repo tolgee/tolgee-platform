@@ -72,6 +72,8 @@ export const ProjectMenu = () => {
       matchAsPrefix: true,
       quickStart: { itemKey: 'menu_languages' },
     },
+    // TODO: Do we want to include glossaries in project menu?
+    // Also this will need to be in ee module
     // {
     //   id: 'glossaries',
     //   condition: () => true,

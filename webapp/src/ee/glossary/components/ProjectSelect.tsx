@@ -58,7 +58,6 @@ export const ProjectSelect: React.VFC<Props> = ({
         {available.map((p) => (
           <MenuItem key={p[valueKey]} value={p[valueKey]}>
             {p.name}
-            {/*  TODO: next project view for this select*/}
           </MenuItem>
         ))}
       </Select>

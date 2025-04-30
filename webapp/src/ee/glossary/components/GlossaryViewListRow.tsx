@@ -6,6 +6,7 @@ import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryL
 import { SelectionService } from 'tg.service/useSelectionService';
 import { T } from '@tolgee/react';
 
+type OrganizationModel = components['schemas']['OrganizationModel'];
 type GlossaryTermWithTranslationsModel =
   components['schemas']['GlossaryTermWithTranslationsModel'];
 
@@ -22,7 +23,7 @@ const StyledRow = styled('div')`
 `;
 
 type Props = {
-  organizationId: number;
+  organization: OrganizationModel;
   glossaryId: number;
   item: GlossaryTermWithTranslationsModel;
   baseLanguage: string | undefined;
@@ -33,7 +34,7 @@ type Props = {
 };
 
 export const GlossaryViewListRow: React.VFC<Props> = ({
-  organizationId,
+  organization,
   glossaryId,
   item,
   baseLanguage,
@@ -42,13 +43,16 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
   selectedLanguages,
   selectionService,
 }) => {
-  const editEnabled = true; // TODO: Permissions handling
+  const editEnabled = ['OWNER', 'MAINTAINER'].includes(
+    organization.currentUserRole || ''
+  );
+
   const [editingTermId, editingLanguageTag] = editingTranslation;
 
   return (
     <StyledRow key={item.id}>
       <GlossaryListTermCell
-        organizationId={organizationId}
+        organizationId={organization.id}
         glossaryId={glossaryId}
         item={item}
         editEnabled={editEnabled}
@@ -63,7 +67,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
         return (
           <GlossaryListTranslationCell
             key={i + 1}
-            organizationId={organizationId}
+            organizationId={organization.id}
             glossaryId={glossaryId}
             termId={item.id}
             translation={translation}
@@ -83,4 +87,24 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
       })}
     </StyledRow>
   );
+};
+
+export const estimateGlossaryViewListRowHeight = (
+  row?: GlossaryTermWithTranslationsModel
+): number => {
+  if (!row) {
+    return 84;
+  }
+
+  const base = 58;
+  const tags =
+    row.flagNonTranslatable ||
+    row.flagAbbreviation ||
+    row.flagCaseSensitive ||
+    row.flagForbiddenTerm
+      ? 25
+      : 0;
+  const description = row.description ? 26 : 0;
+
+  return base + tags + description;
 };

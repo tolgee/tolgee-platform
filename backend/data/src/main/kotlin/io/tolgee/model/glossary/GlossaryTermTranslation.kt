@@ -11,12 +11,11 @@ import java.util.*
 @EntityListeners(GlossaryTermTranslation.Companion.GlossaryTermTranslationListener::class)
 @ActivityLoggedEntity
 @Table(
-  name = "GlossaryTermTranslation",
   indexes = [
-    Index(columnList = "textLowercased"),
+    Index(columnList = "text_lowercased"),
   ],
   uniqueConstraints = [
-    UniqueConstraint(columnNames = ["term_id", "languageTag"]),
+    UniqueConstraint(columnNames = ["term_id", "language_tag"]),
   ],
 )
 class GlossaryTermTranslation(

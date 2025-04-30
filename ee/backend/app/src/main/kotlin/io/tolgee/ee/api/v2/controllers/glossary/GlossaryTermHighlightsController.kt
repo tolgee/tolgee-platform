@@ -39,7 +39,7 @@ class GlossaryTermHighlightsController(
     text: String,
     @RequestParam("languageTag")
     languageTag: String,
-  ): CollectionModel<GlossaryTermHighlightDto> { // TODO: use CollectionModel
+  ): CollectionModel<GlossaryTermHighlightDto> {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,

@@ -56,9 +56,7 @@ class GlossaryService(
         organizationOwner = organization
         baseLanguageTag = dto.baseLanguageTag
 
-        // TODO project permissions handling?
-        val projects = projectService.findAll(dto.assignedProjects ?: emptySet())
-        assignedProjects.addAll(projects)
+        updateAssignedProjects(this, dto.assignedProjects ?: emptySet())
       }
     return glossaryRepository.save(glossary)
   }
@@ -73,11 +71,24 @@ class GlossaryService(
     glossary.baseLanguageTag = dto.baseLanguageTag
     val newAssignedProjects = dto.assignedProjects
     if (newAssignedProjects != null) {
-      glossary.assignedProjects.clear()
-      val projects = projectService.findAll(newAssignedProjects)
-      glossary.assignedProjects.addAll(projects)
+      updateAssignedProjects(glossary, newAssignedProjects)
     }
     return glossaryRepository.save(glossary)
+  }
+
+  private fun updateAssignedProjects(
+    glossary: Glossary,
+    newAssignedProjects: Iterable<Long>,
+  ) {
+    glossary.assignedProjects.clear()
+    val projects = projectService.findAll(newAssignedProjects)
+    projects.forEach {
+      if (it.organizationOwner.id != glossary.organizationOwner.id) {
+        // Project belongs to another organization
+        throw NotFoundException(Message.PROJECT_NOT_FOUND)
+      }
+    }
+    glossary.assignedProjects.addAll(projects)
   }
 
   fun delete(
@@ -92,9 +103,12 @@ class GlossaryService(
     glossaryId: Long,
     projectId: Long,
   ) {
-    // TODO project permissions handling?
     val glossary = get(organizationId, glossaryId)
     val project = projectService.get(projectId)
+    if (project.organizationOwner.id != organizationId) {
+      // Project belongs to another organization
+      throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    }
     glossary.assignedProjects.add(project)
     glossaryRepository.save(glossary)
   }
