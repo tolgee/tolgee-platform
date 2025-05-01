@@ -116,7 +116,7 @@ Create a file `webapp/.env.development.local` with following content.
 Don't forget to supply it with your API key generated in the Tolgee app:
 
 ```properties
-VITE_APP_TOLGEE_API_URL=https://app.tolgee.io
+VITE_APP_API_URL=https://app.tolgee.io
 VITE_APP_TOLGEE_API_KEY=your-tolgee-api-key
 ```
 
