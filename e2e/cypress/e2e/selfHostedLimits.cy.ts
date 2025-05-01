@@ -1,12 +1,12 @@
 import 'cypress-file-upload';
-import { fillAndSubmitSignUpForm, visitSignUp } from '../common/login';
-import { waitForGlobalLoading } from '../common/loading';
-import { E2TranslationsView } from '../compounds/E2TranslationsView';
-import { gcy } from '../common/shared';
-import { selfHostedLimitsTestData } from '../common/apiCalls/testData/testData';
-import { TestDataStandardResponse } from '../common/apiCalls/testData/generator';
-import { login } from '../common/apiCalls/common';
-import { visitTranslations } from '../common/translations';
+import {fillAndSubmitSignUpForm, visitSignUp} from '../common/login';
+import {waitForGlobalLoading} from '../common/loading';
+import {E2TranslationsView} from '../compounds/E2TranslationsView';
+import {gcy} from '../common/shared';
+import {selfHostedLimitsTestData} from '../common/apiCalls/testData/testData';
+import {TestDataStandardResponse} from '../common/apiCalls/testData/generator';
+import {login} from '../common/apiCalls/common';
+import {visitTranslations} from '../common/translations';
 
 /**
  * This is not a traditional test. We mock the results of the API calls,
@@ -28,7 +28,6 @@ describe('Self-hosted Limits', () => {
 
     // Mock the subscription usage and license info endpoints
     mockSubscriptionUsage();
-    mockLicenseInfo();
   });
 
   afterEach(() => {
@@ -76,7 +75,6 @@ describe('Self-hosted Limits', () => {
       loginAndVisitTranslations(testData);
       mockKeyCreation('plan_key_limit_exceeded');
       mockSubscriptionUsage();
-      mockLicenseInfo();
       tryCreateKey();
       cy.wait('@createKey');
       assertPlanLimitPopoverWithUsageVisible();
@@ -186,18 +184,6 @@ function mockSubscriptionUsage() {
       credits: { current: 5000, included: 10000, limit: 10000 },
     },
   }).as('subscriptionUsage');
-}
-
-/**
- * Mocks the license info endpoint
- */
-function mockLicenseInfo() {
-  cy.intercept('GET', '/v2/ee-license/info', {
-    statusCode: 200,
-    body: {
-      isPayAsYouGo: false,
-    },
-  }).as('licenseInfo');
 }
 
 /**

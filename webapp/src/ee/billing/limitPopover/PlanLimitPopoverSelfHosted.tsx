@@ -1,8 +1,8 @@
-import React, { FC } from 'react';
-import { PlanLimitPopoverWrapperProps } from './generic/PlanLimitPopoverWrapper';
-import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { getSelfHostedProgressData } from '../getSelfHostedProgressData';
+import React, {FC} from 'react';
+import {PlanLimitPopoverWrapperProps} from './generic/PlanLimitPopoverWrapper';
+import {GenericPlanLimitPopover} from './generic/GenericPlanLimitPopover';
+import {useApiQuery} from 'tg.service/http/useQueryApi';
+import {getSelfHostedProgressData} from '../getSelfHostedProgressData';
 
 type SelfHostedPlanLimitPopoverProps = PlanLimitPopoverWrapperProps;
 
@@ -21,14 +21,6 @@ export const PlanLimitPopoverSelfHosted: FC<
     },
   });
 
-  const infoLoadable = useApiQuery({
-    url: '/v2/ee-license/info',
-    method: 'get',
-    options: {
-      enabled: open,
-    },
-  });
-
   const progressData =
     usageLoadable.data &&
     getSelfHostedProgressData({ usage: usageLoadable.data });
@@ -37,9 +29,9 @@ export const PlanLimitPopoverSelfHosted: FC<
     <GenericPlanLimitPopover
       onClose={onClose}
       open={open}
-      isPayAsYouGo={infoLoadable.data?.isPayAsYouGo}
+      isPayAsYouGo={usageLoadable.data?.isPayAsYouGo}
       progressData={progressData}
-      loading={usageLoadable.isLoading || infoLoadable.isLoading}
+      loading={usageLoadable.isLoading}
     />
   );
 };
