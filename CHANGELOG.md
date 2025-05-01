@@ -1,3 +1,10 @@
+## [3.116.1](https://github.com/tolgee/tolgee-platform/compare/v3.116.0...v3.116.1) (2025-05-01)
+
+
+### Bug Fixes
+
+* Stop subscription plan edit from freezing ([#3048](https://github.com/tolgee/tolgee-platform/issues/3048)) ([5b340d9](https://github.com/tolgee/tolgee-platform/commit/5b340d923b5df4cebf9c1c64309ea7d6c3540c68))
+
 # [3.116.0](https://github.com/tolgee/tolgee-platform/compare/v3.115.0...v3.116.0) (2025-04-30)
 
 
