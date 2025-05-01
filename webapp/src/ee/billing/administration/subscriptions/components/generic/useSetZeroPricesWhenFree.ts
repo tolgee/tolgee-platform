@@ -39,5 +39,5 @@ export const useSetZeroPricesWhenFree = ({
     if (nonZeroPrices) {
       setPriceValuesNonZero();
     }
-  }, [free, nonZeroPrices, setFieldValue, prices]);
+  }, [free]);
 };
