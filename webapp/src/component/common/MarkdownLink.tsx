@@ -1,10 +1,7 @@
 import { Link as MuiLink } from '@mui/material';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 
-type Props = React.DetailedHTMLProps<
-  React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  HTMLAnchorElement
->;
+type Props = React.ComponentProps<'a'>;
 
 export const MarkdownLink = (props: Props) => {
   return (
