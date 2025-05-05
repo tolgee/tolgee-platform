@@ -121,7 +121,7 @@ task openE2e(type: Exec, group: "e2e") {
 task openE2eDev(type: Exec, group: "e2e") {
     commandLine npmCommandName, "run", "cy:open"
 
-    environment "CYPRESS_HOST", "http://localhost:8082"
+    environment "CYPRESS_HOST", "http://localhost:8081"
 
     workingDir E2E_DIR
 }
