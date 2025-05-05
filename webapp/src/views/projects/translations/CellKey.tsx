@@ -30,6 +30,8 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { ScreenshotDropzone } from './Screenshots/ScreenshotDropzone';
 import { useScreenshotUpload } from './Screenshots/useScreenshotUpload';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import ReactMarkdown from 'react-markdown';
+import { MarkdownLink } from 'tg.component/common/MarkdownLink';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -244,7 +246,13 @@ export const CellKey: React.FC<Props> = ({
           {data.keyDescription && (
             <StyledDescription data-cy="translations-key-cell-description">
               <LimitedHeightText maxLines={5}>
-                {data.keyDescription}
+                <ReactMarkdown
+                  components={{
+                    a: MarkdownLink,
+                  }}
+                >
+                  {data.keyDescription}
+                </ReactMarkdown>
               </LimitedHeightText>
             </StyledDescription>
           )}
