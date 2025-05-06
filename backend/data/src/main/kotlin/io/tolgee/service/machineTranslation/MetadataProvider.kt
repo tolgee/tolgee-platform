@@ -7,6 +7,7 @@ import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Pageable
+import kotlin.jvm.java
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
@@ -34,6 +35,13 @@ class MetadataProvider(
             metadataKey.keyId,
           )
         } ?: listOf(),
+      glossaryTerms =
+        mtGlossaryTermsProvider.glossaryTermsFor(
+          project = context.project,
+          sourceLanguageTag = context.baseLanguage.tag,
+          targetLanguageTag = targetLanguage.tag,
+          text = metadataKey.baseTranslationText,
+        ).toList(),
       keyDescription = keyDescription,
       projectDescription = context.project.aiTranslatorPromptDescription,
       languageDescription = targetLanguage.aiTranslatorPromptDescription,
@@ -103,5 +111,9 @@ class MetadataProvider(
 
   private val translationMemoryService: TranslationMemoryService by lazy {
     context.applicationContext.getBean(TranslationMemoryService::class.java)
+  }
+
+  private val mtGlossaryTermsProvider by lazy {
+    context.applicationContext.getBean(MtGlossaryTermsProvider::class.java)
   }
 }

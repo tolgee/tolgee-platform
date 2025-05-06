@@ -5,7 +5,6 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.repository.glossary.GlossaryTermTranslationRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Project
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import org.springframework.stereotype.Service
@@ -74,15 +73,15 @@ class GlossaryTermTranslationService(
   }
 
   fun findAll(
-    project: Project,
+    projectId: Long,
     words: Set<String>,
     languageTag: String,
   ): Set<GlossaryTermTranslation> {
     val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
-    return glossaryTermTranslationRepository.findByLowercaseTextAndLanguageTagAndAssignedProject(
+    return glossaryTermTranslationRepository.findByLowercaseTextAndLanguageTagAndAssignedProjectId(
       words.map { it.lowercase(locale) },
       languageTag,
-      project,
+      projectId,
     )
   }
 

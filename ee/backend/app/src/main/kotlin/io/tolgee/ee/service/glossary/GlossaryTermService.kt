@@ -1,26 +1,31 @@
 package io.tolgee.ee.service.glossary
 
+import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.data.glossary.*
 import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Project
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.model.glossary.GlossaryTermTranslation.Companion.WORD_REGEX
+import io.tolgee.service.machineTranslation.MtGlossaryTermsProvider
 import io.tolgee.util.findAll
+import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.util.Locale
+import java.util.*
 
+@Primary
 @Service
 class GlossaryTermService(
   private val glossaryTermRepository: GlossaryTermRepository,
   private val glossaryService: GlossaryService,
   private val glossaryTermTranslationService: GlossaryTermTranslationService,
-) {
+) : MtGlossaryTermsProvider {
   fun find(
     organizationId: Long,
     glossaryId: Long,
@@ -197,12 +202,12 @@ class GlossaryTermService(
   }
 
   fun getHighlights(
-    project: Project,
+    projectId: Long,
     text: String,
     languageTag: String,
   ): Set<GlossaryTermHighlight> {
     val words = text.findAll(WORD_REGEX).filter { it.isNotEmpty() }.toSet()
-    val translations = glossaryTermTranslationService.findAll(project, words, languageTag)
+    val translations = glossaryTermTranslationService.findAll(projectId, words, languageTag)
 
     val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
     val textLowercased = text.lowercase(locale)
@@ -237,4 +242,27 @@ class GlossaryTermService(
     val matches = regex.findAll(text)
     return matches.map { Position(it.range.first, it.range.last + 1) }
   }
+
+  @Transactional
+  override fun glossaryTermsFor(
+    project: ProjectDto,
+    sourceLanguageTag: String,
+    targetLanguageTag: String,
+    text: String,
+  ): Set<TranslationGlossaryItem> =
+    getHighlights(project.id, text, sourceLanguageTag)
+      .filter { !it.value.text.isNullOrEmpty() }
+      .map {
+        val term = it.value.term
+        val targetTranslation = term.translations.find { it.languageTag == targetLanguageTag }
+        TranslationGlossaryItem(
+          source = it.value.text ?: "",
+          target = targetTranslation?.text,
+          description = term.description,
+          isNonTranslatable = term.flagNonTranslatable,
+          isCaseSensitive = term.flagCaseSensitive,
+          isAbbreviation = term.flagAbbreviation,
+          isForbiddenTerm = term.flagForbiddenTerm,
+        )
+      }.toSet()
 }

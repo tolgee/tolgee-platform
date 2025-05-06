@@ -1,6 +1,5 @@
 package io.tolgee.ee.repository.glossary
 
-import io.tolgee.model.Project
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import org.springframework.context.annotation.Lazy
@@ -52,16 +51,17 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
   @Query(
     """
       from GlossaryTermTranslation gtt
+        join gtt.term.glossary.assignedProjects ap
         where
             gtt.textLowercased in :texts and
             (gtt.languageTag = :languageTag or gtt.term.flagNonTranslatable) and
-            :assignedProject member of gtt.term.glossary.assignedProjects and
+            ap.id = :assignedProjectId and
             gtt.term.glossary.deletedAt is null
     """,
   )
-  fun findByLowercaseTextAndLanguageTagAndAssignedProject(
+  fun findByLowercaseTextAndLanguageTagAndAssignedProjectId(
     texts: Collection<String>,
     languageTag: String,
-    assignedProject: Project,
+    assignedProjectId: Long,
   ): Set<GlossaryTermTranslation>
 }
