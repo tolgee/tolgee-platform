@@ -45,7 +45,12 @@ class GlossaryTermHighlightsController(
       Feature.GLOSSARY,
     )
 
-    return glossaryTermService.getHighlights(projectHolder.project.id, text, languageTag).map {
+    return glossaryTermService.getHighlights(
+      organizationHolder.organization.id,
+      projectHolder.project.id,
+      text,
+      languageTag,
+    ).map {
       GlossaryTermHighlightDto(it.position, modelAssembler.toModel(it.value.term))
     }.let { CollectionModel.of(it) }
   }
