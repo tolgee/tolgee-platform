@@ -174,10 +174,7 @@ export function InfiniteMultiSearchSelect<T, S>({
                 searchPlaceholder={searchPlaceholder}
                 search={search}
                 onSearch={onSearchChange}
-                title={label}
-                // compareFunction
                 renderOption={renderOption}
-                // ListboxProps={{ style: { maxHeight: 400, overflow: 'auto' } }}
                 onGetMoreData={onFetchMore}
               />
             </Box>

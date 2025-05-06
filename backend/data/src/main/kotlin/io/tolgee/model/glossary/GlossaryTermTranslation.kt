@@ -12,7 +12,7 @@ import java.util.*
 @ActivityLoggedEntity
 @Table(
   indexes = [
-    Index(columnList = "text_lowercased"),
+    Index(columnList = "first_word_lowercased"),
   ],
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["term_id", "language_tag"]),
@@ -27,8 +27,8 @@ class GlossaryTermTranslation(
   @ManyToOne
   lateinit var term: GlossaryTerm
 
-  @Column(columnDefinition = "text", nullable = false)
-  var textLowercased: String? = null // TODO: rename to include something like textFirstWordLowercased
+  @Column(name = "first_word_lowercased", columnDefinition = "text", nullable = false)
+  var firstWordLowercased: String? = null
 
   companion object {
     val WORD_REGEX = Regex("\\p{L}+")
@@ -36,9 +36,9 @@ class GlossaryTermTranslation(
     class GlossaryTermTranslationListener {
       @PrePersist
       @PreUpdate
-      fun updateTextLowercased(translation: GlossaryTermTranslation) {
+      fun updateFirstWordLowercased(translation: GlossaryTermTranslation) {
         val locale = Locale.forLanguageTag(translation.languageTag) ?: Locale.ROOT
-        translation.textLowercased = translation.text?.lowercase(locale)?.find(WORD_REGEX)
+        translation.firstWordLowercased = translation.text?.lowercase(locale)?.find(WORD_REGEX)
       }
     }
   }

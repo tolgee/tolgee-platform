@@ -16,7 +16,11 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.TypedQuery
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.notNull
+import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

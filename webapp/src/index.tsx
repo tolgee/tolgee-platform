@@ -61,52 +61,55 @@ const tolgee = Tolgee()
 
 const MainWrapper = () => {
   return (
-    <StrictMode>
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider>
-          <CssBaseline />
-          <LoadingProvider>
-            <GlobalLoading />
-            <Suspense fallback={<FullPageLoading />}>
-              <TolgeeProvider
-                tolgee={tolgee}
-                fallback={<FullPageLoading />}
-                options={{ useSuspense: false }}
-              >
-                <BrowserRouter>
-                  <QueryClientProvider client={queryClient}>
-                    {/* @ts-ignore */}
-                    <ErrorBoundary>
-                      <SnackbarProvider
-                        anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
-                        SnackbarProps={{
-                          // @ts-ignore
-                          'data-cy': 'notistack-snackbar',
-                        }}
-                      >
-                        <GlobalContext>
-                          <BottomPanelProvider>
-                            <GlobalStyles />
-                            <MuiLocalizationProvider>
-                              <App />
-                              <GlobalErrorModal />
-                            </MuiLocalizationProvider>
-                          </BottomPanelProvider>
-                        </GlobalContext>
-                      </SnackbarProvider>
-                    </ErrorBoundary>
-                  </QueryClientProvider>
-                </BrowserRouter>
-              </TolgeeProvider>
-            </Suspense>
-          </LoadingProvider>
-        </ThemeProvider>
-      </StyledEngineProvider>
-    </StrictMode>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider>
+        <CssBaseline />
+        <LoadingProvider>
+          <GlobalLoading />
+          <Suspense fallback={<FullPageLoading />}>
+            <TolgeeProvider
+              tolgee={tolgee}
+              fallback={<FullPageLoading />}
+              options={{ useSuspense: false }}
+            >
+              <BrowserRouter>
+                <QueryClientProvider client={queryClient}>
+                  {/* @ts-ignore */}
+                  <ErrorBoundary>
+                    <SnackbarProvider
+                      anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+                      SnackbarProps={{
+                        // @ts-ignore
+                        'data-cy': 'notistack-snackbar',
+                      }}
+                    >
+                      <GlobalContext>
+                        <BottomPanelProvider>
+                          <GlobalStyles />
+                          <MuiLocalizationProvider>
+                            <App />
+                            <GlobalErrorModal />
+                          </MuiLocalizationProvider>
+                        </BottomPanelProvider>
+                      </GlobalContext>
+                    </SnackbarProvider>
+                  </ErrorBoundary>
+                </QueryClientProvider>
+              </BrowserRouter>
+            </TolgeeProvider>
+          </Suspense>
+        </LoadingProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 };
 
-ReactDOM.render(<MainWrapper />, document.getElementById('root'));
+ReactDOM.render(
+  <StrictMode>
+    <MainWrapper />
+  </StrictMode>,
+  document.getElementById('root')
+);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

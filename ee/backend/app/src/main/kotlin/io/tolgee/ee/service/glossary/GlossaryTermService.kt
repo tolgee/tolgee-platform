@@ -202,12 +202,13 @@ class GlossaryTermService(
   }
 
   fun getHighlights(
+    organizationId: Long,
     projectId: Long,
     text: String,
     languageTag: String,
   ): Set<GlossaryTermHighlight> {
     val words = text.findAll(WORD_REGEX).filter { it.isNotEmpty() }.toSet()
-    val translations = glossaryTermTranslationService.findAll(projectId, words, languageTag)
+    val translations = glossaryTermTranslationService.findAll(organizationId, projectId, words, languageTag)
 
     val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
     val textLowercased = text.lowercase(locale)
@@ -250,7 +251,7 @@ class GlossaryTermService(
     targetLanguageTag: String,
     text: String,
   ): Set<TranslationGlossaryItem> =
-    getHighlights(project.id, text, sourceLanguageTag)
+    getHighlights(project.organizationOwnerId, project.id, text, sourceLanguageTag)
       .filter { !it.value.text.isNullOrEmpty() }
       .map {
         val term = it.value.term

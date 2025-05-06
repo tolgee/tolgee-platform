@@ -73,16 +73,19 @@ class GlossaryTermTranslationService(
   }
 
   fun findAll(
+    organizationId: Long,
     projectId: Long,
     words: Set<String>,
     languageTag: String,
   ): Set<GlossaryTermTranslation> {
     val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
-    return glossaryTermTranslationRepository.findByLowercaseTextAndLanguageTagAndAssignedProjectId(
-      words.map { it.lowercase(locale) },
-      languageTag,
-      projectId,
-    )
+    return glossaryTermTranslationRepository
+      .findByFirstWordLowercasedAndLanguageTagAndAssignedProjectIdAndOrganizationId(
+        words.map { it.lowercase(locale) },
+        languageTag,
+        projectId,
+        organizationId,
+      )
   }
 
   fun get(

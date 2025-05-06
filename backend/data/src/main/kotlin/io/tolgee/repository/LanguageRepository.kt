@@ -12,31 +12,6 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
 
-const val LANGUAGE_FILTERS = """
-    (
-        :#{#filters.filterId} is null
-        or l.id in :#{#filters.filterId}
-    )
-    and (
-        :#{#filters.filterNotId} is null
-        or l.id not in :#{#filters.filterNotId}
-    )
-"""
-
-const val SEARCH_FILTER = """
-    (
-        :search is null or (lower(l.name) like lower(concat('%', cast(:search as text), '%'))
-        or lower(l.tag) like lower(concat('%', cast(:search as text),'%')))
-    )
-"""
-
-const val ORGANIZATION_FILTER = """
-    o.id = :organizationId
-    and o.deleted_at is null
-    and p.deleted_at is null
-    and l.deleted_at is null
-"""
-
 @Repository
 @Lazy
 interface LanguageRepository : JpaRepository<Language, Long> {
@@ -110,31 +85,9 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   ): List<Language>
 
   @Query(
-    """
-    with base_distinct_tags AS (
-      select min(l.id) as id, l.tag as tag
-      from language l
-      join project p on p.id = l.project_id
-      join organization o on p.organization_owner_id = o.id
-      where $ORGANIZATION_FILTER
-      and l.id = p.base_language_id
-      and $SEARCH_FILTER
-      group by l.tag
-    ),
-    non_base_distinct_tags AS (
-      select min(l.id) as id, l.tag as tag
-      from language l
-      join project p on p.id = l.project_id
-      join organization o on p.organization_owner_id = o.id
-      where $ORGANIZATION_FILTER
-      and l.id != p.base_language_id
-      and $SEARCH_FILTER
-      and l.tag not in (
-        select tag
-        from base_distinct_tags
-      )
-      group by l.tag
-    )
+    value = """
+    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY,
+    non_base_distinct_tags AS $DISTINCT_TAGS_NON_BASE_SUBQUERY
     select *
     from (
       select
@@ -148,6 +101,21 @@ interface LanguageRepository : JpaRepository<Language, Long> {
             ELSE false
           END
         ) as base
+      from language l
+      where l.id in (
+          select id from base_distinct_tags
+        )
+        or l.id in (
+          select id from non_base_distinct_tags
+        )
+    ) as result
+    """,
+    countQuery = """
+    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY,
+    non_base_distinct_tags AS $DISTINCT_TAGS_NON_BASE_SUBQUERY
+    select count(*)
+    from (
+      select l.id
       from language l
       where l.id in (
           select id from base_distinct_tags
@@ -201,4 +169,65 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   """,
   )
   fun findAllDtosByProjectId(projectId: Long): List<LanguageDto>
+
+  companion object {
+    const val LANGUAGE_FILTERS = """
+      (
+        (
+            :#{#filters.filterId} is null
+            or l.id in :#{#filters.filterId}
+        )
+        and (
+            :#{#filters.filterNotId} is null
+            or l.id not in :#{#filters.filterNotId}
+        )
+      )
+"""
+
+    const val SEARCH_FILTER = """
+      (
+          :search is null or (lower(l.name) like lower(concat('%', cast(:search as text), '%'))
+          or lower(l.tag) like lower(concat('%', cast(:search as text),'%')))
+      )
+"""
+
+    const val ORGANIZATION_FILTER = """
+      (
+        o.id = :organizationId
+        and o.deleted_at is null
+        and p.deleted_at is null
+        and l.deleted_at is null
+      )
+"""
+
+    const val DISTINCT_TAGS_BASE_SUBQUERY = """
+      (
+        select min(l.id) as id, l.tag as tag
+        from language l
+        join project p on p.id = l.project_id
+        join organization o on p.organization_owner_id = o.id
+        where $ORGANIZATION_FILTER
+        and l.id = p.base_language_id
+        and $SEARCH_FILTER
+        group by l.tag
+      )
+"""
+
+    const val DISTINCT_TAGS_NON_BASE_SUBQUERY = """
+      (
+        select min(l.id) as id, l.tag as tag
+        from language l
+        join project p on p.id = l.project_id
+        join organization o on p.organization_owner_id = o.id
+        where $ORGANIZATION_FILTER
+        and l.id != p.base_language_id
+        and $SEARCH_FILTER
+        and l.tag not in (
+          select tag
+          from base_distinct_tags
+        )
+        group by l.tag
+      )
+"""
+  }
 }

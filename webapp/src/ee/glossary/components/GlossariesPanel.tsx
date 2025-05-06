@@ -28,10 +28,6 @@ const StyledContent = styled(Box)`
   margin: ${({ theme }) => theme.spacing(0, 1.5)};
 `;
 
-// const StyledGap = styled('div')`
-//   height: ${({ theme }) => theme.spacing(0.25)};
-// `;
-
 const fetchTermsHighlights = ({ keyData, baseLanguage }: PanelContentData) => {
   const languageTag = baseLanguage.tag;
   const text = keyData.translations[languageTag]?.text;
@@ -97,7 +93,6 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
     });
   return (
     <StyledContainer>
-      {/*<StyledGap />*/}
       <StyledContent>{previews}</StyledContent>
     </StyledContainer>
   );

@@ -48,24 +48,6 @@ export const HeaderBar: React.VFC<HeaderBarProps> = (props) => {
   if (props.headerBarDisable || !displayHeader) {
     return null;
   }
-  // return (
-  //   (props.title !== undefined || props.addLinkTo || props.onAdd) && (
-  //     <Box sx={{ mb: 2, display: 'flex' }}>
-  //       <Box sx={{ flexGrow: 1 }}>
-  //         <Typography variant="h6">{props.title}</Typography>
-  //       </Box>
-  //       {(props.addLinkTo || props.onAdd) && (
-  //         <Box>
-  //           <BaseViewAddButton
-  //             label={props.addLabel}
-  //             addLinkTo={props.addLinkTo}
-  //             onClick={props.onAdd}
-  //           ></BaseViewAddButton>
-  //         </Box>
-  //       )}
-  //     </Box>
-  //   )
-  // );
   return (
     <SecondaryBar
       noBorder={props.noBorder}

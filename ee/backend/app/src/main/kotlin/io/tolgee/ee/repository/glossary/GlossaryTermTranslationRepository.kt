@@ -53,15 +53,17 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
       from GlossaryTermTranslation gtt
         join gtt.term.glossary.assignedProjects ap
         where
-            gtt.textLowercased in :texts and
+            gtt.firstWordLowercased in :texts and
             (gtt.languageTag = :languageTag or gtt.term.flagNonTranslatable) and
             ap.id = :assignedProjectId and
+            gtt.term.glossary.organizationOwner.id = :organizationId and
             gtt.term.glossary.deletedAt is null
     """,
   )
-  fun findByLowercaseTextAndLanguageTagAndAssignedProjectId(
+  fun findByFirstWordLowercasedAndLanguageTagAndAssignedProjectIdAndOrganizationId(
     texts: Collection<String>,
     languageTag: String,
     assignedProjectId: Long,
+    organizationId: Long,
   ): Set<GlossaryTermTranslation>
 }

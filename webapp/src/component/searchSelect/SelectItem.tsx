@@ -24,10 +24,6 @@ const StyledListItemText = styled(ListItemText)`
   overflow: hidden;
 `;
 
-const StyledRadio = styled(Radio)`
-  margin: -8px -8px -8px 0px;
-`;
-
 type Props = MenuItemProps & {
   label: React.ReactNode;
   selected: boolean;
@@ -44,7 +40,6 @@ export const SelectItem = React.forwardRef(function MultiselectItem(
       selected={selected}
       {...other}
     >
-      <StyledRadio checked={Boolean(selected)} size="small" />
       <StyledListItemText primary={label} />
     </StyledMenuItem>
   );
