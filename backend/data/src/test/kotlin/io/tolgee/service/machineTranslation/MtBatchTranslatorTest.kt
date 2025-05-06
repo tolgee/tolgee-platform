@@ -16,11 +16,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.TypedQuery
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.notNull
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -199,6 +195,12 @@ class MtBatchTranslatorTest {
       .thenReturn(projectServiceMock)
     val projectDtoMock = mock(ProjectDto::class.java)
     whenever(projectServiceMock.getDto(any())).thenReturn(projectDtoMock)
+
+    val mtGlossaryTermsProviderMock = mock<MtGlossaryTermsProvider>()
+    whenever(applicationContextMock.getBean(MtGlossaryTermsProvider::class.java))
+      .thenReturn(mtGlossaryTermsProviderMock)
+    whenever(mtGlossaryTermsProviderMock.glossaryTermsFor(any(), any(), any(), any()))
+      .thenReturn(emptySet())
     return applicationContextMock
   }
 
