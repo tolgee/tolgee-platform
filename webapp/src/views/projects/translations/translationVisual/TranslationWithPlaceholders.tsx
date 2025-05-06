@@ -5,7 +5,7 @@ import {
   Placeholder,
   Position,
 } from '@tginternal/editor';
-import { styled, useTheme, Tooltip } from '@mui/material';
+import { styled, Tooltip, useTheme } from '@mui/material';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { placeholderToElement } from './placeholderToElement';
 import { useProject } from 'tg.hooks/useProject';
@@ -38,26 +38,45 @@ type Modifier = {
   highlight?: GlossaryTermHighlightDto;
 };
 
+function isOverlapping(a: Position, b: Position): boolean {
+  return a.start <= b.end && a.end >= b.start;
+}
+
 function sortModifiers(
   placeholders: Placeholder[],
   highlights: GlossaryTermHighlightDto[]
 ): Modifier[] {
-  const modifiers: Modifier[] = placeholders.map((placeholder) => ({
+  let modifiers: Modifier[] = placeholders.map((placeholder) => ({
     position: placeholder.position,
     placeholder: placeholder,
   }));
 
   highlights.forEach((highlight) => {
-    const hasOverlap = modifiers.some(
-      (modifier) =>
-        (highlight.position.start >= modifier.position.start &&
-          highlight.position.start < modifier.position.end) ||
-        (highlight.position.end > modifier.position.start &&
-          highlight.position.end <= modifier.position.end)
+    const overlappingModifiers = modifiers.filter(({ position }) =>
+      isOverlapping(position, highlight.position)
     );
 
-    // Only add non-overlapping highlights
-    if (!hasOverlap) {
+    // Add non-overlapping highlights
+    if (overlappingModifiers.length === 0) {
+      modifiers.push({
+        position: highlight.position,
+        highlight: highlight,
+      });
+      return;
+    }
+
+    // If there is an overlap with only shorter highlights, replace them with the longer one
+    const highlightLength = highlight.position.end - highlight.position.start;
+    const areAllOverlapsOnlyShorterHighlights = overlappingModifiers.every(
+      (modifier) =>
+        modifier.highlight &&
+        modifier.position.end - modifier.position.start < highlightLength
+    );
+
+    if (areAllOverlapsOnlyShorterHighlights) {
+      modifiers = modifiers.filter(
+        ({ position }) => !isOverlapping(position, highlight.position)
+      );
       modifiers.push({
         position: highlight.position,
         highlight: highlight,
