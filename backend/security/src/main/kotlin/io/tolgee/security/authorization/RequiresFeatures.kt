@@ -9,5 +9,5 @@ import io.tolgee.constants.Feature
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresFeatures(
-  val features: Array<Feature>,
+  vararg val features: Feature,
 )
