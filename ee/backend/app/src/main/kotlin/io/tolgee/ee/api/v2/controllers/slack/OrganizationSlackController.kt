@@ -24,6 +24,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/slack"])

@@ -18,6 +18,7 @@ import io.tolgee.security.authorization.UseDefaultPermissions
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @RequestMapping(
   "/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}/terms/{termId:[0-9]+}/translations",

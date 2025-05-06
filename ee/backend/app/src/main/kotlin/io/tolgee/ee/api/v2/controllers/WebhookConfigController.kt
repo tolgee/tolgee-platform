@@ -24,7 +24,7 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.*
 
-@Suppress("MVCPathVariableInspection")
+@Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
