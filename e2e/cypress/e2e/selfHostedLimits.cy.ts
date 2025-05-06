@@ -1,12 +1,12 @@
 import 'cypress-file-upload';
-import {fillAndSubmitSignUpForm, visitSignUp} from '../common/login';
-import {waitForGlobalLoading} from '../common/loading';
-import {E2TranslationsView} from '../compounds/E2TranslationsView';
-import {gcy} from '../common/shared';
-import {selfHostedLimitsTestData} from '../common/apiCalls/testData/testData';
-import {TestDataStandardResponse} from '../common/apiCalls/testData/generator';
-import {login} from '../common/apiCalls/common';
-import {visitTranslations} from '../common/translations';
+import { fillAndSubmitSignUpForm, visitSignUp } from '../common/login';
+import { waitForGlobalLoading } from '../common/loading';
+import { E2TranslationsView } from '../compounds/E2TranslationsView';
+import { gcy } from '../common/shared';
+import { selfHostedLimitsTestData } from '../common/apiCalls/testData/testData';
+import { TestDataStandardResponse } from '../common/apiCalls/testData/generator';
+import { login } from '../common/apiCalls/common';
+import { visitTranslations } from '../common/translations';
 
 /**
  * This is not a traditional test. We mock the results of the API calls,
@@ -178,6 +178,7 @@ function mockSubscriptionUsage() {
   cy.intercept('GET', '/v2/ee-current-subscription-usage', {
     statusCode: 200,
     body: {
+      isPayAsYouGo: false,
       seats: { current: 5, included: 10, limit: 10 },
       keys: { current: 900, included: 1000, limit: 1000 },
       strings: { current: 0, included: -1, limit: -1 },

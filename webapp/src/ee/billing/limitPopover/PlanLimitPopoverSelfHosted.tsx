@@ -1,8 +1,8 @@
-import React, {FC} from 'react';
-import {PlanLimitPopoverWrapperProps} from './generic/PlanLimitPopoverWrapper';
-import {GenericPlanLimitPopover} from './generic/GenericPlanLimitPopover';
-import {useApiQuery} from 'tg.service/http/useQueryApi';
-import {getSelfHostedProgressData} from '../getSelfHostedProgressData';
+import React, { FC } from 'react';
+import { PlanLimitPopoverWrapperProps } from './generic/PlanLimitPopoverWrapper';
+import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { getSelfHostedProgressData } from '../getSelfHostedProgressData';
 
 type SelfHostedPlanLimitPopoverProps = PlanLimitPopoverWrapperProps;
 
