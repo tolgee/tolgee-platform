@@ -8,7 +8,7 @@ fun Map<String, String>.assertFile(
   file: String,
   content: String,
 ) {
-  this[file]!!.assert.isEqualTo(content)
+  this[file]!!.assert.isEqualToNormalizingNewlines(content)
 }
 
 fun getExported(exporter: FileExporter): Map<String, String> {
