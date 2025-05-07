@@ -1,3 +1,10 @@
+## [3.116.3](https://github.com/tolgee/tolgee-platform/compare/v3.116.2...v3.116.3) (2025-05-07)
+
+
+### Bug Fixes
+
+* add stricter pattern for projectId urls and handle NumberFormatException if organizationId or projectId contain non-numeric values ([#3015](https://github.com/tolgee/tolgee-platform/issues/3015)) ([9232ca8](https://github.com/tolgee/tolgee-platform/commit/9232ca88b035cab457ee5c1a25f72d338b75059a))
+
 ## [3.116.2](https://github.com/tolgee/tolgee-platform/compare/v3.116.1...v3.116.2) (2025-05-07)
 
 
