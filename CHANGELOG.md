@@ -1,3 +1,11 @@
+## [3.116.2](https://github.com/tolgee/tolgee-platform/compare/v3.116.1...v3.116.2) (2025-05-07)
+
+
+### Bug Fixes
+
+* Normalize content root prefix in AWS CloudFront cache purging ([#3007](https://github.com/tolgee/tolgee-platform/issues/3007)) ([50cec35](https://github.com/tolgee/tolgee-platform/commit/50cec35ee377fb95a62b184259462ee4f10ba0ee)), closes [#2988](https://github.com/tolgee/tolgee-platform/issues/2988)
+* Self-hosted free plan MT credit issue > user's being logged out ([#3049](https://github.com/tolgee/tolgee-platform/issues/3049)) ([656fd60](https://github.com/tolgee/tolgee-platform/commit/656fd604a9c6f0dfd020a33da3326a17fca7b96c))
+
 ## [3.116.1](https://github.com/tolgee/tolgee-platform/compare/v3.116.0...v3.116.1) (2025-05-01)
 
 
