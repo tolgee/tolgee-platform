@@ -137,7 +137,7 @@ class FlutterArbFileExporterTest {
     file: String,
     content: String,
   ) {
-    this[file]!!.assert.isEqualTo(content)
+    this[file]!!.assert.isEqualToNormalizingNewlines(content)
   }
 
   private fun getExporter(params: ExportParams = getExportParams()): FlutterArbFileExporter {
