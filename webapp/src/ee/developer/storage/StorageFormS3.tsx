@@ -69,7 +69,6 @@ export const StorageFormS3 = ({
       }
     >
       {({ submitForm, validateForm, values, setTouched }) => {
-        console.log(values);
         return (
           <Form>
             <DialogContent>
