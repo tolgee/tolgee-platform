@@ -1,3 +1,10 @@
+# [3.118.0](https://github.com/tolgee/tolgee-platform/compare/v3.117.0...v3.118.0) (2025-05-07)
+
+
+### Features
+
+* publish to s3 subfolder ([#2941](https://github.com/tolgee/tolgee-platform/issues/2941)) ([d0439af](https://github.com/tolgee/tolgee-platform/commit/d0439af153cb73a5fa374c7b1d4736d452827f96))
+
 # [3.117.0](https://github.com/tolgee/tolgee-platform/compare/v3.116.3...v3.117.0) (2025-05-07)
 
 
