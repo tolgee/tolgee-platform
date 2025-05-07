@@ -3,16 +3,13 @@ package io.tolgee.ee.api.v2.controllers
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
 import io.tolgee.component.fileStorage.AzureBlobFileStorage
+import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.service.ContentStorageService
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andHasErrorMessage
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.*
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -70,6 +67,34 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       azureContentStorageConfig.connectionString.assert.isEqualTo("fakeConnectionString")
       azureContentStorageConfig.containerName.assert.isEqualTo("fakeContainerName")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creates Content Storage with custom path`() {
+    doAnswer {
+      mock<S3FileStorage>()
+    }.whenever(contentDeliveryFileStorageProvider).getStorage(any())
+
+    performProjectAuthPost(
+      "content-storages",
+      mapOf(
+        "name" to "s3",
+        "s3ContentStorageConfig" to
+          mapOf(
+            "bucketName" to "bucketName",
+            "accessKey" to "accessKey",
+            "secretKey" to "secretKey",
+            "endpoint" to "endpoint",
+            "signingRegion" to "signingRegion",
+            "path" to "custom/path",
+          ),
+      ),
+    ).andIsOk
+    val all =
+      contentStorageService.getAllInProject(project.id, Pageable.ofSize(100))
+        .sortedBy { it.id }
+    all.last().s3ContentStorageConfig!!.path.assert.isEqualTo("custom/path")
   }
 
   @Test

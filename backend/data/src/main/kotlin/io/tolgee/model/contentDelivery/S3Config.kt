@@ -7,6 +7,11 @@ interface S3Config : StorageConfig {
   val endpoint: String?
   val signingRegion: String?
 
+  /**
+   * Specifies an optional subfolder structure within s3 bucket to which content will be stored
+   */
+  val path: String?
+
   override val enabled: Boolean
     get() = bucketName != null
 

@@ -4072,12 +4072,14 @@ export interface components {
       contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
       endpoint: string;
+      path: string;
       secretKey?: string;
       signingRegion: string;
     };
     S3ContentStorageConfigModel: {
       bucketName: string;
       endpoint: string;
+      path: string;
       signingRegion: string;
     };
     ScreenshotInfoDto: {

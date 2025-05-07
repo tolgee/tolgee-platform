@@ -40,4 +40,6 @@ class S3Settings(
   override var signingRegion: String? = null,
   @DocProperty(description = "Name of the bucket where Tolgee will store its files.")
   override var bucketName: String? = null,
+  @DocProperty(description = "Optional subfolder structure within s3 bucket to which content will be stored")
+  override var path: String? = null,
 ) : S3Config
