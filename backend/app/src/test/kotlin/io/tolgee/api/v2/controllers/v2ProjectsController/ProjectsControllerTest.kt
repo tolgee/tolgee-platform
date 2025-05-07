@@ -273,14 +273,14 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     Assertions.assertThat(project).isNull()
   }
 
-	@Test
-	fun `test bad request error is returned when requested url with wrong pattern`() {
-		performAuthGet("/v2/projects/export&format=JSON")
-			.andIsNotFound
-			.andPrettyPrint
-			.andAssertThatJson.let {
-				it.node("code").isEqualTo(Message.RESOURCE_NOT_FOUND.code)
-				it.node("params[0]").isEqualTo("v2/projects/export&format=JSON")
-			}
-	}
+  @Test
+  fun `test bad request error is returned when requested url with wrong pattern`() {
+    performAuthGet("/v2/projects/export&format=JSON")
+      .andIsNotFound
+      .andPrettyPrint
+      .andAssertThatJson.let {
+        it.node("code").isEqualTo(Message.RESOURCE_NOT_FOUND.code)
+        it.node("params[0]").isEqualTo("v2/projects/export&format=JSON")
+      }
+  }
 }

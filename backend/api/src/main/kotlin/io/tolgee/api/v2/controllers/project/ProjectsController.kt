@@ -99,8 +99,7 @@ class ProjectsController(
   @UseDefaultPermissions
   @AllowApiAccess
   @OpenApiOrderExtension(2)
-  fun get(
-  ): ProjectModel {
+  fun get(): ProjectModel {
     return projectService.getView(projectHolder.project.id).let {
       projectModelAssembler.toModel(it)
     }

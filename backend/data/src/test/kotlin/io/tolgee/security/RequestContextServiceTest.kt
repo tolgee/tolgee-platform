@@ -162,12 +162,12 @@ class RequestContextServiceTest {
   @Test
   fun `it throws invalid path when the path variable of project is not in proper format`() {
     val req = makeRequest("/v2/projects/{projectId}")
-		assertThrows<InvalidPathException> { requestContextService.getTargetProject(req) }
+    assertThrows<InvalidPathException> { requestContextService.getTargetProject(req) }
   }
 
-	@Test
+  @Test
   fun `it throws invalid path when the path variable of organization is not in proper format`() {
     val req = makeRequest("/v2/organizations/{organizationId}")
-		assertThrows<InvalidPathException> { requestContextService.getTargetOrganization(req) }
+    assertThrows<InvalidPathException> { requestContextService.getTargetOrganization(req) }
   }
 }

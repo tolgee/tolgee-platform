@@ -59,11 +59,11 @@ class RequestContextService(
       // No permission check needs to occur here.
       return null
     }
-		val idAsString = pathVariablesMap.values.first() as String
-		return runCatching { projectService.findDto(idAsString.toLong())}
-			.onFailure { throw InvalidPathException("Invalid format of project id: $idAsString") }
-			.getOrNull()
-	}
+    val idAsString = pathVariablesMap.values.first() as String
+    return runCatching { projectService.findDto(idAsString.toLong()) }
+      .onFailure { throw InvalidPathException("Invalid format of project id: $idAsString") }
+      .getOrNull()
+  }
 
   private fun getTargetProjectImplicit(): ProjectDto? {
     // This method is the source of complexity for the global handling, but is itself quite simple. Oh, the irony!
@@ -92,9 +92,9 @@ class RequestContextService(
     if (idOrSlug.contains(IS_SLUG_RE)) {
       return organizationService.findDto(idOrSlug)
     }
-		return runCatching { organizationService.findDto(idOrSlug.toLong())}
-			.onFailure { throw InvalidPathException("Invalid format of organization id: $idOrSlug") }
-			.getOrNull()
+    return runCatching { organizationService.findDto(idOrSlug.toLong()) }
+      .onFailure { throw InvalidPathException("Invalid format of organization id: $idOrSlug") }
+      .getOrNull()
   }
 
   companion object {
