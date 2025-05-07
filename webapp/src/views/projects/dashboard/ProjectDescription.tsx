@@ -1,5 +1,5 @@
 import { Edit02 } from '@untitled-ui/icons-react';
-import { Box, IconButton, Link as MuiLink, styled } from '@mui/material';
+import { Box, IconButton, styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 
