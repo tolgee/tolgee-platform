@@ -2,7 +2,6 @@ package io.tolgee.ee.api.v2.controllers.glossary
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryModel
@@ -14,6 +13,7 @@ import io.tolgee.model.glossary.Glossary
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
@@ -41,12 +41,12 @@ class GlossaryController(
   private val glossaryModelAssembler: GlossaryModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<Glossary>,
   private val organizationHolder: OrganizationHolder,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping
   @Operation(summary = "Create glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   fun create(
     @PathVariable
@@ -54,11 +54,6 @@ class GlossaryController(
     @RequestBody @Valid
     dto: CreateGlossaryRequest,
   ): GlossaryModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val glossary = glossaryService.create(organizationHolder.organizationEntity, dto)
     return glossaryModelAssembler.toModel(glossary)
   }
@@ -67,6 +62,7 @@ class GlossaryController(
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   fun update(
     @PathVariable
@@ -76,11 +72,6 @@ class GlossaryController(
     @RequestBody @Valid
     dto: UpdateGlossaryRequest,
   ): GlossaryModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val organization = organizationHolder.organization
     val glossary = glossaryService.update(organization.id, glossaryId, dto)
     return glossaryModelAssembler.toModel(glossary)
@@ -90,6 +81,7 @@ class GlossaryController(
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   fun delete(
     @PathVariable
@@ -97,11 +89,6 @@ class GlossaryController(
     @PathVariable
     glossaryId: Long,
   ) {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     glossaryService.delete(organizationHolder.organization.id, glossaryId)
   }
 
@@ -109,17 +96,13 @@ class GlossaryController(
   @Operation(summary = "Get glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @RequiresFeatures(Feature.GLOSSARY)
   fun get(
     @PathVariable
     organizationId: Long,
     @PathVariable
     glossaryId: Long,
   ): GlossaryModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val organization = organizationHolder.organization
     val glossary = glossaryService.get(organization.id, glossaryId)
     return glossaryModelAssembler.toModel(glossary)
@@ -129,17 +112,13 @@ class GlossaryController(
   @Operation(summary = "Get all organization glossaries")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @RequiresFeatures(Feature.GLOSSARY)
   fun getAll(
     @PathVariable
     organizationId: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
   ): PagedModel<GlossaryModel> {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val organization = organizationHolder.organization
     val glossaries = glossaryService.findAllPaged(organization.id, pageable, search)
     return pagedAssembler.toModel(glossaries, glossaryModelAssembler)

@@ -22,6 +22,7 @@ import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
 import io.tolgee.security.authentication.EmailValidationInterceptor
 import io.tolgee.security.authentication.SsoAuthenticationInterceptor
+import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.ProjectAuthorizationInterceptor
 import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
@@ -67,6 +68,8 @@ class WebSecurityConfig(
   private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
   @Lazy
   private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
+  @Lazy
+  private val featureAuthorizationInterceptor: FeatureAuthorizationInterceptor,
   private val exceptionHandlerFilter: ExceptionHandlerFilter,
 ) : WebMvcConfigurer {
   @Bean
@@ -131,6 +134,7 @@ class WebSecurityConfig(
       .addPathPatterns("/v2/organizations/**")
     registry.addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns("/v2/projects/**", "/api/project/**", "/api/repository/**")
+    registry.addInterceptor(featureAuthorizationInterceptor)
   }
 
   @Bean

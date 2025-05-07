@@ -2,7 +2,6 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.LanguageAiPromptCustomizationModelAssembler
 import io.tolgee.ee.data.SetLanguagePromptCustomizationRequest
@@ -14,6 +13,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
@@ -29,12 +29,11 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/")
-@Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
+@Suppress("MVCPathVariableInspection")
 @Tag(name = "AI Customization")
 @OpenApiEeExtension
 class AiPromptCustomizationController(
   private val projectHolder: ProjectHolder,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val aiPromptCustomizationService: AiPromptCustomizationService,
   private val languageService: LanguageService,
   private val languageAiPromptCustomizationModelAssembler: LanguageAiPromptCustomizationModelAssembler,
@@ -53,13 +52,10 @@ class AiPromptCustomizationController(
   @Operation(summary = "Sets project level prompt customization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT])
+  @RequiresFeatures(Feature.AI_PROMPT_CUSTOMIZATION)
   fun setPromptProjectCustomization(
     @Valid @RequestBody dto: SetProjectPromptCustomizationRequest,
   ): ProjectAiPromptCustomizationModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.AI_PROMPT_CUSTOMIZATION,
-    )
     val project = aiPromptCustomizationService.setProjectPromptCustomization(projectHolder.project.id, dto)
     return ProjectAiPromptCustomizationModel(
       project.aiTranslatorPromptDescription,
@@ -70,14 +66,11 @@ class AiPromptCustomizationController(
   @Operation(summary = "Sets language level prompt customization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT])
+  @RequiresFeatures(Feature.AI_PROMPT_CUSTOMIZATION)
   fun setLanguagePromptCustomization(
     @Valid @RequestBody dto: SetLanguagePromptCustomizationRequest,
     @PathVariable languageId: Long,
   ): LanguageAiPromptCustomizationModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.AI_PROMPT_CUSTOMIZATION,
-    )
     aiPromptCustomizationService.setLanguagePromptCustomization(projectHolder.project.id, languageId, dto)
     return languageAiPromptCustomizationModelAssembler.toModel(
       languageService.get(
