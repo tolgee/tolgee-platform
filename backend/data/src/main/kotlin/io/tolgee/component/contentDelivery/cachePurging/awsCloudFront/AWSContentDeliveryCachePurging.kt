@@ -1,6 +1,7 @@
 package io.tolgee.component.contentDelivery.cachePurging.awsCloudFront
 
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurging
+import io.tolgee.fixtures.removeSlashSuffix
 import io.tolgee.model.contentDelivery.AWSCloudFrontConfig
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -18,13 +19,17 @@ class AWSCloudFrontContentDeliveryCachePurging(
     contentDeliveryConfig: ContentDeliveryConfig,
     paths: Set<String>,
   ) {
+    val contentPaths = paths.map { "$prefix/${contentDeliveryConfig.slug}/$it" }.toSet()
+    val credentialProvider = AWSCredentialProvider.get(config)
+    invalidateCloudFrontCache(credentialProvider, config.distributionId, contentPaths)
+  }
+
+  private val prefix by lazy {
     var contentRoot = config.contentRoot?.removeSuffix("/") ?: ""
     if (!contentRoot.startsWith("/")) {
       contentRoot = "/$contentRoot"
     }
-    val contentPaths = paths.map { "$contentRoot/${contentDeliveryConfig.slug}/$it" }.toSet()
-    val credentialProvider = AWSCredentialProvider.get(config)
-    invalidateCloudFrontCache(credentialProvider, config.distributionId, contentPaths)
+    contentRoot.removeSlashSuffix()
   }
 
   private fun createClient(credentialsProvider: StaticCredentialsProvider): CloudFrontClient {
