@@ -24,17 +24,12 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects/{projectId}/activity", "/v2/projects/activity"])
+@RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/activity", "/v2/projects/activity"])
 @Tag(name = "Projects")
 class ProjectActivityController(
   private val activityService: ActivityService,

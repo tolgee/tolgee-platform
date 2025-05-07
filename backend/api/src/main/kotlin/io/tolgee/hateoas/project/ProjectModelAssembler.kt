@@ -1,6 +1,5 @@
 package io.tolgee.hateoas.project
 
-import io.tolgee.api.v2.controllers.organization.OrganizationController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -17,7 +16,6 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
-import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component
 
 @Component
@@ -37,7 +35,6 @@ class ProjectModelAssembler(
     ProjectModel::class.java,
   ) {
   override fun toModel(view: ProjectWithLanguagesView): ProjectModel {
-    val link = linkTo<ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage =
       languageService.getProjectLanguages(view.id).find { it.base } ?: let {
         projectService.getOrAssignBaseLanguage(view.id)
@@ -63,9 +60,7 @@ class ProjectModelAssembler(
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       icuPlaceholders = view.icuPlaceholders,
-    ).add(link).also { model ->
-      model.add(linkTo<OrganizationController> { get(view.organizationOwner.slug) }.withRel("organizationOwner"))
-    }
+    )
   }
 
   private fun getComputedPermissions(view: ProjectWithLanguagesView): ComputedPermissionDto {

@@ -17,12 +17,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.translation.AutoTranslationService
 import org.springframework.hateoas.CollectionModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
 @RestController
@@ -34,7 +29,7 @@ class ProjectsAutoTranslationSettingsController(
   private val autoTranslateService: AutoTranslationService,
   private val autoTranslationSettingsModelAssembler: AutoTranslationSettingsModelAssembler,
 ) {
-  @PutMapping("/{projectId}/per-language-auto-translation-settings")
+  @PutMapping("/{projectId:[0-9]+}/per-language-auto-translation-settings")
   @Operation(
     summary = "Set per-language auto-translation settings",
   )
@@ -47,7 +42,7 @@ class ProjectsAutoTranslationSettingsController(
     return autoTranslationSettingsModelAssembler.toCollectionModel(config)
   }
 
-  @GetMapping("/{projectId}/per-language-auto-translation-settings")
+  @GetMapping("/{projectId:[0-9]+}/per-language-auto-translation-settings")
   @Operation(summary = "Get per-language auto-translation settings")
   @UseDefaultPermissions
   @AllowApiAccess
@@ -56,7 +51,7 @@ class ProjectsAutoTranslationSettingsController(
     return autoTranslationSettingsModelAssembler.toCollectionModel(configs)
   }
 
-  @PutMapping("/{projectId}/auto-translation-settings")
+  @PutMapping("/{projectId:[0-9]+}/auto-translation-settings")
   @Operation(
     summary = "Set default auto translation settings for project",
     description =
@@ -74,7 +69,7 @@ class ProjectsAutoTranslationSettingsController(
     return autoTranslationSettingsModelAssembler.toModel(config)
   }
 
-  @GetMapping("/{projectId}/auto-translation-settings")
+  @GetMapping("/{projectId:[0-9]+}/auto-translation-settings")
   @Operation(
     summary = "Get default auto-translation settings for project",
     description =

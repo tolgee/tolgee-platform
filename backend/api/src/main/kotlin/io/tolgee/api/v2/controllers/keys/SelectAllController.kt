@@ -17,11 +17,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -55,7 +51,7 @@ class SelectAllController(
     paths = [
       // should be included in keys, not in translations
       "/v2/projects/translations/select-all",
-      "/v2/projects/{projectId}/translations/select-all",
+      "/v2/projects/{projectId:[0-9]+}/translations/select-all",
     ],
   )
   fun selectKeys(

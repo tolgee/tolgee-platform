@@ -17,12 +17,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.hateoas.CollectionModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
 @RestController
@@ -34,7 +29,7 @@ class MachineTranslationSettingsController(
   private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val mtServiceConfigService: MtServiceConfigService,
 ) {
-  @GetMapping("/{projectId}/machine-translation-service-settings")
+  @GetMapping("/{projectId:[0-9]+}/machine-translation-service-settings")
   @Operation(summary = "Get machine translation settings")
   @UseDefaultPermissions
   @AllowApiAccess
@@ -43,7 +38,7 @@ class MachineTranslationSettingsController(
     return languageConfigItemModelAssembler.toCollectionModel(data)
   }
 
-  @PutMapping("/{projectId}/machine-translation-service-settings")
+  @PutMapping("/{projectId:[0-9]+}/machine-translation-service-settings")
   @Operation(summary = "Sets machine translation settings")
   @RequiresProjectPermissions([ Scope.LANGUAGES_EDIT ])
   @AllowApiAccess
@@ -54,7 +49,7 @@ class MachineTranslationSettingsController(
     return getMachineTranslationSettings()
   }
 
-  @GetMapping("/{projectId}/machine-translation-language-info")
+  @GetMapping("/{projectId:[0-9]+}/machine-translation-language-info")
   @Operation(
     summary = "Machine translation info",
     description =
