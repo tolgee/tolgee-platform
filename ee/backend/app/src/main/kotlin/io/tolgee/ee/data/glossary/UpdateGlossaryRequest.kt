@@ -1,20 +1,24 @@
 package io.tolgee.ee.data.glossary
 
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.annotation.Nullable
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
 class UpdateGlossaryRequest {
-  @field:Size(min = 3, max = 50)
+  @Schema(example = "My glossary", description = "Glossary name")
+  @field:NotBlank
+  @field:Size(max = 50)
   var name: String = ""
 
-  @field:NotBlank // TODO: if it stays as code we need stricter validation here
+  @Schema(example = "cs-CZ", description = "Language tag according to BCP 47 definition")
+  @field:NotBlank
+  @field:Size(max = 20)
+  @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
   var baseLanguageTag: String? = null
 
-  /**
-   * Assigned projects to glossary.
-   * When null, assigned projects will be kept unchanged.
-   */
+  @Schema(description = "Projects assigned to glossary; when null, assigned projects will be kept unchanged.")
   @field:Nullable
   var assignedProjects: MutableSet<Long>? = null
 }

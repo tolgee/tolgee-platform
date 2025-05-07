@@ -7,7 +7,6 @@ import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.translation.TranslationMemoryService
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Pageable
-import kotlin.jvm.java
 
 class MetadataProvider(
   private val context: MtTranslatorContext,
