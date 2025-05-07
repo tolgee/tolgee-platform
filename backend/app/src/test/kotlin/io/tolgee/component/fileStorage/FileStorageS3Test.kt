@@ -5,7 +5,7 @@
 package io.tolgee.component.fileStorage
 
 import io.findify.s3mock.S3Mock
-import io.tolgee.component.fileStorage.FileStorageS3Test.Companion.BUCKET_NAME
+import io.tolgee.configuration.tolgee.ContentStorageS3Properties
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatExceptionOfType
@@ -13,35 +13,34 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.beans.factory.annotation.Autowired
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.S3Exception
 
 @ContextRecreatingTest
-@SpringBootTest(
-  properties = [
-    "tolgee.authentication.jwt-secret=this is a predefined secret, so it doesn't attempt to " +
-      "get it from the S3 mock that doesn't exist yet :D",
-    "tolgee.file-storage.s3.enabled=true",
-    "tolgee.file-storage.s3.access-key=dummy_access_key",
-    "tolgee.file-storage.s3.secret-key=dummy_secret_key",
-    "tolgee.file-storage.s3.endpoint=http://localhost:29090",
-    "tolgee.file-storage.s3.signing-region=dummy_signing_region",
-    "tolgee.file-storage.s3.bucket-name=$BUCKET_NAME",
-    "tolgee.authentication.initial-password=hey password manager, please don't use the filesystem :3",
-    "tolgee.internal.use-in-memory-file-storage=false",
-  ],
-)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FileStorageS3Test : AbstractFileStorageServiceTest() {
   companion object {
     const val BUCKET_NAME = "testbucket"
   }
 
+  @Autowired
+  private lateinit var s3FileStorageFactory: S3FileStorageFactory
   lateinit var s3Mock: S3Mock
 
+  val defaultProperties =
+    ContentStorageS3Properties().apply {
+      bucketName = BUCKET_NAME
+      accessKey = "dummy_access_key"
+      secretKey = "dummy_secret_key"
+      endpoint = "http://localhost:29090"
+      signingRegion = "dummy_signing_region"
+    }
+
   val s3 by lazy {
-    S3ClientProvider(tolgeeProperties.fileStorage.s3).provide()
+    S3ClientProvider(
+      defaultProperties,
+    ).provide()
   }
 
   @BeforeAll
@@ -57,21 +56,16 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   }
 
   @Test
-  fun `is S3FileStorage`() {
-    assertThat(fileStorage is S3FileStorage).isTrue()
-  }
-
-  @Test
   fun testGetFile() {
     s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
     val fileByteContent = testFileContent.toByteArray(charset("UTF-8"))
-    assertThat(fileStorage.readFile(testFilePath)).isEqualTo(fileByteContent)
+    assertThat(createFileStorage().readFile(testFilePath)).isEqualTo(fileByteContent)
   }
 
   @Test
   fun testDeleteFile() {
     s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
-    fileStorage.deleteFile(testFilePath)
+    createFileStorage().deleteFile(testFilePath)
     assertThatExceptionOfType(S3Exception::class.java)
       .isThrownBy {
         s3.getObject { req ->
@@ -82,7 +76,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
 
   @Test
   fun testStoreFile() {
-    fileStorage.storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
+    createFileStorage().storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
     assertThat(
       s3.getObject { req -> req.bucket(BUCKET_NAME).key(testFilePath) }.readAllBytes(),
     ).isEqualTo(testFileContent.toByteArray())
@@ -90,14 +84,30 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
 
   @Test
   fun testPruneDirectory() {
-    fileStorage.storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
-    fileStorage.pruneDirectory("test")
-    assertThat(fileStorage.fileExists(testFilePath)).isEqualTo(false)
+    createFileStorage().storeFile(testFilePath, testFileContent.toByteArray(charset("UTF-8")))
+    createFileStorage().pruneDirectory("test")
+    assertThat(createFileStorage().fileExists(testFilePath)).isEqualTo(false)
   }
 
   @Test
   fun testFileExists() {
     s3.putObject({ req -> req.bucket(BUCKET_NAME).key(testFilePath) }, RequestBody.fromString(testFileContent))
-    assertThat(fileStorage.fileExists(testFilePath)).isTrue
+    assertThat(createFileStorage().fileExists(testFilePath)).isTrue
+  }
+
+  @Test
+  fun `stores files to path by config`() {
+    val storage = s3FileStorageFactory.create(defaultProperties.copy(path = "content/path"))
+    storage.storeFile(
+      testFilePath,
+      testFileContent.toByteArray(charset("UTF-8")),
+    )
+    assertThat(
+      s3.getObject { req -> req.bucket(BUCKET_NAME).key("content/path/$testFilePath") }.readAllBytes(),
+    ).isEqualTo(testFileContent.toByteArray())
+  }
+
+  fun createFileStorage(): S3FileStorage {
+    return s3FileStorageFactory.create(defaultProperties)
   }
 }

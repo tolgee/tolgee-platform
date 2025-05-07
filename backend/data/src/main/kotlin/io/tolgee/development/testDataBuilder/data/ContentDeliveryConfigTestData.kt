@@ -29,6 +29,20 @@ class ContentDeliveryConfigTestData : BaseTestData() {
         }
     }
 
+  val s3ContentStorageWithCustomPath =
+    projectBuilder.addContentStorage {
+      name = "S3"
+      this.s3ContentStorageConfig =
+        S3ContentStorageConfig(this).apply {
+          bucketName = "fake"
+          accessKey = "fake"
+          secretKey = "fake"
+          endpoint = "fake"
+          signingRegion = "fake"
+          path = "fake"
+        }
+    }
+
   val defaultServerContentDeliveryConfig =
     projectBuilder.addContentDeliveryConfig {
       name = "Default server"
@@ -56,7 +70,7 @@ class ContentDeliveryConfigTestData : BaseTestData() {
 
   val s3ContentDeliveryConfigWithCustomSlugAndPath =
     projectBuilder.addContentDeliveryConfig {
-      contentStorage = s3ContentStorage.self
+      contentStorage = s3ContentStorageWithCustomPath.self
       name = "Custom Slug"
       slug = "my-slug"
       customSlug = true

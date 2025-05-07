@@ -6,8 +6,9 @@ interface S3Config : StorageConfig {
   val secretKey: String?
   val endpoint: String?
   val signingRegion: String?
+
   /**
-   * Specifies optional subfolder structure within s3 bucket to which content will be stored
+   * Specifies an optional subfolder structure within s3 bucket to which content will be stored
    */
   val path: String?
 

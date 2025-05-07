@@ -2,16 +2,10 @@ package io.tolgee.api.v2.controllers.contentDelivery
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobConcurrentLauncher
-import io.tolgee.component.fileStorage.AzureBlobFileStorage
-import io.tolgee.component.fileStorage.AzureFileStorageFactory
-import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.component.fileStorage.S3FileStorage
-import io.tolgee.component.fileStorage.S3FileStorageFactory
+import io.tolgee.component.fileStorage.*
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
-import io.tolgee.dtos.request.ContentDeliveryConfigRequest
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -61,6 +55,7 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
   fun after() {
     resetServerProperties()
     batchJobConcurrentLauncher.pause = false
+    tolgeeProperties.contentDelivery.storage.s3.bucketName = null
   }
 
   @Test
@@ -112,9 +107,12 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
 
   private fun assertStored(mocked: FileStorage) {
     mocked.getStoreFileInvocations().assert.hasSize(1)
-    (mocked.getStoreFileInvocations().single().arguments[0] as String)
+    getLastStoreFileInvocationPath(mocked)
       .matches("[a-f0-9]{32}/en\\.json".toRegex())
   }
+
+  private fun getLastStoreFileInvocationPath(mocked: FileStorage): String =
+    (mocked.getStoreFileInvocations().single().arguments[0] as String)
 
   private fun assertPruned(mocked: FileStorage) {
     mocked.getPruneDirectoryInvocations().assert.hasSize(1)
