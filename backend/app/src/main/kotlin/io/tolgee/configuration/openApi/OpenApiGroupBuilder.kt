@@ -3,7 +3,11 @@ package io.tolgee.configuration.openApi
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.Paths
-import io.tolgee.openApiDocs.*
+import io.tolgee.openApiDocs.OpenApiCloudExtension
+import io.tolgee.openApiDocs.OpenApiEeExtension
+import io.tolgee.openApiDocs.OpenApiOrderExtension
+import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
+import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.authentication.AllowApiAccess
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.web.method.HandlerMethod
