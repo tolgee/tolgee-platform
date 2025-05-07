@@ -149,11 +149,11 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     countQuery =
       """select count(o)
         from Organization o
-        where (:search is null or (
-              lower(o.name) like lower(concat('%', coalesce(:search, ''), '%')) or
-              lower(o.slug) like lower(concat('%', coalesce(:search, ''), '%')) or
-              lower(cast(o.id as string)) like lower(concat(coalesce(:search, ''), '%'))
-              ))
+        where (:search is null or
+              lower(o.name) like lower(concat('%', :search, '%')) or
+              lower(o.slug) like lower(concat('%', :search, '%')) or
+              lower(cast(o.id as string)) like lower(concat(:search, '%'))
+              )
         and o.deletedAt is null
         """,
   )
