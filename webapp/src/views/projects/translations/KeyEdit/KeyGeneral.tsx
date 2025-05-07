@@ -102,7 +102,9 @@ export const KeyGeneral = () => {
 
       <StyledSection>
         <FieldLabel>
-          <LabelHint title={t('translations_key_edit_label_description_hint')}>
+          <LabelHint
+            title={t('translations_key_edit_label_description_markdown_hint')}
+          >
             {t('translations_key_edit_label_description')}
           </LabelHint>
         </FieldLabel>

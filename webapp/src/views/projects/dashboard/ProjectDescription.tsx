@@ -1,11 +1,12 @@
 import { Edit02 } from '@untitled-ui/icons-react';
-import { Box, IconButton, Link as MuiLink, styled } from '@mui/material';
+import { Box, IconButton, styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { MarkdownLink } from 'tg.component/common/MarkdownLink';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -52,15 +53,7 @@ export const ProjectDescription: React.FC<Props> = ({ description }) => {
       <StyledContent>
         <ReactMarkdown
           components={{
-            a: (props) => (
-              <MuiLink
-                href={props.href || ''}
-                target="_blank"
-                rel="nofollow noreferrer noopener"
-              >
-                {props.children}
-              </MuiLink>
-            ),
+            a: MarkdownLink,
           }}
         >
           {description}

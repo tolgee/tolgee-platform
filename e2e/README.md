@@ -21,7 +21,7 @@ To just run it, you can execute the runE2e Gradle task. This command runs a comp
 3. Run the tested environment
    ```shell
    # Run frontend with E2E settings
-   ./gradlew runWebAppNpmStartE2eDev
+   cd webapp && VITE_APP_API_URL=http://localhost:8201 npm run start -- --port 8081 --host --no-open
    # Run the E2E Docker services (like fake SMTP server)
    ./gradlew runDockerE2eDev
    # Run backend with e2e profile
