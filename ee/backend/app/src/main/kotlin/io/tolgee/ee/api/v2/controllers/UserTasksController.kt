@@ -16,6 +16,7 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/user-tasks"])

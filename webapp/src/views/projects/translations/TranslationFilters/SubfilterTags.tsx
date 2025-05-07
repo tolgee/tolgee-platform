@@ -149,12 +149,12 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
               <InfiniteSearchSelectContent
                 open={true}
                 items={data}
+                itemKey={(item) => item.id}
                 maxWidth={400}
                 onSearch={setSearch}
                 search={search}
                 displaySearch={(totalItems ?? 0) > 10}
                 renderOption={renderItem}
-                getOptionLabel={(o) => o.name}
                 ListboxProps={{
                   style: { maxHeight: 400, overflow: 'auto' },
                 }}

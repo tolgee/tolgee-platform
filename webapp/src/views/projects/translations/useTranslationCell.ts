@@ -56,9 +56,7 @@ export const useTranslationCell = ({
   const langTag = language.tag;
 
   const cursor = useTranslationsSelector((v) => {
-    return v.cursor?.keyId === keyId && v.cursor.language === language.tag
-      ? v.cursor
-      : undefined;
+    return v.cursor?.keyId === keyId ? v.cursor : undefined;
   });
 
   const baseLanguage = useTranslationsSelector((c) =>
@@ -207,6 +205,7 @@ export const useTranslationCell = ({
     editVal: isEditing ? cursor : undefined,
     isEditing,
     isEditingRow,
+    editingLanguageTag: cursor?.language,
     autofocus: true,
     keyData,
     canChangeState,
