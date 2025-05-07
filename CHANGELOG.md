@@ -1,3 +1,15 @@
+# [3.117.0](https://github.com/tolgee/tolgee-platform/compare/v3.116.3...v3.117.0) (2025-05-07)
+
+
+### Bug Fixes
+
+* handle null search parameter in OrganizationRepository query ([#3059](https://github.com/tolgee/tolgee-platform/issues/3059)) ([f579721](https://github.com/tolgee/tolgee-platform/commit/f579721ba806374136fcc1e800991cb1e91f76a2))
+
+
+### Features
+
+* Add markdown to key descriptions ([#3051](https://github.com/tolgee/tolgee-platform/issues/3051)) ([681c7d9](https://github.com/tolgee/tolgee-platform/commit/681c7d958baee23e4c0e080616113f362db37c00))
+
 ## [3.116.3](https://github.com/tolgee/tolgee-platform/compare/v3.116.2...v3.116.3) (2025-05-07)
 
 
