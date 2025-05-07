@@ -1,4 +1,5 @@
 [*.{kt, kts}]
+ktlint_code_style = intellij_idea
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_filename = disabled
 ij_kotlin_name_count_to_use_star_import = 5
@@ -13,3 +14,19 @@ max_line_length = 500
 
 [**/in/**/*.{kt, kts}]
 ktlint_standard_package-name = disabled
+
+# Update to kotlin 2.1.* required update to ktlint 1.5.0
+# This version is not backwards compatible, despite "ktlint_code_style = intellij_idea" 
+# Disabling conflicting checks, should be enabled by a senior core developer.
+[*.{kt, kts}]
+ktlint_standard_function-signature = disabled
+ktlint_standard_function-expression-body = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_class-signature = disabled
+ktlint_standard_import-ordering = disabled
+ktlint_standard_newline-before-dot = disabled
+ktlint_standard_indent = disabled
+ktlint_standard_condition-wrapping = disabled
+ktlint_standard_function-literal = disabled
+ktlint_standard_parameter-list-wrapping = disabled
