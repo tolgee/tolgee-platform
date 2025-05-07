@@ -502,6 +502,7 @@ export interface components {
     };
     CurrentUsageModel: {
       credits: components["schemas"]["CurrentUsageItemModel"];
+      isPayAsYouGo: boolean;
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
@@ -718,6 +719,7 @@ export interface components {
         | "current_user_does_not_own_image"
         | "user_cannot_view_this_organization"
         | "user_is_not_owner_of_organization"
+        | "user_is_not_owner_or_maintainer_of_organization"
         | "pak_created_for_different_project"
         | "custom_slug_is_only_applicable_for_custom_storage"
         | "invalid_slug_format"
@@ -1226,8 +1228,11 @@ export interface components {
     };
     SetLicenseKeyLicensingDto: {
       instanceId: string;
-      /** Format: int64 */
-      keys: number;
+      /**
+       * Format: int64
+       * @description Number of keys in the project. If not provided, the number of keys will not be updated.
+       */
+      keys?: number;
       licenseKey: string;
       /** Format: int64 */
       seats: number;

@@ -28,7 +28,6 @@ describe('Self-hosted Limits', () => {
 
     // Mock the subscription usage and license info endpoints
     mockSubscriptionUsage();
-    mockLicenseInfo();
   });
 
   afterEach(() => {
@@ -76,7 +75,6 @@ describe('Self-hosted Limits', () => {
       loginAndVisitTranslations(testData);
       mockKeyCreation('plan_key_limit_exceeded');
       mockSubscriptionUsage();
-      mockLicenseInfo();
       tryCreateKey();
       cy.wait('@createKey');
       assertPlanLimitPopoverWithUsageVisible();
@@ -180,24 +178,13 @@ function mockSubscriptionUsage() {
   cy.intercept('GET', '/v2/ee-current-subscription-usage', {
     statusCode: 200,
     body: {
+      isPayAsYouGo: false,
       seats: { current: 5, included: 10, limit: 10 },
       keys: { current: 900, included: 1000, limit: 1000 },
       strings: { current: 0, included: -1, limit: -1 },
       credits: { current: 5000, included: 10000, limit: 10000 },
     },
   }).as('subscriptionUsage');
-}
-
-/**
- * Mocks the license info endpoint
- */
-function mockLicenseInfo() {
-  cy.intercept('GET', '/v2/ee-license/info', {
-    statusCode: 200,
-    body: {
-      isPayAsYouGo: false,
-    },
-  }).as('licenseInfo');
 }
 
 /**

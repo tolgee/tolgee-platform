@@ -1709,6 +1709,7 @@ export interface components {
     };
     CurrentUsageModel: {
       credits: components["schemas"]["CurrentUsageItemModel"];
+      isPayAsYouGo: boolean;
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];

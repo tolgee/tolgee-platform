@@ -16,4 +16,5 @@ open class CurrentUsageModel(
   @Schema(description = "For MT credits, the values are in full credits. Not Cents.")
   val credits: CurrentUsageItemModel,
   val keys: CurrentUsageItemModel,
+  val isPayAsYouGo: Boolean,
 ) : RepresentationModel<CurrentUsageModel>(), Serializable

@@ -66,6 +66,7 @@ class EeSubscriptionUsageControllerTest : AuthorizedControllerTest() {
           keys = CurrentUsageItemModel(current = 0, included = 5000, limit = 5000),
           strings = CurrentUsageItemModel(current = 0, included = -1, limit = -1),
           credits = CurrentUsageItemModel(current = 10000, included = 10000, limit = 10000),
+          isPayAsYouGo = true,
         )
       }
 
@@ -92,6 +93,7 @@ class EeSubscriptionUsageControllerTest : AuthorizedControllerTest() {
               node("included").isEqualTo(5000)
               node("limit").isEqualTo(5000)
             }
+            node("isPayAsYouGo").isEqualTo(true)
           }
 
         val body = this.captor.allValues.single().body
