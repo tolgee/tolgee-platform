@@ -20,9 +20,9 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.glossary.GlossaryTerm
-import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
@@ -45,13 +45,12 @@ class GlossaryTermController(
   private val simpleGlossaryTermWithTranslationsModelAssembler: SimpleGlossaryTermWithTranslationsModelAssembler,
   private val glossaryTermTranslationModelAssembler: GlossaryTermTranslationModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<GlossaryTerm>,
-  private val organizationHolder: OrganizationHolder,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping("/terms")
   @Operation(summary = "Create a new glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_CREATE)
   fun create(
@@ -62,10 +61,6 @@ class GlossaryTermController(
     @RequestBody
     dto: CreateGlossaryTermWithTranslationRequest,
   ): CreateUpdateGlossaryTermResponse {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
     val (term, translation) = glossaryTermService.createWithTranslation(organizationId, glossaryId, dto)
     return CreateUpdateGlossaryTermResponse(
       term = simpleGlossaryTermModelAssembler.toModel(term),
@@ -77,6 +72,7 @@ class GlossaryTermController(
   @Operation(summary = "Batch delete multiple terms")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)
   fun deleteMultiple(
@@ -84,11 +80,6 @@ class GlossaryTermController(
     @PathVariable glossaryId: Long,
     @RequestBody @Valid dto: DeleteMultipleGlossaryTermsRequest,
   ) {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     glossaryTermService.deleteMultiple(organizationId, glossaryId, dto.termIds)
   }
 
@@ -96,6 +87,7 @@ class GlossaryTermController(
   @Operation(summary = "Update glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_UPDATE)
   fun update(
@@ -104,11 +96,6 @@ class GlossaryTermController(
     @PathVariable termId: Long,
     @RequestBody @Valid dto: UpdateGlossaryTermWithTranslationRequest,
   ): CreateUpdateGlossaryTermResponse {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val (term, translation) = glossaryTermService.updateWithTranslation(organizationId, glossaryId, termId, dto)
     return CreateUpdateGlossaryTermResponse(
       term = simpleGlossaryTermModelAssembler.toModel(term),
@@ -120,6 +107,7 @@ class GlossaryTermController(
   @Operation(summary = "Delete glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)
   fun delete(
@@ -127,11 +115,6 @@ class GlossaryTermController(
     @PathVariable glossaryId: Long,
     @PathVariable termId: Long,
   ) {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     glossaryTermService.delete(organizationId, glossaryId, termId)
   }
 
@@ -139,16 +122,12 @@ class GlossaryTermController(
   @Operation(summary = "Get glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @RequiresFeatures(Feature.GLOSSARY)
   fun get(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
     @PathVariable termId: Long,
   ): GlossaryTermModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     return glossaryTermModelAssembler.toModel(glossaryTerm)
   }
@@ -157,6 +136,7 @@ class GlossaryTermController(
   @Operation(summary = "Get all glossary terms")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @RequiresFeatures(Feature.GLOSSARY)
   fun getAll(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
@@ -164,11 +144,6 @@ class GlossaryTermController(
     @RequestParam("search", required = false) search: String?,
     @RequestParam("languageTags", required = false) languageTags: List<String>?,
   ): PagedModel<SimpleGlossaryTermModel> {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val terms = glossaryTermService.findAllPaged(organizationId, glossaryId, pageable, search, languageTags?.toSet())
     return pagedAssembler.toModel(terms, simpleGlossaryTermModelAssembler)
   }
@@ -177,6 +152,7 @@ class GlossaryTermController(
   @Operation(summary = "Get all glossary terms with translations")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @RequiresFeatures(Feature.GLOSSARY)
   fun getAllWithTranslations(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
@@ -184,11 +160,6 @@ class GlossaryTermController(
     @RequestParam("search", required = false) search: String?,
     @RequestParam("languageTags", required = false) languageTags: List<String>?,
   ): PagedModel<SimpleGlossaryTermWithTranslationsModel> {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val terms =
       glossaryTermService.findAllWithTranslationsPaged(
         organizationId,
@@ -204,17 +175,13 @@ class GlossaryTermController(
   @Operation(summary = "Get all glossary terms ids")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @RequiresFeatures(Feature.GLOSSARY)
   fun getAllIds(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
     @RequestParam("search", required = false) search: String?,
     @RequestParam("languageTags", required = false) languageTags: List<String>?,
   ): CollectionModel<Long> {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val terms = glossaryTermService.findAllIds(organizationId, glossaryId, search, languageTags?.toSet())
     return CollectionModel.of(terms)
   }

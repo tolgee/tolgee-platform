@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.userAccount.UserAccountPermissionsFilters
 import io.tolgee.ee.api.v2.hateoas.assemblers.TaskModelAssembler
@@ -23,6 +22,8 @@ import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresFeatures
+import io.tolgee.security.authorization.RequiresOneOfFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.security.SecurityService
@@ -59,7 +60,6 @@ class TaskController(
   private val pagedUserResourcesAssembler: PagedResourcesAssembler<UserAccount>,
   private val taskPerUserReportModelAssembler: TaskPerUserReportModelAssembler,
   private val securityService: SecurityService,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping("")
   @Operation(summary = "Create task")
@@ -67,16 +67,13 @@ class TaskController(
   @AllowApiAccess
   @RequestActivity(ActivityType.TASK_CREATE)
   @OpenApiOrderExtension(1)
+  @RequiresFeatures(Feature.TASKS)
   fun createTask(
     @RequestBody @Valid
     dto: CreateTaskRequest,
     @ParameterObject
     filters: TranslationScopeFilters,
   ): TaskModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.TASKS,
-    )
     val task = taskService.createTask(projectHolder.project.id, dto, filters)
     return taskModelAssembler.toModel(task)
   }
@@ -87,17 +84,13 @@ class TaskController(
   @AllowApiAccess
   @RequestActivity(ActivityType.TASKS_CREATE)
   @OpenApiOrderExtension(2)
+  @RequiresFeatures(Feature.TASKS)
   fun createTasks(
     @RequestBody @Valid
     dto: CreateMultipleTasksRequest,
     @ParameterObject
     filters: TranslationScopeFilters,
   ) {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.TASKS,
-    )
-
     taskService.createMultipleTasks(projectHolder.project.id, dto.tasks, filters)
   }
 
@@ -140,17 +133,13 @@ class TaskController(
   @AllowApiAccess
   @RequestActivity(ActivityType.TASK_UPDATE)
   @OpenApiOrderExtension(5)
+  @RequiresOneOfFeatures(Feature.TASKS, Feature.ORDER_TRANSLATION)
   fun updateTask(
     @PathVariable
     taskNumber: Long,
     @RequestBody @Valid
     dto: UpdateTaskRequest,
   ): TaskModel {
-    enabledFeaturesProvider.checkOneOfFeaturesEnabled(
-      projectHolder.project.organizationOwnerId,
-      listOf(Feature.TASKS, Feature.ORDER_TRANSLATION),
-    )
-
     val task = taskService.updateTask(projectHolder.project.id, taskNumber, dto)
     return taskModelAssembler.toModel(task)
   }
@@ -206,14 +195,11 @@ class TaskController(
   @AllowApiAccess
   @RequestActivity(ActivityType.TASK_REOPEN)
   @OpenApiOrderExtension(8)
+  @RequiresOneOfFeatures(Feature.TASKS, Feature.ORDER_TRANSLATION)
   fun reopenTask(
     @PathVariable
     taskNumber: Long,
   ): TaskModel {
-    enabledFeaturesProvider.checkOneOfFeaturesEnabled(
-      projectHolder.project.organizationOwnerId,
-      listOf(Feature.TASKS, Feature.ORDER_TRANSLATION),
-    )
     val task = taskService.setTaskState(projectHolder.project.id, taskNumber, TaskState.IN_PROGRESS)
     return taskModelAssembler.toModel(task)
   }

@@ -12,15 +12,14 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.ee.service.glossary.GlossaryTermTranslationService
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @RequestMapping(
   "/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}/terms/{termId:[0-9]+}/translations",
@@ -30,13 +29,12 @@ class GlossaryTermTranslationController(
   private val glossaryTermService: GlossaryTermService,
   private val glossaryTermTranslationService: GlossaryTermTranslationService,
   private val modelAssembler: GlossaryTermTranslationModelAssembler,
-  private val organizationHolder: OrganizationHolder,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping()
   @Operation(summary = "Set a new glossary term translation for language")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_TRANSLATION_UPDATE)
   fun update(
@@ -49,11 +47,6 @@ class GlossaryTermTranslationController(
     @RequestBody
     dto: UpdateGlossaryTermTranslationRequest,
   ): GlossaryTermTranslationModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     val translation = glossaryTermTranslationService.updateOrCreate(glossaryTerm, dto)
     return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(
@@ -65,6 +58,7 @@ class GlossaryTermTranslationController(
   @Operation(summary = "Get glossary term translation for language")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
+  @RequiresFeatures(Feature.GLOSSARY)
   fun get(
     @PathVariable
     organizationId: Long,
@@ -75,11 +69,6 @@ class GlossaryTermTranslationController(
     @PathVariable
     languageTag: String,
   ): GlossaryTermTranslationModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationHolder.organization.id,
-      Feature.GLOSSARY,
-    )
-
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
     val translation = glossaryTermTranslationService.find(glossaryTerm, languageTag)
     return translation?.let { modelAssembler.toModel(translation) } ?: GlossaryTermTranslationModel.defaultValue(
