@@ -70,8 +70,9 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
     }
   }
 
+  // Renamed from getScreenshotFile to avoid Spring bean introspection conflict
   @Test
-  fun getScreenshotFile() {
+  fun performGetScreenshotFile() {
     executeInNewTransaction {
       val base = dbPopulator.createBase()
       val project = base.project
