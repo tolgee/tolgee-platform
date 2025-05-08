@@ -138,9 +138,10 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
     }
   }
 
+  // Renamed from getScreenshotFile to avoid Spring bean introspection conflict
   @Test
   @ProjectJWTAuthTestMethod
-  fun getScreenshotFile() {
+  fun performGetScreenshotFile() {
     val screenshot =
       executeInNewTransaction {
         val key = keyService.create(project, CreateKeyDto("test"))
