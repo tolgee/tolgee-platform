@@ -26,6 +26,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           type = LLMProviderType.OPENAI,
           pricePerMillionInput = 2.0,
           pricePerMillionOutput = 2.0,
+          apiUrl = "http://test.com"
         ),
       )
     internalProperties.fakeLlmProviders = true
@@ -124,6 +125,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         keyId = testData.keys.first().self.id,
         targetLanguageId = testData.czech.self.id,
         provider = "default",
+        options = null
       ),
     ).andIsOk.andAssertThatJson {
       node("prompt").isString.contains("Hi LLM")
