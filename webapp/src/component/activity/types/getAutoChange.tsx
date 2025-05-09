@@ -2,6 +2,8 @@ import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { AutoTranslationIcon } from 'tg.component/AutoTranslationIcon';
 import { DiffValue } from '../types';
+import { getServiceName } from 'tg.views/projects/languages/MachineTranslation/getServiceName';
+import { ServiceType } from 'tg.views/projects/languages/MachineTranslation/types';
 
 const StyledWrapper = styled('div')`
   & > div {
@@ -18,14 +20,16 @@ const StyledRemoved = styled(StyledWrapper)`
 `;
 
 const getContent = (auto: boolean | string) => {
-  const provider = typeof auto === 'string' ? auto : undefined;
+  const provider = typeof auto === 'string' ? (auto as ServiceType) : undefined;
+  const providerName = provider && getServiceName(provider);
+
   return (
     <>
       {provider ? (
         <T
           keyName="translations_auto_translated_provider"
           params={{
-            provider: provider,
+            provider: providerName,
           }}
         />
       ) : (
