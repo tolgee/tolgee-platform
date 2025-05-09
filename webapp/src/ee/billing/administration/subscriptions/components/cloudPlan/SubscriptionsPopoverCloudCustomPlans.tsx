@@ -1,13 +1,13 @@
 import React, { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { SubscriptionsCustomPlanItem } from './SubscriptionsCustomPlanItem';
 import { SubscriptionsPopoverCustomPlans } from '../generic/SubscriptionsPopoverCustomPlans';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { SubscriptionsCloudCustomPlanItem } from './SubscriptionsCloudCustomPlanItem';
 
 type OrganizationCloudCustomPlansProps = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
 };
+
 
 export const SubscriptionsPopoverCloudCustomPlans: FC<
   OrganizationCloudCustomPlansProps
@@ -26,12 +26,9 @@ export const SubscriptionsPopoverCloudCustomPlans: FC<
     <SubscriptionsPopoverCustomPlans
       getLoadable={getLoadable}
       renderItem={(plan) => (
-        <SubscriptionsCustomPlanItem
-          organizationId={item.organization.id}
+        <SubscriptionsCloudCustomPlanItem
+          organizationAndSubscription={item}
           plan={plan}
-          editLink={`${LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
-            [PARAMS.PLAN_ID]: plan.id,
-          })}?editingForOrganizationId=${item.organization.id}`}
         />
       )}
     />

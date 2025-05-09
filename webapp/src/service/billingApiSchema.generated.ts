@@ -69,6 +69,10 @@ export interface paths {
     /** Assigns a self-hosted plan to an organization. If plan is free, it's assigned as active plan.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
     put: operations["assignSelfHostedPlan"];
   };
+  "/v2/administration/organizations/{organizationId}/billing/unassign-cloud-plan/{planId}": {
+    /** Make plan invisible for organization when not subscribed to. Or unassign the plan if is free or trial. If plan is registered in stripe, you will have to cancel it via stripe and then unassign it when required. */
+    put: operations["unassignCloudPlan"];
+  };
   "/v2/administration/organizations/{organizationId}/billing/update-trial-end-date": {
     put: operations["updateTrialEndDate"];
   };
@@ -785,7 +789,8 @@ export interface components {
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
-        | "instance_not_using_license_key";
+        | "instance_not_using_license_key"
+        | "invalid_path";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -2688,6 +2693,51 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["AssignSelfHostedPlanRequest"];
+      };
+    };
+  };
+  /** Make plan invisible for organization when not subscribed to. Or unassign the plan if is free or trial. If plan is registered in stripe, you will have to cancel it via stripe and then unassign it when required. */
+  unassignCloudPlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };

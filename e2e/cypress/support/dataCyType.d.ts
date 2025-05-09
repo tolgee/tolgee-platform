@@ -24,6 +24,7 @@ declare namespace DataCy {
         "administration-billing-edit-custom-plan-button" |
         "administration-billing-exclusive-plan-chip" |
         "administration-billing-trial-badge" |
+        "administration-billing-unassign-custom-plan-button" |
         "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-keys" |
         "administration-cloud-plan-field-included-mt-credits" |
