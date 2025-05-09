@@ -164,21 +164,6 @@ class PromptFragmentsService {
 
     result.add(
       Variable(
-        "otherTranslations",
-        """
-        {{#each other}}
-        {{#if this.translation}}
-        To {{this.language}} it's translated as "{{this.translation}}"
-        {{/if}}
-        {{/each}}
-        """.trimIndent(),
-        type = PromptVariableType.FRAGMENT,
-        option = BasicPromptOption.OTHER_TRANSLATIONS,
-      ),
-    )
-
-    result.add(
-      Variable(
         "translateJson",
         """
         Return translation output and also describe a context in a few words.
