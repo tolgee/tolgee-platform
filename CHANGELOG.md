@@ -1,3 +1,10 @@
+## [3.118.1](https://github.com/tolgee/tolgee-platform/compare/v3.118.0...v3.118.1) (2025-05-09)
+
+
+### Bug Fixes
+
+* make S3 content storage path nullable and handle default value ([#3063](https://github.com/tolgee/tolgee-platform/issues/3063)) ([f5cb5d7](https://github.com/tolgee/tolgee-platform/commit/f5cb5d787b5e93a3493d11d2202b56714cbe656a))
+
 # [3.118.0](https://github.com/tolgee/tolgee-platform/compare/v3.117.0...v3.118.0) (2025-05-07)
 
 
