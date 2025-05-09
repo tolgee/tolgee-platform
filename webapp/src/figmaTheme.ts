@@ -160,6 +160,7 @@ export const tolgeePalette = {
       dark: '#a52c55',
       light: '#ef6694',
       contrast: '#ffffff',
+      disabled: '#ec407a4d',
       _states: {
         hover: '#ec407a0a',
         selected: '#ec407a14',
@@ -173,6 +174,7 @@ export const tolgeePalette = {
       dark: '#007a6b',
       light: '#33bfae',
       contrast: '#ffffff',
+      disabled: '#00af9a4d',
       _states: {
         hover: '#00af9a0a',
         selected: '#00af9a14',
@@ -390,13 +392,13 @@ export const tolgeePalette = {
         importantLinkHover: tolgeeColors['pink']['600'],
       },
       progressbar: {
+        background: tolgeeColors['grey']['50'],
         pricing: {
           low: tolgeeColors['red']['400'],
           over: tolgeeColors['yellow']['500'],
           overForbidden: tolgeeColors['red']['800'],
           sufficient: tolgeeColors['teal']['500'],
         },
-        background: tolgeeColors['grey']['50'],
         task: {
           inProgress: tolgeeColors['lightBlue']['500'],
           done: tolgeeColors['green']['600'],
@@ -474,6 +476,7 @@ export const tolgeePalette = {
       dark: '#a84768',
       light: '#f384aa',
       contrast: '#000000de',
+      disabled: '#f066954d',
       _states: {
         hover: '#f0669514',
         selected: '#f0669529',
@@ -487,6 +490,7 @@ export const tolgeePalette = {
       dark: '#6ba095',
       light: '#adeade',
       contrast: '#000000de',
+      disabled: '#99e5d64d',
       _states: {
         hover: '#99e5d614',
         selected: '#99e5d629',
@@ -704,13 +708,13 @@ export const tolgeePalette = {
         importantLinkHover: tolgeeColors['grey']['50'],
       },
       progressbar: {
+        background: tolgeeColors['grey']['700'],
         pricing: {
           low: tolgeeColors['red']['400'],
           over: tolgeeColors['yellow']['500'],
           overForbidden: tolgeeColors['red']['600'],
           sufficient: tolgeeColors['teal']['400'],
         },
-        background: tolgeeColors['grey']['700'],
         task: {
           inProgress: tolgeeColors['lightBlue']['700'],
           done: tolgeeColors['green']['600'],

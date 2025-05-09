@@ -11,13 +11,7 @@ import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.TolgeeMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.*
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
@@ -169,7 +163,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var baiduMachineTranslationProperties: BaiduMachineTranslationProperties
 
   @Autowired
-  lateinit var tolgeeMachineTranslationProperties: TolgeeMachineTranslationProperties
+  lateinit var llmProperties: LLMProperties
 
   @Autowired
   open lateinit var internalProperties: InternalProperties
@@ -264,8 +258,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     baiduMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.BAIDU)
     baiduMachineTranslationProperties.appId = "dummy"
     baiduMachineTranslationProperties.appSecret = "dummy"
-    tolgeeMachineTranslationProperties.url = "http://localhost:8081"
-    tolgeeMachineTranslationProperties.defaultEnabled = enabledServices.contains(MtServiceType.TOLGEE)
     internalProperties.fakeMtProviders = false
   }
 

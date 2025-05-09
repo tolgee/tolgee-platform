@@ -5,7 +5,7 @@ import { TopBar } from './TopBar/TopBar';
 import { TopBanner } from './TopBanner/TopBanner';
 import { TopSpacer } from './TopSpacer';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { RightSidePanel } from './RightSidePanel';
+import { RightSideLayout } from './RightSideLayout';
 
 const StyledMain = styled(Box)`
   display: grid;
@@ -37,6 +37,7 @@ type Props = {
   isAdminAccess?: boolean;
   fixedContent?: React.ReactNode;
   hideQuickStart?: boolean;
+  rightPanelContent?: (width: number) => React.ReactNode;
 };
 
 export const DashboardPage: FunctionComponent<Props> = ({
@@ -44,14 +45,13 @@ export const DashboardPage: FunctionComponent<Props> = ({
   isAdminAccess = false,
   fixedContent,
   hideQuickStart,
+  rightPanelContent,
 }) => {
   const isDebuggingCustomerAccount = useGlobalContext(
     (c) => Boolean(c.auth.jwtToken) && Boolean(c.auth.adminToken)
   );
 
-  const rightPanelWidth = useGlobalContext((c) =>
-    hideQuickStart ? 0 : c.layout.rightPanelWidth
-  );
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
 
   return (
     <>
@@ -80,7 +80,10 @@ export const DashboardPage: FunctionComponent<Props> = ({
             {children}
           </StyledMain>
         </StyledHorizontal>
-        {!hideQuickStart && <RightSidePanel />}
+        <RightSideLayout
+          rightPanelContent={rightPanelContent}
+          hideQuickStart={hideQuickStart}
+        />
       </Box>
     </>
   );
