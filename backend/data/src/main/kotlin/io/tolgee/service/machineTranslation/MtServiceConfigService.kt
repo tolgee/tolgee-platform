@@ -71,7 +71,11 @@ class MtServiceConfigService(
       services.asSequence()
         .sortedBy { it.key.order }
         .sortedByDescending { it.value.first?.defaultPrimary ?: true }
-        .filter { it.value.first?.defaultEnabled ?: true && it.value.second.isEnabled && language.isSupportedBy(it.key) }
+        .filter {
+          it.value.first?.defaultEnabled ?: true && it.value.second.isEnabled && language.isSupportedBy(
+          it.key
+        )
+        }
         .map { it.key }
         .map { MtServiceInfo(it, null) }
         .toMutableList()
