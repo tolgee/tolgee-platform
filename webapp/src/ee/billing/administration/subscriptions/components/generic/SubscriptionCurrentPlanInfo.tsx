@@ -20,6 +20,7 @@ type SubscriptionCurrentPlanInfoProps = {
     trialEnd?: number;
   };
   editButton: ReactElement;
+  cancelButton?: ReactElement;
 };
 
 export const SubscriptionCurrentPlanInfo: FC<
@@ -40,6 +41,7 @@ export const SubscriptionCurrentPlanInfo: FC<
           {props.subscription.plan.name}{' '}
         </Typography>
         {props.editButton}
+        {props.cancelButton}
         <Box ml={1}></Box>
         <PlanPublicChip isPublic={props.subscription.plan.public} />
       </Box>

@@ -8,6 +8,7 @@ import { SubscriptionsDetailPopover } from '../generic/SubscriptionsDetailPopove
 import { SubscriptionCurrentPlanInfo } from '../generic/SubscriptionCurrentPlanInfo';
 import { SubscriptionsCloudEditPlanButton } from './SubscriptionsCloudEditPlanButton';
 import { SubscriptionsPopoverCreateCustomPlanButton } from '../generic/SubscriptionsPopoverCreateCustomPlanButton';
+import { SubscriptionCloudCancelPlanButton } from './SubscriptionCloudCancelPlanButton';
 
 type Props = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
@@ -27,6 +28,7 @@ export const SubscriptionCloudPlanPopover: FC<Props> = ({
           <SubscriptionCurrentPlanInfo
             subscription={item.cloudSubscription}
             editButton={<SubscriptionsCloudEditPlanButton item={item} />}
+            cancelButton={<SubscriptionCloudCancelPlanButton item={item} />}
           />
           <SubscriptionsPopoverCloudCustomPlans item={item} />
           <Box display="flex" mt={3}>

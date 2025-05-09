@@ -15,6 +15,7 @@ declare namespace DataCy {
         "activity-compact-detail-button" |
         "activity-detail" |
         "activity-detail-dialog" |
+        "admin-subscriptions-cloud-cancel-plan-button" |
         "administration-access-message" |
         "administration-assign-plan-button" |
         "administration-assign-plan-dialog-not-trial-not-free-alert" |
