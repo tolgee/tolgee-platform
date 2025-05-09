@@ -16,9 +16,7 @@ export const useServiceImg = () => {
       case 'BAIDU':
         return `/images/providers/baidu-icon.svg`;
       case 'PROMPT':
-        return contextPresent
-          ? `/images/providers/tolgee-logo-${palette.mode}-in-context.svg`
-          : `/images/providers/tolgee-logo-${palette.mode}.svg`;
+        return `/images/providers/llm-logo-${palette.mode}.svg`;
       default:
         return undefined;
     }
