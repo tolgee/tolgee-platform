@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.builders
 import io.tolgee.development.testDataBuilder.FT
 
 import io.tolgee.model.*
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import org.springframework.core.io.ClassPathResource

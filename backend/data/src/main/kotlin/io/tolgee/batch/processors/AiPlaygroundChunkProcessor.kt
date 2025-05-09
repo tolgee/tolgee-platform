@@ -13,6 +13,8 @@ import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.exceptions.*
+import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
+import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
 import io.tolgee.model.batch.params.MachineTranslationJobParams
 import io.tolgee.model.enums.LLMProviderPriority
 import io.tolgee.service.AiPlaygroundResultService
@@ -134,9 +136,9 @@ class AiPlaygroundChunkProcessor(
           increaseFactor = 1,
           maxRetries = -1,
         )
-      } catch (e: PlanTranslationLimitExceeded) {
+      } catch (e: PlanLimitExceededStringsException) {
         throw FailedDontRequeueException(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED, successfulTargets, e)
-      } catch (e: TranslationSpendingLimitExceeded) {
+      } catch (e: PlanSpendingLimitExceededStringsException) {
         throw FailedDontRequeueException(Message.TRANSLATION_SPENDING_LIMIT_EXCEEDED, successfulTargets, e)
       } catch (e: FormalityNotSupportedException) {
         throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
