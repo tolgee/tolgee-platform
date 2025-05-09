@@ -8,6 +8,7 @@ import { SubscriptionsPopoverSelfHostedCustomPlans } from './SubscriptionsPopove
 import { Box } from '@mui/material';
 import { SubscriptionsPopoverCreateCustomPlanButton } from '../generic/SubscriptionsPopoverCreateCustomPlanButton';
 import { LINKS } from 'tg.constants/links';
+import { SubscriptionSelfHostedCancelPlanButton } from './SubscriptionSelfHostedCancelPlanButton';
 
 type SubscriptionsSelfHostedPopoverProps = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
@@ -22,14 +23,19 @@ export const SubscriptionsSelfHostedPopover: FC<
     <SubscriptionsDetailPopover
       popoverContent={
         <>
-          {item.selfHostedSubscriptions.map((i) => (
+          {item.selfHostedSubscriptions.map((subscription) => (
             <SubscriptionCurrentPlanInfo
-              key={i.id}
-              subscription={i}
+              key={subscription.id}
+              subscription={subscription}
               editButton={
                 <SubscriptionsSelfHostedEditPlanButton
-                  subscription={i}
+                  subscription={subscription}
                   organizationId={item.organization.id}
+                />
+              }
+              cancelButton={
+                <SubscriptionSelfHostedCancelPlanButton
+                  subscription={subscription}
                 />
               }
             />

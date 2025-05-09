@@ -50,6 +50,10 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
     }
   }
 
+  const customCompareFunction = (prompt: string, label: string) => {
+    return label.toLowerCase().includes(prompt.toLocaleLowerCase());
+  };
+
   return (
     <SearchSelect
       dataCy="administration-plan-selector"
@@ -57,6 +61,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
       items={selectItems}
       value={value}
       onChange={handleChange}
+      compareFunction={customCompareFunction}
     />
   );
 };

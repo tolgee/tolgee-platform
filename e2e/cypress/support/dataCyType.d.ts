@@ -15,6 +15,8 @@ declare namespace DataCy {
         "activity-compact-detail-button" |
         "activity-detail" |
         "activity-detail-dialog" |
+        "admin-subscriptions-cloud-cancel-plan-button" |
+        "admin-subscriptions-self-hosted-cancel-plan-button" |
         "administration-access-message" |
         "administration-assign-plan-button" |
         "administration-assign-plan-dialog-not-trial-not-free-alert" |
@@ -24,6 +26,7 @@ declare namespace DataCy {
         "administration-billing-edit-custom-plan-button" |
         "administration-billing-exclusive-plan-chip" |
         "administration-billing-trial-badge" |
+        "administration-billing-unassign-custom-plan-button" |
         "administration-cloud-plan-field-free" |
         "administration-cloud-plan-field-included-keys" |
         "administration-cloud-plan-field-included-mt-credits" |
@@ -562,6 +565,7 @@ declare namespace DataCy {
         "storage-subtitle" |
         "submenu-item" |
         "subscribe-cancels-trial-plan-tooltip" |
+        "subscriptions-cloud-popover-active-plan-name" |
         "subscriptions-trial-alert" |
         "subscriptions-trial-alert-reaching-the-limit" |
         "tag-autocomplete-input" |
