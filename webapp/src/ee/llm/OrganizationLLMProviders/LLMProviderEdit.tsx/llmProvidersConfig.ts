@@ -1,4 +1,4 @@
-import { TFnType } from '@tolgee/react';
+import { TranslateFunction } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
 import * as Yup from 'yup';
 
@@ -20,7 +20,7 @@ type ProvidersConfig = Record<
 >;
 
 export const llmProvidersDefaults = (
-  t: TFnType
+  t: TranslateFunction
 ): Partial<Record<keyof LLMProviderModel, ProviderOptions>> => ({
   name: {
     label: t('llm_provider_form_name'),
@@ -33,7 +33,7 @@ export const llmProvidersDefaults = (
   deployment: { label: t('llm_provider_form_deployment') },
 });
 
-export const llmProvidersConfig = (t: TFnType): ProvidersConfig => {
+export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
   return {
     OPENAI: {
       name: {},
@@ -63,7 +63,10 @@ export const llmProvidersConfig = (t: TFnType): ProvidersConfig => {
   };
 };
 
-export const getValidationSchema = (type: LLMProviderType, t: TFnType) => {
+export const getValidationSchema = (
+  type: LLMProviderType,
+  t: TranslateFunction
+) => {
   const fields: Record<string, Yup.AnySchema> = {};
   Object.entries(llmProvidersConfig(t)[type]).forEach(([name, o]) => {
     const options: ProviderOptions = { ...llmProvidersDefaults(t)[name], ...o };
@@ -81,7 +84,7 @@ export const getValidationSchema = (type: LLMProviderType, t: TFnType) => {
 
 export const getInitialValues = (
   type: LLMProviderType,
-  t: TFnType,
+  t: TranslateFunction,
   existingData?: LLMProviderModel
 ) => {
   const result: LLMProviderRequest = {

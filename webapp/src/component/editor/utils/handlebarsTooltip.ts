@@ -47,7 +47,7 @@ export const handlebarsTooltip = (
               ? t('handlebars_editor_variable_empty')
               : variable.value
             : unknownVariableMessageRef?.current ??
-              t('handlebars_editor_variable_unknown');
+              t('ai_prompt_editor_unknown_variable');
 
           let onInsert: (() => void) | undefined = undefined;
 
