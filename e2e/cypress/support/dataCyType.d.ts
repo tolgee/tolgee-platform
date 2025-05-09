@@ -16,6 +16,7 @@ declare namespace DataCy {
         "activity-detail" |
         "activity-detail-dialog" |
         "admin-subscriptions-cloud-cancel-plan-button" |
+        "admin-subscriptions-self-hosted-cancel-plan-button" |
         "administration-access-message" |
         "administration-assign-plan-button" |
         "administration-assign-plan-dialog-not-trial-not-free-alert" |
@@ -564,6 +565,7 @@ declare namespace DataCy {
         "storage-subtitle" |
         "submenu-item" |
         "subscribe-cancels-trial-plan-tooltip" |
+        "subscriptions-cloud-popover-active-plan-name" |
         "subscriptions-trial-alert" |
         "subscriptions-trial-alert-reaching-the-limit" |
         "tag-autocomplete-input" |

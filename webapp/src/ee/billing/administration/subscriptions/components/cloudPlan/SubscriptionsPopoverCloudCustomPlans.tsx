@@ -8,7 +8,6 @@ type OrganizationCloudCustomPlansProps = {
   item: components['schemas']['OrganizationWithSubscriptionsModel'];
 };
 
-
 export const SubscriptionsPopoverCloudCustomPlans: FC<
   OrganizationCloudCustomPlansProps
 > = ({ item }) => {

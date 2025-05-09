@@ -45,7 +45,7 @@ export const SubscriptionSelfHostedCancelPlanButton: FC<
         >
           <IconButton
             onClick={onCancel}
-            data-cy="admin-subscriptions-cloud-cancel-plan-button"
+            data-cy="admin-subscriptions-self-hosted-cancel-plan-button"
           >
             <XCircle />
           </IconButton>

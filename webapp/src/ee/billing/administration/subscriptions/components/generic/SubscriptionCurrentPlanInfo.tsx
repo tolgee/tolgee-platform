@@ -37,7 +37,11 @@ export const SubscriptionCurrentPlanInfo: FC<
   return (
     <Box data-cy="administration-subscriptions-current-plan-info" mb={2}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Typography variant={'h3'} sx={{ display: 'inline', fontSize: '20px' }}>
+        <Typography
+          variant={'h3'}
+          sx={{ display: 'inline', fontSize: '20px' }}
+          data-cy="subscriptions-cloud-popover-active-plan-name"
+        >
           {props.subscription.plan.name}{' '}
         </Typography>
         {props.editButton}
