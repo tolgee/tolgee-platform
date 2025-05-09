@@ -302,7 +302,7 @@ export interface paths {
     get: operations["getAllWithStatistics"];
   };
   "/v2/projects/{projectId}": {
-    get: operations["get_4"];
+    get: operations["get_8"];
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
@@ -348,10 +348,10 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_3"];
+    get: operations["list"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
-    get: operations["get_12"];
+    get: operations["get_6"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}/cancel": {
     /** Stops batch operation if possible. */
@@ -362,27 +362,27 @@ export interface paths {
     post: operations["store_2"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
-    get: operations["list_2"];
-    post: operations["create_6"];
+    get: operations["list_4"];
+    post: operations["create_10"];
   };
   "/v2/projects/{projectId}/content-delivery-configs/{id}": {
-    get: operations["get_9"];
-    put: operations["update_4"];
+    get: operations["get_17"];
+    put: operations["update_6"];
     /** Immediately publishes content to the configured Content Delivery */
     post: operations["post"];
-    delete: operations["delete_7"];
+    delete: operations["delete_9"];
   };
   "/v2/projects/{projectId}/content-storages": {
-    get: operations["list_1"];
-    post: operations["create_5"];
+    get: operations["list_3"];
+    post: operations["create_9"];
   };
   "/v2/projects/{projectId}/content-storages/test": {
     post: operations["test_1"];
   };
   "/v2/projects/{projectId}/content-storages/{contentStorageId}": {
-    get: operations["get_8"];
-    put: operations["update_3"];
-    delete: operations["delete_6"];
+    get: operations["get_16"];
+    put: operations["update_5"];
+    delete: operations["delete_8"];
   };
   "/v2/projects/{projectId}/content-storages/{id}/test": {
     /** Tests existing Content Storage with new configuration. (Uses existing secrets, if nulls provided) */
@@ -405,13 +405,13 @@ export interface paths {
   };
   "/v2/projects/{projectId}/import-settings": {
     /** Returns import settings for the authenticated user and the project. */
-    get: operations["get_10"];
+    get: operations["get_4"];
     /** Stores import settings for the authenticated user and the project. */
     put: operations["store"];
   };
   "/v2/projects/{projectId}/import/all-namespaces": {
     /** Returns all existing and imported namespaces */
-    get: operations["getAllNamespaces_2"];
+    get: operations["getAllNamespaces"];
   };
   "/v2/projects/{projectId}/import/apply": {
     /** Imports the data prepared in previous step */
@@ -474,13 +474,13 @@ export interface paths {
     put: operations["inviteUser"];
   };
   "/v2/projects/{projectId}/keys": {
-    get: operations["getAll_1"];
-    post: operations["create_2"];
+    get: operations["getAll_7"];
+    post: operations["create_6"];
     /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
-    delete: operations["delete_4"];
+    delete: operations["delete_6"];
   };
   "/v2/projects/{projectId}/keys/create": {
-    post: operations["create_1"];
+    post: operations["create_5"];
   };
   "/v2/projects/{projectId}/keys/import": {
     /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
@@ -507,10 +507,10 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
-    delete: operations["delete_2"];
+    delete: operations["delete_4"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
-    get: operations["get_6"];
+    get: operations["get_14"];
     put: operations["edit"];
   };
   "/v2/projects/{projectId}/keys/{id}/big-meta": {
@@ -554,11 +554,11 @@ export interface paths {
     get: operations["getLanguagePromptCustomizations"];
   };
   "/v2/projects/{projectId}/languages": {
-    get: operations["getAll_7"];
+    get: operations["getAll_5"];
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_16"];
+    get: operations["get_12"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
@@ -592,10 +592,10 @@ export interface paths {
     get: operations["getByName"];
   };
   "/v2/projects/{projectId}/namespaces": {
-    get: operations["getAllNamespaces"];
+    get: operations["getAllNamespaces_2"];
   };
   "/v2/projects/{projectId}/namespaces/{id}": {
-    put: operations["update_1"];
+    put: operations["update_3"];
   };
   "/v2/projects/{projectId}/per-language-auto-translation-settings": {
     get: operations["getPerLanguageAutoTranslationSettings"];
@@ -679,7 +679,7 @@ export interface paths {
     put: operations["executeComplexTagOperation"];
   };
   "/v2/projects/{projectId}/tags": {
-    get: operations["getAll_3"];
+    get: operations["getAll_1"];
   };
   "/v2/projects/{projectId}/tasks": {
     get: operations["getTasks_1"];
@@ -747,7 +747,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/create-comment": {
     /** Creates a translation comment. Empty translation is stored, when not exists. */
-    post: operations["create_9"];
+    post: operations["create_3"];
   };
   "/v2/projects/{projectId}/translations/select-all": {
     /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
@@ -759,13 +759,13 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     /** Returns translation comments of translation */
-    get: operations["getAll_5"];
-    post: operations["create_7"];
+    get: operations["getAll_3"];
+    post: operations["create_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_14"];
-    put: operations["update_5"];
-    delete: operations["delete_8"];
+    get: operations["get_10"];
+    put: operations["update_1"];
+    delete: operations["delete_2"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}/set-state/{state}": {
     put: operations["setState"];
@@ -808,11 +808,11 @@ export interface paths {
     put: operations["setUsersPermissions_1"];
   };
   "/v2/projects/{projectId}/webhook-configs": {
-    get: operations["list"];
+    get: operations["list_2"];
     post: operations["create"];
   };
   "/v2/projects/{projectId}/webhook-configs/{id}": {
-    get: operations["get_5"];
+    get: operations["get_9"];
     put: operations["update"];
     delete: operations["delete_1"];
   };
@@ -2198,7 +2198,15 @@ export interface components {
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
-        | "instance_not_using_license_key";
+        | "instance_not_using_license_key"
+        | "invalid_path"
+        | "llm_provider_not_found"
+        | "llm_provider_error"
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error"
+        | "llm_rate_limited"
+        | "llm_provider_timeout";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4052,6 +4060,7 @@ export interface components {
       type: "FRAGMENT" | "OBJECT" | "STRING";
       value?: string;
     };
+    /** @description Modified fields */
     PropertyModification: {
       new?: { [key: string]: unknown };
       old?: { [key: string]: unknown };
@@ -4324,6 +4333,7 @@ export interface components {
       contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
       endpoint: string;
+      /** @description Specifies an optional subfolder structure within s3 bucket to which content will be stored */
       path: string;
       secretKey?: string;
       signingRegion: string;
@@ -4523,6 +4533,7 @@ export interface components {
       name: string;
       slug?: string;
     };
+    /** @description User who created the comment */
     SimpleUserAccountModel: {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
@@ -4890,7 +4901,15 @@ export interface components {
         | "plan_key_limit_exceeded"
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
-        | "instance_not_using_license_key";
+        | "instance_not_using_license_key"
+        | "invalid_path"
+        | "llm_provider_not_found"
+        | "llm_provider_error"
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error"
+        | "llm_rate_limited"
+        | "llm_provider_timeout";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -4952,7 +4971,6 @@ export interface components {
       keyIds: number[];
       tags: string[];
     };
-    /** @description Tags of key */
     TagModel: {
       /** Format: int64 */
       id: number;
@@ -5093,10 +5111,6 @@ export interface components {
       similarity: number;
       targetText: string;
     };
-    /**
-     * @description Translations object containing values updated in this request
-     * @example [object Object]
-     */
     TranslationModel: {
       /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
@@ -9800,7 +9814,7 @@ export interface operations {
       };
     };
   };
-  get_4: {
+  get_8: {
     parameters: {
       path: {
         projectId: number;
@@ -10607,7 +10621,7 @@ export interface operations {
       };
     };
   };
-  list_3: {
+  list: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -10662,7 +10676,7 @@ export interface operations {
       };
     };
   };
-  get_12: {
+  get_6: {
     parameters: {
       path: {
         id: number;
@@ -10804,7 +10818,7 @@ export interface operations {
       };
     };
   };
-  list_2: {
+  list_4: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -10859,7 +10873,7 @@ export interface operations {
       };
     };
   };
-  create_6: {
+  create_10: {
     parameters: {
       path: {
         projectId: number;
@@ -10911,7 +10925,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_17: {
     parameters: {
       path: {
         id: number;
@@ -10959,7 +10973,7 @@ export interface operations {
       };
     };
   };
-  update_4: {
+  update_6: {
     parameters: {
       path: {
         id: number;
@@ -11057,7 +11071,7 @@ export interface operations {
       };
     };
   };
-  delete_7: {
+  delete_9: {
     parameters: {
       path: {
         id: number;
@@ -11101,7 +11115,7 @@ export interface operations {
       };
     };
   };
-  list_1: {
+  list_3: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -11156,7 +11170,7 @@ export interface operations {
       };
     };
   };
-  create_5: {
+  create_9: {
     parameters: {
       path: {
         projectId: number;
@@ -11260,7 +11274,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_16: {
     parameters: {
       path: {
         contentStorageId: number;
@@ -11308,7 +11322,7 @@ export interface operations {
       };
     };
   };
-  update_3: {
+  update_5: {
     parameters: {
       path: {
         contentStorageId: number;
@@ -11361,7 +11375,7 @@ export interface operations {
       };
     };
   };
-  delete_6: {
+  delete_8: {
     parameters: {
       path: {
         contentStorageId: number;
@@ -11828,7 +11842,7 @@ export interface operations {
     };
   };
   /** Returns import settings for the authenticated user and the project. */
-  get_10: {
+  get_4: {
     parameters: {
       path: {
         projectId: number;
@@ -11929,7 +11943,7 @@ export interface operations {
     };
   };
   /** Returns all existing and imported namespaces */
-  getAllNamespaces_2: {
+  getAllNamespaces: {
     parameters: {
       path: {
         projectId: number;
@@ -12768,7 +12782,7 @@ export interface operations {
       };
     };
   };
-  getAll_1: {
+  getAll_7: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -12823,7 +12837,7 @@ export interface operations {
       };
     };
   };
-  create_2: {
+  create_6: {
     parameters: {
       path: {
         projectId: number;
@@ -12876,7 +12890,7 @@ export interface operations {
     };
   };
   /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
-  delete_4: {
+  delete_6: {
     parameters: {
       path: {
         projectId: number;
@@ -12924,7 +12938,7 @@ export interface operations {
       };
     };
   };
-  create_1: {
+  create_5: {
     parameters: {
       path: {
         projectId: number;
@@ -13313,7 +13327,7 @@ export interface operations {
       };
     };
   };
-  delete_2: {
+  delete_4: {
     parameters: {
       path: {
         ids: number[];
@@ -13357,7 +13371,7 @@ export interface operations {
       };
     };
   };
-  get_6: {
+  get_14: {
     parameters: {
       path: {
         id: number;
@@ -14019,7 +14033,7 @@ export interface operations {
       };
     };
   };
-  getAll_7: {
+  getAll_5: {
     parameters: {
       path: {
         projectId: number;
@@ -14130,7 +14144,7 @@ export interface operations {
       };
     };
   };
-  get_16: {
+  get_12: {
     parameters: {
       path: {
         languageId: number;
@@ -14715,7 +14729,7 @@ export interface operations {
       };
     };
   };
-  getAllNamespaces: {
+  getAllNamespaces_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -14771,7 +14785,7 @@ export interface operations {
       };
     };
   };
-  update_1: {
+  update_3: {
     parameters: {
       path: {
         id: number;
@@ -16211,7 +16225,7 @@ export interface operations {
       };
     };
   };
-  getAll_3: {
+  getAll_1: {
     parameters: {
       query: {
         search?: string;
@@ -17512,7 +17526,7 @@ export interface operations {
     };
   };
   /** Creates a translation comment. Empty translation is stored, when not exists. */
-  create_9: {
+  create_3: {
     parameters: {
       path: {
         projectId: number;
@@ -17751,7 +17765,7 @@ export interface operations {
     };
   };
   /** Returns translation comments of translation */
-  getAll_5: {
+  getAll_3: {
     parameters: {
       path: {
         translationId: number;
@@ -17807,7 +17821,7 @@ export interface operations {
       };
     };
   };
-  create_7: {
+  create_1: {
     parameters: {
       path: {
         translationId: number;
@@ -17860,7 +17874,7 @@ export interface operations {
       };
     };
   };
-  get_14: {
+  get_10: {
     parameters: {
       path: {
         translationId: number;
@@ -17909,7 +17923,7 @@ export interface operations {
       };
     };
   };
-  update_5: {
+  update_1: {
     parameters: {
       path: {
         commentId: number;
@@ -17963,7 +17977,7 @@ export interface operations {
       };
     };
   };
-  delete_8: {
+  delete_2: {
     parameters: {
       path: {
         translationId: number;
@@ -18573,7 +18587,7 @@ export interface operations {
       };
     };
   };
-  list: {
+  list_2: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -18680,7 +18694,7 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  get_9: {
     parameters: {
       path: {
         id: number;
