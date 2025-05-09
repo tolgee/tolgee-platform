@@ -7,7 +7,11 @@ import { signUpService } from '../service/SignUpService';
 import { checkParamNameIsValid } from '@tginternal/editor';
 import { validateObject } from 'tg.fixtures/validateObject';
 
-type TranslateFunction = TFnType<DefaultParamType, string, TranslationKey>;
+export type TranslateFunction = TFnType<
+  DefaultParamType,
+  string,
+  TranslationKey
+>;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
