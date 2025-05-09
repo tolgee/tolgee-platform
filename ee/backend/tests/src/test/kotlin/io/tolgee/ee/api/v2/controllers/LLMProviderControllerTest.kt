@@ -21,6 +21,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
       mutableListOf(
         LLMProperties.LLMProvider(
           type = LLMProviderType.OPENAI,
+          apiUrl = "http://test.com"
         ),
       )
     this.userAccount = testData.organizationOwner.self
@@ -105,7 +106,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
   fun `updates llm provider`() {
     performAuthPut(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/${testData.llmProvider.self.id}",
-      LLMProviderRequest(name = "updated-provider", type = LLMProviderType.OLLAMA, apiUrl = "different-url"),
+      LLMProviderRequest(name = "updated-provider", type = LLMProviderType.OPENAI_AZURE, apiUrl = "different-url"),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("updated-provider")
       node("type").isEqualTo("OLLAMA")
@@ -118,7 +119,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
     this.userAccount = testData.organizationMember.self
     performAuthPut(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/${testData.llmProvider.self.id}",
-      LLMProviderRequest(name = "updated-provider", type = LLMProviderType.OLLAMA, apiUrl = "different-url"),
+      LLMProviderRequest(name = "updated-provider", type = LLMProviderType.OPENAI_AZURE, apiUrl = "different-url"),
     ).andIsForbidden
   }
 }
