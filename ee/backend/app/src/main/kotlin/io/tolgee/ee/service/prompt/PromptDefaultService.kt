@@ -30,8 +30,6 @@ class PromptDefaultService(private val llmProperties: LLMProperties) {
         {{fragment.keyInfo}}
 
         {{fragment.translationInfo}}
-        
-        {{fragment.otherTranslations}}
 
         {{fragment.translateJson}}
         """.trimIndent(),

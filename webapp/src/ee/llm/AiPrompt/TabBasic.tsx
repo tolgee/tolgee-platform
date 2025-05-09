@@ -87,11 +87,6 @@ export const TabBasic = ({ value, onChange }: Props) => {
       label: t('ai_prompt_item_screenshot'),
       hint: t('ai_prompt_item_screenshot_hint'),
     },
-    {
-      id: 'OTHER_TRANSLATIONS',
-      label: t('ai_prompt_item_other_translations'),
-      hint: t('ai_prompt_item_other_translations_hint'),
-    },
   ];
 
   const theme = useTheme();
