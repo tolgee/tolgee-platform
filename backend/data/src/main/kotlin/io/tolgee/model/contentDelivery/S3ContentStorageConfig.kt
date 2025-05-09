@@ -33,5 +33,5 @@ class S3ContentStorageConfig(
   @field:Schema(
     description = "Specifies an optional subfolder structure within s3 bucket to which content will be stored",
   )
-  override var path: String = ""
+  override var path: String? = ""
 }

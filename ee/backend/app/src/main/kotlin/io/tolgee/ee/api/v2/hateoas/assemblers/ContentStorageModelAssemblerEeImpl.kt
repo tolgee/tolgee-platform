@@ -25,7 +25,7 @@ class ContentStorageModelAssemblerEeImpl :
             bucketName = it.bucketName,
             endpoint = it.endpoint,
             signingRegion = it.signingRegion,
-            path = it.path,
+            path = it.path ?: "",
           )
         },
       azureContentStorageConfig =
