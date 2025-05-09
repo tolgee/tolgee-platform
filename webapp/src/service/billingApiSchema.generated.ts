@@ -11,6 +11,10 @@ export interface paths {
     /** Cancel local subscriptions */
     put: operations["cancelLocalSubscriptions"];
   };
+  "/v2/administration/billing/cancel-self-hosted-subscription/{subscriptionId}": {
+    /** Cancels a self-hosted subscription if its plan is free. If the plan is not free, it will throw a BadRequest exception. */
+    put: operations["cancelSelfHostedSubscription"];
+  };
   "/v2/administration/billing/cloud-plans": {
     get: operations["getPlans_2"];
     post: operations["create_2"];
@@ -72,6 +76,10 @@ export interface paths {
   "/v2/administration/organizations/{organizationId}/billing/unassign-cloud-plan/{planId}": {
     /** Make plan invisible for organization when not subscribed to. Or unassign the plan if is free or trial. If plan is registered in stripe, you will have to cancel it via stripe and then unassign it when required. */
     put: operations["unassignCloudPlan"];
+  };
+  "/v2/administration/organizations/{organizationId}/billing/unassign-self-hosted-plan/{planId}": {
+    /** Unassigns a self-hosted plan from an organization - Removes the organization from the plan's visibility list. */
+    put: operations["unassignSelfHostedPlan"];
   };
   "/v2/administration/organizations/{organizationId}/billing/update-trial-end-date": {
     put: operations["updateTrialEndDate"];
@@ -1459,6 +1467,50 @@ export interface operations {
       };
     };
   };
+  /** Cancels a self-hosted subscription if its plan is free. If the plan is not free, it will throw a BadRequest exception. */
+  cancelSelfHostedSubscription: {
+    parameters: {
+      path: {
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getPlans_2: {
     parameters: {
       query: {
@@ -2698,6 +2750,51 @@ export interface operations {
   };
   /** Make plan invisible for organization when not subscribed to. Or unassign the plan if is free or trial. If plan is registered in stripe, you will have to cancel it via stripe and then unassign it when required. */
   unassignCloudPlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Unassigns a self-hosted plan from an organization - Removes the organization from the plan's visibility list. */
+  unassignSelfHostedPlan: {
     parameters: {
       path: {
         organizationId: number;
