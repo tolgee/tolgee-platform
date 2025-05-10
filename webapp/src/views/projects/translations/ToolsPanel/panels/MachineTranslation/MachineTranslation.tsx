@@ -147,9 +147,9 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
         !nothingFetched &&
-        results?.map(([provider, data]) => {
+        results?.map(([provider, result]) => {
           const props = {
-            data: data,
+            data: result,
             provider: provider,
             isFetching: machineLoadable.isFetching,
             languageTag: language.tag,
