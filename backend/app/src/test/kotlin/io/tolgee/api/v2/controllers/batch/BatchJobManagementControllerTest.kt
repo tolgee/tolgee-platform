@@ -1,5 +1,7 @@
 package io.tolgee.api.v2.controllers.batch
 
+import io.tolgee.testing.ContextRecreatingTest
+
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobActivityFinalizer
 import io.tolgee.batch.BatchJobChunkExecutionQueue
@@ -40,6 +42,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentHashMap
 
+@ContextRecreatingTest
 class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
   lateinit var testData: BatchJobsTestData
 

@@ -9,6 +9,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.bigMeta.KeysDistanceDto
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeEach
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.time.measureTime
 
+@ContextRecreatingTest
 class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
   lateinit var testData: BigMetaTestData
 

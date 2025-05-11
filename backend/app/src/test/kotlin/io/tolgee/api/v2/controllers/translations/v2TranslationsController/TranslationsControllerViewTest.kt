@@ -26,9 +26,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import kotlin.system.measureTimeMillis
+import io.tolgee.testing.ContextRecreatingTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 

@@ -15,6 +15,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.ContextRecreatingTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -25,6 +26,7 @@ import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 class ApiKeyControllerTest : AuthorizedControllerTest() {
   lateinit var testData: ApiKeysTestData
 

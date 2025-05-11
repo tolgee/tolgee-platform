@@ -23,13 +23,8 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Compile kotlin
         run: ./gradlew compileTestKotlin --parallel
@@ -75,6 +70,7 @@ jobs:
           [
             "server-app:runContextRecreatingTests",
             "server-app:runStandardTests",
+            "server-app:runAuthorizedTests",
             "server-app:runWebsocketTests",
             "server-app:runWithoutEeTests",
             "ee-test:test",
@@ -93,13 +89,8 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Download backend build result
         uses: actions/download-artifact@v4
@@ -180,13 +171,8 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -288,7 +274,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
+      
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -445,13 +431,8 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck
