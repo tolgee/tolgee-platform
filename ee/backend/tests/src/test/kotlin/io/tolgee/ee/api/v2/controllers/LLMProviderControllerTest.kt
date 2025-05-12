@@ -54,7 +54,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("items").isArray.hasSize(1)
       node("items[0].name").isEqualTo("default")
-      node("items[0].id").isEqualTo("-1")
+      node("items[0].type").isEqualTo("OPENAI")
     }
   }
 
@@ -109,7 +109,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
       LLMProviderRequest(name = "updated-provider", type = LLMProviderType.OPENAI_AZURE, apiUrl = "different-url"),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("updated-provider")
-      node("type").isEqualTo("OLLAMA")
+      node("type").isEqualTo("OPENAI_AZURE")
       node("apiUrl").isEqualTo("different-url")
     }
   }

@@ -2,8 +2,10 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.PromptTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
@@ -11,8 +13,12 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.LLMProviderType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   private lateinit var testData: PromptTestData
 
   @BeforeEach
@@ -31,6 +37,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       )
     internalProperties.fakeLlmProviders = true
     this.userAccount = testData.projectEditor.self
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_PROMPT_CUSTOMIZATION)
   }
 
   @Test
@@ -38,7 +45,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performAuthGet(
       "/v2/projects/${testData.promptProject.self.id}/prompts/default",
     ).andIsOk.andAssertThatJson {
-      node("name").isEqualTo("default")
+      node("name").isEqualTo("Default")
       node("providerName").isEqualTo("default")
     }
   }
