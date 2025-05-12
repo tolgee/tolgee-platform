@@ -17,12 +17,9 @@ type SubscriptionsCustomPlanItemProps = {
   onUnassign?: () => void;
 };
 
-export const SubscriptionsCustomPlanItem: FC<SubscriptionsCustomPlanItemProps> = ({
-  plan,
-  organizationId,
-  editLink,
-  onUnassign,
-}) => {
+export const SubscriptionsCustomPlanItem: FC<
+  SubscriptionsCustomPlanItemProps
+> = ({ plan, organizationId, editLink, onUnassign }) => {
   return (
     <Box
       display="flex"
