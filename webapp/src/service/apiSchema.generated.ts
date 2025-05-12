@@ -3343,12 +3343,6 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelGlossaryModel: {
-      _embedded?: {
-        glossaries?: components["schemas"]["GlossaryModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     PagedModelImportFileIssueModel: {
       _embedded?: {
         importFileIssues?: components["schemas"]["ImportFileIssueModel"][];
@@ -3442,6 +3436,12 @@ export interface components {
     PagedModelProjectWithStatsModel: {
       _embedded?: {
         projects?: components["schemas"]["ProjectWithStatsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelSimpleGlossaryModel: {
+      _embedded?: {
+        glossaries?: components["schemas"]["SimpleGlossaryModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4435,6 +4435,13 @@ export interface components {
       recaptchaToken?: string;
       /** @description Where did the user find us? */
       userSource?: string;
+    };
+    SimpleGlossaryModel: {
+      assignedProjects: components["schemas"]["CollectionModelSimpleProjectModel"];
+      baseLanguageTag?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
     };
     SimpleGlossaryTermModel: {
       description?: string;
@@ -8079,7 +8086,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelGlossaryModel"];
+          "application/json": components["schemas"]["PagedModelSimpleGlossaryModel"];
         };
       };
       /** Bad Request */

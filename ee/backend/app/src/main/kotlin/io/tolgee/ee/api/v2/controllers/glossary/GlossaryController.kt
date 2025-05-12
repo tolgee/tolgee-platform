@@ -5,7 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.SimpleGlossaryModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryModel
+import io.tolgee.ee.api.v2.hateoas.model.glossary.SimpleGlossaryModel
 import io.tolgee.ee.data.glossary.CreateGlossaryRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
 import io.tolgee.ee.service.glossary.GlossaryService
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController
 class GlossaryController(
   private val glossaryService: GlossaryService,
   private val glossaryModelAssembler: GlossaryModelAssembler,
+  private val simpleGlossaryModelAssembler: SimpleGlossaryModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<Glossary>,
   private val organizationHolder: OrganizationHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
@@ -134,7 +137,7 @@ class GlossaryController(
     organizationId: Long,
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
-  ): PagedModel<GlossaryModel> {
+  ): PagedModel<SimpleGlossaryModel> {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
@@ -142,6 +145,6 @@ class GlossaryController(
 
     val organization = organizationHolder.organization
     val glossaries = glossaryService.findAllPaged(organization.id, pageable, search)
-    return pagedAssembler.toModel(glossaries, glossaryModelAssembler)
+    return pagedAssembler.toModel(glossaries, simpleGlossaryModelAssembler)
   }
 }

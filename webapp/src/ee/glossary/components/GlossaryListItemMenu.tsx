@@ -11,10 +11,10 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlossaryCreateEditDialog } from 'tg.ee.module/glossary/views/GlossaryCreateEditDialog';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-type GlossaryModel = components['schemas']['GlossaryModel'];
+type SimpleGlossaryModel = components['schemas']['SimpleGlossaryModel'];
 
 type Props = {
-  glossary: GlossaryModel;
+  glossary: SimpleGlossaryModel;
 };
 
 export const GlossaryListItemMenu: FC<Props> = ({ glossary }) => {
@@ -47,7 +47,7 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary }) => {
       onConfirm() {
         deleteMutation.mutate({
           path: {
-            organizationId: glossary.organizationOwner.id,
+            organizationId: preferredOrganization!.id,
             glossaryId: glossary.id,
           },
         });

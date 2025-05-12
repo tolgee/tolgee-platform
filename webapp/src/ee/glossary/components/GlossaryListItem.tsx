@@ -9,7 +9,7 @@ import { languageInfo } from '@tginternal/language-util/lib/generated/languageIn
 import { GlossaryListItemMenu } from 'tg.ee.module/glossary/components/GlossaryListItemMenu';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-type GlossaryModel = components['schemas']['GlossaryModel'];
+type SimpleGlossaryModel = components['schemas']['SimpleGlossaryModel'];
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -69,7 +69,7 @@ const StyledNameText = styled(Typography)`
 `;
 
 type Props = {
-  glossary: GlossaryModel;
+  glossary: SimpleGlossaryModel;
 };
 
 export const GlossaryListItem: React.VFC<Props> = ({ glossary }) => {
