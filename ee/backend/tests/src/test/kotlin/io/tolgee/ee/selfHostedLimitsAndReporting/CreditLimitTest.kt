@@ -62,10 +62,13 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
     )
     whenever(internalProperties.fakeMtProviders).thenReturn(false)
     llmProperties.enabled = true
-    llmProperties.providers.add(LLMProperties.LLMProvider(
-      "default", LLMProviderType.OPENAI,
+    llmProperties.providers.add(
+      LLMProperties.LLMProvider(
+      "default",
+        LLMProviderType.OPENAI,
       apiUrl = "https://test.com",
-    ))
+    )
+    )
   }
 
   @Test
