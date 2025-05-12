@@ -1,3 +1,10 @@
+# [3.119.0](https://github.com/tolgee/tolgee-platform/compare/v3.118.1...v3.119.0) (2025-05-12)
+
+
+### Features
+
+* Billing plans unassigning and cancelling ([#3062](https://github.com/tolgee/tolgee-platform/issues/3062)) ([e802234](https://github.com/tolgee/tolgee-platform/commit/e8022344ec10994bef1ecf97e6a15dad936393a6))
+
 ## [3.118.1](https://github.com/tolgee/tolgee-platform/compare/v3.118.0...v3.118.1) (2025-05-09)
 
 

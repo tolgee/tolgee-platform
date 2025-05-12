@@ -1002,6 +1002,7 @@
   "llm_provider_create_success_message": "Nowy dostawca został pomyślnie utworzony",
   "llm_provider_create_title": "Utwórz dostawcę LLM",
   "llm_provider_error": "Błąd dostawcy: {value}",
+  "llm_provider_form_api_url": "Adres URL API",
   "llm_provider_not_found": "Nie znaleziono dostawcy Llm \"{value}\"",
   "llm_provider_not_returned_json": "Dostawca LLM nie zwrócił json",
   "llm_rate_limited": "Dostawca ograniczył częstotliwość zapytań",

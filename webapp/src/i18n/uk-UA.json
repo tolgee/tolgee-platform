@@ -1002,6 +1002,7 @@
   "llm_provider_create_success_message": "Новий постачальник успішно створений",
   "llm_provider_create_title": "Створити постачальника LLM",
   "llm_provider_error": "Помилка провайдера: {value}",
+  "llm_provider_form_api_url": "URL API",
   "llm_provider_not_found": "Постачальника Llm не знайдено \"{value}\"",
   "llm_provider_not_returned_json": "Постачальник LLM не повернув json",
   "llm_rate_limited": "Постачальник обмежив частоту запитів",
