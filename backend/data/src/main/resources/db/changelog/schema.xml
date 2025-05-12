@@ -4202,6 +4202,7 @@
             <column name="path" type="TEXT">
             </column>
         </addColumn>
+    </changeSet>
     <changeSet author="anty (generated)" id="1746535895543-1">
         <createTable tableName="glossary">
             <column name="id" type="BIGINT">
