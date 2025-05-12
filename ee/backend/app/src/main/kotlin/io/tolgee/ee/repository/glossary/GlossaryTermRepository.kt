@@ -64,7 +64,7 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       and (
         :search is null or
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
-        lower(tr.text) like lower(concat('%', ccoalesce(:search, ''), '%'))
+        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%'))
       )
   """,
   )
@@ -86,7 +86,7 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       and (
         :search is null or
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
-        lower(tr.text) like lower(concat('%', ccoalesce(:search, ''), '%'))
+        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%'))
       )
   """,
   )
