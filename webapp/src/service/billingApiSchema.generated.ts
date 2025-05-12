@@ -798,7 +798,14 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "instance_not_using_license_key"
-        | "invalid_path";
+        | "invalid_path"
+        | "llm_provider_not_found"
+        | "llm_provider_error"
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error"
+        | "llm_rate_limited"
+        | "llm_provider_timeout";
       params?: { [key: string]: unknown }[];
     };
     GetMySubscriptionDto: {
