@@ -308,6 +308,8 @@ export class LINKS {
     p(PARAMS.GLOSSARY_ID)
   );
 
+  static ORGANIZATION_GLOSSARY_VIEW = LINKS.ORGANIZATION_GLOSSARY;
+
   /**
    * Slack
    */

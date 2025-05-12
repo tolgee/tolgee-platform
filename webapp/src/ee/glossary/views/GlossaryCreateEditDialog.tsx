@@ -6,7 +6,10 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import {
+  useEnabledFeatures,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { GlossaryCreateForm } from 'tg.ee.module/glossary/views/GlossaryCreateForm';
 import { messageService } from 'tg.service/MessageService';
@@ -63,8 +66,6 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onFinished: () => void;
-  organizationId: number;
-  organizationSlug: string;
   editGlossaryId?: number;
 };
 
@@ -72,8 +73,6 @@ export const GlossaryCreateEditDialog = ({
   open,
   onClose,
   onFinished,
-  organizationId,
-  organizationSlug,
   editGlossaryId,
 }: Props) => {
   const initialGlossaryId = useRef(editGlossaryId).current;
@@ -87,6 +86,8 @@ export const GlossaryCreateEditDialog = ({
 
   const { t } = useTranslate();
   const history = useHistory();
+
+  const { preferredOrganization } = usePreferredOrganization();
 
   const { isEnabled } = useEnabledFeatures();
   const glossaryFeature = isEnabled('GLOSSARY');
@@ -109,7 +110,7 @@ export const GlossaryCreateEditDialog = ({
             mutation.mutate(
               {
                 path: {
-                  organizationId,
+                  organizationId: preferredOrganization!.id,
                 },
                 content: {
                   'application/json': data,
@@ -123,7 +124,7 @@ export const GlossaryCreateEditDialog = ({
                   history.push(
                     LINKS.ORGANIZATION_GLOSSARY.build({
                       [PARAMS.GLOSSARY_ID]: id,
-                      [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+                      [PARAMS.ORGANIZATION_SLUG]: preferredOrganization!.slug,
                     })
                   );
                   onFinished();
@@ -150,7 +151,7 @@ export const GlossaryCreateEditDialog = ({
             mutation.mutate(
               {
                 path: {
-                  organizationId,
+                  organizationId: preferredOrganization!.id,
                   glossaryId: initialGlossaryId,
                 },
                 content: {
@@ -179,7 +180,7 @@ export const GlossaryCreateEditDialog = ({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
     method: 'get',
     path: {
-      organizationId,
+      organizationId: preferredOrganization!.id,
       glossaryId: initialGlossaryId ?? -1,
     },
     options: {
@@ -222,7 +223,6 @@ export const GlossaryCreateEditDialog = ({
             <StyledContainer>
               <GlossaryCreateForm
                 disabled={!glossaryFeature}
-                organizationId={organizationId}
                 withAssignedProjects
               />
               <StyledActions>

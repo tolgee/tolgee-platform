@@ -19,7 +19,6 @@ import { GlossaryBatchToolbar } from 'tg.ee.module/glossary/components/GlossaryB
 import { useSelectionService } from 'tg.service/useSelectionService';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
-type OrganizationModel = components['schemas']['OrganizationModel'];
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
 
@@ -147,8 +146,6 @@ const StyledBatchToolbarWrapper = styled(Box)`
 `;
 
 type Props = {
-  organization: OrganizationModel;
-  glossaryId: number;
   loading?: boolean;
   data?: SimpleGlossaryTermWithTranslationsModel[];
   fetchDataIds: () => Promise<number[]>;
@@ -164,8 +161,6 @@ type Props = {
 };
 
 export const GlossaryViewBody: React.VFC<Props> = ({
-  organization,
-  glossaryId,
   loading,
   data = [],
   fetchDataIds,
@@ -234,8 +229,6 @@ export const GlossaryViewBody: React.VFC<Props> = ({
     return (
       <GlossaryViewListRow
         key={row.id}
-        organization={organization}
-        glossaryId={glossaryId}
         item={row}
         baseLanguage={baseLanguage}
         onEditTranslation={(termId, languageTag) => {
@@ -266,8 +259,6 @@ export const GlossaryViewBody: React.VFC<Props> = ({
               </Box>
               <Box display="flex" gap={2}>
                 <GlossaryViewLanguageSelect
-                  organizationId={organization.id}
-                  glossaryId={glossaryId}
                   value={selectedLanguagesWithBaseLanguage}
                   onValueChange={updateSelectedLanguages}
                   sx={{
@@ -366,11 +357,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
               left: verticalScrollRef.current?.getBoundingClientRect?.()?.left,
             }}
           >
-            <GlossaryBatchToolbar
-              organization={organization}
-              glossaryId={glossaryId}
-              selectionService={selectionService}
-            />
+            <GlossaryBatchToolbar selectionService={selectionService} />
           </StyledBatchToolbarWrapper>
         </Portal>
       </StyledContainer>

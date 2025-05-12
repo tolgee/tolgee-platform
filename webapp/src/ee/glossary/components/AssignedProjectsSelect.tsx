@@ -7,6 +7,7 @@ import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { InfiniteMultiSearchSelect } from 'tg.component/searchSelect/InfiniteMultiSearchSelect';
 import { MultiselectItem } from 'tg.component/searchSelect/MultiselectItem';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 type SelectedProjectModel = {
@@ -16,16 +17,15 @@ type SelectedProjectModel = {
 
 type Props = {
   name: string;
-  organizationId: number;
   disabled?: boolean;
 } & Omit<ComponentProps<typeof Box>, 'children'>;
 
 export const AssignedProjectsSelect: React.VFC<Props> = ({
   name,
-  organizationId,
   disabled,
   ...boxProps
 }) => {
+  const { preferredOrganization } = usePreferredOrganization();
   const context = useFormikContext();
   const { t } = useTranslate();
   const [field, meta] = useField(name);
@@ -43,7 +43,7 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
   const dataLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{id}/projects',
     method: 'get',
-    path: { id: organizationId },
+    path: { id: preferredOrganization!.id },
     query,
     options: {
       keepPreviousData: true,
@@ -55,7 +55,7 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
           lastPage.page.number! < lastPage.page.totalPages! - 1
         ) {
           return {
-            path: { id: organizationId },
+            path: { id: preferredOrganization!.id },
             query: {
               ...query,
               page: lastPage.page!.number! + 1,

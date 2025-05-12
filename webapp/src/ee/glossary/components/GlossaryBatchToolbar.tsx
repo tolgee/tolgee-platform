@@ -15,9 +15,8 @@ import { T } from '@tolgee/react';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { components } from 'tg.service/apiSchema.generated';
-
-type OrganizationModel = components['schemas']['OrganizationModel'];
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 const StyledCard = styled(Card)`
   display: flex;
@@ -44,16 +43,15 @@ const StyledCheckbox = styled(Checkbox)`
 `;
 
 type Props = {
-  organization: OrganizationModel;
-  glossaryId: number;
   selectionService: SelectionService<number>;
 };
 
 export const GlossaryBatchToolbar: React.VFC<Props> = ({
-  organization,
-  glossaryId,
   selectionService,
 }) => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const glossary = useGlossary();
+
   const deleteSelectedMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms',
     method: 'delete',
@@ -74,8 +72,8 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
         deleteSelectedMutation.mutate(
           {
             path: {
-              organizationId: organization.id,
-              glossaryId,
+              organizationId: preferredOrganization!.id,
+              glossaryId: glossary.id,
             },
             content: {
               'application/json': {
@@ -99,7 +97,7 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
   };
 
   const canDelete = ['OWNER', 'MAINTAINER'].includes(
-    organization.currentUserRole || ''
+    preferredOrganization?.currentUserRole || ''
   );
 
   return (

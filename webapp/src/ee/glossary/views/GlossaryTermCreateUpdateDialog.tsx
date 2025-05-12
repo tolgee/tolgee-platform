@@ -12,6 +12,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import Box from '@mui/material/Box';
 import { confirmation } from 'tg.hooks/confirmation';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type CreateGlossaryTermWithTranslationRequest =
   components['schemas']['CreateGlossaryTermWithTranslationRequest'];
@@ -56,8 +58,6 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onFinished: () => void;
-  organizationId: number;
-  glossaryId: number;
   /**
    * When undefined - create new Term; Otherwise edit existing Term
    * Immutable prop!
@@ -83,10 +83,10 @@ export const GlossaryTermCreateUpdateDialog = ({
   open,
   onClose,
   onFinished,
-  organizationId,
-  glossaryId,
   editTermId,
 }: Props) => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const glossary = useGlossary();
   const initialTermId = useRef(editTermId).current;
 
   useEffect(() => {
@@ -130,8 +130,8 @@ export const GlossaryTermCreateUpdateDialog = ({
             mutation.mutate(
               {
                 path: {
-                  organizationId,
-                  glossaryId,
+                  organizationId: preferredOrganization!.id,
+                  glossaryId: glossary.id,
                 },
                 content: {
                   'application/json': values,
@@ -161,8 +161,8 @@ export const GlossaryTermCreateUpdateDialog = ({
               mutation.mutate(
                 {
                   path: {
-                    organizationId,
-                    glossaryId,
+                    organizationId: preferredOrganization!.id,
+                    glossaryId: glossary.id,
                     termId: initialTermId,
                   },
                   content: {
@@ -215,8 +215,8 @@ export const GlossaryTermCreateUpdateDialog = ({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
     method: 'get',
     path: {
-      organizationId,
-      glossaryId,
+      organizationId: preferredOrganization!.id,
+      glossaryId: glossary.id,
     },
     options: {
       enabled: initialTermId !== undefined,
@@ -230,8 +230,8 @@ export const GlossaryTermCreateUpdateDialog = ({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}',
     method: 'get',
     path: {
-      organizationId,
-      glossaryId,
+      organizationId: preferredOrganization!.id,
+      glossaryId: glossary.id,
       termId: initialTermId ?? -1,
     },
     options: {
@@ -249,8 +249,8 @@ export const GlossaryTermCreateUpdateDialog = ({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageTag}',
     method: 'get',
     path: {
-      organizationId,
-      glossaryId,
+      organizationId: preferredOrganization!.id,
+      glossaryId: glossary.id,
       termId: initialTermId ?? -1,
       languageTag: glossaryQuery.data?.baseLanguageTag ?? '',
     },
@@ -285,8 +285,8 @@ export const GlossaryTermCreateUpdateDialog = ({
         deleteMutation.mutate(
           {
             path: {
-              organizationId,
-              glossaryId,
+              organizationId: preferredOrganization!.id,
+              glossaryId: glossary.id,
               termId,
             },
           },

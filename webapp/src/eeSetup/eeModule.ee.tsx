@@ -55,13 +55,13 @@ import {
 } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
-import { GlossaryView } from '../ee/glossary/views/GlossaryView';
 import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
 import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
 import {
   glossariesCount,
   GlossariesPanel,
 } from '../ee/glossary/components/GlossariesPanel';
+import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -184,7 +184,7 @@ export const routes = {
           <GlossariesListView />
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ORGANIZATION_GLOSSARY.template}>
-          <GlossaryView />
+          <GlossaryRouter />
         </PrivateRoute>
       </>
     );

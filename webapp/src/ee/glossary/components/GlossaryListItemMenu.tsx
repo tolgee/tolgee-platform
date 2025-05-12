@@ -9,22 +9,23 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlossaryCreateEditDialog } from 'tg.ee.module/glossary/views/GlossaryCreateEditDialog';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-type OrganizationModel = components['schemas']['OrganizationModel'];
 type GlossaryModel = components['schemas']['GlossaryModel'];
 
 type Props = {
   glossary: GlossaryModel;
-  organization: OrganizationModel;
 };
 
-export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
+export const GlossaryListItemMenu: FC<Props> = ({ glossary }) => {
+  const { preferredOrganization } = usePreferredOrganization();
+
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [isEditing, setIsEditing] = React.useState(false);
 
   const canManage = ['OWNER', 'MAINTAINER'].includes(
-    organization.currentUserRole || ''
+    preferredOrganization?.currentUserRole || ''
   );
 
   const deleteMutation = useApiMutation({
@@ -90,7 +91,7 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
           component={Link}
           to={LINKS.ORGANIZATION_GLOSSARY.build({
             [PARAMS.GLOSSARY_ID]: glossary.id,
-            [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+            [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.slug || '',
           })}
         >
           <T keyName="glossary_view_button" />
@@ -118,8 +119,6 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary, organization }) => {
           open={isEditing}
           onClose={() => setIsEditing(false)}
           onFinished={() => setIsEditing(false)}
-          organizationId={organization.id}
-          organizationSlug={organization.slug}
           editGlossaryId={glossary.id}
         />
       )}

@@ -88,8 +88,6 @@ export const GlossariesListView = () => {
             open={createDialogOpen}
             onClose={() => setCreateDialogOpen(false)}
             onFinished={() => setCreateDialogOpen(false)}
-            organizationId={organization!.id}
-            organizationSlug={organization!.slug}
           />
         )}
         {glossaryFeature ? (
@@ -97,13 +95,7 @@ export const GlossariesListView = () => {
             wrapperComponentProps={{ className: 'listWrapper' }}
             onPageChange={setPage}
             loadable={glossaries}
-            renderItem={(g) => (
-              <GlossaryListItem
-                key={g.id}
-                glossary={g}
-                organization={organization!}
-              />
-            )}
+            renderItem={(g) => <GlossaryListItem key={g.id} glossary={g} />}
             emptyPlaceholder={
               <GlossariesEmptyListMessage
                 loading={glossaries.isFetching}

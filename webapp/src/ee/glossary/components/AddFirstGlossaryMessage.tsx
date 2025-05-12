@@ -1,4 +1,4 @@
-import { Button, Card, styled, Typography } from '@mui/material';
+import { Button, Card, Link, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import Box from '@mui/material/Box';
 import EmptyImage from 'tg.svgs/icons/glossary-empty.svg?react';
@@ -51,7 +51,7 @@ export const AddFirstGlossaryMessage: React.VFC<
             keyName="glossaries_list_empty_message"
             params={{
               bestPractice: (
-                <a href="https://docs.tolgee.io/platform/projects_and_organizations/glossary" />
+                <Link href="https://docs.tolgee.io/platform/projects_and_organizations/glossary" />
               ),
             }}
           />

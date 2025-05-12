@@ -8,26 +8,27 @@ import { LanguageValue } from 'tg.component/languages/LanguageValue';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { InfiniteMultiSearchSelect } from 'tg.component/searchSelect/InfiniteMultiSearchSelect';
 import { MultiselectItem } from 'tg.component/searchSelect/MultiselectItem';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];
 
 type Props = {
-  organizationId: number;
-  glossaryId: number;
   disabled?: boolean;
   value: string[] | undefined;
   onValueChange: (value: string[]) => void;
 } & Omit<ComponentProps<typeof Box>, 'children'>;
 
 export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
-  organizationId,
-  glossaryId,
   disabled,
   value,
   onValueChange,
   ...boxProps
 }) => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const glossary = useGlossary();
+
   const { t } = useTranslate();
 
   const [search, setSearch] = useState('');
@@ -36,7 +37,10 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
   const priorityDataLoadable = useApiQuery({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages',
     method: 'get',
-    path: { organizationId, glossaryId },
+    path: {
+      organizationId: preferredOrganization!.id,
+      glossaryId: glossary.id,
+    },
   });
 
   const query = {
@@ -46,7 +50,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
   const dataLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{organizationId}/languages',
     method: 'get',
-    path: { organizationId: organizationId },
+    path: { organizationId: preferredOrganization!.id },
     query,
     options: {
       keepPreviousData: true,
@@ -58,7 +62,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
           lastPage.page.number! < lastPage.page.totalPages! - 1
         ) {
           return {
-            path: { id: organizationId },
+            path: { id: preferredOrganization!.id },
             query: {
               ...query,
               page: lastPage.page!.number! + 1,

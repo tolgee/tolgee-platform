@@ -5,8 +5,8 @@ import { GlossaryListTranslationCell } from 'tg.ee.module/glossary/components/Gl
 import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryListTermCell';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { T } from '@tolgee/react';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-type OrganizationModel = components['schemas']['OrganizationModel'];
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
 
@@ -23,8 +23,6 @@ const StyledRow = styled('div')`
 `;
 
 type Props = {
-  organization: OrganizationModel;
-  glossaryId: number;
   item: SimpleGlossaryTermWithTranslationsModel;
   baseLanguage: string | undefined;
   editingTranslation: [number | undefined, string | undefined];
@@ -34,8 +32,6 @@ type Props = {
 };
 
 export const GlossaryViewListRow: React.VFC<Props> = ({
-  organization,
-  glossaryId,
   item,
   baseLanguage,
   editingTranslation,
@@ -43,8 +39,10 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
   selectedLanguages,
   selectionService,
 }) => {
+  const { preferredOrganization } = usePreferredOrganization();
+
   const editEnabled = ['OWNER', 'MAINTAINER'].includes(
-    organization.currentUserRole || ''
+    preferredOrganization?.currentUserRole || ''
   );
 
   const [editingTermId, editingLanguageTag] = editingTranslation;
@@ -52,8 +50,6 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
   return (
     <StyledRow key={item.id}>
       <GlossaryListTermCell
-        organizationId={organization.id}
-        glossaryId={glossaryId}
         item={item}
         editEnabled={editEnabled}
         baseLanguage={baseLanguage}
@@ -67,8 +63,6 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
         return (
           <GlossaryListTranslationCell
             key={i + 1}
-            organizationId={organization.id}
-            glossaryId={glossaryId}
             termId={item.id}
             translation={translation}
             languageTag={tag}

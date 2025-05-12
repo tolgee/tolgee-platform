@@ -8,6 +8,7 @@ import { useDebounce } from 'use-debounce';
 import { SelectItem } from 'tg.component/searchSelect/SelectItem';
 import { InfiniteSearchSelect } from 'tg.component/searchSelect/InfiniteSearchSelect';
 import { LanguageValue } from 'tg.component/languages/LanguageValue';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];
@@ -19,16 +20,15 @@ type SelectedLanguageModel = {
 
 type Props = {
   name: string;
-  organizationId: number;
   disabled?: boolean;
 } & Omit<ComponentProps<typeof Box>, 'children'>;
 
 export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
   name,
-  organizationId,
   disabled,
   ...boxProps
 }) => {
+  const { preferredOrganization } = usePreferredOrganization();
   const context = useFormikContext();
   const { t } = useTranslate();
   const [field, meta] = useField(name);
@@ -46,7 +46,7 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
   const dataLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{organizationId}/languages',
     method: 'get',
-    path: { organizationId: organizationId },
+    path: { organizationId: preferredOrganization!.id },
     query,
     options: {
       keepPreviousData: true,
@@ -58,7 +58,7 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
           lastPage.page.number! < lastPage.page.totalPages! - 1
         ) {
           return {
-            path: { id: organizationId },
+            path: { id: preferredOrganization!.id },
             query: {
               ...query,
               page: lastPage.page!.number! + 1,

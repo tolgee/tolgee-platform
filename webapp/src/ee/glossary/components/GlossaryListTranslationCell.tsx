@@ -9,6 +9,8 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import Box from '@mui/material/Box';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type GlossaryTermTranslationModel =
   components['schemas']['GlossaryTermTranslationModel'];
@@ -45,8 +47,6 @@ const StyledControls = styled('div')`
 `;
 
 type Props = {
-  organizationId: number;
-  glossaryId: number;
   termId: number;
   translation?: GlossaryTermTranslationModel;
   languageTag: string;
@@ -59,8 +59,6 @@ type Props = {
 };
 
 export const GlossaryListTranslationCell: React.VFC<Props> = ({
-  organizationId,
-  glossaryId,
   termId,
   translation,
   languageTag,
@@ -71,6 +69,9 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
   onCancel,
   onSave,
 }) => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const glossary = useGlossary();
+
   const [value, setValue] = React.useState(translation?.text || '');
   const [replacementText, setReplacementText] = React.useState('');
 
@@ -91,7 +92,11 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
   const save = () => {
     saveMutation.mutate(
       {
-        path: { organizationId, glossaryId, termId },
+        path: {
+          organizationId: preferredOrganization!.id,
+          glossaryId: glossary.id,
+          termId,
+        },
         content: {
           'application/json': {
             languageTag: languageTag,

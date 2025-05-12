@@ -7,8 +7,8 @@ import { T } from '@tolgee/react';
 import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import { GlossaryListItemMenu } from 'tg.ee.module/glossary/components/GlossaryListItemMenu';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-type OrganizationModel = components['schemas']['OrganizationModel'];
 type GlossaryModel = components['schemas']['GlossaryModel'];
 
 const StyledContainer = styled('div')`
@@ -70,13 +70,11 @@ const StyledNameText = styled(Typography)`
 
 type Props = {
   glossary: GlossaryModel;
-  organization: OrganizationModel;
 };
 
-export const GlossaryListItem: React.VFC<Props> = ({
-  glossary,
-  organization,
-}) => {
+export const GlossaryListItem: React.VFC<Props> = ({ glossary }) => {
+  const { preferredOrganization } = usePreferredOrganization();
+
   const history = useHistory();
   const assignedProjects = glossary.assignedProjects._embedded?.projects;
   const languageTag = glossary.baseLanguageTag!;
@@ -102,7 +100,7 @@ export const GlossaryListItem: React.VFC<Props> = ({
         history.push(
           LINKS.ORGANIZATION_GLOSSARY.build({
             [PARAMS.GLOSSARY_ID]: glossary.id,
-            [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+            [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.slug || '',
           })
         )
       }
@@ -133,10 +131,7 @@ export const GlossaryListItem: React.VFC<Props> = ({
       </StyledLanguages>
       <StyledControls>
         <Box width="100%" display="flex" justifyContent="flex-end">
-          <GlossaryListItemMenu
-            glossary={glossary}
-            organization={organization}
-          />
+          <GlossaryListItemMenu glossary={glossary} />
         </Box>
       </StyledControls>
     </StyledContainer>

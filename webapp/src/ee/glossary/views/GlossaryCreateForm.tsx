@@ -7,13 +7,11 @@ import { GlossaryBaseLanguageSelect } from 'tg.ee.module/glossary/components/Glo
 
 type Props = {
   disabled?: boolean;
-  organizationId: number;
   withAssignedProjects?: boolean;
 };
 
 export const GlossaryCreateForm: VFC<Props> = ({
   disabled,
-  organizationId,
   withAssignedProjects = false,
 }) => {
   const { t } = useTranslate();
@@ -28,17 +26,9 @@ export const GlossaryCreateForm: VFC<Props> = ({
         data-cy="create-glossary-field-name"
         disabled={disabled}
       />
-      <GlossaryBaseLanguageSelect
-        name="baseLanguage"
-        organizationId={organizationId}
-        disabled={disabled}
-      />
+      <GlossaryBaseLanguageSelect name="baseLanguage" disabled={disabled} />
       {withAssignedProjects && (
-        <AssignedProjectsSelect
-          name="assignedProjects"
-          organizationId={organizationId}
-          disabled={disabled}
-        />
+        <AssignedProjectsSelect name="assignedProjects" disabled={disabled} />
       )}
     </Box>
   );

@@ -49,8 +49,6 @@ const StyledTags = styled(Box)`
 `;
 
 type Props = {
-  organizationId: number;
-  glossaryId: number;
   item: SimpleGlossaryTermWithTranslationsModel;
   editEnabled: boolean;
   baseLanguage: string | undefined;
@@ -58,8 +56,6 @@ type Props = {
 };
 
 export const GlossaryListTermCell: React.VFC<Props> = ({
-  organizationId,
-  glossaryId,
   item,
   editEnabled,
   baseLanguage,
@@ -105,8 +101,6 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
           open={isEditingTerm}
           onClose={() => setIsEditingTerm(false)}
           onFinished={() => setIsEditingTerm(false)}
-          organizationId={organizationId}
-          glossaryId={glossaryId}
           editTermId={item.id}
         />
       )}

@@ -6,7 +6,6 @@ const StyledMenuItem = styled(CompactMenuItem)`
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  padding-left: 4px !important;
 
   & .hidden {
     opacity: 0;
