@@ -13,6 +13,7 @@ export const SubscriptionsDetailPopover = ({
   return (
     <Tooltip
       componentsProps={{ tooltip: { sx: { maxWidth: 'none' } } }}
+      placement="bottom-start"
       title={
         <Box sx={{ p: 1 }} data-cy="administration-subscriptions-plan-popover">
           {popoverContent}
