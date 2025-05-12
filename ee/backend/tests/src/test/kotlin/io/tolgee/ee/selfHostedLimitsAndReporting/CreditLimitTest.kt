@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
@@ -13,6 +14,7 @@ import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.fixtures.HttpClientMocker
 import io.tolgee.fixtures.NdJsonParser
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.LLMProviderType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addDays
@@ -59,6 +61,11 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
       enabledServices = setOf(MtServiceType.PROMPT),
     )
     whenever(internalProperties.fakeMtProviders).thenReturn(false)
+    llmProperties.enabled = true
+    llmProperties.providers.add(LLMProperties.LLMProvider(
+      "default", LLMProviderType.OPENAI,
+      apiUrl = "https://test.com",
+    ))
   }
 
   @Test
