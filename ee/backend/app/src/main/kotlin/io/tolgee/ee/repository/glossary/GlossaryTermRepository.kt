@@ -41,8 +41,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       and te.glossary.id = :glossaryId
       and te.glossary.deletedAt is null
       and (:search is null or
-        lower(te.description) like lower(concat('%', cast(:search as text), '%')) or
-        lower(tr.text) like lower(concat('%', cast(:search as text), '%'))
+        lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
+        lower(tr.text) like lower(concat('%', coalesce(:search, '') , '%'))
       )
   """,
   )
@@ -63,12 +63,34 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     where te.glossary = :glossary
       and (
         :search is null or
-        lower(te.description) like lower(concat('%', cast(:search as text), '%')) or
-        lower(tr.text) like lower(concat('%', cast(:search as text), '%'))
+        lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
+        lower(tr.text) like lower(concat('%', ccoalesce(:search, ''), '%'))
       )
   """,
   )
   fun findByGlossaryPaged(
+    glossary: Glossary,
+    pageable: Pageable,
+    search: String?,
+    languageTags: Set<String>?,
+  ): Page<GlossaryTerm>
+
+  @Query(
+    """
+    from GlossaryTerm te
+    join fetch te.translations
+    left join GlossaryTermTranslation tr on tr.term.id = te.id
+      and tr.languageTag = te.glossary.baseLanguageTag
+      and (:languageTags is null or tr.languageTag in :languageTags)
+    where te.glossary = :glossary
+      and (
+        :search is null or
+        lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
+        lower(tr.text) like lower(concat('%', ccoalesce(:search, ''), '%'))
+      )
+  """,
+  )
+  fun findByGlossaryWithTranslationsPaged(
     glossary: Glossary,
     pageable: Pageable,
     search: String?,
@@ -84,8 +106,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     where te.glossary = :glossary
       and (
         :search is null or
-        lower(te.description) like lower(concat('%', cast(:search as text), '%')) or
-        lower(tr.text) like lower(concat('%', cast(:search as text), '%'))
+        lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
+        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%'))
       )
   """,
   )

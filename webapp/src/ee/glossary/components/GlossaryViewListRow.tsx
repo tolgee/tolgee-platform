@@ -7,8 +7,8 @@ import { SelectionService } from 'tg.service/useSelectionService';
 import { T } from '@tolgee/react';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-type GlossaryTermWithTranslationsModel =
-  components['schemas']['GlossaryTermWithTranslationsModel'];
+type SimpleGlossaryTermWithTranslationsModel =
+  components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
 
 const StyledRow = styled('div')`
   display: grid;
@@ -25,7 +25,7 @@ const StyledRow = styled('div')`
 type Props = {
   organization: OrganizationModel;
   glossaryId: number;
-  item: GlossaryTermWithTranslationsModel;
+  item: SimpleGlossaryTermWithTranslationsModel;
   baseLanguage: string | undefined;
   editingTranslation: [number | undefined, string | undefined];
   onEditTranslation: (termId?: number, languageTag?: string) => void;
@@ -90,7 +90,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
 };
 
 export const estimateGlossaryViewListRowHeight = (
-  row?: GlossaryTermWithTranslationsModel
+  row?: SimpleGlossaryTermWithTranslationsModel
 ): number => {
   if (!row) {
     return 84;

@@ -1,9 +1,11 @@
 package io.tolgee.ee.data.glossary
 
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
 
 open class CreateGlossaryTermRequest {
-  @field:Size(min = 0, max = 500)
+  @Schema(example = "", description = "Glossary term description")
+  @field:Size(max = 500)
   var description: String? = null
 
   var flagNonTranslatable: Boolean = false

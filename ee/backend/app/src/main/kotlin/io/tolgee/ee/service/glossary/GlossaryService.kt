@@ -9,6 +9,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.service.project.ProjectService
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class GlossaryService(
   private val glossaryRepository: GlossaryRepository,
+  private val glossaryTermTranslationService: GlossaryTermTranslationService,
   private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
 ) {
@@ -45,6 +47,7 @@ class GlossaryService(
     return find(organizationId, glossaryId) ?: throw NotFoundException(Message.GLOSSARY_NOT_FOUND)
   }
 
+  @Transactional
   fun create(
     organization: Organization,
     dto: CreateGlossaryRequest,
@@ -61,6 +64,7 @@ class GlossaryService(
     return glossaryRepository.save(glossary)
   }
 
+  @Transactional
   fun update(
     organizationId: Long,
     glossaryId: Long,
@@ -68,6 +72,13 @@ class GlossaryService(
   ): Glossary {
     val glossary = get(organizationId, glossaryId)
     glossary.name = dto.name
+    if (dto.baseLanguageTag != glossary.baseLanguageTag) {
+      glossaryTermTranslationService.updateBaseLanguage(
+        glossary,
+        glossary.baseLanguageTag,
+        dto.baseLanguageTag,
+      )
+    }
     glossary.baseLanguageTag = dto.baseLanguageTag
     val newAssignedProjects = dto.assignedProjects
     if (newAssignedProjects != null) {
@@ -91,6 +102,7 @@ class GlossaryService(
     glossary.assignedProjects.addAll(projects)
   }
 
+  @Transactional
   fun delete(
     organizationId: Long,
     glossaryId: Long,

@@ -40,8 +40,7 @@ export type PrefilterTaskProps = {
 export type GlossaryTermHighlightDto =
   components['schemas']['GlossaryTermHighlightDto'];
 
-export type GlossaryTermWithTranslationsModel =
-  components['schemas']['GlossaryTermWithTranslationsModel'];
+export type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
 
 export type GlossaryTermHighlightsProps = {
   text: string | null | undefined;
@@ -50,7 +49,7 @@ export type GlossaryTermHighlightsProps = {
 };
 
 export type GlossaryTermPreviewProps = {
-  term: GlossaryTermWithTranslationsModel;
+  term: GlossaryTermModel;
   languageTag: string;
   targetLanguageTag?: string;
   showIcon?: boolean;

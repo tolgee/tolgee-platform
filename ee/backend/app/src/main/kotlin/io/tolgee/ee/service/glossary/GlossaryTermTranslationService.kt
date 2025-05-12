@@ -5,6 +5,7 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.repository.glossary.GlossaryTermTranslationRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import org.springframework.stereotype.Service
@@ -93,5 +94,17 @@ class GlossaryTermTranslationService(
     languageTag: String,
   ): GlossaryTermTranslation {
     return find(term, languageTag) ?: throw NotFoundException(Message.GLOSSARY_TERM_TRANSLATION_NOT_FOUND)
+  }
+
+  fun updateBaseLanguage(
+    glossary: Glossary,
+    oldBaseLanguageTag: String?,
+    newBaseLanguageTag: String?,
+  ) {
+    glossaryTermTranslationRepository.updateBaseLanguage(
+      glossary,
+      oldBaseLanguageTag,
+      newBaseLanguageTag,
+    )
   }
 }

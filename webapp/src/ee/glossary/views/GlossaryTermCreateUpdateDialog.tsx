@@ -21,7 +21,10 @@ type CreateOrUpdateGlossaryTermRequest =
   CreateGlossaryTermWithTranslationRequest &
     UpdateGlossaryTermWithTranslationRequest;
 
-type GlossaryTermModel = Omit<components['schemas']['GlossaryTermModel'], 'id'>;
+type SimpleGlossaryTermModel = Omit<
+  components['schemas']['SimpleGlossaryTermModel'],
+  'id'
+>;
 type GlossaryTermTranslationModel = Omit<
   components['schemas']['GlossaryTermTranslationModel'],
   'languageTag'
@@ -68,7 +71,7 @@ const translationInitialValues: GlossaryTermTranslationModel = {
   text: '',
 };
 
-const termInitialValues: Omit<GlossaryTermModel, 'glossary'> = {
+const termInitialValues: SimpleGlossaryTermModel = {
   description: undefined,
   flagNonTranslatable: false,
   flagCaseSensitive: false,

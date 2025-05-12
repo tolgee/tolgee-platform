@@ -1,9 +1,11 @@
 package io.tolgee.ee.repository.glossary
 
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -66,4 +68,20 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
     assignedProjectId: Long,
     organizationId: Long,
   ): Set<GlossaryTermTranslation>
+
+  @Modifying
+  @Query(
+    """
+      update GlossaryTermTranslation gtt
+      set gtt.languageTag = :newBaseLanguageTag
+      where gtt.term.glossary = :glossary
+       and gtt.languageTag = :oldBaseLanguageTag
+       and gtt.term.flagNonTranslatable = true
+    """,
+  )
+  fun updateBaseLanguage(
+    glossary: Glossary,
+    oldBaseLanguageTag: String?,
+    newBaseLanguageTag: String?,
+  )
 }

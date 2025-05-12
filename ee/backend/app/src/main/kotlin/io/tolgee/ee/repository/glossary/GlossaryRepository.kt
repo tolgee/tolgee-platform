@@ -13,8 +13,6 @@ import java.util.Date
 @Repository
 @Lazy
 interface GlossaryRepository : JpaRepository<Glossary, Long> {
-  // TODO: rework - use only glossary id for query, check organization id in service?
-
   @Query(
     """
     from Glossary
@@ -45,7 +43,7 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     where organizationOwner.id = :organizationId
       and organizationOwner.deletedAt is null
       and deletedAt is null
-      and (:search is null or lower(name) like lower(concat('%', cast(:search as text), '%')))
+      and (:search is null or lower(name) like lower(concat('%', coalesce(:search, ''), '%'))) 
   """,
   )
   fun findByOrganizationIdPaged(

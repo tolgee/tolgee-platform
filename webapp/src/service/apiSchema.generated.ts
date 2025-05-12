@@ -1667,11 +1667,21 @@ export interface components {
       scopes: string[];
     };
     CreateGlossaryRequest: {
+      /** @description Projects assigned to glossary */
       assignedProjects: number[];
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
       baseLanguageTag: string;
+      /**
+       * @description Glossary name
+       * @example My glossary
+       */
       name: string;
     };
     CreateGlossaryTermWithTranslationRequest: {
+      /** @description Glossary term description */
       description?: string;
       flagAbbreviation: boolean;
       flagCaseSensitive: boolean;
@@ -1759,7 +1769,7 @@ export interface components {
       type: "TRANSLATE" | "REVIEW";
     };
     CreateUpdateGlossaryTermResponse: {
-      term: components["schemas"]["GlossaryTermModel"];
+      term: components["schemas"]["SimpleGlossaryTermModel"];
       translation?: components["schemas"]["GlossaryTermTranslationModel"];
     };
     CreditBalanceModel: {
@@ -2325,7 +2335,7 @@ export interface components {
     };
     GlossaryTermHighlightDto: {
       position: components["schemas"]["Position"];
-      value: components["schemas"]["GlossaryTermWithTranslationsModel"];
+      value: components["schemas"]["GlossaryTermModel"];
     };
     GlossaryTermModel: {
       description?: string;
@@ -2336,21 +2346,11 @@ export interface components {
       glossary: components["schemas"]["GlossaryModel"];
       /** Format: int64 */
       id: number;
+      translations: components["schemas"]["GlossaryTermTranslationModel"][];
     };
     GlossaryTermTranslationModel: {
       languageTag: string;
       text: string;
-    };
-    GlossaryTermWithTranslationsModel: {
-      description?: string;
-      flagAbbreviation: boolean;
-      flagCaseSensitive: boolean;
-      flagForbiddenTerm: boolean;
-      flagNonTranslatable: boolean;
-      glossary: components["schemas"]["GlossaryModel"];
-      /** Format: int64 */
-      id: number;
-      translations: components["schemas"]["GlossaryTermTranslationModel"][];
     };
     HierarchyItem: {
       requires: components["schemas"]["HierarchyItem"][];
@@ -3349,18 +3349,6 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelGlossaryTermModel: {
-      _embedded?: {
-        glossaryTerms?: components["schemas"]["GlossaryTermModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    PagedModelGlossaryTermWithTranslationsModel: {
-      _embedded?: {
-        glossaryTerms?: components["schemas"]["GlossaryTermWithTranslationsModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     PagedModelImportFileIssueModel: {
       _embedded?: {
         importFileIssues?: components["schemas"]["ImportFileIssueModel"][];
@@ -3454,6 +3442,18 @@ export interface components {
     PagedModelProjectWithStatsModel: {
       _embedded?: {
         projects?: components["schemas"]["ProjectWithStatsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelSimpleGlossaryTermModel: {
+      _embedded?: {
+        glossaryTerms?: components["schemas"]["SimpleGlossaryTermModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelSimpleGlossaryTermWithTranslationsModel: {
+      _embedded?: {
+        glossaryTerms?: components["schemas"]["SimpleGlossaryTermWithTranslationsModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4436,6 +4436,25 @@ export interface components {
       /** @description Where did the user find us? */
       userSource?: string;
     };
+    SimpleGlossaryTermModel: {
+      description?: string;
+      flagAbbreviation: boolean;
+      flagCaseSensitive: boolean;
+      flagForbiddenTerm: boolean;
+      flagNonTranslatable: boolean;
+      /** Format: int64 */
+      id: number;
+    };
+    SimpleGlossaryTermWithTranslationsModel: {
+      description?: string;
+      flagAbbreviation: boolean;
+      flagCaseSensitive: boolean;
+      flagForbiddenTerm: boolean;
+      flagNonTranslatable: boolean;
+      /** Format: int64 */
+      id: number;
+      translations: components["schemas"]["GlossaryTermTranslationModel"][];
+    };
     SimpleOrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
@@ -5100,12 +5119,29 @@ export interface components {
       tags: string[];
     };
     UpdateGlossaryRequest: {
+      /** @description Projects assigned to glossary; when null, assigned projects will be kept unchanged. */
       assignedProjects?: number[];
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
       baseLanguageTag: string;
+      /**
+       * @description Glossary name
+       * @example My glossary
+       */
       name: string;
     };
     UpdateGlossaryTermTranslationRequest: {
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
       languageTag: string;
+      /**
+       * @description Translation text
+       * @example Translated text to language of languageTag
+       */
       text: string;
     };
     UpdateGlossaryTermWithTranslationRequest: {
@@ -8346,7 +8382,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelGlossaryTermModel"];
+          "application/json": components["schemas"]["PagedModelSimpleGlossaryTermModel"];
         };
       };
       /** Bad Request */
@@ -8497,7 +8533,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["GlossaryTermModel"];
+          "application/json": components["schemas"]["SimpleGlossaryTermModel"];
         };
       };
       /** Bad Request */
@@ -8810,7 +8846,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelGlossaryTermWithTranslationsModel"];
+          "application/json": components["schemas"]["PagedModelSimpleGlossaryTermWithTranslationsModel"];
         };
       };
       /** Bad Request */

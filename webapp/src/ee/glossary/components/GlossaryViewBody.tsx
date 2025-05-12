@@ -20,8 +20,8 @@ import { useSelectionService } from 'tg.service/useSelectionService';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-type GlossaryTermWithTranslationsModel =
-  components['schemas']['GlossaryTermWithTranslationsModel'];
+type SimpleGlossaryTermWithTranslationsModel =
+  components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
 
 const ARROW_SIZE = 50;
 
@@ -150,7 +150,7 @@ type Props = {
   organization: OrganizationModel;
   glossaryId: number;
   loading?: boolean;
-  data?: GlossaryTermWithTranslationsModel[];
+  data?: SimpleGlossaryTermWithTranslationsModel[];
   fetchDataIds: () => Promise<number[]>;
   totalElements?: number;
   baseLanguage?: string;

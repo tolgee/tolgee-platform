@@ -9,8 +9,8 @@ import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/Glos
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { SelectionService } from 'tg.service/useSelectionService';
 
-type GlossaryTermWithTranslationsModel =
-  components['schemas']['GlossaryTermWithTranslationsModel'];
+type SimpleGlossaryTermWithTranslationsModel =
+  components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
 
 const StyledRowTermCell = styled(GlossaryListStyledRowCell)`
   grid-template-areas:
@@ -51,7 +51,7 @@ const StyledTags = styled(Box)`
 type Props = {
   organizationId: number;
   glossaryId: number;
-  item: GlossaryTermWithTranslationsModel;
+  item: SimpleGlossaryTermWithTranslationsModel;
   editEnabled: boolean;
   baseLanguage: string | undefined;
   selectionService: SelectionService<number>;

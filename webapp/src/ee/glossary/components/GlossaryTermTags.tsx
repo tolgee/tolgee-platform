@@ -4,7 +4,7 @@ import React from 'react';
 import { PropsOf } from '@emotion/react/dist/emotion-react.cjs';
 import { useTranslate } from '@tolgee/react';
 
-type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
+type SimpleGlossaryTermModel = components['schemas']['SimpleGlossaryTermModel'];
 
 const StyledTags = styled('div')`
   display: flex;
@@ -30,7 +30,7 @@ const CustomizedTag: React.VFC<PropsOf<typeof Chip>> = (props) => {
 };
 
 type Props = {
-  term: GlossaryTermModel;
+  term: SimpleGlossaryTermModel;
 };
 
 export const GlossaryTermTags: React.VFC<Props> = ({ term }) => {

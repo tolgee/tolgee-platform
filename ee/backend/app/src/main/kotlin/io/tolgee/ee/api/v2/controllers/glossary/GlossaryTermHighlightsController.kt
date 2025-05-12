@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
-import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermWithTranslationsModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermModelAssembler
 import io.tolgee.ee.data.glossary.GlossaryTermHighlightDto
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.Scope
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 class GlossaryTermHighlightsController(
   private val projectHolder: ProjectHolder,
   private val glossaryTermService: GlossaryTermService,
-  private val modelAssembler: GlossaryTermWithTranslationsModelAssembler,
+  private val modelAssembler: GlossaryTermModelAssembler,
   private val organizationHolder: OrganizationHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
