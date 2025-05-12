@@ -3,14 +3,15 @@ import { Box, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { UseQueryResult } from 'react-query';
+import { HateoasListData } from 'tg.service/response.types';
 
 type SubscriptionsPopoverCustomPlansProps<T> = {
-  getLoadable: () => UseQueryResult<T, any>;
+  getLoadable: () => UseQueryResult<HateoasListData<T>, any>;
   renderItem: (item: T) => React.ReactNode;
 };
 
 export const SubscriptionsPopoverCustomPlans = <T,>(
-  props: SubscriptionsPopoverCustomPlansProps<any>
+  props: SubscriptionsPopoverCustomPlansProps<T>
 ) => {
   const loadable = props.getLoadable();
 

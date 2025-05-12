@@ -20,6 +20,7 @@ type SubscriptionCurrentPlanInfoProps = {
     trialEnd?: number;
   };
   editButton: ReactElement;
+  cancelButton?: ReactElement;
 };
 
 export const SubscriptionCurrentPlanInfo: FC<
@@ -36,10 +37,15 @@ export const SubscriptionCurrentPlanInfo: FC<
   return (
     <Box data-cy="administration-subscriptions-current-plan-info" mb={2}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Typography variant={'h3'} sx={{ display: 'inline', fontSize: '20px' }}>
+        <Typography
+          variant={'h3'}
+          sx={{ display: 'inline', fontSize: '20px' }}
+          data-cy="subscriptions-cloud-popover-active-plan-name"
+        >
           {props.subscription.plan.name}{' '}
         </Typography>
         {props.editButton}
+        {props.cancelButton}
         <Box ml={1}></Box>
         <PlanPublicChip isPublic={props.subscription.plan.public} />
       </Box>
