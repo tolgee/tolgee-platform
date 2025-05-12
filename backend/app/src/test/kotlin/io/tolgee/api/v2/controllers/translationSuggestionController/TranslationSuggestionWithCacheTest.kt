@@ -77,7 +77,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
       ),
     ).thenAnswer {
       MtValueProvider.MtResult(
-        "Translated with Tolgee Translator",
+        "Translated with LLM Prompt",
         ((it.arguments[0] as? ProviderTranslateParams)?.text?.length ?: 0) * 100,
       )
     }

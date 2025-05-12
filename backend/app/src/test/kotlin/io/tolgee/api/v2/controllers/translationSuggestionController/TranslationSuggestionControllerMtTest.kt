@@ -163,7 +163,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
       ),
     ).thenAnswer {
       MtValueProvider.MtResult(
-        "Translated with Tolgee Translator",
+        "Translated with LLM Prompt",
         ((it.arguments[0] as? ProviderTranslateParams)?.text?.length ?: 0) * 100,
       )
     }
@@ -235,7 +235,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
         node("DEEPL").isEqualTo("Translated with DeepL")
         node("AZURE").isEqualTo("Translated with Azure Cognitive")
         node("BAIDU").isEqualTo("Translated with Baidu")
-        node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
+        node("PROMPT").isEqualTo("Translated with LLM Prompt")
       }
 
       mtCreditBucketService.getCreditBalances(
@@ -260,7 +260,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
         node("DEEPL").isAbsent()
         node("AZURE").isAbsent()
         node("BAIDU").isAbsent()
-        node("PROMPT").isEqualTo("Translated with Tolgee Translator")
+        node("PROMPT").isEqualTo("Translated with LLM Prompt")
       }
     }
   }
@@ -378,7 +378,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 //
 //    performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
 //      node("machineTranslations") {
-//        node("TOLGEE").isEqualTo("Translated with Tolgee Translator")
+//        node("TOLGEE").isEqualTo("Translated with LLM Prompt")
 //      }
 //      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
 //        .assert.isEqualTo(5100)
