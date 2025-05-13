@@ -440,6 +440,7 @@ declare namespace DataCy {
         "permissions-menu-inherited-message" |
         "permissions-menu-reset-to-organization" |
         "permissions-menu-save" |
+        "plan-limit-dialog-close" |
         "plan-limit-exceeded-popover" |
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
@@ -547,6 +548,7 @@ declare namespace DataCy {
         "signup-error-free-seat-limit" |
         "signup-error-plan-seat-limit" |
         "signup-error-seats-spending-limit" |
+        "spending-limit-dialog-close" |
         "spending-limit-exceeded-popover" |
         "sso-migration-info-text" |
         "storage-add-item-button" |

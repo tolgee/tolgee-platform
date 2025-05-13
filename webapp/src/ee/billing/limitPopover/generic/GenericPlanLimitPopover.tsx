@@ -56,15 +56,18 @@ export const GenericPlanLimitPopover: FC<PlanLimitPopoverProps> = ({
           loading && <CircularProgress />
         )}
       </StyledDialogContent>
-      <Button
-        data-cy="global-confirmation-cancel"
-        onClick={onClose}
-        type="button"
-        color="secondary"
-      >
-        <T keyName="plan_limit_dialog_close" />
-      </Button>
-      <DialogActions>{actionButton}</DialogActions>
+
+      <DialogActions>
+        <Button
+          data-cy="plan-limit-dialog-close"
+          onClick={onClose}
+          type="button"
+          color="secondary"
+        >
+          <T keyName="plan_limit_dialog_close" />
+        </Button>
+        {actionButton}
+      </DialogActions>
     </PlanLimitPopoverWrapper>
   );
 };
