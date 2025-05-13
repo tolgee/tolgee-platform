@@ -8,9 +8,11 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Primary
 @Service
 class AiPlaygroundResultServiceEeImpl(
   private val aiPlaygroundResultRepository: AiPlaygroundResultRepository,
