@@ -183,8 +183,8 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
         listOf(
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.germanLanguage.id,
-            primaryService = MtServiceType.PROMPT,
-            primaryServiceInfo = MtServiceInfo(MtServiceType.PROMPT, Formality.FORMAL, promptId = null),
+            primaryService = MtServiceType.AWS,
+            primaryServiceInfo = MtServiceInfo(MtServiceType.AWS, Formality.FORMAL, promptId = null),
           ),
         ),
       ),
@@ -204,14 +204,14 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     performSet(testData.englishLanguage, MtServiceType.AWS, Formality.FORMAL).andIsBadRequest
     performSet(testData.germanLanguage, MtServiceType.AWS, Formality.FORMAL).andIsOk
     performSet(testData.germanLanguage, MtServiceType.AWS, Formality.DEFAULT).andIsOk
-    performSet(testData.germanLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsOk
-    performSet(testData.englishLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsOk
+    performSet(testData.germanLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsBadRequest
+    performSet(testData.englishLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsBadRequest
     performSet(
       MachineTranslationLanguagePropsDto(
         testData.englishLanguage.id,
         primaryServiceInfo = MtServiceInfo(MtServiceType.PROMPT, Formality.FORMAL),
       ),
-    ).andIsOk
+    ).andIsBadRequest
   }
 
   private fun performSet(
