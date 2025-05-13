@@ -19,7 +19,7 @@ export const AiPromptsEmptyState = () => {
   const project = useProject();
   return (
     <EmptyState>
-      <Box display="grid" justifyItems="center" gap={2}>
+      <Box display="grid" justifyItems="center" gap={2} textAlign="center">
         <Typography variant="h4">{t('ai_prompts_empty_message')}</Typography>
         <Typography color={theme.palette.text.secondary}>
           <T
