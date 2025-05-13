@@ -44,9 +44,6 @@ class LLMTranslationProviderEeImpl(
     promptId: Long?,
   ): MtMetadata? {
     val promptDto = promptService.findPromptOrDefaultDto(projectId, promptId)
-    if (keyId == null) {
-      throw Error("Key ID is required")
-    }
     val prompt =
       promptService.getPrompt(
         projectId,
