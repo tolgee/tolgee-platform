@@ -9,6 +9,7 @@ import { getAiPlaygroundUrl } from 'tg.constants/links';
 import { AiPromptItem } from './AiPromptItem';
 import { useState } from 'react';
 import { Plus } from '@untitled-ui/icons-react';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 export const AiPromptsList = () => {
   const { t } = useTranslate();
@@ -28,20 +29,38 @@ export const AiPromptsList = () => {
 
   return (
     <Box display="grid" marginTop="32px" gap="20px">
-      <Box display="flex" justifyContent="end">
-        <Button
-          color="primary"
-          variant="contained"
-          component={Link}
-          to={getAiPlaygroundUrl(project.id)}
-          startIcon={<Plus width={19} height={19} />}
-        >
-          {t('ai_prompts_add')}
-        </Button>
-      </Box>
+      {promptsLoadable.data?._embedded?.prompts?.length && (
+        <Box display="flex" justifyContent="end">
+          <Button
+            color="primary"
+            variant="contained"
+            component={Link}
+            to={getAiPlaygroundUrl(project.id)}
+            startIcon={<Plus width={19} height={19} />}
+          >
+            {t('ai_prompts_add')}
+          </Button>
+        </Box>
+      )}
       <PaginatedHateoasList
         onPageChange={setPage}
         loadable={promptsLoadable}
+        emptyPlaceholder={
+          <EmptyListMessage
+            hint={
+              <Button
+                component={Link}
+                to={getAiPlaygroundUrl(project.id)}
+                color="primary"
+                variant="contained"
+              >
+                {t('ai_prompts_open_playground_label')}
+              </Button>
+            }
+          >
+            {t('ai_prompts_empty_message')}
+          </EmptyListMessage>
+        }
         listComponentProps={
           {
             sx: {
