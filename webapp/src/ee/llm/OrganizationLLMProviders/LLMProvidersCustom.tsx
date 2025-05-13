@@ -5,6 +5,8 @@ import { LLMProviderItem } from './LLMProviderItem';
 import { useState } from 'react';
 import { LLMProviderModel } from 'tg.translationTools/useLLMProviderTranslation';
 import { LLMProviderEditDialog } from './LLMProviderEditDialog';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -14,6 +16,7 @@ const StyledContainer = styled(Box)`
 `;
 
 export const LLMProvidersCustom = () => {
+  const { t } = useTranslate();
   const [editItem, setEditItem] = useState<LLMProviderModel>();
   const organization = useOrganization();
   const providersLoadable = useApiQuery({
@@ -23,6 +26,14 @@ export const LLMProvidersCustom = () => {
       organizationId: organization!.id,
     },
   });
+
+  if (providersLoadable.data?.items.length === 0) {
+    return (
+      <EmptyListMessage>
+        {t('llm_providers_custom_empty_message')}
+      </EmptyListMessage>
+    );
+  }
 
   return (
     <>
