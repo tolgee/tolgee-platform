@@ -228,6 +228,87 @@ tasks.register('runWithoutEeTests', Test) {
     rootProject.setTestRetry(it)
 }
 
+// Register a new Gradle test task that supports splitting test execution across CI jobs
+tasks.register('standardJobTests', Test) {
+    outputs.upToDateWhen { false }
+    useJUnitPlatform {
+        // These tests run in separate tasks
+        excludeTags "contextRecreating", "websocket"
+    }
+    maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
+    
+    doFirst {
+        // Get job parameters from project properties (-P args) or use defaults
+        def currentJobIndex = project.findProperty('jobIndex')?.toInteger() ?: 1
+        def totalJobs = project.findProperty('jobTotal')?.toInteger() ?: 1
+        // Convert to 0-based index for modulo arithmetic
+        currentJobIndex = currentJobIndex - 1
+        
+        logger.lifecycle("Running standard tests - job ${currentJobIndex + 1}/${totalJobs}")
+        
+        if (totalJobs > 1) {
+            // Since Gradle doesn't provide test partitioning, we need to discover test classes manually
+            def testClassNames = []
+            testClassesDirs.each { dir ->
+                if (dir.exists()) {
+                    project.fileTree(dir).include("**/*Test.class").each { file ->
+                        if (!file.path.contains('$')) {
+                            def className = file.absolutePath.substring(dir.absolutePath.length() + 1)
+                                .replace(".class", "")
+                                .replace(File.separator, ".")
+                            testClassNames.add(className)
+                        }
+                    }
+                }
+            }
+            
+            // Sort for consistent distribution across jobs
+            testClassNames.sort()
+            
+            filter.setIncludePatterns()
+            
+            // Distribute tests using round-robin (modulo)
+            def testsForThisJob = []
+            testClassNames.eachWithIndex { className, index ->
+                if (index % totalJobs == currentJobIndex) {
+                    testsForThisJob.add(className)
+                    filter.includeTestsMatching(className)
+                }
+            }
+            
+            logger.lifecycle("Job ${currentJobIndex + 1}/${totalJobs}: Running ${testsForThisJob.size()} of ${testClassNames.size()} test classes")
+            if (logger.isDebugEnabled()) {
+                logger.debug("Tests assigned to this job: ${testsForThisJob.join(', ')}")
+            }
+        }
+    }
+}
+
+// Wrapper task for first half of the tests
+tasks.register('runStandardJob1Tests') {
+    outputs.upToDateWhen { false }
+    
+    doFirst {
+        project.ext.set('jobIndex', 1)
+        project.ext.set('jobTotal', 2)
+    }
+    
+    finalizedBy tasks.named('standardJobTests')
+}
+
+// Wrapper task for second half of the tests
+tasks.register('runStandardJob2Tests') {
+    outputs.upToDateWhen { false }
+    
+    doFirst {
+        project.ext.set('jobIndex', 2)
+        project.ext.set('jobTotal', 2)
+    }
+    
+    finalizedBy tasks.named('standardJobTests')
+}
+
 springBoot {
     buildInfo {
         properties {
