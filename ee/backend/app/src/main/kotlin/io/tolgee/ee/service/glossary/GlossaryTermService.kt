@@ -74,17 +74,6 @@ class GlossaryTermService(
     return glossaryTermRepository.findAllIds(glossary, search, languageTags)
   }
 
-//  fun findAllPagedWithTranslations(
-//    organizationId: Long,
-//    glossaryId: Long,
-//    pageable: Pageable,
-//    search: String?,
-//    languageTags: Set<String>?,
-//  ): Page<GlossaryTermWithTranslationsView> {
-//    val glossary = glossaryService.get(organizationId, glossaryId)
-//    return glossaryTermRepository.findByGlossaryPagedWithTranslations(glossary, pageable, search, languageTags)
-//  }
-
   fun get(
     organizationId: Long,
     glossaryId: Long,

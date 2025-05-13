@@ -43,7 +43,7 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     where organizationOwner.id = :organizationId
       and organizationOwner.deletedAt is null
       and deletedAt is null
-      and (:search is null or lower(name) like lower(concat('%', coalesce(:search, ''), '%'))) 
+      and (lower(name) like lower(concat('%', coalesce(:search, ''), '%')) or :search is null)
   """,
   )
   fun findByOrganizationIdPaged(

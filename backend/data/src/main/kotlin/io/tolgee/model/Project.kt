@@ -19,6 +19,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Filter
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -95,6 +96,10 @@ class Project(
   var defaultNamespace: Namespace? = null
 
   @ManyToMany(fetch = FetchType.LAZY, mappedBy = "assignedProjects")
+  @field:Filter(
+    name = "deletedFilter",
+    condition = "(deleted_at IS NULL)",
+  )
   var glossaries: MutableSet<Glossary> = mutableSetOf()
 
   @ActivityLoggedProp

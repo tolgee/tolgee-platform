@@ -4280,9 +4280,7 @@
             <column name="term_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="anty (generated)" id="1746535895543-5">
-        <addUniqueConstraint columnNames="organization_owner_id, name" constraintName="UK6lhjfekqt9yfoxa2qdolqe180" tableName="glossary"/>
-    </changeSet>
+
     <changeSet author="anty (generated)" id="1746535895543-6">
         <addUniqueConstraint columnNames="term_id, language_tag" constraintName="UK7xx1elb7fl7qdj2qpf48p0w74" tableName="glossary_term_translation"/>
     </changeSet>
