@@ -13,7 +13,6 @@ import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
-import io.tolgee.ee.component.LLMTranslationProviderEeImpl
 import io.tolgee.fixtures.*
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -61,7 +60,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   @Autowired
   @MockBean
-  lateinit var llmTranslationProvider: LLMTranslationProviderEeImpl
+  lateinit var llmTranslationProvider: LLMTranslationProvider
 
   @Autowired
   @MockBean

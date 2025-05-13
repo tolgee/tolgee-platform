@@ -3,14 +3,13 @@ package io.tolgee.batch
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.bucket.TokenBucketManager
-import io.tolgee.ee.component.LLMTranslationProviderEeImpl
+import io.tolgee.component.machineTranslation.providers.LLMTranslationProvider
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doThrow
-import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,7 +29,7 @@ class TolgeeTranslatorWithBatchTest {
   lateinit var restTemplate: RestTemplate
 
   @Autowired
-  lateinit var llmTranslationProviderEeImpl: LLMTranslationProviderEeImpl
+  lateinit var llmTranslationProvider: LLMTranslationProvider
 
   @SpyBean
   lateinit var tokenBucketManager: TokenBucketManager
