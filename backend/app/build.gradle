@@ -204,7 +204,7 @@ tasks.register('runContextRecreatingTests', Test) {
 tasks.register('runStandardTests', Test) {
     outputs.upToDateWhen { false }
     useJUnitPlatform {
-        excludeTags "contextRecreating", "websocket"
+        excludeTags "contextRecreating", "websocket", "authorized"
     }
     maxHeapSize = "4096m"
     rootProject.setTestRetry(it)
@@ -214,6 +214,20 @@ tasks.register('runWebsocketTests', Test) {
     outputs.upToDateWhen { false }
     useJUnitPlatform {
         includeTags "websocket"
+    }
+    maxHeapSize = "4096m"
+    rootProject.setTestRetry(it)
+}
+
+/**
+ * Split around half of the standard tests into a separate CI job.
+ * This allows the CI pipeline to complete faster by running these tests in parallel.
+ */
+tasks.register('runAuthorizedTests', Test) {
+    outputs.upToDateWhen { false }
+    useJUnitPlatform {
+        includeTags "authorized"
+        excludeTags "contextRecreating", "websocket"
     }
     maxHeapSize = "4096m"
     rootProject.setTestRetry(it)

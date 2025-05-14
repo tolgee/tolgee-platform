@@ -6,6 +6,7 @@ import io.tolgee.fixtures.AuthorizedRequestPerformer
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.time.Duration
 import java.util.*
 
+@Tag("authorized")
 abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
 

@@ -17,9 +17,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
+import io.tolgee.testing.ContextRecreatingTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 
