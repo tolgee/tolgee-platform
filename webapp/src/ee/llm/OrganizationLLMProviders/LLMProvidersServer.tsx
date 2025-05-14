@@ -27,7 +27,7 @@ export const LLMProvidersServer = () => {
         <T keyName="llm_providers_server_description" />
       </Box>
       <StyledContainer>
-        {serverProvidersLoadable.data?.items.map((p, i) => (
+        {serverProvidersLoadable.data?._embedded?.providers?.map((p, i) => (
           <LLMProviderItem key={i} provider={p} />
         ))}
       </StyledContainer>

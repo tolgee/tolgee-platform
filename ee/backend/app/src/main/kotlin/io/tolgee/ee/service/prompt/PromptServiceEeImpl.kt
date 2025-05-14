@@ -19,7 +19,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.BasicPromptOption
-import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.PromptVariableType
 import io.tolgee.repository.PromptRepository
 import io.tolgee.service.PromptService
@@ -273,7 +273,7 @@ class PromptServiceEeImpl(
     organizationId: Long,
     params: LLMParams,
     provider: String,
-    priority: LLMProviderPriority?,
+    priority: LlmProviderPriority?,
   ): PromptService.Companion.PromptResult {
     val result =
       try {
@@ -310,7 +310,7 @@ class PromptServiceEeImpl(
   override fun translate(
     projectId: Long,
     data: PromptRunDto,
-    priority: LLMProviderPriority?,
+    priority: LlmProviderPriority?,
   ): MtValueProvider.MtResult {
     val project = projectService.get(projectId)
     val prompt =
@@ -330,7 +330,7 @@ class PromptServiceEeImpl(
   override fun translateAndUpdateTranslation(
     projectId: Long,
     data: PromptRunDto,
-    priority: LLMProviderPriority?,
+    priority: LlmProviderPriority?,
   ) {
     val result = translate(projectId, data, priority)
     val translation = translationService.getOrCreate(data.keyId, data.targetLanguageId)

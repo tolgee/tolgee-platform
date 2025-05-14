@@ -1241,6 +1241,11 @@ export interface components {
       keyIds: number[];
       languageIds: number[];
     };
+    CollectionModelAiPlaygroundResultModel: {
+      _embedded?: {
+        results?: components["schemas"]["AiPlaygroundResultModel"][];
+      };
+    };
     CollectionModelAutoTranslationConfigModel: {
       _embedded?: {
         configs?: components["schemas"]["AutoTranslationConfigModel"][];
@@ -1299,6 +1304,16 @@ export interface components {
     CollectionModelLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["LanguageModel"][];
+      };
+    };
+    CollectionModelLlmProviderModel: {
+      _embedded?: {
+        providers?: components["schemas"]["LlmProviderModel"][];
+      };
+    };
+    CollectionModelLlmProviderSimpleModel: {
+      _embedded?: {
+        providers?: components["schemas"]["LlmProviderSimpleModel"][];
       };
     };
     CollectionModelOrganizationInvitationModel: {
@@ -2939,19 +2954,6 @@ export interface components {
       /** @description Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
     };
-    LLMProviderModel: {
-      apiKey?: string;
-      apiUrl: string;
-      deployment?: string;
-      format?: string;
-      /** Format: int64 */
-      id: number;
-      keepAlive?: string;
-      model?: string;
-      name: string;
-      priority?: "LOW" | "HIGH";
-      type: "OPENAI" | "OPENAI_AZURE";
-    };
     LLMProviderRequest: {
       apiKey?: string;
       apiUrl: string;
@@ -2961,11 +2963,6 @@ export interface components {
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
-      type: "OPENAI" | "OPENAI_AZURE";
-    };
-    LLMProviderSimpleModel: {
-      name: string;
-      source?: string;
       type: "OPENAI" | "OPENAI_AZURE";
     };
     LanguageAiPromptCustomizationModel: {
@@ -3120,6 +3117,24 @@ export interface components {
       /** Format: int64 */
       untranslatedWordCount: number;
     };
+    LlmProviderModel: {
+      apiKey?: string;
+      apiUrl: string;
+      deployment?: string;
+      format?: string;
+      /** Format: int64 */
+      id: number;
+      keepAlive?: string;
+      model?: string;
+      name: string;
+      priority?: "LOW" | "HIGH";
+      type: "OPENAI" | "OPENAI_AZURE";
+    };
+    LlmProviderSimpleModel: {
+      name: string;
+      source?: string;
+      type: "OPENAI" | "OPENAI_AZURE";
+    };
     LoginRequest: {
       otp?: string;
       password: string;
@@ -3220,15 +3235,6 @@ export interface components {
       id: number;
       /** @example homepage */
       name: string;
-    };
-    NonPagedModelAiPlaygroundResultModel: {
-      items: components["schemas"]["AiPlaygroundResultModel"][];
-    };
-    NonPagedModelLLMProviderModel: {
-      items: components["schemas"]["LLMProviderModel"][];
-    };
-    NonPagedModelLLMProviderSimpleModel: {
-      items: components["schemas"]["LLMProviderSimpleModel"][];
     };
     NotificationModel: {
       /** Format: date-time */
@@ -4128,7 +4134,7 @@ export interface components {
       contentDeliveryConfigured: boolean;
       ga4Tag?: string;
       internalControllerEnabled: boolean;
-      llm: components["schemas"]["PublicLLMConfigurationDTO"];
+      llm: components["schemas"]["PublicLlmConfigurationDTO"];
       machineTranslationServices: components["schemas"]["MtServicesDTO"];
       /** Format: int64 */
       maxTranslationTextLength: number;
@@ -4158,7 +4164,7 @@ export interface components {
       organizationName?: string;
       projectName?: string;
     };
-    PublicLLMConfigurationDTO: {
+    PublicLlmConfigurationDTO: {
       enabled: boolean;
     };
     PublicSsoTenantModel: {
@@ -8194,7 +8200,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["NonPagedModelLLMProviderModel"];
+          "application/json": components["schemas"]["CollectionModelLlmProviderModel"];
         };
       };
       /** Bad Request */
@@ -8241,7 +8247,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["LLMProviderModel"];
+          "application/json": components["schemas"]["LlmProviderModel"];
         };
       };
       /** Bad Request */
@@ -8293,7 +8299,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["NonPagedModelLLMProviderSimpleModel"];
+          "application/json": components["schemas"]["CollectionModelLlmProviderSimpleModel"];
         };
       };
       /** Bad Request */
@@ -8340,7 +8346,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["NonPagedModelLLMProviderSimpleModel"];
+          "application/json": components["schemas"]["CollectionModelLlmProviderSimpleModel"];
         };
       };
       /** Bad Request */
@@ -8388,7 +8394,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["LLMProviderModel"];
+          "application/json": components["schemas"]["LlmProviderModel"];
         };
       };
       /** Bad Request */
@@ -10127,7 +10133,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["NonPagedModelAiPlaygroundResultModel"];
+          "application/json": components["schemas"]["CollectionModelAiPlaygroundResultModel"];
         };
       };
       /** Bad Request */

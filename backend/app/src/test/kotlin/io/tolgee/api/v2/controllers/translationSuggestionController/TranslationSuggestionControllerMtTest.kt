@@ -60,7 +60,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   @Autowired
   @MockBean
-  lateinit var llmTranslationProvider: LLMTranslationProvider
+  lateinit var llmTranslationProvider: LlmTranslationProvider
 
   @Autowired
   @MockBean

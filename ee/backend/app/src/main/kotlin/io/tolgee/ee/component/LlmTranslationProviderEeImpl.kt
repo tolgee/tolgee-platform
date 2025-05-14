@@ -2,12 +2,12 @@ package io.tolgee.ee.component
 
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.metadata.MtMetadata
-import io.tolgee.component.machineTranslation.providers.LLMTranslationProvider
+import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.ee.service.prompt.PromptDefaultService
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
-import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.model.enums.LlmProviderPriority
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
@@ -16,11 +16,11 @@ import org.springframework.stereotype.Component
 @Component
 @Primary
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class LLMTranslationProviderEeImpl(
+class LlmTranslationProviderEeImpl(
   private val promptService: PromptServiceEeImpl,
-  private val llmProperties: LLMProperties,
+  private val llmProperties: LlmProperties,
   private val promptDefaultService: PromptDefaultService,
-) : LLMTranslationProvider() {
+) : LlmTranslationProvider() {
   override val isEnabled: Boolean get() = llmProperties.enabled
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
@@ -31,7 +31,7 @@ class LLMTranslationProviderEeImpl(
         metadata.organizationId,
         params = promptParams,
         provider = metadata.provider,
-        priority = if (params.isBatch) LLMProviderPriority.LOW else LLMProviderPriority.HIGH,
+        priority = if (params.isBatch) LlmProviderPriority.LOW else LlmProviderPriority.HIGH,
       )
     return promptService.getTranslationFromPromptResult(result)
   }

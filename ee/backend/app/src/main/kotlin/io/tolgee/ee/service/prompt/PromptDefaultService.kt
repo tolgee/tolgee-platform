@@ -1,11 +1,11 @@
 package io.tolgee.ee.service.prompt
 
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.dtos.request.prompt.PromptDto
 import org.springframework.stereotype.Service
 
 @Service
-class PromptDefaultService(private val llmProperties: LLMProperties) {
+class PromptDefaultService(private val llmProperties: LlmProperties) {
   fun getDefaultPrompt(): PromptDto {
     return PromptDto(
       name = "Default",

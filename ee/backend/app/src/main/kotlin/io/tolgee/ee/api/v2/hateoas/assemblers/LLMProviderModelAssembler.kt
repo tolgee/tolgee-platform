@@ -2,17 +2,17 @@ package io.tolgee.ee.api.v2.hateoas.assemblers
 
 import io.tolgee.dtos.LLMProviderDto
 import io.tolgee.ee.api.v2.controllers.LLMProviderController
-import io.tolgee.hateoas.llmProvider.LLMProviderModel
+import io.tolgee.hateoas.llmProvider.LlmProviderModel
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
-class LLMProviderModelAssembler : RepresentationModelAssemblerSupport<LLMProviderDto, LLMProviderModel>(
+class LLMProviderModelAssembler : RepresentationModelAssemblerSupport<LLMProviderDto, LlmProviderModel>(
   LLMProviderController::class.java,
-  LLMProviderModel::class.java,
+  LlmProviderModel::class.java,
 ) {
-  override fun toModel(entity: LLMProviderDto): LLMProviderModel {
-    return LLMProviderModel(
+  override fun toModel(entity: LLMProviderDto): LlmProviderModel {
+    return LlmProviderModel(
       id = entity.id,
       name = entity.name,
       type = entity.type,

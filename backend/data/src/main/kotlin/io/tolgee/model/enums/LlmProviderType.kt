@@ -1,6 +1,6 @@
 package io.tolgee.model.enums
 
-enum class LLMProviderType {
+enum class LlmProviderType {
   OPENAI,
   OPENAI_AZURE,
 }

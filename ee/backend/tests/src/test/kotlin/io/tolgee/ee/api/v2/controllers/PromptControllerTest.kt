@@ -1,7 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
@@ -10,7 +10,7 @@ import io.tolgee.ee.development.PromptTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,8 +28,8 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     llmProperties.enabled = true
     llmProperties.providers =
       mutableListOf(
-        LLMProperties.LLMProvider(
-          type = LLMProviderType.OPENAI,
+        LlmProperties.LLMProvider(
+          type = LlmProviderType.OPENAI,
           pricePerMillionInput = 2.0,
           pricePerMillionOutput = 2.0,
           apiUrl = "http://test.com"

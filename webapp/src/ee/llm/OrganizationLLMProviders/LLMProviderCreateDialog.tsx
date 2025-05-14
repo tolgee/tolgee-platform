@@ -16,7 +16,7 @@ import { messageService } from 'tg.service/MessageService';
 import {
   getInitialValues,
   getValidationSchema,
-  LLMProviderType,
+  LlmProviderType,
 } from './LLMProviderEdit.tsx/llmProvidersConfig';
 import { useState } from 'react';
 
@@ -38,7 +38,7 @@ type Props = {
 export const LLMProviderCreateDialog = ({ onClose }: Props) => {
   const { t } = useTranslate();
   const organization = useOrganization();
-  const [type, setType] = useState<LLMProviderType>('OPENAI');
+  const [type, setType] = useState<LlmProviderType>('OPENAI');
 
   const createLoadable = useApiMutation({
     url: '/v2/organizations/{organizationId}/llm-providers',

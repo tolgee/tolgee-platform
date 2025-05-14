@@ -3,7 +3,7 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import {
   llmProvidersConfig,
   llmProvidersDefaults,
-  LLMProviderType,
+  LlmProviderType,
   ProviderOptions,
 } from './llmProvidersConfig';
 import { Select } from 'tg.component/common/form/fields/Select';
@@ -18,8 +18,8 @@ const StyledEmpty = styled(Box)`
 `;
 
 type Props = {
-  type: LLMProviderType;
-  onTypeChange: (value: LLMProviderType) => void;
+  type: LlmProviderType;
+  onTypeChange: (value: LlmProviderType) => void;
 };
 
 export const LLMProviderForm = ({ type, onTypeChange }: Props) => {
@@ -33,10 +33,10 @@ export const LLMProviderForm = ({ type, onTypeChange }: Props) => {
       <MuiSelect
         label={t('llm_provider_form_type')}
         value={type}
-        onChange={(e) => onTypeChange(e.target.value as LLMProviderType)}
+        onChange={(e) => onTypeChange(e.target.value as LlmProviderType)}
         size="small"
       >
-        {(Object.keys(globalConfig) as LLMProviderType[]).map((type) => (
+        {(Object.keys(globalConfig) as LlmProviderType[]).map((type) => (
           <MenuItem key={type} value={type}>
             {translateType(type)}
           </MenuItem>

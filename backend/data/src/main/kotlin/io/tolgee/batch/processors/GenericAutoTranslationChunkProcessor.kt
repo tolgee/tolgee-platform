@@ -14,7 +14,7 @@ import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
-import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -65,7 +65,7 @@ class GenericAutoTranslationChunkProcessor(
             provider = llmPrompt.providerName,
             options = llmPrompt.options,
           ),
-          priority = LLMProviderPriority.LOW,
+          priority = LlmProviderPriority.LOW,
         )
       }
     }

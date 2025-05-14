@@ -16,7 +16,7 @@ import io.tolgee.exceptions.*
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
 import io.tolgee.model.batch.params.MachineTranslationJobParams
-import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
@@ -56,7 +56,7 @@ class AiPlaygroundChunkProcessor(
             provider = llmPrompt.providerName,
             options = llmPrompt.options,
           ),
-          priority = LLMProviderPriority.LOW,
+          priority = LlmProviderPriority.LOW,
         )
 
       aiPlaygroundResultService.setResult(

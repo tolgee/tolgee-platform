@@ -2,12 +2,12 @@ import { useTranslate } from '@tolgee/react';
 import { assertUnreachable } from 'tg.fixtures/assertUnreachable';
 import { components } from 'tg.service/apiSchema.generated';
 
-export type LLMProviderModel = components['schemas']['LLMProviderModel'];
-export type LLMProviderType = LLMProviderModel['type'];
+export type LlmProviderModel = components['schemas']['LlmProviderModel'];
+export type LlmProviderType = LlmProviderModel['type'];
 
 export const useLLMProviderTranslation = () => {
   const { t } = useTranslate();
-  return (type: LLMProviderType) => {
+  return (type: LlmProviderType) => {
     switch (type) {
       case 'OPENAI':
         return t('llm_provider_type_openai');

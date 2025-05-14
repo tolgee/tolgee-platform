@@ -3,7 +3,7 @@ package io.tolgee.ee.service
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -15,8 +15,8 @@ import io.tolgee.ee.component.llm.*
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.LLMProvider
-import io.tolgee.model.enums.LLMProviderPriority
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LLMProviderRepository
 import io.tolgee.service.PromptService
 import io.tolgee.service.organization.OrganizationService
@@ -38,7 +38,7 @@ const val TOKEN_PRICE = 0.000_035 // EUR
 class LLMProviderService(
   private val llmProviderRepository: LLMProviderRepository,
   private val organizationService: OrganizationService,
-  private val providerLLMProperties: LLMProperties,
+  private val providerLlmProperties: LlmProperties,
   private val openaiApiService: OpenaiApiService,
   private val ollamaApiService: OllamaApiService,
   private val cacheManager: CacheManager,
@@ -54,7 +54,7 @@ class LLMProviderService(
   fun getProviderByName(
     organizationId: Long,
     name: String,
-    priority: LLMProviderPriority?,
+    priority: LlmProviderPriority?,
   ): LLMProviderDto {
     val customProviders = getAll(organizationId)
     val serverProviders = getAllServerProviders()
@@ -107,7 +107,7 @@ class LLMProviderService(
   fun <T> repeatWhileProvidersRateLimited(
     organizationId: Long,
     provider: String,
-    priority: LLMProviderPriority?,
+    priority: LlmProviderPriority?,
     callback: (provider: LLMProviderDto) -> T,
   ): T {
     var lastError: Exception? = null
@@ -145,7 +145,7 @@ class LLMProviderService(
     organizationId: Long,
     provider: String,
     params: LLMParams,
-    priority: LLMProviderPriority? = null,
+    priority: LlmProviderPriority? = null,
   ): PromptService.Companion.PromptResult {
     return repeatWhileProvidersRateLimited(organizationId, provider, priority) { providerConfig ->
       val providerService = getProviderService(providerConfig.type)
@@ -189,10 +189,10 @@ class LLMProviderService(
     return providerService.translate(params, config, restTemplate)
   }
 
-  fun getProviderService(providerType: LLMProviderType): AbstractLLMApiService {
+  fun getProviderService(providerType: LlmProviderType): AbstractLLMApiService {
     return when (providerType) {
-      LLMProviderType.OPENAI -> openaiApiService
-      LLMProviderType.OPENAI_AZURE -> openaiApiService
+      LlmProviderType.OPENAI -> openaiApiService
+      LlmProviderType.OPENAI_AZURE -> openaiApiService
 //      LLMProviderType.OLLAMA -> ollamaApiService
 //      LLMProviderType.CLAUDE -> claudeApiService
 //      LLMProviderType.GEMINI -> geminiApiService
@@ -260,7 +260,7 @@ class LLMProviderService(
   }
 
   fun getAllServerProviders(): List<LLMProviderDto> {
-    return providerLLMProperties.providers.mapIndexed { index, llmProvider ->
+    return providerLlmProperties.providers.mapIndexed { index, llmProvider ->
       // server configured providers are indexed like -1, -2, -3, to identify them
       llmProvider.toDto(-(index.toLong()) - 1)
     }

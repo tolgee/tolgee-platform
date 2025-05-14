@@ -6,19 +6,19 @@ import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.model.Prompt
-import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.model.enums.LlmProviderPriority
 
 interface PromptService {
   fun translateAndUpdateTranslation(
-    projectId: Long,
-    data: PromptRunDto,
-    priority: LLMProviderPriority?,
+      projectId: Long,
+      data: PromptRunDto,
+      priority: LlmProviderPriority?,
   )
 
   fun translate(
-    projectId: Long,
-    data: PromptRunDto,
-    priority: LLMProviderPriority?,
+      projectId: Long,
+      data: PromptRunDto,
+      priority: LlmProviderPriority?,
   ): MtValueProvider.MtResult
 
   fun findPromptOrDefaultDto(

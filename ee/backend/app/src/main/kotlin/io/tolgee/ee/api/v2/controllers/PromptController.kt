@@ -13,7 +13,7 @@ import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.ee.service.prompt.PromptVariablesService
 import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
-import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -137,7 +137,7 @@ class PromptController(
         organizationId,
         params,
         data.provider,
-        LLMProviderPriority.HIGH,
+        LlmProviderPriority.HIGH,
       )
     return PromptResponseDto(
       prompt,
