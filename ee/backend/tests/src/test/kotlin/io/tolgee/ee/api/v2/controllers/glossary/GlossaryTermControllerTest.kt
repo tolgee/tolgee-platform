@@ -50,11 +50,12 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
     )
       .andIsOk.andAssertThatJson {
         node("_embedded.glossaryTerms") {
-          isArray.hasSize(3)
+          isArray.hasSize(4)
           node("[0].id").isValidId
           node("[0].description").isEqualTo("Forbidden term")
           node("[1].description").isEqualTo("The description")
-          node("[2].description").isEqualTo("Trademark")
+          node("[2].description").isEqualTo("The multiword term")
+          node("[3].description").isEqualTo("Trademark")
         }
       }
   }
@@ -73,7 +74,7 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
     )
       .andIsOk.andAssertThatJson {
         node("_embedded.glossaryTerms") {
-          isArray.hasSize(3)
+          isArray.hasSize(4)
           node("[0].id").isValidId
           node("[0].description").isEqualTo("Forbidden term")
           node("[0].translations") {
@@ -84,8 +85,12 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
             isArray.hasSize(1)
             node("[0].text").isEqualTo("Term")
           }
-          node("[2].description").isEqualTo("Trademark")
+          node("[2].description").isEqualTo("The multiword term")
           node("[2].translations") {
+            isArray.hasSize(2)
+          }
+          node("[3].description").isEqualTo("Trademark")
+          node("[3].translations") {
             isArray.hasSize(1)
             node("[0].text").isEqualTo("Apple")
           }
@@ -107,7 +112,7 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/termsIds")
       .andIsOk.andAssertThatJson {
         node("_embedded.longList") {
-          isArray.hasSize(3)
+          isArray.hasSize(4)
         }
       }
   }
