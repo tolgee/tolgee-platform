@@ -8,13 +8,13 @@ import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.util.nullIfEmpty
 import org.springframework.stereotype.Service
 
-// max sum of lenghts of the examples and close items
-val MAX_EXAMPLES_LENGTH = 2000
-
 @Service
 class LegacyPromptService(
   val promptVariablesService: PromptVariablesService
 ) {
+
+  // max sum of lengths of the examples and close items
+  val MAX_EXAMPLES_LENGTH = 2000
 
   fun getLegacyPrompt(): String {
     return """

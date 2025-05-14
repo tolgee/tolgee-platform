@@ -5,11 +5,7 @@ import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.PromptVariableType
 import org.springframework.stereotype.Service
 
-/**
- * Signifies that model should return json, some models have a property for that
- * others just need a strong wording, so it's up to the provider class to deal with this
- */
-const val LLM_MARK_JSON = "[[output_valid_json]]"
+
 
 @Service
 class PromptFragmentsService {
@@ -195,5 +191,13 @@ class PromptFragmentsService {
     )
 
     return result
+  }
+
+  companion object {
+    /**
+     * Signifies that model should return json, some models have a property for that
+     * others just need a strong wording, so it's up to the provider class to deal with this
+     */
+    val LLM_MARK_JSON = "[[output_valid_json]]"
   }
 }
