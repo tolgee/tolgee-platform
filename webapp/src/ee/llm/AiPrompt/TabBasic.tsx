@@ -52,9 +52,14 @@ export const TabBasic = ({ value, onChange }: Props) => {
 
   const basicPromptItems: PromptItem[] = [
     {
-      id: 'KEY_INFO',
-      label: t('ai_prompt_item_key_info'),
-      hint: t('ai_prompt_item_key_info_hint'),
+      id: 'KEY_NAME',
+      label: t('ai_prompt_item_key_name'),
+      hint: t('ai_prompt_item_key_name_hint'),
+    },
+    {
+      id: 'KEY_DESCRIPTION',
+      label: t('ai_prompt_item_key_description'),
+      hint: t('ai_prompt_item_key_description_hint'),
     },
     {
       id: 'PROJECT_DESCRIPTION',

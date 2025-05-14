@@ -19,7 +19,8 @@ type BasicPromptOption = NonNullable<
 >[number];
 
 const DEFAULT_BASIC_OPTIONS: BasicPromptOption[] = [
-  'KEY_INFO',
+  'KEY_NAME',
+  'KEY_DESCRIPTION',
   'KEY_CONTEXT',
   'LANGUAGE_NOTES',
   'PROJECT_DESCRIPTION',
