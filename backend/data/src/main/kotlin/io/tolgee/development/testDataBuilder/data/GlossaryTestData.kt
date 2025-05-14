@@ -49,6 +49,7 @@ class GlossaryTestData {
           name = "Test Glossary"
           baseLanguageTag = "en"
         }.build {
+          assignProject(project)
           term = addTerm {
             description = "The description"
           }.build {
@@ -83,11 +84,27 @@ class GlossaryTestData {
               text = "zábava"
             }
           }.self
+
+          addTerm {
+            description = "The multiword term"
+            flagAbbreviation = true
+          }.build {
+            addTranslation {
+              languageTag = "en"
+              text = "A.B.C Inc"
+            }
+            addTranslation {
+              languageTag = "cs"
+              text = "A.B.C, s.r.o."
+            }
+          }
         }.self
 
         emptyGlossary = addGlossary {
           name = "Empty Glossary"
           baseLanguageTag = "cs"
+        }.build {
+          assignProject(project)
         }.self
       }
     }
