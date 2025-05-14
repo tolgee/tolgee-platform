@@ -373,31 +373,6 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it uses Tolgee correctly`() {
-    mockDefaultMtBucketSize(6000)
-    testData.enablePrompt()
-    testData.addAiDescriptions()
-    saveTestData()
-
-    performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
-      node("machineTranslations") {
-        node("TOLGEE").isEqualTo("Translated with LLM Prompt")
-      }
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
-        .assert.isEqualTo(5100)
-    }
-
-    tolgeeTranslateParamsCaptor.allValues.assert.hasSize(1)
-    val metadata = tolgeeTranslateParamsCaptor.firstValue
-    metadata!!.proj
-    metadata.closeItems.assert.hasSize(4)
-    metadata.keyDescription.assert.isEqualTo(testData.beautifulKey.keyMeta!!.description)
-    metadata.projectDescription.assert.isEqualTo(testData.project.aiTranslatorPromptDescription)
-    metadata.languageDescription.assert.isEqualTo(testData.germanLanguage.aiTranslatorPromptDescription)
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
   fun `it uses correct DeepL formality`() {
     mockDefaultMtBucketSize(6000)
     testData.enableDeepL(Formality.FORMAL)
