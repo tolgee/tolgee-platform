@@ -4,20 +4,20 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
-import io.tolgee.dtos.LLMParams
-import io.tolgee.dtos.LLMProviderDto
-import io.tolgee.dtos.request.llmProvider.LLMProviderRequest
+import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmProviderDto
+import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.ee.component.llm.*
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.LLMProvider
+import io.tolgee.model.LlmProvider
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
-import io.tolgee.repository.LLMProviderRepository
+import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.PromptService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -35,8 +35,8 @@ import kotlin.math.roundToInt
 const val TOKEN_PRICE = 0.000_035 // EUR
 
 @Service
-class LLMProviderService(
-  private val llmProviderRepository: LLMProviderRepository,
+class LlmProviderService(
+  private val llmProviderRepository: LlmProviderRepository,
   private val organizationService: OrganizationService,
   private val providerLlmProperties: LlmProperties,
   private val openaiApiService: OpenaiApiService,
@@ -55,7 +55,7 @@ class LLMProviderService(
     organizationId: Long,
     name: String,
     priority: LlmProviderPriority?,
-  ): LLMProviderDto {
+  ): LlmProviderDto {
     val customProviders = getAll(organizationId)
     val serverProviders = getAllServerProviders()
     val providersOfTheName =
@@ -100,7 +100,7 @@ class LLMProviderService(
     return provider
   }
 
-  fun getAll(organizationId: Long): List<LLMProviderDto> {
+  fun getAll(organizationId: Long): List<LlmProviderDto> {
     return llmProviderRepository.getAll(organizationId).map { it.toDto() }
   }
 
@@ -108,7 +108,7 @@ class LLMProviderService(
     organizationId: Long,
     provider: String,
     priority: LlmProviderPriority?,
-    callback: (provider: LLMProviderDto) -> T,
+    callback: (provider: LlmProviderDto) -> T,
   ): T {
     var lastError: Exception? = null
 
@@ -144,7 +144,7 @@ class LLMProviderService(
   fun callProvider(
     organizationId: Long,
     provider: String,
-    params: LLMParams,
+    params: LlmParams,
     priority: LlmProviderPriority? = null,
   ): PromptService.Companion.PromptResult {
     return repeatWhileProvidersRateLimited(organizationId, provider, priority) { providerConfig ->
@@ -159,8 +159,8 @@ class LLMProviderService(
   }
 
   fun getFakedResponse(
-    params: LLMParams,
-    config: LLMProviderInterface,
+    params: LlmParams,
+    config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptService.Companion.PromptResult {
     val json =
@@ -178,9 +178,9 @@ class LLMProviderService(
   }
 
   fun getProviderResponse(
-    providerService: AbstractLLMApiService,
-    params: LLMParams,
-    config: LLMProviderInterface,
+    providerService: AbstractLlmApiService,
+    params: LlmParams,
+    config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptService.Companion.PromptResult {
     if (internalProperties.fakeLlmProviders) {
@@ -189,7 +189,7 @@ class LLMProviderService(
     return providerService.translate(params, config, restTemplate)
   }
 
-  fun getProviderService(providerType: LlmProviderType): AbstractLLMApiService {
+  fun getProviderService(providerType: LlmProviderType): AbstractLlmApiService {
     return when (providerType) {
       LlmProviderType.OPENAI -> openaiApiService
       LlmProviderType.OPENAI_AZURE -> openaiApiService
@@ -211,10 +211,10 @@ class LLMProviderService(
 
   fun createProvider(
     organizationId: Long,
-    dto: LLMProviderRequest,
-  ): LLMProviderDto {
+    dto: LlmProviderRequest,
+  ): LlmProviderDto {
     val provider =
-      LLMProvider(
+      LlmProvider(
         name = dto.name,
         type = dto.type,
         priority = dto.priority,
@@ -235,8 +235,8 @@ class LLMProviderService(
   fun updateProvider(
     organizationId: Long,
     providerId: Long,
-    dto: LLMProviderRequest,
-  ): LLMProviderDto {
+    dto: LlmProviderRequest,
+  ): LlmProviderDto {
     val provider = llmProviderRepository.findById(providerId).getOrNull() ?: throw NotFoundException()
     provider.name = dto.name
     provider.type = dto.type
@@ -259,7 +259,7 @@ class LLMProviderService(
     llmProviderRepository.deleteById(providerId)
   }
 
-  fun getAllServerProviders(): List<LLMProviderDto> {
+  fun getAllServerProviders(): List<LlmProviderDto> {
     return providerLlmProperties.providers.mapIndexed { index, llmProvider ->
       // server configured providers are indexed like -1, -2, -3, to identify them
       llmProvider.toDto(-(index.toLong()) - 1)
@@ -267,7 +267,7 @@ class LLMProviderService(
   }
 
   fun calculatePrice(
-    providerConfig: LLMProviderDto,
+    providerConfig: LlmProviderDto,
     usage: PromptResponseUsageDto?,
   ): Int {
     val pricePerTokenInput: Double = (providerConfig.pricePerMillionInput ?: 0.0) / 1_000_000.0

@@ -1,7 +1,7 @@
 import { Box, styled } from '@mui/material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { LLMProviderItem } from './LLMProviderItem';
+import { LlmProviderItem } from './LlmProviderItem';
 import { T } from '@tolgee/react';
 
 const StyledContainer = styled(Box)`
@@ -10,7 +10,7 @@ const StyledContainer = styled(Box)`
   align-items: center;
 `;
 
-export const LLMProvidersServer = () => {
+export const LlmProvidersServer = () => {
   const organization = useOrganization();
 
   const serverProvidersLoadable = useApiQuery({
@@ -28,7 +28,7 @@ export const LLMProvidersServer = () => {
       </Box>
       <StyledContainer>
         {serverProvidersLoadable.data?._embedded?.providers?.map((p, i) => (
-          <LLMProviderItem key={i} provider={p} />
+          <LlmProviderItem key={i} provider={p} />
         ))}
       </StyledContainer>
     </Box>

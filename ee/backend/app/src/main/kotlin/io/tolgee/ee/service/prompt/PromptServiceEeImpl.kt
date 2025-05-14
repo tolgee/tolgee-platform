@@ -10,11 +10,11 @@ import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
-import io.tolgee.dtos.LLMParams
+import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.data.prompt.PromptVariableDto
-import io.tolgee.ee.service.LLMProviderService
+import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Prompt
@@ -47,7 +47,7 @@ class PromptServiceEeImpl(
   private val fileStorage: FileStorage,
   private val screenshotService: ScreenshotService,
   private val promptRepository: PromptRepository,
-  private val providerService: LLMProviderService,
+  private val providerService: LlmProviderService,
   private val promptDefaultService: PromptDefaultService,
   private val promptVariablesService: PromptVariablesService,
   @Lazy
@@ -178,10 +178,10 @@ class PromptServiceEeImpl(
   }
 
   @Transactional
-  fun getLLMParamsFromPrompt(
+  fun getLlmParamsFromPrompt(
     prompt: String,
     keyId: Long?,
-  ): LLMParams {
+  ): LlmParams {
     val key = keyId?.let { keyService.find(it) ?: throw NotFoundException(Message.KEY_NOT_FOUND) }
     var preparedPrompt = prompt
 
@@ -227,19 +227,19 @@ class PromptServiceEeImpl(
               image = fileStorage.readFile(filePath)
             }
 
-            LLMParams.Companion.LlmMessage(
-              type = LLMParams.Companion.LlmMessageType.IMAGE,
+            LlmParams.Companion.LlmMessage(
+              type = LlmParams.Companion.LlmMessageType.IMAGE,
               image = image,
             )
           }
         } else {
-          LLMParams.Companion.LlmMessage(
-            type = LLMParams.Companion.LlmMessageType.TEXT,
+          LlmParams.Companion.LlmMessage(
+            type = LlmParams.Companion.LlmMessageType.TEXT,
             text = it,
           )
         }
       }
-    return LLMParams(messages, shouldOutputJson)
+    return LlmParams(messages, shouldOutputJson)
   }
 
   // Helper function to split and keep matches
@@ -271,7 +271,7 @@ class PromptServiceEeImpl(
 
   fun runPrompt(
     organizationId: Long,
-    params: LLMParams,
+    params: LlmParams,
     provider: String,
     priority: LlmProviderPriority?,
   ): PromptService.Companion.PromptResult {
@@ -322,7 +322,7 @@ class PromptServiceEeImpl(
         data.provider,
         data.options,
       )
-    val params = getLLMParamsFromPrompt(prompt, data.keyId)
+    val params = getLlmParamsFromPrompt(prompt, data.keyId)
     val result = runPrompt(project.organizationOwner.id, params, data.provider, priority)
     return getTranslationFromPromptResult(result)
   }

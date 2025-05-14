@@ -4409,4 +4409,38 @@
     <changeSet author="stepangranat (generated)" id="1747062764275-1">
         <dropColumn columnName="primary_service_formality" tableName="mt_service_config"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747226466743-3">
+        <dropForeignKeyConstraint baseTableName="llmprovider" constraintName="FK2qvq02bh315h5igu9uigrj6ub"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747226466743-1">
+        <createTable tableName="llm_provider">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="llm_providerPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="api_key" type="VARCHAR(255)"/>
+            <column name="api_url" type="VARCHAR(255)"/>
+            <column name="deployment" type="VARCHAR(255)"/>
+            <column name="format" type="VARCHAR(255)"/>
+            <column name="keep_alive" type="VARCHAR(255)"/>
+            <column name="model" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="price_per_million_input" type="FLOAT(53)"/>
+            <column name="price_per_million_output" type="FLOAT(53)"/>
+            <column name="priority" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747226466743-2">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="llm_provider" constraintName="FKtky043854voywcr6m36rpiell" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747226466743-4">
+        <dropTable tableName="llmprovider"/>
+    </changeSet>
 </databaseChangeLog>

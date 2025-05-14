@@ -189,10 +189,10 @@ class TestDataService(
     saveAllMtCreditBuckets(builder)
     saveSlackWorkspaces(builder)
     saveOrganizationTenants(builder)
-    saveLLMProviders(builder)
+    saveLlmProviders(builder)
   }
 
-  private fun saveLLMProviders(builder: TestDataBuilder) {
+  private fun saveLlmProviders(builder: TestDataBuilder) {
     builder.data.organizations.forEach { organizationBuilder ->
       organizationBuilder.data.llmProviders.map { it.self }.forEach {
         entityManager.persist(it)

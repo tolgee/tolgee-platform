@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 
-data class LLMProviderRequest(
+data class LlmProviderRequest(
   var name: String,
   var type: LlmProviderType,
   var apiUrl: String,

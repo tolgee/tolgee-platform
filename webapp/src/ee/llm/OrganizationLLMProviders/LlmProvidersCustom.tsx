@@ -1,10 +1,10 @@
 import { Box, styled } from '@mui/material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { LLMProviderItem } from './LLMProviderItem';
+import { LlmProviderItem } from './LlmProviderItem';
 import { useState } from 'react';
-import { LlmProviderModel } from 'tg.translationTools/useLLMProviderTranslation';
-import { LLMProviderEditDialog } from './LLMProviderEditDialog';
+import { LlmProviderModel } from 'tg.translationTools/useLlmProviderTranslation';
+import { LlmProviderEditDialog } from './LlmProviderEditDialog';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useTranslate } from '@tolgee/react';
 
@@ -15,7 +15,7 @@ const StyledContainer = styled(Box)`
   align-items: center;
 `;
 
-export const LLMProvidersCustom = () => {
+export const LlmProvidersCustom = () => {
   const { t } = useTranslate();
   const [editItem, setEditItem] = useState<LlmProviderModel>();
   const organization = useOrganization();
@@ -39,7 +39,7 @@ export const LLMProvidersCustom = () => {
     <>
       <StyledContainer>
         {providersLoadable.data?._embedded?.providers?.map((p) => (
-          <LLMProviderItem
+          <LlmProviderItem
             key={p.id}
             provider={p}
             onEdit={() => setEditItem(p)}
@@ -47,7 +47,7 @@ export const LLMProvidersCustom = () => {
         ))}
       </StyledContainer>
       {editItem && (
-        <LLMProviderEditDialog
+        <LlmProviderEditDialog
           provider={editItem}
           onClose={() => setEditItem(undefined)}
         />

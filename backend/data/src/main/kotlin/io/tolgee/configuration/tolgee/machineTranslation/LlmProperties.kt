@@ -1,7 +1,7 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
-import io.tolgee.dtos.LLMProviderDto
+import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -9,9 +9,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.llm")
 class LlmProperties {
   var enabled: Boolean = false
-  var providers: MutableList<LLMProvider> = mutableListOf()
+  var providers: MutableList<LlmProvider> = mutableListOf()
 
-  open class LLMProvider(
+  open class LlmProvider(
     @DocProperty("User visible provider name")
     override var name: String = "default",
     @DocProperty("Provider type (OPENAI or OLLAMA)")
@@ -26,9 +26,9 @@ class LlmProperties {
     override var pricePerMillionInput: Double? = null,
     override var pricePerMillionOutput: Double? = null,
     override var attempts: List<Int>? = null,
-  ) : LLMProviderInterface {
-    fun toDto(id: Long): LLMProviderDto {
-      return LLMProviderDto(
+  ) : LlmProviderInterface {
+    fun toDto(id: Long): LlmProviderDto {
+      return LlmProviderDto(
         id = id,
         name = name,
         type = type,

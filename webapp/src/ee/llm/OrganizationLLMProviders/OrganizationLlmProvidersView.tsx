@@ -3,10 +3,10 @@ import { Tabs, Box, styled, Tab } from '@mui/material';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from '../../../views/organizations/useOrganization';
 import { BaseOrganizationSettingsView } from '../../../views/organizations/components/BaseOrganizationSettingsView';
-import { useLLMProvidersViewItems } from './llmProvidersViewItems';
+import { useLlmProvidersViewItems } from './llmProvidersViewItems';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { LLMProviderCreateDialog } from './LLMProviderCreateDialog';
+import { LlmProviderCreateDialog } from './LlmProviderCreateDialog';
 
 const StyledTabs = styled(Tabs)`
   margin-bottom: -1px;
@@ -16,12 +16,12 @@ const StyledTabWrapper = styled(Box)`
   border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
-export const OrganizationLLMProvidersView = () => {
+export const OrganizationLlmProvidersView = () => {
   const organization = useOrganization();
   const { t } = useTranslate();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { ActiveComponent, items, value } = useLLMProvidersViewItems();
+  const { ActiveComponent, items, value } = useLlmProvidersViewItems();
 
   return (
     <BaseOrganizationSettingsView
@@ -64,7 +64,7 @@ export const OrganizationLLMProvidersView = () => {
       </StyledTabWrapper>
       {ActiveComponent && <ActiveComponent />}
       {dialogOpen && (
-        <LLMProviderCreateDialog onClose={() => setDialogOpen(false)} />
+        <LlmProviderCreateDialog onClose={() => setDialogOpen(false)} />
       )}
     </BaseOrganizationSettingsView>
   );

@@ -1,7 +1,7 @@
 import { useTranslate } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
-import { LLMProvidersCustom } from './LLMProvidersCustom';
-import { LLMProvidersServer } from './LLMProvidersServer';
+import { LlmProvidersCustom } from './LlmProvidersCustom';
+import { LlmProvidersServer } from './LlmProvidersServer';
 import { useRouteMatch } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -11,7 +11,7 @@ export type ProviderItem = {
   type: components['schemas']['LlmProviderModel']['type'];
 };
 
-export const useLLMProvidersViewItems = () => {
+export const useLlmProvidersViewItems = () => {
   const { t } = useTranslate();
 
   const items = [
@@ -24,7 +24,7 @@ export const useLLMProvidersViewItems = () => {
       },
       link: LINKS.ORGANIZATION_LLM_PROVIDERS,
       requireExactMath: true,
-      component: LLMProvidersCustom,
+      component: LlmProvidersCustom,
     },
     {
       value: 'server',
@@ -35,7 +35,7 @@ export const useLLMProvidersViewItems = () => {
       },
       link: LINKS.ORGANIZATION_LLM_PROVIDERS_SERVER,
       requireExactMath: true,
-      component: LLMProvidersServer,
+      component: LlmProvidersServer,
     },
   ] as const;
 

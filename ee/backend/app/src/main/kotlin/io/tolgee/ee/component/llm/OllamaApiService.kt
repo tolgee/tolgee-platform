@@ -1,7 +1,7 @@
 package io.tolgee.ee.component.llm
 
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
-import io.tolgee.dtos.LLMParams
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
+import io.tolgee.dtos.LlmParams
 import io.tolgee.service.PromptService
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -16,10 +16,10 @@ import java.util.*
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class OllamaApiService : AbstractLLMApiService(), Logging {
+class OllamaApiService : AbstractLlmApiService(), Logging {
   override fun translate(
-    params: LLMParams,
-    config: LLMProviderInterface,
+    params: LlmParams,
+    config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptService.Companion.PromptResult {
     val headers = HttpHeaders()
@@ -29,16 +29,16 @@ class OllamaApiService : AbstractLLMApiService(), Logging {
 
     if (params.shouldOutputJson) {
       inputMessages.add(
-        LLMParams.Companion.LlmMessage(LLMParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
+        LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
       )
     }
 
     val messages = mutableListOf<RequestMessage>()
 
     inputMessages.forEach {
-      if (it.type == LLMParams.Companion.LlmMessageType.TEXT && it.text != null) {
+      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
         messages.add(RequestMessage(role = "user", content = it.text))
-      } else if (it.type == LLMParams.Companion.LlmMessageType.IMAGE && it.image != null) {
+      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
         messages.add(
           RequestMessage(
             role = "user",

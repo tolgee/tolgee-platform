@@ -1,8 +1,8 @@
 package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
-import io.tolgee.dtos.LLMParams
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
+import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.service.PromptService
 import io.tolgee.util.Logging
@@ -19,10 +19,10 @@ import java.util.*
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class GeminiApiService : AbstractLLMApiService(), Logging {
+class GeminiApiService : AbstractLlmApiService(), Logging {
   override fun translate(
-    params: LLMParams,
-    config: LLMProviderInterface,
+    params: LlmParams,
+    config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptService.Companion.PromptResult {
     val headers = HttpHeaders()
@@ -33,16 +33,16 @@ class GeminiApiService : AbstractLLMApiService(), Logging {
 
     if (params.shouldOutputJson) {
       inputMessages.add(
-        LLMParams.Companion.LlmMessage(LLMParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
+        LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
       )
     }
 
     val contents = mutableListOf<RequestContent>()
 
     inputMessages.forEach {
-      if (it.type == LLMParams.Companion.LlmMessageType.TEXT && it.text != null) {
+      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
         contents.add(RequestContent(parts = listOf(RequestPart(text = it.text!!))))
-      } else if (it.type == LLMParams.Companion.LlmMessageType.IMAGE && it.image != null) {
+      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
         contents.add(
           RequestContent(
             parts =
