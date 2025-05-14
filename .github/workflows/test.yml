@@ -74,7 +74,8 @@ jobs:
         command:
           [
             "server-app:runContextRecreatingTests",
-            "server-app:runStandardTests",
+            "server-app:runStandardJob1Tests",
+            "server-app:runStandardJob2Tests",
             "server-app:runWebsocketTests",
             "server-app:runWithoutEeTests",
             "ee-test:test",
