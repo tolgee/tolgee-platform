@@ -72,3 +72,6 @@ backend/app/src/main/resources/application-js-e2e.properties
 
 ngrok.yml
 ngrok.local.yml
+
+# Local developer workstuff
+/.local
