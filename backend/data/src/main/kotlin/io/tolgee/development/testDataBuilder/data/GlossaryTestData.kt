@@ -21,6 +21,8 @@ class GlossaryTestData {
   lateinit var trademarkTerm: GlossaryTerm
   lateinit var forbiddenTerm: GlossaryTerm
 
+  lateinit var emptyGlossary: Glossary
+
   val root: TestDataBuilder = TestDataBuilder().apply {
     addUserAccount {
       username = "Owner"
@@ -83,10 +85,10 @@ class GlossaryTestData {
           }.self
         }.self
 
-        addGlossary {
+        emptyGlossary = addGlossary {
           name = "Empty Glossary"
           baseLanguageTag = "cs"
-        }
+        }.self
       }
     }
   }
