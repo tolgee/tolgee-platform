@@ -5,6 +5,7 @@ import io.tolgee.component.machineTranslation.metadata.MtMetadata
 import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
+import io.tolgee.dtos.LlmParams
 import io.tolgee.ee.service.prompt.PromptDefaultService
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.model.enums.LlmProviderPriority
@@ -26,12 +27,21 @@ class LlmTranslationProviderEeImpl(
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val metadata = params.metadata ?: throw Error("Metadata are required here")
     val promptParams = promptService.getLlmParamsFromPrompt(metadata.prompt, metadata.keyId)
+    return translate(promptParams, metadata.organizationId, metadata.provider, params.isBatch)
+  }
+
+  fun translate(
+    promptParams: LlmParams,
+    organizationId: Long,
+    provider: String,
+    isBatch: Boolean,
+  ): MtValueProvider.MtResult {
     val result =
       promptService.runPrompt(
-        metadata.organizationId,
+        organizationId,
         params = promptParams,
-        provider = metadata.provider,
-        priority = if (params.isBatch) LlmProviderPriority.LOW else LlmProviderPriority.HIGH,
+        provider = provider,
+        priority = if (isBatch) LlmProviderPriority.LOW else LlmProviderPriority.HIGH,
       )
     return promptService.getTranslationFromPromptResult(result)
   }
