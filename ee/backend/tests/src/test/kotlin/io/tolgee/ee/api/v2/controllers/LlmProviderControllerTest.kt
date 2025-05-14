@@ -33,9 +33,9 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
     performAuthGet(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/all-available",
     ).andIsOk.andAssertThatJson {
-      node("items").isArray.hasSize(2)
-      node("items[0].name").isEqualTo("organization-provider")
-      node("items[1].name").isEqualTo("default")
+      node("_embedded.providers").isArray.hasSize(2)
+      node("_embedded.providers[0].name").isEqualTo("organization-provider")
+      node("_embedded.providers[1].name").isEqualTo("default")
     }
   }
 
@@ -52,9 +52,9 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
     performAuthGet(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/server-providers",
     ).andIsOk.andAssertThatJson {
-      node("items").isArray.hasSize(1)
-      node("items[0].name").isEqualTo("default")
-      node("items[0].type").isEqualTo("OPENAI")
+      node("_embedded.providers").isArray.hasSize(1)
+      node("_embedded.providers[0].name").isEqualTo("default")
+      node("_embedded.providers[0].type").isEqualTo("OPENAI")
     }
   }
 
@@ -63,8 +63,8 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
     performAuthGet(
       "/v2/organizations/${testData.organization.self.id}/llm-providers",
     ).andIsOk.andAssertThatJson {
-      node("items").isArray.hasSize(1)
-      node("items[0].name").isEqualTo("organization-provider")
+      node("_embedded.providers").isArray.hasSize(1)
+      node("_embedded.providers[0].name").isEqualTo("organization-provider")
     }
   }
 

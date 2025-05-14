@@ -4443,4 +4443,7 @@
     <changeSet author="stepangranat (generated)" id="1747226466743-4">
         <dropTable tableName="llmprovider"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747239477130-1">
+        <dropColumn columnName="prompt_formality" tableName="mt_service_config"/>
+    </changeSet>
 </databaseChangeLog>
