@@ -25,7 +25,6 @@ import { LanguageItem } from '../../../../component/languages/LanguageItem';
 import {
   StyledLanguageTable,
   TABLE_CENTERED,
-  TABLE_FIRST_CELL,
   TABLE_TOP_ROW,
 } from '../../../../component/languages/tableStyles';
 import { FormalityType, RowData, ServiceType } from './types';
@@ -71,6 +70,22 @@ const StyledSettings = styled('div')`
   display: flex;
   flex-direction: column;
   margin: ${({ theme }) => theme.spacing(0.5, 1)};
+`;
+
+const StyledLabelCell = styled(Box)`
+  display: grid;
+  gap: 8px;
+  align-items: center;
+  min-height: 50px;
+  grid-column-start: 1;
+  padding: ${({ theme }) => theme.spacing(1, 0, 1, 2)};
+`;
+
+const StyledCell = styled(Box)`
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
 `;
 
 const FORMALITY_VALUES = ['DEFAULT', 'FORMAL', 'INFORMAL'] as const;
@@ -287,7 +302,7 @@ export const LanguageSettingsDialog = ({
                   ({ type, languageSupported, formalitySupported }) => {
                     return (
                       <React.Fragment key={type}>
-                        <Box className={TABLE_FIRST_CELL} gap={2}>
+                        <StyledLabelCell>
                           <ServiceLabel
                             name={getServiceName(type)}
                             icon={getServiceImg(type, false)}
@@ -313,8 +328,8 @@ export const LanguageSettingsDialog = ({
                               })}
                             </Select>
                           )}
-                        </Box>
-                        <div className={TABLE_CENTERED}>
+                        </StyledLabelCell>
+                        <StyledCell>
                           <Radio
                             data-cy="mt-language-dialog-primary-radio"
                             data-cy-service={type}
@@ -323,8 +338,8 @@ export const LanguageSettingsDialog = ({
                             onClick={() => setPrimary(type)}
                             disabled={!languageSupported}
                           />
-                        </div>
-                        <div className={TABLE_CENTERED}>
+                        </StyledCell>
+                        <StyledCell>
                           {languageSupported && (
                             <Checkbox
                               data-cy="mt-language-dialog-enabled-checkbox"
@@ -337,8 +352,8 @@ export const LanguageSettingsDialog = ({
                               onClick={() => toggleService(type)}
                             />
                           )}
-                        </div>
-                        <div className={TABLE_CENTERED}>
+                        </StyledCell>
+                        <StyledCell>
                           {formalitySupported ? (
                             <Select
                               data-cy="mt-language-dialog-formality-select"
@@ -371,7 +386,7 @@ export const LanguageSettingsDialog = ({
                               {t('project_mt_dialog_formality_not_supported')}
                             </StyledFormalityHint>
                           )}
-                        </div>
+                        </StyledCell>
                       </React.Fragment>
                     );
                   }
