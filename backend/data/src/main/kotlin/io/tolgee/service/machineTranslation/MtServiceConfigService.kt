@@ -328,6 +328,20 @@ class MtServiceConfigService(
     }
   }
 
+  @Transactional
+  fun removePrompt(
+    projectEntity: Project,
+    promptId: Long,
+  ) {
+    val data = getProjectSettings(projectEntity)
+    data.forEach { entity ->
+      if (entity.prompt?.id == promptId) {
+        entity.prompt = null
+        save(entity)
+      }
+    }
+  }
+
   private fun getDefaultConfig(project: Project): MtServiceConfig {
     return MtServiceConfig().apply {
       enabledServices =
