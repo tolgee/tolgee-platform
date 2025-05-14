@@ -24,7 +24,7 @@ import {
 import { useState } from 'react';
 import { getPreselectedLanguages } from 'tg.views/projects/translations/BatchOperations/getPreselectedLanguages';
 
-const AI_PLAYGROUND_TAG = 'ai-playground';
+export const AI_PLAYGROUND_TAG = 'ai-playground';
 
 const StyledList = styled('ol')`
   padding-left: 20px;
@@ -170,16 +170,12 @@ export const PreviewDatasetDialog = ({
         {keysLoadable.isLoading ? null : taggedKeys?.length ? (
           <>
             <Button onClick={onClose}>{t('global_cancel_button')}</Button>
-            <Button
-              onClick={handleRunBatch}
-              color="primary"
-              variant="contained"
-            >
+            <Button onClick={handleRunBatch} color="primary">
               {t('ai_prompt_dataset_run')}
             </Button>
           </>
         ) : (
-          <Button variant="contained" color="primary" onClick={onClose}>
+          <Button color="primary" onClick={onClose}>
             {t('ai_prompt_dataset_got_it')}
           </Button>
         )}
