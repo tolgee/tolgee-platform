@@ -5,8 +5,6 @@ import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.PromptVariableType
 import org.springframework.stereotype.Service
 
-
-
 @Service
 class PromptFragmentsService {
   fun getAllFragments(): MutableList<Variable> {
