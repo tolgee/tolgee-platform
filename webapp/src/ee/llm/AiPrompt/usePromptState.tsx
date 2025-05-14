@@ -46,7 +46,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
   const [value, setValue] = useState('');
 
   function getPromptType(prompt: PromptItem) {
-    if (!prompt.id && !isEnabled('AI_PROMPT_CUSTOMIZATION')) {
+    if (!prompt.id) {
       return 'basic';
     }
     return typeof prompt.template === 'string' ? 'advanced' : 'basic';
@@ -135,7 +135,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
     setValue(item.template || openPromptLoadable.defaultTemplate || '');
     setOptions(item.options ?? DEFAULT_BASIC_OPTIONS);
     if (!tab || overrideTab) {
-      if (!item.id && !isEnabled('AI_PROMPT_CUSTOMIZATION')) {
+      if (item.id === undefined) {
         setTab('basic');
       } else {
         setTab(getPromptType(item));
