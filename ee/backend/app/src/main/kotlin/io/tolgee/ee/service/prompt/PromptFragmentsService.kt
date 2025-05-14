@@ -37,7 +37,7 @@ class PromptFragmentsService {
         All translations are part of software product, don't transform them into sentences.
         
         {{#if target.isCJK}}
-        Add space between {{target.language}} characters and latin words
+        Add space between {{target.languageName}} characters and latin words
         {{/if}}
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
@@ -113,7 +113,7 @@ class PromptFragmentsService {
         If message includes ICU parameters in curly braces, don't modify the parameter names.
         {{#with target.pluralFormExamples}}
         Translate ICU message plural forms, these are examples of source strings with placeholder replaced with example number
-        for {{ target.language }}:
+        for {{target.languageName}}:
         {{this}}
         
         Please include exactly these forms in the response exactly in this order: {{target.exactForms}}. So it will look like this:
@@ -160,7 +160,7 @@ class PromptFragmentsService {
       Variable(
         "translationInfo",
         """
-        Translate "{{source.translation}}" from {{source.language}} to {{target.language}}.
+        Translate "{{source.translation}}" from {{source.languageName}} to {{target.languageName}}.
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
       ),
