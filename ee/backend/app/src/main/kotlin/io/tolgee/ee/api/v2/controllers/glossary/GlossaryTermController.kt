@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
+import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.SimpleGlossaryTermModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.SimpleGlossaryTermWithTranslationsModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermModel
 import io.tolgee.ee.api.v2.hateoas.model.glossary.SimpleGlossaryTermModel
 import io.tolgee.ee.api.v2.hateoas.model.glossary.SimpleGlossaryTermWithTranslationsModel
 import io.tolgee.ee.data.glossary.CreateGlossaryTermWithTranslationRequest
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.*
 @Tag(name = "Glossary term")
 class GlossaryTermController(
   private val glossaryTermService: GlossaryTermService,
+  private val glossaryTermModelAssembler: GlossaryTermModelAssembler,
   private val simpleGlossaryTermModelAssembler: SimpleGlossaryTermModelAssembler,
   private val simpleGlossaryTermWithTranslationsModelAssembler: SimpleGlossaryTermWithTranslationsModelAssembler,
   private val glossaryTermTranslationModelAssembler: GlossaryTermTranslationModelAssembler,
@@ -135,14 +138,14 @@ class GlossaryTermController(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
     @PathVariable termId: Long,
-  ): SimpleGlossaryTermModel {
+  ): GlossaryTermModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
     )
 
     val glossaryTerm = glossaryTermService.get(organizationId, glossaryId, termId)
-    return simpleGlossaryTermModelAssembler.toModel(glossaryTerm)
+    return glossaryTermModelAssembler.toModel(glossaryTerm)
   }
 
   @GetMapping("/terms")

@@ -40,9 +40,10 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       and te.glossary.organizationOwner.deletedAt is null
       and te.glossary.id = :glossaryId
       and te.glossary.deletedAt is null
-      and (:search is null or
+      and (
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
-        lower(tr.text) like lower(concat('%', coalesce(:search, '') , '%'))
+        lower(tr.text) like lower(concat('%', coalesce(:search, '') , '%')) or
+        :search is null
       )
   """,
   )
@@ -62,9 +63,9 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       and (:languageTags is null or tr.languageTag in :languageTags)
     where te.glossary = :glossary
       and (
-        :search is null or
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
-        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%'))
+        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%')) or
+        :search is null
       )
   """,
   )
@@ -84,9 +85,9 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       and (:languageTags is null or tr.languageTag in :languageTags)
     where te.glossary = :glossary
       and (
-        :search is null or
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
-        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%'))
+        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%')) or
+        :search is null
       )
   """,
   )
@@ -105,9 +106,9 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       and (:languageTags is null or tr.languageTag in :languageTags)
     where te.glossary = :glossary
       and (
-        :search is null or
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
-        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%'))
+        lower(tr.text) like lower(concat('%', coalesce(:search, ''), '%')) or
+        :search is null
       )
   """,
   )

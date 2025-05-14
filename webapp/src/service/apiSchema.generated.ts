@@ -8540,7 +8540,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["SimpleGlossaryTermModel"];
+          "application/json": components["schemas"]["GlossaryTermModel"];
         };
       };
       /** Bad Request */
