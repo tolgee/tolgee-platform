@@ -118,6 +118,7 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
     val request = UpdateGlossaryRequest().apply {
       name = "Updated Glossary"
       baseLanguageTag = "de"
+//      assignedProjects TODO test too
     }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsOk.andAssertThatJson {
