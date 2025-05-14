@@ -22,12 +22,15 @@ import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LLMProviderPriority
 import io.tolgee.model.enums.PromptVariableType
 import io.tolgee.repository.PromptRepository
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.ImageConverter
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -48,6 +51,8 @@ class PromptServiceEeImpl(
   private val providerService: LLMProviderService,
   private val promptDefaultService: PromptDefaultService,
   private val promptVariablesService: PromptVariablesService,
+  @Lazy
+  private val mtServiceConfigService: MtServiceConfigService,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -116,6 +121,8 @@ class PromptServiceEeImpl(
     promptId: Long,
   ) {
     val prompt = this.findPrompt(projectId, promptId)
+    val project = projectService.get(projectId)
+    mtServiceConfigService.removePrompt(project, prompt.id)
     promptRepository.delete(prompt)
   }
 
