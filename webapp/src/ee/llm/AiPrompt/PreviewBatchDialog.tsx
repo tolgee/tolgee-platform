@@ -100,16 +100,18 @@ export const PreviewBatchDialog = ({
           onChange={setSelectedLangs}
           languagePermission="translations.edit"
         />
-        <Alert color="warning" icon={false}>
-          <T
-            keyName="ai_prompt_batch_dialog_many_keys_warning"
-            params={{
-              highlight: (value) => <Chip label={value} size="small" />,
-              tagName: AI_PLAYGROUND_TAG,
-              link: <Link href="https://docs.tolgee.io" target="_blank" />,
-            }}
-          />
-        </Alert>
+        {numberOfKeys > 10 && (
+          <Alert color="warning" icon={false}>
+            <T
+              keyName="ai_prompt_batch_dialog_many_keys_warning"
+              params={{
+                highlight: (value) => <Chip label={value} size="small" />,
+                tagName: AI_PLAYGROUND_TAG,
+                link: <Link href="https://docs.tolgee.io" target="_blank" />,
+              }}
+            />
+          </Alert>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('global_cancel_button')}</Button>
