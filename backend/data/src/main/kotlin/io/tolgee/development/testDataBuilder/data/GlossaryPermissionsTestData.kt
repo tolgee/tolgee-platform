@@ -1,0 +1,77 @@
+package io.tolgee.development.testDataBuilder.data
+
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.model.Organization
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.glossary.Glossary
+import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.model.glossary.GlossaryTermTranslation
+
+class GlossaryPermissionsTestData {
+  lateinit var userOwner: UserAccount
+  lateinit var userMaintainer: UserAccount
+  lateinit var userMember: UserAccount
+  lateinit var userBystander: UserAccount
+
+  lateinit var organization: Organization
+  lateinit var project: Project
+  lateinit var glossary: Glossary
+  lateinit var term: GlossaryTerm
+  lateinit var translation: GlossaryTermTranslation
+
+  val root: TestDataBuilder = TestDataBuilder().apply {
+    addUserAccount {
+      username = "Owner"
+    }.build {
+      userOwner = self
+
+      project = addProject(defaultOrganizationBuilder.self) {
+        name = "TheProject"
+      }.self
+
+      defaultOrganizationBuilder.build {
+        organization = self
+
+        addRole {
+          user = addUserAccount {
+            username = "Maintainer"
+          }.build {
+            userMaintainer = self
+          }.self
+          type = OrganizationRoleType.MAINTAINER
+        }
+
+        addRole {
+          user = addUserAccount {
+            username = "Member"
+          }.build {
+            userMember = self
+          }.self
+          type = OrganizationRoleType.MEMBER
+        }
+
+        // Add a bystander user (not in the organization)
+        userBystander = addUserAccount {
+          username = "Bystander"
+        }.self
+
+        glossary = addGlossary {
+          name = "Test Glossary"
+          baseLanguageTag = "en"
+        }.build {
+          assignProject(project)
+          term = addTerm {
+            description = "The description"
+          }.build {
+            translation = addTranslation {
+              languageTag = "en"
+              text = "Term"
+            }.self
+          }.self
+        }.self
+      }
+    }
+  }
+}
