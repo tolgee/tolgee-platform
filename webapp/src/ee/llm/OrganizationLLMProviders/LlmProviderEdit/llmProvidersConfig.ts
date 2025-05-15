@@ -3,7 +3,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import * as Yup from 'yup';
 
 export type LlmProviderModel = components['schemas']['LlmProviderModel'];
-export type LlmProviderType = LlmProviderModel['type'];
+export type LlmProviderType = Exclude<LlmProviderModel['type'], 'TOLGEE'>;
 type LlmProviderRequest = components['schemas']['LlmProviderRequest'];
 
 export type ProviderOptions = {

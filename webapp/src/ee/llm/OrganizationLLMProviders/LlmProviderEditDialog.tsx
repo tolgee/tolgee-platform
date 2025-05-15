@@ -7,7 +7,7 @@ import {
   styled,
 } from '@mui/material';
 import { Formik } from 'formik';
-import { LlmProviderForm } from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit.tsx/LlmProviderForm';
+import { LlmProviderForm } from './LlmProviderEdit/LlmProviderForm';
 import { T, useTranslate } from '@tolgee/react';
 import { LoadingButton } from '@mui/lab';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -18,7 +18,7 @@ import {
   getValidationSchema,
   LlmProviderModel,
   LlmProviderType,
-} from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit.tsx/llmProvidersConfig';
+} from './LlmProviderEdit/llmProvidersConfig';
 import { useState } from 'react';
 
 const StyledDialogContent = styled(DialogContent)`
@@ -40,7 +40,9 @@ type Props = {
 export const LlmProviderEditDialog = ({ onClose, provider }: Props) => {
   const { t } = useTranslate();
   const organization = useOrganization();
-  const [type, setType] = useState<LlmProviderType>(provider.type);
+  const [type, setType] = useState<LlmProviderType>(
+    provider.type as Exclude<LlmProviderType, 'TOLGEE'>
+  );
 
   const updateLoadable = useApiMutation({
     url: '/v2/organizations/{organizationId}/llm-providers/{providerId}',

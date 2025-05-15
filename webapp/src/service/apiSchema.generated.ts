@@ -3117,7 +3117,7 @@ export interface components {
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
-      type: "OPENAI" | "OPENAI_AZURE";
+      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE";
     };
     LlmProviderRequest: {
       apiKey?: string;
@@ -3128,12 +3128,12 @@ export interface components {
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
-      type: "OPENAI" | "OPENAI_AZURE";
+      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE";
     };
     LlmProviderSimpleModel: {
       name: string;
       source?: string;
-      type: "OPENAI" | "OPENAI_AZURE";
+      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE";
     };
     LoginRequest: {
       otp?: string;

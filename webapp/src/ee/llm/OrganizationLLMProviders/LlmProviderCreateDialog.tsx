@@ -7,7 +7,7 @@ import {
   styled,
 } from '@mui/material';
 import { Formik } from 'formik';
-import { LlmProviderForm } from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit.tsx/LlmProviderForm';
+import { LlmProviderForm } from './LlmProviderEdit/LlmProviderForm';
 import { T, useTranslate } from '@tolgee/react';
 import { LoadingButton } from '@mui/lab';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -17,7 +17,7 @@ import {
   getInitialValues,
   getValidationSchema,
   LlmProviderType,
-} from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit.tsx/llmProvidersConfig';
+} from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit/llmProvidersConfig';
 import { useState } from 'react';
 
 const StyledDialogContent = styled(DialogContent)`
