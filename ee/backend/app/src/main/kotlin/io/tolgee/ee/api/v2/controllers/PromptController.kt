@@ -130,14 +130,13 @@ class PromptController(
         data.provider,
         data.options,
       )
-    val params = promptService.getLlmParamsFromPrompt(prompt, data.keyId)
+    val params = promptService.getLlmParamsFromPrompt(prompt, data.keyId, LlmProviderPriority.HIGH)
     val organizationId = projectHolder.project.organizationOwnerId
     val response =
       promptService.runPrompt(
         organizationId,
         params,
-        data.provider,
-        LlmProviderPriority.HIGH,
+        data.provider
       )
     return PromptResponseDto(
       prompt,
