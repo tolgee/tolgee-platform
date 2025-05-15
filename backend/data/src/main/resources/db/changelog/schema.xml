@@ -4446,4 +4446,10 @@
     <changeSet author="stepangranat (generated)" id="1747239477130-1">
         <dropColumn columnName="prompt_formality" tableName="mt_service_config"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747301738286-1">
+        <dropColumn columnName="price_per_million_input" tableName="llm_provider"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747301738286-2">
+        <dropColumn columnName="price_per_million_output" tableName="llm_provider"/>
+    </changeSet>
 </databaseChangeLog>
