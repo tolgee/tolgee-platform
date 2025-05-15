@@ -62,7 +62,12 @@ Tolgee is organized into several key components:
    - Integration tests should be used for testing complex interactions
    - **Do not run** all tests locally - like `./gradlew test` as it takes too long;
      instead, push changes and let the CI pipeline run tests
-     or run locally single test file to test specific feature you have just modified
+     or run locally a single test file to test specific feature you have just modified
+   - While writing tests,
+     if you encounter server returning 500 code
+     or some function crashing without a good reason,
+     don't be afraid to fix the underlying issue;
+     don't just modify test to make it pass if the behavior is clearly wrong
    - Use TestData classes for setting up test data:
      ```kotlin
      // Example of using a TestData class in a test
@@ -339,4 +344,4 @@ Tolgee is organized into several key components:
    - Never update translation files with new keys
    - Freely use nonexistent translation keys in the codebase,
      their translation will be handled outside of codebase
-     and the keys will be added to the translation files automatically after the changes are merged to main branch
+     and the keys will be added to the translation files automatically after the changes are merged to the main branch
