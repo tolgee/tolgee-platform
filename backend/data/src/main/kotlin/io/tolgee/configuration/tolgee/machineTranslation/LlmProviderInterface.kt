@@ -27,8 +27,8 @@ interface LlmProviderInterface {
   var format: String?
 
   // pricing
-  var pricePerMillionInput: Double?
-  var pricePerMillionOutput: Double?
+  var tokenPriceInCreditsInput: Double?
+  var tokenPriceInCreditsOutput: Double?
 
   @DocProperty(description = "List of attempts (values are timeouts in seconds)")
   var attempts: List<Int>?

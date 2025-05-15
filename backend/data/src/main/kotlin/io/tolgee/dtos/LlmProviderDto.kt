@@ -16,8 +16,8 @@ data class LlmProviderDto(
   override var deployment: String?,
   override var keepAlive: String?,
   override var format: String?,
-  override var pricePerMillionInput: Double?,
-  override var pricePerMillionOutput: Double?,
+  override var tokenPriceInCreditsInput: Double?,
+  override var tokenPriceInCreditsOutput: Double?,
   override var attempts: List<Int>?,
 ) : LlmProviderInterface {
   @JsonSetter("type")
