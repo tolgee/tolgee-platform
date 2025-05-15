@@ -52,13 +52,6 @@ class AutoTranslateChunkProcessor(
     request: AutoTranslationRequest,
     projectId: Long?,
   ): Int {
-    projectId ?: throw IllegalArgumentException("Project id is required")
-    val languageIds = request.target.map { it.languageId }.distinct()
-    val project = projectService.getDto(projectId)
-    val services = mtServiceConfigService.getPrimaryServices(languageIds, project.id).values.toSet()
-//    if (!services.mapNotNull { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
-//      return 5
-//    }
     return 2
   }
 
