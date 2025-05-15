@@ -16,7 +16,7 @@ interface LlmProviderInterface {
 
   // general
   var apiKey: String?
-  var apiUrl: String
+  var apiUrl: String?
   var model: String?
 
   // openai only

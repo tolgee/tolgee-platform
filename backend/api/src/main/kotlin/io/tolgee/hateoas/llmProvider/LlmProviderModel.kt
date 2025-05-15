@@ -12,7 +12,7 @@ open class LlmProviderModel(
   var type: LlmProviderType,
   var priority: LlmProviderPriority?,
   var apiKey: String?,
-  var apiUrl: String,
+  var apiUrl: String?,
   var model: String?,
   var deployment: String?,
   var keepAlive: String?,

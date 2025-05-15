@@ -19,6 +19,7 @@ import io.tolgee.model.LlmProvider
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
+import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.cache.Cache
@@ -36,7 +37,7 @@ import kotlin.math.roundToInt
 class LlmProviderService(
   private val llmProviderRepository: LlmProviderRepository,
   private val organizationService: OrganizationService,
-  private val providerLlmProperties: LlmProperties,
+  private val llmPropertiesService: LlmPropertiesService,
   private val openaiApiService: OpenaiApiService,
   private val tolgeeApiService: TolgeeApiService,
   private val ollamaApiService: OllamaApiService,
@@ -258,7 +259,7 @@ class LlmProviderService(
   }
 
   fun getAllServerProviders(): List<LlmProviderDto> {
-    return providerLlmProperties.providers.mapIndexed { index, llmProvider ->
+    return llmPropertiesService.getProviders().mapIndexed { index, llmProvider ->
       // server configured providers are indexed like -1, -2, -3, to identify them
       llmProvider.toDto(-(index.toLong()) - 1)
     }
