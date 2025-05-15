@@ -121,6 +121,8 @@ export const tasks = generateTestDataObject('task');
 
 export const batchJobs = generateTestDataObject('batch-jobs');
 
+export const glossaryTestData = generateTestDataObject('glossary');
+
 export const notificationTestData = generateTestDataObject('notification');
 
 export const authProviderChange = generateTestDataObject(
