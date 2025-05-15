@@ -41,6 +41,7 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Primary
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)

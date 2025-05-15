@@ -24,6 +24,7 @@ export function useFeatures() {
     PROJECT_LEVEL_CONTENT_STORAGES: t(
       'billing_subscriptions_project_level_content_storages'
     ),
+    GLOSSARY: t('billing_subscriptions_glossary'),
 
     ACCOUNT_MANAGER: t('billing_subscriptions_account_manager_feature'),
     DEDICATED_SLACK_CHANNEL: t('billing_subscriptions_dedicated_slack_channel'),

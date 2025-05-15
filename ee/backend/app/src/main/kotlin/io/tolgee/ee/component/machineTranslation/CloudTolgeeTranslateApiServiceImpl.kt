@@ -43,6 +43,18 @@ class CloudTolgeeTranslateApiServiceImpl(
     val closeItems =
       params.metadata?.closeItems?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
     val examples = params.metadata?.examples?.map { item -> TolgeeTranslateExample(item.key, item.source, item.target) }
+    val glossary =
+      params.metadata?.glossaryTerms?.map { item ->
+        TolgeeTranslateGlossaryItem(
+          item.source,
+          item.target,
+          item.description,
+          item.isNonTranslatable,
+          item.isCaseSensitive,
+          item.isAbbreviation,
+          item.isForbiddenTerm,
+        )
+      }
 
     val requestBody =
       TolgeeTranslateRequest(
@@ -52,6 +64,7 @@ class CloudTolgeeTranslateApiServiceImpl(
         params.sourceTag,
         params.targetTag,
         examples,
+        glossary,
         closeItems,
         priority = if (params.isBatch) "low" else "high",
         params.formality,
@@ -130,6 +143,7 @@ class CloudTolgeeTranslateApiServiceImpl(
       val source: String,
       val target: String?,
       val examples: List<TolgeeTranslateExample>?,
+      val glossary: List<TolgeeTranslateGlossaryItem>?,
       val closeItems: List<TolgeeTranslateExample>?,
       val priority: String = "low",
       val formality: Formality? = null,
@@ -143,6 +157,16 @@ class CloudTolgeeTranslateApiServiceImpl(
       var keyName: String,
       var source: String,
       var target: String,
+    )
+
+    class TolgeeTranslateGlossaryItem(
+      var source: String,
+      var target: String? = null,
+      var description: String? = null,
+      var isNonTranslatable: Boolean? = null,
+      var isCaseSensitive: Boolean? = null,
+      var isAbbreviation: Boolean? = null,
+      var isForbiddenTerm: Boolean? = null,
     )
 
     class TolgeeTranslateResponse(val output: String, val contextDescription: String?)

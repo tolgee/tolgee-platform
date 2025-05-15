@@ -32,7 +32,7 @@ export const SimpleList = <
     };
     renderItem: (item: DataItem) => ReactNode;
     itemSeparator?: () => ReactNode;
-    getKey?: (item: DataItem) => any;
+    getKey?: (item: DataItem) => React.Key;
   } & OverridableListWrappers<WrapperComponent, ListComponent>
 ) => {
   const { data, pagination } = props;

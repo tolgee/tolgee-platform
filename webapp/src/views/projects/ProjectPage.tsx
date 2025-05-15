@@ -17,10 +17,7 @@ export const ProjectPage: FunctionComponent = ({ children }) => {
   const isAdminAccess = project.computedPermission.origin === 'SERVER_ADMIN';
 
   return (
-    <DashboardPage
-      isAdminAccess={isAdminAccess}
-      fixedContent={<ProjectMenu id={project.id} />}
-    >
+    <DashboardPage isAdminAccess={isAdminAccess} fixedContent={<ProjectMenu />}>
       <StyledContent>{children}</StyledContent>
     </DashboardPage>
   );

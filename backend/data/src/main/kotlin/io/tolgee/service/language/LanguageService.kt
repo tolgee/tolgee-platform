@@ -6,6 +6,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.cacheable.OrganizationLanguageDto
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.language.LanguageFilters
 import io.tolgee.exceptions.NotFoundException
@@ -343,6 +344,14 @@ class LanguageService(
     filters: LanguageFilters?,
   ): Page<LanguageDto> {
     return this.languageRepository.findAllByProjectId(projectId, pageable, filters ?: LanguageFilters())
+  }
+
+  fun getPagedByOrganization(
+    organizationId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<OrganizationLanguageDto> {
+    return this.languageRepository.findAllByOrganizationId(organizationId, pageable, search)
   }
 
   fun findByIdIn(ids: Iterable<Long>): List<Language> {

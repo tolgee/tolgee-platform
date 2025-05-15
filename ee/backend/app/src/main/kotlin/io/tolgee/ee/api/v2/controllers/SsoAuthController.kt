@@ -11,6 +11,7 @@ import io.tolgee.ee.data.SsoUrlResponse
 import io.tolgee.service.TenantService
 import org.springframework.web.bind.annotation.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @RequestMapping("/api/public")
 @AuthenticationTag
