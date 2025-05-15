@@ -1,8 +1,6 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
-import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.configuration.annotations.DocProperty
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType

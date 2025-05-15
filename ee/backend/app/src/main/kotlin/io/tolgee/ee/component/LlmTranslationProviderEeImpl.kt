@@ -4,7 +4,6 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.metadata.MtMetadata
 import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.dtos.LlmParams
 import io.tolgee.ee.service.prompt.PromptDefaultService
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
