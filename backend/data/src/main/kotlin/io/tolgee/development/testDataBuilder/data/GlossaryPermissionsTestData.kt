@@ -5,6 +5,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
@@ -14,6 +15,7 @@ class GlossaryPermissionsTestData {
   lateinit var userMaintainer: UserAccount
   lateinit var userMember: UserAccount
   lateinit var userBystander: UserAccount
+  lateinit var userProjectTranslator: UserAccount
 
   lateinit var organization: Organization
   lateinit var project: Project
@@ -27,8 +29,17 @@ class GlossaryPermissionsTestData {
     }.build {
       userOwner = self
 
+      userProjectTranslator = addUserAccount {
+        username = "ProjectTranslator"
+      }.self
+
       project = addProject(defaultOrganizationBuilder.self) {
         name = "TheProject"
+      }.build {
+        addPermission {
+          user = userProjectTranslator
+          type = ProjectPermissionType.VIEW
+        }
       }.self
 
       defaultOrganizationBuilder.build {
