@@ -11,6 +11,7 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.data.prompt.PromptVariableDto
@@ -276,7 +277,7 @@ class PromptServiceEeImpl(
     organizationId: Long,
     params: LlmParams,
     provider: String,
-  ): PromptService.Companion.PromptResult {
+  ): PromptResult {
     val result =
       try {
         providerService.callProvider(organizationId, provider, params, params.priority)
@@ -296,7 +297,7 @@ class PromptServiceEeImpl(
     return result
   }
 
-  fun getTranslationFromPromptResult(result: PromptService.Companion.PromptResult): MtValueProvider.MtResult {
+  fun getTranslationFromPromptResult(result: PromptResult): MtValueProvider.MtResult {
     val json = result.parsedJson ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
     val translation = json.get("output")?.asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
 

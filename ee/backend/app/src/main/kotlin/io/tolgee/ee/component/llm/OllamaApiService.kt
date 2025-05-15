@@ -2,7 +2,7 @@ package io.tolgee.ee.component.llm
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
-import io.tolgee.service.PromptService
+import io.tolgee.dtos.PromptResult
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -21,7 +21,7 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
     params: LlmParams,
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
-  ): PromptService.Companion.PromptResult {
+  ): PromptResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
 
@@ -65,7 +65,7 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
         request,
       )
 
-    return PromptService.Companion.PromptResult(
+    return PromptResult(
       response.body?.message?.content ?: throw RuntimeException(response.toString()),
       usage = null,
     )

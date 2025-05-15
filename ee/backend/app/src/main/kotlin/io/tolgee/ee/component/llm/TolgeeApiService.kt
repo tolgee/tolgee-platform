@@ -1,8 +1,8 @@
 package io.tolgee.ee.component.llm
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
-import io.tolgee.service.PromptService
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -24,7 +24,7 @@ class TolgeeApiService(
     params: LlmParams,
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
-  ): PromptService.Companion.PromptResult {
+  ): PromptResult {
     val licenseKey =
       subscriptionService.findSubscriptionDto()?.licenseKey ?: throw IllegalStateException("Not Subscribed")
     val headers = HttpHeaders()
@@ -36,7 +36,7 @@ class TolgeeApiService(
     val url = "${config.apiUrl}/v2/public/llm/prompt"
 
     val response =
-      restTemplate.exchange<PromptService.Companion.PromptResult>(
+      restTemplate.exchange<PromptResult>(
         url,
         HttpMethod.POST,
         request,
