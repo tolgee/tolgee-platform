@@ -68,6 +68,9 @@ Tolgee is organized into several key components:
      or some function crashing without a good reason,
      don't be afraid to fix the underlying issue;
      don't just modify test to make it pass if the behavior is clearly wrong
+   - Avoid repeating yourself—if every test in the file needs a special piece of code to test something,
+     maybe it is time to implement a helper function for it;
+     Try to keep these helper functions outside the tests themselves so they can be reused between different test files
    - Use TestData classes for setting up test data:
      ```kotlin
      // Example of using a TestData class in a test
