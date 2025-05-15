@@ -146,4 +146,31 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
         }
       }
   }
+
+  @Test
+  fun `get all languages in use`() {
+    val testData = PermissionsTestData()
+    val organization = testData.organizationBuilder.self
+    testDataService.saveTestData(testData.root)
+    loginAsUser("member@member.com")
+
+    println(testData.projectBuilder.self.organizationOwner.id)
+    println(organization.id)
+    performAuthGet("/v2/organizations/${organization.id}/languages")
+      .andIsOk.andPrettyPrint.andAssertThatJson {
+        node("_embedded.languages") {
+          isArray.hasSize(3)
+          // Order is important
+          node("[0].name").isEqualTo("English")
+          node("[0].tag").isEqualTo("en")
+          node("[0].base").isEqualTo(true)
+          node("[1].name").isEqualTo("Czech")
+          node("[1].tag").isEqualTo("cs")
+          node("[1].base").isEqualTo(false)
+          node("[2].name").isEqualTo("German")
+          node("[2].tag").isEqualTo("de")
+          node("[2].base").isEqualTo(false)
+        }
+      }
+  }
 }
