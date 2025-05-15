@@ -20,7 +20,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.util.*
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class RecaptchaValidationDisabledTest : AbstractSpringTest() {
   @Autowired
   lateinit var reCaptchaValidationService: ReCaptchaValidationService

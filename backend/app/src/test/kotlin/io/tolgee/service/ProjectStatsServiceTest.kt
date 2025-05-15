@@ -6,7 +6,9 @@ import io.tolgee.service.project.ProjectStatsService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 internal class ProjectStatsServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var projectStatsService: ProjectStatsService

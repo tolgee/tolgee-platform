@@ -5,7 +5,9 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Pageable
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class SoftDeleteTest : AbstractSpringTest() {
   @Test
   fun `project is soft deleted`() {

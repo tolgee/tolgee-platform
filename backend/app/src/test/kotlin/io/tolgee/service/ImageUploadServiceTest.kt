@@ -19,7 +19,9 @@ import org.springframework.core.io.InputStreamSource
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class ImageUploadServiceTest : AbstractSpringTest() {
   val screenshotFile: InputStreamSource by lazy {
     generateImage(100, 100)
