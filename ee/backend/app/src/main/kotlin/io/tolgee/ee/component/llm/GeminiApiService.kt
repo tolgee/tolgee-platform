@@ -51,7 +51,7 @@ class GeminiApiService : AbstractLlmApiService(), Logging {
                   inlineData =
                     RequestInlineData(
                       mimeType = "image/png",
-                      data = Base64.getEncoder().encodeToString(it.image),
+                      data = it.image!!,
                     ),
                 ),
               ),

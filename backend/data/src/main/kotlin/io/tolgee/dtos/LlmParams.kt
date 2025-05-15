@@ -13,7 +13,7 @@ class LlmParams(
     class LlmMessage(
       val type: LlmMessageType,
       var text: String? = null,
-      val image: ByteArray? = null,
+      val image: String? = null,
     )
   }
 }

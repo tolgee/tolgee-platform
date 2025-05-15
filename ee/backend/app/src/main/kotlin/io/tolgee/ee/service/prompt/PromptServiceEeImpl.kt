@@ -37,6 +37,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestClientException
 import java.io.ByteArrayInputStream
+import java.util.*
+import kotlin.collections.AbstractMap
 
 @Primary
 @Service
@@ -229,7 +231,7 @@ class PromptServiceEeImpl(
 
             LlmParams.Companion.LlmMessage(
               type = LlmParams.Companion.LlmMessageType.IMAGE,
-              image = image,
+              image = Base64.getEncoder().encodeToString(image),
             )
           }
         } else {
