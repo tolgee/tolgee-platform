@@ -299,7 +299,7 @@ class PromptServiceEeImpl(
     return result
   }
 
-  fun <T>rateLimitToStatus(func: () -> T): T {
+  fun <T> rateLimitToStatus(func: () -> T): T {
     return try {
       func()
     } catch (e: BadRequestException) {
