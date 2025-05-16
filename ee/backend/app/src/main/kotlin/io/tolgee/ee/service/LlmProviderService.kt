@@ -55,6 +55,7 @@ class LlmProviderService(
     name: String,
     priority: LlmProviderPriority?,
   ): LlmProviderDto {
+
     val customProviders = getAll(organizationId)
     val serverProviders = getAllServerProviders()
     val providersOfTheName =
@@ -86,6 +87,7 @@ class LlmProviderService(
           true
         }
       }
+
     if (providers.isEmpty() && providerInfo?.suspendMap?.isNotEmpty() != null) {
       val closestUnsuspend = providerInfo.suspendMap.map { (_, time) -> time }.min()
       throw TranslationApiRateLimitException(closestUnsuspend)
@@ -121,7 +123,7 @@ class LlmProviderService(
         lastError = e
       }
     }
-    throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(lastError!!.message), lastError!!)
+    throw BadRequestException(Message.LLM_RATE_LIMITED, listOf(lastError!!.message), lastError)
   }
 
   fun <T> repeatWithTimeouts(
@@ -144,12 +146,12 @@ class LlmProviderService(
     organizationId: Long,
     provider: String,
     params: LlmParams,
-    priority: LlmProviderPriority? = null,
+    attempts: List<Int>? = null,
   ): PromptResult {
-    return repeatWhileProvidersRateLimited(organizationId, provider, priority) { providerConfig ->
+    return repeatWhileProvidersRateLimited(organizationId, provider, params.priority) { providerConfig ->
       val providerService = getProviderService(providerConfig.type)
-      val attempts = providerConfig.attempts ?: providerService.defaultAttempts()
-      repeatWithTimeouts(attempts) { restTemplate ->
+      val resolvedAttempts = attempts ?: providerConfig.attempts ?: providerService.defaultAttempts()
+      repeatWithTimeouts(resolvedAttempts) { restTemplate ->
         val result = getProviderResponse(providerService, params, providerConfig, restTemplate)
         result.price = if (result.price != 0) result.price else calculatePrice(providerConfig, result.usage)
         result

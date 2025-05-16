@@ -18,6 +18,7 @@ import io.tolgee.ee.data.prompt.PromptVariableDto
 import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.TooManyRequestsException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LlmProviderPriority
@@ -277,14 +278,15 @@ class PromptServiceEeImpl(
     organizationId: Long,
     params: LlmParams,
     provider: String,
+    attempts: List<Int>? = null,
   ): PromptResult {
     val result =
       try {
-        providerService.callProvider(organizationId, provider, params, params.priority)
+        providerService.callProvider(organizationId, provider, params, attempts)
       } catch (e: RestClientException) {
-        throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message))
+        throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
       } catch (e: TranslationApiRateLimitException) {
-        throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message))
+        throw BadRequestException(Message.LLM_RATE_LIMITED, listOf(e.message), e)
       }
 
     result.parsedJson =
@@ -295,6 +297,18 @@ class PromptServiceEeImpl(
       }
 
     return result
+  }
+
+  fun <T>rateLimitToStatus(func: () -> T): T {
+    return try {
+      func()
+    } catch (e: BadRequestException) {
+      if (e.tolgeeMessage == Message.LLM_RATE_LIMITED) {
+        throw TooManyRequestsException(Message.TOO_MANY_REQUESTS, cause = e)
+      } else {
+        throw e
+      }
+    }
   }
 
   fun getTranslationFromPromptResult(result: PromptResult): MtValueProvider.MtResult {
