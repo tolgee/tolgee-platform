@@ -1,8 +1,13 @@
 package io.tolgee.ee.component.llm
+
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
+import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -10,6 +15,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException.BadRequest
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
 
@@ -35,13 +41,27 @@ class TolgeeApiService(
 
     val url = "${config.apiUrl}/v2/public/llm/prompt"
 
-    val response =
+    val response = try {
       restTemplate.exchange<PromptResult>(
         url,
         HttpMethod.POST,
         request,
       )
+    } catch (e: BadRequest) {
+      extractTolgeeErrorOrThrow(e)
+    }
 
-    return response.body ?: throw IllegalStateException("Response body is null")
+    return response.body ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf("Empty response body"))
+  }
+
+  fun extractTolgeeErrorOrThrow(e: BadRequest): Nothing {
+    if (!e.responseBodyAsString.isNullOrBlank()) {
+      val json = jacksonObjectMapper().readValue(e.responseBodyAsString, JsonNode::class.java)
+      val eCode = json.get("code")?.runCatching { this.asText() }?.getOrNull()
+      val eParams = json.get("params")?.runCatching { this.asIterable().map { it.asText() } }?.getOrNull()
+      val message = eCode?.runCatching { Message.valueOf(this.uppercase()) }?.getOrNull()
+      message?.let { throw BadRequestException(message, params = eParams, e) }
+    }
+    throw e
   }
 }
