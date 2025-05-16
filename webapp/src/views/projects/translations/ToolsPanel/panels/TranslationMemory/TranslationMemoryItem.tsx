@@ -42,6 +42,8 @@ const StyledItem = styled('div')`
 const StyledTarget = styled('div')`
   grid-area: target;
   font-size: 15px;
+  overflow-wrap: break-word;
+  overflow: hidden;
 `;
 
 const StyledBase = styled('div')`
@@ -49,6 +51,8 @@ const StyledBase = styled('div')`
   font-style: italic;
   color: ${({ theme }) => theme.palette.text.secondary};
   font-size: 13px;
+  overflow-wrap: break-word;
+  overflow: hidden;
 
   & .placeholder-widget {
     font-size: 11px;

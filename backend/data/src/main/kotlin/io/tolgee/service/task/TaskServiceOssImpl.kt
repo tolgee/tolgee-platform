@@ -1,6 +1,5 @@
 package io.tolgee.service.task
 
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class TaskServiceOssImpl : ITaskService {
   override fun deleteAll(tasks: List<Task>) {
-    throw BadRequestException("Not implemented")
+    throw UnsupportedOperationException("Not included in OSS")
   }
 
   override fun findAssigneeById(
@@ -38,6 +37,6 @@ class TaskServiceOssImpl : ITaskService {
   }
 
   override fun getAgencyTasks(agencyId: Long): List<Task> {
-    throw BadRequestException("Not implemented")
+    throw UnsupportedOperationException("Not included in OSS")
   }
 }

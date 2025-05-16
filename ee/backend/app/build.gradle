@@ -99,6 +99,11 @@ dependencies {
      */
     implementation 'org.apache.poi:poi-ooxml:5.3.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
+
+    /**
+     * HANDLEBARS
+     */
+    implementation('com.github.jknack:handlebars:4.4.0')
 }
 
 kotlin {

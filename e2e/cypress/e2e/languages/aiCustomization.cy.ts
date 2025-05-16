@@ -50,6 +50,6 @@ describe('Machine translation settings', () => {
   });
 
   const visit = () => {
-    cy.visit(`${HOST}/projects/${project.id}/languages/ai`);
+    cy.visit(`${HOST}/projects/${project.id}/ai/context-data`);
   };
 });

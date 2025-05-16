@@ -12,6 +12,8 @@ import {
   useGlobalActions,
   useGlobalContext,
 } from 'tg.globalContext/GlobalContext';
+import { TranslationsTaskDetail, TaskAllDonePlaceholder } from 'tg.ee';
+import { EmptyState } from 'tg.component/common/EmptyState';
 
 import {
   useTranslationsActions,
@@ -25,10 +27,8 @@ import { BaseProjectView } from '../BaseProjectView';
 import { TranslationsToolbar } from './TranslationsToolbar';
 import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperationsChangeIndicator';
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
-import { TranslationsTaskDetail } from 'tg.ee';
-import { TaskAllDonePlaceholder } from 'tg.ee';
-import { EmptyState } from 'tg.component/common/EmptyState';
 import { countFilters } from './TranslationFilters/summary';
+import { AiPlayground } from './ToolsPanel/AiPlayground';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -36,7 +36,7 @@ const StyledContainer = styled('div')`
 `;
 
 export const Translations = () => {
-  const { setQuickStartOpen, setRightPanelFloatingForced } = useGlobalActions();
+  const { setQuickStartOpen, setQuickStartFloatingForced } = useGlobalActions();
   const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const { t } = useTranslate();
@@ -92,10 +92,10 @@ export const Translations = () => {
   // hide quick start panel
   useEffect(() => {
     if (sidePanelWidth && quickStartEnabled) {
-      setRightPanelFloatingForced(true);
+      setQuickStartFloatingForced(true);
       setQuickStartOpen(true);
       return () => {
-        setRightPanelFloatingForced(false);
+        setQuickStartFloatingForced(false);
       };
     }
   }, [sidePanelWidth, quickStartEnabled]);
@@ -160,6 +160,7 @@ export const Translations = () => {
         ],
       ]}
       wrapperProps={{ style: { paddingBottom: 0, paddingTop: '3px' } }}
+      rightPanelContent={(width) => <AiPlayground width={width} />}
     >
       <BatchOperationsChangeIndicator />
       <TranslationsHeader />

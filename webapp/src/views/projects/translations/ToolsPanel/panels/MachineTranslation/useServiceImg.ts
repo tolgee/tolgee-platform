@@ -15,10 +15,8 @@ export const useServiceImg = () => {
         return `/images/providers/azure-cognitive-logo.svg`;
       case 'BAIDU':
         return `/images/providers/baidu-icon.svg`;
-      case 'TOLGEE':
-        return contextPresent
-          ? `/images/providers/tolgee-logo-${palette.mode}-in-context.svg`
-          : `/images/providers/tolgee-logo-${palette.mode}.svg`;
+      case 'PROMPT':
+        return `/images/providers/llm-logo-${palette.mode}.svg`;
       default:
         return undefined;
     }

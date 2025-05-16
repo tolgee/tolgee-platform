@@ -8,6 +8,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { ProjectPage } from './ProjectPage';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -64,5 +65,9 @@ export const TaskRedirect = () => {
     );
   }, []);
 
-  return <BoxLoading />;
+  return (
+    <ProjectPage>
+      <BoxLoading />
+    </ProjectPage>
+  );
 };

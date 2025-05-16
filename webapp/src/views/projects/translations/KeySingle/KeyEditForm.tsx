@@ -1,4 +1,4 @@
-import { Box, Button, styled, useMediaQuery } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -20,10 +20,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { FloatingToolsPanel } from '../ToolsPanel/FloatingToolsPanel';
 
 const StyledContainer = styled('div')`
@@ -67,7 +64,6 @@ const StyledActions = styled('div')`
 `;
 
 export const KeyEditForm: React.FC = () => {
-  const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
@@ -82,9 +78,9 @@ export const KeyEditForm: React.FC = () => {
   const languages = useTranslationsSelector((c) => c.languages);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const history = useHistory();
-
-  const isSmall = useMediaQuery(`@media (max-width: ${800}px)`);
-  const toolsPanelOpen = translationOpen && !isSmall;
+  const sidePanelWidth = useTranslationsSelector(
+    (c) => c.layout.sidePanelWidth
+  );
 
   const urlId = useUrlSearch().id as string | undefined;
   const [_urlKey, setUrlKey] = useUrlSearchState('key');
@@ -259,11 +255,9 @@ export const KeyEditForm: React.FC = () => {
           )}
         </StyledActions>
       </StyledContainer>
-      {toolsPanelOpen && (
+      {translationOpen && Boolean(sidePanelWidth) && (
         <Box ml="-1px" mt="25px">
-          <FloatingToolsPanel
-            width={Math.min(Math.max(bodyWidth * 0.24, 300), 500)}
-          />
+          <FloatingToolsPanel width={sidePanelWidth} />
         </Box>
       )}
     </Box>

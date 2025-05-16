@@ -60,6 +60,8 @@ class ProjectBuilder(
     val batchJobs: MutableList<BatchJobBuilder> = mutableListOf()
     val tasks = mutableListOf<TaskBuilder>()
     val taskKeys = mutableListOf<TaskKeyBuilder>()
+    val prompts = mutableListOf<PromptBuilder>()
+    val aiPlaygroundResults = mutableListOf<AiPlaygroundResultBuilder>()
   }
 
   var data = DATA()
@@ -203,6 +205,10 @@ class ProjectBuilder(
   fun setImportSettings(ft: FT<ImportSettings>) {
     data.importSettings = ImportSettings(this.self).apply(ft)
   }
+
+  fun addPrompt(ft: FT<Prompt>) = addOperation(data.prompts, ft)
+
+  fun addAiPlaygroundResult(ft: FT<AiPlaygroundResult>) = addOperation(data.aiPlaygroundResults, ft)
 
   val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
 

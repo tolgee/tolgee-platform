@@ -47,6 +47,7 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     googleMachineTranslationProperties.defaultEnabled = true
     googleMachineTranslationProperties.defaultPrimary = true
     googleMachineTranslationProperties.apiKey = "dummy"
+    llmProperties.enabled = true
   }
 
   @Test
@@ -183,7 +184,7 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
           MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.germanLanguage.id,
             primaryService = MtServiceType.AWS,
-            primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL),
+            primaryServiceInfo = MtServiceInfo(MtServiceType.AWS, Formality.FORMAL, promptId = null),
           ),
         ),
       ),
@@ -203,14 +204,14 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
     performSet(testData.englishLanguage, MtServiceType.AWS, Formality.FORMAL).andIsBadRequest
     performSet(testData.germanLanguage, MtServiceType.AWS, Formality.FORMAL).andIsOk
     performSet(testData.germanLanguage, MtServiceType.AWS, Formality.DEFAULT).andIsOk
-    performSet(testData.germanLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
-    performSet(testData.englishLanguage, MtServiceType.TOLGEE, Formality.FORMAL).andIsOk
+    performSet(testData.germanLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsBadRequest
+    performSet(testData.englishLanguage, MtServiceType.PROMPT, Formality.FORMAL).andIsBadRequest
     performSet(
       MachineTranslationLanguagePropsDto(
         testData.englishLanguage.id,
-        primaryServiceInfo = MtServiceInfo(MtServiceType.TOLGEE, Formality.FORMAL),
+        primaryServiceInfo = MtServiceInfo(MtServiceType.PROMPT, Formality.FORMAL),
       ),
-    ).andIsOk
+    ).andIsBadRequest
   }
 
   private fun performSet(

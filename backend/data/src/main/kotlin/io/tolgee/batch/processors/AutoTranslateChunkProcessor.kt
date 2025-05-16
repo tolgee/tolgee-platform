@@ -5,7 +5,6 @@ import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.AutoTranslationRequest
-import io.tolgee.constants.MtServiceType
 import io.tolgee.model.batch.params.AutoTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
@@ -53,13 +52,6 @@ class AutoTranslateChunkProcessor(
     request: AutoTranslationRequest,
     projectId: Long?,
   ): Int {
-    projectId ?: throw IllegalArgumentException("Project id is required")
-    val languageIds = request.target.map { it.languageId }.distinct()
-    val project = projectService.getDto(projectId)
-    val services = mtServiceConfigService.getPrimaryServices(languageIds, project.id).values.toSet()
-    if (!services.mapNotNull { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
-      return 5
-    }
     return 2
   }
 

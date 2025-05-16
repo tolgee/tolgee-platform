@@ -42,7 +42,7 @@ export const PlanLimitPopoverSpendingLimitExceeded: React.FC<Props> = ({
 
       <DialogActions>
         <Button
-          data-cy="global-confirmation-cancel"
+          data-cy="spending-limit-dialog-close"
           onClick={onClose}
           type="button"
           color="secondary"
