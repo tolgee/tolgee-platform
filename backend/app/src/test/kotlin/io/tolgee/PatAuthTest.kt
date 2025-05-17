@@ -13,7 +13,9 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import java.util.*
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class PatAuthTest : AbstractControllerTest() {
   @Test
   fun `user authorizes with PAT`() {

@@ -8,7 +8,9 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class KeyControllerResolvableImportAutomationsTest : MachineTranslationTest() {
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L

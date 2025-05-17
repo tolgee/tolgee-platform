@@ -14,7 +14,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: TranslationsTestData
 

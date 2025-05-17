@@ -14,7 +14,9 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import java.util.function.Consumer
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:import/simple.json")
   lateinit var simpleJson: Resource

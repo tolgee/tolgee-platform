@@ -30,10 +30,12 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.web.servlet.ResultActions
 import java.util.function.Consumer
 
+@SpringBootTest
 class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: ContentDeliveryConfigTestData
 

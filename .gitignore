@@ -75,3 +75,7 @@ ngrok.local.yml
 
 # Local developer workstuff
 /.local
+
+# IDEs and tools
+.cursorrules
+.cursorignore

@@ -21,9 +21,11 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
 
+@SpringBootTest
 class EeTolgeeTranslatorSuggestingTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: SuggestionTestData
 

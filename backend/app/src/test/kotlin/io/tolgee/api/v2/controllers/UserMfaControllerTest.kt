@@ -18,7 +18,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class UserMfaControllerTest : AuthorizedControllerTest() {
   companion object {
     private const val TOTP_KEY = "meowmeowmeowmeow"

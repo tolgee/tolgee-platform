@@ -10,7 +10,9 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class V2ImportControllerManipulationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `it deletes import`() {

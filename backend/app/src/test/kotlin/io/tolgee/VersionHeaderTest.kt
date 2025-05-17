@@ -6,7 +6,9 @@ import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class VersionHeaderTest : AbstractControllerTest() {
   @Test
   fun `adds header on endpoints`() {

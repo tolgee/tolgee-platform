@@ -12,7 +12,9 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.system.measureTimeMillis
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class TranslationSuggestionControllerTmTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 

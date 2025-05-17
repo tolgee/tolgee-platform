@@ -15,7 +15,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.time.measureTime
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
   lateinit var testData: BigMetaTestData
 

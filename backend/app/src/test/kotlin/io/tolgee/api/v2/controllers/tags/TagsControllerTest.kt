@@ -14,7 +14,9 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TagsTestData
 

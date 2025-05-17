@@ -8,7 +8,9 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
   lateinit var testData: OrganizationTestData
 

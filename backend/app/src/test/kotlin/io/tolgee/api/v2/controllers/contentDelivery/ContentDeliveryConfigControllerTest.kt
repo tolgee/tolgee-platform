@@ -21,7 +21,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 @ContextRecreatingTest
 class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: ContentDeliveryConfigTestData

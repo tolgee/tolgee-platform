@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.MvcResult
@@ -28,6 +29,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.HashMap
 import kotlin.collections.get
 
+@SpringBootTest
 class AuthProviderChangeTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var authProviderChangeService: AuthProviderChangeService

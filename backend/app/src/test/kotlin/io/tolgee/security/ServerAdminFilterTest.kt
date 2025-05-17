@@ -5,8 +5,10 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
+@SpringBootTest
 @Transactional
 class ServerAdminFilterTest : AuthorizedControllerTest() {
   @Test

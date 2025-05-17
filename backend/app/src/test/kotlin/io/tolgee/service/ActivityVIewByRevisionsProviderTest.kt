@@ -7,7 +7,9 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class ActivityVIewByRevisionsProviderTest : ProjectAuthControllerTest() {
   @Test
   fun `it returns limited number of modified entities`() {

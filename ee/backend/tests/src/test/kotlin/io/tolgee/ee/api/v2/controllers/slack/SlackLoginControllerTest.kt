@@ -17,9 +17,11 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 
 @ContextRecreatingTest
+@SpringBootTest
 class SlackLoginControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var slackUserConnectionService: SlackUserConnectionService

@@ -13,7 +13,9 @@ import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class BatchPreTranslateByTmTest : Logging, ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var batchJobTestBase: BatchJobTestBase

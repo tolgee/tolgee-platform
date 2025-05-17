@@ -17,7 +17,9 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   lateinit var initialScreenshotUrl: String

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpMethod
@@ -38,7 +39,8 @@ import kotlin.reflect.jvm.javaMethod
     "tolgee.ee.scheduled-reporting-enabled=true",
   ],
 )
-class ScheduledUsageReportingTest : AbstractSpringTest() {
+@SpringBootTest
+open class ScheduledUsageReportingTest : AbstractSpringTest() {
   companion object {
     @BeforeAll
     @JvmStatic

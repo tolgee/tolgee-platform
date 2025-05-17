@@ -57,7 +57,6 @@ import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.test.web.servlet.ResultActions
@@ -69,8 +68,7 @@ import java.time.Duration
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
-abstract class AbstractSpringTest : AbstractTransactionalTest() {
+open abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
 

@@ -13,7 +13,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {

@@ -4,8 +4,10 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
+@SpringBootTest
 @Transactional
 class ProjectPermissionFilterTest : AuthorizedControllerTest() {
   @Test

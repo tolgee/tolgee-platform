@@ -5,7 +5,9 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.testing.AbstractControllerTest
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class ExportInfoControllerTest : AbstractControllerTest() {
   @Test
   fun `returns formats`() {

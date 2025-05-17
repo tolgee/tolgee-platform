@@ -18,7 +18,9 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 

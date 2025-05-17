@@ -24,8 +24,10 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import java.util.stream.Collectors
+import org.springframework.boot.test.context.SpringBootTest
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest
 class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   lateinit var initialFileStorageUrl: String
 

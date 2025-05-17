@@ -37,8 +37,10 @@ import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 import java.util.*
+import org.springframework.boot.test.context.SpringBootTest
 import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
+@SpringBootTest
 class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 
