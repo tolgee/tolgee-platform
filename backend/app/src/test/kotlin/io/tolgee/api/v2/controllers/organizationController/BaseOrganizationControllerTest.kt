@@ -8,7 +8,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.BeforeEach
 
-class BaseOrganizationControllerTest : AuthorizedControllerTest() {
+open class BaseOrganizationControllerTest : AuthorizedControllerTest() {
   protected lateinit var dummyDto: OrganizationDto
   protected lateinit var dummyDto2: OrganizationDto
 

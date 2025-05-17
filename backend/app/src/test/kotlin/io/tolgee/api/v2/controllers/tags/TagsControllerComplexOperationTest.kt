@@ -8,7 +8,9 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.time.measureTime
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TagsTestData
 

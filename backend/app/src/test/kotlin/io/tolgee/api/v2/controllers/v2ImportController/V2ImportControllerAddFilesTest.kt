@@ -22,7 +22,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 @Transactional
 class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:import/zipOfJsons.zip")

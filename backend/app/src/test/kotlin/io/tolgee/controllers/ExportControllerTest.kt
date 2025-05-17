@@ -17,7 +17,9 @@ import java.io.ByteArrayInputStream
 import java.util.function.Consumer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class ExportControllerTest : ProjectAuthControllerTest() {
   @Test
   @Transactional

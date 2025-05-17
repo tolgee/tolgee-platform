@@ -14,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.ResultActions
 import java.util.function.Consumer
+import org.springframework.boot.test.context.SpringBootTest
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
+@SpringBootTest
 class BatchMoveToNamespaceTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var batchJobOperationQueue: BatchJobChunkExecutionQueue

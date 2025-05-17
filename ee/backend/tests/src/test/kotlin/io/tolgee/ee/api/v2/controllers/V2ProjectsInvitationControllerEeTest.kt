@@ -15,7 +15,9 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/projects/") {
   val invitationTestUtil: InvitationTestUtil by lazy {
     InvitationTestUtil(this, applicationContext)

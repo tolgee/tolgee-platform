@@ -11,7 +11,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class NotificationControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var notificationRepository: NotificationRepository

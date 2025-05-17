@@ -7,7 +7,9 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class SlugControllerTest : AuthorizedControllerTest() {
   @Test
   fun testValidateOrganizationSlug() {

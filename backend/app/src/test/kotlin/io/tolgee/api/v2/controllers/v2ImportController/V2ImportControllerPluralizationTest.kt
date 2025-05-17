@@ -7,7 +7,9 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class V2ImportControllerPluralizationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: ImportPluralizationTestData
 

@@ -26,8 +26,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import kotlin.properties.Delegates
+import org.springframework.boot.test.context.SpringBootTest
 
 @AutoConfigureMockMvc
+@SpringBootTest
 class PublicControllerTest :
   AbstractControllerTest() {
   private var canCreateOrganizations by Delegates.notNull<Boolean>()

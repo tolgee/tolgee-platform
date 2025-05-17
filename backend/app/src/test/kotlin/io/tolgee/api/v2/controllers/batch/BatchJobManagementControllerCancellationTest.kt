@@ -33,7 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
   lateinit var testData: BatchJobsTestData
 
