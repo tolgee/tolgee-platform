@@ -75,6 +75,7 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
       onClick={
         editEnabled && !isEditingTerm ? () => setIsEditingTerm(true) : undefined
       }
+      data-cy="glossary-term-list-item"
     >
       <StyledCheckbox
         size="small"
