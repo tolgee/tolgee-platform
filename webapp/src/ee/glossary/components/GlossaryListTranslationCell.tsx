@@ -134,6 +134,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
           editing: isEditing,
         })}
         onClick={onHandleEdit}
+        data-cy="glossary-translation-cell"
       >
         {!isEditing ? (
           <Box overflow="hidden" gridArea="text">
@@ -152,6 +153,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
               multiline
               minRows={3}
               autoFocus
+              data-cy="glossary-translation-edit-field"
             />
             <StyledControls>
               <Button
@@ -159,6 +161,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
                 color="primary"
                 variant="outlined"
                 size="small"
+                data-cy="glossary-translation-cancel-button"
               >
                 <T keyName="translate_glossary_term_cell_cancel" />
               </Button>
@@ -168,6 +171,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
                 size="small"
                 variant="contained"
                 loading={isSaveLoading}
+                data-cy="glossary-translation-save-button"
               >
                 <T keyName="translate_glossary_term_cell_save" />
               </LoadingButton>
