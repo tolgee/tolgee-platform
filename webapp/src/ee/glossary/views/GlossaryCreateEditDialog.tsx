@@ -233,7 +233,7 @@ export const GlossaryCreateEditDialog = ({
                   color="primary"
                   variant="contained"
                   loading={saveIsLoading}
-                  data-cy="create-glossary-submit"
+                  data-cy="create-edit-glossary-submit"
                 >
                   {initialGlossaryId === undefined
                     ? t('create_glossary_submit_button')

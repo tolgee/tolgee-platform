@@ -43,6 +43,8 @@ class GlossaryTestData {
 
       project = addProject(defaultOrganizationBuilder.self) {
         name = "TheProject"
+      }.build {
+        addFrench()
       }.self
 
       defaultOrganizationBuilder.build {

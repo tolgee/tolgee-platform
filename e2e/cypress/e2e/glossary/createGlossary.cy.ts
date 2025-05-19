@@ -1,6 +1,6 @@
 import { glossaryTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { gcy, gcyChain } from '../../common/shared';
+import { gcy } from '../../common/shared';
 import { HOST } from '../../common/constants';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
 
@@ -36,7 +36,7 @@ describe('Glossary', () => {
     gcy('assigned-projects-select-item').contains('TheProject').click();
     cy.get('body').click(0, 0); // Close the dropdown
 
-    gcy('create-glossary-submit').click();
+    gcy('create-edit-glossary-submit').click();
     gcy('create-edit-glossary-dialog').should('not.exist');
 
     cy.contains('Create Test Glossary').should('be.visible');
@@ -57,7 +57,7 @@ describe('Glossary', () => {
     gcy('glossary-base-language-select').click();
     gcy('glossary-base-language-select-item').contains('English').click();
 
-    gcy('create-glossary-submit').click();
+    gcy('create-edit-glossary-submit').click();
     gcy('create-edit-glossary-dialog').should('not.exist');
 
     cy.contains('Create Test Glossary').should('be.visible');

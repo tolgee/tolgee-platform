@@ -95,7 +95,7 @@ export const GlossaryListItem: React.VFC<Props> = ({ glossary }) => {
   return (
     <StyledContainer
       role="button"
-      data-cy="dashboard-projects-list-item"
+      data-cy="glossary-list-item"
       onClick={() =>
         history.push(
           LINKS.ORGANIZATION_GLOSSARY.build({
