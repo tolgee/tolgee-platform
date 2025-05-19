@@ -25,7 +25,10 @@ describe('Glossary editing', () => {
     ).slug;
     cy.visit(`${HOST}/organizations/${organizationSlug}/glossaries`);
 
-    gcy('glossaries-list-more-button').first().click();
+    gcy('glossary-list-item')
+      .filter(':contains("Test Glossary")')
+      .findDcy('glossaries-list-more-button')
+      .click();
     gcy('glossary-edit-button').click();
 
     gcy('create-edit-glossary-dialog').should('be.visible');
@@ -47,7 +50,10 @@ describe('Glossary editing', () => {
     ).slug;
     cy.visit(`${HOST}/organizations/${organizationSlug}/glossaries`);
 
-    gcy('glossaries-list-more-button').first().click();
+    gcy('glossary-list-item')
+      .filter(':contains("Test Glossary")')
+      .findDcy('glossaries-list-more-button')
+      .click();
     gcy('glossary-edit-button').click();
 
     gcy('create-edit-glossary-dialog').should('be.visible');
@@ -57,7 +63,10 @@ describe('Glossary editing', () => {
 
     gcy('create-edit-glossary-dialog').should('not.exist');
 
-    gcy('glossaries-list-more-button').first().click();
+    gcy('glossary-list-item')
+      .filter(':contains("Test Glossary")')
+      .findDcy('glossaries-list-more-button')
+      .click();
     gcy('glossary-edit-button').click();
 
     gcy('create-edit-glossary-dialog').should('be.visible');
@@ -72,7 +81,10 @@ describe('Glossary editing', () => {
     ).slug;
     cy.visit(`${HOST}/organizations/${organizationSlug}/glossaries`);
 
-    gcy('glossaries-list-more-button').first().click();
+    gcy('glossary-list-item')
+      .filter(':contains("Test Glossary")')
+      .findDcy('glossaries-list-more-button')
+      .click();
     gcy('glossary-edit-button').click();
 
     gcy('create-edit-glossary-dialog').should('be.visible');
@@ -86,7 +98,10 @@ describe('Glossary editing', () => {
 
     gcy('create-edit-glossary-dialog').should('not.exist');
 
-    gcy('glossaries-list-more-button').first().click();
+    gcy('glossary-list-item')
+      .filter(':contains("Test Glossary")')
+      .findDcy('glossaries-list-more-button')
+      .click();
     gcy('glossary-edit-button').click();
 
     gcy('create-edit-glossary-dialog').should('be.visible');

@@ -12,6 +12,7 @@ import io.tolgee.model.glossary.GlossaryTermTranslation
 class GlossaryTestData {
   lateinit var userOwner: UserAccount
   lateinit var userMaintainer: UserAccount
+  lateinit var userMember: UserAccount
   lateinit var organization: Organization
   lateinit var project: Project
   lateinit var glossary: Glossary
@@ -57,6 +58,15 @@ class GlossaryTestData {
             userMaintainer = self
           }.self
           type = OrganizationRoleType.MAINTAINER
+        }
+
+        addRole {
+          user = addUserAccount {
+            username = "Member"
+          }.build {
+            userMember = self
+          }.self
+          type = OrganizationRoleType.MEMBER
         }
 
         glossary = addGlossary {
