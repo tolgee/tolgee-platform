@@ -266,6 +266,7 @@ declare namespace DataCy {
         "glossaries-list-more-button" |
         "glossary-base-language-select" |
         "glossary-base-language-select-item" |
+        "glossary-batch-delete-button" |
         "glossary-delete-button" |
         "glossary-edit-button" |
         "glossary-list-item" |

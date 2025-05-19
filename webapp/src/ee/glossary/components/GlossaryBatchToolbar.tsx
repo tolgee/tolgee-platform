@@ -126,6 +126,7 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
         sx={{ minWidth: 0, minHeight: 0, width: 40, height: 40, padding: 0 }}
         loading={deleteSelectedMutation.isLoading || selectionService.isLoading}
         onClick={onDeleteSelected}
+        data-cy="glossary-batch-delete-button"
       >
         <ChevronRight width={20} height={20} />
       </LoadingButton>
