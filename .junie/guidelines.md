@@ -276,6 +276,7 @@ Tolgee is organized into several key components:
      - Add missing data-cy to all components that you need to access from tests
      - Make data-cy attributes as specific as possible to uniquely identify elements
      - Avoid using `first()` to select first item from list, use `filter()` with known content instead
+     - Avoid writing comments that explain following line of code without adding any additional context (they only make the code longer)
      - For specific UI components, use descriptive names that indicate the component's purpose:
        ```tsx
        <Alert severity="error" data-cy="signup-error-seats-spending-limit">
