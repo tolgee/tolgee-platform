@@ -62,12 +62,11 @@ Tolgee is organized into several key components:
    - Integration tests should be used for testing complex interactions
    - **Do not run** all tests locally - like `./gradlew test` as it takes too long;
      instead, push changes and let the CI pipeline run tests
-     or run locally a single test file to test specific feature you have just modified
-   - While writing tests,
-     if you encounter server returning 500 code
+     or run a single test file locally to test specific feature you have just modified
+   - While writing tests, if you encounter a code 500
      or some function crashing without a good reason,
      don't be afraid to fix the underlying issue;
-     don't just modify test to make it pass if the behavior is clearly wrong
+     don't just modify the test to make it pass if the behavior is clearly wrong
    - Avoid repeating yourself—if every test in the file needs a special piece of code to test something,
      maybe it is time to implement a helper function for it;
      Try to keep these helper functions outside the tests themselves so they can be reused between different test files
@@ -164,7 +163,8 @@ Tolgee is organized into several key components:
            });
          });
          ```
-     ```
+       - Avoid using `yourFeatureTestData.generate()` function for new tests;
+         it is used in outdated tests, but new tests should be using the standard one - `yourFeatureTestData.generateStandard()`
    - Use `.andAssertThatJson` for testing JSON responses:
      ```kotlin
      // Example of testing JSON responses
@@ -346,5 +346,5 @@ Tolgee is organized into several key components:
 4. **Translation keys**:
    - Never update translation files with new keys
    - Freely use nonexistent translation keys in the codebase,
-     their translation will be handled outside of codebase
+     their translation will be handled outside the codebase,
      and the keys will be added to the translation files automatically after the changes are merged to the main branch
