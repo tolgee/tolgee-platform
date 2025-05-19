@@ -349,6 +349,7 @@ export const GlossaryTermCreateUpdateDialog = ({
       maxWidth="sm"
       fullWidth
       onClick={(e) => e.stopPropagation()}
+      data-cy="create-glossary-term-dialog"
     >
       <DialogTitle>
         {initialTermId === undefined ? (

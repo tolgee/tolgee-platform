@@ -34,22 +34,42 @@ export const GlossaryTermCreateUpdateForm: VFC = () => {
       />
       <StyledContainer>
         <FormControlLabel
-          control={<Checkbox name="flagNonTranslatable" />}
+          control={
+            <Checkbox
+              name="flagNonTranslatable"
+              data-cy="create-glossary-term-flag-non-translatable"
+            />
+          }
           label={t('create_glossary_term_field_non_translatable')}
           sx={{ gridArea: 'flagNonTranslatable' }}
         />
         <FormControlLabel
-          control={<Checkbox name="flagCaseSensitive" />}
+          control={
+            <Checkbox
+              name="flagCaseSensitive"
+              data-cy="create-glossary-term-flag-case-sensitive"
+            />
+          }
           label={t('create_glossary_term_field_case_sensitive')}
           sx={{ gridArea: 'flagCaseSensitive' }}
         />
         <FormControlLabel
-          control={<Checkbox name="flagAbbreviation" />}
+          control={
+            <Checkbox
+              name="flagAbbreviation"
+              data-cy="create-glossary-term-flag-abbreviation"
+            />
+          }
           label={t('create_glossary_term_field_abbreviation')}
           sx={{ gridArea: 'flagAbbreviation' }}
         />
         <FormControlLabel
-          control={<Checkbox name="flagForbiddenTerm" />}
+          control={
+            <Checkbox
+              name="flagForbiddenTerm"
+              data-cy="create-glossary-term-flag-forbidden"
+            />
+          }
           label={t('create_glossary_term_field_forbidden')}
           sx={{ gridArea: 'flagForbiddenTerm' }}
         />

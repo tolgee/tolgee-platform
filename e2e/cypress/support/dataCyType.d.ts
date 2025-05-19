@@ -189,8 +189,13 @@ declare namespace DataCy {
         "create-edit-glossary-dialog" |
         "create-edit-glossary-submit" |
         "create-glossary-field-name" |
+        "create-glossary-term-dialog" |
         "create-glossary-term-field-description" |
         "create-glossary-term-field-text" |
+        "create-glossary-term-flag-abbreviation" |
+        "create-glossary-term-flag-case-sensitive" |
+        "create-glossary-term-flag-forbidden" |
+        "create-glossary-term-flag-non-translatable" |
         "create-glossary-term-submit" |
         "create-task-field-description" |
         "create-task-field-languages" |
