@@ -55,4 +55,5 @@ before(() => {
   setFeature('AI_PROMPT_CUSTOMIZATION', true);
   setFeature('TASKS', true);
   setFeature('SSO', true);
+  setFeature('GLOSSARY', true);
 });

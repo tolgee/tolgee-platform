@@ -252,6 +252,7 @@ export const GlossaryCreateEditDialog = ({
 
   return (
     <Dialog
+      data-cy="create-edit-glossary-dialog"
       open={open}
       onClose={onClose}
       maxWidth="sm"

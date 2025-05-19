@@ -96,6 +96,7 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
     const selected = value.some((v) => v.id === item.id);
     return (
       <MultiselectItem
+        data-cy="assigned-projects-select-item"
         selected={selected}
         label={item.name}
         onClick={() => toggleSelected(item)}
@@ -108,9 +109,8 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
   }
 
   return (
-    <Box {...boxProps}>
+    <Box data-cy="assigned-projects-select" {...boxProps}>
       <InfiniteMultiSearchSelect
-        data-cy="assigned-projects-select"
         items={data}
         selected={value}
         queryResult={dataLoadable}

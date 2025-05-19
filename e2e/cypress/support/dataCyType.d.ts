@@ -106,6 +106,7 @@ declare namespace DataCy {
         "api-keys-create-edit-dialog" |
         "api-keys-project-select-item" |
         "assigned-projects-select" |
+        "assigned-projects-select-item" |
         "assignee-search-select-popover" |
         "assignee-select" |
         "auto-avatar-img" |
@@ -185,6 +186,7 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "create-edit-glossary-dialog" |
         "create-glossary-field-name" |
         "create-glossary-submit" |
         "create-glossary-term-field-description" |
@@ -258,6 +260,7 @@ declare namespace DataCy {
         "glossaries-empty-add-button" |
         "glossaries-list-more-button" |
         "glossary-base-language-select" |
+        "glossary-base-language-select-item" |
         "glossary-delete-button" |
         "glossary-edit-button" |
         "glossary-list-languages" |

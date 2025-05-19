@@ -96,6 +96,7 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
     const selected = value?.tag === item.tag;
     return (
       <SelectItem
+        data-cy="glossary-base-language-select-item"
         selected={selected}
         label={<LanguageValue language={item} />}
         onClick={() => setSelected(item)}
@@ -108,9 +109,8 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
   }
 
   return (
-    <Box {...boxProps}>
+    <Box data-cy="glossary-base-language-select" {...boxProps}>
       <InfiniteSearchSelect
-        data-cy="glossary-base-language-select"
         items={data}
         selected={value}
         queryResult={dataLoadable}
