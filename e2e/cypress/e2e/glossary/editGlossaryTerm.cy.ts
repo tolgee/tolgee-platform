@@ -27,8 +27,8 @@ describe('Glossary term editing', () => {
 
     gcy('glossary-list-item').filter(':contains("Test Glossary")').click();
 
-    cy.contains('Test Term').should('be.visible');
-    gcy('glossary-term-list-item').filter(':contains("Test Term")').click();
+    cy.contains('Term').should('be.visible');
+    gcy('glossary-term-list-item').filter(':contains("Term")').click();
     gcy('create-glossary-term-dialog').should('be.visible');
 
     gcy('create-glossary-term-field-text')
@@ -52,8 +52,8 @@ describe('Glossary term editing', () => {
 
     gcy('glossary-list-item').filter(':contains("Test Glossary")').click();
 
-    cy.contains('Test Term').should('be.visible');
-    gcy('glossary-term-list-item').filter(':contains("Test Term")').click();
+    cy.contains('Term').should('be.visible');
+    gcy('glossary-term-list-item').filter(':contains("Term")').click();
     gcy('create-glossary-term-dialog').should('be.visible');
 
     gcy('create-glossary-term-field-description')
@@ -79,8 +79,8 @@ describe('Glossary term editing', () => {
 
     gcy('glossary-list-item').filter(':contains("Test Glossary")').click();
 
-    cy.contains('Test Term').should('be.visible');
-    gcy('glossary-term-list-item').filter(':contains("Test Term")').click();
+    cy.contains('Term').should('be.visible');
+    gcy('glossary-term-list-item').filter(':contains("Term")').click();
     gcy('create-glossary-term-dialog').should('be.visible');
 
     gcy('create-glossary-term-flag-case-sensitive').click();
@@ -90,11 +90,17 @@ describe('Glossary term editing', () => {
     gcy('create-glossary-term-submit').click();
     gcy('create-glossary-term-dialog').should('not.exist');
 
-    gcy('glossary-term-list-item').filter(':contains("Test Term")').click();
+    gcy('glossary-term-list-item').filter(':contains("Term")').click();
     gcy('create-glossary-term-dialog').should('be.visible');
 
-    gcy('create-glossary-term-flag-case-sensitive').should('be.checked');
-    gcy('create-glossary-term-flag-abbreviation').should('be.checked');
-    gcy('create-glossary-term-flag-forbidden').should('be.checked');
+    gcy('create-glossary-term-flag-case-sensitive')
+      .find('input')
+      .should('be.checked');
+    gcy('create-glossary-term-flag-abbreviation')
+      .find('input')
+      .should('be.checked');
+    gcy('create-glossary-term-flag-forbidden')
+      .find('input')
+      .should('be.checked');
   });
 });
