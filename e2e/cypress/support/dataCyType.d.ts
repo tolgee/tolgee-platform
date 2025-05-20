@@ -365,6 +365,7 @@ declare namespace DataCy {
         "language-ai-prompt-dialog-description-input" |
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
+        "language-icon-list-item" |
         "language-modify-form" |
         "language-select-popover" |
         "languages-add-dialog-submit" |
@@ -511,7 +512,6 @@ declare namespace DataCy {
         "project-delete-button" |
         "project-leave-button" |
         "project-list-languages" |
-        "project-list-languages-item" |
         "project-list-more-button" |
         "project-list-translations-button" |
         "project-member-item" |
@@ -521,7 +521,6 @@ declare namespace DataCy {
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
-        "project-menu-item-glossaries" |
         "project-menu-item-import" |
         "project-menu-item-integrate" |
         "project-menu-item-languages" |

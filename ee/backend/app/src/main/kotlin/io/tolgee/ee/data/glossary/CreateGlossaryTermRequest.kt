@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
 
 open class CreateGlossaryTermRequest {
-  @Schema(example = "", description = "Glossary term description")
+  @Schema(example = "It's trademark", description = "Glossary term description")
   @field:Size(max = 500)
   var description: String? = null
 

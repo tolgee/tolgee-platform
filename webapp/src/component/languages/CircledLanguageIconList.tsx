@@ -38,19 +38,19 @@ export const CircledLanguageIconList = ({
           onClick={stopBubble()}
           disableInteractive
         >
-          <Box data-cy="project-list-languages-item">
+          <Box data-cy="language-icon-list-item">
             <StyledCircledLanguageIcon size={20} flag={l.flagEmoji} />
           </Box>
         </Tooltip>
       ))}
       {showNumber && (
-        <Box data-cy="project-list-languages-item" onClick={stopBubble()}>
+        <Box data-cy="language-icon-list-item" onClick={stopBubble()}>
           <Tooltip
             disableInteractive
             title={
               <Box display="flex" flexWrap="wrap">
                 {languages.slice(maxLangs).map((l, i) => (
-                  <Box key={i} data-cy="project-list-languages-item">
+                  <Box key={i} data-cy="language-icon-list-item">
                     <StyledCircledLanguageIcon size={20} flag={l.flagEmoji} />
                   </Box>
                 ))}

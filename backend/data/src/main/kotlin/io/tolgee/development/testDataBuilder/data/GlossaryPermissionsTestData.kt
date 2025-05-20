@@ -63,7 +63,6 @@ class GlossaryPermissionsTestData {
           type = OrganizationRoleType.MEMBER
         }
 
-        // Add a bystander user (not in the organization)
         userBystander = addUserAccount {
           username = "Bystander"
         }.self

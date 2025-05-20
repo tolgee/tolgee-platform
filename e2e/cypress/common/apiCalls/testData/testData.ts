@@ -175,7 +175,7 @@ export function getOrganizationByNameFromTestData(
 }
 
 export function getGlossaryByNameFromOrganizationData(
-  data: TestDataStandardResponse['organizations'][0],
+  data: TestDataStandardResponse['organizations'][number],
   name: string
 ) {
   return data.glossaries.find((glossary) => glossary.name === name);
