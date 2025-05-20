@@ -29,7 +29,7 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `project tags are returned correctly`() {
-    performProjectAuthGet("tags").andAssertThatJson {
+    performProjectAuthGet("tags").andPrettyPrint.andAssertThatJson {
       node("_embedded.tags") {
         isArray.hasSize(20)
         node("[0].id").isValidId
@@ -94,7 +94,7 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `tags key with existing tag`() {
-    performProjectAuthPut("keys/${testData.noTagKey.id}/tags", TagKeyDto(name = testData.existingTag.name))
+    performProjectAuthPut("keys/${testData.noTagKey.id}/tags", mapOf("name"  to testData.existingTag.name))
       .andPrettyPrint.andAssertThatJson {
         node("id").isEqualTo(testData.existingTag.id)
         node("name").isEqualTo(testData.existingTag.name)
