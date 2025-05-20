@@ -174,6 +174,22 @@ export function getOrganizationByNameFromTestData(
   return data.organizations.find((organization) => organization.name === name);
 }
 
+export function getGlossaryByNameFromOrganizationData(
+  data: TestDataStandardResponse['organizations'][0],
+  name: string
+) {
+  return data.glossaries.find((glossary) => glossary.name === name);
+}
+
+export function getGlossaryByNameFromTestData(
+  data: TestDataStandardResponse,
+  orgName: string,
+  name: string
+) {
+  const organization = getOrganizationByNameFromTestData(data, orgName);
+  return getGlossaryByNameFromOrganizationData(organization, name);
+}
+
 export function getProjectByNameFromTestData(
   data: TestDataStandardResponse,
   name: string

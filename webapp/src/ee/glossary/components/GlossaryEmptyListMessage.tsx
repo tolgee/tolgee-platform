@@ -74,6 +74,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             disabled={!onCreate}
             variant="contained"
             color="primary"
+            data-cy="glossary-empty-add-term-button"
           >
             <T keyName="glossary_empty_placeholder_add_term_button" />
           </Button>
@@ -96,6 +97,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             disabled={!onImport}
             variant="contained"
             color="primary"
+            data-cy="glossary-empty-import-terms-button"
           >
             <T keyName="glossary_empty_placeholder_import_terms_button" />
           </Button>

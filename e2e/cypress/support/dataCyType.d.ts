@@ -186,9 +186,11 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "create-edit-glossary-cancel" |
         "create-edit-glossary-dialog" |
         "create-edit-glossary-submit" |
         "create-glossary-field-name" |
+        "create-glossary-term-cancel" |
         "create-glossary-term-dialog" |
         "create-glossary-term-field-description" |
         "create-glossary-term-field-text" |
@@ -269,6 +271,8 @@ declare namespace DataCy {
         "glossary-batch-delete-button" |
         "glossary-delete-button" |
         "glossary-edit-button" |
+        "glossary-empty-add-term-button" |
+        "glossary-empty-import-terms-button" |
         "glossary-list-item" |
         "glossary-list-languages" |
         "glossary-term-list-item" |

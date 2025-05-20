@@ -1,16 +1,20 @@
 import { glossaryTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
-import { HOST } from '../../common/constants';
-import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
+import { E2GlossaryView } from '../../compounds/glossaries/E2GlossaryView';
+import { E2GlossaryTermCreateEditDialog } from '../../compounds/glossaries/E2GlossaryTermCreateEditDialog';
 
 describe('Glossary term editing', () => {
-  let data: TestDataStandardResponse;
+  let view: E2GlossaryView;
+  let dialog: E2GlossaryTermCreateEditDialog;
 
   beforeEach(() => {
     glossaryTestData.clean();
     glossaryTestData.generateStandard().then((res) => {
-      data = res.body;
+      login('Owner');
+      view = new E2GlossaryView();
+      view.findAndVisit(res.body, 'Owner', 'Test Glossary');
+      dialog = view.openEditTermDialog('Term');
     });
   });
 
@@ -19,80 +23,29 @@ describe('Glossary term editing', () => {
   });
 
   it('Edits a glossary term name', () => {
-    login('Owner');
-    const organizationSlug = data.organizations.find(
-      (org) => org.name === 'Owner'
-    ).slug;
-    cy.visit(`${HOST}/organizations/${organizationSlug}/glossaries`);
+    dialog.setDefaultTranslation('Edited Test Term');
+    dialog.submit();
 
-    gcy('glossary-list-item').filter(':contains("Test Glossary")').click();
-
-    cy.contains('Term').should('be.visible');
-    gcy('glossary-term-list-item').filter(':contains("Term")').click();
-    gcy('create-glossary-term-dialog').should('be.visible');
-
-    gcy('create-glossary-term-field-text')
-      .click()
-      .focused()
-      .clear()
-      .type('Edited Test Term');
-
-    gcy('create-glossary-term-submit').click();
-    gcy('create-glossary-term-dialog').should('not.exist');
-
-    cy.contains('Edited Test Term').should('be.visible');
+    gcy('glossary-term-list-item').should('contain', 'Edited Test Term');
   });
 
   it('Edits a glossary term description', () => {
-    login('Owner');
-    const organizationSlug = data.organizations.find(
-      (org) => org.name === 'Owner'
-    ).slug;
-    cy.visit(`${HOST}/organizations/${organizationSlug}/glossaries`);
+    dialog.setDescription('This is an edited description for the test term');
+    dialog.submit();
 
-    gcy('glossary-list-item').filter(':contains("Test Glossary")').click();
-
-    cy.contains('Term').should('be.visible');
-    gcy('glossary-term-list-item').filter(':contains("Term")').click();
-    gcy('create-glossary-term-dialog').should('be.visible');
-
-    gcy('create-glossary-term-field-description')
-      .click()
-      .focused()
-      .clear()
-      .type('This is an edited description for the test term');
-
-    gcy('create-glossary-term-submit').click();
-    gcy('create-glossary-term-dialog').should('not.exist');
-
-    cy.contains('This is an edited description for the test term').should(
-      'be.visible'
+    gcy('glossary-term-list-item').should(
+      'contain',
+      'This is an edited description for the test term'
     );
   });
 
   it('Edits glossary term flags', () => {
-    login('Owner');
-    const organizationSlug = data.organizations.find(
-      (org) => org.name === 'Owner'
-    ).slug;
-    cy.visit(`${HOST}/organizations/${organizationSlug}/glossaries`);
+    dialog.toggleFlagCaseSensitive();
+    dialog.toggleFlagAbbreviation();
+    dialog.toggleFlagForbidden();
+    dialog.submit();
 
-    gcy('glossary-list-item').filter(':contains("Test Glossary")').click();
-
-    cy.contains('Term').should('be.visible');
-    gcy('glossary-term-list-item').filter(':contains("Term")').click();
-    gcy('create-glossary-term-dialog').should('be.visible');
-
-    gcy('create-glossary-term-flag-case-sensitive').click();
-    gcy('create-glossary-term-flag-abbreviation').click();
-    gcy('create-glossary-term-flag-forbidden').click();
-
-    gcy('create-glossary-term-submit').click();
-    gcy('create-glossary-term-dialog').should('not.exist');
-
-    gcy('glossary-term-list-item').filter(':contains("Term")').click();
-    gcy('create-glossary-term-dialog').should('be.visible');
-
+    const dialogAfterEdit = view.openEditTermDialog('Term');
     gcy('create-glossary-term-flag-case-sensitive')
       .find('input')
       .should('be.checked');
@@ -102,5 +55,6 @@ describe('Glossary term editing', () => {
     gcy('create-glossary-term-flag-forbidden')
       .find('input')
       .should('be.checked');
+    dialogAfterEdit.cancel();
   });
 });

@@ -322,7 +322,9 @@ export const GlossaryTermCreateUpdateDialog = ({
                   <Box flexGrow={1} />
                 </>
               )}
-              <Button onClick={onClose}>{t('global_cancel_button')}</Button>
+              <Button onClick={onClose} data-cy="create-glossary-term-cancel">
+                {t('global_cancel_button')}
+              </Button>
               <LoadingButton
                 onClick={submitForm}
                 color="primary"

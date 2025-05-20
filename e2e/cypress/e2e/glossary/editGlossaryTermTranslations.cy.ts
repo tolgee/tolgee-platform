@@ -1,8 +1,8 @@
 import { glossaryTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
-import { HOST } from '../../common/constants';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
+import { E2GlossaryView } from '../../compounds/glossaries/E2GlossaryView';
 
 describe('Glossary term translation editing', () => {
   let data: TestDataStandardResponse;
@@ -20,37 +20,17 @@ describe('Glossary term translation editing', () => {
 
   it('Changes a translation', () => {
     login('Owner');
-    const organization = data.organizations.find((org) => org.name === 'Owner');
-    const glossaryId = organization.glossaries.find(
-      (glossary) => glossary.name === 'Test Glossary'
-    ).id;
-    cy.visit(
-      `${HOST}/organizations/${organization.slug}/glossaries/${glossaryId}`
-    );
+    const view = new E2GlossaryView();
+    view.findAndVisit(data, 'Owner', 'Test Glossary');
 
-    gcy('glossary-translation-cell')
-      .filter(':contains("A.B.C, s.r.o.")')
-      .click();
-    gcy('glossary-translation-edit-field')
-      .find('textarea')
-      .first()
-      .clear()
-      .type('Nový překlad');
-
-    gcy('glossary-translation-save-button').click();
-
-    cy.contains('Nový překlad').should('be.visible');
+    view.setTranslation('A.B.C, s.r.o.', 'Nový překlad');
+    view.checkTranslationExists('Nový překlad');
   });
 
   it('Cannot change a non-translatable translation', () => {
     login('Owner');
-    const organization = data.organizations.find((org) => org.name === 'Owner');
-    const glossaryId = organization.glossaries.find(
-      (glossary) => glossary.name === 'Test Glossary'
-    ).id;
-    cy.visit(
-      `${HOST}/organizations/${organization.slug}/glossaries/${glossaryId}`
-    );
+    const view = new E2GlossaryView();
+    view.findAndVisit(data, 'Owner', 'Test Glossary');
 
     gcy('glossary-translation-cell')
       .filter(':contains("Apple")')
@@ -61,36 +41,17 @@ describe('Glossary term translation editing', () => {
 
   it('Clears a translation', () => {
     login('Owner');
-    const organization = data.organizations.find((org) => org.name === 'Owner');
-    const glossaryId = organization.glossaries.find(
-      (glossary) => glossary.name === 'Test Glossary'
-    ).id;
-    cy.visit(
-      `${HOST}/organizations/${organization.slug}/glossaries/${glossaryId}`
-    );
+    const view = new E2GlossaryView();
+    view.findAndVisit(data, 'Owner', 'Test Glossary');
 
-    gcy('glossary-translation-cell').filter(':contains("zábava")').click();
-
-    gcy('glossary-translation-edit-field')
-      .should('be.visible')
-      .find('textarea')
-      .first()
-      .clear();
-
-    gcy('glossary-translation-save-button').click();
-
+    view.setTranslation('zábava', undefined);
     cy.contains('zábava').should('not.exist');
   });
 
   it('Cannot change translation if just a member', () => {
     login('Member');
-    const organization = data.organizations.find((org) => org.name === 'Owner');
-    const glossaryId = organization.glossaries.find(
-      (glossary) => glossary.name === 'Test Glossary'
-    ).id;
-    cy.visit(
-      `${HOST}/organizations/${organization.slug}/glossaries/${glossaryId}`
-    );
+    const view = new E2GlossaryView();
+    view.findAndVisit(data, 'Owner', 'Test Glossary');
 
     gcy('glossary-translation-cell')
       .filter(':contains("A.B.C, s.r.o.")')

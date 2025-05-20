@@ -226,7 +226,9 @@ export const GlossaryCreateEditDialog = ({
                 withAssignedProjects
               />
               <StyledActions>
-                <Button onClick={onClose}>{t('global_cancel_button')}</Button>
+                <Button onClick={onClose} data-cy="create-edit-glossary-cancel">
+                  {t('global_cancel_button')}
+                </Button>
                 <LoadingButton
                   disabled={!glossaryFeature}
                   onClick={submitForm}
