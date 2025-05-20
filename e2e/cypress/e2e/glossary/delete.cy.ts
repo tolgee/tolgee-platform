@@ -1,10 +1,6 @@
-import {
-  getOrganizationByNameFromTestData,
-  glossaryTestData,
-} from '../../common/apiCalls/testData/testData';
+import { glossaryTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
-import { HOST } from '../../common/constants';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
 import { E2GlossariesView } from '../../compounds/glossaries/E2GlossariesView';
 
