@@ -80,11 +80,16 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
     ? languageInfo[targetLanguageTag]?.flags?.[0]
     : undefined;
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="glossary-term-preview-container">
       <StyledTitleWrapper>
         {showIcon && <BookClosed />}
         <StyledTitleTextWrapper>
-          <StyledTitle variant="body2">{translation?.text}</StyledTitle>
+          <StyledTitle
+            variant="body2"
+            data-cy="glossary-term-preview-source-text"
+          >
+            {translation?.text}
+          </StyledTitle>
           {targetTranslation &&
             languageTag != targetLanguageTag &&
             !term.flagNonTranslatable && (
@@ -93,7 +98,10 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
                 {targetLanguageFlag && (
                   <FlagImage width={20} flagEmoji={targetLanguageFlag} />
                 )}
-                <StyledTitle variant="body2">
+                <StyledTitle
+                  variant="body2"
+                  data-cy="glossary-term-preview-target-text"
+                >
                   {targetTranslation.text}
                 </StyledTitle>
               </>
@@ -119,11 +127,16 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
         </Tooltip>
       </StyledTitleWrapper>
       <GlossaryTermTags term={term} />
-      <StyledInnerCard elevation={0}>
+      <StyledInnerCard
+        elevation={0}
+        data-cy="glossary-term-preview-description-card"
+      >
         {term.description ? (
-          <StyledDescription>{term.description}</StyledDescription>
+          <StyledDescription data-cy="glossary-term-preview-description">
+            {term.description}
+          </StyledDescription>
         ) : (
-          <StyledEmptyDescription>
+          <StyledEmptyDescription data-cy="glossary-term-preview-empty-description">
             <T keyName="empty_description" />
           </StyledEmptyDescription>
         )}

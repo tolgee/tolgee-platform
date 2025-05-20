@@ -275,7 +275,16 @@ declare namespace DataCy {
         "glossary-empty-import-terms-button" |
         "glossary-list-item" |
         "glossary-list-languages" |
+        "glossary-panel-container" |
+        "glossary-panel-container-empty" |
+        "glossary-term-highlight" |
         "glossary-term-list-item" |
+        "glossary-term-preview-container" |
+        "glossary-term-preview-description" |
+        "glossary-term-preview-description-card" |
+        "glossary-term-preview-empty-description" |
+        "glossary-term-preview-source-text" |
+        "glossary-term-preview-target-text" |
         "glossary-translation-cancel-button" |
         "glossary-translation-cell" |
         "glossary-translation-edit-field" |

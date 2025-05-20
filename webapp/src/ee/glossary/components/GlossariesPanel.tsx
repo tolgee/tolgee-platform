@@ -41,7 +41,7 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
 
   if (terms.length === 0) {
     return (
-      <StyledContainer>
+      <StyledContainer data-cy="glossary-panel-container-empty">
         <TabMessage>
           <T keyName="translation_tools_glossary_no_terms" />
         </TabMessage>
@@ -92,7 +92,7 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
       );
     });
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="glossary-panel-container">
       <StyledContent>{previews}</StyledContent>
     </StyledContainer>
   );

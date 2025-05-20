@@ -45,7 +45,48 @@ class GlossaryTestData {
       project = addProject(defaultOrganizationBuilder.self) {
         name = "TheProject"
       }.build {
-        addFrench()
+        val english = addEnglish()
+        val french = addFrench()
+        val czech = addLanguage {
+          tag = "cs"
+          name = "Czech"
+        }
+
+        self.baseLanguage = english.self
+
+        addKey {
+          name = "key_with_term"
+        }.build {
+          addTranslation {
+            language = english.self
+            text = "This is a Term that should be highlighted"
+          }
+          addTranslation {
+            language = french.self
+            text = "C'est un terme qui devrait être mis en évidence"
+          }
+          addTranslation {
+            language = czech.self
+            text = "Toto je termín, který by měl být zvýrazněn"
+          }
+        }
+
+        addKey {
+          name = "key_without_term"
+        }.build {
+          addTranslation {
+            language = english.self
+            text = "This is a text"
+          }
+          addTranslation {
+            language = french.self
+            text = "C'est un texte"
+          }
+          addTranslation {
+            language = czech.self
+            text = "Toto je text"
+          }
+        }
       }.self
 
       defaultOrganizationBuilder.build {

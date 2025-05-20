@@ -156,7 +156,9 @@ export const TranslationWithPlaceholders = ({
             />
           }
         >
-          <StyledHighlight>{text}</StyledHighlight>
+          <StyledHighlight data-cy="glossary-term-highlight">
+            {text}
+          </StyledHighlight>
         </Tooltip>
       );
     }
