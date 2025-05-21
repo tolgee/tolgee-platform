@@ -48,12 +48,12 @@ class PromptFragmentsService {
       Variable(
         "projectDescription",
         """
-        {{#with project.description}}
+        {{#if project.description}}
         Here is user defined description for the project:
         ```
-        {{this}}
+        {{project.description}}
         ```
-        {{/with}}
+        {{/if}}
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
         option = BasicPromptOption.PROJECT_DESCRIPTION,
@@ -64,12 +64,12 @@ class PromptFragmentsService {
       Variable(
         "languageNotes",
         """
-        {{#with target.languageNote}}
+        {{#if target.languageNote}}
         Here is user defined note:
         ```
-        {{this}}
+        {{target.languageNote}}
         ```
-        {{/with}}          
+        {{/if}}          
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
         option = BasicPromptOption.LANGUAGE_NOTES,
@@ -80,11 +80,11 @@ class PromptFragmentsService {
       Variable(
         "translationMemory",
         """
-        {{#with translationMemory.json}}
+        {{#if translationMemory.json}}
         These are some results from translation memory from the same project. You may use this as a inspiraton:
         
-        {{this}}
-        {{/with}}
+        {{translationMemory.json}}
+        {{/if}}
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
         option = BasicPromptOption.TM_SUGGESTIONS,
@@ -95,11 +95,11 @@ class PromptFragmentsService {
       Variable(
         "relatedKeys",
         """
-        {{#with relatedKeys.json}}
+        {{#if relatedKeys.json}}
         Here is list of translations used in the same context:
         
-        {{this}}
-        {{/with}}
+        {{relatedKeys.json}}
+        {{/if}}
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
         option = BasicPromptOption.KEY_CONTEXT,
@@ -111,17 +111,17 @@ class PromptFragmentsService {
         "icuInfo",
         """
         If message includes ICU parameters in curly braces, don't modify the parameter names.
-        {{#with target.pluralFormExamples}}
+        {{#if target.pluralFormExamples}}
         Translate ICU message plural forms, these are examples of source strings with placeholder replaced with example number
         for {{target.languageName}}:
-        {{this}}
+        {{target.pluralFormExamples}}
         
         Please include exactly these forms in the response exactly in this order: {{target.exactForms}}. So it will look like this:
         ```
         {{target.exampleIcuPlural}}
         ```
         Always replace number with # in the plural.
-        {{/with}}
+        {{/if}}
         
         Translation can contain also different i18n placeholder formats.
         If you spot some kind, don't translate them and keep them in the original format.
@@ -132,19 +132,28 @@ class PromptFragmentsService {
 
     result.add(
       Variable(
-        "keyInfo",
+        "keyName",
         """
         You are working with translation key "{{ key.name }}" (no need to mention it in response).
-        {{#with key.description}}
+        """,
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.KEY_NAME,
+      ),
+    )
+
+    result.add(
+      Variable(
+        """
+        {{#if key.description}}
         User provided additional description of the key:
         ```
-        {{this}}
+        {{key.description}}
         ```
-        {{/with}}
+        {{/if}}
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
-        option = BasicPromptOption.KEY_INFO,
-      ),
+        option = BasicPromptOption.KEY_DESCRIPTION,
+      )
     )
 
     result.add(

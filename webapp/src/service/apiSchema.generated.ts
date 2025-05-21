@@ -3990,7 +3990,8 @@ export interface components {
     PromptDto: {
       name: string;
       options?: (
-        | "KEY_INFO"
+        | "KEY_NAME"
+        | "KEY_DESCRIPTION"
         | "KEY_CONTEXT"
         | "PROJECT_DESCRIPTION"
         | "LANGUAGE_NOTES"
@@ -4005,7 +4006,8 @@ export interface components {
       id: number;
       name: string;
       options?: (
-        | "KEY_INFO"
+        | "KEY_NAME"
+        | "KEY_DESCRIPTION"
         | "KEY_CONTEXT"
         | "PROJECT_DESCRIPTION"
         | "LANGUAGE_NOTES"
@@ -4037,7 +4039,8 @@ export interface components {
       /** Format: int64 */
       keyId: number;
       options?: (
-        | "KEY_INFO"
+        | "KEY_NAME"
+        | "KEY_DESCRIPTION"
         | "KEY_CONTEXT"
         | "PROJECT_DESCRIPTION"
         | "LANGUAGE_NOTES"
