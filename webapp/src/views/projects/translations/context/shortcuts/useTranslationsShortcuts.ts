@@ -130,7 +130,9 @@ export const useTranslationsShortcuts = () => {
   };
 
   const getCancelHandler = () => {
-    if (cursorKeyId) {
+    const root = document.getElementById('root');
+    const activeElement = document.activeElement;
+    if (cursorKeyId && (!activeElement || root?.contains(activeElement))) {
       setEdit(undefined);
       return;
     }
