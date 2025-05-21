@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.llm")
 class LlmProperties {
   var enabled: Boolean? = null
-  var providers: MutableList<LlmProvider>? = null
+  var providers: MutableList<LlmProvider> = mutableListOf()
 
   open class LlmProvider(
     @DocProperty("User visible provider name")
@@ -28,6 +28,7 @@ class LlmProperties {
     override var tokenPriceInCreditsInput: Double? = null,
     override var tokenPriceInCreditsOutput: Double? = null,
     override var attempts: List<Int>? = null,
+    var enabled: Boolean = true
   ) : LlmProviderInterface {
     fun toDto(id: Long): LlmProviderDto {
       return LlmProviderDto(

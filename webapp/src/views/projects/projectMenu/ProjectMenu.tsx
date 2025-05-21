@@ -127,7 +127,7 @@ export const ProjectMenu = ({ id }) => {
     {
       id: 'ai',
       condition: ({ satisfiesPermission }) =>
-        satisfiesPermission('prompts.view'),
+        satisfiesPermission('prompts.view') && config.llm.enabled,
       link: LINKS.PROJECT_AI,
       icon: Stars,
       text: t('project_menu_ai'),

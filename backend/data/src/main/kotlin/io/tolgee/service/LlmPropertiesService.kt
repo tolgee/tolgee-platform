@@ -9,19 +9,30 @@ import org.springframework.stereotype.Service
 @Service
 class LlmPropertiesService(
   private val llmProperties: LlmProperties,
-  private val eeSubscriptionProvider: EeSubscriptionProvider?
+  private val eeSubscriptionProvider: EeSubscriptionProvider?,
 ) {
-  fun isEnabled(): Boolean {
-    return llmProperties.enabled ?: (eeSubscriptionProvider?.findSubscriptionDto()?.licenseKey != null)
+  fun subscriptionActive(): Boolean {
+    return eeSubscriptionProvider?.findSubscriptionDto()?.licenseKey != null
   }
 
-  fun getProviders(): List<LlmProperties.LlmProvider> {
-    return llmProperties.providers ?: listOf(
-      LlmProvider(
-        type = LlmProviderType.TOLGEE,
-        name = "Tolgee",
-        apiUrl = eeSubscriptionProvider?.getLicensingUrl() ?: "http://app.tolgee.io"
-      )
-    )
+  fun isEnabled(): Boolean {
+    return llmProperties.enabled ?: getProviders().isNotEmpty()
+  }
+
+  fun getProviders(): List<LlmProvider> {
+    val result = llmProperties.providers.toMutableList()
+    if (subscriptionActive()) {
+      val hasTolgeeConfig = llmProperties.providers.find { it.type == LlmProviderType.TOLGEE } != null
+      if (!hasTolgeeConfig) {
+        result.add(
+          LlmProvider(
+            type = LlmProviderType.TOLGEE,
+            name = "Tolgee",
+            apiUrl = eeSubscriptionProvider?.getLicensingUrl() ?: "http://app.tolgee.io"
+          )
+        )
+      }
+    }
+    return result.filter { it.enabled }
   }
 }
