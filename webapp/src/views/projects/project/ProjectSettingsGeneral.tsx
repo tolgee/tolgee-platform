@@ -15,6 +15,7 @@ import { FieldLabel } from 'tg.component/FormField';
 import { Box, FormControlLabel, styled, Typography } from '@mui/material';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
+import { DOCS_ROOT } from 'tg.constants/docLinks';
 import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
 import { useField } from 'formik';
 
@@ -187,7 +188,7 @@ export const ProjectSettingsGeneral = () => {
                     params={{
                       a: (
                         <a
-                          href="https://docs.tolgee.io/js-sdk/namespaces"
+                          href={`${DOCS_ROOT}/js-sdk/namespaces`}
                           target="_blank"
                           rel="noreferrer"
                           style={{ color: '#D81B5F' }}

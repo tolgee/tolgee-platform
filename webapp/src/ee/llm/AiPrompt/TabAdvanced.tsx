@@ -10,6 +10,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 
 import { Label } from './Label';
+import { DOCS_ROOT } from 'tg.constants/docLinks';
 
 type PromptVariable = components['schemas']['PromptVariableDto'];
 
@@ -40,7 +41,7 @@ export const TabAdvanced = ({
     <Box sx={{ margin: '20px 20px' }}>
       <Label
         rightContent={
-          <Link href="https://docs.tolgee.io" target="_blank">
+          <Link href={DOCS_ROOT} target="_blank">
             {t('ai_prompt_learn_more')}
           </Link>
         }

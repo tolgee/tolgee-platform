@@ -20,6 +20,7 @@ import {
 } from 'tg.views/projects/translations/context/TranslationsContext';
 import { BasicPromptOption } from './TabBasic';
 import { AI_PLAYGROUND_TAG } from './PreviewDatasetDialog';
+import { DOCS_ROOT } from 'tg.constants/docLinks';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 
@@ -107,7 +108,7 @@ export const PreviewBatchDialog = ({
               params={{
                 highlight: (value) => <Chip label={value} size="small" />,
                 tagName: AI_PLAYGROUND_TAG,
-                link: <Link href="https://docs.tolgee.io" target="_blank" />,
+                link: <Link href={DOCS_ROOT} target="_blank" />,
               }}
             />
           </Alert>

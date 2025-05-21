@@ -12,6 +12,7 @@ import PromptImage from 'tg.svgs/prompts/promptImage.svg?react';
 import { EmptyState } from 'tg.component/common/EmptyState';
 import { getAiPlaygroundUrl } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { DOCS_ROOT } from 'tg.constants/docLinks';
 
 export const AiPromptsEmptyState = () => {
   const { t } = useTranslate();
@@ -25,7 +26,7 @@ export const AiPromptsEmptyState = () => {
           <T
             keyName="ai_prompts_empty_description"
             params={{
-              link: <MuiLink href="https://docs.tolgee.io/" target="_blank" />,
+              link: <MuiLink href={DOCS_ROOT} target="_blank" />,
             }}
           />
         </Typography>
