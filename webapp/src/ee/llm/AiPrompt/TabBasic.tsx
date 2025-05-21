@@ -20,6 +20,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 export type BasicPromptOption = NonNullable<
   components['schemas']['PromptRunDto']['options']
@@ -38,6 +39,7 @@ type Props = {
 };
 
 export const TabBasic = ({ value, onChange }: Props) => {
+  const { isEnabled } = useEnabledFeatures();
   const { t } = useTranslate();
   const project = useProject();
   const [projectDescription, setProjectDescription] = useState(false);
@@ -45,7 +47,8 @@ export const TabBasic = ({ value, onChange }: Props) => {
 
   const { satisfiesPermission } = useProjectPermissions();
 
-  const canCustomize = satisfiesPermission('prompts.edit');
+  const canCustomize =
+    satisfiesPermission('prompts.edit') && isEnabled('AI_PROMPT_CUSTOMIZATION');
 
   const basicPromptItems: PromptItem[] = [
     {
