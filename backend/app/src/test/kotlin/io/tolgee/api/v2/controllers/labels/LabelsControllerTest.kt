@@ -2,12 +2,11 @@ package io.tolgee.api.v2.controllers.labels
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LabelsTestData
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.*
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import io.tolgee.fixtures.node
 
 
 class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -67,5 +66,25 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("description").isString.isEqualTo("This is an updated label")
       node("color").isString.isEqualTo("#0000FF")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `update label with invalid color`() {
+    val requestBody = mapOf<String, Any>(
+      "name" to "Updated label",
+      "description" to "This is an updated label",
+      "color" to "#ZZZZZZ",
+    )
+
+    performProjectAuthPut("labels/${testData.firstLabel.id}", requestBody)
+      .andAssertError.isStandardValidation.onField("color").isEqualTo("invalid_pattern")
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `deletes label`() {
+    performProjectAuthDelete("labels/${testData.firstLabel.id}").andIsOk
+    labelService.find(testData.firstLabel.id).orElse(null).assert.isNull()
   }
 }
