@@ -1,6 +1,5 @@
 package io.tolgee.api.publicConfiguration
 
-import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.AuthMethodsDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicConfigDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicExtendsConfigDTO
@@ -11,7 +10,6 @@ import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.PlausibleDto
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.response.PublicLlmConfigurationDTO

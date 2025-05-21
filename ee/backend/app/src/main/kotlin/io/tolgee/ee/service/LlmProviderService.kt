@@ -3,7 +3,6 @@ package io.tolgee.ee.service
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
