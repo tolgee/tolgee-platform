@@ -50,7 +50,7 @@ class MachineTranslationSettingsController(
   }
 
   @PutMapping("/{projectId:[0-9]+}/machine-translation-service-settings/set-default-prompt/{promptId}")
-  @Operation(summary = "Sets machine translation settings")
+  @Operation(summary = "Sets machine translation default prompt for all languages")
   @RequiresProjectPermissions([Scope.LANGUAGES_EDIT])
   fun setMachineTranslationSettings(
     @PathVariable promptId: Long,
