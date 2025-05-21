@@ -65,7 +65,8 @@ class PromptVariablesService(
 
     val source = Variable("source")
 
-    source.props.add(Variable("language", sLanguage.name))
+    source.props.add(Variable("languageName", sLanguage.name))
+    source.props.add(Variable("languageTag", sLanguage.tag))
     source.props.add(Variable("translation", escapeAsJson(sTranslation?.text) ?: ""))
     source.props.add(Variable("languageNote", sLanguage.aiTranslatorPromptDescription ?: ""))
     source.props.add(cjkVariable(sLanguage.tag))
@@ -73,8 +74,10 @@ class PromptVariablesService(
 
     val target = Variable("target")
 
-    target.props.add(Variable("language", tLanguage?.name))
+    target.props.add(Variable("languageName", tLanguage?.name))
+    target.props.add(Variable("languageTag", tLanguage?.tag))
     target.props.add(Variable("translation", escapeAsJson(tTranslation?.text) ?: ""))
+    target.props.add(Variable("languageNote", tLanguage?.aiTranslatorPromptDescription ?: ""))
     target.props.add(cjkVariable(tLanguage?.tag))
 
     val context = MtTranslatorContext(projectId, applicationContext, false)
@@ -116,12 +119,7 @@ class PromptVariablesService(
         value = pluralSourceExamples?.let { "{count, plural, ${it.map { "${it.key} {...}" }.joinToString(" ")}}" },
       ),
     )
-    target.props.add(
-      Variable(
-        "languageNote",
-        tLanguage?.aiTranslatorPromptDescription ?: "",
-      ),
-    )
+
 
     variables.add(target)
 
@@ -131,7 +129,8 @@ class PromptVariablesService(
       it.id != sLanguage.id && it.id != tLanguage?.id
     }.forEach { language ->
       val langVar = Variable(language.tag)
-      langVar.props.add(Variable("language", language.name))
+      langVar.props.add(Variable("languageName", language.name))
+      langVar.props.add(Variable("languageTag", language.tag))
       langVar.props.add(Variable("languageNote", language.aiTranslatorPromptDescription))
       langVar.props.add(
         Variable("translation", lazyValue = {
