@@ -134,8 +134,8 @@ class PromptFragmentsService {
       Variable(
         "keyName",
         """
-        You are working with translation key "{{ key.name }}" (no need to mention it in response).
-        """,
+        You are working with translation key "{{key.name}}" (no need to mention it in response).
+        """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
         option = BasicPromptOption.KEY_NAME,
       ),
