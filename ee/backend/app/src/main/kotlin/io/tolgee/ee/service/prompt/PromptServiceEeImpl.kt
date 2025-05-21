@@ -128,7 +128,6 @@ class PromptServiceEeImpl(
     template: String,
     keyId: Long?,
     targetLanguageId: Long,
-    provider: String,
     options: List<BasicPromptOption>?,
   ): String {
     try {
@@ -258,7 +257,6 @@ class PromptServiceEeImpl(
         data.template ?: promptDefaultService.getDefaultPrompt().template!!,
         data.keyId,
         data.targetLanguageId,
-        data.provider,
         data.options,
       )
     val params = getLlmParamsFromPrompt(prompt, data.keyId, priority ?: LlmProviderPriority.HIGH)
