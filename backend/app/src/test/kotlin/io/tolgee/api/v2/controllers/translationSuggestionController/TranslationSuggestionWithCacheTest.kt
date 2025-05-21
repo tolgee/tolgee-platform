@@ -3,11 +3,11 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
+import io.tolgee.component.machineTranslation.providers.LLMTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
-import io.tolgee.ee.component.LLMTranslationProviderEeImpl
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.AfterEach
@@ -34,7 +34,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @Autowired
   @MockBean
-  lateinit var llmTranslationProviderEeImpl: LLMTranslationProviderEeImpl
+  lateinit var llmTranslationProvider: LLMTranslationProvider
 
   @Autowired
   @MockBean
@@ -48,7 +48,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @BeforeEach
   fun setup() {
-    Mockito.clearInvocations(llmTranslationProviderEeImpl)
+    Mockito.clearInvocations(llmTranslationProvider)
     setForcedDate(Date())
     initTestData()
     initMachineTranslationProperties(1000)
@@ -72,7 +72,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
     tolgeeTranslateParamsCaptor = argumentCaptor()
 
     whenever(
-      llmTranslationProviderEeImpl.translate(
+      llmTranslationProvider.translate(
         tolgeeTranslateParamsCaptor.capture(),
       ),
     ).thenAnswer {
