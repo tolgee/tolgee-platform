@@ -143,6 +143,7 @@ class PromptFragmentsService {
 
     result.add(
       Variable(
+        "keyDescription",
         """
         {{#if key.description}}
         User provided additional description of the key:

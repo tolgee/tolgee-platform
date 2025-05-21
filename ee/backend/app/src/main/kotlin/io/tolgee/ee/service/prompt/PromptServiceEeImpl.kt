@@ -145,7 +145,7 @@ class PromptServiceEeImpl(
 
       fragments?.forEach {
         val included = it.option == null || (options?.contains(it.option) ?: true)
-        if (included) {
+        if (included && it.value is String) {
           val renderedTemplate = handlebars.compileInline(it.value as String)
           it.value = renderedTemplate.apply(paramsForFragments)
         } else {
