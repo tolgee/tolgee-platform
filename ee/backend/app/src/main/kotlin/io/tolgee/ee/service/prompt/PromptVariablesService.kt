@@ -29,6 +29,13 @@ class PromptVariablesService(
   private val applicationContext: ApplicationContext,
   private val promptFragmentsService: PromptFragmentsService,
 ) {
+
+  fun cjkVariable(tag: String?): Variable {
+    // language is Chinese, Japanese or Korean
+    val isCJK = tag?.let { it.startsWith("zh") || it.startsWith("ja") || it.startsWith("ko") } ?: false
+    return Variable("isCJK", isCJK, description = "Is Chinese, Japanese or Korean")
+  }
+
   @Transactional
   fun getVariables(
     projectId: Long,
@@ -61,12 +68,14 @@ class PromptVariablesService(
     source.props.add(Variable("language", sLanguage.name))
     source.props.add(Variable("translation", escapeAsJson(sTranslation?.text) ?: ""))
     source.props.add(Variable("languageNote", sLanguage.aiTranslatorPromptDescription ?: ""))
+    source.props.add(cjkVariable(sLanguage.tag))
     variables.add(source)
 
     val target = Variable("target")
 
     target.props.add(Variable("language", tLanguage?.name))
     target.props.add(Variable("translation", escapeAsJson(tTranslation?.text) ?: ""))
+    target.props.add(cjkVariable(tLanguage?.tag))
 
     val context = MtTranslatorContext(projectId, applicationContext, false)
     val pluralFormsWithReplacedParam =
@@ -129,6 +138,7 @@ class PromptVariablesService(
           key?.let { escapeAsJson(translationService.find(it, language).getOrNull()?.text) }
         }),
       )
+      langVar.props.add(cjkVariable(language.tag))
       otherVar.props.add(langVar)
     }
 

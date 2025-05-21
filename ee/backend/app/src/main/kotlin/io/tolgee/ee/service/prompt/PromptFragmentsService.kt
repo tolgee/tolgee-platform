@@ -35,6 +35,10 @@ class PromptFragmentsService {
         Keep original line breaks in the text.
         Keep the style of source text.
         All translations are part of software product, don't transform them into sentences.
+        
+        {{#if target.isCJK}}
+        Add space between {{target.language}} characters and latin words
+        {{/if}}
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
       ),

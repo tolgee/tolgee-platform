@@ -140,7 +140,7 @@ class PromptServiceEeImpl(
       fragments?.forEach {
         val included = it.option == null || (options?.contains(it.option) ?: true)
         if (included) {
-          val renderedTemplate = handlebars.compileInline(it.value)
+          val renderedTemplate = handlebars.compileInline(it.value as String)
           it.value = renderedTemplate.apply(paramsForFragments)
         } else {
           it.value = ""
@@ -256,6 +256,10 @@ class PromptServiceEeImpl(
       result.add(input.substring(lastIndex))
     }
 
+    if (result.size == 0) {
+      result.add("")
+    }
+
     return result
   }
 
@@ -355,7 +359,7 @@ class PromptServiceEeImpl(
         }
 
         val stringValue = promptValue?.lazyValue?.let { it() } ?: promptValue?.value
-        return stringValue?.let { Handlebars.SafeString(it) }
+        return stringValue?.let { if (it is String) Handlebars.SafeString(it) else it }
       }
 
       override val entries: Set<Map.Entry<String, Any?>>
@@ -371,8 +375,8 @@ class PromptServiceEeImpl(
 
     class Variable(
       val name: String,
-      var value: String? = null,
-      var lazyValue: (() -> String?)? = null,
+      var value: Any? = null,
+      var lazyValue: (() -> Any?)? = null,
       val description: String? = null,
       val props: MutableList<Variable> = mutableListOf(),
       val type: PromptVariableType? = null,
@@ -389,7 +393,7 @@ class PromptServiceEeImpl(
         return PromptVariableDto(
           name = name,
           description = description,
-          value = value,
+          value = value.toString(),
           props =
             if (props.isNotEmpty()) {
               props.map { it.toPromptVariableDto() }.toMutableList()
