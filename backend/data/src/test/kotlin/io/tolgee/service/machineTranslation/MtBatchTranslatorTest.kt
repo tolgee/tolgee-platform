@@ -35,7 +35,7 @@ class MtBatchTranslatorTest {
     prepareSeparatePluralsResponse()
 
     val context = getMtTranslatorContext()
-    val translator = MtBatchTranslator(context, mockApplicationContext())
+    val translator = MtBatchTranslator(context)
 
     val translated =
       translator.translate(
@@ -66,7 +66,7 @@ class MtBatchTranslatorTest {
     prepareSingleValuePluralResponse()
 
     val context = getMtTranslatorContext()
-    val translator = MtBatchTranslator(context, mockApplicationContext())
+    val translator = MtBatchTranslator(context)
 
     val translated =
       translator.translate(

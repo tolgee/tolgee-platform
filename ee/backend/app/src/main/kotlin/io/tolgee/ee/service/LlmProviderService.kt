@@ -198,9 +198,6 @@ class LlmProviderService(
       LlmProviderType.OPENAI -> openaiApiService
       LlmProviderType.OPENAI_AZURE -> openaiApiService
       LlmProviderType.TOLGEE -> tolgeeApiService
-//      LLMProviderType.OLLAMA -> ollamaApiService
-//      LLMProviderType.CLAUDE -> claudeApiService
-//      LLMProviderType.GEMINI -> geminiApiService
     }
   }
 

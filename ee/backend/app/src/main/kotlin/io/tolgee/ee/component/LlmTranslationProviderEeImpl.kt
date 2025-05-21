@@ -40,8 +40,9 @@ class LlmTranslationProviderEeImpl(
     val result =
       promptService.runPromptWithoutChargingCredits(
         organizationId,
-        params = promptParams,
-        provider = provider,
+        promptParams,
+        provider,
+        attempts
       )
     return promptService.getTranslationFromPromptResult(result)
   }
