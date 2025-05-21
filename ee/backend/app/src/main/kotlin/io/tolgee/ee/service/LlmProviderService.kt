@@ -55,7 +55,6 @@ class LlmProviderService(
     name: String,
     priority: LlmProviderPriority?,
   ): LlmProviderDto {
-
     val customProviders = getAll(organizationId)
     val serverProviders = getAllServerProviders()
     val providersOfTheName =
