@@ -397,7 +397,6 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 //    metadata.languageDescription.assert.isEqualTo(testData.germanLanguage.aiTranslatorPromptDescription)
 //  }
 
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `it uses correct DeepL formality`() {

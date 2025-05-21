@@ -46,11 +46,13 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
     Mockito.clearInvocations(mtService)
     internalProperties.fakeMtProviders = true
     llmProperties.enabled = true
-    llmProperties.providers.add(LLMProperties.LLMProvider(
+    llmProperties.providers.add(
+      LLMProperties.LLMProvider(
       "default",
       type = LLMProviderType.OPENAI,
       apiUrl = "https://test.com",
-    ))
+    )
+    )
 
     testData =
       BaseTestData().apply {
