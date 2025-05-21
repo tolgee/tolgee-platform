@@ -9,6 +9,7 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.ee.service.prompt.PromptDefaultService
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.service.LlmPropertiesService
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
@@ -19,10 +20,10 @@ import org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class LlmTranslationProviderEeImpl(
   private val promptService: PromptServiceEeImpl,
-  private val llmProperties: LlmProperties,
+  private val llmPropertiesService: LlmPropertiesService,
   private val promptDefaultService: PromptDefaultService,
 ) : LlmTranslationProvider() {
-  override val isEnabled: Boolean get() = llmProperties.enabled
+  override val isEnabled: Boolean get() = llmPropertiesService.isEnabled()
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val metadata = params.metadata ?: throw Error("Metadata are required here")

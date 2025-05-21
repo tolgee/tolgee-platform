@@ -1,5 +1,6 @@
 package io.tolgee.api.publicConfiguration
 
+import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.AuthMethodsDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicConfigDTO
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO.OAuthPublicExtendsConfigDTO
@@ -14,6 +15,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.response.PublicLlmConfigurationDTO
+import io.tolgee.service.LlmPropertiesService
 import io.tolgee.util.VersionProvider
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -25,7 +27,7 @@ class PublicConfigurationAssembler(
   private val publicBillingConfProvider: PublicBillingConfProvider,
   private val versionProvider: VersionProvider,
   private val contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider,
-  private val llmProperties: LlmProperties,
+  private val llmPropertiesService: LlmPropertiesService,
 ) {
   fun toDto(): PublicConfigurationDTO {
     return PublicConfigurationDTO(
@@ -73,7 +75,7 @@ class PublicConfigurationAssembler(
       allowRegistrations = properties.authentication.registrationsAllowed,
       authMethods = properties.authentication.asAuthMethodsDTO(),
       translationsViewLanguagesLimit = properties.translationsViewLanguagesLimit,
-      llm = PublicLlmConfigurationDTO(llmProperties.enabled),
+      llm = PublicLlmConfigurationDTO(llmPropertiesService.isEnabled()),
     )
   }
 

@@ -1,11 +1,13 @@
 package io.tolgee.ee.service.prompt
 
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.dtos.request.prompt.PromptDto
+import io.tolgee.service.LlmPropertiesService
 import org.springframework.stereotype.Service
 
 @Service
-class PromptDefaultService(private val llmProperties: LlmProperties) {
+class PromptDefaultService(
+  private val llmPropertiesService: LlmPropertiesService
+) {
   fun getDefaultPrompt(): PromptDto {
     return PromptDto(
       name = "Default",
@@ -35,7 +37,7 @@ class PromptDefaultService(private val llmProperties: LlmProperties) {
 
         {{fragment.translateJson}}
         """.trimIndent(),
-      providerName = llmProperties.providers.getOrNull(0)?.name ?: "default",
+      providerName = llmPropertiesService.getProviders().getOrNull(0)?.name ?: "default",
     )
   }
 }

@@ -11,7 +11,7 @@ data class LlmProviderDto(
   override var type: LlmProviderType,
   override var priority: LlmProviderPriority?,
   override var apiKey: String?,
-  override var apiUrl: String,
+  override var apiUrl: String?,
   override var model: String?,
   override var deployment: String?,
   override var keepAlive: String?,
