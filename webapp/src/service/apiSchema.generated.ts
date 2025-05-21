@@ -1681,7 +1681,10 @@ export interface components {
       name: string;
     };
     CreateGlossaryTermWithTranslationRequest: {
-      /** @description Glossary term description */
+      /**
+       * @description Glossary term description
+       * @example It's trademark
+       */
       description?: string;
       flagAbbreviation: boolean;
       flagCaseSensitive: boolean;
