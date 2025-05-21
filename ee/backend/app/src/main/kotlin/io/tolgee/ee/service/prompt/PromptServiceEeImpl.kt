@@ -22,7 +22,6 @@ import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LLMProviderPriority
 import io.tolgee.model.enums.PromptVariableType
 import io.tolgee.repository.PromptRepository
-import io.tolgee.security.ProjectHolder
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
@@ -400,7 +399,7 @@ class PromptServiceEeImpl(
         return PromptVariableDto(
           name = name,
           description = description,
-          value = value.toString(),
+          value = value?.toString(),
           props =
             if (props.isNotEmpty()) {
               props.map { it.toPromptVariableDto() }.toMutableList()
