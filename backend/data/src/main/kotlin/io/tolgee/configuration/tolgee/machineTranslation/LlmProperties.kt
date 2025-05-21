@@ -23,8 +23,8 @@ class LlmProperties {
     override var deployment: String? = null,
     override var keepAlive: String? = null,
     override var format: String? = null,
-    override var pricePerMillionInput: Double? = null,
-    override var pricePerMillionOutput: Double? = null,
+    override var tokenPriceInCreditsInput: Double? = null,
+    override var tokenPriceInCreditsOutput: Double? = null,
     override var attempts: List<Int>? = null,
   ) : LlmProviderInterface {
     fun toDto(id: Long): LlmProviderDto {
@@ -39,8 +39,8 @@ class LlmProperties {
         deployment = deployment,
         keepAlive = keepAlive,
         format = format,
-        pricePerMillionInput = pricePerMillionInput,
-        pricePerMillionOutput = pricePerMillionOutput,
+        tokenPriceInCreditsInput = tokenPriceInCreditsInput,
+        tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,
         attempts = attempts,
       )
     }

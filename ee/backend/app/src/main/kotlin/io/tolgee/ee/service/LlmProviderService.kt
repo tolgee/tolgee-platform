@@ -32,8 +32,6 @@ import java.time.Duration
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.roundToInt
 
-const val TOKEN_PRICE = 0.000_035 // EUR
-
 @Service
 class LlmProviderService(
   private val llmProviderRepository: LlmProviderRepository,
@@ -225,8 +223,6 @@ class LlmProviderService(
         keepAlive = dto.keepAlive,
         format = dto.format,
         organization = organizationService.get(organizationId),
-        pricePerMillionInput = null,
-        pricePerMillionOutput = null,
       )
     llmProviderRepository.save(provider)
     return provider.toDto()
@@ -270,18 +266,18 @@ class LlmProviderService(
     providerConfig: LlmProviderDto,
     usage: PromptResponseUsageDto?,
   ): Int {
-    val pricePerTokenInput: Double = (providerConfig.pricePerMillionInput ?: 0.0) / 1_000_000.0
-    val pricePerTokenOutput: Double = (providerConfig.pricePerMillionOutput ?: 0.0) / 1_000_000.0
+    val tokenPriceInCreditsInput: Double = (providerConfig.tokenPriceInCreditsInput ?: 0.0)
+    val tokenPriceInCreditsOutput: Double = (providerConfig.tokenPriceInCreditsOutput ?: 0.0)
     val inputTokens: Long = usage?.inputTokens ?: 0L
     val outputTokens: Long = usage?.outputTokens ?: 0L
     val cachedTokens: Long = usage?.cachedTokens ?: 0L
 
-    val inputPrice = (inputTokens - cachedTokens) * pricePerTokenInput
-    val outputPrice = (outputTokens) * pricePerTokenOutput
+    val inputPrice = (inputTokens - cachedTokens) * tokenPriceInCreditsInput
+    val outputPrice = (outputTokens) * tokenPriceInCreditsOutput
 
     val price = inputPrice + outputPrice
 
-    return ((price / TOKEN_PRICE) * 100).roundToInt()
+    return (price * 100).roundToInt()
   }
 
   companion object {

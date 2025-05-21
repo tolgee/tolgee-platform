@@ -23,8 +23,6 @@ class LlmProvider(
   var deployment: String? = null,
   var keepAlive: String? = null,
   var format: String? = null,
-  var pricePerMillionInput: Double? = null,
-  var pricePerMillionOutput: Double? = null,
   @ManyToOne
   @JoinColumn(name = "organization_id")
   var organization: Organization,
@@ -41,9 +39,9 @@ class LlmProvider(
       deployment = deployment,
       keepAlive = keepAlive,
       format = format,
-      pricePerMillionInput = pricePerMillionInput,
-      pricePerMillionOutput = pricePerMillionOutput,
       attempts = null,
+      tokenPriceInCreditsInput = null,
+      tokenPriceInCreditsOutput = null,
     )
   }
 }
