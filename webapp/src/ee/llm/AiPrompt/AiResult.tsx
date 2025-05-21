@@ -17,6 +17,7 @@ const StyledPre = styled(Box)`
   flex-grow: 1;
   color: ${({ theme }) => theme.palette.text.secondary};
   white-space: pre-wrap;
+  word-break: break-word;
 `;
 
 const StyledDescription = styled('div')`
