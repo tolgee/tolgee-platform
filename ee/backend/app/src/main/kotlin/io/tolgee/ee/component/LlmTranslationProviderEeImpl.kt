@@ -26,22 +26,21 @@ class LlmTranslationProviderEeImpl(
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val metadata = params.metadata ?: throw Error("Metadata are required here")
-    val promptParams = promptService.getLlmParamsFromPrompt(metadata.prompt, metadata.keyId)
-    return translate(promptParams, metadata.organizationId, metadata.provider, params.isBatch)
+    val priority = if (params.isBatch) LlmProviderPriority.LOW else LlmProviderPriority.HIGH
+    val promptParams = promptService.getLlmParamsFromPrompt(metadata.prompt, metadata.keyId, priority)
+    return translate(promptParams, metadata.organizationId, metadata.provider)
   }
 
   fun translate(
     promptParams: LlmParams,
     organizationId: Long,
     provider: String,
-    isBatch: Boolean,
   ): MtValueProvider.MtResult {
     val result =
       promptService.runPrompt(
         organizationId,
         params = promptParams,
         provider = provider,
-        priority = if (isBatch) LlmProviderPriority.LOW else LlmProviderPriority.HIGH,
       )
     return promptService.getTranslationFromPromptResult(result)
   }

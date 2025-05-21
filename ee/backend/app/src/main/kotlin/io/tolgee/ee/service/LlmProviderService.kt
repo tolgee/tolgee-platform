@@ -38,6 +38,7 @@ class LlmProviderService(
   private val organizationService: OrganizationService,
   private val providerLlmProperties: LlmProperties,
   private val openaiApiService: OpenaiApiService,
+  private val tolgeeApiService: TolgeeApiService,
   private val ollamaApiService: OllamaApiService,
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
@@ -191,6 +192,7 @@ class LlmProviderService(
     return when (providerType) {
       LlmProviderType.OPENAI -> openaiApiService
       LlmProviderType.OPENAI_AZURE -> openaiApiService
+      LlmProviderType.TOLGEE -> tolgeeApiService
 //      LLMProviderType.OLLAMA -> ollamaApiService
 //      LLMProviderType.CLAUDE -> claudeApiService
 //      LLMProviderType.GEMINI -> geminiApiService

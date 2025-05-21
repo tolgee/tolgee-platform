@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import java.util.*
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)

@@ -183,6 +183,7 @@ class PromptServiceEeImpl(
   fun getLlmParamsFromPrompt(
     prompt: String,
     keyId: Long?,
+    priority: LlmProviderPriority,
   ): LlmParams {
     val key = keyId?.let { keyService.find(it) ?: throw NotFoundException(Message.KEY_NOT_FOUND) }
     var preparedPrompt = prompt
@@ -241,7 +242,7 @@ class PromptServiceEeImpl(
           )
         }
       }
-    return LlmParams(messages, shouldOutputJson)
+    return LlmParams(messages, shouldOutputJson, priority)
   }
 
   // Helper function to split and keep matches
@@ -275,11 +276,10 @@ class PromptServiceEeImpl(
     organizationId: Long,
     params: LlmParams,
     provider: String,
-    priority: LlmProviderPriority?,
   ): PromptService.Companion.PromptResult {
     val result =
       try {
-        providerService.callProvider(organizationId, provider, params, priority)
+        providerService.callProvider(organizationId, provider, params, params.priority)
       } catch (e: RestClientException) {
         throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message))
       } catch (e: TranslationApiRateLimitException) {
@@ -324,8 +324,8 @@ class PromptServiceEeImpl(
         data.provider,
         data.options,
       )
-    val params = getLlmParamsFromPrompt(prompt, data.keyId)
-    val result = runPrompt(project.organizationOwner.id, params, data.provider, priority)
+    val params = getLlmParamsFromPrompt(prompt, data.keyId, priority ?: LlmProviderPriority.HIGH)
+    val result = runPrompt(project.organizationOwner.id, params, data.provider)
     return getTranslationFromPromptResult(result)
   }
 
