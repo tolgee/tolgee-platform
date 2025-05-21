@@ -179,7 +179,7 @@ class LlmProviderService(
     return PromptResult(
       response = json,
       usage = PromptResponseUsageDto(inputTokens = 42, outputTokens = 42, cachedTokens = 21),
-      price = 42,
+      price = 400,
     )
   }
 

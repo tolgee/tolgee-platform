@@ -302,7 +302,7 @@ class PromptServiceEeImpl(
     return result
   }
 
-  fun runPrompt(
+  fun runPromptAndChargeCredits(
     organizationId: Long,
     params: LlmParams,
     provider: String,
@@ -355,7 +355,7 @@ class PromptServiceEeImpl(
         data.options,
       )
     val params = getLlmParamsFromPrompt(prompt, data.keyId, priority ?: LlmProviderPriority.HIGH)
-    val result = runPrompt(project.organizationOwner.id, params, data.provider)
+    val result = runPromptWithoutChargingCredits(project.organizationOwner.id, params, data.provider)
     return getTranslationFromPromptResult(result)
   }
 

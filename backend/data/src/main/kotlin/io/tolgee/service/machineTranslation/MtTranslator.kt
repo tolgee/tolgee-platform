@@ -30,9 +30,7 @@ class MtTranslator(
     val result = MtBatchTranslator(context, applicationContext).translate(batchItems)
     publishAfterEvent(
       context.project,
-      // count mt credits for conventional providers (GOOGLE, AWS, etc.)
-      // PROMPT is counted in PromptServiceEeImpl
-      result.filter { it.service !== MtServiceType.PROMPT }.sumOf { it.actualPrice }
+      result.sumOf { it.actualPrice }
     )
     return result
   }

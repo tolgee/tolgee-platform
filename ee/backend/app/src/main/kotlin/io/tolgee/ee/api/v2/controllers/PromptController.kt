@@ -133,7 +133,7 @@ class PromptController(
     val params = promptService.getLlmParamsFromPrompt(prompt, data.keyId, LlmProviderPriority.HIGH)
     val organizationId = projectHolder.project.organizationOwnerId
     val response =
-      promptService.runPrompt(
+      promptService.runPromptAndChargeCredits(
         organizationId,
         params,
         data.provider
