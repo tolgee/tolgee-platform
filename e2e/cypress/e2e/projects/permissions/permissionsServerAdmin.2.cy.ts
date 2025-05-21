@@ -23,6 +23,7 @@ describe('Server admin 2', () => {
           'project-menu-item-export': SKIP,
           'project-menu-item-developer': SKIP,
           'project-menu-item-integrate': SKIP,
+          'project-menu-item-ai': SKIP,
         });
       }
     );
