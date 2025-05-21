@@ -1,9 +1,6 @@
 package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
@@ -19,7 +16,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
 
@@ -101,10 +97,11 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
       }
 
     val response: ResponseEntity<ResponseBody> =
-      restTemplate.exchange<ResponseBody>(
+      restTemplate.exchange(
         url,
         HttpMethod.POST,
         request,
+        ResponseBody::class.java
       )
 
     return PromptResult(

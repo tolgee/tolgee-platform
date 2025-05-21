@@ -20,6 +20,7 @@ class HttpClientMocker(private val restTemplate: RestTemplate) {
   data class Definition(
     var url: (String) -> Boolean = { true },
     var method: (HttpMethod) -> Boolean = { true },
+    var responseType: Class<*> = String::class.java,
   )
 
   private lateinit var definition: Definition

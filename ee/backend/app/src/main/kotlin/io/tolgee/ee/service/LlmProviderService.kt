@@ -24,8 +24,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.set
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException.TooManyRequests
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
@@ -117,9 +118,13 @@ class LlmProviderService(
       val providerConfig = getProviderByName(organizationId, provider, priority)
       try {
         return callback(providerConfig)
-      } catch (e: TooManyRequests) {
-        suspendProvider(provider, providerConfig.id, 60 * 1000)
-        lastError = e
+      } catch (e: HttpClientErrorException) {
+        if (e.statusCode == HttpStatus.TOO_MANY_REQUESTS) {
+          suspendProvider(provider, providerConfig.id, 60 * 1000)
+          lastError = e
+        } else {
+          throw e
+        }
       }
     }
     throw BadRequestException(Message.LLM_RATE_LIMITED, listOf(lastError!!.message), lastError)

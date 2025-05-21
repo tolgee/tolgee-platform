@@ -17,7 +17,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException.BadRequest
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.exchange
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -42,23 +41,26 @@ class TolgeeApiService(
     val url = "${config.apiUrl}/v2/public/llm/prompt"
 
     val response = try {
-      restTemplate.exchange<PromptResult>(
+      restTemplate.exchange(
         url,
         HttpMethod.POST,
         request,
+        PromptResult::class.java
       )
     } catch (e: BadRequest) {
       extractTolgeeErrorOrThrow(e)
     }
 
-    return response.body ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf("Empty response body"))
+    return response?.body ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf("Empty response body"))
   }
 
   fun extractTolgeeErrorOrThrow(e: BadRequest): Nothing {
     if (!e.responseBodyAsString.isNullOrBlank()) {
-      val json = jacksonObjectMapper().readValue(e.responseBodyAsString, JsonNode::class.java)
-      val eCode = json.get("code")?.runCatching { this.asText() }?.getOrNull()
-      val eParams = json.get("params")?.runCatching { this.asIterable().map { it.asText() } }?.getOrNull()
+      val json = e.responseBodyAsString.runCatching {
+        jacksonObjectMapper().readValue(e.responseBodyAsString, JsonNode::class.java)
+      }?.getOrNull()
+      val eCode = json?.get("code")?.runCatching { this.asText() }?.getOrNull()
+      val eParams = json?.get("params")?.runCatching { this.asIterable().map { it.asText() } }?.getOrNull()
       val message = eCode?.runCatching { Message.valueOf(this.uppercase()) }?.getOrNull()
       message?.let { throw BadRequestException(message, params = eParams, e) }
     }
