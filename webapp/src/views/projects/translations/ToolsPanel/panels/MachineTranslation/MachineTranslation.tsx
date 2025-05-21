@@ -166,13 +166,20 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
               >
                 <MachineTranslationItem
                   {...props}
+                  data-cy="translation-tools-machine-translation-item-prompt"
                   showIcon={false}
                   sx={{ margin: 0, padding: '8px' }}
                 />
               </MachineTranslationPromptWrapper>
             );
           } else {
-            return <MachineTranslationItem key={provider} {...props} />;
+            return (
+              <MachineTranslationItem
+                key={provider}
+                {...props}
+                data-cy="translation-tools-machine-translation-item"
+              />
+            );
           }
         })
       )}

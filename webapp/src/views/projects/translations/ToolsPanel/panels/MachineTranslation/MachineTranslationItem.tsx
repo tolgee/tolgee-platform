@@ -66,6 +66,7 @@ type Props = {
   pluralVariant: string | undefined;
   showIcon?: boolean;
   sx?: SxProps;
+  'data-cy'?: string;
 };
 
 export const MachineTranslationItem = ({
@@ -78,6 +79,7 @@ export const MachineTranslationItem = ({
   pluralVariant,
   showIcon = true,
   sx,
+  'data-cy': dataCy,
 }: Props) => {
   const error = data?.errorMessage?.toLowerCase();
   const errorParams = data?.errorParams;
@@ -101,7 +103,7 @@ export const MachineTranslationItem = ({
           setValue(text);
         }
       }}
-      data-cy="translation-tools-machine-translation-item"
+      data-cy={dataCy}
       className={clsx({ clickable })}
       sx={{ gridTemplateColumns: showIcon ? '20px 1fr' : '1fr', ...sx }}
     >

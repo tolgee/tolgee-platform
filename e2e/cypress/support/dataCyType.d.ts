@@ -655,6 +655,7 @@ declare namespace DataCy {
         "translation-state-button" |
         "translation-text" |
         "translation-tools-machine-translation-item" |
+        "translation-tools-machine-translation-item-prompt" |
         "translation-tools-translation-memory-item" |
         "translations-add-button" |
         "translations-auto-translated-clear-button" |
