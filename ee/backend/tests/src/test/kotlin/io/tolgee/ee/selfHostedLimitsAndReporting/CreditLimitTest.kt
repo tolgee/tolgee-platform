@@ -56,7 +56,7 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
     httpClientMocker = HttpClientMocker(restTemplate)
     initMachineTranslationProperties(
       freeCreditsAmount = -1,
-      enabledServices = setOf(MtServiceType.TOLGEE),
+      enabledServices = setOf(MtServiceType.PROMPT),
     )
     whenever(internalProperties.fakeMtProviders).thenReturn(false)
   }

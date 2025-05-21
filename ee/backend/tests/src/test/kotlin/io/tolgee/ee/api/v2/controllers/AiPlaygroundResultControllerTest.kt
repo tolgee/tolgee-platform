@@ -22,6 +22,7 @@ class AiPlaygroundResultControllerTest : ProjectAuthControllerTest("/v2/projects
           type = LLMProviderType.OPENAI,
           pricePerMillionInput = 2.0,
           pricePerMillionOutput = 2.0,
+          apiUrl = "http://test.com"
         ),
       )
     internalProperties.fakeLlmProviders = true
