@@ -187,9 +187,9 @@ class PromptServiceEeImpl(
 
     val pattern = Regex("\\[\\[screenshot_(full|small)_(\\d+)]]")
 
-    val shouldOutputJson = preparedPrompt.contains(LLM_MARK_JSON)
+    val shouldOutputJson = preparedPrompt.contains(PromptFragmentsService.LLM_MARK_JSON)
     if (shouldOutputJson) {
-      preparedPrompt = preparedPrompt.replace(LLM_MARK_JSON, "")
+      preparedPrompt = preparedPrompt.replace(PromptFragmentsService.LLM_MARK_JSON, "")
     }
 
     val parts = pattern.splitWithMatches(preparedPrompt)
