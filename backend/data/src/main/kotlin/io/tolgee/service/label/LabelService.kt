@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.Optional
 
 @Service
 class LabelService(
@@ -17,6 +18,10 @@ class LabelService(
   ) {
   fun getProjectLabels(projectId: Long, pageable: Pageable): Page<Label> {
     return labelRepository.findByProjectId(projectId, pageable)
+  }
+
+  fun find(labelId: Long): Optional<Label> {
+    return labelRepository.findById(labelId)
   }
 
   @Transactional
@@ -47,5 +52,10 @@ class LabelService(
 
     labelRepository.save(label)
     return label
+  }
+
+  @Transactional
+  fun deleteLabel(label: Label) {
+    labelRepository.delete(label)
   }
 }
