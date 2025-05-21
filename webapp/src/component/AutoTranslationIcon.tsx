@@ -1,7 +1,7 @@
 import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Mt, TranslationMemory } from 'tg.component/CustomIcons';
-import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/MachineTranslation/useServiceImg';
+import { useServiceImg } from 'tg.hooks/useServiceImg';
 import { TranslationFlagIcon } from './TranslationFlagIcon';
 import { getServiceName } from 'tg.views/projects/languages/MachineTranslation/getServiceName';
 import { ServiceType } from 'tg.views/projects/languages/MachineTranslation/types';

@@ -40,7 +40,7 @@ export const LlmProviderCreateDialog = ({ onClose }: Props) => {
   const organization = useOrganization();
   const [type, setType] = useState<LlmProviderType>('OPENAI');
 
-  const createLoadable = useApiMutation({
+  const createMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/llm-providers',
     method: 'post',
     invalidatePrefix: '/v2/organizations/{organizationId}/llm-providers',
@@ -53,7 +53,7 @@ export const LlmProviderCreateDialog = ({ onClose }: Props) => {
         enableReinitialize
         isInitialValid={false}
         onSubmit={(values) => {
-          createLoadable.mutate(
+          createMutation.mutate(
             {
               content: { 'application/json': { ...values, type } },
               path: {
@@ -83,7 +83,7 @@ export const LlmProviderCreateDialog = ({ onClose }: Props) => {
                 <Button onClick={onClose}>{t('global_cancel_button')}</Button>
                 <LoadingButton
                   onClick={submitForm}
-                  loading={createLoadable.isLoading}
+                  loading={createMutation.isLoading}
                   color="primary"
                   variant="contained"
                 >

@@ -10,7 +10,7 @@ import {
   TABLE_LAST_CELL,
 } from '../../../../component/languages/tableStyles';
 import { ServiceAvatar } from './ServiceAvatar';
-import { LanguageSettingsDialog } from './LanguageSettingsDialog';
+import { LanguageSettingsDialog } from './LanguageSettings/LanguageSettingsDialog';
 import { RowData, ServiceType } from './types';
 
 type Props = {
