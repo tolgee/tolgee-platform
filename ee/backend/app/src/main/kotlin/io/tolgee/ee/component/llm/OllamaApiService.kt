@@ -54,7 +54,6 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
       RequestBody(
         model = config.model!!,
         messages = messages,
-        keepAlive = config.keepAlive,
         format = if (params.shouldOutputJson && config.format == "json") "json" else null,
       )
 
@@ -82,7 +81,6 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
       val model: String,
       val messages: List<RequestMessage>,
       val stream: Boolean = false,
-      val keepAlive: String? = null,
       val format: String? = "json",
     )
 

@@ -14,7 +14,6 @@ data class LlmProviderDto(
   override var apiUrl: String?,
   override var model: String?,
   override var deployment: String?,
-  override var keepAlive: String?,
   override var format: String?,
   override var tokenPriceInCreditsInput: Double?,
   override var tokenPriceInCreditsOutput: Double?,

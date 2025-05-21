@@ -15,6 +15,5 @@ open class LlmProviderModel(
   var apiUrl: String?,
   var model: String?,
   var deployment: String?,
-  var keepAlive: String?,
   var format: String?,
 ) : RepresentationModel<LlmProviderModel>()

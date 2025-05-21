@@ -14,14 +14,13 @@ class LlmProperties {
   open class LlmProvider(
     @DocProperty("User visible provider name")
     override var name: String = "default",
-    @DocProperty("Provider type (OPENAI or OLLAMA)")
+    @DocProperty("Provider type")
     override var type: LlmProviderType,
     override var priority: LlmProviderPriority? = null,
     override var apiKey: String? = null,
     override var apiUrl: String? = null,
     override var model: String? = null,
     override var deployment: String? = null,
-    override var keepAlive: String? = null,
     override var format: String? = null,
     override var tokenPriceInCreditsInput: Double? = null,
     override var tokenPriceInCreditsOutput: Double? = null,
@@ -38,7 +37,6 @@ class LlmProperties {
         apiUrl = apiUrl,
         model = model,
         deployment = deployment,
-        keepAlive = keepAlive,
         format = format,
         tokenPriceInCreditsInput = tokenPriceInCreditsInput,
         tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,

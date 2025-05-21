@@ -37,7 +37,6 @@ class LlmProvider(
       apiUrl = apiUrl,
       model = model,
       deployment = deployment,
-      keepAlive = keepAlive,
       format = format,
       attempts = null,
       tokenPriceInCreditsInput = null,

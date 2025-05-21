@@ -8,26 +8,34 @@ interface LlmProviderInterface {
   @DocProperty(description = "Provider name")
   var name: String
 
-  @DocProperty(description = "Provider type: openai or ollama")
+  @DocProperty(description = "Provider type")
   var type: LlmProviderType
 
   @DocProperty(description = "Provider priority")
   var priority: LlmProviderPriority?
 
   // general
+  @DocProperty(description = "Provider API key")
   var apiKey: String?
+
+  @DocProperty(description = "Provider API url")
   var apiUrl: String?
+
+  @DocProperty(description = "Provider model name")
   var model: String?
 
-  // openai only
-  var deployment: String?
-
-  // ollama only
-  var keepAlive: String?
+  @DocProperty(description = "Provider format")
   var format: String?
 
+  // azure openai only
+  @DocProperty(description = "Provider deployment (azure only)")
+  var deployment: String?
+
   // pricing
+  @DocProperty(hidden = true)
   var tokenPriceInCreditsInput: Double?
+
+  @DocProperty(hidden = true)
   var tokenPriceInCreditsOutput: Double?
 
   @DocProperty(description = "List of attempts (values are timeouts in seconds)")

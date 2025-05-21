@@ -21,7 +21,6 @@ class LlmProviderModelAssembler : RepresentationModelAssemblerSupport<LlmProvide
       apiUrl = entity.apiUrl,
       model = entity.model,
       deployment = entity.deployment,
-      keepAlive = entity.keepAlive,
       format = entity.format,
     )
   }
