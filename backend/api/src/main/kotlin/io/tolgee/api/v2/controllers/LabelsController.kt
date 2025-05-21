@@ -1,7 +1,9 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.label.CreateLabelDto
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.label.LabelModelAssembler
 import io.tolgee.model.translation.Label
@@ -17,6 +19,7 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -78,6 +81,18 @@ class LabelsController(
   ): LabelModel {
     val label = labelService.updateLabel(labelId, dto)
     return label.model
+  }
+
+  @DeleteMapping(value = ["labels/{labelId:\\d+}"])
+  @Operation(summary = "Delete label")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  fun deleteLabel(
+    @PathVariable("labelId")
+    labelId: Long,
+  ) {
+    val label = labelService.find(labelId).orElseThrow { NotFoundException(Message.LABEL_NOT_FOUND) }
+    labelService.deleteLabel(label)
   }
 
   private val Label.model: LabelModel
