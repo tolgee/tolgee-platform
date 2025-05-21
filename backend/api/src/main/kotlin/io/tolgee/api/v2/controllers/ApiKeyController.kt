@@ -69,7 +69,7 @@ class ApiKeyController(
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
 ) {
   @PostMapping(path = ["/api-keys"])
-  @Operation(summary = "Crete API key", description = "Creates new API key with provided scopes")
+  @Operation(summary = "Create API key", description = "Creates new API key with provided scopes")
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(1)
   fun create(
