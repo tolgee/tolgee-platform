@@ -9,7 +9,7 @@ import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.exceptions.*
-import io.tolgee.model.batch.params.MachineTranslationJobParams
+import io.tolgee.model.batch.params.AiPlaygroundJobParams
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.key.Key
 import io.tolgee.service.AiPlaygroundResultService
@@ -24,7 +24,7 @@ class AiPlaygroundChunkProcessor(
   private val promptService: PromptService,
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   private val mtProviderCatching: MtProviderCatching
-) : ChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem> {
+) : ChunkProcessor<MachineTranslationRequest, AiPlaygroundJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
@@ -37,7 +37,6 @@ class AiPlaygroundChunkProcessor(
       val (keyId, languageId) = item
       val key = keys[keyId] ?: return@iterateCatching
       val llmPrompt = getParams(job).llmPrompt ?: throw InvalidStateException()
-
       translateAndSetResult(job, llmPrompt, key, languageId)
     }
   }
@@ -66,8 +65,8 @@ class AiPlaygroundChunkProcessor(
     )
   }
 
-  override fun getParamsType(): Class<MachineTranslationJobParams> {
-    return MachineTranslationJobParams::class.java
+  override fun getParamsType(): Class<AiPlaygroundJobParams> {
+    return AiPlaygroundJobParams::class.java
   }
 
   override fun getTarget(data: MachineTranslationRequest): List<BatchTranslationTargetItem> {
@@ -97,8 +96,8 @@ class AiPlaygroundChunkProcessor(
     return BatchTranslationTargetItem::class.java
   }
 
-  override fun getParams(data: MachineTranslationRequest): MachineTranslationJobParams {
-    return MachineTranslationJobParams().apply {
+  override fun getParams(data: MachineTranslationRequest): AiPlaygroundJobParams {
+    return AiPlaygroundJobParams().apply {
       this.targetLanguageIds = data.targetLanguageIds
       this.llmPrompt = data.llmPrompt
     }

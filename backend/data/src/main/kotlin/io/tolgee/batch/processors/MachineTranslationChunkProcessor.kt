@@ -75,7 +75,6 @@ class MachineTranslationChunkProcessor(
   override fun getParams(data: MachineTranslationRequest): MachineTranslationJobParams {
     return MachineTranslationJobParams().apply {
       this.targetLanguageIds = data.targetLanguageIds
-      this.llmPrompt = data.llmPrompt
     }
   }
 }
