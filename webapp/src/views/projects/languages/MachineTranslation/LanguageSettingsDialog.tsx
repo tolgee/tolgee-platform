@@ -11,7 +11,6 @@ import {
   Checkbox,
   Box,
   Radio,
-  Select,
   MenuItem,
   FormControlLabel,
   Typography,
@@ -38,6 +37,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/MachineTranslation/useServiceImg';
 import { getServiceName } from './getServiceName';
+import { Select } from 'tg.component/common/Select';
 
 const StyledSubtitle = styled('div')`
   font-size: 14px;
@@ -278,11 +278,7 @@ export const LanguageSettingsDialog = ({
                   ({ type, languageSupported, formalitySupported }) => {
                     return (
                       <React.Fragment key={type}>
-                        <Box
-                          className={TABLE_FIRST_CELL}
-                          display="flex"
-                          gap={2}
-                        >
+                        <Box className={TABLE_FIRST_CELL} gap={2}>
                           <ServiceLabel
                             name={getServiceName(type)}
                             icon={getServiceImg(type, false)}
@@ -296,8 +292,9 @@ export const LanguageSettingsDialog = ({
                                 setFieldValue('promptId', e.target.value)
                               }
                               displayEmpty
+                              minHeight={false}
                             >
-                              <MenuItem value={null as any}>default</MenuItem>
+                              <MenuItem value={null as any}>Default</MenuItem>
                               {prompts.data?._embedded?.prompts?.map((item) => {
                                 return (
                                   <MenuItem key={item.id} value={item.id}>
@@ -342,6 +339,7 @@ export const LanguageSettingsDialog = ({
                                 values.servicesFormality[type] ?? 'DEFAULT'
                               }
                               size="small"
+                              minHeight={false}
                               onChange={(e) =>
                                 changeFormality(
                                   type,
