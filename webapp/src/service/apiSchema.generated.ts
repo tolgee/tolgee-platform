@@ -837,6 +837,9 @@ export interface paths {
     /** Returns initial data required by the UI to load */
     get: operations["get_1"];
   };
+  "/v2/public/llm/prompt": {
+    post: operations["prompt"];
+  };
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
     get: operations["getInfo_4"];
@@ -3106,9 +3109,19 @@ export interface components {
       /** Format: int64 */
       untranslatedWordCount: number;
     };
+    LlmMessage: {
+      image?: string;
+      text?: string;
+      type: "TEXT" | "IMAGE";
+    };
+    LlmParams: {
+      messages: components["schemas"]["LlmMessage"][];
+      priority: "LOW" | "HIGH";
+      shouldOutputJson: boolean;
+    };
     LlmProviderModel: {
       apiKey?: string;
-      apiUrl: string;
+      apiUrl?: string;
       deployment?: string;
       format?: string;
       /** Format: int64 */
@@ -4040,6 +4053,13 @@ export interface components {
       inputTokens?: number;
       /** Format: int64 */
       outputTokens?: number;
+    };
+    PromptResult: {
+      parsedJson?: components["schemas"]["JsonNode"];
+      /** Format: int32 */
+      price: number;
+      response: string;
+      usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     PromptRunDto: {
       /** Format: int64 */
@@ -19105,6 +19125,53 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  prompt: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LlmParams"];
       };
     };
   };
