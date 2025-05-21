@@ -167,9 +167,7 @@ class LlmProviderService(
   }
 
   fun getFakedResponse(
-    params: LlmParams,
     config: LlmProviderInterface,
-    restTemplate: RestTemplate,
   ): PromptResult {
     val json =
       """
@@ -192,7 +190,7 @@ class LlmProviderService(
     restTemplate: RestTemplate,
   ): PromptResult {
     if (internalProperties.fakeLlmProviders) {
-      return getFakedResponse(params, config, restTemplate)
+      return getFakedResponse(config)
     }
     return providerService.translate(params, config, restTemplate)
   }
