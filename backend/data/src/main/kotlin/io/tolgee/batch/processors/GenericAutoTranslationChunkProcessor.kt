@@ -14,8 +14,6 @@ import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
-import io.tolgee.exceptions.PlanTranslationLimitExceeded
-import io.tolgee.exceptions.TranslationSpendingLimitExceeded
 import io.tolgee.model.enums.LLMProviderPriority
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
