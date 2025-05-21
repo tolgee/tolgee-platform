@@ -6,7 +6,13 @@ import io.tolgee.model.enums.LlmProviderType
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 
-@Entity
+@Entity()
+@Table(
+  indexes = [
+    Index(columnList = "organization_id"),
+    Index(columnList = "name"),
+  ],
+)
 class LlmProvider(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +30,6 @@ class LlmProvider(
   var keepAlive: String? = null,
   var format: String? = null,
   @ManyToOne
-  @JoinColumn(name = "organization_id")
   var organization: Organization,
 ) : AuditModel() {
   fun toDto(): LlmProviderDto {

@@ -8,6 +8,11 @@ import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "project_id"),
+  ],
+)
 class Prompt(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
