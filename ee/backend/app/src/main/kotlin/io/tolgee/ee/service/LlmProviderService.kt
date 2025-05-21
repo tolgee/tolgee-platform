@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.context.WebApplicationContext
 import java.time.Duration
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.roundToInt
@@ -152,7 +153,7 @@ class LlmProviderService(
     params: LlmParams,
     attempts: List<Int>? = null,
   ): PromptResult {
-    return repeatWhileProvidersRateLimited(organizationId, provider, params.priority) { providerConfig ->
+    val result = repeatWhileProvidersRateLimited(organizationId, provider, params.priority) { providerConfig ->
       val providerService = getProviderService(providerConfig.type)
       val resolvedAttempts = attempts ?: providerConfig.attempts ?: providerService.defaultAttempts()
       repeatWithTimeouts(resolvedAttempts) { restTemplate ->
@@ -161,6 +162,7 @@ class LlmProviderService(
         result
       }
     }
+    return result
   }
 
   fun getFakedResponse(

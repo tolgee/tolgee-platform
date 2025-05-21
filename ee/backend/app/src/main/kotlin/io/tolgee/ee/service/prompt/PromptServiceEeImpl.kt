@@ -16,6 +16,8 @@ import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.data.prompt.PromptVariableDto
 import io.tolgee.ee.service.LlmProviderService
+import io.tolgee.events.OnAfterMachineTranslationEvent
+import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.TooManyRequestsException
@@ -31,6 +33,7 @@ import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.ImageConverter
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
@@ -56,6 +59,7 @@ class PromptServiceEeImpl(
   private val promptVariablesService: PromptVariablesService,
   @Lazy
   private val mtServiceConfigService: MtServiceConfigService,
+  private val applicationContext: ApplicationContext
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -274,7 +278,7 @@ class PromptServiceEeImpl(
     return result
   }
 
-  fun runPrompt(
+  fun runPromptWithoutChargingCredits(
     organizationId: Long,
     params: LlmParams,
     provider: String,
@@ -295,7 +299,18 @@ class PromptServiceEeImpl(
       } catch (e: JsonProcessingException) {
         null
       }
+    return result
+  }
 
+  fun runPrompt(
+    organizationId: Long,
+    params: LlmParams,
+    provider: String,
+    attempts: List<Int>? = null,
+  ): PromptResult {
+    publishBeforeEvent(organizationId)
+    val result = runPromptWithoutChargingCredits(organizationId, params, provider, attempts)
+    publishAfterEvent(organizationId, result.price)
     return result
   }
 
@@ -357,6 +372,21 @@ class PromptServiceEeImpl(
 
   fun getDefaultPrompt(): PromptDto {
     return promptDefaultService.getDefaultPrompt()
+  }
+
+  private fun publishBeforeEvent(organizationId: Long) {
+    applicationContext.publishEvent(
+      OnBeforeMachineTranslationEvent(this, organizationId),
+    )
+  }
+
+  private fun publishAfterEvent(
+    organizationId: Long,
+    actualPriceInCents: Int,
+  ) {
+    applicationContext.publishEvent(
+      OnAfterMachineTranslationEvent(this, organizationId, actualPriceInCents),
+    )
   }
 
   companion object {
