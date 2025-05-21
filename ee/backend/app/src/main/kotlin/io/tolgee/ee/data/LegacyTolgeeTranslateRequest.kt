@@ -1,8 +1,8 @@
-package io.tolgee.component.machineTranslation
+package io.tolgee.ee.data
 
 import io.tolgee.model.mtServiceConfig.Formality
 
-data class LegacyTolgeeTranslateParams(
+data class LegacyTolgeeTranslateRequest(
   val text: String,
   val keyName: String?,
   val sourceTag: String,
