@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.context.WebApplicationContext
 import java.time.Duration
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.roundToInt
