@@ -4,12 +4,12 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.AiPlaygroundResultModelAssembler
 import io.tolgee.ee.data.AiPlaygroundResultRequest
 import io.tolgee.ee.service.AiPlaygroundResultServiceEeImpl
 import io.tolgee.hateoas.AiPlaygroundResultModel
-import io.tolgee.hateoas.NonPagedModel
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import jakarta.validation.Valid
+import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -32,14 +32,14 @@ class AiPlaygroundResultController(
   fun getAiPlaygroundResult(
     @RequestBody @Valid
     body: AiPlaygroundResultRequest,
-  ): NonPagedModel<AiPlaygroundResultModel> {
+  ): CollectionModel<AiPlaygroundResultModel> {
     val result =
       aiPlaygroundResultService.getResult(
         projectHolder.project.id,
         authenticationFacade.authenticatedUser.id,
         body.keys!!,
         body.languages!!,
-      ).map { aiPlaygroundResultModelAssembler.toModel(it) }
-    return NonPagedModel(result)
+      )
+    return aiPlaygroundResultModelAssembler.toCollectionModel(result)
   }
 }

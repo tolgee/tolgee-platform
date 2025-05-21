@@ -1,10 +1,10 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.ee.development.PromptTestData
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -18,8 +18,8 @@ class AiPlaygroundResultControllerTest : ProjectAuthControllerTest("/v2/projects
     llmProperties.enabled = true
     llmProperties.providers =
       mutableListOf(
-        LLMProperties.LLMProvider(
-          type = LLMProviderType.OPENAI,
+        LlmProperties.LLMProvider(
+          type = LlmProviderType.OPENAI,
           pricePerMillionInput = 2.0,
           pricePerMillionOutput = 2.0,
           apiUrl = "http://test.com"

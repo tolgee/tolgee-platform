@@ -4,23 +4,23 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.model.Prompt
-import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.model.enums.LlmProviderPriority
 import org.springframework.stereotype.Service
 
 @Service
 class PromptServiceOssImpl : PromptService {
   override fun translateAndUpdateTranslation(
-    projectId: Long,
-    data: PromptRunDto,
-    priority: LLMProviderPriority?,
+      projectId: Long,
+      data: PromptRunDto,
+      priority: LlmProviderPriority?,
   ) {
     throw UnsupportedOperationException("Not included in OSS")
   }
 
   override fun translate(
-    projectId: Long,
-    data: PromptRunDto,
-    priority: LLMProviderPriority?,
+      projectId: Long,
+      data: PromptRunDto,
+      priority: LlmProviderPriority?,
   ): MtValueProvider.MtResult {
     throw UnsupportedOperationException("Not included in OSS")
   }

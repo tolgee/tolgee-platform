@@ -199,7 +199,7 @@ export const AiPrompt: React.FC<Props> = ({
             onChange={(e) => setProvider(e.target.value)}
             sx={{ width: '50%' }}
           >
-            {providers?.items.map((i) => (
+            {providers?._embedded?.providers?.map((i) => (
               <MenuItem key={i.name} value={i.name}>
                 {i.name}
               </MenuItem>

@@ -3,7 +3,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { LLMProviderItem } from './LLMProviderItem';
 import { useState } from 'react';
-import { LLMProviderModel } from 'tg.translationTools/useLLMProviderTranslation';
+import { LlmProviderModel } from 'tg.translationTools/useLLMProviderTranslation';
 import { LLMProviderEditDialog } from './LLMProviderEditDialog';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useTranslate } from '@tolgee/react';
@@ -17,7 +17,7 @@ const StyledContainer = styled(Box)`
 
 export const LLMProvidersCustom = () => {
   const { t } = useTranslate();
-  const [editItem, setEditItem] = useState<LLMProviderModel>();
+  const [editItem, setEditItem] = useState<LlmProviderModel>();
   const organization = useOrganization();
   const providersLoadable = useApiQuery({
     url: '/v2/organizations/{organizationId}/llm-providers',
@@ -27,7 +27,7 @@ export const LLMProvidersCustom = () => {
     },
   });
 
-  if (providersLoadable.data?.items.length === 0) {
+  if (providersLoadable.data?._embedded?.providers?.length === 0) {
     return (
       <EmptyListMessage>
         {t('llm_providers_custom_empty_message')}
@@ -38,7 +38,7 @@ export const LLMProvidersCustom = () => {
   return (
     <>
       <StyledContainer>
-        {providersLoadable.data?.items.map((p) => (
+        {providersLoadable.data?._embedded?.providers?.map((p) => (
           <LLMProviderItem
             key={p.id}
             provider={p}

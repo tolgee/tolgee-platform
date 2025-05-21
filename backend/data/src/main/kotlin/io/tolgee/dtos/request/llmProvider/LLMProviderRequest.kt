@@ -1,15 +1,15 @@
 package io.tolgee.dtos.request.llmProvider
 
 import com.fasterxml.jackson.annotation.JsonSetter
-import io.tolgee.model.enums.LLMProviderPriority
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.LlmProviderType
 
 data class LLMProviderRequest(
   var name: String,
-  var type: LLMProviderType,
+  var type: LlmProviderType,
   var apiUrl: String,
   var apiKey: String? = null,
-  var priority: LLMProviderPriority? = null,
+  var priority: LlmProviderPriority? = null,
   var model: String? = null,
   var deployment: String? = null,
   var keepAlive: String? = null,
@@ -17,6 +17,6 @@ data class LLMProviderRequest(
 ) {
   @JsonSetter("type")
   fun setType(type: String) {
-    this.type = LLMProviderType.valueOf(type.uppercase())
+    this.type = LlmProviderType.valueOf(type.uppercase())
   }
 }

@@ -1,6 +1,6 @@
 package io.tolgee.model.enums
 
-enum class LLMProviderPriority {
+enum class LlmProviderPriority {
   LOW,
   HIGH,
 }

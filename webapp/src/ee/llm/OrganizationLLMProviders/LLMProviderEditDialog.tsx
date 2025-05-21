@@ -16,8 +16,8 @@ import { messageService } from 'tg.service/MessageService';
 import {
   getInitialValues,
   getValidationSchema,
-  LLMProviderModel,
-  LLMProviderType,
+  LlmProviderModel,
+  LlmProviderType,
 } from './LLMProviderEdit.tsx/llmProvidersConfig';
 import { useState } from 'react';
 
@@ -34,13 +34,13 @@ const StyledDialogContent = styled(DialogContent)`
 
 type Props = {
   onClose: () => void;
-  provider: LLMProviderModel;
+  provider: LlmProviderModel;
 };
 
 export const LLMProviderEditDialog = ({ onClose, provider }: Props) => {
   const { t } = useTranslate();
   const organization = useOrganization();
-  const [type, setType] = useState<LLMProviderType>(provider.type);
+  const [type, setType] = useState<LlmProviderType>(provider.type);
 
   const updateLoadable = useApiMutation({
     url: '/v2/organizations/{organizationId}/llm-providers/{providerId}',

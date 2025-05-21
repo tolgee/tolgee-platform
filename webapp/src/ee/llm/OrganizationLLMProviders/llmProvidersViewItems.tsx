@@ -8,7 +8,7 @@ import { components } from 'tg.service/apiSchema.generated';
 export type ProviderItem = {
   id?: number | undefined;
   name: string;
-  type: components['schemas']['LLMProviderModel']['type'];
+  type: components['schemas']['LlmProviderModel']['type'];
 };
 
 export const useLLMProvidersViewItems = () => {

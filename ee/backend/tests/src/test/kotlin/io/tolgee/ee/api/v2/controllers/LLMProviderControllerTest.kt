@@ -1,10 +1,10 @@
 package io.tolgee.ee.api.v2.controllers
 
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.dtos.request.llmProvider.LLMProviderRequest
 import io.tolgee.ee.development.PromptTestData
 import io.tolgee.fixtures.*
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,8 +19,8 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
     llmProperties.enabled = true
     llmProperties.providers =
       mutableListOf(
-        LLMProperties.LLMProvider(
-          type = LLMProviderType.OPENAI,
+        LlmProperties.LLMProvider(
+          type = LlmProviderType.OPENAI,
           apiUrl = "http://test.com"
         ),
       )
@@ -72,7 +72,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
   fun `adds llm provider`() {
     performAuthPost(
       "/v2/organizations/${testData.organization.self.id}/llm-providers",
-      LLMProviderRequest(name = "custom-provider", type = LLMProviderType.OPENAI, apiUrl = "mock"),
+      LLMProviderRequest(name = "custom-provider", type = LlmProviderType.OPENAI, apiUrl = "mock"),
     ).andIsOk
   }
 
@@ -81,7 +81,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
     this.userAccount = testData.organizationMember.self
     performAuthPost(
       "/v2/organizations/${testData.organization.self.id}/llm-providers",
-      LLMProviderRequest(name = "custom-provider", type = LLMProviderType.OPENAI, apiUrl = "mock"),
+      LLMProviderRequest(name = "custom-provider", type = LlmProviderType.OPENAI, apiUrl = "mock"),
     ).andIsForbidden.andAssertThatJson {
       node("code").isEqualTo("operation_not_permitted")
     }
@@ -106,7 +106,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
   fun `updates llm provider`() {
     performAuthPut(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/${testData.llmProvider.self.id}",
-      LLMProviderRequest(name = "updated-provider", type = LLMProviderType.OPENAI_AZURE, apiUrl = "different-url"),
+      LLMProviderRequest(name = "updated-provider", type = LlmProviderType.OPENAI_AZURE, apiUrl = "different-url"),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("updated-provider")
       node("type").isEqualTo("OPENAI_AZURE")
@@ -119,7 +119,7 @@ class LLMProviderControllerTest : AuthorizedControllerTest() {
     this.userAccount = testData.organizationMember.self
     performAuthPut(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/${testData.llmProvider.self.id}",
-      LLMProviderRequest(name = "updated-provider", type = LLMProviderType.OPENAI_AZURE, apiUrl = "different-url"),
+      LLMProviderRequest(name = "updated-provider", type = LlmProviderType.OPENAI_AZURE, apiUrl = "different-url"),
     ).andIsForbidden
   }
 }

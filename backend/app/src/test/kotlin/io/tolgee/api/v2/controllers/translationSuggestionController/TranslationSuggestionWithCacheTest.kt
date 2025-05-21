@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.LLMTranslationProvider
+import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
@@ -34,7 +34,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @Autowired
   @MockBean
-  lateinit var llmTranslationProvider: LLMTranslationProvider
+  lateinit var llmTranslationProvider: LlmTranslationProvider
 
   @Autowired
   @MockBean

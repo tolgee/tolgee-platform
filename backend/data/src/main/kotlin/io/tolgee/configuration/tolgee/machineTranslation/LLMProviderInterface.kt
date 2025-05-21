@@ -1,18 +1,18 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
-import io.tolgee.model.enums.LLMProviderPriority
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.LlmProviderType
 
 interface LLMProviderInterface {
   @DocProperty(description = "Provider name")
   var name: String
 
   @DocProperty(description = "Provider type: openai or ollama")
-  var type: LLMProviderType
+  var type: LlmProviderType
 
   @DocProperty(description = "Provider priority")
-  var priority: LLMProviderPriority?
+  var priority: LlmProviderPriority?
 
   // general
   var apiKey: String?

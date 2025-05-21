@@ -163,7 +163,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var baiduMachineTranslationProperties: BaiduMachineTranslationProperties
 
   @Autowired
-  lateinit var llmProperties: LLMProperties
+  lateinit var llmProperties: LlmProperties
 
   @Autowired
   open lateinit var internalProperties: InternalProperties

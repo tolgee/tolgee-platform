@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
 import io.tolgee.dtos.LLMParams
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.service.PromptService
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -95,7 +95,7 @@ class OpenaiApiService : AbstractLLMApiService(), Logging {
     val request = HttpEntity(requestBody, headers)
 
     val url =
-      if (config.type === LLMProviderType.OPENAI) {
+      if (config.type === LlmProviderType.OPENAI) {
         "${config.apiUrl}/v1/chat/completions"
       } else {
         "${config.apiUrl}/openai/deployments/${config.deployment}/chat/completions?api-version=2024-12-01-preview"

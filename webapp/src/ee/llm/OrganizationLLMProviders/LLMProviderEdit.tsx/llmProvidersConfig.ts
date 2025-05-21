@@ -2,8 +2,8 @@ import { TranslateFunction } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
 import * as Yup from 'yup';
 
-export type LLMProviderModel = components['schemas']['LLMProviderModel'];
-export type LLMProviderType = LLMProviderModel['type'];
+export type LlmProviderModel = components['schemas']['LlmProviderModel'];
+export type LlmProviderType = LlmProviderModel['type'];
 type LLMProviderRequest = components['schemas']['LLMProviderRequest'];
 
 export type ProviderOptions = {
@@ -15,13 +15,13 @@ export type ProviderOptions = {
 };
 
 type ProvidersConfig = Record<
-  LLMProviderType,
-  Partial<Record<keyof LLMProviderModel, Partial<ProviderOptions>>>
+  LlmProviderType,
+  Partial<Record<keyof LlmProviderModel, Partial<ProviderOptions>>>
 >;
 
 export const llmProvidersDefaults = (
   t: TranslateFunction
-): Partial<Record<keyof LLMProviderModel, ProviderOptions>> => ({
+): Partial<Record<keyof LlmProviderModel, ProviderOptions>> => ({
   name: {
     label: t('llm_provider_form_name'),
     hint: t('llm_provider_form_name_hint'),
@@ -64,7 +64,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
 };
 
 export const getValidationSchema = (
-  type: LLMProviderType,
+  type: LlmProviderType,
   t: TranslateFunction
 ) => {
   const fields: Record<string, Yup.AnySchema> = {};
@@ -83,9 +83,9 @@ export const getValidationSchema = (
 };
 
 export const getInitialValues = (
-  type: LLMProviderType,
+  type: LlmProviderType,
   t: TranslateFunction,
-  existingData?: LLMProviderModel
+  existingData?: LlmProviderModel
 ) => {
   const result: LLMProviderRequest = {
     type,

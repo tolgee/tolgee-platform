@@ -4,7 +4,7 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import org.springframework.stereotype.Component
 
 @Component
-class LLMTranslationProviderOssImpl : LLMTranslationProvider() {
+class LlmTranslationProviderOssImpl : LlmTranslationProvider() {
   override val isEnabled: Boolean
     get() = false
 

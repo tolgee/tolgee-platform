@@ -1,5 +1,5 @@
 package io.tolgee.dtos.response
 
-class PublicLLMConfigurationDTO(
+class PublicLlmConfigurationDTO(
   val enabled: Boolean,
 )

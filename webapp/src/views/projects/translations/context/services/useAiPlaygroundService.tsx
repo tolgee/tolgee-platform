@@ -62,7 +62,7 @@ export const useAiPlaygroundService = ({
   const data = useMemo(() => {
     const result: Record<number, Record<number, AiPlaygroundResultModel>> = {};
     aiPlaygroundResult.forEach((items) =>
-      items.data?.items.forEach((item) => {
+      items.data?._embedded?.results?.forEach((item) => {
         let key = result[item.keyId];
         if (!key) {
           key = result[item.keyId] = {};

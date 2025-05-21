@@ -2,12 +2,12 @@ package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.dtos.LLMProviderDto
-import io.tolgee.model.enums.LLMProviderPriority
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.LlmProviderType
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.llm")
-class LLMProperties {
+class LlmProperties {
   var enabled: Boolean = false
   var providers: MutableList<LLMProvider> = mutableListOf()
 
@@ -15,8 +15,8 @@ class LLMProperties {
     @DocProperty("User visible provider name")
     override var name: String = "default",
     @DocProperty("Provider type (OPENAI or OLLAMA)")
-    override var type: LLMProviderType,
-    override var priority: LLMProviderPriority? = null,
+    override var type: LlmProviderType,
+    override var priority: LlmProviderPriority? = null,
     override var apiKey: String? = null,
     override var apiUrl: String,
     override var model: String? = null,

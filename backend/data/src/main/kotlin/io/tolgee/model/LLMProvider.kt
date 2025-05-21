@@ -1,8 +1,8 @@
 package io.tolgee.model
 
 import io.tolgee.dtos.LLMProviderDto
-import io.tolgee.model.enums.LLMProviderPriority
-import io.tolgee.model.enums.LLMProviderType
+import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.LlmProviderType
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 
@@ -14,9 +14,9 @@ class LLMProvider(
   @field:NotBlank
   var name: String = "",
   @field:Enumerated(EnumType.STRING)
-  var type: LLMProviderType = LLMProviderType.OPENAI,
+  var type: LlmProviderType = LlmProviderType.OPENAI,
   @field:Enumerated(EnumType.STRING)
-  var priority: LLMProviderPriority? = null,
+  var priority: LlmProviderPriority? = null,
   var apiKey: String? = null,
   var apiUrl: String = "",
   var model: String? = null,

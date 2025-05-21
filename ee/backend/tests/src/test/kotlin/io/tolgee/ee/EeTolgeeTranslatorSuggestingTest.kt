@@ -6,7 +6,7 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
-import io.tolgee.ee.component.LLMTranslationProviderEeImpl
+import io.tolgee.ee.component.LlmTranslationProviderEeImpl
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.fixtures.andAssertThatJson
@@ -27,7 +27,7 @@ class EeTolgeeTranslatorSuggestingTest : ProjectAuthControllerTest("/v2/projects
 
   @Autowired
   @MockBean
-  private lateinit var llmTranslationProviderEeImpl: LLMTranslationProviderEeImpl
+  private lateinit var llmTranslationProviderEeImpl: LlmTranslationProviderEeImpl
 
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
