@@ -116,7 +116,7 @@ class LlmProviderService(
     var lastError: Exception? = null
 
     // attempt 3 times to find non-rate-limited provider
-    for (i in 0..3) {
+    repeat(3) {
       val providerConfig = getProviderByName(organizationId, provider, priority)
       try {
         return callback(providerConfig)
