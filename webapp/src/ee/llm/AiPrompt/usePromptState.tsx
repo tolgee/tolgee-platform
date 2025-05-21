@@ -25,7 +25,6 @@ const DEFAULT_BASIC_OPTIONS: BasicPromptOption[] = [
   'PROJECT_DESCRIPTION',
   'TM_SUGGESTIONS',
   'SCREENSHOT',
-  'OTHER_TRANSLATIONS',
 ];
 
 function getPromptType(prompt: PromptItem) {
