@@ -13,6 +13,6 @@ class SetLanguagePromptCustomizationRequest(
         "Paper -> ورقة\n" +
         "Office -> مكتب\n",
   )
-  @field:Size(max = 2000)
+
   var description: String? = null,
 )

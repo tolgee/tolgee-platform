@@ -87,7 +87,6 @@ class Language : StandardAuditModel(), ILanguage, SoftDeletable {
   @OneToMany(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
   var tasks: MutableList<Task> = mutableListOf()
 
-  @field:Size(max = 2000)
   @ActivityLoggedProp
   @Column(columnDefinition = "text")
   override var aiTranslatorPromptDescription: String? = null

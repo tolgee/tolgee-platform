@@ -14,7 +14,7 @@ class Prompt(
   var id: Long = 0L,
   @field:NotBlank
   var name: String = "",
-  @Column(length = 10000)
+  @Column(columnDefinition = "text")
   var template: String? = null,
   @Column
   var providerName: String = "",

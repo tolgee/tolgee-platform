@@ -4406,4 +4406,7 @@
             <column name="options" type="VARCHAR[]"/>
         </addColumn>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1747062764275-1">
+        <dropColumn columnName="primary_service_formality" tableName="mt_service_config"/>
+    </changeSet>
 </databaseChangeLog>
