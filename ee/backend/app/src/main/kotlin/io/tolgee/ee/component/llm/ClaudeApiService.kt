@@ -27,45 +27,9 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptResult {
-    val headers = HttpHeaders()
-    headers.set("content-type", "application/json")
-    headers.set("anthropic-version", "2023-06-01")
-    headers.set("x-api-key", config.apiKey)
+    val headers = getHeaders(config)
 
-    val inputMessages = params.messages.toMutableList()
-
-    if (params.shouldOutputJson) {
-      inputMessages.add(
-        LlmParams.Companion.LlmMessage(
-          LlmParams.Companion.LlmMessageType.TEXT,
-          "Strictly return only valid json!",
-        ),
-      )
-    }
-
-    val messages = mutableListOf<RequestMessage>()
-
-    inputMessages.forEach {
-      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
-        messages.add(RequestMessage(role = "user", content = it.text!!))
-      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
-        messages.add(
-          RequestMessage(
-            role = "user",
-            content =
-              listOf(
-                RequestMessageContent(
-                  type = "image",
-                  source =
-                    RequestImage(
-                      data = it.image!!,
-                    ),
-                ),
-              ),
-          ),
-        )
-      }
-    }
+    val messages = getMessages(params)
 
     val requestBody =
       RequestBody(
@@ -103,6 +67,53 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
           )
         },
     )
+  }
+
+  private fun getHeaders(config: LlmProviderInterface): HttpHeaders {
+    val headers = HttpHeaders()
+    headers.set("content-type", "application/json")
+    headers.set("anthropic-version", "2023-06-01")
+    headers.set("x-api-key", config.apiKey)
+    return headers
+  }
+
+  private fun getMessages(params: LlmParams): MutableList<RequestMessage> {
+    val inputMessages = params.messages.toMutableList()
+
+    val messages = mutableListOf<RequestMessage>()
+
+    inputMessages.forEach {
+      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
+        messages.add(RequestMessage(role = "user", content = it.text!!))
+      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
+        messages.add(
+          RequestMessage(
+            role = "user",
+            content =
+              listOf(
+                RequestMessageContent(
+                  type = "image",
+                  source =
+                    RequestImage(
+                      data = it.image!!,
+                    ),
+                ),
+              ),
+          ),
+        )
+      }
+    }
+
+    if (params.shouldOutputJson) {
+      messages.add(
+        RequestMessage(role = "user", content = "Strictly return only valid json!")
+      )
+    }
+    return messages
+  }
+
+  private fun getRequestBody() {
+
   }
 
   /**

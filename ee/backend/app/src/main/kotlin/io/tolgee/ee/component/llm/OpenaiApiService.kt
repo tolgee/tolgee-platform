@@ -32,43 +32,6 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
     headers.set("content-type", "application/json")
     headers.set("api-key", config.apiKey)
 
-    val inputMessages = params.messages.toMutableList()
-
-    if (params.shouldOutputJson) {
-      inputMessages.add(
-        LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
-      )
-    }
-
-    val messages = mutableListOf<RequestMessage>()
-
-    inputMessages.forEach {
-      if (
-        it.type == LlmParams.Companion.LlmMessageType.TEXT &&
-        it.text != null
-      ) {
-        messages.add(RequestMessage(role = "user", content = it.text!!))
-      } else if (
-        it.type == LlmParams.Companion.LlmMessageType.IMAGE &&
-        it.image != null
-      ) {
-        messages.add(
-          RequestMessage(
-            role = "user",
-            content =
-              listOf(
-                RequestMessageContent(
-                  type = "image_url",
-                  image_url =
-                    RequestImageUrl(
-                      "data:image/jpeg;base64,${it.image}",
-                    ),
-                ),
-              ),
-          ),
-        )
-      }
-    }
 
     val requestBody =
       RequestBody(
@@ -115,6 +78,48 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
           )
         },
     )
+  }
+
+  fun getMessages(params: LlmParams): MutableList<RequestMessage> {
+    val messages = mutableListOf<RequestMessage>()
+
+    params.messages.forEach {
+      if (
+        it.type == LlmParams.Companion.LlmMessageType.TEXT &&
+        it.text != null
+      ) {
+        messages.add(RequestMessage(role = "user", content = it.text!!))
+      } else if (
+        it.type == LlmParams.Companion.LlmMessageType.IMAGE &&
+        it.image != null
+      ) {
+        messages.add(
+          RequestMessage(
+            role = "user",
+            content =
+              listOf(
+                RequestMessageContent(
+                  type = "image_url",
+                  image_url =
+                    RequestImageUrl(
+                      "data:image/jpeg;base64,${it.image}",
+                    ),
+                ),
+              ),
+          ),
+        )
+      }
+    }
+
+    if (params.shouldOutputJson) {
+      messages.add(
+        // LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
+        RequestMessage(role = "user", content = "Strictly return only valid json!")
+      )
+    }
+
+    return messages
+
   }
 
   /**

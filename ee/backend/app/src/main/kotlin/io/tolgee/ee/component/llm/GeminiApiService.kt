@@ -27,40 +27,9 @@ class GeminiApiService : AbstractLlmApiService(), Logging {
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptResult {
-    val headers = HttpHeaders()
-    headers.set("content-type", "application/json")
-    headers.set("api-key", config.apiKey)
 
-    val inputMessages = params.messages.toMutableList()
-
-    if (params.shouldOutputJson) {
-      inputMessages.add(
-        LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
-      )
-    }
-
-    val contents = mutableListOf<RequestContent>()
-
-    inputMessages.forEach {
-      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
-        contents.add(RequestContent(parts = listOf(RequestPart(text = it.text!!))))
-      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
-        contents.add(
-          RequestContent(
-            parts =
-              listOf(
-                RequestPart(
-                  inlineData =
-                    RequestInlineData(
-                      mimeType = "image/png",
-                      data = it.image!!,
-                    ),
-                ),
-              ),
-          ),
-        )
-      }
-    }
+    val headers = getHeaders(config)
+    val contents = getContents(params)
 
     val requestBody =
       RequestBody(
@@ -92,6 +61,46 @@ class GeminiApiService : AbstractLlmApiService(), Logging {
           )
         },
     )
+  }
+
+  fun getContents(params: LlmParams): MutableList<RequestContent> {
+    val contents = mutableListOf<RequestContent>()
+
+    params.messages.forEach {
+      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
+        contents.add(RequestContent(parts = listOf(RequestPart(text = it.text!!))))
+      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
+        contents.add(
+          RequestContent(
+            parts =
+              listOf(
+                RequestPart(
+                  inlineData =
+                    RequestInlineData(
+                      mimeType = "image/png",
+                      data = it.image!!,
+                    ),
+                ),
+              ),
+          ),
+        )
+      }
+    }
+
+    if (params.shouldOutputJson) {
+      contents.add(
+        RequestContent(parts = listOf(RequestPart(text = "Strictly return only valid json!")))
+      )
+    }
+
+    return contents
+  }
+
+  fun getHeaders(config: LlmProviderInterface): HttpHeaders {
+    val headers = HttpHeaders()
+    headers.set("content-type", "application/json")
+    headers.set("api-key", config.apiKey)
+    return headers
   }
 
   /**

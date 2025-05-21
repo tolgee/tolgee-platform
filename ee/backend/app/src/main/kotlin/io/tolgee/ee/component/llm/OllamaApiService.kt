@@ -14,7 +14,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import java.util.*
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -27,28 +26,7 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
 
-    val inputMessages = params.messages.toMutableList()
-
-    if (params.shouldOutputJson) {
-      inputMessages.add(
-        LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
-      )
-    }
-
-    val messages = mutableListOf<RequestMessage>()
-
-    inputMessages.forEach {
-      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
-        messages.add(RequestMessage(role = "user", content = it.text))
-      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
-        messages.add(
-          RequestMessage(
-            role = "user",
-            images = listOf("${it.image}"),
-          ),
-        )
-      }
-    }
+    val messages = getMessages(params)
 
     val requestBody =
       RequestBody(
@@ -71,6 +49,30 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
         ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
       usage = null,
     )
+  }
+
+  fun getMessages(params: LlmParams): MutableList<RequestMessage> {
+    val messages = mutableListOf<RequestMessage>()
+
+    params.messages.forEach {
+      if (it.type == LlmParams.Companion.LlmMessageType.TEXT && it.text != null) {
+        messages.add(RequestMessage(role = "user", content = it.text))
+      } else if (it.type == LlmParams.Companion.LlmMessageType.IMAGE && it.image != null) {
+        messages.add(
+          RequestMessage(
+            role = "user",
+            images = listOf("${it.image}"),
+          ),
+        )
+      }
+    }
+
+    if (params.shouldOutputJson) {
+      messages.add(
+        RequestMessage(role = "user", content = "Strictly return only valid json!")
+      )
+    }
+    return messages
   }
 
   /**
