@@ -7,7 +7,6 @@ import io.tolgee.formats.forceEscapePluralForms
 import io.tolgee.formats.toIcuPluralString
 import io.tolgee.formats.unescapePluralForms
 import io.tolgee.helpers.TextHelper
-import org.springframework.context.ApplicationContext
 
 class MtBatchTranslator(
   private val context: MtTranslatorContext,

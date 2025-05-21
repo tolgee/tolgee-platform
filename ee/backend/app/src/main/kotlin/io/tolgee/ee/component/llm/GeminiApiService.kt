@@ -27,7 +27,6 @@ class GeminiApiService : AbstractLlmApiService(), Logging {
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptResult {
-
     val headers = getHeaders(config)
     val contents = getContents(params)
 

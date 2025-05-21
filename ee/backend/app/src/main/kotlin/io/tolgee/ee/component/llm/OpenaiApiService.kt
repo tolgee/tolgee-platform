@@ -32,7 +32,6 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
     headers.set("content-type", "application/json")
     headers.set("api-key", config.apiKey)
 
-
     val requestBody =
       RequestBody(
         messages = messages,
@@ -119,7 +118,6 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
     }
 
     return messages
-
   }
 
   /**
