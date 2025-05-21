@@ -27,10 +27,6 @@ const DEFAULT_BASIC_OPTIONS: BasicPromptOption[] = [
   'SCREENSHOT',
 ];
 
-function getPromptType(prompt: PromptItem) {
-  return typeof prompt.template === 'string' ? 'advanced' : 'basic';
-}
-
 type Props = {
   language: LanguageModel;
   keyData: DeletableKeyWithTranslationsModelType;
@@ -47,6 +43,13 @@ export const usePromptState = ({ language, keyData }: Props) => {
   );
 
   const [value, setValue] = useState('');
+
+  function getPromptType(prompt: PromptItem) {
+    if (!prompt.id && !isEnabled('AI_PROMPT_CUSTOMIZATION')) {
+      return 'basic';
+    }
+    return typeof prompt.template === 'string' ? 'advanced' : 'basic';
+  }
 
   const [provider, setProvider] = useState<string>('default');
   const [errors, setErrors] = useState<EditorError[]>();
