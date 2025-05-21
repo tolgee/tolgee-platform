@@ -9,6 +9,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.LlmProviderDto
+import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.ee.component.llm.*
@@ -18,7 +19,6 @@ import io.tolgee.model.LlmProvider
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
-import io.tolgee.service.PromptService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.cache.Cache
@@ -145,7 +145,7 @@ class LlmProviderService(
     provider: String,
     params: LlmParams,
     priority: LlmProviderPriority? = null,
-  ): PromptService.Companion.PromptResult {
+  ): PromptResult {
     return repeatWhileProvidersRateLimited(organizationId, provider, priority) { providerConfig ->
       val providerService = getProviderService(providerConfig.type)
       val attempts = providerConfig.attempts ?: providerService.defaultAttempts()
@@ -161,7 +161,7 @@ class LlmProviderService(
     params: LlmParams,
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
-  ): PromptService.Companion.PromptResult {
+  ): PromptResult {
     val json =
       """
       {
@@ -169,7 +169,7 @@ class LlmProviderService(
         "contextDescription": "context description from: ${config.name}"
       }
       """.trimIndent()
-    return PromptService.Companion.PromptResult(
+    return PromptResult(
       response = json,
       usage = PromptResponseUsageDto(inputTokens = 42, outputTokens = 42, cachedTokens = 21),
       price = 42,
@@ -181,7 +181,7 @@ class LlmProviderService(
     params: LlmParams,
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
-  ): PromptService.Companion.PromptResult {
+  ): PromptResult {
     if (internalProperties.fakeLlmProviders) {
       return getFakedResponse(params, config, restTemplate)
     }

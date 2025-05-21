@@ -6,9 +6,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.model.enums.LlmProviderType
-import io.tolgee.service.PromptService
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -30,7 +30,7 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
     params: LlmParams,
     config: LlmProviderInterface,
     restTemplate: RestTemplate,
-  ): PromptService.Companion.PromptResult {
+  ): PromptResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
     headers.set("api-key", config.apiKey)
@@ -105,7 +105,7 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
         request,
       )
 
-    return PromptService.Companion.PromptResult(
+    return PromptResult(
       response = response.body?.choices?.first()?.message?.content ?: throw RuntimeException(response.toString()),
       usage =
         response.body?.usage?.let {
