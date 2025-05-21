@@ -33,7 +33,7 @@ class TolgeeApiService(
 
     val request = HttpEntity(params, headers)
 
-    val url = "${config.apiUrl}/v2/public/translator/prompt"
+    val url = "${config.apiUrl}/v2/public/llm/prompt"
 
     val response =
       restTemplate.exchange<PromptService.Companion.PromptResult>(

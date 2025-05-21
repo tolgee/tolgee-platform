@@ -151,7 +151,7 @@ class LlmProviderService(
       val attempts = providerConfig.attempts ?: providerService.defaultAttempts()
       repeatWithTimeouts(attempts) { restTemplate ->
         val result = getProviderResponse(providerService, params, providerConfig, restTemplate)
-        result.price = calculatePrice(providerConfig, result.usage)
+        result.price = if (result.price != 0) result.price else calculatePrice(providerConfig, result.usage)
         result
       }
     }
