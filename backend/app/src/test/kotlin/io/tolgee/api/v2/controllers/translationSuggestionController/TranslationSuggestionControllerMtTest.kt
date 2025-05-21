@@ -79,7 +79,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   lateinit var cacheMock: Cache
 
-  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<ProviderTranslateParams>
+  lateinit var promptTranslateCaptor: KArgumentCaptor<ProviderTranslateParams>
 
   @BeforeEach
   fun setup() {
@@ -153,13 +153,13 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
       ),
     ).thenReturn("Translated with Baidu")
 
-    tolgeeTranslateParamsCaptor = argumentCaptor()
+    promptTranslateCaptor = argumentCaptor()
 
     whenever(llmTranslationProvider.isEnabled).thenReturn(true)
     whenever(llmTranslationProvider.isLanguageSupported(any())).thenReturn(true)
     whenever(
       llmTranslationProvider.translate(
-        tolgeeTranslateParamsCaptor.capture(),
+        promptTranslateCaptor.capture(),
       ),
     ).thenAnswer {
       MtValueProvider.MtResult(
@@ -180,7 +180,11 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     saveTestData()
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
-      SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id),
+      SuggestRequestDto(
+        keyId = testData.beautifulKey.id,
+        targetLanguageId = testData.germanLanguage.id,
+        services = setOf(MtServiceType.GOOGLE)
+      ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
@@ -393,15 +397,6 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 //    metadata.languageDescription.assert.isEqualTo(testData.germanLanguage.aiTranslatorPromptDescription)
 //  }
 
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it uses correct Tolgee formality`() {
-    mockDefaultMtBucketSize(6000)
-    testData.enablePrompt(Formality.FORMAL)
-    saveTestData()
-    performMtRequest()
-    tolgeeTranslateParamsCaptor.firstValue.formality.assert.isEqualTo(Formality.FORMAL)
-  }
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -434,7 +429,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   }
 
   private fun performMtRequestAndExpectAfterBalance(creditBalance: Long) {
-    performMtRequest().andIsOk
+    performMtRequest(listOf(MtServiceType.GOOGLE)).andIsOk
     mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
       .assert.isEqualTo(creditBalance * 100)
   }
