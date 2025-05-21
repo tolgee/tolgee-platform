@@ -32,6 +32,8 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
     headers.set("content-type", "application/json")
     headers.set("api-key", config.apiKey)
 
+    val messages = getMessages(params)
+
     val requestBody =
       RequestBody(
         messages = messages,
