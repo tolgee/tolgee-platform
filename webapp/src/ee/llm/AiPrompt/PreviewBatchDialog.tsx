@@ -4,8 +4,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Alert,
+  Chip,
+  Link,
 } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -16,6 +19,7 @@ import {
   useTranslationsSelector,
 } from 'tg.views/projects/translations/context/TranslationsContext';
 import { BasicPromptOption } from './TabBasic';
+import { AI_PLAYGROUND_TAG } from './PreviewDatasetDialog';
 
 type BatchJobModel = components['schemas']['BatchJobModel'];
 
@@ -89,17 +93,27 @@ export const PreviewBatchDialog = ({
       <DialogTitle>
         {t('ai_prompt_batch_dialog_title', { value: numberOfKeys })}
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ display: 'grid', gap: 2 }}>
         <BatchOperationsLanguagesSelect
           languages={allLanguages || []}
           value={selectedLangs || []}
           onChange={setSelectedLangs}
           languagePermission="translations.edit"
         />
+        <Alert color="warning" icon={false}>
+          <T
+            keyName="ai_prompt_batch_dialog_many_keys_warning"
+            params={{
+              highlight: (value) => <Chip label={value} size="small" />,
+              tagName: AI_PLAYGROUND_TAG,
+              link: <Link href="https://docs.tolgee.io" target="_blank" />,
+            }}
+          />
+        </Alert>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('global_cancel_button')}</Button>
-        <Button onClick={handleRunBatch}>
+        <Button onClick={handleRunBatch} color="primary">
           {t('confirmation_dialog_confirm')}
         </Button>
       </DialogActions>
